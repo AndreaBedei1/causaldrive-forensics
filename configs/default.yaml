@@ -247,6 +247,8 @@ fusion:
     # which is how a vehicle struck from behind learns who struck it.
     mutual_impact_tolerance_s: 0.5
     mutual_impact_max_distance_m: 12.0
+    mutual_impact_ambiguity_dt_s: 0.1   # a rival this much further away in time
+                                        # is not the same impact, however close
   confidence_fusion:
     method: "noisy_or"             # documented in docs/GRAPH_FUSION.md
     cap: 0.99
@@ -270,6 +272,21 @@ fusion:
       temporal_decay_s: 3.0        # exp(-|lag|/tau)
       single_observer_factor: 0.85 # a claim no second vehicle corroborates
     overrides: {}                  # rule -> {enabled, prior, max_lag_s}
+
+# -----------------------------------------------------------------------------
+# Behavioural episodes, causal chains and the graph-derived reconstruction
+# -----------------------------------------------------------------------------
+graph:
+  episodes:
+    merge_gap_s: 1.5               # a brake command and the deceleration it
+                                   # produced are one act, not two
+    late_response_margin_s: 0.0    # braking after one own critical TTC is late
+    no_response_window_s: 2.5      # window for "did this vehicle respond at all"
+  reconstruction:
+    max_chains_per_outcome: 8
+    max_chain_length: null         # null = no cutoff on path length
+  attribution:
+    min_chain_confidence: 0.15     # below this a chain does not support a claim
 
 # -----------------------------------------------------------------------------
 # Finite-trace model checking

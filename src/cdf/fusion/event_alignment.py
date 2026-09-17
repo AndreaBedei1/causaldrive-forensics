@@ -686,29 +686,41 @@ def reconcile_mutual_impacts(
     margin_m = float(
         cfg.get("fusion.event_alignment.counterpart_ambiguity_margin_m", 1.0)
     )
+    margin_s = float(
+        cfg.get("fusion.event_alignment.mutual_impact_ambiguity_dt_s", 0.1)
+    )
     by_event: Dict[str, List[Tuple[float, float, str]]] = {}
     for dt, distance, eid_a, eid_b, pid_a, pid_b in candidates:
-        by_event.setdefault(eid_a, []).append((distance, dt, pid_b))
-        by_event.setdefault(eid_b, []).append((distance, dt, pid_a))
+        by_event.setdefault(eid_a, []).append((dt, distance, pid_b))
+        by_event.setdefault(eid_b, []).append((dt, distance, pid_a))
 
     def decisive(event_id: str, partner: str) -> Tuple[bool, str]:
-        """Whether this event's best partner is distinguishable from the next."""
+        """Whether this event's best partner is distinguishable from the next.
+
+        Two records of one impact coincide in *time* and in *space*, and either
+        axis can settle the question alone: a rival half a second away is not the
+        same impact however close it stood, and a rival ten metres away is not
+        the same impact however well the timestamps agree. Only when neither
+        separates them is the pairing a guess.
+        """
         ranked = sorted(by_event.get(event_id, []))
         rivals = [row for row in ranked if row[2] != partner]
         if not rivals:
             return True, ""
         best = next(row for row in ranked if row[2] == partner)
         rival = rivals[0]
-        if (rival[0] - best[0]) < margin_m:
-            return False, (
-                "{0} at {1:.3f}m and {2} at {3:.3f}m are indistinguishable as the "
-                "other side of this impact (margin {4:.3f}m < "
-                "fusion.event_alignment.counterpart_ambiguity_margin_m={5}m); "
-                "naming either would be a guess".format(
-                    partner, best[0], rival[2], rival[0], rival[0] - best[0], margin_m
-                )
+        if (rival[0] - best[0]) >= margin_s or (rival[1] - best[1]) >= margin_m:
+            return True, ""
+        return False, (
+            "{0} ({1:.3f}s, {2:.3f}m) and {3} ({4:.3f}s, {5:.3f}m) are "
+            "indistinguishable as the other side of this impact, in time and in "
+            "range alike (counterpart_ambiguity_margin_m={6}m, "
+            "mutual_impact_ambiguity_dt_s={7}s); naming either would be a "
+            "guess".format(
+                partner, best[0], best[1], rival[2], rival[0], rival[1],
+                margin_m, margin_s,
             )
-        return True, ""
+        )
 
     used: set = set()
     resolved: Dict[str, str] = {}

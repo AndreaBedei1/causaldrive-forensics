@@ -20,7 +20,7 @@ that a mis-wired path fails loudly instead of leaking ground truth.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from ..common.config import Config
 from ..common.evidence import RunEvidence, load_run
@@ -31,6 +31,11 @@ from ..graph.export import graph_summary, load_graph, save_graph
 from .event_alignment import resolve_subjects
 from .aligned_evidence import AlignedRunEvidence
 from .graph_fusion import fuse_graphs
+from ..graph.episodes import CausalEpisode, extract_episodes
+from ..graph.reconstruction import (
+    build_attribution_hypothesis,
+    build_incident_reconstruction,
+)
 from .time_alignment import align_participants
 from .track_association import associate_tracks, association_report
 
@@ -51,6 +56,9 @@ class FusionResult(object):
         "diagnostics",
         "local_causal",
         "local_event",
+        "episodes",
+        "reconstruction",
+        "attribution",
     )
 
     def __init__(
@@ -63,6 +71,9 @@ class FusionResult(object):
         diagnostics: Dict[str, Any],
         local_causal: Dict[str, GraphDocument],
         local_event: Dict[str, GraphDocument],
+        episodes: Optional[List[CausalEpisode]] = None,
+        reconstruction: Optional[Dict[str, Any]] = None,
+        attribution: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.alignment = alignment
         self.assignments = assignments
@@ -72,6 +83,9 @@ class FusionResult(object):
         self.diagnostics = diagnostics
         self.local_causal = local_causal
         self.local_event = local_event
+        self.episodes = list(episodes or [])
+        self.reconstruction = reconstruction
+        self.attribution = attribution
 
     def summary(self) -> Dict[str, Any]:
         resolved = sum(
@@ -153,6 +167,15 @@ def fuse_run(
     diagnostics["event_graph_fusion"] = event_diag
     diagnostics["schema_version"] = SCHEMA_VERSIONS["fusion_diagnostics"]
 
+    # What the merged account actually says happened, and which behaviours it
+    # implicates. Both are read off the fused causal graph, so they are produced
+    # here rather than in a separate pass that could drift out of step with it.
+    episodes = extract_episodes(fused_causal, cfg, run.participant_ids)
+    reconstruction = build_incident_reconstruction(
+        fused_causal, cfg, run.participant_ids, alignment, episodes
+    )
+    attribution = build_attribution_hypothesis(reconstruction, fused_causal, cfg)
+
     if persist:
         layout.fusion_dir.mkdir(parents=True, exist_ok=True)
         write_json(layout.association_report, association_report(assignments, run, cfg))
@@ -166,6 +189,8 @@ def fuse_run(
                 "events": [to_jsonable(n) for n in fused_causal.nodes],
             },
         )
+        write_json(layout.incident_reconstruction, reconstruction)
+        write_json(layout.causal_attribution, attribution)
         save_graph(fused_causal, layout.fused_causal_graph, layout.fused_causal_graphml)
         if fused_event is not None:
             save_graph(fused_event, layout.fused_event_graph, layout.fused_event_graphml)
@@ -184,4 +209,7 @@ def fuse_run(
         diagnostics=diagnostics,
         local_causal=local_causal,
         local_event=local_event,
+        episodes=episodes,
+        reconstruction=reconstruction,
+        attribution=attribution,
     )

@@ -194,6 +194,16 @@ class RunLayout:
     def fusion_diagnostics(self) -> Path:
         return self.fusion_dir / "fusion_diagnostics.json"
 
+    @property
+    def incident_reconstruction(self) -> Path:
+        """What happened, reconstructed from the exchanged logs alone."""
+        return self.fusion_dir / "incident_reconstruction.json"
+
+    @property
+    def causal_attribution(self) -> Path:
+        """Which behaviours contributed, as a hypothesis read off the graph."""
+        return self.fusion_dir / "causal_attribution.json"
+
     # -- oracle (privileged) ----------------------------------------------
 
     @property

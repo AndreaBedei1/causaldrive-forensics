@@ -52,13 +52,45 @@ ALL_STAGES = ("analyse", "fuse", "oracle", "check", "evaluate", "figures",
 def discover_runs(artifacts_root: Path) -> List[Path]:
     """Every directory that looks like a recorded run, in a stable order."""
     out: List[Path] = []
-    for manifest in sorted(artifacts_root.glob("*/*/manifest.json")):
+    for manifest in sorted(artifacts_root.rglob("manifest.json")):
         # A counterfactual replay lives under <run>/counterfactual/replays/<id>/
         # and is scored through its parent, so it is not a run in its own right.
         if "counterfactual" in manifest.parts:
             continue
         out.append(manifest.parent)
     return out
+
+
+def config_for_run(manifest, scenario_id):
+    """The configuration to re-derive a recorded run under.
+
+    The run's own recorded parameters are the base: re-analysing a recording
+    under today's thresholds would describe a run that was never made. Keys the
+    recording has no value for -- stages added since it was recorded -- are
+    filled from the current defaults, which is the only way a new stage can be
+    applied to an old recording at all. The result is that every threshold the
+    recording depended on is the one it was recorded with, and nothing else is
+    silently invented.
+    """
+    from cdf.common.config import Config
+
+    current = load_run_config(scenario_id=scenario_id)
+    recorded = manifest.get("config")
+    if not isinstance(recorded, dict) or not recorded:
+        return current
+
+    def merge(base, patch):
+        """`patch` wins, except where `base` supplies a key `patch` lacks."""
+        out = dict(patch)
+        for key, value in base.items():
+            if key not in out:
+                out[key] = value
+            elif isinstance(value, dict) and isinstance(out[key], dict):
+                out[key] = merge(value, out[key])
+        return out
+
+    merged = merge(current.data, recorded)
+    return Config(merged, sources=["current defaults", "run manifest"])
 
 
 def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
@@ -79,7 +111,7 @@ def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
     scenario_id = str(manifest.get("scenario_id", ""))
     variant = str(manifest.get("variant", "")) or None
 
-    cfg = load_run_config(scenario_id=scenario_id)
+    cfg = config_for_run(manifest, scenario_id)
     result: Dict[str, Any] = {"run": str(run_dir), "scenario": scenario_id, "variant": variant}
 
     for stage in stages:

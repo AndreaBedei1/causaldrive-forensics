@@ -35,6 +35,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Union
 from ..common.config import Config, deep_merge
 from ..common.evidence import RunEvidence, load_run
 from ..common.io import read_json, write_csv, write_json
+from ..common.campaign import classify_runs
 from ..common.layout import RunLayout
 from ..common.schemas import (
     SCHEMA_VERSIONS,
@@ -629,7 +630,32 @@ def aggregate_runs(artifacts_root: PathLike, cfg: Config) -> Dict[str, Any]:
         {"run_path": d.as_posix(), "kind": run_kind(d, root)}
         for d in _run_dirs(root, kinds=(RUN_KIND_REPLAY, RUN_KIND_ABLATION))
     ]
-    for run_dir in _run_dirs(root):
+
+    # Which experiment this tree holds. Two campaigns averaged together answer
+    # no question anyone asked, so a run recorded under a different clock
+    # protocol than the campaign declares is reported as foreign, not averaged.
+    primary = list(_run_dirs(root))
+    manifests: Dict[str, Dict[str, Any]] = {}
+    for run_dir in primary:
+        layout = RunLayout.from_run_dir(run_dir)
+        try:
+            manifests[run_dir.as_posix()] = read_json(layout.manifest)
+        except (OSError, ValueError):
+            manifests[run_dir.as_posix()] = {}
+    identity = classify_runs(root, manifests)
+    belonging = set(identity["runs"])
+    for row in identity["foreign_runs"]:
+        excluded.append(
+            {
+                "run_path": row["run_path"],
+                "kind": "foreign_campaign",
+                "reason": row["reason"],
+            }
+        )
+
+    for run_dir in primary:
+        if run_dir.as_posix() not in belonging:
+            continue
         layout = RunLayout.from_run_dir(run_dir)
         if not layout.metrics.exists():
             missing.append(
@@ -677,6 +703,16 @@ def aggregate_runs(artifacts_root: PathLike, cfg: Config) -> Dict[str, Any]:
         written[filename] = str(len(rows))
 
     summary = _campaign_summary(collected, missing, run_rows, cfg, excluded)
+    summary["campaign"] = {
+        "campaign_id": identity.get("campaign_id"),
+        "declared_clock_protocol": identity.get("declared_clock_protocol"),
+        "clock_protocols": identity.get("clock_protocols"),
+        "n_foreign_runs": len(identity.get("foreign_runs") or []),
+        "foreign_runs": identity.get("foreign_runs"),
+        "mixed_unnamed_campaign": identity.get("mixed_unnamed_campaign"),
+        "note": identity.get("note"),
+        "artifacts_root": root.as_posix(),
+    }
     summary["tables"] = {k: int(v) for k, v in sorted(written.items())}
     write_json(out_dir / "summary.json", summary)
     LOGGER.info(
