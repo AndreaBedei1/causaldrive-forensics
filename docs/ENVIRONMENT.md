@@ -113,11 +113,13 @@ so they are recorded rather than left to be rediscovered.
    restarts the simulator instead of switching twice. A suite that runs nine
    scenarios on one map and one on another pays that restart exactly once.
 
-4. **Town03 cannot be loaded at all.** Every attempt killed the server: from a
-   freshly booted process and after a prior switch, both with `-RenderOffScreen`
-   and windowed. Town03 is consequently not used anywhere in this project;
-   scenario S09 (roundabout) runs on **Town04** instead, and every other scenario
-   on **Town05**. Town04 loads in ~19 s and exposes 372 spawn points.
+4. **Town03 cannot be loaded at all by this tested build.** Every attempt killed
+   or failed to connect to the server: from a freshly booted process and after a
+   prior switch, both with `-RenderOffScreen` and windowed. The active S09
+   configuration therefore uses **Town03_Opt**, which loads successfully and
+   exposes the same Town03 roundabout geometry. The last completed S09 campaign
+   used **Town04**; every other scenario uses **Town05**. Town04 loads in ~19 s
+   and exposes 372 spawn points.
 
 5. **The map cannot be selected from the command line.** Passing
    `/Game/Carla/Maps/Town05` as the first argument was ignored and the server

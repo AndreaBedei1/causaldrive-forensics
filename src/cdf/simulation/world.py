@@ -166,17 +166,22 @@ class ScenarioWorld:
         self.world.apply_settings(settings)
 
         # The Traffic Manager is only used for background traffic; safety-critical
-        # timing always comes from our own scripted controllers. It is still
-        # seeded so that any background behaviour is reproducible.
-        try:
-            tm_port = int(self.cfg.get("simulation.traffic_manager_port", 8000))
-            self.traffic_manager = self.client.get_trafficmanager(tm_port)
-            self._tm_original_sync = True
-            self.traffic_manager.set_synchronous_mode(True)
-            self.traffic_manager.set_random_device_seed(self.seed)
-        except RuntimeError as exc:
-            LOGGER.warning("traffic manager unavailable (%s); continuing without it", exc)
-            self.traffic_manager = None
+        # timing always comes from our own scripted controllers. Some packaged
+        # CARLA maps crash while creating a TM client even when no background
+        # traffic exists, so scenarios may explicitly disable this optional
+        # service without changing the scientific run.
+        if bool(self.cfg.get("simulation.traffic_manager_enabled", True)):
+            try:
+                tm_port = int(self.cfg.get("simulation.traffic_manager_port", 8000))
+                self.traffic_manager = self.client.get_trafficmanager(tm_port)
+                self._tm_original_sync = True
+                self.traffic_manager.set_synchronous_mode(True)
+                self.traffic_manager.set_random_device_seed(self.seed)
+            except RuntimeError as exc:
+                LOGGER.warning("traffic manager unavailable (%s); continuing without it", exc)
+                self.traffic_manager = None
+        else:
+            LOGGER.info("Traffic Manager disabled for %s", self.map_name)
 
         self._entered = True
         LOGGER.info(

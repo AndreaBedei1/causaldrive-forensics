@@ -119,7 +119,7 @@ carries it.
 - [x] S06 chain collision (both causal orders, validated)
 - [x] S07 partial/occluded view (occluded + full-view control)
 - [x] S08 multi-direction crossing
-- [x] S09 roundabout (Town04)
+- [x] S09 roundabout (Town03_Opt; live validated)
 - [x] never more than three participant vehicles (asserted in
       `ScenarioSpec.validate_static` and in run validation)
 

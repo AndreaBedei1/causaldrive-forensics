@@ -153,8 +153,9 @@ CarlaUE4.exe -carla-server -quality-level=Low -RenderOffScreen -nosound
 Map handling is deliberately defensive, because this build is fragile about it:
 reloading the map already running crashes the server, and a second switch in one
 process is unreliable, so `SimulatorSession` switches once and restarts the
-process if another map is needed. **Town03 is never used — it cannot be loaded
-on this build at all.** Details and measurements in
+process if another map is needed. **S09 is configured for Town03_Opt**, the
+stable optimized variant of the Town03 map in the tested build.
+Details and measurements in
 [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
 ## Quick start — one scenario

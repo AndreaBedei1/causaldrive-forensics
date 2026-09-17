@@ -11,10 +11,10 @@ its intended encounter fails loudly).
 
 ## Maps
 
-**S09 (roundabout) is on Town04. Every other scenario is on Town05.**
+**S09 (roundabout) is on Town03_Opt. Every other scenario is on Town05.**
 
-**Town03 is not used**, because loading it reproducibly crashes the tested
-simulator build (see `docs/ENVIRONMENT.md`).
+The tested simulator build cannot load base Town03 reliably, so S09 uses the
+stable `Town03_Opt` variant with the same roundabout geometry.
 
 Two Town05 sites carry almost everything:
 
@@ -25,7 +25,7 @@ Two Town05 sites carry almost everything:
   (maximum bearing error 0.7°) and carrying **no traffic light**, so signal state
   cannot confound a crossing scenario -- used by S03, S04, S05 and S08;
 
-On Town04, **junction 621** at `(313.1, -120.6)` is the roundabout used by S09:
+On Town03_Opt, the central roundabout around `(0.0, 0.0)` is used by S09:
 four clean approaches whose routes curve by roughly 90° through the circulating
 area. That curvature is the point -- constant-velocity path prediction is
 weakest exactly where heading changes fastest.
@@ -233,15 +233,15 @@ Identical crossing geometry to S03, but B brakes and yields on the approach. The
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (101.6, 0.3), bearing 0deg, back 42 m | 10 / 10 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (101.6, 0.3), bearing 0deg, back 50 m | 10 / 10 m/s | baseline |
 | B | `vehicle.audi.tt` | junction (101.6, 0.3), bearing -90deg, back 42 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_yield_brake` -- brake at t=1.4s for 6s (intensity 0.9)
-* **B** &mdash; `B_resume` -- set_speed at t=9s for 14s (target_speed 7)
+* **B** &mdash; `B_yield_brake` -- brake at t=3.2s for 4s (intensity 0.9)
+* **B** &mdash; `B_resume` -- set_speed at t=8s for 14s (target_speed 7)
 
-*Validation:* expected outcome **no_event**; A-B must close to under 45 m.
+*Validation:* expected outcome **no_event**; A-B must close to under 12 m.
 
 *Counterfactual candidates:* `B_yield_brake`.
 
@@ -465,7 +465,7 @@ Scripted actions (these are the intervention handles):
 
 ### S09 -- roundabout
 
-*Map:* **Town04** &nbsp;&nbsp; *Config:* `configs/scenarios/s09_roundabout.yaml`
+*Map:* **Town03_Opt** &nbsp;&nbsp; *Config:* `configs/scenarios/s09_roundabout.yaml`
 
 A is already committed to the roundabout, curving through the circulating area. B enters from a perpendicular approach without giving way and their curved paths conflict.
 
@@ -473,8 +473,8 @@ A is already committed to the roundabout, curving through the circulating area. 
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (313.1, -120.6), bearing 0deg, back 46 m | 8 / 8 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (313.1, -120.6), bearing 90deg, back 41 m | 8 / 8 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (0, 0), bearing 0deg, back 45 m | 8 / 8 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (0, 0), bearing 90deg, back 35 m | 8 / 8 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
