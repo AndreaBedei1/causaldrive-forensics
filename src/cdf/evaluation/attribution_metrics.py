@@ -16,13 +16,10 @@ mapping between them is a legal judgement, and a percentage printed next to a
 participant's name would be read as one no matter what the caption said.
 
 **Did the system claim what it could not know?** :func:`evaluate_local_unknowns`
-is the S10 check. Scenario S10 puts a traffic-light violation at the root of a
-collision; no onboard sensor in this project can observe a traffic light, so the
-local and fused layers must report the geometric conflict and stay silent about
-the signal. A system that "detected" the red-light violation from geometry alone
-would be hallucinating, and this function fails it. ``honest`` is therefore about
-restraint: it is ``True`` exactly when the forbidden name appears nowhere in any
-local or fused artifact.
+checks every scenario-declared expected unknown. A system that claims a
+privileged fact from onboard evidence alone would be hallucinating, and this
+function fails it. ``honest`` is therefore about restraint: it is ``True``
+exactly when the forbidden name appears nowhere in any local or fused artifact.
 """
 
 from __future__ import annotations
@@ -385,7 +382,7 @@ def evaluate_attribution(
 
 
 # ---------------------------------------------------------------------------
-# The S10 epistemic check
+# The epistemic honesty check
 # ---------------------------------------------------------------------------
 
 

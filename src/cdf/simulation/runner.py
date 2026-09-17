@@ -413,9 +413,10 @@ def run_scenario(
 def configure_traffic_lights(sworld: ScenarioWorld, spec: ScenarioSpec) -> List[Dict[str, Any]]:
     """Force the signals around a junction into a fixed, declared state.
 
-    Scenario S10 needs one approach to be genuinely red at the moment a vehicle
+    A scenario may need an approach to be genuinely red at the moment a vehicle
     crosses it, and it needs that to be identical on every replay. Leaving the
-    lights on their normal cycle would make the violation depend on run timing.
+    lights on their normal cycle would make the declared encounter depend on run
+    timing.
 
     Each light is matched to an approach by the heading of its stop waypoints,
     then set and frozen. This is scenario construction using privileged map and

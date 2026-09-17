@@ -303,13 +303,13 @@ def test_evaluate_events_refuses_an_empty_reference() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Attribution and the S10 epistemic check
+# Attribution and the generic epistemic check
 # ---------------------------------------------------------------------------
 
 
-S10_SPEC: Dict[str, Any] = {
-    "scenario_id": "S10",
-    "name": "signalized_limitation",
+SIGNAL_UNKNOWN_SPEC: Dict[str, Any] = {
+    "scenario_id": "generic_privileged_state",
+    "name": "privileged_state_observability",
     "expected_local_unknowns": ["signal_violation"],
     "causal_template": [
         {
@@ -331,7 +331,9 @@ def test_evaluate_local_unknowns_honest_when_the_claim_is_absent() -> None:
     local = {"causal:A": partial_chain("a"), "causal:B": partial_chain("b", owner="B")}
     fused = three_node_chain("f", scope=Provenance.FUSED, owner=None)
 
-    result = evaluate_local_unknowns(S10_SPEC, local, fused, None, cfg_for_tests())
+    result = evaluate_local_unknowns(
+        SIGNAL_UNKNOWN_SPEC, local, fused, None, cfg_for_tests()
+    )
 
     assert result["honest"] is True
     assert result["hallucinated"] == []
@@ -347,7 +349,9 @@ def test_evaluate_local_unknowns_catches_a_hallucinating_local_graph() -> None:
     local = {"causal:A": hallucinating}
     fused = three_node_chain("f", scope=Provenance.FUSED, owner=None)
 
-    result = evaluate_local_unknowns(S10_SPEC, local, fused, None, cfg_for_tests())
+    result = evaluate_local_unknowns(
+        SIGNAL_UNKNOWN_SPEC, local, fused, None, cfg_for_tests()
+    )
 
     assert result["honest"] is False
     assert result["hallucinated"] == ["signal_violation"]
@@ -364,7 +368,9 @@ def test_evaluate_local_unknowns_scans_the_fused_graph_and_the_model_check() -> 
             {"property_id": "P9_signal_violation", "status": "FAIL", "participant_id": "B"}
         ]
     }
-    result = evaluate_local_unknowns(S10_SPEC, local, fused, model_check, cfg_for_tests())
+    result = evaluate_local_unknowns(
+        SIGNAL_UNKNOWN_SPEC, local, fused, model_check, cfg_for_tests()
+    )
     assert result["honest"] is False
     assert "model_check" in result["findings"]["signal_violation"]["claimed_in"]
 

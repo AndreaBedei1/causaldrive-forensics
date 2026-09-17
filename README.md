@@ -305,7 +305,7 @@ never from the Traffic Manager.
 | [CAUSAL_MODEL.md](docs/CAUSAL_MODEL.md) | event graph vs causal DAG, the rule table, interventional semantics |
 | [GRAPH_FUSION.md](docs/GRAPH_FUSION.md) | association cost function, merging, provenance, knowledge gain |
 | [MODEL_CHECKING.md](docs/MODEL_CHECKING.md) | properties, finite-trace semantics, why UNKNOWN is first class |
-| [SCENARIOS.md](docs/SCENARIOS.md) | S01–S10: map, participants, intent, expected outcome, interventions |
+| [SCENARIOS.md](docs/SCENARIOS.md) | S01–S09: map, participants, intent, expected outcome, interventions |
 | [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) | seeds, variants, metrics, radar calibration procedure |
 | [ENVIRONMENT.md](docs/ENVIRONMENT.md) | tested versions and measured simulator behaviour |
 | [EXPERIMENTAL_FINDINGS.md](docs/EXPERIMENTAL_FINDINGS.md) | results, generated from actual runs |

@@ -415,7 +415,7 @@ def evaluate_run(
             data["attribution"], data["oracle_causal"], data["spec"], cfg
         )
 
-    # --- epistemic honesty (S10) -----------------------------------------
+    # --- epistemic honesty -----------------------------------------------
     unknown_names = _expected_local_unknowns(data["spec"])
     if data["spec"] is None:
         reasons["local_unknowns"] = "no scenario specification was available"

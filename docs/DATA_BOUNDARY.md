@@ -274,7 +274,7 @@ consult the oracle, and `viewer/` carries the badged oracle view for human
 inspection.
 
 The walk runs over a synthetic run built in-process **and** over every recorded
-run under `artifacts/` -- all 42 of the campaign plus their counterfactual
+run under `artifacts/` -- all 39 of the campaign plus their counterfactual
 replays, marked `slow` because it takes about 95 s. Scanning one run proves the
 pipeline *can* produce clean artifacts; scanning the campaign proves it *did*.
 
@@ -319,5 +319,5 @@ The boundary is not free, and the committed S01 run shows the bill:
 
 An omniscient recorder would have answered all three. Reporting *insufficient
 evidence* instead is the behaviour under test, not a defect -- and it is what
-makes the fusion benefit measured in S07, and the epistemic limit demonstrated in
-S10, meaningful rather than circular.
+makes the fusion benefit measured in S07 and the remaining epistemic limits
+meaningful rather than circular.

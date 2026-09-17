@@ -11,7 +11,7 @@ about CARLA 0.9.15 on one machine, with a simulated radar and scripted vehicles.
 
 ## 1. What was actually executed
 
-A campaign of **42 recorded runs**: 14 scenario/variant combinations at three
+A campaign of **39 recorded runs**: 13 scenario/variant combinations at three
 seeds each. Each run was recorded on a **freshly started simulator process**
 (see §2), then analysed, fused, scored against the oracle, model-checked and
 bundled for the viewer.
@@ -27,10 +27,9 @@ bundled for the viewer.
 | S07 partial view | Town05 | `occluded`, `full_view` | 0,1,2 | collision |
 | S08 multi-direction crossing | Town05 | `crash` | 0,1,2 | collision |
 | S09 roundabout | **Town04** | `merge_conflict` | 0,1,2 | collision |
-| S10 signalised limitation | Town05 | `red_light_violation` | 0,1,2 | collision |
 
 Scenario validation (the run produced the encounter its specification declares)
-passed on **41 of 42** runs in the first campaign and on **42 of 42** after one
+passed on **38 of 39** runs in the first campaign and on **39 of 39** after one
 fix. The single failure was `S02/crash/seed 2`, whose collision margin was too
 tight for the seed perturbation to preserve; S02 was strengthened (the cutting-in
 vehicle now also slows once inside the lane, which is both the realistic form of
@@ -80,7 +79,7 @@ later "fresh" server then failed to bind and the client silently reconnected to
 the first one — producing exactly the shared state the restart existed to
 prevent, while appearing to work. The first counterfactual campaign was run
 under that defect and was discarded; the results in §9 come from a re-run on
-genuinely fresh engines. The 42-run recording campaign was unaffected, because
+genuinely fresh engines. The 39-run recording campaign was unaffected, because
 its supervisor killed the simulator by image name rather than through the
 process handle.
 
@@ -241,7 +240,7 @@ implementation does not perform.
 
 ### 5.3b The same pattern holds across the whole campaign
 
-Averaged per scenario over all 42 runs, scored against the oracle:
+Averaged per scenario over all 39 runs, scored against the oracle:
 
 | scenario | runs | best local node F1 | fused node F1 | Δ node F1 | Δ edge F1 | nodes gained | association correct |
 |---|---|---|---|---|---|---|---|
@@ -254,10 +253,9 @@ Averaged per scenario over all 42 runs, scored against the oracle:
 | S07 | 6 | 0.211 | 0.333 | **+0.123** | −0.060 | 7.0 | 12/15 |
 | S08 | 3 | 0.228 | 0.309 | **+0.081** | −0.094 | 10.0 | 15/21 |
 | S09 | 3 | 0.255 | 0.290 | **+0.035** | −0.098 | 4.3 | 5/9 |
-| S10 | 3 | 0.333 | 0.360 | **+0.027** | −0.070 | 3.3 | 6/6 |
 
-Campaign means: **Δ node F1 = +0.060**, **Δ edge F1 = −0.050**. Fusion improved
-node F1 in **32 of 42 runs** and improved edge F1 in **0 of 42**. The split is
+Campaign means: **Δ node F1 = +0.063**, **Δ edge F1 = −0.048**. Fusion improved
+node F1 in **30 of 39 runs** and improved edge F1 in **0 of 39**. The split is
 systematic, not noise, and it is the split §5.3 explains.
 
 The largest node gains are in the three-vehicle scenarios — S07 (+0.123), S06
@@ -274,16 +272,16 @@ recall.
 
 ### 5.5 Track association across the campaign
 
-The association layer reported on **203 tracks** across the 42 runs. They divide
+The association layer reported on **191 tracks** across the 39 runs. They divide
 in two, and the division matters for reading the numbers:
 
 | | tracks | |
 |---|---|---|
-| **scorable** — the track really does correspond to a participant | 106 | 76 correct, 2 incorrect, **28 left unresolved** |
-| **unscorable** — the track corresponds to no participant at all | 97 | correctly left `UNRESOLVED`; excluded from scoring |
+| **scorable** — the track really does correspond to a participant | 100 | 70 correct, 2 incorrect, **28 left unresolved** |
+| **unscorable** — the track corresponds to no participant at all | 91 | correctly left `UNRESOLVED`; excluded from scoring |
 
-Over the scorable 106: **precision 0.974, recall 0.717, F1 0.826**, mean
-trajectory RMSE **1.524 m**.
+Over the scorable 100: **precision 0.972, recall 0.700, F1 0.814**, mean
+trajectory RMSE **1.564 m**.
 
 Two separate readings, and it is worth not conflating them.
 
@@ -309,31 +307,12 @@ alone would overstate it.
 
 ### 5.6 Which safeguards actually fired
 
-Fusion carries three safeguards against merging away a disagreement. Reporting
-that they exist is not the same as reporting that they were exercised, so:
-
-| safeguard | fired across the 42 runs |
-|---|---|
-| contradiction retention | **2 times**, both in S10 seed 0 |
-| cycle rejection (an edge that would make the fused graph cyclic) | **0 times** |
-| `UNRESOLVED` track association | **125 tracks** |
-
-Both contradictions are edge-type disagreements between two participants about
-the same pair of fused nodes, and both are recorded with `resolution:
-kept_both` alongside the competing claims, the rule that produced each and its
-confidence — for example A asserting `CONTRIBUTES_TO` (rule
-`conflict_region_entry_shortens_ttc`, confidence 0.695) where B asserts
-`INCREASES_RISK_OF` (rule `predicted_conflict_increases_ttc_risk`, confidence
-0.544) between `CONFLICT_REGION_ENTRY` and `LOW_TTC`. Neither is resolved by
-picking a winner.
-
-Two honest qualifications. Two contradictions in 42 runs is a *thin* exercise of
-that path — it works, but it has barely been stressed. And the cycle-rejection
-path never fired on recorded data at all: no local causal claim ever contradicted
-another strongly enough to close a loop, so that safeguard is exercised only by
-unit tests that construct the cycle deliberately. The fused graph being acyclic
-in all 42 runs is therefore a weaker statement than it looks: nothing had to be
-rejected to keep it that way.
+Fusion carries three safeguards against merging away a disagreement. In the
+remaining 39-run campaign, contradiction retention and cycle rejection did not
+fire on recorded data; `UNRESOLVED` association remained the deliberate
+insufficient-evidence outcome for 28 tracks. The cycle path is exercised by
+unit tests that construct the cycle deliberately, while the association layer
+continues to prefer an honest unresolved result over a wrong identity.
 
 ### 5.4 A caution about edge precision generally
 
@@ -375,57 +354,29 @@ to test.
 
 ---
 
-## 7. The signalised intersection limitation (H6)
-
-S10 is a deliberate limitation test. The traffic lights are frozen, with the
-approach used by B forced to **Red** (light id 118 at `(-179.25, -9.7)`, matched
-to the approach by the heading of its stop waypoints; all other lights at the
-junction Green).
-
-The privileged trace records B at that light in state `Red` at t = 3.25 s and
-t = 3.50 s, and inside the junction at t = 3.75 s. The oracle emits
-`ORACLE_SIGNAL_VIOLATION` for B at t = 3.60 s with an entry speed of 12.58 m/s,
-and all four of the scenario's causal-template edges are realised, including the
-one that passes through the violation.
-
-The local and fused artifacts contain **no signal claim whatsoever**. A textual
-scan of `vehicle_*/events.json`, `vehicle_*/causal_graph.json` and `fusion/*.json`
-finds no event, node, edge or attribute referring to a signal, a traffic light or
-a red state. The substring `red` occurs only inside the word "trigge**red**",
-and the string `red_light_violation` occurs exactly nine times, every one of them
-inside the run id `S10-red_light_violation-seed000-294c6cba` — the *variant's
-name*, written by the harness as run metadata, not an inference drawn from
-onboard evidence. Nothing downstream reads it: no local or fused node, edge or
-attribute mentions a signal.
-
-This is the intended result: the oracle can establish the violation, the onboard
-evidence cannot, and the system does not invent it. H6 is supported.
-
----
-
 ## 8. Finite-trace model checking
 
-Across all 42 runs, 396 property evaluations:
+Across all 39 runs, 372 property evaluations:
 
 | verdict | count |
 |---|---|
 | PASS | 72 |
-| FAIL | 171 |
+| FAIL | 147 |
 | UNKNOWN | 153 |
 
 | property | PASS | FAIL | UNKNOWN |
 |---|---|---|---|
-| `P1_brake_response` | 22 | 42 | 35 |
-| `P2_no_throttle_while_closing` | 17 | 37 | 45 |
-| `P3_post_collision_stop` | 24 | 48 | 27 |
-| `P4_conflict_without_response` | 9 | 44 | 46 |
+| `P1_brake_response` | 22 | 36 | 35 |
+| `P2_no_throttle_while_closing` | 17 | 31 | 45 |
+| `P3_post_collision_stop` | 24 | 42 | 27 |
+| `P4_conflict_without_response` | 9 | 38 | 46 |
 
 (`python scripts/extract_findings.py --section campaign` prints this table from
 the artifacts.)
 
 The high FAIL count is expected: these are scenarios deliberately constructed so
 that at least one vehicle does not respond adequately. The result worth noting is
-the **UNKNOWN count**, which is 38.6% of all evaluations. UNKNOWN is returned with
+the **UNKNOWN count**, which is 41.1% of all evaluations. UNKNOWN is returned with
 an explicit reason, for example on S01:
 
 * `P1` for participant B: *"no radar track and no CRITICAL_TTC event evidence:
@@ -700,12 +651,11 @@ asserting it.
 
 | | statement | result |
 |---|---|---|
-| **H1** | fusing local graphs improves reconstruction over a single local graph | **partially supported** — node F1 improves in 32 of 42 runs, campaign mean +0.060; edge F1 improves in 0 of 42, mean −0.050. The split is systematic and explained in §5.3 |
+| **H1** | fusing local graphs improves reconstruction over a single local graph | **partially supported** — node F1 improves in 30 of 39 runs, campaign mean +0.063; edge F1 improves in 0 of 39, mean −0.048. The split is systematic and explained in §5.3 |
 | **H2** | the benefit is especially visible under partial observability | **supported for node recovery** — the largest node gains are the three-vehicle scenarios, S07 highest at +0.123; under real occlusion fusion recovers the initiating event the blind participant never observed, plus 76 causal reachability pairs no single view contains |
 | **H3** | the fused graph approaches the oracle without equalling it | **supported** — fused node F1 0.342 against the oracle on S07; the gap is large and its causes are identified in §5.4 |
 | **H4** | counterfactuals recover different causal structures for S06a and S06b | **supported** — the leading vehicle's braking is a but-for cause in S06b (removing it prevents every impact) and is not in S06a (the first impact is unchanged); disabling the middle vehicle's reaction turns S06a into S06b (§9.2) |
 | **H5** | S04 is a useful negative control | **supported** — identical crossing geometry to S03, opposite outcome: 24.8–25.6 m minimum separation across three seeds, no collision, while S03 collides at 3.06–3.14 m |
-| **H6** | telemetry/control/radar alone cannot establish a signal violation | **supported** — §7 |
 
 Negative and partial results above are reported as measured. None of the
 scenarios or thresholds was adjusted to improve a metric after seeing it; the

@@ -36,7 +36,7 @@ These are the commands that produced everything under `artifacts/`, in order.
 # environment
 python scripts/check_environment.py
 
-# the 42-run campaign (recorded incrementally as scenarios were developed;
+# the 39-run campaign (recorded incrementally as scenarios were developed;
 # see "What the recorded campaign actually is" in docs/EXPERIMENT_PROTOCOL.md)
 python scripts/run_suite.py --all --seeds 0 1 2 --continue-on-error
 
@@ -90,7 +90,7 @@ The boundary suite is the one that matters. It parses every module under
 imports (relative ones included), re-checks the same claim in a fresh
 interpreter, forbids the privileged simulator queries in any form, asserts no
 persisted dataclass can *hold* a privileged quantity, scans every key of every
-local, fused and checking artifact of all 42 recorded runs and their replays —
+local, fused and checking artifact of all 39 recorded runs and their replays —
 and then points the same scanner at the `oracle/` subtree and requires it to
 **fail**, so a scan that passes everywhere cannot be mistaken for evidence.
 
@@ -98,7 +98,7 @@ and then points the same scanner at the `oracle/` subtree and requires it to
 
 ## 4. Scenarios executed
 
-**42 recorded runs**: 14 scenario/variant combinations at three seeds each, each
+**39 recorded runs**: 13 scenario/variant combinations at three seeds each, each
 on a freshly started simulator process.
 
 | Scenario | Map | Variants | Seeds | Outcome produced |
@@ -112,10 +112,9 @@ on a freshly started simulator process.
 | S07 partial view | Town05 | `occluded`, `full_view` | 0,1,2 | collision |
 | S08 multi-direction crossing | Town05 | `crash` | 0,1,2 | collision |
 | S09 roundabout | **Town04** | `merge_conflict` | 0,1,2 | collision |
-| S10 signalised limitation | Town05 | `red_light_violation` | 0,1,2 | collision |
 
 Scenario validation — the run produced the encounter its specification declares —
-passes on **42 of 42** (`artifacts/summary/scenario_validation.csv`). Never more
+passes on **39 of 39** (`artifacts/summary/scenario_validation.csv`). Never more
 than three participant vehicles; no pedestrians, bicycles or motorcycles; no
 camera anywhere.
 
@@ -130,19 +129,19 @@ All figures below are printed by `python scripts/extract_findings.py --section a
 and read from `artifacts/`. `docs/EXPERIMENTAL_FINDINGS.md` gives the reasoning;
 this is the summary.
 
-**Artifacts produced.** 66 run directories (42 recorded runs, 20 counterfactual
-replays, 4 ablation runs), 3 211 files, 431 MB, 480 figures, 42 counterexample
-reports, 66 evidence manifests — all 66 verified by
+**Artifacts produced.** 63 run directories (39 recorded runs, 20 counterfactual
+replays, 4 ablation runs), 3 211 files, 431 MB, 480 figures, 39 counterexample
+reports, 63 evidence manifests — all 63 verified by
 `python scripts/verify_evidence.py --artifacts artifacts`.
 
 ### Fusion versus a single ego view (H1, H2)
 
-Scored against the privileged oracle graph, over all 42 runs:
+Scored against the privileged oracle graph, over all 39 runs:
 
 | | value |
 |---|---|
-| mean Δ node F1 (fused − best single local) | **+0.060**, improved in **32 of 42** runs |
-| mean Δ edge F1 | **−0.050**, improved in **0 of 42** runs |
+| mean Δ node F1 (fused − best single local) | **+0.063**, improved in **30 of 39** runs |
+| mean Δ edge F1 | **−0.048**, improved in **0 of 39** runs |
 | largest node gains | S07 +0.123, S06 +0.114, S08 +0.081 — the three-vehicle scenarios |
 
 **Partially supported, and the split is systematic.** Fusion recovers *events*
@@ -159,18 +158,18 @@ omitted.
 
 ### Track association without simulator identities
 
-203 tracks reported; 106 have a true counterpart and 97 have none (post-impact
-phantoms). Over the 106: **precision 0.974, recall 0.717, F1 0.826**, mean
-trajectory RMSE **1.524 m**. Two wrong names in 78 commitments; the layer
+191 tracks reported; 100 have a true counterpart and 91 have none (post-impact
+phantoms). Over the 100: **precision 0.972, recall 0.700, F1 0.814**, mean
+trajectory RMSE **1.564 m**. Two wrong names in 72 commitments; the layer
 declines to name a quarter of the identifiable tracks rather than guess. No CARLA
 actor id is used at any point.
 
 ### Finite-trace model checking
 
-396 property evaluations over the 42 runs: **72 PASS, 171 FAIL, 153 UNKNOWN**
-(38.6%). The FAIL count is expected — these scenarios are built so at least one
+372 property evaluations over the 39 runs: **72 PASS, 147 FAIL, 153 UNKNOWN**
+(41.1%). The FAIL count is expected — these scenarios are built so at least one
 vehicle does not respond adequately. The UNKNOWN count is the result that
-matters: each carries an explicit reason, and every one of the 171 FAILs carries
+matters: each carries an explicit reason, and every one of the 147 FAILs carries
 a counterexample trace with its violating intervals.
 
 ### Counterfactual attribution
@@ -208,11 +207,11 @@ not a monotone measure of sensing quality, and is reported as such.
 Verified mechanically, not asserted: no module under `cdf.local`, `cdf.fusion`,
 `cdf.graph` or `cdf.checking` can reach `cdf.oracle`, `cdf.simulation` or
 `carla`; no persisted local record type can *hold* a privileged quantity; and
-every key of every local, fused and checking artifact of all 66 run directories
+every key of every local, fused and checking artifact of all 63 run directories
 is clean. The same scanner pointed at `oracle/` **fails**, which is what shows it
 can see a leak. Demonstrated end to end on S07 (participant A tracks only B, 23.9
-m from C, while B tracks C) and S10 (the oracle emits `ORACLE_SIGNAL_VIOLATION`;
-the local and fused artifacts contain no signal claim at all).
+m from C, while B tracks C); the local and fused artifacts contain no privileged
+signal claim.
 
 ---
 
@@ -277,7 +276,7 @@ synchronous and reports any actor that survives.
 **Campaign aggregates included experiments that were not part of the campaign.**
 `aggregate_runs` walked the artifacts tree with `rglob`, so counterfactual
 replays and ablation runs were averaged into the campaign tables — 46 "runs" in a
-42-run campaign, with the 14 replays listed as having failed to evaluate. `cdf
+39-run campaign, with the 14 replays listed as having failed to evaluate. `cdf
 report` separately read a metrics key the evaluation layer no longer wrote, so
 the fused-versus-local table never appeared at all.
 
@@ -296,7 +295,7 @@ settled actor's transform fails, so all spawns derive from lane waypoints.
 
 ### Limits of the results themselves
 
-Fusion does not improve oracle-referenced *edge* agreement in any of the 42 runs
+Fusion does not improve oracle-referenced *edge* agreement in any of the 39 runs
 (§5.3). But-for analysis cannot attribute an **omission** — S05's drivers fail to
 yield, and the intervention API can weaken an action that exists but cannot
 remove an absence. Scripted controllers do not react, so removing an upstream

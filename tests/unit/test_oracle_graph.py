@@ -773,7 +773,7 @@ def test_signal_violation_is_detected_through_the_junction(cfg):
 
 
 def test_signal_violation_template_edge_resolves(cfg):
-    """An ``oracle_state`` endpoint is realised by the privileged event, as S10 needs."""
+    """An ``oracle_state`` endpoint is realised by the privileged event."""
     trace = _red_light_trace()
     template = [
         {

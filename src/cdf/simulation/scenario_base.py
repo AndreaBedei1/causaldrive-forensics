@@ -184,7 +184,7 @@ class ScenarioSpec:
 
     Scenario construction may set traffic-light state; the resulting states are
     recorded by the oracle only. Local inference has no way to observe them,
-    which is exactly the limitation scenario S10 is built to quantify."""
+    which is exactly why those facts remain outside local and fused inference."""
     expected_local_unknowns: List[str] = field(default_factory=list)
     """Facts the local and fused layers are expected to be UNABLE to establish.
     The evaluation asserts they are absent locally and present in the oracle."""

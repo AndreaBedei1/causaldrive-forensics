@@ -394,7 +394,7 @@ a viewer showing "counterexample report missing" for all of them.
 `tests/integration/test_recorded_graph_invariants.py` now fails if any recorded
 `FAIL` carries a dangling reference or no violating interval.
 
-Across the 42 recorded runs: 171 `FAIL` verdicts, 171 counterexamples, 0 skipped.
+Across the 39 recorded runs: 147 `FAIL` verdicts, 147 counterexamples, 0 skipped.
 
 ---
 
@@ -405,8 +405,8 @@ Across the 42 recorded runs: 171 `FAIL` verdicts, 171 counterexamples, 0 skipped
   about the vehicle's design.
 * A `PASS` is witnessed on *that* trace only.
 * An `UNKNOWN` means **insufficient evidence**, and is the intended verdict
-  whenever the onboard recording genuinely cannot settle the question. S10 is
-  built to produce exactly that about a signal violation, while `O1` -- reading
-  privileged state -- can decide it.
+whenever the onboard recording genuinely cannot settle the question. Scenarios
+may deliberately exercise this boundary, while `O1` -- reading privileged state
+-- can decide questions that onboard evidence cannot.
 * The property set is small, hand-written and auditable by design. It is a monitor
   over evidence, not a proof about a system.

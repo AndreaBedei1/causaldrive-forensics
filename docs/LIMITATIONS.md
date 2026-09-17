@@ -90,9 +90,9 @@ road users.
 
 By design, local inference sees only telemetry, controls and radar. It therefore
 cannot observe traffic-light state, lane markings, signage, road geometry or
-right-of-way rules. Scenario S10 exists to quantify that boundary rather than
-hide it: the oracle can establish a red-light violation and the local and fused
-layers must report insufficient evidence about it.
+right-of-way rules. Those privileged facts remain outside the local and fused
+evidence boundary; the oracle and model-checking layers retain explicit support
+for them.
 
 That is an honest epistemic result, not a capability. A production forensic
 system would fuse camera and map data and would not face this particular limit.

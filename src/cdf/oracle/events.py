@@ -102,8 +102,8 @@ STATE_EVENT_TYPES: Dict[str, EventType] = {
 }
 
 #: ``kind: "oracle_state"`` names. These have no local counterpart at all: they
-#: are the facts the distributed reconstruction provably cannot reach, and S10
-#: exists to make that limitation measurable.
+#: are the facts the distributed reconstruction provably cannot reach; they are
+#: retained on the privileged side for evaluation only.
 ORACLE_STATE_EVENT_TYPES: Dict[str, EventType] = {
     "signal_violation": EventType.ORACLE_SIGNAL_VIOLATION,
     "right_of_way": EventType.ORACLE_RIGHT_OF_WAY_CONFLICT,
@@ -867,8 +867,7 @@ def _signal_violation_events(
 
     Structurally unreachable from onboard evidence -- neither the junction
     geometry nor the signal phase appears anywhere in a participant's own
-    recording -- which is exactly what makes it the reference S10 is scored
-    against.
+    recording -- which is exactly what makes it a privileged reference event.
 
     The predicate carries the governing light forward. CARLA reports a vehicle's
     traffic light only while the vehicle is *approaching* the stop line; the

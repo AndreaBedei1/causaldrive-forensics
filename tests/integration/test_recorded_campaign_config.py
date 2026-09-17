@@ -1,6 +1,6 @@
 """The recorded campaign must be one experiment, not eleven.
 
-The 42 runs under ``artifacts/`` were recorded over a working day, across
+The 39 runs under ``artifacts/`` were recorded over a working day, across
 several commits, as the scenarios were developed and defects were fixed. That is
 only legitimate if nothing which *governs* a recording or its evaluation changed
 between them -- otherwise the runs are not comparable with each other, and the

@@ -72,7 +72,7 @@ deltas keyed by participant id (`participant_overrides`). The variants that exis
 | S02 | `crash`, `avoided` | negative control: same geometry and cut-in, timely response |
 | S06 | `a_front_pushed`, `b_rear_first` | same layout, **opposite causal order** |
 | S07 | `occluded`, `full_view` | control: A on the baseline radar instead of narrow-FOV |
-| S03, S04, S05, S08, S10 | single variant each | S04 is itself the negative control for S03 |
+| S03, S04, S05, S08 | single variant each | S04 is itself the negative control for S03 |
 
 Variants and seeds are orthogonal: the campaign is scenarios x variants x seeds.
 
@@ -331,9 +331,10 @@ exactly the reading this project rejects. See `docs/CAUSAL_MODEL.md` §6.
 
 `evaluate_local_unknowns` takes each name in the scenario's
 `expected_local_unknowns` and asserts it is **absent** from the local and fused
-output and **present** in the oracle output. S10 declares `signal_violation`; a
-system that "recovered" it locally has hallucinated, and this check is what makes
-that a measurable failure rather than an anecdote.
+output and **present** in the oracle output. Scenario specifications may declare
+privileged events such as `signal_violation`; a system that "recovered" one
+locally has hallucinated, and this check is what makes that a measurable failure
+rather than an anecdote.
 
 ### 3.9 Model-checking metrics
 
@@ -507,7 +508,7 @@ and all of them are checkable from the artifacts alone:
 
 ### What the recorded campaign actually is
 
-The 42 runs under `artifacts/` were **not** recorded in one pass under one
+The 39 runs under `artifacts/` were **not** recorded in one pass under one
 commit. They were recorded over a working day, across eleven commits, as the
 scenarios were developed and defects were fixed; `manifest.json` records the
 commit for each one. That is only legitimate if nothing which governs a
@@ -515,7 +516,7 @@ recording or its evaluation changed between them, and that is checkable, because
 every run stores its own fully merged configuration rather than a reference to
 one.
 
-It was checked. Across all 42 runs and against the configuration in force at
+It was checked. Across all 39 runs and against the configuration in force at
 HEAD, the *only* keys that differ anywhere are
 
 * `counterfactual.resume` (all runs -- the key did not exist yet), and
@@ -531,10 +532,10 @@ identical to HEAD.
 the claim fails loudly if a future edit changes a parameter that the recorded
 campaign depended on. Evaluation is re-derived offline over every run in one
 pass (`python scripts/reprocess_runs.py --stages evaluate figures viewer`), so
-all 42 runs are scored by one build of the metrics code rather than by whatever
+all 39 runs are scored by one build of the metrics code rather than by whatever
 was current when each was recorded.
 
 The honest summary is that the campaign is reproducible run-by-run from its
 recorded parameters, and internally comparable, but it is not a single-commit
-campaign. Re-recording all 42 runs at HEAD would make it one; it was not done,
+campaign. Re-recording all 39 runs at HEAD would make it one; it was not done,
 and the artifacts say so.

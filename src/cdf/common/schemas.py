@@ -128,7 +128,8 @@ class CheckStatus(str, Enum):
 
     ``UNKNOWN`` is a first-class result: it is returned when the local evidence is
     insufficient to decide the property, which is a central epistemic feature of
-    this project (see scenario S10).
+    this project: privileged properties may remain UNKNOWN when onboard evidence
+    cannot observe the required ground-truth state.
     """
 
     PASS = "PASS"

@@ -24,8 +24,6 @@ Two Town05 sites carry almost everything:
 * **junction 720** at `(101.6, 0.3)`, measured to expose four clean approaches
   (maximum bearing error 0.7°) and carrying **no traffic light**, so signal state
   cannot confound a crossing scenario -- used by S03, S04, S05 and S08;
-* **junction 838** at `(-189.8, 1.4)`, which *is* signalised and was measured to
-  expose four clean approaches (maximum bearing error 0.1°) -- used by S10 alone.
 
 On Town04, **junction 621** at `(313.1, -120.6)` is the roundabout used by S09:
 four clean approaches whose routes curve by roughly 90° through the circulating
@@ -51,7 +49,6 @@ table of hand-measured spawn coordinates (`SpawnSpec.anchor: junction_approach` 
 | S07 | `partial_view` | Town05 | 3 (A, B, C) | **`occluded`**, `full_view` | collision | 30 s |
 | S08 | `multidirection_crossing` | Town05 | 3 (A, B, C) | **`crash`** | collision | 30 s |
 | S09 | `roundabout` | **Town04** | 2 (A, B) | **`merge_conflict`** | collision | 30 s |
-| S10 | `signalized_limitation` | Town05 | 2 (A, B) | **`red_light_violation`** | collision | 28 s |
 
 ---
 
@@ -496,42 +493,6 @@ Scripted actions (these are the intervention handles):
 
 > both routes curve through the roundabout, so headings change throughout the encounter
 > tests map-free reconstruction where constant-velocity prediction is weakest
-
----
-
-### S10 -- signalized limitation
-
-*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s10_signalized_limitation.yaml`
-
-A crosses a signalised junction on green. B crosses the same junction on red and strikes A. The traffic lights are frozen so the violation is exact and reproducible.
-
-**Variant `red_light_violation`** *(default)*
-
-| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
-|---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (-189.8, 1.4), bearing 0deg, back 42 m | 10 / 10 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (-189.8, 1.4), bearing -90deg, back 50 m | 9 / 9 m/s | baseline |
-
-Scripted actions (these are the intervention handles):
-
-* **B** &mdash; `B_run_red_light` -- set_speed at t=1.2s for 14s (target_speed 12.5)
-
-*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
-
-*Counterfactual candidates:* `B_run_red_light`.
-
-*Expected local UNKNOWNs:* `signal_violation` -- the oracle may assert these; local and fused inference must not.
-
-*Ground-truth causal template (oracle only):*
-
-* `B.B_run_red_light` --TRIGGERS--> `B.signal_violation (oracle only)`  
-  _ORACLE ONLY -- the light state is unobservable from onboard evidence_
-* `B.signal_violation (oracle only)` --CONTRIBUTES_TO--> `B.conflict_entry`
-* `B.conflict_entry` --CONTRIBUTES_TO--> `A.critical_ttc`
-* `A.critical_ttc` --CAUSES_OUTCOME--> `collision(A-B)`
-
-> B physically crosses on red; only the oracle can establish that
-> local and fused inference must report the conflict but say UNKNOWN about the signal
 
 ---
 

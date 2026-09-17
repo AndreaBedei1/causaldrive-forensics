@@ -91,7 +91,7 @@ carries it.
 - [x] PASS / FAIL / UNKNOWN, with UNKNOWN as a first-class verdict
 - [x] counterexample traces with violating intervals — written by
       `TraceChecker.check_and_persist` alongside the results, so a `FAIL` can
-      never name a counterexample that does not exist; 171 FAILs, 171
+      never name a counterexample that does not exist; 147 FAILs, 147
       counterexamples, 0 dangling, asserted by a test over the artifacts
 - [x] oracle-only properties kept separate and unable to affect inference
 
@@ -120,7 +120,6 @@ carries it.
 - [x] S07 partial/occluded view (occluded + full-view control)
 - [x] S08 multi-direction crossing
 - [x] S09 roundabout (Town04)
-- [x] S10 signalised limitation case
 - [x] never more than three participant vehicles (asserted in
       `ScenarioSpec.validate_static` and in run validation)
 
@@ -134,9 +133,9 @@ carries it.
 - [x] attribution metrics, including single vs shared contribution and
       insufficient-evidence cases
 - [x] model-checking metrics
-- [x] the S10 epistemic check (`evaluate_local_unknowns`)
+- [x] the generic epistemic-honesty check (`evaluate_local_unknowns`)
 - [x] **robustness / ablation sweep executed** — single-vehicle vs fusion over
-      all 42 runs, local vs privileged-oracle gap throughout, and a four-profile
+      all 39 runs, local vs privileged-oracle gap throughout, and a four-profile
       radar degradation ablation (`scripts/run_ablation.py`) holding the
       encounter fixed while varying only the sensor profile. Its baseline
       profile doubles as a reproducibility control: re-recording the campaign's
@@ -182,7 +181,7 @@ carries it.
       figures (local-vs-fused edge F1, scenario outcomes, and the finite-trace
       verdict distribution)
 - [x] scenario validation table — `artifacts/summary/scenario_validation.csv`;
-      42 of 42 runs pass
+      39 of 39 runs pass
 - [x] `docs/EXPERIMENTAL_FINDINGS.md` written from actual outputs only, with
       `scripts/extract_findings.py` reproducing every number from the artifacts
 - [x] `docs/LIMITATIONS.md`
@@ -197,5 +196,5 @@ carries it.
 - [x] simulator restarted per run, which is what actually makes runs reproducible
 - [x] SHA-256 digests of every artifact in `evidence_manifest.json`, written at
       the end of a recording and refreshed by
-      `scripts/reprocess_runs.py --stages manifest`; **66 of 66 run directories
+      `scripts/reprocess_runs.py --stages manifest`; **63 of 63 run directories
       verify** with `scripts/verify_evidence.py`

@@ -208,7 +208,7 @@ is a leakage bug.
 
 | Type | Semantics | Why it is unobservable onboard |
 |---|---|---|
-| `ORACLE_SIGNAL_VIOLATION` | an actor was inside a junction while the signal facing it was red | needs ground-truth junction geometry *and* signal phase; neither appears anywhere in a participant's own recording. This is the reference S10 is scored against |
+| `ORACLE_SIGNAL_VIOLATION` | an actor was inside a junction while the signal facing it was red | needs ground-truth junction geometry *and* signal phase; neither appears anywhere in a participant's own recording. This remains an oracle-only reference event |
 | `ORACLE_RIGHT_OF_WAY_CONFLICT` | two actors occupied the same junction simultaneously | needs the map's junction identity for both actors |
 | `ORACLE_SCRIPTED_INTERVENTION` | a scripted action fired: "this was a commanded 8 s emergency brake" | declared intent; no amount of onboard evidence recovers a *command* as opposed to its effect |
 
