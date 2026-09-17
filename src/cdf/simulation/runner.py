@@ -545,16 +545,40 @@ def _latest_trigger_time(agents: Sequence[ParticipantAgent]) -> Optional[float]:
 
 
 def _apply_intervention(spec: ScenarioSpec, intervention: Dict[str, Any]) -> ScenarioSpec:
-    """Return a copy of ``spec`` with one scripted action modified.
+    """Return a copy of ``spec`` with the intervention's scripted actions modified.
 
-    Supported operations: ``disable`` (remove the action entirely), ``delay``
-    (shift ``t_start``), ``scale`` (multiply a parameter), ``set`` (assign a
-    parameter). Exactly one action id is targeted so the comparison isolates a
-    single candidate cause.
+    Supported operations: ``disable`` (remove the action entirely), ``delay`` and
+    ``advance`` (shift ``t_start``), ``scale`` (multiply a parameter), ``set``
+    (assign a parameter).
+
+    The usual form targets exactly one action, so the comparison isolates a
+    single candidate cause. A ``steps`` list targets several at once, each
+    action at most once: that is what a *joint* counterfactual is, and two
+    vehicles can each contribute without either being individually decisive.
     """
     import copy
 
     out = copy.deepcopy(spec)
+    steps = intervention.get("steps")
+    if steps:
+        for step in steps:
+            out = _apply_one_step(out, step)
+        out.variant = "{0}+{1}".format(
+            spec.variant, intervention.get("intervention_id", "composite")
+        )
+        return out
+    out = _apply_one_step(out, intervention)
+    out.variant = "{0}+{1}".format(
+        spec.variant, intervention.get("intervention_id", intervention.get("op", "disable"))
+    )
+    return out
+
+
+def _apply_one_step(out: ScenarioSpec, intervention: Dict[str, Any]) -> ScenarioSpec:
+    """Apply exactly one operation to exactly one scripted action, in place.
+
+    The caller owns the copy and the variant name; this only edits the action.
+    """
     action_id = intervention.get("action_id")
     op = intervention.get("op", "disable")
 
@@ -586,7 +610,6 @@ def _apply_intervention(spec: ScenarioSpec, intervention: Dict[str, Any]) -> Sce
     else:
         raise ValueError("unknown intervention op {0!r}".format(op))
 
-    out.variant = "{0}+{1}".format(spec.variant, intervention.get("intervention_id", op))
     return out
 
 

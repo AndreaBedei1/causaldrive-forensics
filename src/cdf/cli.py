@@ -723,11 +723,44 @@ def cmd_run(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
+def declared_variants(scenario_id: str, overrides: Sequence[str] = ()) -> List[str]:
+    """Every variant a scenario declares, in declaration order.
+
+    The campaign is defined as "every scenario, every variant it declares, every
+    seed", so the list has to come from the scenario files rather than from a
+    number written down somewhere. ``--variants crash avoided`` applies the same
+    names to every scenario and fails on one that has no such variant, which is
+    why this exists alongside it.
+    """
+    cfg = resolve_config(scenario_id=scenario_id, overrides=list(overrides))
+    block = cfg.get("scenario", None)
+    if not isinstance(block, Mapping):
+        return []
+    variants = block.get("variants")
+    if isinstance(variants, Mapping):
+        return [str(name) for name in variants.keys()]
+    if isinstance(variants, (list, tuple)):
+        return [str((v or {}).get("name", "")) for v in variants if (v or {}).get("name")]
+    return []
+
+
+def suite_combinations(
+    scenario_ids: Sequence[str], overrides: Sequence[str] = ()
+) -> List[Tuple[str, str]]:
+    """``(scenario_id, variant)`` for every declared variant of every scenario."""
+    out: List[Tuple[str, str]] = []
+    for scenario_id in scenario_ids:
+        for variant in declared_variants(scenario_id, overrides):
+            out.append((str(scenario_id), variant))
+    return out
+
+
 def _suite_plan(
     scenario_ids: Sequence[str],
     seeds: Sequence[int],
     variants: Optional[Sequence[str]],
     overrides: Sequence[str],
+    all_variants: bool = False,
 ) -> List[Dict[str, Any]]:
     """Build the ordered work plan, grouped so that map switches are minimal.
 
@@ -735,13 +768,20 @@ def _suite_plan(
     towns pays a full server restart on every alternation (see
     :class:`~cdf.simulation.carla_client.SimulatorSession`), while one that runs
     every Town05 scenario before the first Town03 one pays exactly one.
+
+    With ``all_variants`` every variant each scenario declares is run, which is
+    what the experimental campaign is defined as; ``variants`` applies one fixed
+    list to every scenario and is for running a slice of it.
     """
     from .simulation.scenario_base import ScenarioSpec
 
     entries: List[Dict[str, Any]] = []
     for scenario_id in scenario_ids:
         cfg = resolve_config(scenario_id=scenario_id, overrides=overrides)
-        wanted = list(variants) if variants else [None]
+        if all_variants:
+            wanted = declared_variants(scenario_id, overrides) or [None]
+        else:
+            wanted = list(variants) if variants else [None]
         for variant in wanted:
             spec = ScenarioSpec.from_config(cfg, variant=variant)
             for seed in seeds:
@@ -769,7 +809,13 @@ def cmd_suite(args: argparse.Namespace) -> int:
     from .simulation.carla_client import session_from_config
     from .simulation.runner import run_scenario
 
-    plan = _suite_plan(scenario_ids, seeds, args.variants, args.config_overrides)
+    plan = _suite_plan(
+        scenario_ids,
+        seeds,
+        args.variants,
+        args.config_overrides,
+        all_variants=bool(getattr(args, "all_variants", False)),
+    )
     if not plan:
         raise CliError("the suite plan is empty; check --scenarios and --seeds")
     maps = sorted({entry["map"] for entry in plan})
@@ -2151,6 +2197,11 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     suite.add_argument("--all", action="store_true", help="run every scenario in configs/scenarios")
+    suite.add_argument(
+        "--all-variants",
+        action="store_true",
+        help="run every variant each scenario declares (the experimental campaign)",
+    )
     suite.add_argument(
         "--scenarios", nargs="+", default=None, metavar="ID", help="explicit scenario ids"
     )

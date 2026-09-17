@@ -325,12 +325,23 @@ counterfactual:
   # interrupted campaign does not have to repeat the hour it already spent.
   # Set to false to force every replay to be recorded afresh.
   resume: true
+  # Multi-action replay. Two vehicles can each contribute without either being
+  # individually decisive; only removing both in one replay can tell that apart
+  # from an absence of evidence. Runs only when no single removal prevented the
+  # collision, and stops at the first size that does -- which is what makes the
+  # set it reports minimal.
+  combinations:
+    enabled: true
+    max_combination_size: 2        # with two or three vehicles, pairs suffice
+    max_replays: 6                 # hard ceiling on the extra replays
   severity_metric: "relative_impact_speed"
   contribution:
     # Normalised causal-contribution score; formula documented in
     # docs/CAUSAL_MODEL.md. It is explicitly NOT a legal fault percentage.
     prevention_weight: 1.0
     severity_weight: 0.5
+    min_severity_reduction: 0.05   # below this a replay did not measurably change
+                                   # the severity, and nothing is claimed
 
 # -----------------------------------------------------------------------------
 # Evaluation
@@ -362,6 +373,16 @@ evaluation:
     use_matched_nodes_only: false
   association:
     count_unresolved_as_miss: true
+  # Scene reconstruction: how close the merged account puts the vehicles and the
+  # impact to the truth, in metres and seconds on the simulator clock.
+  reconstruction:
+    max_pose_gap_s: 0.10         # no privileged pose within this of a sample
+                                 # means that sample is not scored, rather than
+                                 # scored against a stale pose
+  # Causal chains into the collision, compared by canonical family signature.
+  causal_paths:
+    max_paths_per_outcome: 64    # a dense graph can carry combinatorially many
+                                 # paths; the cap is recorded with the result
 
 # -----------------------------------------------------------------------------
 # Output

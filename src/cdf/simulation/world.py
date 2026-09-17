@@ -229,7 +229,15 @@ class ScenarioWorld:
             try:
                 if self.world.get_settings().synchronous_mode:
                     self.world.tick()
-                survivors = [int(a.id) for a in self.world.get_actors(destroyed)]
+                # `get_actors(ids)` answers from the client's cached actor list,
+                # which still holds an entry for an actor the server has already
+                # removed; `is_alive` is the authoritative field. Checking the
+                # ids alone reports a leak on every run that never happened.
+                survivors = [
+                    int(a.id)
+                    for a in self.world.get_actors(destroyed)
+                    if bool(getattr(a, "is_alive", True))
+                ]
                 if survivors:
                     LOGGER.warning(
                         "actor(s) %s survived cleanup and are still in the world",

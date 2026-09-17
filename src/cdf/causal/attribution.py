@@ -425,6 +425,18 @@ def attribution_report(
             "this run and every score reflects severity only"
         )
 
+    set_analysis = set_analysis_from(factual, counterfactuals, cfg)
+    if set_analysis.get("n_composite_replays"):
+        # Only a multi-action replay can tell a joint contribution from an
+        # absence of evidence, so when one was run its verdict is the verdict.
+        classification = dict(classification)
+        classification["attribution_class"] = set_analysis["attribution_class"]
+        classification["rationale"] = set_analysis["rationale"]
+        classification["minimal_prevention_sets"] = set_analysis[
+            "minimal_prevention_sets"
+        ]
+        classification["source"] = "multi_action_replay"
+
     return {
         "schema_version": SCHEMA_VERSIONS["counterfactual"],
         "scenario_id": scenario_id,
@@ -451,12 +463,58 @@ def attribution_report(
         "interventions": [iv.to_dict() for iv in (interventions or [])],
         "contributions": [c.to_dict() for c in contributions],
         "classification": classification,
+        "set_analysis": set_analysis,
         "n_requested": len(interventions or []),
         "n_completed": len(counterfactuals),
         "n_failed": len(failures),
         "failures": [dict(f) for f in failures],
         "notes": notes,
     }
+
+
+def set_analysis_from(
+    factual: Optional[CounterfactualOutcome],
+    counterfactuals: Sequence[CounterfactualOutcome],
+    cfg: Optional[Config],
+) -> Dict[str, Any]:
+    """Classify the replays as *sets* of removed actions.
+
+    This is the analysis that can distinguish a joint contribution -- neither
+    change is enough alone, both together are -- from a genuine absence of
+    evidence. It subsumes the single-action verdicts, so it is reported for
+    every suite; when only single actions were replayed it simply finds no
+    multi-action prevention set, which is itself worth recording.
+    """
+    from .combinations import SetOutcome, classify_from_set_outcomes
+
+    outcomes = []
+    for cf in counterfactuals:
+        actions = getattr(cf, "action_ids", None) or (
+            [cf.action_id] if cf.action_id else []
+        )
+        if not actions:
+            continue
+        outcomes.append(
+            SetOutcome(
+                actions=frozenset(str(a) for a in actions),
+                prevented=bool(
+                    factual is not None and factual.collision and not cf.collision
+                ),
+                severity_reduction=severity_reduction(factual, cf, cfg)
+                if factual is not None
+                else None,
+                intervention_id=cf.intervention_id,
+                collision=cf.collision,
+            )
+        )
+    result = classify_from_set_outcomes(
+        bool(factual is not None and factual.collision), outcomes, cfg
+    )
+    result["set_outcomes"] = [o.to_dict() for o in sorted(
+        outcomes, key=lambda o: (len(o.actions), sorted(o.actions))
+    )]
+    result["n_composite_replays"] = sum(1 for o in outcomes if len(o.actions) > 1)
+    return result
 
 
 def _require_outcome(value: Any, role: str) -> None:

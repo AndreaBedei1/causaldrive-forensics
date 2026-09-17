@@ -1,7 +1,14 @@
-# Generated experiment artifacts (regenerate with scripts/run_suite.py).
+# Generated experiment artifacts (regenerate with scripts/run_campaign.py).
+# Two campaigns are kept side by side: artifacts/ is the historical
+# synchronized-clock baseline, artifacts_independent_clocks/ is the final
+# campaign in which every recorder keeps its own clock. Neither is committed --
+# they are hundreds of megabytes of recordings -- but the summary tables derived
+# from them are, under docs/ and results/.
 artifacts/**
 !artifacts/.gitkeep
 !artifacts/example/**
+artifacts_independent_clocks/**
+!artifacts_independent_clocks/.gitkeep
 
 # Python
 __pycache__/

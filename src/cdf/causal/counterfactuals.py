@@ -96,6 +96,10 @@ class CounterfactualOutcome:
 
     intervention_id: str
     action_id: str = ""
+    #: Every action this replay removed: one entry for a single-action replay,
+    #: several for a joint one, empty for the factual run. ``action_id`` stays
+    #: the first of them so every existing consumer keeps working.
+    action_ids: List[str] = field(default_factory=list)
     op: str = "none"
     targets_participant: str = ""
 
@@ -124,6 +128,7 @@ class CounterfactualOutcome:
         return {
             "intervention_id": self.intervention_id,
             "action_id": self.action_id,
+            "action_ids": list(self.action_ids or ([self.action_id] if self.action_id else [])),
             "op": self.op,
             "targets_participant": self.targets_participant,
             "collision": bool(self.collision),
@@ -223,6 +228,7 @@ def outcome_from_run(
     return CounterfactualOutcome(
         intervention_id=intervention.intervention_id if intervention else FACTUAL_ID,
         action_id=intervention.action_id if intervention else "",
+        action_ids=list(getattr(intervention, "action_ids", ()) or ()) if intervention else [],
         op=intervention.op if intervention else "none",
         targets_participant=intervention.targets_participant if intervention else "",
         collision=collided,
@@ -402,6 +408,27 @@ def run_counterfactual_suite(
             continue
         outcomes.append(outcome_from_run(result, cfg, intervention=intervention))
 
+    # Bounded multi-action search. Only worth running when the factual run
+    # collided and no single removal prevented it: if one did, a set containing
+    # it would not be minimal. Sizes grow one at a time and the search stops at
+    # the first size that prevents, which is what makes the set it finds minimal.
+    combo_outcomes, combo_failures, combo_specs = _run_combination_search(
+        session=session,
+        cfg=cfg,
+        spec=spec,
+        seed=seed,
+        artifacts_root=artifacts_root,
+        layout=layout,
+        factual_outcome=factual_outcome,
+        single_outcomes=outcomes,
+        restart_each=restart_each,
+        can_restart=can_restart,
+        replay_dirs=replay_dirs,
+    )
+    outcomes.extend(combo_outcomes)
+    failures.extend(combo_failures)
+    interventions = list(interventions) + list(combo_specs)
+
     report = attribution_report(
         factual_outcome,
         outcomes,
@@ -528,6 +555,128 @@ def _completed_replay(
         return outcome_from_artifacts(target, cfg, intervention=intervention)
     except FileNotFoundError:
         return None
+
+
+def _run_combination_search(
+    session: Any,
+    cfg: Config,
+    spec: Any,
+    seed: int,
+    artifacts_root: str,
+    layout: RunLayout,
+    factual_outcome: Optional[CounterfactualOutcome],
+    single_outcomes: Sequence[CounterfactualOutcome],
+    restart_each: bool,
+    can_restart: bool,
+    replay_dirs: Dict[str, str],
+) -> Tuple[List[CounterfactualOutcome], List[Dict[str, Any]], List[Any]]:
+    """Replay sets of actions until one prevents the collision, or the budget ends.
+
+    Two vehicles can each contribute without either being individually decisive.
+    Single-action replay reports that as insufficient evidence, which is true and
+    uninformative; this finds the smallest set of changes that would have been
+    enough, and reports honestly when none of the ones it could afford to try was.
+    """
+    from .combinations import plan_combinations
+    from .interventions import InterventionSpec
+
+    if not bool(cfg.get("counterfactual.combinations.enabled", True)):
+        return [], [], []
+    if factual_outcome is None or not factual_outcome.collision:
+        return [], [], []
+
+    prevented_alone = {
+        o.action_id
+        for o in single_outcomes
+        if o.action_id and not o.collision
+    }
+    if prevented_alone:
+        return [], [], []
+
+    max_size = int(cfg.get("counterfactual.combinations.max_combination_size", 2))
+    max_replays = int(cfg.get("counterfactual.combinations.max_replays", 6))
+    candidates = sorted({o.action_id for o in single_outcomes if o.action_id})
+    if len(candidates) < 2 or max_size < 2 or max_replays < 1:
+        return [], [], []
+
+    tested = [frozenset([o.action_id]) for o in single_outcomes if o.action_id]
+    new_outcomes: List[CounterfactualOutcome] = []
+    failures: List[Dict[str, Any]] = []
+    specs: List[Any] = []
+    budget = max_replays
+    resume = bool(cfg.get("counterfactual.resume", True))
+
+    for size in range(2, max_size + 1):
+        if budget <= 0:
+            break
+        prevented_here = False
+        for combo in plan_combinations(candidates, tested, size, budget):
+            if budget <= 0:
+                break
+            budget -= 1
+            actions = sorted(combo)
+            iv = InterventionSpec(
+                intervention_id="joint__" + "__".join(actions),
+                action_id=actions[0],
+                op="disable",
+                params={},
+                description=(
+                    "none of {0} performs its action; everything else in the run "
+                    "is held identical [joint counterfactual: no single removal "
+                    "prevented the collision]".format(", ".join(actions))
+                ),
+                steps=[{"action_id": a, "op": "disable"} for a in actions],
+            )
+            specs.append(iv)
+            tested.append(combo)
+            target = replay_layout(layout, iv.intervention_id)
+            replay_dirs[iv.intervention_id] = str(
+                target.root.relative_to(layout.root).as_posix()
+            )
+            done = _completed_replay(target, cfg, iv) if resume else None
+            if done is not None:
+                LOGGER.info(
+                    "joint replay %s: reusing the completed replay", iv.intervention_id
+                )
+                new_outcomes.append(done)
+                if not done.collision:
+                    prevented_here = True
+                continue
+            if restart_each and can_restart:
+                session.fresh_world_for_map(spec.map_name)
+            LOGGER.info("joint replay %s: %s", iv.intervention_id, iv.description)
+            try:
+                result = run_scenario(
+                    _client_for(session, spec),
+                    cfg,
+                    spec,
+                    seed,
+                    artifacts_root=artifacts_root,
+                    persist=True,
+                    intervention=iv.as_runner_dict(),
+                    layout=target,
+                )
+            except Exception as exc:  # noqa: BLE001 - recorded, never swallowed
+                LOGGER.exception("joint replay %s failed", iv.intervention_id)
+                failures.append(
+                    {
+                        "intervention_id": iv.intervention_id,
+                        "action_id": iv.action_id,
+                        "op": "disable",
+                        "targets_participant": "",
+                        "error": "{0}: {1}".format(type(exc).__name__, exc),
+                    }
+                )
+                continue
+            outcome = outcome_from_run(result, cfg, intervention=iv)
+            new_outcomes.append(outcome)
+            if not outcome.collision:
+                prevented_here = True
+        if prevented_here:
+            # A set of this size prevented it; any larger set containing it is
+            # not minimal, so the search stops here.
+            break
+    return new_outcomes, failures, specs
 
 
 def _read_factual_outcome(

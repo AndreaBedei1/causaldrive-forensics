@@ -104,14 +104,13 @@ def root_contributors(
     *behaviour* rather than as a node, because "B braked hard at 4.0 s" is an
     answer and "fused:B:HARD_BRAKE:1c2f..." is not.
     """
-    ancestry = set(analyzer.ancestors(outcome_id))
     by_node: Dict[str, CausalEpisode] = {}
     for episode in episodes:
         for node_id in episode.node_ids:
             by_node[node_id] = episode
-    roots = [r for r in analyzer.root_causes(outcome_id) if r in ancestry or True]
+    # ``root_causes`` already restricts itself to this outcome's ancestors.
     out: Dict[str, CausalEpisode] = {}
-    for node_id in roots:
+    for node_id in analyzer.root_causes(outcome_id):
         episode = by_node.get(node_id)
         if episode is not None:
             out[episode.episode_id] = episode

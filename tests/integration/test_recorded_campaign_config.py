@@ -56,6 +56,8 @@ MIGRATION_NAMESPACES = (
     "fusion.event_alignment.counterpart_",
     "fusion.event_alignment.mutual_impact_",
     "evaluation.canonical_vocabulary.",
+    "evaluation.reconstruction.",
+    "evaluation.causal_paths.",
     "graph.episodes.",
     "graph.reconstruction.",
     "graph.attribution.",

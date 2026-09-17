@@ -75,7 +75,16 @@ _OP_RANK: Dict[str, int] = {"disable": 0, "scale": 1, "advance": 2, "delay": 3, 
 
 @dataclass
 class InterventionSpec:
-    """One controlled modification of one scripted action."""
+    """One controlled modification of one scripted action -- or of a set of them.
+
+    A single-action intervention is the common case and is described by
+    ``action_id``/``op``/``params``. When ``steps`` is non-empty the replay
+    applies every step instead, which is what a joint counterfactual needs: two
+    vehicles can each contribute without either being individually decisive, and
+    the only way to find that out is to remove both in one replay.
+    ``action_id`` then names the first step, so every consumer that reads a
+    single action keeps working and sorts stably.
+    """
 
     intervention_id: str
     """Stable, filesystem-safe identity; also the replay's artifact directory."""
@@ -84,8 +93,51 @@ class InterventionSpec:
     params: Dict[str, Any] = field(default_factory=dict)
     description: str = ""
     targets_participant: str = ""
+    #: ``[{action_id, op, **params}, ...]``; empty means the single-action form.
+    steps: List[Dict[str, Any]] = field(default_factory=list)
+
+    @property
+    def action_ids(self) -> Tuple[str, ...]:
+        """Every action this replay modifies, sorted and deduplicated."""
+        if self.steps:
+            return tuple(sorted({str(step["action_id"]) for step in self.steps}))
+        return (self.action_id,)
+
+    @property
+    def is_composite(self) -> bool:
+        return len(self.action_ids) > 1
 
     def __post_init__(self) -> None:
+        if self.steps:
+            for step in self.steps:
+                op = str(step.get("op", ""))
+                if op not in RUNNER_OPS:
+                    raise ValueError(
+                        "unknown intervention op {0!r} in composite {1!r}".format(
+                            op, self.intervention_id
+                        )
+                    )
+                if not step.get("action_id"):
+                    raise ValueError(
+                        "a step of composite intervention {0!r} names no "
+                        "action".format(self.intervention_id)
+                    )
+                missing = [k for k in _REQUIRED_PARAMS[op] if k not in step]
+                if missing:
+                    raise ValueError(
+                        "step {0!r} (op={1}) of {2!r} is missing required "
+                        "parameter(s) {3}".format(
+                            step.get("action_id"), op, self.intervention_id, missing
+                        )
+                    )
+            if len({str(step["action_id"]) for step in self.steps}) != len(self.steps):
+                raise ValueError(
+                    "composite intervention {0!r} modifies the same action twice; "
+                    "one replay changes each action at most once".format(
+                        self.intervention_id
+                    )
+                )
+            return
         if self.op not in RUNNER_OPS:
             raise ValueError(
                 "unknown intervention op {0!r} for action {1!r}; the runner "
@@ -110,6 +162,11 @@ class InterventionSpec:
         Only the keys the runner reads are emitted; ranking and bookkeeping stay
         on this object, so nothing that could perturb the replay travels with it.
         """
+        if self.steps:
+            return {
+                "intervention_id": self.intervention_id,
+                "steps": [dict(step) for step in self.steps],
+            }
         payload: Dict[str, Any] = {
             "intervention_id": self.intervention_id,
             "action_id": self.action_id,
@@ -123,10 +180,13 @@ class InterventionSpec:
         return {
             "intervention_id": self.intervention_id,
             "action_id": self.action_id,
+            "action_ids": list(self.action_ids),
             "op": self.op,
             "params": dict(self.params),
             "description": self.description,
             "targets_participant": self.targets_participant,
+            "steps": [dict(step) for step in self.steps],
+            "composite": self.is_composite,
         }
 
 

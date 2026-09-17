@@ -48,7 +48,16 @@ from ..graph.export import graph_summary, load_graph
 from ..oracle.events import load_oracle_trace
 from . import tables
 from .association_metrics import evaluate_association
-from .attribution_metrics import evaluate_attribution, evaluate_local_unknowns
+from .attribution_metrics import (
+    evaluate_attribution,
+    evaluate_local_unknowns,
+    oracle_causal_initiators,
+)
+from .causal_metrics import (
+    evaluate_attribution_sets,
+    evaluate_causal_paths,
+    evaluate_scene_reconstruction,
+)
 from .event_metrics import evaluate_events
 from .graph_metrics import evaluate_graphs, fusion_benefit
 from .clocks import load_clock_truth, simulator_evidence, map_event, map_graph, evaluate_clock_alignment
@@ -69,6 +78,9 @@ _BLOCKS = (
     "fusion_benefit",
     "association",
     "attribution",
+    "scene_reconstruction",
+    "causal_paths",
+    "attribution_sets",
     "local_unknowns",
     "model_check",
     "scenario_validation",
@@ -205,6 +217,16 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
     validation: Optional[Dict[str, Any]] = (
         read_json(layout.scenario_validation) if layout.scenario_validation.exists() else None
     )
+    # The hypothesis fusion read off the graph before any replay. Scored beside
+    # the replay-backed attribution so the contribution of reasoning alone is
+    # visible rather than inferred.
+    graph_hypothesis: Optional[Dict[str, Any]] = (
+        read_json(layout.causal_attribution) if layout.causal_attribution.exists() else None
+    )
+    reconstruction: Optional[Dict[str, Any]] = (
+        read_json(layout.incident_reconstruction)
+        if layout.incident_reconstruction.exists() else None
+    )
 
     variant = str(manifest.get("variant", "")) or None
     resolved_spec = spec if spec is not None else _scenario_block(cfg, variant)
@@ -222,6 +244,11 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
             "independent-clock scoring requires all oracle clock profiles and an "
             "estimated reference; raw/common times cannot be compared to simulator time"
         )
+    # The cross-view reconstruction metric must see the recordings as they were
+    # written, on each recorder's own clock, so that the *estimated* alignment is
+    # what places them in a common frame and its error is measured rather than
+    # divided out. Everything else is scored against the privileged inversion.
+    raw_run = run
     if truth:
         run = simulator_evidence(run, truth)
         for pid, profile in truth.items():
@@ -244,6 +271,9 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
     return {
         "manifest": manifest,
         "run": run,
+        "raw_run": raw_run,
+        "clock_truth": truth,
+        "time_alignment": alignment,
         "local_causal": local_causal,
         "local_event": local_event,
         "local_events": local_events,
@@ -258,6 +288,8 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
         "assignments": assignments,
         "model_check": model_check,
         "attribution": attribution,
+        "graph_hypothesis": graph_hypothesis,
+        "incident_reconstruction": reconstruction,
         "scenario_validation": validation,
         "spec": resolved_spec,
         "variant": variant or "",
@@ -464,6 +496,59 @@ def evaluate_run(
             data["attribution"], data["oracle_causal"], data["spec"], cfg
         )
 
+    # --- the explanation itself -------------------------------------------
+    # Structural F1 says how much of the oracle graph came back. These three say
+    # whether the incident was reconstructed, whether the chains into it were
+    # recovered, and whether the right vehicles were named -- which is what the
+    # project actually claims to do.
+    if data["oracle_trace"] is None:
+        reasons["scene_reconstruction"] = (
+            "no privileged trace at {0}; true poses are unknown".format(
+                layout.oracle_trace.as_posix()
+            )
+        )
+    else:
+        metrics["scene_reconstruction"] = evaluate_scene_reconstruction(
+            run,
+            data["fused_causal"],
+            data["oracle_trace"],
+            run.participant_ids,
+            cfg,
+            time_scoring_reason=data["time_scoring_reason"],
+            raw_run=data["raw_run"],
+            alignment=data["time_alignment"],
+            clock_truth=data["clock_truth"],
+            subject_map=data["subject_map"],
+        )
+
+    if data["oracle_causal"] is None:
+        reasons["causal_paths"] = "no oracle causal graph at {0}".format(
+            layout.oracle_causal_graph.as_posix()
+        )
+    elif data["fused_causal"] is None:
+        reasons["causal_paths"] = "no fused causal graph at {0}".format(
+            layout.fused_causal_graph.as_posix()
+        )
+    else:
+        metrics["causal_paths"] = evaluate_causal_paths(
+            data["fused_causal"], data["oracle_causal"], cfg
+        )
+
+    if data["spec"] is None:
+        reasons["attribution_sets"] = (
+            "no scenario specification: the declared causal contributors come from "
+            "the scenario's causal_template"
+        )
+    else:
+        initiators = oracle_causal_initiators(data["oracle_causal"], data["spec"], cfg)
+        expect_collision = _expects_collision(data["spec"], data["oracle_trace"])
+        metrics["attribution_sets"] = evaluate_attribution_sets(
+            data["attribution"],
+            initiators,
+            expect_collision,
+            graph_hypothesis=data["graph_hypothesis"],
+        )
+
     # --- epistemic honesty -----------------------------------------------
     unknown_names = _expected_local_unknowns(data["spec"])
     if data["spec"] is None:
@@ -513,6 +598,36 @@ def evaluate_run(
         ", ".join(sorted(reasons)) or "none",
     )
     return metrics
+
+
+def _expects_collision(spec: Any, oracle_trace: Optional[Mapping[str, Any]]) -> bool:
+    """Whether this run is one where there is an outcome to attribute at all.
+
+    The scenario's declared expectation decides it; the privileged trace is used
+    only when the scenario declares nothing, and then only to say whether a
+    collision physically happened. A negative control that unexpectedly collided
+    is therefore still scored as a collision run -- hiding that behind the
+    declaration would score the design rather than the run.
+    """
+    if oracle_trace is not None:
+        pairs = oracle_trace.get("collision_pairs") or []
+        if pairs:
+            return True
+    expected = _spec_expectation(spec)
+    if expected is not None:
+        return expected
+    return False
+
+
+def _spec_expectation(spec: Any) -> Optional[bool]:
+    """``expected_outcome.collision`` from a spec object or raw mapping."""
+    outcome = getattr(spec, "expected_outcome", None)
+    if outcome is None and isinstance(spec, Mapping):
+        outcome = spec.get("expected_outcome")
+    if isinstance(outcome, Mapping) and "collision" in outcome:
+        return bool(outcome["collision"])
+    value = getattr(outcome, "collision", None)
+    return None if value is None else bool(value)
 
 
 def _expected_local_unknowns(spec: Any) -> List[str]:
