@@ -18,10 +18,13 @@ simulation step, the radar profiles, the event thresholds, the fusion gates, the
 checking and evaluation parameters, and every scenario specification -- must be
 byte-identical across every run and identical to the configuration in force now.
 
-The explicit clock-protocol migration also permits newly introduced ``clocks.*``
-and ``fusion.time_alignment.*`` keys absent from legacy recordings. It does not
-excuse changing existing sensor/event/association/scenario parameters: the old
-campaign is the synchronized-clock baseline, not the new clock protocol.
+A recording is also allowed to predate a *stage that did not exist yet*. The
+retained campaign under ``artifacts/`` is the synchronized-clock baseline; the
+clock protocol and post-fusion causal reasoning were added afterwards, so keys
+under :data:`MIGRATION_NAMESPACES` are permitted **only when the recording does
+not carry them at all**. A key the recording does carry must still match
+exactly: that is the difference between adding a stage and quietly retuning the
+one the campaign was recorded under.
 
 Skipped when the artifacts are not present, so a fresh clone still passes.
 """
@@ -41,6 +44,19 @@ ARTIFACTS = REPO_ROOT / "artifacts"
 
 #: Keys that may legitimately differ: replay *execution*, never recording.
 ALLOWED_PREFIX = "counterfactual."
+
+#: Namespaces introduced after the retained baseline was recorded. A key under
+#: one of these is tolerated only when the recording has no value for it -- an
+#: absent key means the stage did not exist, a *different* value would mean the
+#: stage was retuned between runs of one campaign.
+MIGRATION_NAMESPACES = (
+    "clocks.",
+    "fusion.time_alignment.",
+    "fusion.post_fusion.",
+    "fusion.event_alignment.counterpart_",
+    "fusion.event_alignment.mutual_impact_",
+    "evaluation.canonical_vocabulary.",
+)
 
 
 def _flatten(node: Any, prefix: str = "") -> Dict[str, str]:
@@ -109,9 +125,17 @@ def test_recorded_configs_differ_from_the_current_one_only_in_replay_execution()
         # The retained campaign predates independent clocks and is a separate
         # synchronized-clock baseline. Permit only newly introduced protocol
         # fields that it did not record; existing scientific settings still match.
-        legacy = manifest.get('clock_protocol','synchronized_clock_baseline') == 'synchronized_clock_baseline'
-        def protocol_migration(k):
-            return legacy and k not in recorded and (k.startswith('clocks.') or k.startswith('fusion.time_alignment.'))
+        legacy = (
+            manifest.get("clock_protocol", "synchronized_clock_baseline")
+            == "synchronized_clock_baseline"
+        )
+
+        def protocol_migration(key):
+            return (
+                legacy
+                and key not in recorded
+                and any(key.startswith(ns) for ns in MIGRATION_NAMESPACES)
+            )
         disallowed = [k for k in differing if not k.startswith(ALLOWED_PREFIX) and not protocol_migration(k)]
         if disallowed:
             offenders["{0}/{1}".format(scenario_id, config_hash[:8])] = disallowed

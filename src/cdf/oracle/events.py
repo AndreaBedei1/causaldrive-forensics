@@ -533,8 +533,17 @@ def _action_events(trace: Dict[str, Any], cfg: Config) -> List[Event]:
             params = {str(k): float(v) for k, v in (action.get("params", {}) or {}).items()}
             t_end = min(t_start + max(0.0, duration), t_last)
 
+            kind = str(action.get("kind", "")).strip().lower()
             values: Dict[str, Any] = {"duration_s": duration}
             values.update(params)
+            # The action's declared kind, as numeric flags. graph._mechanical_edges
+            # reads kind_is_brake and previously found it never populated, falling
+            # back to a substring test on the action id; cdf.graph.canonical reads
+            # it to place a scripted action in the same family as the command the
+            # vehicle itself recorded.
+            values["kind_is_brake"] = 1.0 if kind == "brake" else 0.0
+            values["kind_is_speed"] = 1.0 if kind in ("set_speed", "hold_speed") else 0.0
+            values["kind_is_lateral"] = 1.0 if kind in ("lane_shift", "steer") else 0.0
             out.append(
                 _oracle_event(
                     participant_id=str(pid),

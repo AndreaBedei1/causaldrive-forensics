@@ -52,6 +52,11 @@ from ..common.schemas import (
 )
 from .confidence import fuse_confidence
 from .event_alignment import EventGroup, align_event_records, resolve_subjects
+from .post_fusion_causal import (
+    ORIGIN_INFERRED,
+    ORIGIN_LOCAL,
+    infer_global_causal_edges,
+)
 from .track_association import STATUS_UNRESOLVED, TrackAssignment
 from .aligned_evidence import AlignedRunEvidence, participant_is_aligned, require_common_time
 
@@ -130,6 +135,35 @@ def fuse_graphs(
 
     fused_nodes, node_map = _merge_nodes(groups, node_index, cfg)
     fused_edges, contradictions, rejected_edges = _merge_edges(docs, node_map, cfg)
+    for edge in fused_edges:
+        # Every edge carries where it came from, so that a reader can always
+        # separate the participants' own claims from what fusion concluded.
+        edge.detail.setdefault("origin", ORIGIN_LOCAL)
+
+    # Post-fusion causal reasoning: the edges that only exist once the logs are
+    # merged and the identities are resolved. Run before DAG enforcement so the
+    # inferred edges are subject to exactly the same acyclicity discipline as
+    # the participants' own.
+    fused_doc_for_inference = GraphDocument(
+        graph_kind=graph_kind,
+        scope=Provenance.FUSED,
+        owner=None,
+        run_id=run.run_id,
+        scenario_id=run.scenario_id,
+        seed=run.seed,
+        nodes=fused_nodes,
+        edges=list(fused_edges),
+        meta={},
+    )
+    inferred_edges, post_fusion_diag = infer_global_causal_edges(
+        fused_doc_for_inference,
+        fused_edges,
+        assignments,
+        run.time_alignment if isinstance(run, AlignedRunEvidence) else None,
+        cfg,
+        list(docs.keys()),
+    )
+    fused_edges = list(fused_edges) + list(inferred_edges)
 
     fused = GraphDocument(
         graph_kind=graph_kind,
@@ -178,6 +212,9 @@ def fuse_graphs(
             "enforced_dag": enforce,
         }
     }
+    diagnostics["post_fusion_causal"] = post_fusion_diag
+    fused.meta["fusion"]["n_inferred_edges"] = len(inferred_edges)
+    fused.meta["fusion"]["post_fusion_reasoning"] = bool(post_fusion_diag.get("enabled"))
     diagnostics["unresolved_time_participants"] = unresolved
     diagnostics["unresolved_local_graphs"] = {
         p: {"n_nodes":len(local_docs[p].nodes),"n_edges":len(local_docs[p].edges),

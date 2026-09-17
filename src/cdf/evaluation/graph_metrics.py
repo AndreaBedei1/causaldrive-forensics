@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 from ..common.config import Config
 from ..common.schemas import EventType, GraphDocument
 from ..graph.analysis import GraphAnalyzer
+from ..graph.canonical import canonicalise
 from ..graph.metrics import compare_local_vs_fused, graph_structure_metrics
 from .event_metrics import event_match_tolerance
 
@@ -149,6 +150,38 @@ def evaluate_graphs(
     out["use_matched_nodes_only"] = matched_only
     out["n_reference_nodes"] = len(reference.nodes)
     out["n_reference_edges"] = len(reference.edges)
+
+    # The same comparison in the canonical vocabulary, reported *beside* the
+    # strict one and never in place of it. Most oracle edges are caused by a
+    # scripted action, a privileged node type no reconstruction can ever emit;
+    # without a translation table a large part of edge recall is unreachable by
+    # vocabulary rather than by reconstruction quality. See cdf.graph.canonical
+    # for what the translation forgives and why the strict block stays primary.
+    if bool(cfg.get("evaluation.canonical_vocabulary.enabled", True)):
+        canonical = compare_local_vs_fused(
+            {pid: canonicalise(doc) for pid, doc in local_docs.items()},
+            canonicalise(fused_doc),
+            canonicalise(reference),
+            tolerance_s=tolerance_s,
+            require_same_type=require_same_type,
+            subject_maps=maps,
+            subject_map_truth=None,
+            restrict_to_matched_nodes=matched_only,
+        )
+        out["canonical"] = {
+            "vocabulary": "cdf.graph.canonical",
+            "note": (
+                "node and edge types restated as semantic families so that the "
+                "same claim written in two layers' vocabularies can match; a "
+                "weaker test than the strict block above, reported alongside it"
+            ),
+            "best_single_local": canonical.get("best_single_local"),
+            "best_local_participant_id": canonical.get("best_local_participant_id"),
+            "fused": canonical.get("fused"),
+            "delta_edge_f1": canonical.get("delta_edge_f1"),
+            "delta_node_f1": canonical.get("delta_node_f1"),
+            "delta_shd": canonical.get("delta_shd"),
+        }
     return out
 
 

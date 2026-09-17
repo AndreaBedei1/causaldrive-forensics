@@ -293,13 +293,18 @@ def _collision_counterpart_case(cfg, range_to_b: float, range_to_c: float):
     """``A``'s onboard collision trigger, with two resolved tracks nearby.
 
     An onboard collision sensor records *that* an impact happened, never with
-    whom, so the counterpart has to be inferred from ``A``'s own resolved radar
-    tracks. Here two of them are candidates, and the only thing separating them is
-    their range at the moment of impact.
+    whom, so the counterpart has to be inferred. Two candidates are in contention
+    and the only thing separating them is a millimetre of range.
+
+    ``B`` and ``C`` are placed symmetrically about ``A`` -- one ahead, one to the
+    side, both about three metres away -- so that the ambiguity survives every
+    source of evidence fusion has, the exchanged trajectories included. An
+    ambiguity that the exchanged logs could resolve is not an ambiguity; this one
+    genuinely cannot be resolved, which is what the discipline is for.
     """
     a = _participant("A")
-    b = _participant("B", x0=20.0)
-    c = _participant("C", y=3.5)
+    b = _participant("B", x0=range_to_b)
+    c = _participant("C", y=range_to_c)
     _fixed_range_track(a, "A::T001", range_to_b)
     _fixed_range_track(a, "A::T002", range_to_c)
     _fixed_range_track(b, "B::T001", 3.0)
@@ -359,12 +364,32 @@ def test_an_indistinguishable_collision_counterpart_is_refused_not_guessed(cfg):
     # And the guard must not become a blanket refusal: when the two candidates are
     # genuinely far apart, the nearer one is still named and the merge happens.
     separated, a3, b3, _c3 = _collision_counterpart_case(cfg, 3.0, 6.5)
-    inferred = [
+    # The counterpart may be established either by proximity alone or by the two
+    # vehicles' mutually corroborating impact records -- reciprocity is the
+    # stronger evidence and takes precedence when both sides recorded the impact.
+    # What must hold either way is the *outcome*: A is paired with B, the vehicle
+    # the evidence singles out, and not with the one 3.5 m further away.
+    settled = [
         d
         for d in separated["diagnostics"]
-        if d["kind"] == "counterpart_inferred" and d["participant_id"] == "A"
+        if d["kind"] in ("counterpart_inferred", "mutual_impact_reconciled")
+        and (
+            d.get("participant_id") == "A" or "A" in (d.get("participants") or [])
+        )
     ]
-    assert len(inferred) == 1 and inferred[0]["counterpart"] == "B"
+    assert settled, "a decisively nearer counterpart must still be named"
+    named = {
+        d.get("counterpart")
+        for d in settled
+        if d["kind"] == "counterpart_inferred"
+    } | {
+        p
+        for d in settled
+        if d["kind"] == "mutual_impact_reconciled"
+        for p in (d.get("participants") or [])
+        if p != "A"
+    }
+    assert named == {"B"}, "A must be paired with B, not {0}".format(sorted(named))
     assert [sorted(g) for g in separated["groups"]] == [
         sorted([a3.events[0].event_id, b3.events[0].event_id])
     ]

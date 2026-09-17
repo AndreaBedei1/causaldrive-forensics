@@ -56,6 +56,7 @@ __all__ = [
     "align_events",
     "align_event_records",
     "family_of",
+    "reconcile_mutual_impacts",
 ]
 
 
@@ -300,6 +301,16 @@ def align_event_records(
     diagnostics: List[Dict[str, Any]] = []
     records: List[_Record] = []
 
+    # An impact is mutual: settle both sides of it before keying anything, so a
+    # vehicle struck from behind is not left guessing from a forward radar.
+    aligned_events: Dict[str, List[Event]] = {}
+    for pid in sorted(events_by_participant.keys()):
+        evs = events_by_participant[pid]
+        if run is not None and hasattr(run, "align_event") and participant_is_aligned(run, pid):
+            evs = [run.align_event(pid, e) for e in evs]
+        aligned_events[pid] = list(evs)
+    mutual = reconcile_mutual_impacts(aligned_events, cfg, run, diagnostics)
+
     for pid in sorted(events_by_participant.keys()):
         events = events_by_participant[pid]
         if run is not None and hasattr(run, "align_event") and participant_is_aligned(run, pid):
@@ -313,7 +324,7 @@ def align_event_records(
                 )
             fam, relational = family_of(event.event_type, cfg)
             key, note = _subject_key(
-                event, pid, relational, subject_map, cfg, run, diagnostics
+                event, pid, relational, subject_map, cfg, run, diagnostics, mutual
             )
             records.append(
                 _Record(
@@ -459,6 +470,7 @@ def _subject_key(
     cfg: Config,
     run: Optional[RunEvidence],
     diagnostics: List[Dict[str, Any]],
+    mutual: Optional[Mapping[str, str]] = None,
 ) -> Tuple[Optional[Tuple[str, ...]], str]:
     """The physical subject of an event: which vehicles it makes a claim about.
 
@@ -492,6 +504,13 @@ def _subject_key(
 
     if not relational:
         return (subject_pid or observer_id,), ""
+
+    if subject_pid is None and mutual:
+        reciprocal = mutual.get(event.event_id)
+        if reciprocal is not None and reciprocal != observer_id:
+            return tuple(sorted({observer_id, reciprocal})), (
+                "counterpart {0} established by mutual impact records".format(reciprocal)
+            )
 
     if subject_pid is None:
         inferred, detail, verdict = _infer_counterpart(
@@ -529,6 +548,208 @@ def _subject_key(
         subject_pid = inferred
 
     return tuple(sorted({observer_id, subject_pid})), ""
+
+
+def _position_at(evidence: Any, t: float, max_gap_s: float) -> Optional[Tuple[float, float]]:
+    """A participant's own position at common time ``t``, or None if not covered.
+
+    Linear interpolation between the two bracketing telemetry samples; a gap
+    wider than ``max_gap_s`` yields None rather than an extrapolation.
+    """
+    samples = getattr(evidence, "telemetry", None) or []
+    if not samples:
+        return None
+    before = None
+    after = None
+    for sample in samples:
+        ts = float(sample.t)
+        if ts <= t and (before is None or ts > float(before.t)):
+            before = sample
+        if ts >= t and (after is None or ts < float(after.t)):
+            after = sample
+    if before is None and after is None:
+        return None
+    if before is None:
+        return (float(after.x), float(after.y)) if abs(float(after.t) - t) <= max_gap_s else None
+    if after is None:
+        return (float(before.x), float(before.y)) if abs(float(before.t) - t) <= max_gap_s else None
+    if before is after:
+        return (float(before.x), float(before.y)) if abs(float(before.t) - t) <= max_gap_s else None
+    span = float(after.t) - float(before.t)
+    if span > max_gap_s:
+        return None
+    frac = 0.0 if span <= 0.0 else (t - float(before.t)) / span
+    return (
+        float(before.x) + frac * (float(after.x) - float(before.x)),
+        float(before.y) + frac * (float(after.y) - float(before.y)),
+    )
+
+
+def _telemetry_ranges(
+    observer_id: str,
+    t: float,
+    run: Optional[RunEvidence],
+    max_gap_s: float,
+) -> Dict[str, float]:
+    """Distance from the observer to every other participant at common time ``t``.
+
+    This is evidence only fusion has. A vehicle's own radar cannot see what is
+    behind it, so an impact from the rear is unattributable from one log alone --
+    but every participant exported its own trajectory, and once the clocks are
+    aligned those trajectories answer the question directly. Nothing privileged
+    is consulted: these are the participants' own recorded positions.
+    """
+    if run is None or observer_id not in getattr(run, "participants", {}):
+        return {}
+    if not participant_is_aligned(run, observer_id):
+        return {}
+    own = _position_at(run.get(observer_id), t, max_gap_s)
+    if own is None:
+        return {}
+    out: Dict[str, float] = {}
+    for pid in run.participant_ids:
+        if pid == observer_id or not participant_is_aligned(run, pid):
+            continue
+        other = _position_at(run.get(pid), t, max_gap_s)
+        if other is None:
+            continue
+        out[pid] = float(
+            ((own[0] - other[0]) ** 2 + (own[1] - other[1]) ** 2) ** 0.5
+        )
+    return out
+
+
+def reconcile_mutual_impacts(
+    events_by_participant: Mapping[str, Sequence[Event]],
+    cfg: Config,
+    run: Optional[RunEvidence],
+    diagnostics: List[Dict[str, Any]],
+) -> Dict[str, str]:
+    """Pair up the two sides of the same impact, and name each side's counterpart.
+
+    An impact is *mutual*: it is recorded by both vehicles involved, at the same
+    instant, and at that instant they are touching. A single onboard collision
+    sensor reports only that something was hit, and a forward radar cannot see a
+    vehicle that struck from behind -- so from one log the counterpart may be
+    genuinely unknowable. Two logs on a common clock settle it.
+
+    Candidate pairings are scored on how close the two records are in time and
+    how close the two vehicles were in space, and matched best-first so that each
+    collision record is used at most once. A record left unmatched keeps whatever
+    its own evidence supports; nothing is forced.
+
+    Returns ``{event_id: counterpart participant id}``.
+    """
+    tol = float(cfg.get("fusion.event_alignment.mutual_impact_tolerance_s", 0.5))
+    max_gap_s = float(cfg.get("fusion.event_alignment.counterpart_max_time_gap_s", 0.5))
+    contact_m = float(cfg.get("fusion.event_alignment.mutual_impact_max_distance_m", 12.0))
+
+    records: List[Tuple[str, str, float]] = []
+    for pid in sorted(events_by_participant.keys()):
+        if run is not None and not participant_is_aligned(run, pid):
+            continue
+        for event in events_by_participant[pid]:
+            if event.event_type is not EventType.COLLISION:
+                continue
+            records.append((event.event_id, pid, float(event.t_peak)))
+    if len(records) < 2:
+        return {}
+
+    candidates: List[Tuple[float, float, str, str, str, str]] = []
+    for i in range(len(records)):
+        for j in range(i + 1, len(records)):
+            eid_a, pid_a, t_a = records[i]
+            eid_b, pid_b, t_b = records[j]
+            if pid_a == pid_b:
+                continue
+            dt = abs(t_a - t_b)
+            if dt > tol:
+                continue
+            midpoint = 0.5 * (t_a + t_b)
+            ranges = _telemetry_ranges(pid_a, midpoint, run, max_gap_s)
+            distance = ranges.get(pid_b)
+            if distance is None:
+                # Without exchanged positions the pairing rests on time alone;
+                # allow it but rank it behind every distance-supported pairing.
+                distance = contact_m
+            elif distance > contact_m:
+                continue
+            candidates.append((round(dt, 9), round(distance, 6), eid_a, eid_b, pid_a, pid_b))
+
+    candidates.sort()
+
+    # Reciprocity settles an impact only when it singles one partner out. Three
+    # vehicles that all record an impact at the same instant, all equally close,
+    # are not reconciled by a tie-break: that would let measurement noise decide
+    # which pair the fused COLLISION node names. The same discipline as
+    # `_infer_counterpart`, applied to the pairing rather than to the range.
+    margin_m = float(
+        cfg.get("fusion.event_alignment.counterpart_ambiguity_margin_m", 1.0)
+    )
+    by_event: Dict[str, List[Tuple[float, float, str]]] = {}
+    for dt, distance, eid_a, eid_b, pid_a, pid_b in candidates:
+        by_event.setdefault(eid_a, []).append((distance, dt, pid_b))
+        by_event.setdefault(eid_b, []).append((distance, dt, pid_a))
+
+    def decisive(event_id: str, partner: str) -> Tuple[bool, str]:
+        """Whether this event's best partner is distinguishable from the next."""
+        ranked = sorted(by_event.get(event_id, []))
+        rivals = [row for row in ranked if row[2] != partner]
+        if not rivals:
+            return True, ""
+        best = next(row for row in ranked if row[2] == partner)
+        rival = rivals[0]
+        if (rival[0] - best[0]) < margin_m:
+            return False, (
+                "{0} at {1:.3f}m and {2} at {3:.3f}m are indistinguishable as the "
+                "other side of this impact (margin {4:.3f}m < "
+                "fusion.event_alignment.counterpart_ambiguity_margin_m={5}m); "
+                "naming either would be a guess".format(
+                    partner, best[0], rival[2], rival[0], rival[0] - best[0], margin_m
+                )
+            )
+        return True, ""
+
+    used: set = set()
+    resolved: Dict[str, str] = {}
+    for dt, distance, eid_a, eid_b, pid_a, pid_b in candidates:
+        if eid_a in used or eid_b in used:
+            continue
+        ok_a, why_a = decisive(eid_a, pid_b)
+        ok_b, why_b = decisive(eid_b, pid_a)
+        if not (ok_a and ok_b):
+            diagnostics.append(
+                {
+                    "kind": "mutual_impact_ambiguous",
+                    "severity": "warning",
+                    "participants": [pid_a, pid_b],
+                    "events": [eid_a, eid_b],
+                    "message": why_a or why_b,
+                }
+            )
+            used.add(eid_a)
+            used.add(eid_b)
+            continue
+        used.add(eid_a)
+        used.add(eid_b)
+        resolved[eid_a] = pid_b
+        resolved[eid_b] = pid_a
+        diagnostics.append(
+            {
+                "kind": "mutual_impact_reconciled",
+                "severity": "info",
+                "participants": [pid_a, pid_b],
+                "events": [eid_a, eid_b],
+                "dt_s": dt,
+                "distance_m": distance,
+                "message": (
+                    "{0} and {1} each recorded an impact {2:.3f}s apart on the "
+                    "common clock and were {3:.2f}m apart; they are two accounts "
+                    "of one impact".format(pid_a, pid_b, dt, distance)
+                ),
+            }
+        )
+    return resolved
 
 
 def _infer_counterpart(
@@ -599,12 +820,26 @@ def _infer_counterpart(
         if pid not in by_participant or rng < by_participant[pid]:
             by_participant[pid] = rng
 
+    # Second evidence source, available only after fusion: the other
+    # participants' own exported trajectories on the common clock. A rear impact
+    # is invisible to a forward radar but obvious in the exchanged telemetry.
+    source: Dict[str, str] = {pid: "own_radar_track" for pid in by_participant}
+    for pid, distance in _telemetry_ranges(
+        observer_id, float(event.t_peak), run, max_gap_s
+    ).items():
+        if distance > max_range_m:
+            continue
+        if pid not in by_participant or distance < by_participant[pid]:
+            by_participant[pid] = distance
+            source[pid] = (
+                "exchanged_telemetry" if pid not in source else "radar+telemetry"
+            )
+
     if not by_participant:
         return (
             None,
-            "no resolved track was within {0}m at t={1:.3f}s".format(
-                max_range_m, float(event.t_peak)
-            ),
+            "no resolved track and no exchanged trajectory was within {0}m at "
+            "t={1:.3f}s".format(max_range_m, float(event.t_peak)),
             "unknown",
         )
 
@@ -634,8 +869,8 @@ def _infer_counterpart(
 
     return (
         best_pid,
-        "counterpart {0} inferred from own track at {1:.2f}m at t={2:.3f}s".format(
-            best_pid, best_range, float(event.t_peak)
+        "counterpart {0} inferred from {1} at {2:.2f}m at t={3:.3f}s".format(
+            best_pid, source.get(best_pid, "own track"), best_range, float(event.t_peak)
         ),
         "inferred",
     )

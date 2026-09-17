@@ -239,11 +239,37 @@ fusion:
     time_tolerance_s: 1.0
     require_same_type: true
     subject_must_agree: true       # merged events must concern the same participant
+    counterpart_max_time_gap_s: 0.5
+    counterpart_max_range_m: 8.0
+    counterpart_ambiguity_margin_m: 1.0
+    # An impact is mutual. Two vehicles that each record one within this window,
+    # while this close on the common clock, are two accounts of one impact --
+    # which is how a vehicle struck from behind learns who struck it.
+    mutual_impact_tolerance_s: 0.5
+    mutual_impact_max_distance_m: 12.0
   confidence_fusion:
     method: "noisy_or"             # documented in docs/GRAPH_FUSION.md
     cap: 0.99
   conflict:
     keep_contradictions: true      # never silently drop a disagreeing claim
+  # Causal reasoning over the FUSED event set, once identities are resolved.
+  # Local rules only fire when one vehicle saw both the cause and the effect;
+  # these fire across logs (B's braking -> the gap A measured closing), which is
+  # the whole point of exchanging the recordings. Turn it off to obtain the
+  # "simple fusion" ablation: the union of the participants' own claims.
+  post_fusion:
+    enabled: true
+    min_edge_confidence: 0.20
+    min_lag_s: -0.15               # a cause may appear marginally after its
+                                   # effect: event peaks are estimates
+    max_clock_slack_s: 0.35        # extra tolerance, capped; the amount actually
+                                   # used is the alignment's own residual
+    max_new_edges: 4000
+    confidence:
+      node_weight: 0.6             # weight of the endpoint confidences
+      temporal_decay_s: 3.0        # exp(-|lag|/tau)
+      single_observer_factor: 0.85 # a claim no second vehicle corroborates
+    overrides: {}                  # rule -> {enabled, prior, max_lag_s}
 
 # -----------------------------------------------------------------------------
 # Finite-trace model checking
@@ -293,6 +319,12 @@ counterfactual:
 # Evaluation
 # -----------------------------------------------------------------------------
 evaluation:
+  # Report the structural comparison a second time in the canonical vocabulary
+  # (cdf.graph.canonical), so that the same claim written in the oracle's terms
+  # and in the reconstruction's terms can match. Strictly weaker than the strict
+  # comparison, which stays the headline number; never applied to an artifact.
+  canonical_vocabulary:
+    enabled: true
   event_match:
     time_tolerance_s: 1.5
     require_same_type: true

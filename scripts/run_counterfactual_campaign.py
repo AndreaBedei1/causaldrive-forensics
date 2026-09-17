@@ -99,7 +99,9 @@ def contribution_state(run_dir: Path, expected: Optional[int]) -> Dict[str, Any]
         return {"complete": False, "n_contributions": 0,
                 "reason": "unreadable report: {0}".format(exc)}
     n = len(doc.get("contributions") or [])
-    failures = len((doc.get("classification") or {}).get("failures") or [])
+    # `failures` is a top-level key of causal_contribution.json (attribution_report),
+    # not part of the classification block.
+    failures = len(doc.get("failures") or [])
     complete = n >= expected if expected else n > 0
     return {
         "complete": bool(complete),
