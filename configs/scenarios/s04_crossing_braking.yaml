@@ -25,7 +25,7 @@ scenario:
         junction_x: 101.6
         junction_y: 0.3
         bearing_deg: 0.0
-        back_m: 42.0
+        back_m: 50.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
       initial_speed: 10.0
       target_speed: 10.0
@@ -45,12 +45,12 @@ scenario:
       actions:
         - action_id: "B_yield_brake"
           kind: "brake"
-          t_start: 1.4
-          duration: 6.0
+          t_start: 3.2
+          duration: 4.0
           params: { intensity: 0.9 }
         - action_id: "B_resume"
           kind: "set_speed"
-          t_start: 9.0
+          t_start: 8.0
           duration: 14.0
           params: { target_speed: 7.0 }
 
@@ -59,7 +59,7 @@ scenario:
 
   validation:
     encounter_pair: ["A", "B"]
-    min_separation_below_m: 45.0
+    min_separation_below_m: 12.0
 
   intervention_candidates:
     - "B_yield_brake"
