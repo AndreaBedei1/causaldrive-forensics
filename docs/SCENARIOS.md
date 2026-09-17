@@ -467,13 +467,13 @@ Scripted actions (these are the intervention handles):
 
 *Map:* **Town03_Opt** &nbsp;&nbsp; *Config:* `configs/scenarios/s09_roundabout.yaml`
 
-A is already committed to the roundabout, curving through the circulating area. B enters from a perpendicular approach without giving way and their curved paths conflict.
+A is already circulating inside the roundabout on the outer circulating lane. B approaches from the south entry, fails to give way, and collides with A while entering the circulating area.
 
 **Variant `merge_conflict`** *(default)*
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (0, 0), bearing 0deg, back 45 m | 8 / 8 m/s | baseline |
+| A | `vehicle.tesla.model3` | location (3, -23) | 8 / 8 m/s | baseline |
 | B | `vehicle.audi.tt` | junction (0, 0), bearing 90deg, back 35 m | 8 / 8 m/s | baseline |
 
 Scripted actions (these are the intervention handles):

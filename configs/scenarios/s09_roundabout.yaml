@@ -27,9 +27,9 @@ scenario:
   scenario_id: "S09"
   name: "roundabout"
   description: >
-    A is already committed to the roundabout, curving through the circulating
-    area. B enters from a perpendicular approach without giving way and their
-    curved paths conflict.
+    A is already circulating inside the roundabout on the outer circulating
+    lane. B approaches from the south entry, fails to give way, and collides
+    with A while entering the circulating area.
   map: "Town03_Opt"
   default_variant: "merge_conflict"
   max_duration_s: 30.0
@@ -38,11 +38,9 @@ scenario:
     - id: "A"
       blueprint: "vehicle.tesla.model3"
       spawn:
-        anchor: "junction_approach"
-        junction_x: 0.0
-        junction_y: 0.0
-        bearing_deg: 0.0
-        back_m: 45.0
+        anchor: "location"
+        x: 3.0
+        y: -23.0
       route: { length_m: 120.0, step_m: 2.0, turns: ["straight", "straight"] }
       initial_speed: 8.0
       target_speed: 8.0
