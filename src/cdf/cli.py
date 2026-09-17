@@ -654,6 +654,18 @@ def cmd_run(args: argparse.Namespace) -> int:
     from .simulation.scenario_base import ScenarioSpec
 
     spec = ScenarioSpec.from_config(cfg, variant=args.variant)
+    if args.follow_vehicle.upper() not in spec.participant_ids:
+        raise CliError(
+            "follow vehicle {0!r} is not present in {1}; available vehicles: {2}".format(
+                args.follow_vehicle,
+                spec.scenario_id,
+                ", ".join(spec.participant_ids),
+            )
+        )
+    if args.realtime and not args.live:
+        raise CliError("--realtime requires --live")
+    if not args.realtime and abs(float(args.playback_speed) - 1.0) > 1e-12:
+        raise CliError("--playback-speed other than 1.0 requires --realtime")
     artifacts = _artifacts_root(args, cfg)
     print("running {0} ({1}) variant={2} seed={3} on {4}".format(
         spec.scenario_id, spec.name, spec.variant, args.seed, spec.map_name
@@ -671,6 +683,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             seed=int(args.seed),
             artifacts_root=str(artifacts),
             persist=True,
+            live=bool(args.live),
+            realtime=bool(args.realtime),
+            playback_speed=float(args.playback_speed),
+            spectator_mode=args.spectator,
+            follow_vehicle=args.follow_vehicle.upper(),
+            spectator_height=float(args.spectator_height),
+            show_labels=not bool(args.no_labels),
         )
 
     layout = result.layout
@@ -1995,6 +2014,17 @@ def cmd_viewer(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
+def _positive_float(value: str) -> float:
+    """Parse a strictly positive floating-point CLI value."""
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("expected a number greater than zero") from exc
+    if parsed <= 0.0:
+        raise argparse.ArgumentTypeError("value must be greater than zero")
+    return parsed
+
+
 def _common_parser() -> argparse.ArgumentParser:
     """Options every subcommand shares."""
     common = argparse.ArgumentParser(add_help=False)
@@ -2062,6 +2092,47 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--seed", type=int, default=0, help="random seed (default: 0)")
     run.add_argument(
         "--variant", default=None, help="scenario variant (default: the scenario's own default)"
+    )
+    run.add_argument(
+        "--live",
+        action="store_true",
+        help="show the running scenario through CARLA's native spectator",
+    )
+    run.add_argument(
+        "--realtime",
+        action="store_true",
+        help="pace a live run to simulated wall-clock time",
+    )
+    run.add_argument(
+        "--playback-speed",
+        type=_positive_float,
+        default=1.0,
+        metavar="FLOAT",
+        help="live playback multiplier (default: 1.0; requires --realtime)",
+    )
+    run.add_argument(
+        "--spectator",
+        choices=("overhead", "follow"),
+        default="overhead",
+        help="live spectator mode (default: overhead)",
+    )
+    run.add_argument(
+        "--follow-vehicle",
+        choices=("A", "B", "C"),
+        default="A",
+        help="participant for --spectator follow (default: A)",
+    )
+    run.add_argument(
+        "--spectator-height",
+        type=_positive_float,
+        default=35.0,
+        metavar="FLOAT",
+        help="spectator height in metres (default: 35)",
+    )
+    run.add_argument(
+        "--no-labels",
+        action="store_true",
+        help="do not draw A/B/C labels above participant vehicles",
     )
     run.add_argument("--no-analyse", action="store_true", help="skip local analysis")
     run.add_argument("--no-fuse", action="store_true", help="skip fusion")

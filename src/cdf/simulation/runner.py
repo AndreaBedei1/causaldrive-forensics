@@ -37,6 +37,7 @@ from ..common.schemas import (
 )
 from ..oracle.logger import OracleLogger
 from .carla_client import import_carla
+from .live_view import LiveScenarioView, LiveViewOptions
 from .scenario_base import (
     ParticipantSpec,
     ScenarioSpec,
@@ -77,6 +78,33 @@ def make_run_id(scenario_id: str, seed: int, variant: str, config_hash: str) -> 
     )
 
 
+def _maybe_live_view(
+    sworld: ScenarioWorld,
+    agents: Sequence[ParticipantAgent],
+    *,
+    live: bool,
+    realtime: bool,
+    playback_speed: float,
+    spectator_mode: str,
+    follow_vehicle: str,
+    spectator_height: float,
+    show_labels: bool,
+) -> Optional[LiveScenarioView]:
+    """Create the external spectator view without exposing it to the pipeline."""
+    if not live:
+        return None
+    options = LiveViewOptions(
+        mode=spectator_mode,
+        follow_vehicle=follow_vehicle,
+        spectator_height=spectator_height,
+        show_labels=show_labels,
+        realtime=realtime,
+        playback_speed=playback_speed,
+    )
+    vehicles = {agent.participant_id: agent.vehicle for agent in agents}
+    return LiveScenarioView(sworld.world, vehicles, options=options)
+
+
 def run_scenario(
     client: Any,
     cfg: Config,
@@ -87,6 +115,13 @@ def run_scenario(
     intervention: Optional[Dict[str, Any]] = None,
     layout: Optional[RunLayout] = None,
     vary_by_seed: bool = True,
+    live: bool = False,
+    realtime: bool = False,
+    playback_speed: float = 1.0,
+    spectator_mode: str = "overhead",
+    follow_vehicle: str = "A",
+    spectator_height: float = 35.0,
+    show_labels: bool = True,
 ) -> RunResult:
     """Execute one scenario and return its evidence, oracle trace and validation.
 
@@ -95,7 +130,16 @@ def run_scenario(
     map, spawn state, seed, controller parameters -- is held identical, which is
     what makes the comparison a controlled counterfactual rather than a
     different experiment.
+    The optional live arguments affect only the external CARLA spectator.  They
+    never enter evidence, oracle state, analysis, or persisted artifacts.
     """
+    if float(playback_speed) <= 0.0:
+        raise ValueError("playback speed must be greater than zero")
+    if realtime and not live:
+        raise ValueError("realtime pacing requires live=True")
+    if not realtime and abs(float(playback_speed) - 1.0) > 1e-12:
+        raise ValueError("playback speed other than 1.0 requires realtime=True")
+
     carla = import_carla()
     # Repeating a deterministic scenario under a different seed alone would
     # reproduce the same trace, so seeds beyond 0 apply a small, reproducible
@@ -132,6 +176,7 @@ def run_scenario(
     n_frames = 0
     duration_sim_s = 0.0
     traffic_light_config: List[Dict[str, Any]] = []
+    live_view: Optional[LiveScenarioView] = None
 
     with ScenarioWorld(client, cfg, spec.map_name, seed=seed) as sworld:
         oracle.bind_map(sworld.map)
@@ -182,6 +227,18 @@ def run_scenario(
                 controller=controller,
             )
 
+        live_view = _maybe_live_view(
+            sworld,
+            agents,
+            live=live,
+            realtime=realtime,
+            playback_speed=playback_speed,
+            spectator_mode=spectator_mode,
+            follow_vehicle=follow_vehicle,
+            spectator_height=spectator_height,
+            show_labels=show_labels,
+        )
+
         # --- settle physics, then impart initial speeds ---
         sworld.warmup()
         for agent in agents:
@@ -196,6 +253,8 @@ def run_scenario(
         for agent in agents:
             agent.time_offset = t0
             agent.drain_radar_queues(sworld.frame)
+        if live_view is not None:
+            live_view.start(0.0)
 
         # --- main loop ---
         dt = sworld.delta_seconds
@@ -215,6 +274,12 @@ def run_scenario(
                 agent.step(t, frame, dt)
 
             oracle.capture(t, frame, world=sworld.world)
+
+            # External-only visualization.  It runs after all scientific work for
+            # the tick and returns no data to any inference or artifact stage.
+            if live_view is not None:
+                live_view.update(t)
+                live_view.pace(t)
 
             # Termination is anchored to the LATEST trigger, not the first one.
             # An early near-miss trigger must not end the run before the

@@ -167,6 +167,26 @@ That records the run and then, by default, runs local analysis, fusion, the
 oracle graph build, model checking and the viewer bundle. It exits non-zero if
 scenario validation fails.
 
+### Watching scenarios live
+
+Use CARLA's native spectator to observe a run while it executes:
+
+```powershell
+python scripts/run_scenario.py --scenario S01 --variant crash --seed 0 --live --realtime
+```
+
+```powershell
+python scripts/run_scenario.py --scenario S07 --variant occluded --seed 0 --live --realtime
+```
+
+```powershell
+python scripts/run_scenario.py --scenario S02 --variant crash --seed 0 --live --realtime --spectator follow --follow-vehicle A
+```
+
+The CARLA spectator is visualization-only and is never used by local forensic
+inference, graph fusion, or evaluation. `--playback-speed 0.5` and `2.0` select
+slow motion and 2x playback respectively; both require `--realtime`.
+
 ## Full experiment suite
 
 ```bash

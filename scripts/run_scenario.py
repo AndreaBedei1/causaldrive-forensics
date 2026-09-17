@@ -5,6 +5,7 @@
 
     python scripts/run_scenario.py --scenario S01 [--seed 0] [--variant crash]
                                    [--no-analyse] [--no-fuse]
+                                   [--live --realtime]
 
 Runs the scenario and then, by default, local analysis, fusion, the oracle graph
 build, model checking and the viewer bundle, printing a concise summary of what
