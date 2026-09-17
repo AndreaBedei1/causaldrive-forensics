@@ -473,6 +473,8 @@ class RollingRecorder:
         """
         window = self.window
         return {
+            "time_domain": ("participant_local" if self.cfg.get("clocks.independent", False)
+                            else "synchronized_baseline"),
             "recorder": {
                 "participant_id": self.participant_id,
                 "pre_event_s": self.pre_event_s,

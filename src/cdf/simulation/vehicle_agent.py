@@ -20,6 +20,7 @@ import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ..common.config import Config, deep_merge, load_yaml
+from ..common.clocks import LocalClock
 from ..common.evidence import ParticipantEvidence
 from ..common.layout import RunLayout
 from ..common.schemas import (
@@ -81,6 +82,7 @@ class ParticipantAgent:
         controller: ScriptedController,
         spawn_transform: Any,
         seed: int = 0,
+        clock_context: str = "",
     ) -> None:
         self.world = scenario_world
         self.spec = spec
@@ -90,6 +92,8 @@ class ParticipantAgent:
 
         self.cfg = participant_config(cfg, spec)
         self.seed = int(seed)
+        self.clock = LocalClock.for_participant(self.cfg, seed, self.participant_id, clock_context)
+        self.latest_trigger_sim_time: Optional[float] = None
         # Each participant gets its own deterministic stream so that adding a
         # third vehicle cannot perturb the first two's degraded-radar draws.
         self._rng = random.Random(
@@ -101,9 +105,8 @@ class ParticipantAgent:
         self.collision_sensor: Optional[CollisionSensor] = None
 
         # Simulator time at which the scenario proper begins. Every timestamp the
-        # participant records is expressed relative to it, so scripted action
-        # times ("brake at t=6.0") and recorded evidence share one clock and
-        # artifacts stay comparable across runs and across server sessions.
+        # participant samples is first rebased onto scenario time. The recorder
+        # clock then perturbs that time; scripted controllers remain on sim time.
         self.time_offset: float = 0.0
 
         self.front_end = RadarFrontEnd(self.cfg, self.participant_id, rng=self._rng)
@@ -202,14 +205,15 @@ class ParticipantAgent:
 
     def step(self, t: float, frame: int, dt: float) -> None:
         """Advance this participant's onboard stack by one simulation step."""
-        telemetry, control = self.read_own_state(t, frame)
+        local_t, local_frame = self.clock.stamp(t, frame)
+        telemetry, control = self.read_own_state(local_t, local_frame)
 
         radar_frames = self._poll_radars(frame)
         clusters: List[RadarCluster] = []
         for rframe in radar_frames:
             clusters.extend(self.front_end.process(rframe, telemetry))
 
-        track_samples = self.tracker.update(t, frame, clusters, telemetry)
+        track_samples = self.tracker.update(local_t, local_frame, clusters, telemetry)
         self._latest_tracks = list(track_samples)
 
         self.recorder.record_telemetry(telemetry)
@@ -218,7 +222,7 @@ class ParticipantAgent:
             self.recorder.record_radar(rframe)
         self.recorder.record_tracks(track_samples)
 
-        self._handle_triggers(t, frame, telemetry, control, track_samples)
+        self._handle_triggers(local_t, local_frame, telemetry, control, track_samples, sim_t=t)
 
         command = self.controller.step(
             VehicleState(
@@ -249,7 +253,7 @@ class ParticipantAgent:
                 self._radar_frames_missed += 1
                 continue
             self._radar_frames_seen += 1
-            rframe.t = float(rframe.t) - self.time_offset
+            rframe.t, rframe.frame = self.clock.stamp(float(rframe.t) - self.time_offset, rframe.frame)
             out.append(rframe)
         return out
 
@@ -285,6 +289,7 @@ class ParticipantAgent:
         telemetry: TelemetrySample,
         control: ControlSample,
         tracks: Sequence[TrackSample],
+        sim_t: float,
     ) -> None:
         """Evaluate every recorder trigger from ONBOARD evidence only."""
         # --- collision: reported by the onboard sensor, identity stripped ---
@@ -295,7 +300,8 @@ class ParticipantAgent:
                 # CARLA stamps collision events with the absolute simulator
                 # clock; rebase onto scenario time so the trigger lines up with
                 # the telemetry and radar samples recorded for the same tick.
-                rec.t = float(rec.t) - self.time_offset
+                collision_sim_t = float(rec.t) - self.time_offset
+                rec.t, rec.frame = self.clock.stamp(collision_sim_t, rec.frame)
                 # Vehicles that stay in contact emit an event every frame. They
                 # describe ONE impact, so collapse them: otherwise the event
                 # extractor would report a dozen COLLISION events for one crash.
@@ -306,6 +312,7 @@ class ParticipantAgent:
                     self._collisions_debounced += 1
                     continue
                 self._last_collision_t = rec.t
+                self.latest_trigger_sim_time = collision_sim_t
                 self.recorder.trigger(rec)
                 self.controller.notify_impact()
                 LOGGER.info(
@@ -340,6 +347,7 @@ class ParticipantAgent:
                         )
                     )
                     self._near_miss_armed = False
+                    self.latest_trigger_sim_time = float(sim_t)
                     LOGGER.info(
                         "participant %s: near-miss trigger at t=%.2f (ttc %.2f s)",
                         self.participant_id,
@@ -371,6 +379,7 @@ class ParticipantAgent:
                     )
                 )
                 self._brake_trigger_armed = False
+                self.latest_trigger_sim_time = float(sim_t)
 
     # -- results ----------------------------------------------------------
 

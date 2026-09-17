@@ -217,6 +217,7 @@ def run_scenario(
                 controller=controller,
                 spawn_transform=transform,
                 seed=seed,
+                clock_context="{0}/{1}".format(spec.scenario_id, spec.variant),
             )
             agent.spawn()
             agents.append(agent)
@@ -322,6 +323,11 @@ def run_scenario(
             for agent in agents:
                 evidence[agent.participant_id] = agent.persist(layout)
             oracle_summary = oracle.persist(layout)
+            write_json(layout.oracle_dir / "clock_ground_truth.json", {
+                "schema_version": "1.0.0", "provenance": "oracle",
+                "formula": "t_local = true_scale * t_sim + true_offset_s + jitter",
+                "participants": {a.participant_id: a.clock.ground_truth() for a in agents},
+            })
 
     participants_manifest = [
         ParticipantManifest(
@@ -375,6 +381,8 @@ def run_scenario(
         platform=env["platform"],
         package_version=env["package_version"],
         notes=notes + validation.get("problems", []),
+        clock_protocol=("independent_local_clocks" if cfg.get("clocks.independent", False)
+                        else "synchronized_clock_baseline"),
     )
 
     if persist:
@@ -531,8 +539,8 @@ def _latest_trigger_time(agents: Sequence[ParticipantAgent]) -> Optional[float]:
     """
     times: List[float] = []
     for agent in agents:
-        for trig in agent.recorder.triggers:
-            times.append(float(trig.t))
+        if agent.latest_trigger_sim_time is not None:
+            times.append(float(agent.latest_trigger_sim_time))
     return max(times) if times else None
 
 

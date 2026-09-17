@@ -29,6 +29,7 @@ from ..common.layout import RunLayout
 from ..common.schemas import GraphDocument, Provenance, SCHEMA_VERSIONS, to_jsonable
 from ..graph.export import graph_summary, load_graph, save_graph
 from .event_alignment import resolve_subjects
+from .aligned_evidence import AlignedRunEvidence
 from .graph_fusion import fuse_graphs
 from .time_alignment import align_participants
 from .track_association import associate_tracks, association_report
@@ -100,7 +101,7 @@ def fuse_run(
 ) -> FusionResult:
     """Execute the fusion chain over a recorded run."""
     layout = run_dir if isinstance(run_dir, RunLayout) else RunLayout.from_run_dir(run_dir)
-    run: RunEvidence = load_run(layout.root, with_radar=False)
+    run: RunEvidence = load_run(layout.root, with_radar=True)
 
     if len(run.participant_ids) < 2:
         raise ValueError(
@@ -110,6 +111,7 @@ def fuse_run(
         )
 
     alignment = align_participants(run, cfg)
+    run = AlignedRunEvidence(run, alignment)
     assignments = associate_tracks(run, cfg)
     subject_map = resolve_subjects(assignments)
     LOGGER.info(
@@ -155,6 +157,7 @@ def fuse_run(
         layout.fusion_dir.mkdir(parents=True, exist_ok=True)
         write_json(layout.association_report, association_report(assignments, run, cfg))
         write_json(layout.fusion_diagnostics, diagnostics)
+        write_json(layout.fusion_dir / "time_alignment.json", alignment)
         write_json(
             layout.fused_events,
             {

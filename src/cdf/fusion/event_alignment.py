@@ -46,6 +46,7 @@ from ..common.config import Config
 from ..common.evidence import RunEvidence
 from ..common.schemas import Event, EventType, ORACLE_ONLY_EVENT_TYPES
 from .track_association import STATUS_AMBIGUOUS, STATUS_RESOLVED, TrackAssignment
+from .aligned_evidence import participant_is_aligned, require_common_time
 
 __all__ = [
     "DEFAULT_TYPE_FAMILIES",
@@ -291,6 +292,8 @@ def align_event_records(
     reimplemented (and allowed to drift) on the graph side.
     """
     tol = float(cfg.get("fusion.event_alignment.time_tolerance_s", 1.0))
+    if run is not None:
+        require_common_time(run)
     require_same_type = bool(cfg.get("fusion.event_alignment.require_same_type", True))
     subject_must_agree = bool(cfg.get("fusion.event_alignment.subject_must_agree", True))
 
@@ -298,7 +301,10 @@ def align_event_records(
     records: List[_Record] = []
 
     for pid in sorted(events_by_participant.keys()):
-        for event in sorted(events_by_participant[pid], key=lambda e: (e.t_peak, e.event_id)):
+        events = events_by_participant[pid]
+        if run is not None and hasattr(run, "align_event") and participant_is_aligned(run, pid):
+            events = [run.align_event(pid, e) for e in events]
+        for event in sorted(events, key=lambda e: (e.t_peak, e.event_id)):
             if event.event_type in ORACLE_ONLY_EVENT_TYPES:
                 raise ValueError(
                     "privileged event type {0} reached the fusion layer (event {1!r})".format(
@@ -331,6 +337,8 @@ def align_event_records(
     def compatible(i: int, j: int) -> bool:
         a, b = records[i], records[j]
         if a.participant_id == b.participant_id:
+            return False
+        if run is not None and not all(participant_is_aligned(run,p) for p in (a.participant_id,b.participant_id)):
             return False
         if require_same_type and a.family != b.family:
             return False

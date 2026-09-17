@@ -54,6 +54,7 @@ from ..common.evidence import ParticipantEvidence, RunEvidence
 from ..common.geometry import resample_trajectory, trajectory_rmse
 from ..common.schemas import SCHEMA_VERSIONS, to_jsonable
 from ..common.timeline import Interval, TimeGrid
+from .aligned_evidence import participant_is_aligned, require_common_time
 
 __all__ = [
     "STATUS_RESOLVED",
@@ -168,6 +169,10 @@ def score_candidate(
                 track_id, observer_ev.participant_id
             )
         )
+
+    if any(ev.meta.get("time_domain") in ("participant_local", "unresolved_participant_local")
+           for ev in (observer_ev, other_ev)):
+        raise ValueError("score_candidate requires common-clock evidence")
 
     min_overlap_s = float(cfg.get("fusion.track_association.min_overlap_s", 1.0))
     max_rmse_m = float(cfg.get("fusion.track_association.max_rmse_m", 6.0))
@@ -349,6 +354,7 @@ def associate_tracks(run: RunEvidence, cfg: Config) -> Dict[str, TrackAssignment
     The returned mapping is keyed by track id (already globally unique because it
     embeds the observer, e.g. ``"A::T007"``).
     """
+    require_common_time(run)
     min_confidence = float(cfg.get("fusion.track_association.min_confidence", 0.40))
     ambiguity_margin = float(cfg.get("fusion.track_association.ambiguity_margin", 0.12))
     # Not in configs/default.yaml -- reported as a contract issue. Controls how
@@ -372,7 +378,12 @@ def associate_tracks(run: RunEvidence, cfg: Config) -> Dict[str, TrackAssignment
     for observer_id in participant_ids:
         observer_ev = run.get(observer_id)
         track_ids = observer_ev.track_ids()
-        others = [pid for pid in participant_ids if pid != observer_id]
+        others = [pid for pid in participant_ids if pid != observer_id and participant_is_aligned(run, pid)]
+        if not participant_is_aligned(run, observer_id):
+            for track_id in track_ids:
+                assignments[track_id] = TrackAssignment(track_id,observer_id,
+                    reason="UNRESOLVED_TIME_ALIGNMENT: no cross-recorder temporal comparisons")
+            continue
 
         by_track: Dict[str, List[AssociationCandidate]] = {}
         for track_id in track_ids:

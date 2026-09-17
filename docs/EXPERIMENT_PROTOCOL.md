@@ -4,6 +4,95 @@
 
 ## 1. The experimental unit
 
+### Clock protocol (independent recorder clocks)
+
+CARLA itself advances on one simulator clock, but each virtual vehicle exports
+evidence through an independently perturbed local recorder clock. The shared
+simulator time is withheld from fusion. Profiles are deterministically derived
+from scenario/variant context, seed, participant and clock configuration.
+
+Default **experimental perturbations**, not measured vehicle specifications:
+offset uniform within +/-0.4 s, drift within +/-100 ppm, optional seeded Gaussian
+jitter with 0.001 s standard deviation disabled by default. Jitter is cached per
+tick and monotonic-safe. `clocks.independent: false` reproduces synchronized
+recorder timestamping. Neither choice changes scenario action times or physics.
+
+Old campaign artifacts without a `clock_protocol` marker are the
+`synchronized_clock_baseline`; retain them unchanged. New manifests explicitly
+declare `independent_local_clocks`. Do not combine the campaigns as if their
+inference protocol were identical. Final paper results need a new independent
+clock campaign after the smoke tests; this change does not regenerate it.
+
+Use a separate artifacts root for smoke runs:
+
+```powershell
+python scripts/run_scenario.py --scenario S01 --seed 0 --artifacts artifacts/independent_clock_smoke
+python scripts/run_scenario.py --scenario S06 --variant a_front_pushed --seed 0 --artifacts artifacts/independent_clock_smoke
+python scripts/run_scenario.py --scenario S06 --variant b_rear_first --seed 0 --artifacts artifacts/independent_clock_smoke
+python scripts/run_clock_ablation.py --run-dir <printed-run-directory>
+python scripts/validate_clock_smoke.py --artifacts artifacts/independent_clock_smoke
+```
+
+Clock ablation holds the physical recording and local evidence content fixed:
+A is an evaluation-only oracle-restamped synchronized-clock control; B deliberately
+uses raw independent times without correction; C runs the evidence estimator and
+aligned view used by normal fusion. This isolates timestamp effects, not separate
+physics reruns. A separate synchronized simulation can additionally test recorder
+effects on online tracking; the time-only control does not make that claim.
+The driver writes `evaluation/clock_ablation.json` with offset/drift errors relative
+to the reference recorder, alignment residual, association precision/recall/F1,
+event matching and fused node/edge F1. Clock truth never enters normal fusion.
+
+Acceptance includes physical radar/range tests (zero offset, 0.37 s, three clocks,
+transitive paths, drift, periodic-grid ambiguity, insufficient evidence,
+jitter/dropout and fusion invariance), anti-leakage and the non-CARLA suite.
+For CARLA verify S01 collision, S06a A-B then B-C, and S06b B-C then A-B in common
+time as well as scenario validation. Short recordings generally resolve only
+offset; report unobservable drift explicitly and score its remaining error.
+
+#### Verified clock smoke results (seed 0, CARLA 0.9.15)
+
+The three recordings under `artifacts/independent_clock_smoke/` are separate from
+the retained campaign. `clock_smoke_validation.json` checks local/common fused
+provenance and uses oracle pair labels only on the evaluation side:
+
+| Run | Common-time collision order | Offset MAE | Remaining drift MAE |
+|---|---|---:|---:|
+| S01 crash | A-B | 0.004278 s | 13.984 ppm |
+| S06 a_front_pushed | A-B, then B-C | 0.052338 s | 23.262 ppm |
+| S06 b_rear_first | B-C, then A-B | 0.004735 s | 31.116 ppm |
+
+All participant clocks resolve; all scenario validations pass. Across the five
+non-reference clock estimates, offset MAE is 0.023685 s and drift MAE is 24.548 ppm.
+These recordings are short, so drift is explicitly offset-only/unobservable;
+the ppm column is the error of that scale-one assumption, not recovered drift.
+S06a retains a radar-centroid timing bias on its unanchored B-C constraint.
+
+A/B/C association F1 is 1.0 on each recording. Fused event/node F1 remains
+0.375000 / 0.382979 / 0.357143 for S01 / S06a / S06b in all modes.
+Fused edge F1 is **not consistently improved**:
+
+| Run | A synchronized | B uncorrected | C aligned |
+|---|---:|---:|---:|
+| S01 | 0.114286 | 0.114286 | 0.114286 |
+| S06a | 0.065574 | 0.065574 | 0.000000 |
+| S06b | 0.130435 | 0.086957 | 0.043478 |
+
+Thus these smoke checks establish clock propagation and collision-order
+preservation, not improved causal accuracy. Temporal edge rules remain unchanged;
+their sensitivity to residual radar/clock bias requires further evaluation.
+The complete A/B/C reports include per-constraint normalized alignment residuals
+and all precision/recall/F1 values. The proposed path's mean normalized residual
+is 0.106892 / 0.137539 / 0.170825 respectively; these are dimensionless robust
+channel losses, not seconds or calibrated statistical error bars.
+
+Precise synthetic trajectories recover a 0.37 s offset, the three-clock
+transitive chain, and inverse scale for a +3000 ppm clock over 60 s. The latter
+explicitly uses a wider drift search and precision-test observability settings.
+Seeded 1 ms jitter plus 25% sample dropout gives approximately 0.000060 s offset
+error; insufficient evidence reports unresolved rather than zero. These controlled
+point-target results should not be conflated with finite-extent CARLA radar.
+
 One **run** = one `(scenario, variant, seed)` triple, executed end to end and
 persisted under `artifacts/<SCENARIO>_<name>/seed_<nnn>[_<variant>]/`
 (`RunLayout.create`).

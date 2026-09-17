@@ -124,7 +124,8 @@ persist, intervention, layout) -> RunResult`
     imparted velocity takes effect in the solver.
 15. `t0 = sworld.elapsed_seconds`; `oracle.time_offset = t0`;
     `agent.time_offset = t0`; `agent.drain_radar_queues(sworld.frame)` discards
-    warm-up radar output. Every recorded timestamp is scenario-relative from here.
+    warm-up radar output. Hidden physics/controller time is scenario-relative
+    from here; exported participant timestamps pass through `LocalClock`.
 
 **Main loop**
 
@@ -151,6 +152,14 @@ near-miss trigger must not end the run before the collision it anticipated.
 19. When persisting: `agent.persist(layout)` per participant,
     `oracle.persist(layout)`, `write_json(layout.manifest, manifest)`,
     `write_json(layout.scenario_validation, validation)`.
+
+Clock profiles are persisted only in `oracle/clock_ground_truth.json`.
+`LocalClock` derives a private seeded stream from a SHA-256 digest of scenario
+context, seed, participant and clock configuration. It applies
+`t_local = (1 + drift_ppm*1e-6)*t_sim + offset + jitter`, caches one stamp per
+tick for all local streams, and clamps optional jitter to preserve monotonicity.
+Each recorder exports its own unrelated frame-sequence origin, not CARLA frames.
+Controller actions, physics stepping and run termination still use hidden `t_sim`.
 
 ### 3.1 `validate_run`
 
@@ -189,18 +198,19 @@ sequenceDiagram
     participant RC as RollingRecorder
     participant CT as ScriptedController
 
-    R->>A: step(t, frame, dt)
-    A->>A: read_own_state(t, frame) → make_telemetry(...), ControlSample
-    A->>A: _poll_radars(frame) → RadarSensor.poll, rebase t by time_offset
+    R->>A: step(t_sim, frame, dt_sim)
+    A->>A: LocalClock.stamp(t_sim, frame) = t_local, local_frame
+    A->>A: read_own_state(t_local, local_frame) = telemetry, control
+    A->>A: _poll_radars(frame) = private clock stamp + local sequence
     loop per radar frame
         A->>FE: process(frame, telemetry)
         FE-->>A: List[RadarCluster]
     end
-    A->>TK: update(t, frame, clusters, telemetry)
+    A->>TK: update(t_local, local_frame, clusters, telemetry)
     TK-->>A: List[TrackSample]  (confirmed + hit this frame only)
     A->>RC: record_telemetry / record_control / record_radar / record_tracks
     A->>A: _handle_triggers(...) → RollingRecorder.trigger
-    A->>CT: step(VehicleState, dt)
+    A->>CT: step(VehicleState(t_sim), dt_sim)
     CT-->>A: ControlCommand
     A->>A: _apply_command(command)
 ```
@@ -332,9 +342,10 @@ each with `confidence_terms()`, and makes the result acyclic with
 -> FusionResult`
 
 ```
-load_run(layout.root, with_radar=False)              # ≥ 2 participants required
-align_participants(run, cfg)                         # cdf.fusion.time_alignment
-associate_tracks(run, cfg)                           # cdf.fusion.track_association
+run = load_run(layout.root, with_radar=True)         # >= 2 participants; local mounts
+alignment = align_participants(run, cfg)             # joint radar identity/time fitting
+run = AlignedRunEvidence(run, alignment)             # detached common-time streams
+associate_tracks(run, cfg)                           # only common-time comparisons
 resolve_subjects(assignments)                        # track_id → participant_id
 load_graph(layout.causal_graph(pid), expect_scope=Provenance.LOCAL)   # per pid
 load_graph(layout.event_graph(pid),  expect_scope=Provenance.LOCAL)
@@ -354,7 +365,13 @@ the signature rather than assuming it) so a fused DAG is constrained exactly lik
 a local one; `_greedy_acyclic` is the fallback. Full semantics:
 `docs/GRAPH_FUSION.md`.
 
-The persisted outputs are `association_report()`, the diagnostics,
+The loader includes local radar mount calibration. It strips
+simulation/scenario ground truth from the inference-facing manifest. Graphs are
+converted by the aligned view before event matching; fused evidence retains
+local/common times and clock confidence. Unresolved clocks do not participate in
+cross-vehicle fusion; their original local graphs remain untouched.
+
+The persisted outputs are `association_report()`, `time_alignment.json`, the diagnostics,
 `fused_events.json` and both fused graphs in JSON and GraphML.
 
 ---

@@ -1,175 +1,364 @@
-"""Unit tests for :mod:`cdf.fusion.time_alignment`.
+"""Physical-evidence synchronization tests; periodic grids are not anchors."""
 
-The alignment stage is the foundation every later cross-participant comparison
-rests on, so these tests pin the two properties that matter: a synchronous run
-must be recognised as synchronous (offset 0, residual 0), and an artificially
-de-synchronised log must have its offset recovered to sub-millisecond accuracy.
-Failure modes -- an un-estimable offset, an empty log, disjoint spans -- must be
-surfaced as diagnostics instead of being silently absorbed.
-"""
-
-from __future__ import annotations
-
-import math
+from dataclasses import replace
 from pathlib import Path
-from typing import List
-
+import math
+import numpy as np
 import pytest
-
 from cdf.common.config import load_run_config
 from cdf.common.evidence import ParticipantEvidence, RunEvidence
-from cdf.common.schemas import TelemetrySample
-from cdf.fusion.time_alignment import align_participants, aligned_spans, apply_offset
+from cdf.common.schemas import (
+    Event,
+    EventType,
+    GraphDocument,
+    GraphEdge,
+    LocalTriggerRecord,
+    Provenance,
+    TelemetrySample,
+    TrackSample,
+    TriggerKind,
+)
+from cdf.fusion.time_alignment import (
+    align_participants,
+    estimate_track_clock,
+    apply_offset,
+)
+from cdf.fusion.aligned_evidence import AlignedRunEvidence
+from cdf.fusion.track_association import associate_tracks
+from cdf.fusion.event_alignment import align_events
+from cdf.fusion.graph_fusion import fuse_graphs
 
-DT = 0.05
-N = 101
+
+def physical_run(profiles=None, chain=False, span=10.0, jitter=0.0, dropout=False):
+    profiles = profiles or {"A": (0.0, 1.0), "B": (0.0, 1.0)}
+    ts = np.arange(0, span + 0.01, 0.05)
+    participants = {}
+    truth = {}
+    rng = np.random.RandomState(21)
+    for i, (pid, (offset, scale)) in enumerate(profiles.items()):
+        x = 20 * i + (7 + 2 * i) * ts + 1.5 * np.sin(0.6 * ts + i)
+        y = 4 * i + np.sin(0.3 * ts + i)
+        vx = (7 + 2 * i) + 0.9 * np.cos(0.6 * ts + i)
+        vy = 0.3 * np.cos(0.3 * ts + i)
+        local = scale * ts + offset + rng.normal(0, jitter, len(ts))
+        telemetry = [
+            TelemetrySample(
+                float(t),
+                10000 * i + k,
+                pid,
+                float(px),
+                float(py),
+                0.0,
+                0.0,
+                vx=float(vx[k]),
+                vy=float(vy[k]),
+                speed=float(math.hypot(vx[k], vy[k])),
+            )
+            for k, (t, px, py) in enumerate(zip(local, x, y))
+        ]
+        participants[pid] = ParticipantEvidence(
+            pid, telemetry=telemetry, meta={"time_domain": "participant_local"}
+        )
+        truth[pid] = (x, y, vx, vy)
+    pairs = [("A", "B")] + ([("B", "C")] if chain else [])
+    for obs, cand in pairs:
+        own = participants[obs]
+        gx, gy, gvx, gvy = truth[cand]
+        ox, oy, ovx, ovy = truth[obs]
+        dx, dy = gx - ox, gy - oy
+        distance = np.hypot(dx, dy)
+        rate = ((gvx - ovx) * dx + (gvy - ovy) * dy) / distance
+        own.tracks = [
+            TrackSample(
+                t=own.telemetry[k].t,
+                frame=own.telemetry[k].frame,
+                participant_id=obs,
+                track_id=obs + "::T001",
+                gx=float(gx[k]),
+                gy=float(gy[k]),
+                gvx=float(gvx[k]),
+                gvy=float(gvy[k]),
+                rel_x=float(dx[k]),
+                rel_y=float(dy[k]),
+                range_m=float(distance[k]),
+                range_rate=float(rate[k]),
+                confidence=0.95,
+                n_points=5,
+            )
+            for k in range(len(ts))
+            if 1.0 < ts[k] < span - 1.0 and not (dropout and k % 4 == 0)
+        ]
+    for pid, p in participants.items():
+        offset, scale = profiles[pid]
+        p.events = [
+            Event(
+                pid + "own",
+                EventType.DECELERATION,
+                pid,
+                scale * 5 + offset,
+                scale * 5 + offset,
+                scale * 5.2 + offset,
+            )
+        ]
+    a = participants["A"]
+    off, scale = profiles["A"]
+    a.events = [
+        Event(
+            "Aremote",
+            EventType.TARGET_DECELERATION,
+            "A",
+            scale * 5 + off,
+            scale * 5 + off,
+            scale * 5.2 + off,
+            subject="A::T001",
+        )
+    ]
+    if chain:
+        off, scale = profiles["B"]
+        participants["B"].events.append(
+            Event(
+                "Bremote",
+                EventType.TARGET_DECELERATION,
+                "B",
+                scale * 8 + off,
+                scale * 8 + off,
+                scale * 8.2 + off,
+                subject="B::T001",
+            )
+        )
+        off, scale = profiles["C"]
+        participants["C"].events = [
+            Event(
+                "Cown",
+                EventType.DECELERATION,
+                "C",
+                scale * 8 + off,
+                scale * 8 + off,
+                scale * 8.2 + off,
+            )
+        ]
+    return RunEvidence(
+        Path("."),
+        {"run_id": "physical", "clock_protocol": "independent_local_clocks"},
+        participants,
+    )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def cfg():
     return load_run_config()
 
 
-def _telemetry(pid: str, times: List[float]) -> List[TelemetrySample]:
-    """A straight-line trace; only the timestamps matter for alignment."""
-    return [
-        TelemetrySample(
-            t=float(t),
-            frame=i,
-            participant_id=pid,
-            x=10.0 * float(t),
-            y=0.0,
-            z=0.0,
-            yaw=0.0,
-            vx=10.0,
-            vy=0.0,
-            speed=10.0,
-        )
-        for i, t in enumerate(times)
+def test_A_zero_offset_regression(cfg):
+    result = align_participants(physical_run(), cfg)
+    assert result["reference"] == "A"
+    assert result["offsets"]["B"]["offset_s"] == pytest.approx(0, abs=1e-5)
+    assert result["offsets"]["B"]["confidence"] > 0.99
+
+
+def test_B_simple_offset_recovered_from_radar(cfg):
+    raw = physical_run({"A": (0, 1), "B": (0.37, 1)})
+    result = align_participants(raw, cfg)
+    assert result["offsets"]["B"]["offset_s"] == pytest.approx(-0.37, abs=0.003)
+    assert result["constraints"][0]["range_residual_m"] < 0.03
+    assert result["constraints"][0]["range_rate_residual_mps"] < 0.03
+    aligned = AlignedRunEvidence(raw, result)
+    assert associate_tracks(aligned, cfg)["A::T001"].assigned_participant == "B"
+    assert align_events(aligned, {"A::T001": "B"}, cfg)["groups"] == [
+        ["Aremote", "Bown"]
     ]
+    assert raw.get("B").events[0].t_peak == 5.37
+    with pytest.raises(ValueError):
+        associate_tracks(raw, cfg)
 
 
-def _run(**streams: List[float]) -> RunEvidence:
-    participants = {
-        pid: ParticipantEvidence(participant_id=pid, telemetry=_telemetry(pid, times))
-        for pid, times in streams.items()
+def test_C_E_three_clocks_and_transitive_constraint_graph(cfg):
+    profiles = {"A": (0.41, 1), "B": (-0.23, 1), "C": (0.12, 1)}
+    raw = physical_run(profiles, chain=True)
+    result = align_participants(raw, cfg)
+    ref = result["reference"]
+    assert ref == "B"
+    assert {(h["observer"], h["candidate"]) for h in result["constraints"]} == {
+        ("A", "B"),
+        ("B", "C"),
     }
-    return RunEvidence(run_dir=Path("."), manifest={"run_id": "unit", "seed": 0}, participants=participants)
+    for pid, (off, scale) in profiles.items():
+        assert result["offsets"][pid]["offset_s"] == pytest.approx(
+            profiles[ref][0] - off, abs=0.003
+        )
+    view = AlignedRunEvidence(raw, result)
+    assert view.get("A").events[0].t_peak < view.get("C").events[0].t_peak
 
 
-def _grid(n: int = N, dt: float = DT, start: float = 0.0) -> List[float]:
-    return [start + k * dt for k in range(n)]
+def test_D_offset_and_drift_are_recovered(cfg):
+    # Long, precise synthetic point trajectories make sub-ms scale changes identifiable.
+    cfg = cfg.with_overrides(
+        {
+            "fusion": {
+                "time_alignment": {
+                    "max_drift_ppm": 5000.0,
+                    "min_drift_loss_improvement": 1e-5,
+                }
+            }
+        }
+    )
+    raw = physical_run({"A": (0, 1), "B": (0.37, 1.003)}, span=60)
+    result = align_participants(raw, cfg)
+    b = result["offsets"]["B"]
+    assert b["scale"] == pytest.approx(1 / 1.003, abs=2e-5)
+    assert b["offset_s"] == pytest.approx(-0.37 / 1.003, abs=0.005)
+    assert b["drift_status"] == "AFFINE_DRIFT_ESTIMATED"
+    assert abs(b["drift_ppm"] - (1 / 1.003 - 1) * 1e6) < 20
 
 
-def _kinds(result) -> List[str]:
-    return [d["kind"] for d in result["diagnostics"]]
+def test_F_insufficient_evidence_is_unresolved_not_zero(cfg):
+    raw = physical_run({"A": (0, 1), "B": (0.37, 1)})
+    raw.get("A").tracks = []
+    result = align_participants(raw, cfg)
+    assert result["offsets"]["B"]["status"] == "UNRESOLVED_TIME_ALIGNMENT"
+    assert result["offsets"]["B"]["offset_s"] is None
+    assert result["offsets"]["B"]["scale"] is None
+    view = AlignedRunEvidence(raw, result)
+    assert align_events(view, {}, cfg)["groups"] == []
+    docs = {
+        p: GraphDocument("causal", Provenance.LOCAL, p, nodes=raw.get(p).events)
+        for p in raw.participant_ids
+    }
+    fused, diag = fuse_graphs(view, docs, {}, cfg)
+    assert diag["unresolved_time_participants"] == ["B"]
+    assert all(n.participant_id == "A" for n in fused.nodes)
+    assert raw.get("B").events
 
 
-def test_identical_series_align_at_zero_offset(cfg):
-    """Two recorders stepped by the same server must show no offset at all."""
-    result = align_participants(_run(A=_grid(), B=_grid()), cfg)
-
-    assert result["reference"] in ("A", "B")
-    assert sorted(result["offsets"].keys()) == ["A", "B"]
-    for pid in ("A", "B"):
-        entry = result["offsets"][pid]
-        assert abs(entry["offset_s"]) < 1e-9
-        assert entry["residual_s"] < 1e-9
-        assert entry["confidence"] > 0.99
-    assert result["common_span"] == pytest.approx([0.0, (N - 1) * DT])
-    assert "offset_exceeds_limit" not in _kinds(result)
-    assert "non_zero_offset" not in _kinds(result)
+def test_G_periodic_20hz_grid_does_not_identify_clock(cfg):
+    raw = physical_run({"A": (0, 1), "B": (0.4, 1)})
+    assert np.diff(raw.get("A").times()) == pytest.approx(np.diff(raw.get("B").times()))
+    result = align_participants(raw, cfg)
+    assert result["offsets"]["B"]["offset_s"] == pytest.approx(-0.4, abs=0.003)
+    raw.get("A").tracks = []
+    assert align_participants(raw, cfg)["offsets"]["B"]["offset_s"] is None
 
 
-def test_injected_offset_is_recovered_to_within_one_millisecond(cfg):
-    """A deliberately shifted log must have its shift measured, not absorbed.
+def test_H_seeded_jitter_and_dropout_keep_explicit_confidence(cfg):
+    raw = physical_run({"A": (0, 1), "B": (0.37, 1)}, jitter=0.001, dropout=True)
+    result = align_participants(raw, cfg)
+    b = result["offsets"]["B"]
+    assert b["status"] == "ALIGNED"
+    assert b["offset_s"] == pytest.approx(-0.37, abs=0.01)
+    assert 0.8 < b["confidence"] < 1.0
+    assert result["constraints"][0]["n_samples"] >= 12
 
-    The shift is chosen smaller than half the sampling period so that the nearest
-    neighbour of each shifted sample is still its own grid point; a shift that is
-    an exact multiple of the period is unobservable from timestamps alone.
-    """
-    shift = 0.017
-    result = align_participants(
-        _run(A=_grid(), B=[t + shift for t in _grid()]), cfg
+
+def test_range_is_an_actual_term_in_time_estimation(cfg):
+    raw = physical_run({"A": (0, 1), "B": (0.37, 1)})
+    raw.get("A").tracks = [replace(t, gx=t.gx + 2.0) for t in raw.get("A").tracks]
+    both = estimate_track_clock(raw.get("A"), "A::T001", raw.get("B"), cfg)
+    positional = estimate_track_clock(
+        raw.get("A"),
+        "A::T001",
+        raw.get("B"),
+        cfg.with_overrides({"fusion": {"time_alignment": {"range_sigma_m": 1e6}}}),
+    )
+    assert abs(both["offset_s"] + 0.37) < abs(positional["offset_s"] + 0.37)
+
+
+def test_fusion_invariance_and_original_timestamp_provenance(cfg):
+    cfg = cfg.with_overrides(
+        {
+            "fusion": {
+                "time_alignment": {
+                    "max_drift_ppm": 5000.0,
+                    "min_drift_loss_improvement": 1e-5,
+                }
+            }
+        }
+    )
+    profiles1 = {"A": (0, 1), "B": (0, 1), "C": (0, 1)}
+    profiles2 = {"A": (0.41, 1.001), "B": (-0.23, 0.999), "C": (0.12, 1.002)}
+    outputs = []
+    for profiles in (profiles1, profiles2):
+        raw = physical_run(profiles, chain=True, span=60)
+        alignment = align_participants(raw, cfg)
+        view = AlignedRunEvidence(raw, alignment)
+        assigned = associate_tracks(view, cfg)
+        docs = {
+            pid: GraphDocument(
+                "causal",
+                Provenance.LOCAL,
+                pid,
+                nodes=p.events,
+                edges=(
+                    [
+                        GraphEdge(
+                            p.events[0].event_id, p.events[1].event_id, "CONTRIBUTES_TO"
+                        )
+                    ]
+                    if len(p.events) > 1
+                    else []
+                ),
+            )
+            for pid, p in raw.participants.items()
+        }
+        fused, diag = fuse_graphs(view, docs, assigned, cfg)
+        ref = alignment["reference"]
+        off, scale = profiles[ref]
+        key = {n.event_id: tuple(n.merged_from) for n in fused.nodes}
+        outputs.append(
+            (
+                [(t, a.assigned_participant) for t, a in assigned.items()],
+                sorted(
+                    (tuple(n.merged_from), round((n.t_peak - off) / scale, 2))
+                    for n in fused.nodes
+                ),
+                sorted(
+                    (key[e.source], key[e.target], e.edge_type) for e in fused.edges
+                ),
+            )
+        )
+        assert any(
+            e.kind == "clock_alignment"
+            and "local_t_peak" in e.detail
+            and "common_t_peak" in e.detail
+            for n in fused.nodes
+            for e in n.evidence
+        )
+        assert raw.get("A").events[0].t_peak == pytest.approx(
+            profiles["A"][1] * 5 + profiles["A"][0]
+        )
+    assert outputs[0] == outputs[1]
+
+
+def test_collision_anchor_supplements_radar_not_identity_or_cadence(cfg):
+    raw = physical_run({"A": (0.0, 1.0), "B": (0.37, 1.0)})
+    own, other = raw.get("A"), raw.get("B")
+    other.telemetry = [replace(s, x=s.x - 28.0) for s in other.telemetry]
+    tracks = []
+    for s in own.tracks:
+        k = min(range(len(own.telemetry)), key=lambda i: abs(own.telemetry[i].t - s.t))
+        a, b = own.telemetry[k], other.telemetry[k]
+        # Radar reflects a surface one metre ahead of the self-reported origin.
+        dx, dy = b.x + 1.0 - a.x, b.y - a.y
+        distance = math.hypot(dx, dy)
+        rate = ((b.vx - a.vx) * dx + (b.vy - a.vy) * dy) / distance
+        tracks.append(
+            replace(s, gx=b.x + 1.0, gy=b.y, range_m=distance, range_rate=rate)
+        )
+    own.tracks = tracks
+    without = estimate_track_clock(own, "A::T001", other, cfg)
+    for pid, t in [("A", 5.0), ("B", 5.37)]:
+        raw.get(pid).triggers = [
+            LocalTriggerRecord(t, 123, pid, TriggerKind.COLLISION, True, 100.0)
+        ]
+    supported = estimate_track_clock(own, "A::T001", other, cfg)
+    assert supported["collision_anchors"] == 1
+    assert abs(supported["offset_s"] + 0.37) < abs(without["offset_s"] + 0.37)
+    assert "radar_range" in supported["methods"]
+    own.tracks = []
+    assert (
+        align_participants(raw, cfg)["offsets"]["B"]["status"]
+        == "UNRESOLVED_TIME_ALIGNMENT"
     )
 
-    # Whichever participant became the reference, the *relative* correction that
-    # maps B's clock onto A's must equal -shift.
-    relative = result["offsets"]["B"]["offset_s"] - result["offsets"]["A"]["offset_s"]
-    assert relative == pytest.approx(-shift, abs=1e-3)
-    assert result["offsets"]["B"]["n_samples"] == N
-    assert result["offsets"]["B"]["residual_s"] < 1e-6
-    assert "non_zero_offset" in _kinds(result)
-    assert "offset_exceeds_limit" not in _kinds(result)
 
-    corrected = aligned_spans(_run(A=_grid(), B=[t + shift for t in _grid()]), result["offsets"])
-    assert corrected["A"][0] == pytest.approx(corrected["B"][0], abs=1e-3)
-
-
-def test_non_overlapping_streams_report_an_unestimable_offset(cfg):
-    """When no sample pair is close enough, the offset must be declared unknown.
-
-    The nearest-neighbour estimator can only see offsets inside its search window;
-    beyond it there is no evidence, and the honest output is a zero offset carrying
-    zero confidence plus a loud diagnostic -- never a fabricated correction.
-    """
-    result = align_participants(_run(A=_grid(), B=_grid(start=60.0)), cfg)
-
-    entry = result["offsets"]["B"]
-    assert entry["n_samples"] == 0
-    assert entry["confidence"] == 0.0
-    assert not math.isfinite(entry["residual_s"])
-    assert "offset_not_estimable" in _kinds(result)
-
-
-def test_offset_above_the_configured_limit_is_flagged(cfg):
-    """``fusion.time_alignment.max_offset_s`` is enforced as a diagnostic threshold."""
-    strict = cfg.with_overrides(
-        {"fusion": {"time_alignment": {"max_offset_s": 0.01}}}
-    )
-    result = align_participants(
-        _run(A=_grid(), B=[t + 0.017 for t in _grid()]), strict
-    )
-
-    assert "offset_exceeds_limit" in _kinds(result)
-    flagged = [d for d in result["diagnostics"] if d["kind"] == "offset_exceeds_limit"]
-    assert flagged[0]["participant_id"] == "B"
-    assert abs(flagged[0]["offset_s"]) == pytest.approx(0.017, abs=1e-3)
-
-
-def test_empty_telemetry_participant_is_excluded_with_a_diagnostic(cfg):
-    """A participant that exported nothing cannot be aligned and must say so."""
-    run = _run(A=_grid(), B=_grid())
-    run.participants["C"] = ParticipantEvidence(participant_id="C")
-
-    result = align_participants(run, cfg)
-
-    assert "C" not in result["offsets"]
-    assert "empty_telemetry" in _kinds(result)
-    assert result["common_span"] is not None
-
-
-def test_disjoint_spans_yield_no_common_span(cfg):
-    """Logs that never overlap support no cross-participant claim at all."""
-    result = align_participants(
-        _run(A=_grid(), B=_grid(start=60.0)), cfg
-    )
-
-    assert result["common_span"] is None
-    assert "no_common_span" in _kinds(result)
-
-
-def test_apply_offset_shifts_every_sample(cfg):
-    """The public shift helper follows the documented sign convention."""
-    times = [0.0, 0.5, 1.0]
-    assert apply_offset(times, 0.25) == pytest.approx([0.25, 0.75, 1.25])
-    assert apply_offset(times, -0.25) == pytest.approx([-0.25, 0.25, 0.75])
-    assert apply_offset([], 1.0) == []
-
-
-def test_grid_dt_comes_from_configuration(cfg):
-    """The fusion grid step is a configured quantity, never a literal."""
-    result = align_participants(_run(A=_grid(), B=_grid()), cfg)
-    assert result["grid_dt"] == pytest.approx(
-        float(cfg.get("fusion.time_alignment.grid_dt"))
-    )
+def test_apply_offset_helper():
+    assert apply_offset([0, 0.5, 1], -0.25) == [-0.25, 0.25, 0.75]

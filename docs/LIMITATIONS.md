@@ -5,6 +5,32 @@ Read this before the results. Everything below constrains what the numbers in
 
 ## 1. Simulation-to-reality gap
 
+### Recorder clock synchronization
+
+Independent clock offsets/drift/jitter are configurable experimental
+perturbations, not empirically measured automotive clock distributions. Only a
+reference-recorder time gauge is observable, not absolute simulator time. Radar
+surface centroids differ from self-reported vehicle origins; robust fitting and
+supplementary compatible collision triggers reduce, but cannot eliminate, bias.
+Constant motion, short tracks, fragmented tracks, dropout or ambiguous identities
+can make time alignment unresolved. Those local graphs remain valid but are not
+included in common-time cross-vehicle fusion.
+
+Drift needs sufficiently long, informative evidence. A short CARLA crash usually
+produces an offset-only estimate; this is not proof that its clock has no drift.
+Confidence and Jacobian uncertainty are heuristic diagnostics, not calibrated
+coverage guarantees. Large jitter may activate monotonic clamping and distort
+elapsed local time. The A/B/C driver uses a restamped time-only synchronized
+control on the same recording, not a separate online-recorder/physics experiment.
+The old campaign remains a synchronized-clock baseline; independent-clock smoke
+tests do not replace a full newly generated campaign or establish real-world
+clock robustness.
+
+In the seed-0 clock smoke ablation, offset accuracy improves over deliberately
+uncorrected clocks, but fused edge F1 does not consistently improve and decreases
+in both S06 variants. The existing causal/temporal rules were not adjusted to
+hide this result. See the measured A/B/C table in `EXPERIMENT_PROTOCOL.md`.
+
 Every result comes from CARLA 0.9.15. The vehicle dynamics, tyre model, impact
 response and — especially — the radar model are simulator approximations. A
 conclusion of the form "fusion recovered the initiating cause" is a statement

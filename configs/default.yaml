@@ -33,6 +33,15 @@ simulation:
   post_outcome_s: 5.0              # keep simulating this long after the outcome
 
 # -----------------------------------------------------------------------------
+# Participant recorder clocks (configurable experimental perturbations)
+# -----------------------------------------------------------------------------
+clocks:
+  independent: true
+  offset: { enabled: true, max_abs_s: 0.4 }
+  drift: { enabled: true, max_abs_ppm: 100.0 }
+  jitter: { enabled: false, std_s: 0.001 }
+
+# -----------------------------------------------------------------------------
 # Sensors (the radar block is replaced by the selected profile)
 # -----------------------------------------------------------------------------
 sensors:
@@ -200,6 +209,24 @@ fusion:
   time_alignment:
     max_offset_s: 1.0
     grid_dt: 0.05
+    max_drift_ppm: 2000.0
+    min_samples: 12
+    min_overlap_s: 1.0
+    min_overlap_fraction: 0.6
+    coarse_offset_step_s: 0.05
+    min_confidence: 0.4
+    ambiguity_margin: 0.12
+    position_sigma_m: 2.0
+    range_sigma_m: 2.0
+    range_rate_sigma_mps: 1.5
+    velocity_sigma_mps: 3.0
+    min_drift_span_s: 15.0
+    max_drift_uncertainty_ppm: 250.0
+    min_drift_loss_improvement: 0.01
+    max_interpolation_gap_s: 0.3
+    collision_anchor_tolerance_s: 0.3
+    collision_anchor_sigma_s: 0.03
+    max_clock_constraint_residual_s: 0.2
   track_association:
     min_overlap_s: 1.0             # minimum temporal overlap to even consider
     max_rmse_m: 6.0                # gate on trajectory RMSE

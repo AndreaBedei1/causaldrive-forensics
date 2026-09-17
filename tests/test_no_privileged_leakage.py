@@ -52,6 +52,9 @@ from typing import Any, Iterator, List, Optional, Sequence, Set, Tuple
 import pytest
 
 from cdf.common.layout import RunLayout
+from cdf.common.clocks import LocalClock
+from cdf.common.evidence import load_run, load_participant, save_participant
+from cdf.common.io import read_json, write_json
 from cdf.common.schemas import (
     FORBIDDEN_LOCAL_FIELD_NAMES,
     FORBIDDEN_LOCAL_FIELD_SUBSTRINGS,
@@ -81,7 +84,7 @@ from fixtures.synthetic import synthetic_partial_view
 INFERENCE_PACKAGES: Tuple[str, ...] = ("local", "fusion", "graph", "checking")
 
 #: Module roots those packages may not reach, directly or relatively.
-FORBIDDEN_IMPORT_ROOTS: Tuple[str, ...] = ("carla", "cdf.oracle", "cdf.simulation")
+FORBIDDEN_IMPORT_ROOTS: Tuple[str, ...] = ("carla", "cdf.oracle", "cdf.simulation", "cdf.common.clocks")
 
 #: Privileged simulator queries. Each one answers a question an onboard sensor
 #: cannot: who else exists, what the road looks like, what the signal says.
@@ -381,9 +384,40 @@ def analysed_run(tmp_path_factory, default_config) -> RunLayout:
     """
     root = tmp_path_factory.mktemp("leakage_artifacts")
     layout = synthetic_partial_view(root, seed=0, cfg=default_config)
+    profiles = {}
+    for pid in layout.participant_ids():
+        ev = load_participant(layout,pid)
+        clock = LocalClock.for_participant(default_config,0,pid,'synthetic_partial_view')
+        for name in ('telemetry','controls','radar','tracks','triggers'):
+            for sample in sorted(getattr(ev,name),key=lambda s:s.t):
+                sample.t,sample.frame=clock.stamp(sample.t,sample.frame)
+        ev.meta['time_domain']='participant_local'
+        save_participant(layout,ev)
+        profiles[pid]=clock.ground_truth()
+    write_json(layout.oracle_dir / 'clock_ground_truth.json',{'participants':profiles})
+    manifest=read_json(layout.manifest); manifest['clock_protocol']='independent_local_clocks'
+    write_json(layout.manifest,manifest)
     analyse_run(layout.root, default_config)
     fuse_run(layout.root, default_config)
     return layout
+
+
+def test_inference_manifest_withholds_simulator_and_clock_configuration(analysed_run):
+    run=load_run(analysed_run.root)
+    assert not {'config','duration_sim_s','fixed_delta_seconds','outcome_detail','participants'} & set(run.manifest)
+    assert (analysed_run.oracle_dir / 'clock_ground_truth.json').exists()
+    estimated=read_json(analysed_run.fusion_dir / 'time_alignment.json')
+    assert all(v['status']=='ALIGNED' for v in estimated['offsets'].values())
+
+
+def test_clock_ground_truth_path_and_parameters_are_not_read_by_inference(src_root):
+    forbidden=('clock_ground_truth','true_offset_s','true_scale','true_drift_ppm','true_sim_time')
+    for path,name,_ in _iter_modules(src_root,INFERENCE_PACKAGES):
+        tree=ast.parse(path.read_text(encoding='utf-8'))
+        for node in ast.walk(tree):
+            value=getattr(node,'value',None)
+            if isinstance(value,str):
+                assert not any(key in value for key in forbidden), (name,value)
 
 
 # ---------------------------------------------------------------------------

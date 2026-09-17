@@ -12,7 +12,7 @@ modules involved import nothing from `cdf.oracle` or `cdf.simulation`.
 ```mermaid
 flowchart LR
     L["vehicle_*/  local evidence<br/>+ local graphs (scope = LOCAL)"] --> A1
-    A1["align_participants<br/>clock offset per participant"] --> A2
+    A1["joint track/time hypotheses<br/>global clock graph + aligned view"] --> A2
     A2["associate_tracks<br/>track_id → participant_id"] --> A3
     A3["resolve_subjects<br/>RESOLVED + AMBIGUOUS only"] --> A4
     A4["align_event_records<br/>which local events are one physical event"] --> A5
@@ -27,18 +27,49 @@ flowchart LR
 
 ### 1.0 Clock alignment first
 
-`cdf.fusion.time_alignment.align_participants` estimates a per-participant offset
-from the telemetry sample grids alone (`estimate_clock_offset`: the median
-difference between each of one stream's samples and its nearest neighbour in the
-reference stream; the reference is the participant with the most samples). It
-exists because the fusion layer's claim is that it works on *exchanged logs*, not
-that it quietly borrows the simulator's shared clock -- so in a synchronous run
-the correct answer is ~0 offset with ~0 residual, and this stage doubles as an
-integrity check. Diagnostics are raised for an empty stream, a non-estimable
-offset, `|offset| > fusion.time_alignment.max_offset_s` (1.0 s), any non-zero
-offset at all, a residual above `fusion.time_alignment.max_residual_s` (code
-default: `grid_dt`), and a non-intersecting common span. On the committed S01 run
-both offsets are exactly `0.0` with residual `0.0`.
+`align_participants` jointly fits each anonymous radar track against every other
+participant's self trajectory: `t_observer = a_pair*t_candidate + b_pair`.
+The robust soft-L1 residual contains target position, **range versus the distance
+between self trajectories**, signed range rate (negative means closing), target
+velocity and motion-heading consistency. Sensor-origin range rate uses the local
+mount calibration; range is body-origin centroid range. No sample-grid equality,
+frame-id equality, simulator timestamp, map or true clock profile is used.
+
+A coarse offset search initializes continuous fitting. Hungarian assignment
+selects one-to-one identity/time hypotheses, with explicit confidence and identity
+ambiguity gates. A local collision trigger can supplement a viable radar
+hypothesis only when temporal and proximity checks support a shared impact; it
+contains no collision-partner identity. Default minimums are 12 samples, one
+second of span and 60% valid overlap, with interpolation gaps limited to 0.3 s.
+Supplementary impact constraints are trajectory-normalized outside the robust
+loss, so increasing track length does not itself classify an anchor as an
+outlier. Adding anchors restarts the coarse joint search before refinement.
+
+Accepted pairwise constraints form a clock graph. Its reference maximizes
+accepted confidence-weighted degree (lexical tie break). A weighted robust global
+solver fixes reference `a=1, b=0`, solves scales and offsets, and rejects constraints
+whose global time inconsistency exceeds 0.2 s. This supports A observing B and B
+observing C without A observing C. The common time is **a recorder's time**, not
+recovered absolute simulator time.
+
+Drift fitting searches configured scale bounds only for sufficiently long
+trajectories (default 15 s); significance, uncertainty, loss improvement and
+search-boundary checks reject unobservable drift. Such fits report
+`OFFSET_ONLY_UNOBSERVABLE_DRIFT`, not a measured zero drift. Confidence and
+Jacobian-based uncertainty are diagnostics, not calibrated probabilities.
+
+`AlignedRunEvidence` creates detached timestamp-converted streams and graphs.
+Final association, event matching and graph merging use this view exclusively.
+Raw independent-clock input is refused at these cross-vehicle boundaries.
+Disconnected participants report `UNRESOLVED_TIME_ALIGNMENT` with null clock
+parameters: their local graphs remain valid and retained, but are excluded from
+the common-time fused graph, with counts and reasons in diagnostics.
+
+`fusion/time_alignment.json` records hypotheses, accepted/rejected constraints,
+range/position/velocity residuals, scale, offset, drift, reference, confidence and
+methods. Fused node/edge evidence retains participant, local and common timestamps
+and clock confidence. Original files are never restamped. The legacy cadence
+helper remains only a diagnostic capped at confidence 0.05 and is not used here.
 
 ---
 
@@ -505,7 +536,10 @@ precision/recall number instead uses the tolerance-correct Hungarian matcher
 
 | Key | Value | Role |
 |---|---|---|
-| `fusion.time_alignment.max_offset_s` | 1.0 | offset beyond this is an error diagnostic |
+| `fusion.time_alignment.max_offset_s` | 1.0 | pairwise offset search half-window |
+| `fusion.time_alignment.max_drift_ppm` | 2000 | pairwise affine search bound, not an assumed physical drift |
+| `fusion.time_alignment.min_drift_span_s` | 15.0 | minimum span for drift fitting |
+| `fusion.time_alignment.min_samples` | 12 | minimum physical evidence samples |
 | `fusion.time_alignment.grid_dt` | 0.05 | common resampling grid |
 | `fusion.track_association.min_overlap_s` | 1.0 | minimum temporal overlap to even consider |
 | `fusion.track_association.max_rmse_m` | 6.0 | trajectory RMSE gate *and* position normaliser |
@@ -526,6 +560,6 @@ Keys read by the code with a default but **absent from `configs/default.yaml`**:
 ambiguous_confidence_factor, min_evidence_parity}`,
 `fusion.event_alignment.{type_families, relational_families,
 counterpart_max_time_gap_s, counterpart_max_range_m,
-counterpart_ambiguity_margin_m}`, `fusion.time_alignment.max_residual_s`,
+counterpart_ambiguity_margin_m}`,
 `fusion.enforce_dag`, `fusion.diagnostics.max_bridged_paths`. See
 `docs/IMPLEMENTATION_CHECKLIST.md`.

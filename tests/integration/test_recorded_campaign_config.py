@@ -10,13 +10,18 @@ up different experiments.
 Each run stores its own fully merged configuration in ``manifest.json``, so the
 claim is checkable rather than a matter of trust. These tests check it.
 
-The one namespace allowed to differ is ``counterfactual.*``: those keys control
+The replay namespace allowed to differ is ``counterfactual.*``: those keys control
 how replays are *executed* (whether the simulator is restarted before each one,
 whether a completed replay is reused) and cannot reach a recording, a local
 reconstruction, a fusion, a model check or a metric. Everything else -- the
 simulation step, the radar profiles, the event thresholds, the fusion gates, the
 checking and evaluation parameters, and every scenario specification -- must be
 byte-identical across every run and identical to the configuration in force now.
+
+The explicit clock-protocol migration also permits newly introduced ``clocks.*``
+and ``fusion.time_alignment.*`` keys absent from legacy recordings. It does not
+excuse changing existing sensor/event/association/scenario parameters: the old
+campaign is the synchronized-clock baseline, not the new clock protocol.
 
 Skipped when the artifacts are not present, so a fresh clone still passes.
 """
@@ -101,7 +106,13 @@ def test_recorded_configs_differ_from_the_current_one_only_in_replay_execution()
             key for key in set(current) | set(recorded)
             if current.get(key) != recorded.get(key)
         )
-        disallowed = [k for k in differing if not k.startswith(ALLOWED_PREFIX)]
+        # The retained campaign predates independent clocks and is a separate
+        # synchronized-clock baseline. Permit only newly introduced protocol
+        # fields that it did not record; existing scientific settings still match.
+        legacy = manifest.get('clock_protocol','synchronized_clock_baseline') == 'synchronized_clock_baseline'
+        def protocol_migration(k):
+            return legacy and k not in recorded and (k.startswith('clocks.') or k.startswith('fusion.time_alignment.'))
+        disallowed = [k for k in differing if not k.startswith(ALLOWED_PREFIX) and not protocol_migration(k)]
         if disallowed:
             offenders["{0}/{1}".format(scenario_id, config_hash[:8])] = disallowed
 

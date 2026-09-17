@@ -53,6 +53,7 @@ from ..common.schemas import (
 from .confidence import fuse_confidence
 from .event_alignment import EventGroup, align_event_records, resolve_subjects
 from .track_association import STATUS_UNRESOLVED, TrackAssignment
+from .aligned_evidence import AlignedRunEvidence, participant_is_aligned, require_common_time
 
 __all__ = ["fuse_graphs"]
 
@@ -89,10 +90,14 @@ def fuse_graphs(
     ``(fused_document, diagnostics)``. The document has ``scope=FUSED`` and
     ``owner=None`` because it belongs to no single participant.
     """
+    require_common_time(run)
+    unresolved = [p for p in local_docs if not participant_is_aligned(run,p)]
     docs: Dict[str, GraphDocument] = {}
     for pid in sorted(local_docs.keys()):
         doc = local_docs[pid]
         assert_non_oracle(doc, "graph fusion input for participant {0!r}".format(pid))
+        if pid in unresolved:
+            continue
         if doc.scope is not Provenance.LOCAL:
             raise ValueError(
                 "fusion expects LOCAL graphs; participant {0!r} supplied scope {1!r}".format(
@@ -104,7 +109,7 @@ def fuse_graphs(
                 "participant {0!r} supplied a {1!r} graph but fusion was asked for "
                 "{2!r}".format(pid, doc.graph_kind, graph_kind)
             )
-        docs[pid] = doc
+        docs[pid] = run.align_graph(pid,doc) if isinstance(run,AlignedRunEvidence) else doc
 
     subject_map = resolve_subjects(assignments)
     groups, align_diagnostics = align_event_records(
@@ -160,6 +165,8 @@ def fuse_graphs(
         graph_kind=graph_kind,
     )
     fused.meta = {
+        "time_domain": "common",
+        "time_reference": run.time_alignment["reference"] if run.time_alignment else "synchronized_baseline",
         "fusion": {
             "n_merged_groups": diagnostics["n_merged_groups"],
             "n_contradictions": len(contradictions),
@@ -171,6 +178,11 @@ def fuse_graphs(
             "enforced_dag": enforce,
         }
     }
+    diagnostics["unresolved_time_participants"] = unresolved
+    diagnostics["unresolved_local_graphs"] = {
+        p: {"n_nodes":len(local_docs[p].nodes),"n_edges":len(local_docs[p].edges),
+            "status":"UNRESOLVED_TIME_ALIGNMENT","retained":"original local graph; excluded from common-time fusion"}
+        for p in unresolved}
     return fused, diagnostics
 
 

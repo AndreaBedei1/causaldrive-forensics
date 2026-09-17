@@ -211,6 +211,7 @@ class RunEvidence:
     run_dir: Path
     manifest: Dict[str, Any] = field(default_factory=dict)
     participants: Dict[str, ParticipantEvidence] = field(default_factory=dict)
+    time_alignment: Optional[Dict[str, Any]] = None
 
     @property
     def participant_ids(self) -> List[str]:
@@ -327,7 +328,11 @@ def load_run(
     lay = RunLayout.from_run_dir(run_dir)
     manifest: Dict[str, Any] = {}
     if lay.manifest.exists():
-        manifest = read_json(lay.manifest)
+        recorded = read_json(lay.manifest)
+        # An inference bundle carries session labels, never simulator timing,
+        # scripted actions, true collision pairs or replay/clock parameters.
+        manifest = {k: recorded[k] for k in ("run_id", "scenario_id", "seed", "variant",
+                    "clock_protocol") if k in recorded}
     participants = {
         pid: load_participant(lay, pid, with_radar=with_radar)
         for pid in lay.participant_ids()

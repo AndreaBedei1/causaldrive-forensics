@@ -11,6 +11,13 @@ reconstructions fused into a single multi-vehicle causal DAG. A separate
 privileged **oracle** layer holds simulator ground truth and is used *only* to
 score the result.
 
+CARLA itself advances on one simulator clock, but each virtual vehicle exports
+evidence through an independently perturbed local recorder clock. The shared
+simulator time is withheld from fusion. Radar-based joint identity/time fitting
+and a global clock graph establish a common recorder timeline before final
+association and graph merging. Unobservable alignment is reported explicitly,
+not replaced by zero offset. See [GRAPH_FUSION.md](docs/GRAPH_FUSION.md).
+
 The question the project is built to answer:
 
 > Can incomplete vehicle-local observations be fused to reconstruct the causal
@@ -295,6 +302,23 @@ artifact file, and `python scripts/verify_evidence.py --artifacts artifacts`
 re-hashes a run directory and reports anything missing or altered. Simulation is synchronous at a fixed 20 Hz with seeded
 randomness throughout; safety-critical timing comes from scripted controllers,
 never from the Traffic Manager.
+
+Recorder clocks use seeded configurable experimental perturbations (default
+offset up to 0.4 s, drift up to 100 ppm, optional jitter disabled). These are not
+measured real-world clock specifications. Existing campaign artifacts remain a
+synchronized-clock baseline; new independent-clock results must be generated
+separately before making claims about the new protocol. Smoke runs can be isolated:
+
+```powershell
+python scripts/run_scenario.py --scenario S01 --seed 0 --artifacts artifacts/independent_clock_smoke
+python scripts/run_clock_ablation.py --run-dir <printed-run-directory>
+```
+
+The evaluation-only A/B/C driver compares oracle-restamped synchronized timing,
+deliberately uncorrected independent timing, and the normal evidence-aligned path
+on the same physical recording. It writes only under `evaluation/` and cannot
+enable an uncorrected normal fusion mode. See
+[EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md).
 
 ## Documentation
 

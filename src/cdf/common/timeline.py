@@ -1,12 +1,8 @@
-"""Time handling: intervals, tolerant matching and cross-participant alignment.
+"""Intervals and matching within an explicitly chosen time domain.
 
-In a synchronous CARLA run every participant is stepped by the same server tick,
-so their timestamps agree to within floating-point noise. We nevertheless model
-clock offset explicitly, because the scientific claim of the fusion layer is that
-it works on *exchanged logs* rather than on a shared simulator clock: the
-alignment stage estimates an offset per participant and reports a diagnostic, and
-a non-zero estimated offset is therefore a detectable anomaly rather than a
-silent assumption.
+The retained nearest-neighbour cadence helper is only a low-confidence grid
+diagnostic. Periodic timestamps cannot identify physical correspondence; fusion
+uses radar evidence in ``cdf.fusion.clock_alignment`` instead.
 """
 
 from __future__ import annotations
@@ -28,7 +24,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class Interval:
-    """A closed time interval ``[start, end]`` in simulation seconds."""
+    """A closed interval in seconds of the caller's chosen clock."""
 
     start: float
     end: float
@@ -105,7 +101,7 @@ def temporal_relation(a: Interval, b: Interval, tol: float = 0.05) -> str:
 
 @dataclass
 class TimeGrid:
-    """A uniform simulation-time grid shared by the fusion layer."""
+    """A uniform grid in a clock domain already established by the caller."""
 
     t0: float
     t1: float
@@ -166,13 +162,11 @@ def estimate_clock_offset(
     reference_id: str,
     max_offset_s: float = 1.0,
 ) -> ClockOffsetEstimate:
-    """Estimate the clock offset between two participants' sample streams.
+    """Diagnose cadence phase, NOT physical clock alignment.
 
-    Method: both participants are stepped by the same synchronous server, so
-    their sample *grids* should coincide. We take the median difference between
-    each of ``other_times`` and its nearest neighbour in ``ref_times``; a
-    synchronous run yields an offset of ~0 with a tiny residual, and anything
-    else is surfaced as a diagnostic.
+    Equal periodic grids can conceal arbitrarily many sample periods of offset.
+    Confidence is capped at 0.05 even with zero residual. Empty results use a
+    numerical zero placeholder with zero confidence, never a resolved clock.
     """
     ref = sorted(float(t) for t in ref_times)
     oth = sorted(float(t) for t in other_times)
@@ -187,7 +181,7 @@ def estimate_clock_offset(
             n_samples=0,
             method="nearest-neighbour-median",
             confidence=0.0,
-            notes=["empty time series; offset assumed 0"],
+            notes=["empty series; unresolved cadence diagnostic"],
         )
 
     import bisect
@@ -235,11 +229,11 @@ def estimate_clock_offset(
         else 0.5 * (residuals[rmid - 1] + residuals[rmid])
     )
 
-    # Confidence decays with residual: a clean synchronous run has residual ~0.
-    confidence = 1.0 / (1.0 + 50.0 * float(residual))
+    notes.append("cadence only; physical correspondence is unidentifiable")
+    confidence = 0.05 / (1.0 + 50.0 * float(residual))
     if abs(offset) > 1e-6:
         notes.append(
-            "non-zero clock offset estimated ({0:.6f}s); expected ~0 in synchronous mode".format(
+            "non-zero cadence phase ({0:.6f}s); not a physical offset estimate".format(
                 offset
             )
         )

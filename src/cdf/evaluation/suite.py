@@ -50,6 +50,7 @@ from .association_metrics import evaluate_association
 from .attribution_metrics import evaluate_attribution, evaluate_local_unknowns
 from .event_metrics import evaluate_events
 from .graph_metrics import evaluate_graphs, fusion_benefit
+from .clocks import load_clock_truth, simulator_evidence, map_event, map_graph, evaluate_clock_alignment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ PathLike = Union[str, Path]
 #: ``None`` with an entry in ``reasons``; none of them is ever a zero-filled
 #: stand-in for an absent input.
 _BLOCKS = (
+    "clock_alignment",
     "events",
     "graphs",
     "fusion_benefit",
@@ -206,6 +208,38 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
     variant = str(manifest.get("variant", "")) or None
     resolved_spec = spec if spec is not None else _scenario_block(cfg, variant)
 
+    # Evaluation alone can convert recorder/common times to oracle physical time.
+    # These detached copies are never written back into inference artifacts.
+    truth = load_clock_truth(layout)
+    alignment_path = layout.fusion_dir / "time_alignment.json"
+    alignment = read_json(alignment_path) if alignment_path.exists() else {}
+    time_scoring_reason = None
+    if manifest.get("clock_protocol") == "independent_local_clocks" and (
+        set(truth) != set(run.participant_ids) or alignment.get("reference") not in truth
+    ):
+        time_scoring_reason = (
+            "independent-clock scoring requires all oracle clock profiles and an "
+            "estimated reference; raw/common times cannot be compared to simulator time"
+        )
+    if truth:
+        run = simulator_evidence(run, truth)
+        for pid, profile in truth.items():
+            a = 1.0 / float(profile["true_scale"])
+            b = -float(profile["true_offset_s"]) * a
+            if pid in local_causal:
+                local_causal[pid] = map_graph(local_causal[pid], a, b)
+            if pid in local_event:
+                local_event[pid] = map_graph(local_event[pid], a, b)
+            if pid in local_events:
+                local_events[pid] = [map_event(e, a, b) for e in local_events[pid]]
+        profile = truth.get(alignment.get("reference"))
+        if profile:
+            a = 1.0 / float(profile["true_scale"])
+            b = -float(profile["true_offset_s"]) * a
+            fused_causal = map_graph(fused_causal, a, b)
+            fused_event = map_graph(fused_event, a, b)
+            fused_events = [map_event(e, a, b) for e in fused_events]
+
     return {
         "manifest": manifest,
         "run": run,
@@ -226,6 +260,9 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
         "scenario_validation": validation,
         "spec": resolved_spec,
         "variant": variant or "",
+        "clock_alignment": evaluate_clock_alignment(alignment, truth),
+        "clock_protocol": manifest.get("clock_protocol", "synchronized_clock_baseline"),
+        "time_scoring_reason": time_scoring_reason,
     }
 
 
@@ -315,6 +352,10 @@ def evaluate_run(
     reasons: Dict[str, str] = {}
     for name in _BLOCKS:
         metrics[name] = None
+    metrics["clock_alignment"] = data["clock_alignment"]
+    metrics["clock_protocol"] = data["clock_protocol"]
+    if metrics["clock_alignment"] is None:
+        reasons["clock_alignment"] = "clock ground truth or estimated reference absent; legacy synchronized baseline is not a clock-estimation measurement"
 
     # --- always-available structural summary (no oracle needed) ----------
     metrics["reconstruction"] = {
@@ -337,7 +378,9 @@ def evaluate_run(
     }
 
     # --- events -----------------------------------------------------------
-    if not data["oracle_events"]:
+    if data["time_scoring_reason"]:
+        reasons["events"] = data["time_scoring_reason"]
+    elif not data["oracle_events"]:
         reasons["events"] = (
             "no oracle event list: neither {0} nor {1} exists".format(
                 layout.oracle_events.name, layout.oracle_causal_graph.name
@@ -355,7 +398,10 @@ def evaluate_run(
         )
 
     # --- graph structure --------------------------------------------------
-    if data["oracle_causal"] is None:
+    if data["time_scoring_reason"]:
+        reasons["graphs"] = data["time_scoring_reason"]
+        reasons["fusion_benefit"] = reasons["graphs"]
+    elif data["oracle_causal"] is None:
         reasons["graphs"] = "no oracle causal graph at {0}".format(
             layout.oracle_causal_graph.as_posix()
         )
@@ -385,7 +431,9 @@ def evaluate_run(
             )
 
     # --- association ------------------------------------------------------
-    if data["assignments"] is None:
+    if data["time_scoring_reason"]:
+        reasons["association"] = data["time_scoring_reason"]
+    elif data["assignments"] is None:
         reasons["association"] = "no association report at {0}".format(
             layout.association_report.as_posix()
         )

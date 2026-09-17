@@ -262,6 +262,15 @@ FORBIDDEN_LOCAL_FIELD_NAMES: Tuple[str, ...] = (
     "causes",
     "scenario_role",
     "is_at_fault",
+    "true_sim_time",
+    "sim_time",
+    "simulation_timestamp",
+    "carla_timestamp",
+    "true_offset_s",
+    "true_scale",
+    "true_drift_ppm",
+    "true_clock_offset",
+    "true_clock_drift",
 )
 
 #: Substrings that flag a leaked privileged quantity regardless of the exact
@@ -279,6 +288,12 @@ FORBIDDEN_LOCAL_FIELD_SUBSTRINGS: Tuple[str, ...] = (
     "lane_id",
     "road_id",
     "junction",
+    "true_clock",
+    "true_offset",
+    "true_drift",
+    "true_scale",
+    "sim_time",
+    "carla_timestamp",
 )
 
 
@@ -355,9 +370,9 @@ class TelemetrySample:
     """
 
     t: float
-    """Simulation timestamp in seconds (CARLA ``elapsed_seconds``)."""
+    """Recorder-local timestamp in seconds; fusion uses an estimated common view."""
     frame: int
-    """CARLA frame number."""
+    """Recorder-local sequence number (legacy baselines used simulator frames)."""
     participant_id: str
 
     x: float
@@ -777,6 +792,7 @@ class RunManifest:
     package_version: str = ""
 
     notes: List[str] = field(default_factory=list)
+    clock_protocol: str = "synchronized_clock_baseline"
     schema_version: str = SCHEMA_VERSIONS["manifest"]
 
 

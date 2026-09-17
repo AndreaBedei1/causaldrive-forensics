@@ -107,6 +107,26 @@ does not support.
 
 ## 2. How the boundary is enforced structurally
 
+### Independent recorder clocks
+
+CARLA physics and scripted controls use one hidden simulator clock. Every local
+stream, trigger and derived local graph instead uses the participant's recorder
+clock; exported frame numbers are unrelated local sequences. True offsets,
+scales and drift exist only in `oracle/clock_ground_truth.json`, read exclusively
+by evaluation. They must not be copied into local/fused evidence or diagnostics.
+
+The inference-facing `load_run` manifest keeps only run identity and protocol,
+not simulator timings, participant scripts, true collision pairs or the resolved
+generation configuration. Inference may use configurable estimator bounds but
+must not import the clock-profile generator or reconstruct profiles from seeds.
+Anti-leakage tests enforce forbidden imports, field names and direct clock-truth
+access. An independent-clock synthetic recording exercises the complete pipeline.
+
+Synchronization uses local own poses and anonymous radar trajectory/range/rate
+evidence, not frame equality or sampling cadence. Final cross-vehicle APIs reject
+unconverted independent clocks. Evaluation's clock-truth inverse transform is a
+detached scoring copy and never an input to normal inference.
+
 ### 2.1 Record schemas with no field for privileged data
 
 `src/cdf/common/schemas.py` is the single definition of the on-disk evidence
@@ -221,7 +241,7 @@ opened", and `fuse_run` likewise.
 `src/cdf/common/schemas.py` names what must never appear in a `local` or `fused`
 artifact.
 
-`FORBIDDEN_LOCAL_FIELD_NAMES` (exact field names, 31 entries):
+`FORBIDDEN_LOCAL_FIELD_NAMES` (exact field names, 40 entries):
 
 ```
 other_actor_id, carla_actor_id_other, other_actor, actor_id, carla_id,
@@ -229,15 +249,18 @@ true_other_x, true_other_y, true_other_z, true_other_yaw, true_other_velocity,
 true_other_speed, lane_id, road_id, junction_id, section_id, waypoint,
 map_waypoint, traffic_light_state, traffic_light_id, signal_state,
 ground_truth_role, gt_role, role, oracle_label, oracle_id, expected_cause,
-expected_culprit, culprit, causes, scenario_role, is_at_fault
+expected_culprit, culprit, causes, scenario_role, is_at_fault,
+true_sim_time, sim_time, simulation_timestamp, carla_timestamp,
+true_offset_s, true_scale, true_drift_ppm, true_clock_offset, true_clock_drift
 ```
 
-`FORBIDDEN_LOCAL_FIELD_SUBSTRINGS` (flag a leak regardless of the exact name, 12
+`FORBIDDEN_LOCAL_FIELD_SUBSTRINGS` (flag a leak regardless of the exact name, 18
 entries):
 
 ```
 ground_truth, groundtruth, privileged, oracle, true_other, gt_other,
-actor_id, traffic_light, waypoint, lane_id, road_id, junction
+actor_id, traffic_light, waypoint, lane_id, road_id, junction,
+true_clock, true_offset, true_drift, true_scale, sim_time, carla_timestamp
 ```
 
 `ORACLE_ONLY_EVENT_TYPES` names the three event types the oracle alone may emit;
@@ -247,11 +270,10 @@ actor_id, traffic_light, waypoint, lane_id, road_id, junction
 
 ## 4. What `tests/test_no_privileged_leakage.py` must check
 
-> **Status: this file does not exist yet.** It is referenced by `Makefile`
-> (`make leakage`), `src/cdf/__init__.py`, `src/cdf/common/schemas.py` and
-> `src/cdf/oracle/logger.py`, which between them specify its contract. The
-> specification below is that contract, restated in one place so the test can be
-> written against it. Nothing in this section describes code that currently runs.
+The implemented suite checks static/runtime imports, privileged API calls,
+schemas, graph scopes and serialized artifacts. It additionally forbids direct
+clock-truth access and importing the clock-profile generator in inference,
+and exercises an independently clocked synthetic three-vehicle pipeline.
 
 **A. Import-graph checks.** No module under `cdf.local`, `cdf.fusion`, `cdf.graph`
 or `cdf.checking` may import `cdf.oracle`, `cdf.simulation` or `carla`, directly
@@ -275,7 +297,8 @@ inspection.
 
 The walk runs over a synthetic run built in-process **and** over every recorded
 run under `artifacts/` -- all 39 of the campaign plus their counterfactual
-replays, marked `slow` because it takes about 95 s. Scanning one run proves the
+replays and the separate independent-clock smoke recordings are included --
+marked `slow` because the recursive scan takes substantial time. Scanning one run proves the
 pipeline *can* produce clean artifacts; scanning the campaign proves it *did*.
 
 **C. Event-type checks.** No event in a `local` or `fused` artifact may have a
