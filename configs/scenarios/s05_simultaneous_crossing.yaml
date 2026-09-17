@@ -1,0 +1,87 @@
+# =============================================================================
+# S05 -- SIMULTANEOUS CROSSING
+# =============================================================================
+# Both vehicles enter the inferred conflict region with insufficient yielding.
+# Neither action alone is "the" cause: the counterfactual layer should find that
+# intervening on EITHER participant prevents the collision, which is the
+# definition of shared causal contribution used in docs/CAUSAL_MODEL.md.
+# =============================================================================
+
+scenario:
+  scenario_id: "S05"
+  name: "simultaneous_crossing"
+  description: >
+    A and B approach the same unsignalised junction from perpendicular
+    directions at comparable speeds and neither yields. Both arrive at the
+    conflict region at essentially the same moment.
+  map: "Town05"
+  default_variant: "crash"
+  max_duration_s: 28.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 40.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 11.0
+      target_speed: 11.0
+      actions:
+        - action_id: "A_no_yield"
+          kind: "set_speed"
+          t_start: 0.5
+          duration: 14.0
+          params: { target_speed: 11.5 }
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 11.0
+      target_speed: 11.0
+      actions:
+        - action_id: "B_no_yield"
+          kind: "set_speed"
+          t_start: 0.5
+          duration: 14.0
+          params: { target_speed: 11.5 }
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "A_no_yield"
+    - "B_no_yield"
+
+  causal_template:
+    - cause: { kind: "action", participant: "A", action_id: "A_no_yield" }
+      effect: { kind: "state", participant: "A", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "action", participant: "B", action_id: "B_no_yield" }
+      effect: { kind: "state", participant: "B", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "conflict_entry" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  variants:
+    crash:
+      notes:
+        - "symmetric: both participants contribute, neither is the sole initiator"
+        - "expected counterfactual result: intervening on either one prevents the collision"

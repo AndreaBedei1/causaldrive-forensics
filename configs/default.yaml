@@ -1,0 +1,298 @@
+# =============================================================================
+# carla-distributed-causal-forensics -- pipeline defaults
+# =============================================================================
+# Every threshold used anywhere in the pipeline lives in this file (or in a
+# sensor/scenario file that overrides it). Nothing is hard-coded in the modules.
+#
+# Values marked "calibrated" were tuned against measured CARLA 0.9.15 radar
+# output rather than copied from any reference implementation; see
+# docs/EXPERIMENT_PROTOCOL.md for the calibration procedure.
+# =============================================================================
+
+schema_version: "1.0.0"
+
+# -----------------------------------------------------------------------------
+# Simulation
+# -----------------------------------------------------------------------------
+simulation:
+  host: "127.0.0.1"
+  port: 2000
+  traffic_manager_port: 8000
+  timeout_s: 60.0
+  synchronous_mode: true
+  fixed_delta_seconds: 0.05        # 20 Hz
+  substepping: true
+  max_substep_delta_time: 0.01
+  max_substeps: 10
+  # The server crashes if asked to load the map it is already running, so the
+  # client switches maps only when the requested one differs (see world.py).
+  map_switch_settle_s: 60.0
+  spawn_z_offset: 0.3              # lift above the waypoint plane before spawning
+  warmup_ticks: 20                 # ticks discarded before recording starts
+  max_duration_s: 45.0             # hard cap per scenario run
+  post_outcome_s: 5.0              # keep simulating this long after the outcome
+
+# -----------------------------------------------------------------------------
+# Sensors (the radar block is replaced by the selected profile)
+# -----------------------------------------------------------------------------
+sensors:
+  profile: "radar_baseline"
+
+# -----------------------------------------------------------------------------
+# Rolling forensic recorder (event-data-recorder analogue)
+# -----------------------------------------------------------------------------
+recorder:
+  pre_event_s: 20.0                # rolling history retained before a trigger
+  post_event_s: 5.0                # continued recording after a trigger
+  sample_rate_hz: 20.0
+  # Hard ceiling on retained samples; the ring buffer is sized from
+  # pre_event_s * sample_rate_hz and never grows beyond it.
+  max_radar_points_per_frame: 400
+  triggers:
+    collision:
+      enabled: true
+      min_impulse: 1.0             # N*s; below this the impact is ignored
+      debounce_s: 0.5              # sustained contact emits one event per frame;
+                                   # collapse them so one crash is one trigger
+    near_miss:
+      enabled: true
+      ttc_s: 0.9                   # local TTC at or below this arms the trigger
+      min_range_m: 12.0            # only when the target is genuinely close
+    emergency_brake:
+      enabled: true
+      brake_cmd: 0.85
+      decel_mps2: 5.5
+
+# -----------------------------------------------------------------------------
+# Radar signal processing -> clusters -> tracks
+# -----------------------------------------------------------------------------
+radar_processing:
+  # --- plausibility filtering (calibrated: CARLA emits ~145 returns/frame, most
+  #     from the road surface, plus a spurious ~100 m/s return on the first frame)
+  filter:
+    min_range_m: 1.5
+    max_range_m: 90.0
+    max_abs_velocity_mps: 60.0     # rejects the first-frame artifact
+    min_altitude_rad: -0.05        # drop road-surface returns below the sensor plane
+    max_altitude_rad: 0.25
+    max_abs_azimuth_rad: 1.10      # slightly inside the nominal 120 deg FOV
+  # --- world-fixed clutter rejection
+  # A stationary point observed from a sensor moving at speed v produces a radial
+  # velocity of exactly -v*cos(azimuth). Returns matching that prediction are the
+  # road surface, kerbs, walls and parked objects. The test uses only own speed
+  # and the sensor's own bearing/range-rate, so it stays local evidence, and it
+  # gates track BIRTH only -- a tracked vehicle that brakes to a halt is kept.
+  stationary:
+    enabled: true
+    tolerance_mps: 1.5
+    reject_new_tracks: true
+    max_stationary_frames: 40    # drop a track sustained only by world-fixed
+                                 # returns for this many consecutive frames (2 s)
+
+  # --- clustering of surviving returns (DBSCAN-like, in body-frame metres)
+  cluster:
+    eps_m: 2.2
+    min_points: 3
+    velocity_weight: 0.6           # range-rate is part of the distance metric
+    max_clusters: 24
+  # --- multi-frame tracking
+  tracking:
+    gate_m: 4.5                    # association gate around the predicted position
+    max_misses: 6                  # frames without a detection before dropping
+    min_hits_to_confirm: 3
+    position_alpha: 0.55           # alpha-beta smoothing on position
+    velocity_alpha: 0.35           # and on the derived velocity
+    max_tracks: 16
+    confidence:
+      hit_gain: 0.16
+      miss_decay: 0.22
+      min_confirm: 0.35
+
+# -----------------------------------------------------------------------------
+# Derived local indicators
+# -----------------------------------------------------------------------------
+indicators:
+  ttc:
+    max_reportable_s: 12.0
+  conflict:
+    prediction_horizon_s: 4.0      # constant-velocity path prediction horizon
+    prediction_step_s: 0.2
+    min_own_speed_mps: 1.5         # below this a predicted path is meaningless
+    min_target_speed_mps: 1.5
+    region_radius_m: 6.0           # radius of the inferred conflict region
+    max_arrival_gap_s: 2.5         # both parties reach the crossing within this
+
+# -----------------------------------------------------------------------------
+# Local event extraction (with hysteresis, to stop threshold chatter)
+# -----------------------------------------------------------------------------
+events:
+  min_separation_s: 0.75           # debounce: same type+subject cannot repeat faster
+  min_duration_s: 0.10
+  hysteresis_ratio: 0.75           # an active event ends at ratio * enter-threshold
+
+  vehicle_started:
+    speed_mps: 0.8
+  acceleration:
+    enter_mps2: 1.5
+  deceleration:
+    enter_mps2: -1.8
+  hard_deceleration:
+    enter_mps2: -4.5
+  brake_onset:
+    brake_cmd: 0.12
+  hard_brake:
+    brake_cmd: 0.65
+  throttle_onset:
+    throttle_cmd: 0.25
+  steer_onset:
+    steer_cmd: 0.14
+  heading_change:
+    total_deg: 12.0
+    window_s: 1.5
+  lane_change_like:
+    lateral_offset_m: 1.8          # lateral displacement w.r.t. own heading
+    window_s: 3.0
+    max_heading_change_deg: 45.0   # larger means a turn, not a lane change
+
+  radar:
+    range_decreasing:
+      min_rate_mps: 1.0
+      min_duration_s: 0.6
+    rapid_closing:
+      min_rate_mps: 6.0
+    low_ttc:
+      ttc_s: 3.0
+    critical_ttc:
+      ttc_s: 1.6
+    lateral_crossing:
+      min_lateral_rate_mps: 1.8
+      max_range_m: 45.0
+    cut_in_like:
+      lateral_closing_mps: 1.2     # target moving toward own path centre-line
+      max_lateral_offset_m: 4.5
+      min_longitudinal_m: 4.0
+      window_s: 2.5
+    target_deceleration:
+      min_decel_mps2: 2.5          # inferred from range-rate history
+    path_conflict:
+      min_confidence: 0.35
+  outcome:
+    post_impact_stop:
+      speed_mps: 0.6
+      within_s: 4.0
+
+# -----------------------------------------------------------------------------
+# Local causal rule engine (see src/cdf/local/causal_rules.py)
+# -----------------------------------------------------------------------------
+causal_rules:
+  default_max_lag_s: 4.0           # cause must precede effect by at most this
+  min_lag_s: -0.15                 # small negative lag tolerated (sampling jitter)
+  min_edge_confidence: 0.25
+  confidence:
+    # Edge confidence = rule_prior * node_confidence_factor * temporal_factor
+    temporal_decay_s: 3.0          # confidence falls off with the cause->effect lag
+    node_weight: 0.6
+
+# -----------------------------------------------------------------------------
+# Post-event fusion
+# -----------------------------------------------------------------------------
+fusion:
+  time_alignment:
+    max_offset_s: 1.0
+    grid_dt: 0.05
+  track_association:
+    min_overlap_s: 1.0             # minimum temporal overlap to even consider
+    max_rmse_m: 6.0                # gate on trajectory RMSE
+    velocity_weight: 0.35
+    heading_weight: 0.15
+    position_weight: 0.50
+    min_confidence: 0.40           # below this the assignment stays UNRESOLVED
+    ambiguity_margin: 0.12         # 2nd-best within this margin => ambiguous
+  event_alignment:
+    time_tolerance_s: 1.0
+    require_same_type: true
+    subject_must_agree: true       # merged events must concern the same participant
+  confidence_fusion:
+    method: "noisy_or"             # documented in docs/GRAPH_FUSION.md
+    cap: 0.99
+  conflict:
+    keep_contradictions: true      # never silently drop a disagreeing claim
+
+# -----------------------------------------------------------------------------
+# Finite-trace model checking
+# -----------------------------------------------------------------------------
+checking:
+  P1_brake_response:
+    ttc_critical_s: 1.6
+    response_window_s: 1.2
+    brake_cmd: 0.25
+  P2_no_throttle_while_closing:
+    closing_rate_mps: 5.0
+    grace_s: 1.0
+    throttle_cmd: 0.20
+  P3_post_collision_stop:
+    window_s: 3.0
+    max_throttle: 0.05
+    stop_speed_mps: 1.0
+  P4_conflict_without_response:
+    lookahead_s: 3.0
+    min_evasive_brake: 0.2
+    min_evasive_steer: 0.15
+
+# -----------------------------------------------------------------------------
+# Counterfactual replays
+# -----------------------------------------------------------------------------
+counterfactual:
+  max_interventions: 8
+  # Restart the simulator before each replay. A counterfactual is a comparison,
+  # and repeated runs on one server session drift enough to change an outcome
+  # class (docs/ENVIRONMENT.md), which would confound the very difference being
+  # measured. Costs ~45 s per replay.
+  restart_server_per_replay: true
+  # Reuse a replay that already completed under this same configuration instead
+  # of simulating it again. Each replay is an independent server session by
+  # construction, so resuming costs nothing in comparability, and an
+  # interrupted campaign does not have to repeat the hour it already spent.
+  # Set to false to force every replay to be recorded afresh.
+  resume: true
+  severity_metric: "relative_impact_speed"
+  contribution:
+    # Normalised causal-contribution score; formula documented in
+    # docs/CAUSAL_MODEL.md. It is explicitly NOT a legal fault percentage.
+    prevention_weight: 1.0
+    severity_weight: 0.5
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  event_match:
+    time_tolerance_s: 1.5
+    require_same_type: true
+  graph_match:
+    # Whether to score structure only over the node skeleton both graphs share.
+    #
+    # This MUST stay false for the headline metrics. With it true, an oracle edge
+    # touching a node the reconstruction never found is excluded instead of
+    # counted as missing -- so a participant that observed one third of a crash
+    # reports perfect edge recall on the third it saw, and the fused graph cannot
+    # score better than it. That makes the fusion-benefit measurement (H1/H2)
+    # identically zero by construction. Counted honestly, a missed causal claim
+    # is a false negative.
+    #
+    # The shared-skeleton convention is still available per call, and
+    # match_edges always reports n_touching_unmatched_* so the two conventions
+    # can be reconciled after the fact.
+    use_matched_nodes_only: false
+  association:
+    count_unresolved_as_miss: true
+
+# -----------------------------------------------------------------------------
+# Output
+# -----------------------------------------------------------------------------
+output:
+  artifacts_root: "artifacts"
+  write_graphml: true
+  write_figures: true
+  write_viewer_bundle: true
+  compress_raw: true

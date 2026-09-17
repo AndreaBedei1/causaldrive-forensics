@@ -1,0 +1,469 @@
+"""Causal attribution from controlled counterfactual replays.
+
+What this module computes, precisely
+------------------------------------
+For every replayed intervention it answers two questions with numbers that came
+out of the simulator:
+
+*Did removing (or weakening) this action prevent the crash?* -- the **but-for**
+test, :func:`but_for`.
+
+*If the crash still happened, was it less severe?* -- the **severity reduction**,
+:func:`severity_reduction`.
+
+Those two are combined into one transparent, normalised
+:func:`contribution_score`, and :func:`classify_attribution` turns the set of
+per-action results into one of three verdicts: a single initiator, a shared
+contribution, or insufficient evidence.
+
+What this module does NOT compute
+---------------------------------
+Fault. Liability. Blame. A but-for result is a statement about *this* physical
+system under *these* interventions: "in the replayed world where B never braked,
+no collision occurred". Legal fault additionally involves duty, foreseeability,
+right of way, and rules of the road, none of which this system models and none of
+which are recoverable from onboard evidence. Every public function here repeats
+that caveat, because a number labelled "contribution" is exactly the kind of
+number that gets quoted out of context.
+
+Two honesty rules are structural rather than advisory:
+
+* Where no replay succeeded, or no replay prevented the collision, the verdict is
+  ``insufficient_evidence``. A culprit is never forced.
+* A counterfactual's ``validation_passed`` being ``False`` is *not* an error
+  here. Scenario validation asserts that the designed encounter happened; a
+  replay that successfully prevents the crash is expected to fail it. Prevention
+  is read from the outcome, never from the validation flag.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Mapping, Optional, Sequence
+
+from ..common.config import Config
+from ..common.schemas import SCHEMA_VERSIONS
+from .counterfactuals import CounterfactualOutcome
+from .interventions import InterventionSpec
+
+LOGGER = logging.getLogger(__name__)
+
+__all__ = [
+    "ATTRIBUTION_CLASSES",
+    "CausalContribution",
+    "but_for",
+    "severity_reduction",
+    "contribution_score",
+    "contribution_of",
+    "classify_attribution",
+    "attribution_report",
+]
+
+#: The only verdicts this module can reach.
+ATTRIBUTION_CLASSES = (
+    "single_initiator",
+    "shared_contribution",
+    "insufficient_evidence",
+)
+
+#: Severity metrics a configuration may select through
+#: ``counterfactual.severity_metric``.
+_SEVERITY_METRICS = ("relative_impact_speed", "impact_speed")
+
+
+@dataclass
+class CausalContribution:
+    """One intervention's measured contribution, with the raw outcome kept.
+
+    The score is never stored without the evidence that produced it: ``outcome``
+    (and, for the baseline, ``factual``) stay attached so a reader can always ask
+    "what actually happened in that replay?".
+    """
+
+    intervention_id: str
+    action_id: str
+    op: str
+    targets_participant: str
+    but_for: int
+    """1 when the factual run collided and this replay did not, else 0."""
+    severity_reduction: Optional[float]
+    """Fractional reduction of the severity metric; ``None`` when undefined."""
+    score: float
+    outcome: CounterfactualOutcome
+    prevented_collision: bool = False
+    notes: List[str] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialisable record, raw outcome included."""
+        return {
+            "intervention_id": self.intervention_id,
+            "action_id": self.action_id,
+            "op": self.op,
+            "targets_participant": self.targets_participant,
+            "but_for": int(self.but_for),
+            "severity_reduction": self.severity_reduction,
+            "contribution_score": round(float(self.score), 6),
+            "prevented_collision": bool(self.prevented_collision),
+            "outcome": self.outcome.to_dict(),
+            "notes": list(self.notes),
+        }
+
+
+# ---------------------------------------------------------------------------
+# Elementary measures
+# ---------------------------------------------------------------------------
+
+
+def but_for(factual: CounterfactualOutcome, cf: CounterfactualOutcome) -> int:
+    """The but-for test: 1 when the intervention prevented the collision.
+
+    Returns 1 exactly when the factual run collided and the counterfactual replay
+    -- identical in every respect except the single intervened action -- did not.
+    Otherwise 0 (both collided, neither collided, or the factual run never
+    collided in the first place, in which case there is nothing to be but-for).
+
+    This is a **causal contribution under the stated intervention semantics**:
+    "had this scripted action not been performed as it was, no collision would
+    have occurred in this replay". It is explicitly **not** a finding of legal
+    fault: duty of care, right of way and foreseeability are outside this model
+    and cannot be derived from onboard evidence.
+    """
+    _require_outcome(factual, "factual")
+    _require_outcome(cf, "counterfactual")
+    return 1 if (factual.collision and not cf.collision) else 0
+
+
+def severity_reduction(
+    factual: CounterfactualOutcome,
+    cf: CounterfactualOutcome,
+    cfg: Optional[Config] = None,
+) -> Optional[float]:
+    """Fractional reduction of impact severity, or ``None`` when undefined.
+
+    The metric is chosen by ``counterfactual.severity_metric`` and defaults to
+    ``relative_impact_speed`` -- the magnitude of the relative velocity at
+    impact, which is the quantity that governs how bad a collision is, rather
+    than how fast either vehicle happened to be travelling.
+
+    Returns ``(factual - counterfactual) / factual``: positive when the replay
+    was less severe, negative when it was worse, ``None`` when either run has no
+    measured value (no impact, or no persisted oracle trace) or when the factual
+    severity is zero and the ratio would be meaningless. ``None`` means *not
+    measured* and must not be read as zero.
+    """
+    _require_outcome(factual, "factual")
+    _require_outcome(cf, "counterfactual")
+
+    metric = (
+        str(cfg.get("counterfactual.severity_metric", _SEVERITY_METRICS[0]))
+        if cfg
+        else _SEVERITY_METRICS[0]
+    )
+    if metric not in _SEVERITY_METRICS:
+        raise ValueError(
+            "counterfactual.severity_metric is {0!r}; expected one of {1}".format(
+                metric, list(_SEVERITY_METRICS)
+            )
+        )
+
+    base = getattr(factual, metric)
+    replayed = getattr(cf, metric)
+    if base is None or replayed is None:
+        return None
+    base = float(base)
+    if base <= 0.0:
+        return None
+    return (base - float(replayed)) / base
+
+
+def contribution_score(
+    factual: CounterfactualOutcome,
+    cf: CounterfactualOutcome,
+    cfg: Optional[Config] = None,
+) -> float:
+    """Normalised causal-contribution score in ``[0, 1]``.
+
+    The formula, in full::
+
+        score = (w_prevent * but_for + w_severity * clamp(severity_reduction, 0, 1))
+                / (w_prevent + w_severity)
+
+    with ``w_prevent = counterfactual.contribution.prevention_weight`` (default
+    1.0) and ``w_severity = counterfactual.contribution.severity_weight``
+    (default 0.5). Prevention therefore dominates, and a replay that only made
+    the impact softer still scores above one that changed nothing.
+
+    When the replay prevented the collision outright the severity term is 1.0 by
+    definition (there was no impact left to be severe), even though
+    :func:`severity_reduction` returns ``None`` because the counterfactual has no
+    impact speed to compare. When severity is undefined for any other reason the
+    term is 0.0: an unmeasured reduction is not evidence of a reduction.
+
+    **This is not a fault percentage.** It is a monotone summary of two
+    measurements from controlled replays, on an arbitrary but fixed scale, and it
+    is meaningless outside the intervention set that produced it. The raw
+    outcomes are kept alongside it in :class:`CausalContribution` precisely so
+    that the score never has to be trusted on its own.
+    """
+    prevention_weight = (
+        float(cfg.get("counterfactual.contribution.prevention_weight", 1.0)) if cfg else 1.0
+    )
+    severity_weight = (
+        float(cfg.get("counterfactual.contribution.severity_weight", 0.5)) if cfg else 0.5
+    )
+    total = prevention_weight + severity_weight
+    if total <= 0.0:
+        raise ValueError(
+            "counterfactual.contribution weights sum to {0}; they must be "
+            "positive for the score to be normalisable".format(total)
+        )
+
+    prevented = but_for(factual, cf)
+    reduction = severity_reduction(factual, cf, cfg)
+    if reduction is None:
+        # Prevention is the strongest possible severity reduction; anything else
+        # unmeasured contributes nothing.
+        reduction = 1.0 if prevented else 0.0
+
+    severity_term = min(1.0, max(0.0, float(reduction)))
+    return (prevention_weight * prevented + severity_weight * severity_term) / total
+
+
+def contribution_of(
+    factual: CounterfactualOutcome,
+    cf: CounterfactualOutcome,
+    cfg: Optional[Config] = None,
+) -> CausalContribution:
+    """Package one replay into the record :func:`classify_attribution` consumes."""
+    notes: List[str] = []
+    if not factual.collision:
+        notes.append(
+            "the factual run did not collide, so the but-for test is vacuous here"
+        )
+    if cf.collision and cf.relative_impact_speed is None:
+        notes.append("replay collided but its impact severity was not measurable")
+    if not cf.collision and cf.near_miss:
+        notes.append(
+            "collision prevented, but the replay still produced a near miss"
+        )
+    return CausalContribution(
+        intervention_id=cf.intervention_id,
+        action_id=cf.action_id,
+        op=cf.op,
+        targets_participant=cf.targets_participant,
+        but_for=but_for(factual, cf),
+        severity_reduction=severity_reduction(factual, cf, cfg),
+        score=contribution_score(factual, cf, cfg),
+        outcome=cf,
+        prevented_collision=bool(factual.collision and not cf.collision),
+        notes=notes,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Verdict
+# ---------------------------------------------------------------------------
+
+
+def classify_attribution(
+    results: Sequence[CausalContribution], cfg: Optional[Config] = None
+) -> Dict[str, Any]:
+    """Turn per-replay contributions into an attribution verdict.
+
+    Results are aggregated **per scripted action**, not per intervention: an
+    action is replayed several ways (disabled, weakened, re-timed) and each way
+    is a separate test of the same hypothesis. An action counts as *necessary*
+    when at least one of its replays prevented the collision; its score is the
+    strongest one it achieved.
+
+    The verdict follows mechanically from how many actions are necessary:
+
+    * exactly one  -> ``single_initiator``, and that action is the primary
+      initiator;
+    * two or more  -> ``shared_contribution`` (the S05 shape: intervening on
+      *either* participant prevents the crash, so neither is "the" cause), with
+      no primary initiator, because naming one would be a choice the evidence
+      does not support;
+    * none, or no replay at all -> ``insufficient_evidence``.
+
+    The last case is a real result, not a failure to try. It is what an honest
+    system returns when the crash survived every intervention it was able to
+    make, and it must never be rewritten into a culprit.
+    """
+    for item in results:
+        if not isinstance(item, CausalContribution):
+            raise TypeError(
+                "classify_attribution expects CausalContribution records (build "
+                "them with contribution_of), got {0!r}".format(type(item))
+            )
+
+    min_score = (
+        float(cfg.get("counterfactual.contribution.min_reportable_score", 0.0))
+        if cfg
+        else 0.0
+    )
+
+    scores: Dict[str, float] = {}
+    necessary: List[str] = []
+    per_action: Dict[str, List[CausalContribution]] = {}
+    for item in results:
+        per_action.setdefault(item.action_id, []).append(item)
+
+    for action_id in sorted(per_action):
+        items = per_action[action_id]
+        scores[action_id] = round(max(float(i.score) for i in items), 6)
+        if any(int(i.but_for) == 1 for i in items):
+            necessary.append(action_id)
+
+    contributing = [
+        action_id
+        for action_id in sorted(scores)
+        if action_id not in necessary and scores[action_id] > min_score
+    ]
+
+    if not results:
+        attribution_class = "insufficient_evidence"
+        primary: Optional[str] = None
+        rationale = (
+            "no counterfactual replay produced a usable outcome, so no causal "
+            "contribution could be measured"
+        )
+    elif len(necessary) == 1:
+        attribution_class = "single_initiator"
+        primary = necessary[0]
+        rationale = (
+            "removing or weakening {0} prevented the collision in replay, and no "
+            "other replayed action did; the collision is attributed to that "
+            "action under the stated intervention semantics (not a finding of "
+            "legal fault)".format(primary)
+        )
+    elif len(necessary) >= 2:
+        attribution_class = "shared_contribution"
+        primary = None
+        rationale = (
+            "intervening on any of {0} independently prevented the collision, so "
+            "no single action is necessary on its own; the contribution is "
+            "shared and no primary initiator is named".format(", ".join(necessary))
+        )
+    else:
+        attribution_class = "insufficient_evidence"
+        primary = None
+        rationale = (
+            "the collision still occurred in all {0} replay(s); none of the "
+            "interventions available was sufficient to prevent it, so no "
+            "initiator is attributed".format(len(results))
+        )
+
+    return {
+        "necessary_actions": list(necessary),
+        "contributing_actions": contributing,
+        "attribution_class": attribution_class,
+        "primary_initiator": primary,
+        "scores": scores,
+        "rationale": rationale,
+        "n_replays": len(results),
+        "disclaimer": (
+            "Causal contribution under controlled replay semantics. NOT legal "
+            "fault and NOT a fault percentage."
+        ),
+    }
+
+
+def attribution_report(
+    factual: Optional[CounterfactualOutcome],
+    counterfactuals: Sequence[CounterfactualOutcome],
+    cfg: Optional[Config] = None,
+    interventions: Optional[Sequence[InterventionSpec]] = None,
+    failures: Optional[Sequence[Mapping[str, Any]]] = None,
+    scenario_id: str = "",
+    variant: str = "",
+    seed: int = 0,
+) -> Dict[str, Any]:
+    """The full causal-contribution document written to ``causal_contribution.json``.
+
+    Carries the factual outcome, every replay's raw outcome and score, the
+    verdict, and -- importantly -- what could *not* be replayed: a replay that
+    crashed is listed with its error so that a reader can tell a hypothesis that
+    was tested and rejected from one that was never tested at all.
+    """
+    failures = list(failures or [])
+    contributions: List[CausalContribution] = []
+
+    if factual is None:
+        classification = {
+            "necessary_actions": [],
+            "contributing_actions": [],
+            "attribution_class": "insufficient_evidence",
+            "primary_initiator": None,
+            "scores": {},
+            "rationale": (
+                "the factual outcome is unknown, so no counterfactual comparison "
+                "is possible"
+            ),
+            "n_replays": len(counterfactuals),
+            "disclaimer": (
+                "Causal contribution under controlled replay semantics. NOT legal "
+                "fault and NOT a fault percentage."
+            ),
+        }
+    else:
+        contributions = [contribution_of(factual, cf, cfg) for cf in counterfactuals]
+        classification = classify_attribution(contributions, cfg)
+
+    notes: List[str] = []
+    if failures:
+        notes.append(
+            "{0} replay(s) failed and were not evaluated: {1}".format(
+                len(failures),
+                ", ".join(str(f.get("intervention_id", "?")) for f in failures),
+            )
+        )
+    if factual is not None and not factual.collision:
+        notes.append(
+            "the factual run did not collide; but-for prevention is undefined for "
+            "this run and every score reflects severity only"
+        )
+
+    return {
+        "schema_version": SCHEMA_VERSIONS["counterfactual"],
+        "scenario_id": scenario_id,
+        "variant": variant,
+        "seed": int(seed),
+        "severity_metric": (
+            str(cfg.get("counterfactual.severity_metric", _SEVERITY_METRICS[0]))
+            if cfg
+            else _SEVERITY_METRICS[0]
+        ),
+        "weights": {
+            "prevention": (
+                float(cfg.get("counterfactual.contribution.prevention_weight", 1.0))
+                if cfg
+                else 1.0
+            ),
+            "severity": (
+                float(cfg.get("counterfactual.contribution.severity_weight", 0.5))
+                if cfg
+                else 0.5
+            ),
+        },
+        "factual": factual.to_dict() if factual is not None else None,
+        "interventions": [iv.to_dict() for iv in (interventions or [])],
+        "contributions": [c.to_dict() for c in contributions],
+        "classification": classification,
+        "n_requested": len(interventions or []),
+        "n_completed": len(counterfactuals),
+        "n_failed": len(failures),
+        "failures": [dict(f) for f in failures],
+        "notes": notes,
+    }
+
+
+def _require_outcome(value: Any, role: str) -> None:
+    """Fail loudly rather than silently comparing the wrong kind of object."""
+    if not isinstance(value, CounterfactualOutcome):
+        raise TypeError(
+            "the {0} argument must be a CounterfactualOutcome, got {1!r}".format(
+                role, type(value)
+            )
+        )

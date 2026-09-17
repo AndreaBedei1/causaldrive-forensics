@@ -1,0 +1,77 @@
+# =============================================================================
+# S04 -- CROSSING + BRAKING  (NEGATIVE CONTROL)
+# =============================================================================
+# Deliberately the same geometry family as S03, with one vehicle yielding. The
+# point is to test that the system does NOT infer collision causality from path
+# geometry alone: the predicted paths still intersect, but the outcome differs
+# because the actions differ.
+# =============================================================================
+
+scenario:
+  scenario_id: "S04"
+  name: "crossing_braking"
+  description: >
+    Identical crossing geometry to S03, but B brakes and yields on the approach.
+    The paths still conflict; the outcome does not.
+  map: "Town05"
+  default_variant: "yield"
+  max_duration_s: 28.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions:
+        - action_id: "B_yield_brake"
+          kind: "brake"
+          t_start: 1.4
+          duration: 6.0
+          params: { intensity: 0.9 }
+        - action_id: "B_resume"
+          kind: "set_speed"
+          t_start: 9.0
+          duration: 14.0
+          params: { target_speed: 7.0 }
+
+  expected_outcome: "no_event"
+  expected_collision_pairs: []
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 45.0
+
+  intervention_candidates:
+    - "B_yield_brake"
+
+  causal_template:
+    - cause: { kind: "action", participant: "B", action_id: "B_yield_brake" }
+      effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+      edge: "PREVENTS"
+      rationale: "yielding is what keeps the geometric conflict from becoming a collision"
+
+  variants:
+    yield:
+      notes:
+        - "negative control: same crossing geometry as S03, but B yields"
+        - "a system that infers causality from geometry alone would wrongly flag a conflict outcome here"

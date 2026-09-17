@@ -1,0 +1,494 @@
+"""Enumeration of the controlled interventions worth replaying.
+
+An intervention is a single, named modification of the scripted timeline:
+*disable this action*, *start it 1.5 s later*, *brake at 40 % of the commanded
+intensity*. Everything else about the run -- map, spawn state, seed, controller
+gains, sensor configuration -- is held identical, which is what makes the replay
+a controlled counterfactual rather than a different experiment. The modification
+is applied by :func:`cdf.simulation.runner._apply_intervention` before the world
+is created, so it changes behaviour from the first tick and never has to be
+injected mid-run.
+
+Which actions are worth replaying comes from two independent sources:
+
+*The scenario author.* ``intervention_candidates`` in the scenario YAML lists the
+actions the experiment was designed around. These are always enumerated, even
+when the reconstruction never noticed them -- otherwise a reconstruction that
+missed a cause could quietly remove that cause from the experiment.
+
+*The reconstruction itself.* When a fused causal DAG is supplied,
+:meth:`cdf.graph.analysis.GraphAnalyzer.candidate_intervention_nodes` ranks the
+nodes whose removal destroys causal explanations of the outcome. Those nodes are
+observed *events*, not scripted actions, so they are mapped back onto actions by
+participant and time proximity: an event can only have been produced by an action
+of the same participant that started shortly before it. This is what lets the
+counterfactual layer follow evidence the scenario author did not anticipate.
+
+The two rankings are merged, so an action that is both declared and graph-ranked
+outranks one that is only declared, and the list is capped at
+``counterfactual.max_interventions``. Dropped candidates are logged, never
+silently discarded: a replay budget that hid a candidate would make an
+attribution result unreproducible.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
+
+from ..common.config import Config
+from ..common.schemas import GraphDocument
+from ..graph.analysis import GraphAnalyzer
+from ..simulation.controllers import ScriptedAction
+from ..simulation.scenario_base import ParticipantSpec, ScenarioSpec
+
+LOGGER = logging.getLogger(__name__)
+
+__all__ = [
+    "RUNNER_OPS",
+    "InterventionSpec",
+    "enumerate_interventions",
+    "interventions_for_action",
+]
+
+#: Operations understood by :func:`cdf.simulation.runner._apply_intervention`.
+#: ``disable`` removes the action, ``delay``/``advance`` shift its start time by
+#: ``seconds``, ``scale`` multiplies ``param`` by ``factor`` and ``set`` assigns
+#: ``param`` the given ``value``.
+RUNNER_OPS: Tuple[str, ...] = ("disable", "delay", "advance", "scale", "set")
+
+#: Required extra keys per operation, enforced at construction so that a broken
+#: intervention fails here rather than after a two-minute simulator replay.
+_REQUIRED_PARAMS: Dict[str, Tuple[str, ...]] = {
+    "disable": (),
+    "delay": ("seconds",),
+    "advance": ("seconds",),
+    "scale": ("param", "factor"),
+    "set": ("param", "value"),
+}
+
+#: Replay order within one action: the strongest, most interpretable
+#: intervention first, so that a truncated budget keeps the informative ones.
+_OP_RANK: Dict[str, int] = {"disable": 0, "scale": 1, "advance": 2, "delay": 3, "set": 4}
+
+
+@dataclass
+class InterventionSpec:
+    """One controlled modification of one scripted action."""
+
+    intervention_id: str
+    """Stable, filesystem-safe identity; also the replay's artifact directory."""
+    action_id: str
+    op: str
+    params: Dict[str, Any] = field(default_factory=dict)
+    description: str = ""
+    targets_participant: str = ""
+
+    def __post_init__(self) -> None:
+        if self.op not in RUNNER_OPS:
+            raise ValueError(
+                "unknown intervention op {0!r} for action {1!r}; the runner "
+                "understands {2}".format(self.op, self.action_id, list(RUNNER_OPS))
+            )
+        missing = [k for k in _REQUIRED_PARAMS[self.op] if k not in self.params]
+        if missing:
+            raise ValueError(
+                "intervention {0!r} (op={1}) is missing required parameter(s) "
+                "{2}".format(self.intervention_id, self.op, missing)
+            )
+        if not self.action_id:
+            raise ValueError(
+                "intervention {0!r} does not name an action to act on".format(
+                    self.intervention_id
+                )
+            )
+
+    def as_runner_dict(self) -> Dict[str, Any]:
+        """Exactly the mapping :func:`run_scenario` expects as ``intervention``.
+
+        Only the keys the runner reads are emitted; ranking and bookkeeping stay
+        on this object, so nothing that could perturb the replay travels with it.
+        """
+        payload: Dict[str, Any] = {
+            "intervention_id": self.intervention_id,
+            "action_id": self.action_id,
+            "op": self.op,
+        }
+        payload.update(self.params)
+        return payload
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialisable record for the counterfactual manifest."""
+        return {
+            "intervention_id": self.intervention_id,
+            "action_id": self.action_id,
+            "op": self.op,
+            "params": dict(self.params),
+            "description": self.description,
+            "targets_participant": self.targets_participant,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Enumeration
+# ---------------------------------------------------------------------------
+
+
+def enumerate_interventions(
+    spec: ScenarioSpec,
+    fused_causal: Optional[GraphDocument] = None,
+    cfg: Optional[Config] = None,
+) -> List[InterventionSpec]:
+    """Build the ranked list of interventions to replay for one scenario.
+
+    Candidates come from the scenario's own ``intervention_candidates`` and, when
+    ``fused_causal`` is given, from the reconstruction's ranked cut nodes mapped
+    back onto scripted actions. The result is ordered best-first and truncated to
+    ``counterfactual.max_interventions``; whatever is dropped is logged.
+    """
+    actions = _actions_by_id(spec)
+    if not actions:
+        LOGGER.warning(
+            "scenario %s declares no scripted actions, so there is nothing to "
+            "intervene on",
+            spec.scenario_id,
+        )
+        return []
+
+    declared_rank = _declared_ranks(spec, actions)
+    graph_rank = _graph_ranks(spec, actions, fused_causal, cfg)
+
+    ranked: List[Tuple[Tuple[int, int, int, str], str]] = []
+    for action_id in sorted(set(list(declared_rank.keys()) + list(graph_rank.keys()))):
+        cut_rank, paths_cut = graph_rank.get(action_id, (2, 0))
+        declared = declared_rank.get(action_id, len(declared_rank) + 1)
+        ranked.append(((cut_rank, -paths_cut, declared, action_id), action_id))
+    ranked.sort()
+
+    per_action: List[List[InterventionSpec]] = []
+    for _key, action_id in ranked:
+        action, participant = actions[action_id]
+        reason = _rank_reason(action_id, declared_rank, graph_rank)
+        per_action.append(
+            interventions_for_action(action, participant.participant_id, cfg, reason)
+        )
+
+    # Allocate the budget BREADTH-FIRST: every candidate action gets its
+    # strongest intervention (removing it entirely) before any action gets a
+    # second, weaker one.
+    #
+    # Spending the budget depth-first instead silently answers the wrong
+    # question. On the S06 chain collision it filled the budget with three
+    # variations of the shared leading brake and dropped the one action that
+    # distinguishes the two variants -- whether the middle vehicle reacted -- so
+    # the two scenarios would have produced the same attribution for a reason
+    # that had nothing to do with their causal structure.
+    out: List[InterventionSpec] = []
+    depth = 0
+    while any(len(group) > depth for group in per_action):
+        for group in per_action:
+            if len(group) > depth:
+                out.append(group[depth])
+        depth += 1
+
+    limit = int(cfg.get("counterfactual.max_interventions", 8)) if cfg else 8
+    if limit > 0 and len(out) > limit:
+        dropped = out[limit:]
+        LOGGER.warning(
+            "counterfactual budget of %d replay(s) reached for scenario %s: "
+            "dropping %d lower-ranked intervention(s): %s",
+            limit,
+            spec.scenario_id,
+            len(dropped),
+            ", ".join(iv.intervention_id for iv in dropped),
+        )
+        out = out[:limit]
+    return out
+
+
+def interventions_for_action(
+    action: ScriptedAction,
+    participant_id: str,
+    cfg: Optional[Config] = None,
+    reason: str = "",
+) -> List[InterventionSpec]:
+    """The meaningful interventions for one scripted action, strongest first.
+
+    The operations offered depend on what the action *is*: removing a brake and
+    weakening it are different questions, and neither makes sense for an action
+    with no intensity parameter. An operation that would provably do nothing (for
+    example advancing an action that already starts at t=0) is skipped and
+    logged, so the replay budget is never spent on a no-op.
+    """
+    kind = str(action.kind)
+    ops: List[Tuple[str, Dict[str, Any]]] = [("disable", {})]
+
+    if kind == "brake":
+        factor = float(cfg.get("counterfactual.ops.brake.scale_factor", 0.4)) if cfg else 0.4
+        advance_s = float(cfg.get("counterfactual.ops.brake.advance_s", 1.0)) if cfg else 1.0
+        ops.append(("scale", {"param": "intensity", "factor": factor}))
+        ops.append(("advance", {"seconds": advance_s}))
+    elif kind == "set_speed":
+        factor = (
+            float(cfg.get("counterfactual.ops.set_speed.scale_factor", 0.8)) if cfg else 0.8
+        )
+        ops.append(("scale", {"param": "target_speed", "factor": factor}))
+    elif kind == "lane_shift":
+        delay_s = float(cfg.get("counterfactual.ops.lane_shift.delay_s", 1.5)) if cfg else 1.5
+        advance_s = (
+            float(cfg.get("counterfactual.ops.lane_shift.advance_s", 1.5)) if cfg else 1.5
+        )
+        ops.append(("delay", {"seconds": delay_s}))
+        ops.append(("advance", {"seconds": advance_s}))
+    else:
+        LOGGER.info(
+            "action %s has kind %r, for which only 'disable' is meaningful",
+            action.action_id,
+            kind,
+        )
+
+    out: List[InterventionSpec] = []
+    for op, params in sorted(ops, key=lambda item: _OP_RANK[item[0]]):
+        skip = _skip_reason(action, op, params)
+        if skip:
+            LOGGER.info(
+                "skipping %s on action %s: %s", op, action.action_id, skip
+            )
+            continue
+        out.append(
+            InterventionSpec(
+                intervention_id=_intervention_id(action.action_id, op, params),
+                action_id=action.action_id,
+                op=op,
+                params=dict(params),
+                description=_describe(action, participant_id, op, params, reason),
+                targets_participant=participant_id,
+            )
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Candidate ranking
+# ---------------------------------------------------------------------------
+
+
+def _actions_by_id(spec: ScenarioSpec) -> Dict[str, Tuple[ScriptedAction, ParticipantSpec]]:
+    """Every scripted action of the scenario, indexed by its id."""
+    out: Dict[str, Tuple[ScriptedAction, ParticipantSpec]] = {}
+    for participant in spec.participants:
+        for action in participant.actions:
+            out[action.action_id] = (action, participant)
+    return out
+
+
+def _declared_ranks(
+    spec: ScenarioSpec, actions: Dict[str, Tuple[ScriptedAction, ParticipantSpec]]
+) -> Dict[str, int]:
+    """Position of each author-declared candidate, in declaration order."""
+    ranks: Dict[str, int] = {}
+    for index, action_id in enumerate(spec.intervention_candidates):
+        if action_id not in actions:
+            # ScenarioSpec.validate_static already rejects this; reaching here
+            # means the spec was built by hand, so say so rather than crash.
+            raise KeyError(
+                "scenario {0} lists intervention candidate {1!r}, which is not a "
+                "declared scripted action ({2})".format(
+                    spec.scenario_id, action_id, sorted(actions)
+                )
+            )
+        ranks[action_id] = index
+    return ranks
+
+
+def _graph_ranks(
+    spec: ScenarioSpec,
+    actions: Dict[str, Tuple[ScriptedAction, ParticipantSpec]],
+    fused_causal: Optional[GraphDocument],
+    cfg: Optional[Config],
+) -> Dict[str, Tuple[int, int]]:
+    """Map ranked cut nodes of a causal DAG onto scripted actions.
+
+    Returns ``{action_id: (cut_rank, paths_cut)}`` where ``cut_rank`` is 0 for a
+    node whose removal leaves an outcome unexplained and 1 for one that merely
+    destroys some explanations. An action keeps the best evidence found for it.
+    """
+    if fused_causal is None:
+        return {}
+
+    max_lag_s = float(cfg.get("counterfactual.action_match.max_lag_s", 4.0)) if cfg else 4.0
+    pre_s = float(cfg.get("counterfactual.action_match.max_lead_s", 0.5)) if cfg else 0.5
+
+    analyzer = GraphAnalyzer(fused_causal, cfg)
+    ranks: Dict[str, Tuple[int, int]] = {}
+    for candidate in analyzer.candidate_intervention_nodes():
+        action_id = _match_action(
+            candidate.get("participant_id"),
+            float(candidate.get("t_peak", 0.0)),
+            actions,
+            max_lag_s=max_lag_s,
+            pre_s=pre_s,
+        )
+        if action_id is None:
+            LOGGER.debug(
+                "causal node %s (participant %s, t=%.2f) has no scripted action "
+                "close enough to intervene on",
+                candidate.get("event_id"),
+                candidate.get("participant_id"),
+                float(candidate.get("t_peak", 0.0)),
+            )
+            continue
+        cut_rank = 0 if candidate.get("disconnects_outcome") else 1
+        paths_cut = int(candidate.get("paths_cut", 0))
+        best = ranks.get(action_id)
+        if best is None or (cut_rank, -paths_cut) < (best[0], -best[1]):
+            ranks[action_id] = (cut_rank, paths_cut)
+    if ranks:
+        LOGGER.info(
+            "causal graph nominated %d scripted action(s) for replay: %s",
+            len(ranks),
+            sorted(ranks),
+        )
+    return ranks
+
+
+def _match_action(
+    participant_id: Optional[str],
+    t_peak: float,
+    actions: Dict[str, Tuple[ScriptedAction, ParticipantSpec]],
+    max_lag_s: float,
+    pre_s: float,
+) -> Optional[str]:
+    """The scripted action most likely to have produced an observed event.
+
+    An action can only explain an event of the *same participant* that peaks
+    after the action started (allowing ``pre_s`` of sampling and reaction jitter)
+    and within ``max_lag_s`` of it. Among those the closest in time wins; ties
+    break on the action id so the mapping is deterministic.
+    """
+    if not participant_id:
+        return None
+    best: Optional[Tuple[float, str]] = None
+    for action_id, (action, participant) in actions.items():
+        if participant.participant_id != participant_id:
+            continue
+        lag = float(t_peak) - float(action.t_start)
+        if lag < -abs(pre_s) or lag > abs(max_lag_s):
+            continue
+        key = (abs(lag), action_id)
+        if best is None or key < best:
+            best = key
+    return best[1] if best is not None else None
+
+
+def _rank_reason(
+    action_id: str,
+    declared_rank: Dict[str, int],
+    graph_rank: Dict[str, Tuple[int, int]],
+) -> str:
+    """Why this action is being replayed, recorded in the manifest."""
+    parts: List[str] = []
+    if action_id in declared_rank:
+        parts.append("declared by the scenario")
+    if action_id in graph_rank:
+        cut_rank, paths_cut = graph_rank[action_id]
+        parts.append(
+            "nominated by the fused causal graph ({0}, cuts {1} causal path(s))".format(
+                "disconnects the outcome" if cut_rank == 0 else "destroys explanations",
+                paths_cut,
+            )
+        )
+    return "; ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Naming and description
+# ---------------------------------------------------------------------------
+
+
+def _skip_reason(
+    action: ScriptedAction, op: str, params: Dict[str, Any]
+) -> Optional[str]:
+    """Why an operation would be a no-op on this action, or ``None``."""
+    if op == "advance" and float(action.t_start) <= 0.0:
+        return "the action already starts at t=0, so it cannot be advanced"
+    if op in ("scale", "set"):
+        key = str(params.get("param"))
+        if key not in (action.params or {}):
+            return "the action has no parameter {0!r} (it has {1})".format(
+                key, sorted(action.params or {})
+            )
+        if op == "scale" and float(params.get("factor", 1.0)) == 1.0:
+            return "a scale factor of 1.0 changes nothing"
+        if op == "scale" and float(action.params[key]) == 0.0:
+            return "parameter {0!r} is already 0.0, so scaling it changes nothing".format(key)
+    if op in ("delay", "advance") and float(params.get("seconds", 0.0)) == 0.0:
+        return "a shift of 0.0 s changes nothing"
+    return None
+
+
+def _number_slug(value: float) -> str:
+    """``1.5`` -> ``"1_5"``: readable and safe as a directory name."""
+    text = "{0:g}".format(float(value))
+    return text.replace("-", "neg").replace(".", "_")
+
+
+def _intervention_id(action_id: str, op: str, params: Dict[str, Any]) -> str:
+    """Stable identity, used as the replay directory name and as a report key."""
+    if op == "disable":
+        return "{0}__disable".format(action_id)
+    if op in ("delay", "advance"):
+        return "{0}__{1}_{2}s".format(action_id, op, _number_slug(params["seconds"]))
+    if op == "scale":
+        return "{0}__scale_{1}_{2}".format(
+            action_id, params["param"], _number_slug(params["factor"])
+        )
+    return "{0}__set_{1}_{2}".format(
+        action_id, params["param"], _number_slug(params["value"])
+    )
+
+
+def _describe(
+    action: ScriptedAction,
+    participant_id: str,
+    op: str,
+    params: Dict[str, Any],
+    reason: str,
+) -> str:
+    """One sentence stating exactly what the replay changes, and why."""
+    if op == "disable":
+        what = "{0} never performs {1}".format(participant_id, action.action_id)
+    elif op == "delay":
+        what = "{0} starts {1} {2:g} s later (t={3:g}s -> t={4:g}s)".format(
+            participant_id,
+            action.action_id,
+            float(params["seconds"]),
+            float(action.t_start),
+            float(action.t_start) + float(params["seconds"]),
+        )
+    elif op == "advance":
+        what = "{0} starts {1} {2:g} s earlier (t={3:g}s -> t={4:g}s)".format(
+            participant_id,
+            action.action_id,
+            float(params["seconds"]),
+            float(action.t_start),
+            max(0.0, float(action.t_start) - float(params["seconds"])),
+        )
+    elif op == "scale":
+        key = str(params["param"])
+        current = float((action.params or {}).get(key, 0.0))
+        what = "{0} performs {1} with {2} scaled to {3:g} (from {4:g})".format(
+            participant_id,
+            action.action_id,
+            key,
+            current * float(params["factor"]),
+            current,
+        )
+    else:
+        what = "{0} performs {1} with {2} set to {3:g}".format(
+            participant_id, action.action_id, params["param"], float(params["value"])
+        )
+    return "{0}; everything else in the run is held identical{1}".format(
+        what, " [{0}]".format(reason) if reason else ""
+    )

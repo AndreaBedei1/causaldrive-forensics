@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CDF forensic viewer</title>
+<!-- Local only: one stylesheet, one script, one fetch of run_data.json from
+     this same directory. There is deliberately no CDN, no web font and no
+     network request of any kind, so the page works from an offline evidence
+     copy. -->
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-perspective="">
+
+<!-- Perspective badge. Filled by app.js; it is the first thing on the page
+     because which epistemic layer you are looking at is the first thing a
+     reader has to know. -->
+<div id="banner">loading run data</div>
+
+<header>
+  <div>
+    <div id="run-title">&nbsp;</div>
+    <div id="run-meta"></div>
+  </div>
+  <nav id="perspectives" aria-label="Perspective"></nav>
+</header>
+
+<main id="app" hidden>
+
+  <section class="panel" id="map-panel">
+    <h2>Bird's-eye reconstruction <span class="hint" id="map-source"></span></h2>
+    <div id="map-wrap">
+      <canvas id="map" width="900" height="440"></canvas>
+    </div>
+    <div class="transport">
+      <button id="play" type="button">Play</button>
+      <input id="time" type="range" min="0" max="1" step="0.01" value="0" aria-label="Simulation time">
+      <span id="clock">t = 0.00 s</span>
+    </div>
+    <div id="map-legend"></div>
+  </section>
+
+  <section class="panel" id="signals-panel">
+    <h2>Signals <span class="hint" id="signals-source"></span></h2>
+    <div id="signals"></div>
+  </section>
+
+  <section class="panel" id="events-panel">
+    <h2>Event timeline</h2>
+    <div id="events" class="scroll-y"></div>
+  </section>
+
+  <section class="panel" id="graph-panel">
+    <h2>Causal graph <span class="hint">- click a node to highlight its path to the outcome</span></h2>
+    <div id="graph"></div>
+    <div id="graph-detail">No node selected.</div>
+  </section>
+
+  <section class="panel" id="checking-panel">
+    <h2>Model checking</h2>
+    <div id="checking"></div>
+  </section>
+
+  <section class="panel" id="identity-panel">
+    <h2>Reconstructed identity</h2>
+    <div id="identity"></div>
+  </section>
+
+  <section class="panel span-2" id="attribution-panel">
+    <h2>Causal contribution</h2>
+    <div id="attribution"></div>
+  </section>
+
+</main>
+
+<footer id="notes"></footer>
+
+<script src="app.js"></script>
+</body>
+</html>

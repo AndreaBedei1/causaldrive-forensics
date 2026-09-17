@@ -1,0 +1,377 @@
+"""Deterministic synchronous world control with guaranteed actor cleanup.
+
+Two properties matter for reproducible experiments and are enforced here.
+
+**Determinism.** The world runs in synchronous mode at a fixed time step with
+substepping enabled, and the Traffic Manager (used only for background behaviour,
+never for safety-critical timing) gets a fixed random device seed. Every source
+of randomness the client controls is seeded from the run seed.
+
+**No orphans.** A crashed scenario that leaves sensors listening or vehicles
+parked in the world corrupts every subsequent run in the same server session.
+:class:`ScenarioWorld` therefore owns every actor it spawns and destroys them in
+reverse creation order inside a ``finally`` block, restoring the original world
+settings even when the scenario raised.
+"""
+
+from __future__ import annotations
+
+import logging
+import random
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+from ..common.config import Config
+from .carla_client import ensure_map, import_carla, map_basename
+
+LOGGER = logging.getLogger(__name__)
+
+__all__ = ["ScenarioWorld", "SpawnPlan", "resolve_spawn"]
+
+
+@dataclass
+class SpawnPlan:
+    """A resolved, collision-checked spawn request.
+
+    Spawning at a settled actor's transform fails because suspension pitch/roll
+    makes the bounding box intersect the ground, so spawn transforms are always
+    derived from a lane waypoint with a small vertical offset and a clean
+    (yaw-only) rotation.
+    """
+
+    participant_id: str
+    blueprint: str
+    x: float
+    y: float
+    z: float
+    yaw: float
+    role: str = "participant"
+
+    def as_dict(self) -> Dict[str, float]:
+        return {"x": self.x, "y": self.y, "z": self.z, "yaw": self.yaw}
+
+
+def resolve_spawn(
+    carla_map: Any,
+    anchor: Any,
+    forward_m: float = 0.0,
+    lateral_lane_offset: int = 0,
+    z_offset: float = 0.3,
+) -> Any:
+    """Build a spawnable ``carla.Transform`` from a lane waypoint.
+
+    ``anchor`` may be a ``carla.Transform``, a ``carla.Location`` or a
+    ``carla.Waypoint``. The result is advanced ``forward_m`` metres along the lane
+    and shifted ``lateral_lane_offset`` lanes left (negative) or right (positive),
+    staying on drivable lanes with the same travel direction.
+
+    Using the map here is legitimate: this is *scenario construction*, which is
+    test-generation code. No local inference module may do the same.
+    """
+    carla = import_carla()
+
+    if hasattr(anchor, "transform") and hasattr(anchor, "lane_id"):
+        wp = anchor
+    else:
+        location = anchor.location if hasattr(anchor, "location") else anchor
+        wp = carla_map.get_waypoint(
+            location, project_to_road=True, lane_type=carla.LaneType.Driving
+        )
+    if wp is None:
+        raise ValueError("could not project the spawn anchor onto a driving lane")
+
+    for _ in range(abs(int(lateral_lane_offset))):
+        nxt = wp.get_right_lane() if lateral_lane_offset > 0 else wp.get_left_lane()
+        if (
+            nxt is None
+            or nxt.lane_type != carla.LaneType.Driving
+            or nxt.lane_id * wp.lane_id < 0
+        ):
+            raise ValueError(
+                "no drivable same-direction lane {0} of the anchor".format(
+                    "right" if lateral_lane_offset > 0 else "left"
+                )
+            )
+        wp = nxt
+
+    if abs(float(forward_m)) > 1e-6:
+        candidates = wp.next(abs(float(forward_m))) if forward_m > 0 else wp.previous(abs(float(forward_m)))
+        if not candidates:
+            raise ValueError(
+                "cannot advance {0} m along the lane from the anchor".format(forward_m)
+            )
+        wp = candidates[0]
+
+    tf = wp.transform
+    return carla.Transform(
+        carla.Location(x=tf.location.x, y=tf.location.y, z=tf.location.z + float(z_offset)),
+        carla.Rotation(pitch=0.0, yaw=tf.rotation.yaw, roll=0.0),
+    )
+
+
+class ScenarioWorld:
+    """Owns a synchronous CARLA world for the duration of one scenario run.
+
+    Use as a context manager::
+
+        with ScenarioWorld(client, cfg, map_name="Town05", seed=0) as sw:
+            vehicle = sw.spawn_vehicle("vehicle.tesla.model3", transform)
+            sw.tick()
+    """
+
+    def __init__(
+        self,
+        client: Any,
+        cfg: Config,
+        map_name: str,
+        seed: int = 0,
+    ) -> None:
+        self.client = client
+        self.cfg = cfg
+        self.map_name = map_basename(map_name)
+        self.seed = int(seed)
+        self.rng = random.Random(self.seed)
+
+        self.world: Any = None
+        self.map: Any = None
+        self.traffic_manager: Any = None
+
+        self._original_settings: Any = None
+        self._tm_original_sync: Optional[bool] = None
+        self._actors: List[Any] = []
+        self._sensors: List[Any] = []
+        self._frame: int = 0
+        self._entered = False
+
+    # -- lifecycle --------------------------------------------------------
+
+    def __enter__(self) -> "ScenarioWorld":
+        # Fail here, with a clear message, rather than deep inside a spawn call.
+        import_carla()
+        settle = float(self.cfg.get("simulation.map_switch_settle_s", 60.0))
+        self.world = ensure_map(self.client, self.map_name, settle_timeout_s=settle)
+        self.map = self.world.get_map()
+
+        self._original_settings = self.world.get_settings()
+        settings = self.world.get_settings()
+        settings.synchronous_mode = bool(self.cfg.get("simulation.synchronous_mode", True))
+        settings.fixed_delta_seconds = float(
+            self.cfg.get("simulation.fixed_delta_seconds", 0.05)
+        )
+        settings.substepping = bool(self.cfg.get("simulation.substepping", True))
+        settings.max_substep_delta_time = float(
+            self.cfg.get("simulation.max_substep_delta_time", 0.01)
+        )
+        settings.max_substeps = int(self.cfg.get("simulation.max_substeps", 10))
+        self.world.apply_settings(settings)
+
+        # The Traffic Manager is only used for background traffic; safety-critical
+        # timing always comes from our own scripted controllers. It is still
+        # seeded so that any background behaviour is reproducible.
+        try:
+            tm_port = int(self.cfg.get("simulation.traffic_manager_port", 8000))
+            self.traffic_manager = self.client.get_trafficmanager(tm_port)
+            self._tm_original_sync = True
+            self.traffic_manager.set_synchronous_mode(True)
+            self.traffic_manager.set_random_device_seed(self.seed)
+        except RuntimeError as exc:
+            LOGGER.warning("traffic manager unavailable (%s); continuing without it", exc)
+            self.traffic_manager = None
+
+        self._entered = True
+        LOGGER.info(
+            "scenario world ready: map=%s dt=%.3f seed=%d",
+            self.map_name,
+            settings.fixed_delta_seconds,
+            self.seed,
+        )
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self.cleanup()
+
+    def cleanup(self) -> None:
+        """Destroy every owned actor and restore the original world settings.
+
+        Runs unconditionally, and each step is individually guarded so that one
+        failing destroy cannot strand the remaining actors or leave the world in
+        synchronous mode for the next run.
+        """
+        for sensor in reversed(self._sensors):
+            try:
+                if sensor.is_listening:
+                    sensor.stop()
+            except RuntimeError as exc:
+                LOGGER.warning("could not stop sensor %s: %s", sensor, exc)
+        destroyed: List[int] = []
+        for actor in reversed(self._sensors + self._actors):
+            try:
+                destroyed.append(int(actor.id))
+                actor.destroy()
+            except RuntimeError as exc:
+                LOGGER.warning("could not destroy actor %s: %s", actor, exc)
+        self._sensors = []
+        self._actors = []
+
+        # In synchronous mode a destroy is only a queued command: it is applied
+        # on the next tick. Without this tick -- taken while the world is still
+        # synchronous, before the settings below are restored -- every actor
+        # survives the run that created them, and the next run on the same
+        # server starts in a scene that already contains the last one's vehicles.
+        # Harmless in this project's protocol, which restarts the simulator per
+        # run, and not harmless for anyone who reuses a server.
+        if destroyed and self.world is not None:
+            try:
+                if self.world.get_settings().synchronous_mode:
+                    self.world.tick()
+                survivors = [int(a.id) for a in self.world.get_actors(destroyed)]
+                if survivors:
+                    LOGGER.warning(
+                        "actor(s) %s survived cleanup and are still in the world",
+                        survivors,
+                    )
+            except RuntimeError as exc:
+                LOGGER.warning("could not confirm actor destruction: %s", exc)
+
+        if self.traffic_manager is not None and self._tm_original_sync is not None:
+            try:
+                self.traffic_manager.set_synchronous_mode(False)
+            except RuntimeError as exc:
+                LOGGER.warning("could not reset traffic manager: %s", exc)
+
+        if self.world is not None and self._original_settings is not None:
+            try:
+                self.world.apply_settings(self._original_settings)
+            except RuntimeError as exc:
+                LOGGER.warning("could not restore world settings: %s", exc)
+        self._entered = False
+
+    # -- spawning ---------------------------------------------------------
+
+    def blueprint(self, blueprint_id: str, attributes: Optional[Dict[str, Any]] = None) -> Any:
+        """Fetch a blueprint and apply attributes, failing loudly on typos."""
+        library = self.world.get_blueprint_library()
+        matches = library.filter(blueprint_id)
+        if not matches:
+            raise ValueError("no CARLA blueprint matches {0!r}".format(blueprint_id))
+        bp = matches[0]
+        for key, value in (attributes or {}).items():
+            if not bp.has_attribute(key):
+                raise ValueError(
+                    "blueprint {0!r} has no attribute {1!r}".format(bp.id, key)
+                )
+            bp.set_attribute(key, str(value))
+        # Deterministic appearance: pick a colour from the seeded RNG rather than
+        # letting CARLA randomise it, so runs are byte-comparable.
+        if bp.has_attribute("color"):
+            options = bp.get_attribute("color").recommended_values
+            if options:
+                bp.set_attribute("color", options[self.rng.randrange(len(options))])
+        if bp.has_attribute("role_name"):
+            bp.set_attribute("role_name", "cdf")
+        return bp
+
+    def spawn_vehicle(
+        self,
+        blueprint_id: str,
+        transform: Any,
+        attributes: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """Spawn a vehicle and take ownership of it."""
+        bp = self.blueprint(blueprint_id, attributes)
+        actor = self.world.try_spawn_actor(bp, transform)
+        if actor is None:
+            raise RuntimeError(
+                "failed to spawn {0} at ({1:.2f}, {2:.2f}, {3:.2f}) yaw={4:.1f}: the "
+                "position is blocked. Scenario spawn points must be separated and "
+                "derived from lane waypoints.".format(
+                    blueprint_id,
+                    transform.location.x,
+                    transform.location.y,
+                    transform.location.z,
+                    transform.rotation.yaw,
+                )
+            )
+        self._actors.append(actor)
+        return actor
+
+    def spawn_sensor(
+        self,
+        blueprint_id: str,
+        transform: Any,
+        attach_to: Any,
+        attributes: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """Spawn a sensor attached to an actor and take ownership of it."""
+        bp = self.blueprint(blueprint_id, attributes)
+        sensor = self.world.spawn_actor(bp, transform, attach_to=attach_to)
+        self._sensors.append(sensor)
+        return sensor
+
+    def register_actor(self, actor: Any) -> Any:
+        """Take ownership of an externally created actor so it gets cleaned up."""
+        self._actors.append(actor)
+        return actor
+
+    # -- stepping ---------------------------------------------------------
+
+    def tick(self) -> Any:
+        """Advance the simulation one fixed step and return the world snapshot."""
+        if not self._entered:
+            raise RuntimeError("ScenarioWorld.tick() called outside its context manager")
+        self._frame = self.world.tick()
+        return self.world.get_snapshot()
+
+    def warmup(self, ticks: Optional[int] = None) -> None:
+        """Step the world a few times so physics and sensors settle.
+
+        Sensor output from the first frames after spawn is unreliable (a spurious
+        ~100 m/s radar return was measured), so these ticks are discarded rather
+        than recorded.
+        """
+        n = int(self.cfg.get("simulation.warmup_ticks", 20)) if ticks is None else int(ticks)
+        for _ in range(n):
+            self.tick()
+
+    @property
+    def snapshot(self) -> Any:
+        return self.world.get_snapshot()
+
+    @property
+    def elapsed_seconds(self) -> float:
+        """Simulation time of the current snapshot."""
+        return float(self.world.get_snapshot().timestamp.elapsed_seconds)
+
+    @property
+    def frame(self) -> int:
+        return int(self.world.get_snapshot().frame)
+
+    @property
+    def delta_seconds(self) -> float:
+        return float(self.cfg.get("simulation.fixed_delta_seconds", 0.05))
+
+    # -- privileged accessors (ORACLE USE ONLY) ---------------------------
+
+    def all_vehicles(self) -> List[Any]:
+        """Every vehicle actor in the world.
+
+        PRIVILEGED. Only scenario construction and the oracle logger may call
+        this. The local and fusion layers must never see its output -- that is
+        exactly the boundary the anti-leakage tests enforce.
+        """
+        return list(self.world.get_actors().filter("vehicle.*"))
+
+    def traffic_lights(self) -> List[Any]:
+        """Every traffic light actor. PRIVILEGED -- oracle use only."""
+        return list(self.world.get_actors().filter("traffic.traffic_light"))
+
+    def spawn_points(self) -> List[Any]:
+        """The map's recommended spawn points (scenario construction only)."""
+        return list(self.map.get_spawn_points())
+
+    def waypoint(self, location: Any) -> Any:
+        """Project a location onto a driving lane (scenario construction only)."""
+        carla = import_carla()
+        return self.map.get_waypoint(
+            location, project_to_road=True, lane_type=carla.LaneType.Driving
+        )

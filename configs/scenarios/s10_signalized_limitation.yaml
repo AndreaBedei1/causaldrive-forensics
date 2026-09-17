@@ -1,0 +1,109 @@
+# =============================================================================
+# S10 -- SIGNALIZED INTERSECTION LIMITATION CASE   *** EPISTEMIC TEST ***
+# =============================================================================
+# A deliberate limitation test, not a capability demonstration.
+#
+# The agreed local evidence is telemetry + controls + radar. None of that can
+# observe a traffic light. So when B crosses on red and strikes A, the local and
+# fused layers may legitimately report a predicted path conflict and a
+# contributing motion -- but they must report UNKNOWN / INSUFFICIENT EVIDENCE
+# about any signal violation. Only the oracle, which reads the true light state,
+# may assert one.
+#
+# A system that "detected" the red-light violation from geometry alone would be
+# hallucinating, and the evaluation is designed to catch exactly that.
+#
+# Junction 838 of Town05 at (-189.8, 1.4) is signalised and was measured to
+# expose four clean approaches (maximum bearing error 0.1 deg).
+# =============================================================================
+
+scenario:
+  scenario_id: "S10"
+  name: "signalized_limitation"
+  description: >
+    A crosses a signalised junction on green. B crosses the same junction on red
+    and strikes A. The traffic lights are frozen so the violation is exact and
+    reproducible.
+  map: "Town05"
+  default_variant: "red_light_violation"
+  max_duration_s: 28.0
+
+  # Traffic-light control is scenario construction, and the resulting states are
+  # recorded by the oracle only. PRIVILEGED -- never exposed to local inference.
+  traffic_lights:
+    junction_x: -189.8
+    junction_y: 1.4
+    freeze: true
+    default_state: "Green"
+    overrides:
+      - bearing_deg: -90.0
+        state: "Red"
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: -189.8
+        junction_y: 1.4
+        bearing_deg: 0.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: -189.8
+        junction_y: 1.4
+        bearing_deg: -90.0
+        back_m: 50.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions:
+        - action_id: "B_run_red_light"
+          kind: "set_speed"
+          t_start: 1.2
+          duration: 14.0
+          params: { target_speed: 12.5 }
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "B_run_red_light"
+
+  causal_template:
+    - cause: { kind: "action", participant: "B", action_id: "B_run_red_light" }
+      effect: { kind: "oracle_state", participant: "B", name: "signal_violation" }
+      edge: "TRIGGERS"
+      rationale: "ORACLE ONLY -- the light state is unobservable from onboard evidence"
+    - cause: { kind: "oracle_state", participant: "B", name: "signal_violation" }
+      effect: { kind: "state", participant: "B", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+      effect: { kind: "state", participant: "A", name: "critical_ttc" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  # What the local/fused layers are expected to be UNABLE to establish. The
+  # evaluation asserts these are absent from local and fused output, and present
+  # in the oracle output.
+  expected_local_unknowns:
+    - "signal_violation"
+
+  variants:
+    red_light_violation:
+      notes:
+        - "B physically crosses on red; only the oracle can establish that"
+        - "local and fused inference must report the conflict but say UNKNOWN about the signal"

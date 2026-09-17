@@ -1,0 +1,82 @@
+# =============================================================================
+# S03 -- CROSSING
+# =============================================================================
+# Map-free latent conflict-region inference. Two vehicles approach an
+# unsignalised four-way junction from perpendicular directions and their paths
+# intersect. The local pipeline must infer the conflict from the intersection of
+# two predicted trajectories -- it is never told that a junction exists.
+#
+# Junction 720 of Town05 at (101.6, 0.3) was measured to expose four clean
+# approaches (maximum bearing error 0.7 deg) and carries no traffic light, so
+# signal state cannot confound this scenario.
+# =============================================================================
+
+scenario:
+  scenario_id: "S03"
+  name: "crossing"
+  description: >
+    A travels through the junction at constant speed. B approaches from a
+    perpendicular direction and accelerates into the crossing instead of
+    yielding, striking A.
+  map: "Town05"
+  default_variant: "crash"
+  max_duration_s: 28.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 50.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions:
+        # B fails to yield and speeds up on the approach.
+        - action_id: "B_fail_to_yield"
+          kind: "set_speed"
+          t_start: 1.2
+          duration: 14.0
+          params: { target_speed: 12.5 }
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "B_fail_to_yield"
+
+  causal_template:
+    - cause: { kind: "action", participant: "B", action_id: "B_fail_to_yield" }
+      effect: { kind: "state", participant: "B", name: "conflict_entry" }
+      edge: "TRIGGERS"
+      rationale: "accelerating instead of yielding puts B into the shared conflict region"
+    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+      effect: { kind: "state", participant: "A", name: "critical_ttc" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  variants:
+    crash:
+      notes: ["B accelerates into the junction while A proceeds at constant speed"]

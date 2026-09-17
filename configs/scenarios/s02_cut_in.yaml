@@ -1,0 +1,112 @@
+# =============================================================================
+# S02 -- CUT-IN
+# =============================================================================
+# Lateral reconstruction: B leaves the adjacent lane and enters A's predicted
+# path. The manoeuvre is produced by a lateral offset of B's pursuit target, so
+# it is a genuine trajectory rather than a map-level "lane change" command --
+# and the local pipeline must infer CUT_IN_LIKE_MOTION from radar geometry
+# alone, without any lane identity.
+# =============================================================================
+
+scenario:
+  scenario_id: "S02"
+  name: "cut_in"
+  description: >
+    B starts in the lane to A's left, slightly ahead, then moves laterally into
+    A's lane while travelling slower than A. A closes rapidly and reacts late.
+  map: "Town05"
+  default_variant: "crash"
+  max_duration_s: 26.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
+      route: { length_m: 150.0, step_m: 2.0 }
+      initial_speed: 14.0
+      target_speed: 14.0
+      actions:
+        # A reacts only once the gap has already collapsed.
+        - action_id: "A_late_brake"
+          kind: "brake"
+          t_start: 3.9
+          duration: 6.0
+          params: { intensity: 0.85 }
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 30.0, lane_offset: -1 }
+      route: { length_m: 130.0, step_m: 2.0 }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions:
+        # The cut-in itself: a smooth lateral displacement into A's lane, made
+        # while B is still comfortably ahead of the faster A.
+        - action_id: "B_cut_in"
+          kind: "lane_shift"
+          t_start: 1.0
+          duration: 2.2
+          params: { lateral_m: 3.5 }
+        - action_id: "B_slow_after_cut_in"
+          kind: "set_speed"
+          t_start: 3.2
+          duration: 12.0
+          params: { target_speed: 6.5 }
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "B_cut_in"
+    - "B_slow_after_cut_in"
+    - "A_late_brake"
+
+  causal_template:
+    - cause: { kind: "action", participant: "B", action_id: "B_cut_in" }
+      effect: { kind: "state", participant: "A", name: "closing" }
+      edge: "TRIGGERS"
+      rationale: "entering A's path while travelling slower creates the closing conflict"
+    - cause: { kind: "action", participant: "B", action_id: "B_slow_after_cut_in" }
+      effect: { kind: "state", participant: "A", name: "closing" }
+      edge: "CONTRIBUTES_TO"
+      rationale: "slowing once inside A's lane sharpens the closing rate it created"
+    - cause: { kind: "state", participant: "A", name: "closing" }
+      effect: { kind: "state", participant: "A", name: "critical_ttc" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+    - cause: { kind: "action", participant: "A", action_id: "A_late_brake" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "PREVENTS"
+      rationale: "A brakes, but only after the cut-in has already closed the gap"
+
+  variants:
+    crash:
+      notes:
+        - "B cuts in ~24 m ahead of a faster A, then slows inside A's lane"
+        - "A reacts, but not early enough to shed the closing speed in time"
+    avoided:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 16.0
+      notes:
+        - "identical geometry, cut-in and slowdown as the crash variant"
+        - "only A's reaction time changes, isolating it as the difference that decides the outcome"
+      participant_overrides:
+        A:
+          actions:
+            # B performs the same cut-in and the same slowdown; only A's
+            # reaction time differs, which is what isolates it as the difference
+            # that decides the outcome.
+            - action_id: "A_late_brake"
+              kind: "brake"
+              t_start: 2.9
+              duration: 9.0
+              params: { intensity: 1.0 }

@@ -1,0 +1,30 @@
+# Generated experiment artifacts (regenerate with scripts/run_suite.py).
+artifacts/**
+!artifacts/.gitkeep
+!artifacts/example/**
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# CARLA / local scratch
+*.log
+scratch/

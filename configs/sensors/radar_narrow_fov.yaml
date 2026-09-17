@@ -1,0 +1,25 @@
+# Narrow field-of-view radar: longer range, much poorer lateral awareness.
+# Used to create genuine sensing-driven partial observability (scenario S07).
+radar:
+  profile_name: "narrow_fov"
+  sensors:
+    - sensor_id: "front"
+      blueprint: "sensor.other.radar"
+      horizontal_fov_deg: 30.0
+      vertical_fov_deg: 10.0
+      range_m: 100.0
+      points_per_second: 6000
+      sensor_tick_s: 0.05
+      mount:
+        x: 2.2
+        y: 0.0
+        z: 1.0
+        yaw_deg: 0.0
+        pitch_deg: 0.0
+  degradation:
+    enabled: false
+    dropout_prob: 0.0
+    point_dropout_prob: 0.0
+    range_noise_sigma_m: 0.0
+    azimuth_noise_sigma_rad: 0.0
+    velocity_noise_sigma_mps: 0.0
