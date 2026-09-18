@@ -22,9 +22,13 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from ..common.config import Config, deep_merge, load_yaml
 from ..common.clocks import LocalClock
 from ..common.evidence import ParticipantEvidence
+from ..common.io import write_json
 from ..common.layout import RunLayout
 from ..common.schemas import (
     ControlSample,
+    Event,
+    EventType,
+    Provenance,
     LocalTriggerRecord,
     RadarFrame,
     TelemetrySample,
@@ -34,11 +38,15 @@ from ..common.schemas import (
 from ..local.own_state import make_telemetry
 from ..local.radar import RadarCluster, RadarFrontEnd
 from ..local.recorder import RollingRecorder
+from ..local.video_buffer import VideoBuffer
 from ..local.tracking import RadarTracker
 from .carla_client import import_carla
 from .controllers import ControlCommand, ScriptedController, VehicleState
 from .scenario_base import ParticipantSpec
-from .sensors import CollisionSensor, RadarSensor, radar_specs_from_config
+from .sensors import (
+    CameraSensor, CollisionSensor, LaneInvasionSensor, RadarSensor,
+    camera_spec_from_config, radar_specs_from_config,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -103,6 +111,28 @@ class ParticipantAgent:
         self.vehicle: Any = None
         self.radars: List[RadarSensor] = []
         self.collision_sensor: Optional[CollisionSensor] = None
+        self.camera: Optional[CameraSensor] = None
+        self.lane_sensor: Optional[LaneInvasionSensor] = None
+
+        # The camera buffer is bounded by construction: it holds the configured
+        # pre-event window until a contact latches it, then five seconds more.
+        # Nothing here can grow with run length, which is the whole premise of a
+        # vehicle that keeps a short rolling window rather than a full recording.
+        camera_spec = camera_spec_from_config(self.cfg)
+        self.video: Optional[VideoBuffer] = VideoBuffer(
+            pre_event_s=float(self.cfg.get("sensors.camera.pre_event_s", 20.0)),
+            post_event_s=float(self.cfg.get("sensors.camera.post_event_s", 5.0)),
+            max_frames=int(self.cfg.get("sensors.camera.max_frames", 1200)),
+            participant_id=self.participant_id,
+            sensor_id=camera_spec.sensor_id if camera_spec else "front",
+        ) if camera_spec is not None else None
+        self._camera_spec = camera_spec
+        #: ``(t_local, frame, array)`` for perception, kept only while the frame
+        #: is inside the retained window -- the same bound as the video buffer,
+        #: because holding full-resolution arrays for the whole run would cost
+        #: more than the encoded clip it is meant to accompany.
+        self._perception_frames: List[Any] = []
+        self._camera_frames_missed = 0
 
         # Simulator time at which the scenario proper begins. Every timestamp the
         # participant samples is first rebased onto scenario time. The recorder
@@ -133,11 +163,22 @@ class ParticipantAgent:
                 RadarSensor(self.world, self.vehicle, rspec, self.participant_id)
             )
         self.collision_sensor = CollisionSensor(self.world, self.vehicle, self.participant_id)
+        if self._camera_spec is not None:
+            self.camera = CameraSensor(
+                self.world, self.vehicle, self._camera_spec, self.participant_id
+            )
+        if bool(self.cfg.get("sensors.lane_invasion.enabled", True)):
+            self.lane_sensor = LaneInvasionSensor(
+                self.world, self.vehicle, self.participant_id
+            )
         LOGGER.info(
-            "participant %s spawned: %s with %d radar(s), profile=%s",
+            "participant %s spawned: %s with %d radar(s), camera=%s, lane=%s, "
+            "profile=%s",
             self.participant_id,
             self.spec.blueprint,
             len(self.radars),
+            "on" if self.camera else "off",
+            "on" if self.lane_sensor else "off",
             self.cfg.get("sensors.profile", "?"),
         )
         return self.vehicle
@@ -222,6 +263,8 @@ class ParticipantAgent:
             self.recorder.record_radar(rframe)
         self.recorder.record_tracks(track_samples)
 
+        self._poll_camera(frame, local_t)
+
         self._handle_triggers(local_t, local_frame, telemetry, control, track_samples, sim_t=t)
 
         command = self.controller.step(
@@ -238,6 +281,35 @@ class ParticipantAgent:
         )
         self._apply_command(command)
         self._prev_telemetry = telemetry
+
+    def _poll_camera(self, frame: int, local_t: float) -> None:
+        """Take this tick's image, compress it into the buffer, keep it for perception.
+
+        A missed frame is counted and skipped rather than waited on: blocking the
+        tick to wait for a camera would change the physics being recorded, which
+        is a far worse outcome than a gap in the video.
+        """
+        if self.camera is None or self.video is None:
+            return
+        image = self.camera.poll(frame, timeout_s=0.5)
+        if image is None:
+            self._camera_frames_missed += 1
+            return
+        kept = self.video.add(
+            local_t, frame, image["jpeg"], encoding="jpeg",
+            width=image["width"], height=image["height"],
+        )
+        if not kept:
+            return
+        self._perception_frames.append((local_t, frame, image["array"]))
+        # Keep the perception frames in step with the buffer. The buffer evicts
+        # by time; matching that here means the arrays cannot outlive the clip
+        # they belong to.
+        span = self.video.span()
+        if span is not None:
+            self._perception_frames = [
+                f for f in self._perception_frames if f[0] >= span[0]
+            ]
 
     def _poll_radars(self, frame: int) -> List[RadarFrame]:
         """Collect this tick's radar frames, tolerating an occasional miss.
@@ -314,6 +386,10 @@ class ParticipantAgent:
                 self._last_collision_t = rec.t
                 self.latest_trigger_sim_time = collision_sim_t
                 self.recorder.trigger(rec)
+                # Stop the camera's pre-event window rolling. Only the first
+                # contact counts: a chain fires several and re-arming on each
+                # would turn a bounded tail into an unbounded one.
+                self.latch_video(rec.t)
                 self.controller.notify_impact()
                 LOGGER.info(
                     "participant %s: collision trigger at t=%.2f (impulse %.1f)",
@@ -388,6 +464,16 @@ class ParticipantAgent:
         return self.recorder.triggered
 
     @property
+    def latch_video(self, local_t: float) -> None:
+        """Stop the pre-event window rolling: the event has happened.
+
+        Called on the first contact. Only the first counts -- a chain fires
+        several triggers, and re-arming on each would turn a bounded tail into an
+        unbounded one.
+        """
+        if self.video is not None:
+            self.video.mark_event(local_t)
+
     def finished(self) -> bool:
         return self.recorder.finished
 
@@ -426,7 +512,74 @@ class ParticipantAgent:
 
     def persist(self, layout: RunLayout) -> ParticipantEvidence:
         """Persist the retained evidence window under ``vehicle_<id>/``."""
-        return self.recorder.persist(layout)
+        evidence = self.recorder.persist(layout)
+        self._persist_camera(layout)
+        self._persist_lane_events(layout)
+        return evidence
+
+    def _persist_camera(self, layout: RunLayout) -> None:
+        """Write the clip, its index, and what perception made of the frames.
+
+        Perception runs here rather than during the tick because it needs the
+        whole sequence: a sign is one perception across tens of frames, and a
+        stop line is only known to have been crossed once it has left the frame.
+        Running it per tick could not see either.
+        """
+        if self.video is None or not len(self.video):
+            return
+        from ..local.sign_perception import detect_signs
+        from ..local.stop_line_perception import detect_stop_lines
+        from ..common.schemas import to_jsonable
+
+        layout.video_dir(self.participant_id).mkdir(parents=True, exist_ok=True)
+        layout.perception_dir(self.participant_id).mkdir(parents=True, exist_ok=True)
+        index = self.video.index()
+        index["n_frames_missed"] = self._camera_frames_missed
+        write_json(layout.frame_index(self.participant_id), index)
+        _encode_clip(self.video, layout.front_video(self.participant_id))
+
+        frames = list(self._perception_frames)
+        signs = detect_signs(frames, cfg=self.cfg, image_width=index.get("width", 0))
+        # One event per confirmed sign track, at the moment the evidence first
+        # became good enough -- not one per frame, which would put dozens of
+        # nodes in the graph for one physical sign.
+        signs["events"] = [
+            to_jsonable(e) for e in _sign_events(signs, self.participant_id)
+        ]
+        write_json(layout.traffic_sign_detections(self.participant_id), signs)
+
+        speeds = {
+            float(t.t): float(t.speed) for t in self.recorder.to_evidence().telemetry
+        }
+        stop_lines = detect_stop_lines(
+            frames, speed_at=_nearest_speed(speeds), cfg=self.cfg,
+            participant_id=self.participant_id,
+        )
+        stop_lines["events"] = [to_jsonable(e) for e in stop_lines["events"]]
+        write_json(
+            layout.perception_dir(self.participant_id) / "stop_lines.json", stop_lines
+        )
+
+    def _persist_lane_events(self, layout: RunLayout) -> None:
+        """Collapse the lane sensor's reports into the crossings they were."""
+        if self.lane_sensor is None:
+            return
+        from ..local.lane_events import build_lane_events
+        from ..common.schemas import to_jsonable
+
+        records = self.lane_sensor.drain()
+        for record in records:
+            # The sensor stamps simulator time; every other local record is on
+            # this recorder's own clock, and mixing the two inside one vehicle
+            # would be a worse error than any this project is studying.
+            local_t, local_frame = self.clock.stamp(
+                float(record["t"]) - self.time_offset, int(record["frame"])
+            )
+            record["t"], record["frame"] = local_t, local_frame
+        result = build_lane_events(self.participant_id, records, cfg=self.cfg)
+        layout.perception_dir(self.participant_id).mkdir(parents=True, exist_ok=True)
+        result["events"] = [to_jsonable(e) for e in result["events"]]
+        write_json(layout.lane_events(self.participant_id), result)
 
     def manifest_block(self) -> Dict[str, Any]:
         """Per-participant provenance for the run manifest."""
@@ -447,4 +600,120 @@ class ParticipantAgent:
             "initial_speed": self.spec.initial_speed,
             "target_speed": self.spec.target_speed,
             "sensor_health": self.sensor_health(),
+            "camera": (
+                {
+                    "width": self._camera_spec.width,
+                    "height": self._camera_spec.height,
+                    "fov_deg": self._camera_spec.fov_deg,
+                    "pre_event_s": self.video.pre_event_s if self.video else None,
+                    "post_event_s": self.video.post_event_s if self.video else None,
+                    "frames_missed": self._camera_frames_missed,
+                }
+                if self._camera_spec is not None else None
+            ),
+            "lane_sensor": self.lane_sensor is not None,
         }
+
+def _nearest_speed(speeds):
+    """A speed lookup by nearest recorded sample.
+
+    The stop-line inference needs to know the vehicle was moving when the
+    marking left the frame. Nearest-sample rather than interpolation: at 20 Hz
+    the difference is far below the threshold being tested, and interpolating
+    would invent a value between two real ones.
+    """
+    if not speeds:
+        return None
+    ordered = sorted(speeds)
+
+    def at(t: float) -> float:
+        best = min(ordered, key=lambda s: abs(s - float(t)))
+        return speeds[best]
+
+    return at
+
+
+def _sign_events(detection: Dict[str, Any], participant_id: str) -> List[Event]:
+    """One event per confirmed sign track, at its first confident sighting."""
+    from ..common.schemas import Evidence
+
+    kinds = {
+        "STOP": EventType.STOP_SIGN_DETECTED,
+        "YIELD": EventType.YIELD_SIGN_DETECTED,
+    }
+    out: List[Event] = []
+    for track in detection.get("tracks", []) or []:
+        event_type = kinds.get(str(track.get("class")))
+        if event_type is None:
+            continue
+        relevance = track.get("relevance") or {}
+        out.append(Event(
+            event_id="sign-{0}-{1}".format(participant_id, track["sign_track_id"]),
+            event_type=event_type,
+            participant_id=str(participant_id),
+            t_start=float(track["t_first"]),
+            t_peak=float(track["t_first"]),
+            t_end=float(track["t_last"]),
+            subject=None,
+            values={"centredness": float(relevance.get("centredness", 0.0))},
+            detail={
+                "sign_track_id": track["sign_track_id"],
+                "n_detections": track["n_detections"],
+                "best_bbox": track.get("best_bbox"),
+                "relevant_to_ego_path": relevance.get("relevant_to_ego_path"),
+                "method": "camera only; no privileged sign label consulted",
+            },
+            confidence=float(track.get("best_confidence", 0.0)),
+            evidence=[Evidence(
+                kind="camera", ref=str(track["sign_track_id"]),
+                t_start=float(track["t_first"]), t_end=float(track["t_last"]),
+                detail={"n_detections": track["n_detections"]},
+            )],
+            provenance=Provenance.LOCAL,
+            source_sensors=["camera"],
+        ))
+    return sorted(out, key=lambda e: (e.t_peak, e.event_id))
+
+
+def _encode_clip(video, path) -> None:
+    """Mux the buffered frames into a playable file, or leave the frames alone.
+
+    Encoding happens after the run, never during it: an encoder on the critical
+    path of a synchronous tick changes the physics being recorded. If no encoder
+    is available the clip is simply absent and the frame index stands on its own
+    -- the viewer copes, and a missing video is a degraded artifact rather than a
+    lost run.
+    """
+    frames = video.frames
+    if not frames:
+        return
+    try:
+        import cv2
+        import numpy as np
+    except ImportError:  # pragma: no cover - environment-dependent
+        LOGGER.warning("no encoder available; %s not written", path.name)
+        return
+
+    spans = [frames[i + 1].t - frames[i].t for i in range(len(frames) - 1)]
+    period = sorted(spans)[len(spans) // 2] if spans else 0.05
+    fps = max(1.0, 1.0 / max(period, 1e-3))
+    writer = None
+    try:
+        for frame in frames:
+            image = cv2.imdecode(
+                np.frombuffer(frame.payload, dtype=np.uint8), cv2.IMREAD_COLOR
+            )
+            if image is None:
+                continue
+            if writer is None:
+                height, width = image.shape[:2]
+                writer = cv2.VideoWriter(
+                    str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height)
+                )
+                if not writer.isOpened():
+                    LOGGER.warning("could not open %s for writing", path.name)
+                    return
+            writer.write(image)
+    finally:
+        if writer is not None:
+            writer.release()
