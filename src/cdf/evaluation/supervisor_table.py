@@ -132,30 +132,56 @@ def _pair(row_or_event: Mapping[str, Any]) -> Optional[str]:
     return "-".join(sorted([str(who), str(other)]))
 
 
-def _ordered_pairs(records: Sequence[Mapping[str, Any]], time_key: str) -> List[str]:
-    """Distinct impact pairs in the order they occurred, first occurrence wins."""
-    out: List[str] = []
+def _pair_times(
+    records: Sequence[Mapping[str, Any]], time_key: str,
+) -> List[Tuple[str, float]]:
+    """Each distinct impact pair with the time it first appears, in time order."""
+    first: Dict[str, float] = {}
     for record in sorted(records, key=lambda r: float(r.get(time_key) or 0.0)):
         pair = _pair(record)
-        if pair and pair not in out:
-            out.append(pair)
-    return out
+        if pair and pair not in first:
+            first[pair] = float(record.get(time_key) or 0.0)
+    return sorted(first.items(), key=lambda kv: kv[1])
+
+
+def _ordered_pairs(records: Sequence[Mapping[str, Any]], time_key: str) -> List[str]:
+    """Distinct impact pairs in the order they occurred, first occurrence wins."""
+    return [pair for pair, _ in _pair_times(records, time_key)]
+
+
+def _separations(pairs: Sequence[Tuple[str, float]]) -> List[float]:
+    """Gap between each consecutive pair of impacts."""
+    return [
+        pairs[i + 1][1] - pairs[i][1] for i in range(len(pairs) - 1)
+    ]
 
 
 def _collision_order(
     global_log: Optional[Mapping[str, Any]],
     observable: Optional[Mapping[str, Any]],
     alignment: Optional[Mapping[str, Any]] = None,
+    tick_s: Optional[float] = None,
 ) -> str:
     """The order the reconstruction put the impacts in, and whether it is right.
 
-    This is the question §18's multi-impact property deliberately could not
-    answer: a consistently wrong order is still self-consistent, so nothing
-    inside the trace can catch it. Only the privileged record can, which is why
-    it is a metric rather than a property.
+    This is the question the multi-impact property deliberately could not answer:
+    a consistently wrong order is still self-consistent, so nothing inside the
+    trace can catch it. Only the privileged record can, which is why it is a
+    metric rather than a property.
 
     A single-impact run has no order to get wrong and says so, rather than
     reporting a trivially correct one and inflating the column.
+
+    Two impacts closer together than one simulation tick are *not ordered by the
+    reconstruction at all*, and this column must not pretend otherwise. Sorting
+    timestamps always yields some order, including for timestamps that differ by
+    a microsecond of floating-point noise; reporting that as the method's answer
+    invents a claim it never made. An earlier version of this column did exactly
+    that on a recorded chain -- it printed "B-C then A-B (WRONG)" for a run whose
+    two impacts were reconstructed 0.000001 s apart, when the honest reading is
+    that the method could not separate them. The tick is the recording's own
+    resolution and comes from the manifest, so it is a property of the run rather
+    than a threshold chosen here.
     """
     if not global_log:
         return "not fused"
@@ -166,7 +192,8 @@ def _collision_order(
     # The merged log is on common time where it exists and local time where it
     # does not; either way the ordering within one log is what was reconstructed.
     key = "t_common" if any(r.get("t_common") is not None for r in rows) else "t_local"
-    reconstructed = _ordered_pairs(rows, key)
+    pairs = _pair_times(rows, key)
+    reconstructed = [p for p, _ in pairs]
     if not reconstructed:
         return "no impact"
     if len(reconstructed) == 1:
@@ -175,35 +202,59 @@ def _collision_order(
     # An order built on a suspect offset is not an order this method established,
     # however confidently the timestamps happen to be sorted. On a recorded chain
     # the middle vehicle registered one impact and its anchor related both
-    # neighbours, which put the second vehicle 200 ms out and flipped two impacts
-    # that were 200 ms apart. The column has to say so, or the reader takes an
-    # artefact of a shared anchor for a finding.
+    # neighbours, which put the third vehicle's whole timeline out by exactly the
+    # interval between the two impacts and collapsed them onto one instant. The
+    # column has to say so, or the reader takes an artefact of a shared anchor
+    # for a finding.
     suspect = sorted({
         p for caveat in ((alignment or {}).get("shared_anchor_caveats") or [])
         for p in (caveat.get("participants_with_suspect_offset") or [])
     })
-    qualifier = ""
-    if suspect and any(
-        p in pair.split("-") for pair in reconstructed for p in suspect
-    ):
-        qualifier = (
-            "; not established -- {0} offset rests on a shared anchor".format(
-                ", ".join(suspect)
-            )
-        )
-
-    order = " then ".join(reconstructed)
-    truth = _ordered_pairs(
+    truth_pairs = _pair_times(
         [e for e in (observable or {}).get("events", []) or []
          if e.get("event_type") == "COLLISION"],
         "t_peak",
     ) if observable else []
+    truth = [p for p, _ in truth_pairs]
+
+    # Two independent reasons the order is not a finding, and they can hold
+    # separately. A suspect offset can displace a vehicle far enough to leave the
+    # impacts a resolvable distance apart and still in the wrong order, which
+    # looks like an answer and is not one.
+    reasons: List[str] = []
+
+    tick = float(tick_s) if tick_s else 0.0
+    gaps = _separations(pairs)
+    if tick and gaps and min(gaps) < tick:
+        reasons.append(
+            "reconstructed {0:.3f} s apart, inside the {1:.3f} s recording "
+            "resolution".format(min(gaps), tick)
+        )
+    if suspect and any(
+        p in pair.split("-") for pair in reconstructed for p in suspect
+    ):
+        reasons.append(
+            "{0} offset rests on a shared anchor".format(", ".join(suspect))
+        )
+
+    if reasons:
+        detail = "{0}: order not established ({1})".format(
+            ", ".join(reconstructed), "; ".join(reasons),
+        )
+        if truth:
+            truth_gaps = _separations(truth_pairs)
+            detail += "; truth {0}".format(" then ".join(truth))
+            if truth_gaps:
+                detail += " {0:.3f} s apart".format(min(truth_gaps))
+        return detail
+
+    order = " then ".join(reconstructed)
     if not truth:
-        return "{0} (no reference to check against{1})".format(order, qualifier)
+        return "{0} (no reference to check against)".format(order)
     verdict = "correct" if reconstructed == truth else "WRONG, truth {0}".format(
         " then ".join(truth)
     )
-    return "{0} ({1}{2})".format(order, verdict, qualifier)
+    return "{0} ({1})".format(order, verdict)
 
 
 def _line_evidence(
@@ -403,7 +454,10 @@ def build_supervisor_rows(
             "what_happened": _what_happened(manifest, global_log),
             "reconstructed": _reconstructed(metrics),
             "clock_aligned": _clock(alignment),
-            "collision_order": _collision_order(global_log, observable, alignment),
+            "collision_order": _collision_order(
+                global_log, observable, alignment,
+                manifest.get("fixed_delta_seconds"),
+            ),
             "signs_detected": _signs(perception),
             "line_evidence": _line_evidence(layout, layout.participant_ids()),
             "key_formal_violation": _formal(formal),

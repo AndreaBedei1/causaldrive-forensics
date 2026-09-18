@@ -23,12 +23,15 @@ def make_run(root, scenario="S10", variant="rolls_through", seed=0, **artifacts)
     run = root / "{0}_x".format(scenario) / "seed_{0:03d}_{1}".format(seed, variant)
     run.mkdir(parents=True, exist_ok=True)
     layout = RunLayout.from_run_dir(run)
-    write_json(layout.manifest, {
+    manifest = {
         "scenario_id": scenario, "variant": variant, "seed": seed,
         "outcome": artifacts.get("outcome", "collision"),
-    })
+    }
+    if artifacts.get("tick") is not None:
+        manifest["fixed_delta_seconds"] = artifacts["tick"]
+    write_json(layout.manifest, manifest)
     for name, payload in artifacts.items():
-        if name == "outcome" or payload is None:
+        if name in ("outcome", "tick") or payload is None:
             continue
         write_json(getattr(layout, name), payload)
     return layout
@@ -309,9 +312,10 @@ def test_the_table_is_written_as_csv_and_markdown(tmp_path):
 
 def test_an_order_resting_on_a_shared_anchor_is_not_reported_as_established(tmp_path):
     """The middle vehicle of a chain often registers one impact, and its anchor
-    then relates both neighbours. On a recorded run that put the third vehicle
-    200 ms out and flipped two impacts 200 ms apart, so a column that simply
-    sorted the timestamps would present an artefact as a finding."""
+    then relates both neighbours, which leaves the third vehicle's whole timeline
+    displaced. An order read off those timestamps is an artefact of the anchor,
+    and this holds however far apart the impacts happen to land -- so the column
+    must withhold the order rather than print one and mark it wrong."""
     make_run(
         tmp_path,
         global_log={"rows": [
@@ -335,10 +339,91 @@ def test_an_order_resting_on_a_shared_anchor_is_not_reported_as_established(tmp_
         },
     )
     cell = one_row(tmp_path)["collision_order"]
-    assert "B-C then A-B" in cell
-    assert "WRONG, truth A-B then B-C" in cell
-    assert "not established" in cell
+    assert "order not established" in cell
     assert "C offset rests on a shared anchor" in cell
+    # Both pairs are still named, so the reader knows what was reconstructed.
+    assert "B-C" in cell and "A-B" in cell
+    # But never as a sequence: the method did not establish one.
+    assert "then A-B" not in cell
+    # The reference is still shown, because the order was in fact knowable.
+    assert "truth A-B then B-C" in cell
+
+
+def test_impacts_closer_than_the_recording_resolution_are_not_ordered(tmp_path):
+    """Sorting always yields an order, including for timestamps a microsecond
+    apart. On the recorded chain the two impacts were reconstructed onto very
+    nearly the same instant and a sort tie-break decided which came first; the
+    column reported that tie as a confident wrong answer. Inside one tick the
+    recording cannot separate them, so there is no order to be wrong about."""
+    make_run(
+        tmp_path,
+        tick=0.05,
+        global_log={"rows": [
+            {"event_type": "COLLISION", "participant": "C", "subject": "B",
+             "t_common": 5.906272},
+            {"event_type": "COLLISION", "participant": "A", "subject": "B",
+             "t_common": 5.906273},
+        ]},
+        observable_events={"events": [
+            {"event_type": "COLLISION", "participant_id": "A", "subject": "B",
+             "t_peak": 5.95},
+            {"event_type": "COLLISION", "participant_id": "B", "subject": "C",
+             "t_peak": 6.15},
+        ]},
+    )
+    cell = one_row(tmp_path)["collision_order"]
+    assert "order not established" in cell
+    assert "0.000 s apart" in cell
+    assert "0.050 s recording resolution" in cell
+    assert "then" not in cell.split("truth")[0]
+    # The truth was 200 ms apart, which one tick could have resolved. Reporting
+    # that gap is what tells a reader the limit was the alignment, not the tick.
+    assert "truth A-B then B-C 0.200 s apart" in cell
+
+
+def test_impacts_far_enough_apart_on_sound_offsets_keep_their_order(tmp_path):
+    """The resolution rule must not swallow an order the method did establish."""
+    make_run(
+        tmp_path,
+        tick=0.05,
+        global_log={"rows": [
+            {"event_type": "COLLISION", "participant": "A", "subject": "B",
+             "t_common": 5.95},
+            {"event_type": "COLLISION", "participant": "B", "subject": "C",
+             "t_common": 6.15},
+        ]},
+        observable_events={"events": [
+            {"event_type": "COLLISION", "participant_id": "A", "subject": "B",
+             "t_peak": 5.95},
+            {"event_type": "COLLISION", "participant_id": "B", "subject": "C",
+             "t_peak": 6.15},
+        ]},
+    )
+    assert one_row(tmp_path)["collision_order"] == "A-B then B-C (correct)"
+
+
+def test_a_resolvable_order_that_is_wrong_is_still_called_wrong(tmp_path):
+    """Withholding an unresolvable order must not become a way of never being
+    marked wrong. With sound offsets and a gap the recording can resolve, a
+    reversed order is a reversed order."""
+    make_run(
+        tmp_path,
+        tick=0.05,
+        global_log={"rows": [
+            {"event_type": "COLLISION", "participant": "B", "subject": "C",
+             "t_common": 5.95},
+            {"event_type": "COLLISION", "participant": "A", "subject": "B",
+             "t_common": 6.15},
+        ]},
+        observable_events={"events": [
+            {"event_type": "COLLISION", "participant_id": "A", "subject": "B",
+             "t_peak": 5.95},
+            {"event_type": "COLLISION", "participant_id": "B", "subject": "C",
+             "t_peak": 6.15},
+        ]},
+    )
+    cell = one_row(tmp_path)["collision_order"]
+    assert cell == "B-C then A-B (WRONG, truth A-B then B-C)"
 
 
 def test_a_correct_order_on_sound_offsets_is_reported_plainly(tmp_path):
