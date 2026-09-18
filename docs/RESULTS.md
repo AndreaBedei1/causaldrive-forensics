@@ -133,9 +133,21 @@ strict F1 should conclude that fusion did not help by that measure, and that is
 a fair reading of it.
 
 **Attribution is only partly correct.** Exactly the designed contributors are
-named on some scenarios; a subset or a superset on others; and on at least one,
-the wrong vehicle entirely. The per-scenario verdict column says which is which,
-and the campaign's exact-set accuracy is well below 1.0.
+named on some scenarios; a subset or a superset on others. The per-scenario
+verdict column says which is which, and the campaign's exact-set accuracy is
+well below 1.0.
+
+**The graph alone names the wrong vehicle when the cause was an absence.** S08's
+designed cause is `B_fail_to_yield` — B enters the junction without slowing.
+Nothing happened, so no event node exists to root a causal chain at, while A's
+reaction produces a chain full of them. The graph-only hypothesis therefore names
+A: the vehicle that responded to the hazard rather than the one that created it.
+
+The counterfactual replay gets it right, because removing the non-action is
+something the simulator can do even though no recorder could observe it. This is
+the clearest argument in the campaign for reporting both: where they disagree,
+the replay is the one to believe, and the disagreement itself is informative
+about what kinds of cause the reasoning layer cannot see.
 
 **One scenario variant was not reconstructed at all.** In `S02/avoided`, one
 recorder shares too few observations with the other for the alignment to place

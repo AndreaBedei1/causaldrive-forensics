@@ -311,7 +311,37 @@ the impact. What the method is weaker at is selecting *which* of the behaviours
 in that ancestry to name, which is the harder half of the problem and is not
 solved here.
 
-## 20. Post-crash behaviour is not modelled, and the property monitor says so
+## 20. A cause that consists of *not acting* leaves no node to root a chain at
+
+This is the sharpest limitation of the graph-only attribution, and S08 shows it
+cleanly.
+
+The scenario's designed cause is `B_fail_to_yield`: B enters the junction
+without slowing. That is an **absence** — no braking command, no deceleration,
+no manoeuvre — and the event taxonomy has nothing to represent it, because every
+event type in it describes something that happened. A's reaction, by contrast,
+is full of events: A moves laterally, A brakes, A's time-to-collision goes
+critical.
+
+So the reconstruction roots its causal chains at A, and the graph-derived
+hypothesis names A — the vehicle that *responded* to the hazard rather than the
+one that created it. It is exactly wrong, and it is wrong for a structural
+reason rather than a tuning one: you cannot put a non-event at the root of a
+chain of events.
+
+The counterfactual replay gets it right, because removing `B_fail_to_yield` is
+something the simulator can do even though the local recorders could not observe
+it, and the collision then does not happen. This is the clearest case in the
+campaign for why the replay-backed verdict and the graph-only hypothesis are
+both reported: on S08 they disagree, and the replay is the one to believe.
+
+Fixing this properly would need the taxonomy to carry *expected-but-absent*
+behaviour — "approached a conflict at constant speed where a response was due" —
+which is a normative judgement about what was due, and that is right of way
+again (§7). `conflict_entry_without_deceleration` is the closest the current
+vocabulary comes, and it describes the kinematics without asserting the duty.
+
+## 21. Post-crash behaviour is not modelled, and the property monitor says so
 
 The scenario scripts drive each vehicle through the encounter; they do not model
 what a driver does after an impact. Vehicles therefore keep applying throttle
