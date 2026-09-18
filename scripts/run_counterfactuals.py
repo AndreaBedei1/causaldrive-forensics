@@ -72,6 +72,25 @@ def already_done(run_dir: Path) -> bool:
     return bool(payload.get("classification"))
 
 
+def replay_protocol(run_dir: Path) -> Dict[str, Any]:
+    """What protocol the replays of this run actually ran under.
+
+    Each run is replayed in its own subprocess whose output this driver captures
+    and, on success, discards. That is fine for progress chatter and not fine for
+    the one warning a reader of the results has to see: a sweep whose replays
+    silently shared a simulator session is not a sweep whose verdicts can be
+    compared. So the protocol is read back out of the artifact the run wrote,
+    rather than scraped out of a log that may never be looked at.
+    """
+    layout = RunLayout.from_run_dir(run_dir)
+    if not layout.causal_contribution.exists():
+        return {}
+    try:
+        return dict(read_json(layout.causal_contribution).get("replay_protocol") or {})
+    except (OSError, ValueError):
+        return {}
+
+
 def run_one(
     run_dir: Path, artifacts_root: Path, attempts: int, fresh: bool = False
 ) -> Dict[str, Any]:
@@ -145,6 +164,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     print("{0} run(s) to replay".format(len(runs)))
     status: Dict[str, Any] = {}
+    degraded_runs: List[str] = []
     for run_dir in runs:
         name = "{0}/{1}".format(run_dir.parent.name, run_dir.name)
         if not args.force and already_done(run_dir):
@@ -153,18 +173,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             continue
         LOGGER.info("replaying %s", name)
         outcome = run_one(run_dir, artifacts_root, args.attempts, fresh=args.fresh)
+        protocol = replay_protocol(run_dir)
+        outcome["replay_protocol"] = protocol.get("effective")
         status[name] = outcome
+        degraded = (
+            protocol.get("effective")
+            and protocol["effective"] != "fresh_server_per_replay"
+        )
+        if degraded:
+            degraded_runs.append(name)
         print(
-            "  {0:<52} {1} ({2})".format(
+            "  {0:<52} {1} ({2}){3}".format(
                 name, outcome["status"],
                 "{0:.0f}s".format(outcome.get("seconds", 0.0))
                 if outcome["status"] == "completed" else outcome.get("error", ""),
+                "  [DEGRADED: replays shared a simulator session]" if degraded else "",
             )
         )
 
     summary_dir = artifacts_root / "summary"
     summary_dir.mkdir(parents=True, exist_ok=True)
-    write_json(summary_dir / STATUS_FILE, {"seeds": list(args.seeds), "runs": status})
+    write_json(
+        summary_dir / STATUS_FILE,
+        {
+            "seeds": list(args.seeds),
+            "runs": status,
+            "degraded_runs": degraded_runs,
+        },
+    )
 
     failed = [k for k, v in status.items() if v["status"] == "failed"]
     print(
@@ -174,7 +210,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             len(failed),
         )
     )
-    return 1 if failed else 0
+    if degraded_runs:
+        # Loud, and a non-zero exit: verdicts from replays that shared a session
+        # are not comparable with each other, and a sweep that ends "13
+        # completed" while that is true has reported success for nothing.
+        print(
+            "\n{0} run(s) replayed on a SHARED simulator session and are not "
+            "reliably comparable:".format(len(degraded_runs))
+        )
+        for name in degraded_runs:
+            print("  " + name)
+        print(
+            "Stop any simulator already holding the RPC port, set $CARLA_ROOT, "
+            "and re-run with --force --fresh."
+        )
+    return 1 if (failed or degraded_runs) else 0
 
 
 if __name__ == "__main__":
