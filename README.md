@@ -62,11 +62,18 @@ trust:
 > rapidly on B → A closing rapidly on B contributed to A's time-to-collision
 > with B becoming critical → that resulted in the impact between A and B.
 >
-> **Single causal initiator.** Removing B's emergency brake alone prevented the
-> collision in replay, and no other single action did.
+> **Shared causal contribution.** Removing either driver's braking
+> independently prevented the collision in replay, so no single initiator is
+> named.
 
 Every sentence there is a field of an artifact, assembled in reading order.
 There is no language model anywhere in this project.
+
+The verdict is one of five, and two of them decline to name anybody. A
+three-vehicle chain where the braking made the impact worse rather than causing
+it comes back as *contributed without being necessary*; a run where nothing
+tested changed the outcome comes back as *insufficient evidence*, and stays
+there.
 
 **A contribution score states what changed when the encounter was re-run under a
 controlled modification. It is not legal fault and not a fault percentage.**
