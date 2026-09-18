@@ -121,6 +121,8 @@ def _run_rows(artifacts_root: Path) -> List[Dict[str, Any]]:
         metrics = read_json(layout.metrics)
         ablation_path = layout.evaluation_dir / "method_ablation.json"
         ablation = read_json(ablation_path) if ablation_path.exists() else None
+        clock_path = layout.evaluation_dir / "clock_ablation.json"
+        clock_ablation = read_json(clock_path) if clock_path.exists() else None
         reconstruction = (
             read_json(layout.incident_reconstruction)
             if layout.incident_reconstruction.exists() else None
@@ -207,6 +209,7 @@ def _run_rows(artifacts_root: Path) -> List[Dict[str, Any]]:
                     metrics, "clock_alignment", "alignment_residual"
                 ),
                 "ablation": _ablation_row(ablation),
+                "clock_ablation": _clock_ablation_row(clock_ablation),
                 "model_check": _model_check_row(metrics.get("model_check")),
             }
         )
@@ -228,6 +231,74 @@ def _ablation_row(ablation: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
                     out["{0}.{1}.{2}.{3}".format(arm, vocabulary, measure, metric)] = (
                         scores.get(metric)
                     )
+    return out
+
+
+#: The three clock protocols, in the order they are reported.
+CLOCK_ARMS: Tuple[str, ...] = (
+    "A_synchronized",
+    "B_independent_uncorrected",
+    "C_independent_aligned",
+)
+
+
+def _clock_ablation_row(report: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
+    """One run's A/B/C clock comparison, flattened.
+
+    Arm A is a control rather than a separate physics run: the *same* recording
+    is restamped onto the simulator clock using the true profiles. That keeps the
+    comparison about time alone -- three arms over one set of physical events --
+    instead of confounding the clock protocol with a different run.
+    """
+    if not report:
+        return {}
+    out: Dict[str, Any] = {}
+    for arm in CLOCK_ARMS:
+        block = (report.get("modes") or {}).get(arm) or {}
+        graphs = block.get("graphs") or {}
+        fused = graphs.get("fused") or {}
+        out[arm] = {
+            "offset_error_s": _get(block, "clock", "mean_abs_offset_error_s"),
+            "drift_error_ppm": _get(block, "clock", "mean_abs_drift_error_ppm"),
+            "node_f1": fused.get("node_f1"),
+            "edge_f1": fused.get("edge_f1"),
+            "edge_recall": fused.get("edge_recall"),
+            "association_f1": _get(block, "association", "f1"),
+            "n_merged_groups": block.get("n_merged_groups"),
+        }
+    return out
+
+
+def _clock_ablation_summary(runs: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+    """The A/B/C comparison averaged over every run that carries one."""
+    scored = [r for r in runs if r.get("clock_ablation")]
+    if not scored:
+        return {
+            "n_runs": 0,
+            "note": (
+                "no run carries a clock ablation; produce them with "
+                "scripts/reprocess_runs.py --stages clocks"
+            ),
+        }
+    out: Dict[str, Any] = {"n_runs": len(scored)}
+    for arm in CLOCK_ARMS:
+        block: Dict[str, Any] = {}
+        for metric in ("offset_error_s", "drift_error_ppm", "node_f1", "edge_f1",
+                       "edge_recall", "association_f1"):
+            block[metric] = _round(
+                _mean([
+                    (r["clock_ablation"].get(arm) or {}).get(metric) for r in scored
+                ]),
+                6 if metric.endswith("_s") else 4,
+            )
+        out[arm] = block
+    out["note"] = (
+        "one physical recording per run, scored three ways. A restamps the "
+        "recorders onto the simulator clock using the true profiles and is a "
+        "control, not a separate run; B takes each recorder's own timestamps at "
+        "face value; C uses the alignment estimated from shared observations "
+        "alone, which is the protocol the campaign reports"
+    )
     return out
 
 
@@ -335,6 +406,9 @@ def build_final_results(artifacts_root: PathLike) -> Dict[str, Any]:
             "n_insufficient_evidence": sum(
                 1 for s in collisions if s["verdict"] == "insufficient evidence"
             ),
+            "n_scenarios_with_seed_disagreement": sum(
+                1 for s in collisions if s["contributors_disagree_across_seeds"]
+            ),
         },
         "restraint": {
             "note": (
@@ -397,6 +471,7 @@ def build_final_results(artifacts_root: PathLike) -> Dict[str, Any]:
         "campaign": _campaign_identity(root),
         "headline": headline,
         "method_ablation": _ablation_summary(runs),
+        "clock_ablation": _clock_ablation_summary(runs),
         "model_checking": _model_check_summary(runs),
         "per_scenario": per_scenario,
         "runs": runs,
@@ -626,6 +701,41 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         )
     lines.append("")
 
+    # -- clock ablation ------------------------------------------------
+    clocks = results.get("clock_ablation") or {}
+    lines.append("## What the clock alignment is worth")
+    lines.append("")
+    if not clocks.get("n_runs"):
+        lines.append("_{0}_".format(clocks.get("note", "no clock ablation available")))
+    else:
+        lines.append(
+            "| Clock protocol | Offset error [s] | Node F1 | Edge F1 | "
+            "Edge recall | Association F1 |"
+        )
+        lines.append("|---|---|---|---|---|---|")
+        labels = (
+            ("A_synchronized", "A - synchronized (control)"),
+            ("B_independent_uncorrected", "B - independent, uncorrected"),
+            ("C_independent_aligned", "C - independent, estimated alignment"),
+        )
+        for key, label in labels:
+            arm = clocks.get(key) or {}
+            lines.append(
+                "| {0} | {1} | {2} | {3} | {4} | {5} |".format(
+                    label,
+                    _fmt(arm.get("offset_error_s"), 5),
+                    _fmt(arm.get("node_f1")),
+                    _fmt(arm.get("edge_f1")),
+                    _fmt(arm.get("edge_recall")),
+                    _fmt(arm.get("association_f1")),
+                )
+            )
+        lines.append("")
+        lines.append("Averaged over {0} runs.".format(clocks["n_runs"]))
+        lines.append("")
+        lines.append(clocks.get("note", "").capitalize() + ".")
+    lines.append("")
+
     # -- headline figures ----------------------------------------------
     lines.append("## Headline figures")
     lines.append("")
@@ -653,9 +763,10 @@ def render_markdown(results: Mapping[str, Any]) -> str:
             _fmt(attribution["precision"]), _fmt(attribution["recall"]),
             _fmt(attribution["f1"]))),
         ("exact contributor-set accuracy", _fmt(attribution["exact_set_accuracy"])),
-        ("scenarios correct / partial / insufficient",
-         "{0} / {1} / {2}".format(
+        ("scenarios correct / partial / incorrect / insufficient",
+         "{0} / {1} / {2} / {3}".format(
              attribution["n_correct"], attribution["n_partial"],
+             attribution["n_incorrect"],
              attribution["n_insufficient_evidence"])),
         ("false attributions on negative controls",
          "{0} of {1}".format(restraint["n_false_attributions"],
@@ -673,6 +784,17 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     for label, value in rows:
         lines.append("| {0} | {1} |".format(label, value))
     lines.append("")
+    if checks.get("n_runs"):
+        lines.append(
+            "A model-checking FAIL is an observation about the recorded trace, "
+            "not a defect in the checker: these are crash scenarios, and a "
+            "vehicle that entered a conflict without responding, or applied "
+            "throttle within three seconds of an impact, genuinely violated the "
+            "property. UNKNOWN is a first-class verdict -- a finite trace that "
+            "never exhibits a property's premise can neither satisfy nor violate "
+            "it -- and is never folded into a pass rate."
+        )
+        lines.append("")
     lines.append(
         "*A contribution score states what changed when the encounter was "
         "re-run under a controlled modification. It is not a finding of legal "

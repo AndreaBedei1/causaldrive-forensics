@@ -80,14 +80,17 @@ measuring closed* — which no local rule can produce, because no recorder
 observed both events.
 
 **The incident is reconstructed accurately in space and time.** Collision times
-are recovered to within a few milliseconds of the truth on the estimated common
-clock, with no spurious collisions and correct pairing, including in the
-three-vehicle chain where the two impacts must also be put in the right order.
+are recovered to within tens of milliseconds of the truth on the estimated
+common clock, with pair recall close to 1.0 and a single spurious collision
+across the whole campaign — including in the three-vehicle chain, where the two
+impacts must also be put in the right order.
 
-**Strict edge recall improves monotonically too, and reaches its ceiling on more
-than half the runs.** Read against the ceiling rather than against 1.0, the
-merged-plus-reasoning account recovers every strictly reachable edge on the
-majority of the campaign.
+**Strict edge recall improves monotonically too, and reaches its ceiling on
+roughly half the runs.** Read against the ceiling rather than against 1.0, the
+merged-plus-reasoning account recovers every strictly reachable edge on a large
+fraction of the campaign. The exact counts are in the generated table; they are
+not restated here, because a number transcribed into prose is a number that will
+eventually be wrong.
 
 ### What went wrong
 
@@ -105,6 +108,21 @@ a fair reading of it.
 named on some scenarios; a subset or a superset on others; and on at least one,
 the wrong vehicle entirely. The per-scenario verdict column says which is which,
 and the campaign's exact-set accuracy is well below 1.0.
+
+**One scenario variant was not reconstructed at all.** In `S02/avoided`, one
+recorder shares too few observations with the other for the alignment to place
+it on the common timeline. The run produces no reconstruction rather than a
+guessed one, which is the correct behaviour and also a real gap in coverage.
+
+**Model checking reports many violations, and they are real.** Across the
+campaign the properties fail far more often than they pass. That is what a set
+of crash scenarios should produce: a vehicle that entered a conflict without
+responding, or applied throttle within three seconds of an impact, genuinely
+violated the property being monitored. The counterexample witnesses carry the
+evidence — response latencies, throttle magnitudes, conflict counts. `UNKNOWN`
+outnumbers both, because a finite trace that never exhibits a property's premise
+can neither satisfy nor violate it, and that is reported as its own verdict
+rather than folded into a pass rate.
 
 **Some clocks cannot be aligned at all.** In runs where two recorders share too
 few observations, the alignment reports `UNRESOLVED_TIME_ALIGNMENT` rather than
@@ -125,14 +143,35 @@ of a parameter that was *declined*, not one that was estimated badly.
 
 | Arm | Protocol |
 |---|---|
-| A | shared simulator clock (the historical baseline in `artifacts/`) |
-| B | independent recorder clocks, estimated alignment (**the final campaign**) |
-| C | independent recorder clocks, timestamps taken at face value |
+| A | synchronized control — the same recording restamped onto the simulator clock using the true profiles |
+| B | independent recorder clocks, timestamps taken at face value |
+| C | independent recorder clocks, alignment estimated from shared observations (**the protocol the campaign reports**) |
 
-Arm C exists to show what the alignment buys. Without it, events from different
-recorders land at the wrong points on the shared timeline, and the temporal
-guards in the causal rules — which is exactly what stops a cause being placed
-after its effect — start rejecting correct relations and admitting wrong ones.
+Arm A is a **control, not a separate physics run**: the same recording is
+restamped onto the simulator clock using the true profiles, so all three arms
+describe one set of physical events and the comparison is about time alone.
+
+The result splits, and both halves matter.
+
+**The alignment substantially improves timestamp accuracy.** Mean absolute
+offset error falls roughly fourfold from arm B to arm C. Every quantity measured
+in seconds or metres — collision time, collision location, the cross-view
+trajectory RMSE — depends directly on that, and at the speeds in these scenarios
+a fifth of a second is several metres of position error.
+
+**It does not measurably change the graph.** Node F1, edge F1 and edge recall are
+flat across all three arms, within the noise of the campaign. This is not a
+failure of the alignment; it is a property of the comparison. The event matcher's
+tolerance is 1.5 s, and the uncorrected offset is an order of magnitude smaller
+than that, so a misalignment of this size never moves an event across the
+matching threshold. The structural metrics are simply insensitive to a clock
+error this small.
+
+Reporting it the other way round — quoting the improvement in seconds and
+implying the graph improved with it — would be the easy and dishonest reading.
+What the ablation actually establishes is that the alignment is necessary for
+the *reconstruction* claims and, at these offset magnitudes, neutral for the
+*structural* ones.
 
 ### Method
 

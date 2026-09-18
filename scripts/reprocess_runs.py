@@ -16,6 +16,9 @@ Stages, each independently selectable:
 ``evaluate`` scoring against the oracle
 ``ablate``   re-derive fusion with and without post-fusion causal reasoning and
              score both against the oracle, beside the best single viewpoint
+``clocks``   re-score the same recording under three clock protocols: a
+             synchronized control, independent clocks left uncorrected, and
+             independent clocks with the estimated alignment
 ``figures``  per-run figures
 ``viewer``   the viewer bundle
 
@@ -39,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from cdf.common.config import load_run_config  # noqa: E402
 from cdf.common.io import read_json, write_json  # noqa: E402
 from cdf.common.layout import RunLayout  # noqa: E402
+from cdf.evaluation.clock_ablation import run_clock_ablation  # noqa: E402
 from cdf.evaluation.method_ablation import ablate_run  # noqa: E402
 
 LOGGER = logging.getLogger("reprocess")
@@ -49,7 +53,7 @@ def _round(value, digits=4):
 
 
 ALL_STAGES = ("analyse", "fuse", "oracle", "check", "evaluate", "ablate",
-              "figures", "viewer", "manifest")
+              "clocks", "figures", "viewer", "manifest")
 
 
 def discover_runs(artifacts_root: Path) -> List[Path]:
@@ -157,6 +161,14 @@ def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
                                  .get("edges") or {}).get("f1"))
                     for arm in ("best_local", "simple_fusion",
                                 "fusion_global_reasoning")
+                }
+            elif stage == "clocks":
+                report = run_clock_ablation(layout.root, cfg)
+                result[stage] = {
+                    mode: _round(
+                        (block.get("clock") or {}).get("mean_abs_offset_error_s")
+                    )
+                    for mode, block in report["modes"].items()
                 }
             elif stage == "figures":
                 made = render_run_figures(layout.root, cfg)

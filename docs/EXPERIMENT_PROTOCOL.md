@@ -435,6 +435,122 @@ result*, not a defect rate.
 
 ---
 
+## 3.9 Scoring the explanation
+
+Node and edge F1 measure how much of the reference graph came back. They do not
+measure whether the incident was *explained*, which is what this project claims
+to do, so `cdf.evaluation.causal_metrics` scores that directly.
+
+### Scene reconstruction
+
+Two different questions, deliberately not conflated.
+
+**Self-localisation** compares each participant's own exported position to its
+true pose. In this simulator that difference is exactly zero, because no
+localisation noise is modelled. The number verifies that the recorder copies the
+pose faithfully and says nothing about reconstruction quality; it is labelled as
+such in every artifact and kept out of the headline.
+
+**Cross-view reconstruction** is the real measurement: where one vehicle's radar,
+resolved to an identity and placed on the *estimated* common clock, puts another
+vehicle, against where that vehicle truly was. It folds radar error, identity
+resolution and clock error into one number. It is computed from the raw
+recordings and the estimated alignment, so the clock error lands in the number
+rather than being divided out of it; only the final hop from common time to
+physical time is privileged, and that hop is unavoidable because the common
+clock's zero is arbitrary.
+
+Also reported: collision time error, collision location error (which, given
+exact self-localisation, is the distance the vehicles travelled during the
+reconstruction's time error — it measures the clock, not the sensors), pair
+recall, spurious collisions, and impact ordering for the multi-impact scenarios.
+
+A recorder the alignment could not place on the common timeline is **skipped and
+named** in `unaligned_recorders`, never defaulted to the identity transform:
+scoring an unaligned clock as a perfectly aligned one would understate exactly
+the error being measured.
+
+### Causal chains
+
+Root-to-outcome paths in the reconstruction against those in the reference,
+compared by **canonical family signature** rather than by node id. Two graphs
+written by different layers give the same fact different ids, and comparing ids
+would measure nothing but the id scheme.
+
+Two numbers, because they answer different questions:
+
+* **chain P/R/F1** — strict agreement on the whole path. Brittle: a
+  reconstruction can be right about the mechanism and still phrase the chain
+  differently.
+* **ancestry recall** — of the behaviour families the reference blames, how many
+  appear *anywhere* upstream of the impact. Robust, and the one that says whether
+  the mechanism was found at all.
+
+### Attribution, as a set
+
+Contributors are scored as a **set of participants**, with exact-set accuracy
+reported separately from element-wise F1: naming one of two contributors is a
+different failure from naming a third who was not involved.
+
+The class is scored against what the scenario's design admits. A single declared
+contributor implies `single_initiator`. Two or more leave the choice between
+`shared_contribution` and `joint_contribution` to the replay — the template says
+*which* behaviours caused the outcome, never whether removing one alone would
+have sufficed — so both count as correct for a multi-contributor scenario.
+Insisting on one of them would score the simulator's physics rather than the
+method.
+
+The graph-only hypothesis is scored **beside** the replay-backed verdict, so the
+question "how much does the simulator add over reasoning alone?" has an answer
+rather than an assumption.
+
+### Restraint
+
+On the three variants designed not to collide there is nothing to attribute.
+Precision, recall and F1 are vacuously 1.0 and are flagged `vacuous`; they are
+excluded from every attribution mean. What is measured instead is
+`false_attribution`: did the system name anybody?
+
+It is reported as a count, never averaged. Folding it into an F1 would let a
+confident wrong answer on a control be cancelled out by a correct answer
+elsewhere, which is precisely the error a forensic tool must not make.
+
+## 3.10 The two ablations
+
+### Method
+
+Three accounts of the same recording, scored against the same reference:
+
+| Arm | What it has |
+|---|---|
+| `best_local` | the single participant whose own graph scores highest — the *best*, not the mean, so the baseline is as hard to beat as the evidence allows |
+| `simple_fusion` | identities resolved, clocks aligned, graphs merged; every edge still claimed inside one vehicle's log |
+| `fusion_global_reasoning` | the same merge plus post-fusion causal reasoning |
+
+The last two differ in exactly one configuration key
+(`fusion.post_fusion.enabled`). Both are derived in memory from the recorded
+evidence; nothing is re-simulated and nothing is written over the run's own
+artifacts, so the difference between the arms is the method rather than the run.
+
+Each record also carries the **strict edge-recall ceiling**: the fraction of the
+reference's edges that leave an `ORACLE_SCRIPTED_INTERVENTION` node, which no
+reconstruction can match strictly because it has no node of that type to put at
+the tail. A strict recall number read without that ceiling says something untrue,
+so the two always travel together.
+
+### Clock protocol
+
+| Arm | Protocol |
+|---|---|
+| A | synchronized control — the *same* recording restamped onto the simulator clock using the true profiles |
+| B | independent clocks, timestamps taken at face value |
+| C | independent clocks, alignment estimated from shared observations alone |
+
+A is a control, not a separate physics run. Re-recording under a shared clock
+would confound the clock protocol with a different run; restamping keeps all
+three arms over one set of physical events, so the comparison is about time
+alone.
+
 ## 4. Evaluation methodology
 
 1. **The oracle is read last, and never by inference.** `cdf.evaluation` is the
