@@ -44,7 +44,7 @@ ignore this one.
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from ..common.schemas import CausalEdgeType, Event, EventType, GraphDocument
 
@@ -188,16 +188,35 @@ def canonicalise(doc: Optional[GraphDocument]) -> Optional[GraphDocument]:
                 values=values,
             )
         )
-    edges = [
-        dataclasses.replace(edge, edge_type=canonical_edge_family(edge.edge_type))
-        for edge in doc.edges
-    ]
+    # Several strict types collapse into one family -- TRIGGERS and
+    # CONTRIBUTES_TO both become positive_contribution -- so two distinct edges
+    # between the same pair can restate as the same edge. The matcher requires
+    # (source, target, edge_type) to be unique and rejects a document outright
+    # otherwise, which took a three-vehicle run's evaluation down with a
+    # ValueError rather than a metric. Keep the best-supported of the collapsed
+    # edges; confidence is the only thing that distinguishes them once the type
+    # has gone.
+    best: Dict[Tuple[str, str, str], Any] = {}
+    for edge in doc.edges:
+        family = canonical_edge_family(edge.edge_type)
+        key = (str(edge.source), str(edge.target), family)
+        restated = dataclasses.replace(edge, edge_type=family)
+        current = best.get(key)
+        if current is None or float(getattr(restated, "confidence", 0.0) or 0.0) > float(
+            getattr(current, "confidence", 0.0) or 0.0
+        ):
+            best[key] = restated
+    edges = list(best.values())
+    n_collapsed = len(doc.edges) - len(edges)
     meta = dict(doc.meta or {})
     meta["canonical_vocabulary"] = {
         "applied": True,
+        "n_edges_collapsed": n_collapsed,
         "note": (
             "evaluation-only restatement of node and edge types into semantic "
-            "families; see cdf.graph.canonical"
+            "families; see cdf.graph.canonical. Edges that restate to the same "
+            "(source, target, family) are collapsed to the best-supported one, "
+            "and the count is reported rather than left implicit"
         ),
     }
     return GraphDocument(
