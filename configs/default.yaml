@@ -205,6 +205,11 @@ causal_rules:
 # -----------------------------------------------------------------------------
 # Post-event fusion
 # -----------------------------------------------------------------------------
+# Executable temporal logic. See cdf.formal: a window that ran outside the
+# recording, or across a gap in the evidence, is UNKNOWN rather than PASS.
+formal:
+  min_evidence_coverage: 0.8
+
 # Deriving "this did not happen" from onboard evidence. See
 # cdf.graph.non_actions: a window whose evidence falls below the bar is
 # reported UNKNOWN rather than resolved either way.
