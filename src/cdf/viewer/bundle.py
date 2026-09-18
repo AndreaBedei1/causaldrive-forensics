@@ -170,6 +170,10 @@ def build_run_bundle(run_dir: Union[str, Path], cfg: Config) -> Dict[str, Any]:
     if evaluation is not None:
         bundle["evaluation"] = evaluation
 
+    ablation_path = layout.evaluation_dir / "method_ablation.json"
+    if ablation_path.exists():
+        bundle.setdefault("evaluation", {})["method_ablation"] = read_json(ablation_path)
+
     bundle["notes"] = notes
     # to_jsonable also maps NaN/Inf to null, which json.dump(allow_nan=False)
     # would otherwise refuse -- a single bad float must not lose the whole run.
@@ -438,7 +442,88 @@ def _fusion_block(layout: RunLayout, notes: List[Dict[str, Any]]) -> Optional[Di
                 [layout.fusion_diagnostics],
             )
         )
+
+    # What fusion concluded, in the terms a reader asks in: what happened, in
+    # what order, through which chain, and whose behaviour sits at the root of
+    # it. The graph is the evidence for this; this is the answer.
+    if layout.incident_reconstruction.exists():
+        block["reconstruction"] = read_json(layout.incident_reconstruction)
+    else:
+        inner.append(
+            _note(
+                "fusion.reconstruction",
+                "no incident reconstruction; the viewer can show the graph but "
+                "not the account derived from it",
+                [layout.incident_reconstruction],
+            )
+        )
+    if layout.causal_attribution.exists():
+        block["graph_attribution"] = read_json(layout.causal_attribution)
+    else:
+        inner.append(
+            _note(
+                "fusion.graph_attribution",
+                "no graph-derived attribution hypothesis",
+                [layout.causal_attribution],
+            )
+        )
+
+    alignment_path = layout.fusion_dir / "time_alignment.json"
+    if alignment_path.exists():
+        block["clock"] = _clock_block(read_json(alignment_path))
+    else:
+        inner.append(
+            _note(
+                "fusion.clock",
+                "no time alignment; the common timeline is unexplained",
+                [alignment_path],
+            )
+        )
     return block
+
+
+def _clock_block(alignment: Dict[str, Any]) -> Dict[str, Any]:
+    """How each recorder's own clock was placed on the common timeline.
+
+    Every timestamp the viewer shows outside a vehicle's own panel has been
+    through this transform, so a reader must be able to see it: which recorder
+    is the gauge, what scale and offset each other one was given, how well it
+    fitted, and on what evidence. An estimate presented without its residual is
+    an assertion.
+    """
+    offsets = alignment.get("offsets") or {}
+    rows = []
+    for pid in sorted(offsets):
+        entry = offsets[pid] or {}
+        rows.append(
+            {
+                "participant_id": pid,
+                "is_reference": bool(entry.get("is_reference")),
+                "scale": entry.get("scale"),
+                "offset_s": entry.get("offset_s"),
+                "residual_s": entry.get("residual"),
+                "confidence": entry.get("confidence"),
+                "status": entry.get("status"),
+                "drift_ppm": entry.get("drift_ppm"),
+                "drift_status": entry.get("drift_status"),
+                "method": entry.get("method"),
+                "methods": list(entry.get("methods") or []),
+                "n_constraints": entry.get("n_constraints"),
+                "n_samples": entry.get("n_samples"),
+            }
+        )
+    return {
+        "reference": alignment.get("reference"),
+        "reference_rule": alignment.get("reference_rule"),
+        "formula": alignment.get("formula"),
+        "common_span": alignment.get("common_span"),
+        "participants": rows,
+        "note": (
+            "each recorder kept its own clock; these are the estimated "
+            "transforms onto the common timeline, fitted from shared "
+            "observations alone"
+        ),
+    }
 
 
 def _projected_assignment(a: Dict[str, Any]) -> Dict[str, Any]:

@@ -381,3 +381,254 @@ footer ul { margin: 6px 0 0; padding-left: 18px; }
   border-radius: 4px;
   font-size: 12px;
 }
+
+/* ---------------------------------------------------------------- tabs ----
+ *
+ * One tab per question an investigation asks. The tab strip is the primary
+ * navigation; the perspective buttons in the header are orthogonal to it and
+ * stay visible, because "which tab" and "whose viewpoint" are different
+ * questions and a reader has to be able to change one without losing the other.
+ */
+
+#tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--fg); }
+
+.tab[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tabpane {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px;
+}
+
+.tabpane[hidden] { display: none; }
+
+/* ------------------------------------------------------------- overview ---
+ *
+ * The answer panel is the one thing a reader must not be able to miss, so it
+ * gets the largest type on the page and the accent rule down its left edge.
+ */
+
+.answer-block {
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+
+.answer-block:last-of-type { border-bottom: none; }
+
+.headline {
+  font-size: 17px;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.because {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  margin: 8px 0;
+}
+
+.narrative {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.narrative li { margin: 2px 0; }
+
+.insufficient-inline { border-left-color: var(--unknown); color: var(--muted); }
+
+.verdict {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--panel-2);
+  border-radius: 4px;
+}
+
+.verdict-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verdict-src { color: var(--muted); font-size: 12px; }
+.rationale { margin-top: 8px; line-height: 1.5; }
+
+.disclaimer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-style: italic;
+}
+
+.outcome-head {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 14px 0 6px;
+  text-transform: none;
+}
+
+.chain-cell { line-height: 1.9; }
+.chain-cell .arrow { color: var(--muted); }
+
+.step {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--accent);
+  padding: 1px 2px;
+}
+
+.step.inferred {
+  border-bottom-style: dashed;
+  background: rgba(74, 163, 255, 0.08);
+}
+
+tr.preventive td { opacity: 0.75; }
+
+.uncertain { margin: 0; padding-left: 18px; line-height: 1.6; }
+.uncertain li { margin: 3px 0; }
+
+.ok { color: var(--pass); }
+
+.kv th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-right: 14px;
+}
+
+/* --------------------------------------------------------------- tags -----
+ *
+ * A verdict class is a controlled vocabulary term, so it is rendered as a
+ * chip rather than prose. Colour follows meaning: a named contribution is
+ * accented, an absence of evidence is muted, a preventive behaviour is green.
+ */
+
+.tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.tag.single_initiator,
+.tag.single_cause { border-color: var(--accent); color: var(--accent); }
+
+.tag.shared_contribution,
+.tag.multiple_causes,
+.tag.joint_contribution { border-color: var(--p-b); color: var(--p-b); }
+
+.tag.contributing_but_not_necessary { border-color: var(--unknown); color: var(--unknown); }
+
+.tag.insufficient_evidence,
+.tag.no_cause_identified { border-color: var(--muted); color: var(--muted); }
+
+.tag.preventive { border-color: var(--pass); color: var(--pass); }
+.tag.contributing { border-color: var(--accent); color: var(--accent); }
+.tag.cross { border-color: var(--fused); color: var(--fused); }
+.tag.collided { border-color: var(--fail); color: var(--fail); }
+.tag.avoided { border-color: var(--pass); color: var(--pass); }
+.tag.factual { border-color: var(--muted); color: var(--muted); }
+.tag.reference { border-color: var(--accent); color: var(--accent); }
+.tag.ALIGNED { border-color: var(--pass); color: var(--pass); }
+.tag.minimal { border-color: var(--pass); color: var(--pass); }
+.tag.minimal_within_tested { border-color: var(--unknown); color: var(--unknown); }
+
+tr.reference td, tr.factual td { background: rgba(255, 255, 255, 0.02); }
+
+/* ------------------------------------------------------- graph controls ---*/
+
+#graph-controls {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#graph-controls label { display: flex; align-items: center; gap: 6px; }
+#graph-controls input[type="range"] { width: 120px; accent-color: var(--accent); }
+
+#graph-controls button,
+.transport button {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  border-radius: 3px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#gsvg { cursor: grab; touch-action: none; }
+#gsvg.dragging { cursor: grabbing; }
+
+.gedge.inferred { stroke-dasharray: 4 3; }
+
+.speed { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12px; }
+.speed select {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  border-radius: 3px;
+  padding: 3px 6px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.scroll-y.tall { max-height: 70vh; }
+
+/* ------------------------------------------------------------- ceiling ----
+ *
+ * The strict-recall ceiling is the context without which a strict recall
+ * number says something untrue, so it is given a box of its own rather than a
+ * footnote.
+ */
+
+.ceiling {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--unknown);
+  background: var(--panel-2);
+  line-height: 1.55;
+  font-size: 12.5px;
+}
+
+.ceiling.reached { border-left-color: var(--pass); }
+
+@media (max-width: 1100px) {
+  .tabpane { grid-template-columns: 1fr; }
+}

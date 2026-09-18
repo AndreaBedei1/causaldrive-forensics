@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CDF forensic viewer</title>
+<title>CDF incident viewer</title>
 <!-- Local only: one stylesheet, one script, one fetch of run_data.json from
      this same directory. There is deliberately no CDN, no web font and no
      network request of any kind, so the page works from an offline evidence
@@ -25,51 +25,132 @@
   <nav id="perspectives" aria-label="Perspective"></nav>
 </header>
 
+<!-- The investigation, in the order a reader works through it: what happened,
+     where, why, when, who, was it checked, on what evidence, and how well did
+     the method do. Each tab is one question. -->
+<nav id="tabs" role="tablist" aria-label="Investigation"></nav>
+
 <main id="app" hidden>
 
-  <section class="panel" id="map-panel">
-    <h2>Bird's-eye reconstruction <span class="hint" id="map-source"></span></h2>
-    <div id="map-wrap">
-      <canvas id="map" width="900" height="440"></canvas>
-    </div>
-    <div class="transport">
-      <button id="play" type="button">Play</button>
-      <input id="time" type="range" min="0" max="1" step="0.01" value="0" aria-label="Simulation time">
-      <span id="clock">t = 0.00 s</span>
-    </div>
-    <div id="map-legend"></div>
-  </section>
+  <!-- ------------------------------------------------ overview ---------- -->
+  <div class="tabpane" id="pane-overview">
+    <section class="panel span-2" id="answer-panel">
+      <h2>What happened, and why</h2>
+      <div id="answer"></div>
+    </section>
+    <section class="panel span-2" id="chain-panel">
+      <h2>Causal chains into the outcome <span class="hint">- click a step to open it in the graph</span></h2>
+      <div id="chains"></div>
+    </section>
+    <section class="panel" id="summary-panel">
+      <h2>At a glance</h2>
+      <div id="glance"></div>
+    </section>
+    <section class="panel" id="uncertainty-panel">
+      <h2>What the evidence does not settle</h2>
+      <div id="uncertainties"></div>
+    </section>
+  </div>
 
-  <section class="panel" id="signals-panel">
-    <h2>Signals <span class="hint" id="signals-source"></span></h2>
-    <div id="signals"></div>
-  </section>
+  <!-- ------------------------------------------- reconstruction --------- -->
+  <div class="tabpane" id="pane-reconstruction" hidden>
+    <section class="panel span-2" id="map-panel">
+      <h2>Bird's-eye reconstruction <span class="hint" id="map-source"></span></h2>
+      <div id="map-wrap">
+        <canvas id="map" width="900" height="440"></canvas>
+      </div>
+      <div class="transport">
+        <button id="play" type="button">Play</button>
+        <input id="time" type="range" min="0" max="1" step="0.01" value="0" aria-label="Time">
+        <span id="clock">t = 0.00 s</span>
+        <label class="speed">speed
+          <select id="speed" aria-label="Playback speed">
+            <option value="0.1">0.1x</option>
+            <option value="0.25">0.25x</option>
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x</option>
+            <option value="2">2x</option>
+            <option value="4">4x</option>
+          </select>
+        </label>
+        <button id="step-back" type="button" title="One frame back">&#9666;</button>
+        <button id="step-fwd" type="button" title="One frame forward">&#9656;</button>
+      </div>
+      <div id="map-legend"></div>
+    </section>
+    <section class="panel span-2" id="signals-panel">
+      <h2>Signals <span class="hint" id="signals-source"></span></h2>
+      <div id="signals"></div>
+    </section>
+  </div>
 
-  <section class="panel" id="events-panel">
-    <h2>Event timeline</h2>
-    <div id="events" class="scroll-y"></div>
-  </section>
+  <!-- --------------------------------------------- causal graph --------- -->
+  <div class="tabpane" id="pane-graph" hidden>
+    <section class="panel span-2" id="graph-panel">
+      <h2>Causal graph
+        <span class="hint">- drag to pan, wheel to zoom, click a node for its path to the outcome</span>
+      </h2>
+      <div id="graph-controls"></div>
+      <div id="graph"></div>
+      <div id="graph-detail">No node selected.</div>
+    </section>
+  </div>
 
-  <section class="panel" id="graph-panel">
-    <h2>Causal graph <span class="hint">- click a node to highlight its path to the outcome</span></h2>
-    <div id="graph"></div>
-    <div id="graph-detail">No node selected.</div>
-  </section>
+  <!-- -------------------------------------------------- timeline -------- -->
+  <div class="tabpane" id="pane-timeline" hidden>
+    <section class="panel span-2" id="events-panel">
+      <h2>Event timeline <span class="hint">- click an event to seek to it</span></h2>
+      <div id="events" class="scroll-y tall"></div>
+    </section>
+  </div>
 
-  <section class="panel" id="checking-panel">
-    <h2>Model checking</h2>
-    <div id="checking"></div>
-  </section>
+  <!-- ----------------------------------------------- attribution -------- -->
+  <div class="tabpane" id="pane-attribution" hidden>
+    <section class="panel span-2" id="verdict-panel">
+      <h2>Causal contribution</h2>
+      <div id="attribution"></div>
+    </section>
+    <section class="panel span-2" id="prevention-panel">
+      <h2>What would have prevented it</h2>
+      <div id="prevention"></div>
+    </section>
+    <section class="panel span-2" id="replays-panel">
+      <h2>Counterfactual replays</h2>
+      <div id="replays"></div>
+    </section>
+  </div>
 
-  <section class="panel" id="identity-panel">
-    <h2>Reconstructed identity</h2>
-    <div id="identity"></div>
-  </section>
+  <!-- -------------------------------------------- model checking -------- -->
+  <div class="tabpane" id="pane-checking" hidden>
+    <section class="panel span-2" id="checking-panel">
+      <h2>Model checking</h2>
+      <div id="checking"></div>
+    </section>
+  </div>
 
-  <section class="panel span-2" id="attribution-panel">
-    <h2>Causal contribution</h2>
-    <div id="attribution"></div>
-  </section>
+  <!-- -------------------------------------------------- evidence -------- -->
+  <div class="tabpane" id="pane-evidence" hidden>
+    <section class="panel span-2" id="clock-panel">
+      <h2>Recorder clocks <span class="hint">- every shared timestamp passed through these</span></h2>
+      <div id="clocks"></div>
+    </section>
+    <section class="panel span-2" id="identity-panel">
+      <h2>Reconstructed identity</h2>
+      <div id="identity"></div>
+    </section>
+  </div>
+
+  <!-- ------------------------------------------------ evaluation -------- -->
+  <div class="tabpane" id="pane-evaluation" hidden>
+    <section class="panel span-2" id="evaluation-panel">
+      <h2>Scored against the reference <span class="hint">- evaluation only; never an input to the reconstruction</span></h2>
+      <div id="evaluation"></div>
+    </section>
+    <section class="panel span-2" id="ablation-panel">
+      <h2>What each layer of the method was worth</h2>
+      <div id="ablation"></div>
+    </section>
+  </div>
 
 </main>
 

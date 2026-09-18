@@ -27,6 +27,24 @@
   var LAST_FRAME = 0;       // performance.now() of the previous animation frame
   var SELECTED = null;      // selected causal-graph node id
   var HIGHLIGHT = { nodes: {}, edges: {} };
+  var SPEED = 1;            // playback rate, multiples of simulation time
+  var TAB = 'overview';
+  var ZOOM = { k: 1, x: 0, y: 0 };   // causal-graph pan/zoom
+  var FILTERS = { minConfidence: 0, inferredOnly: false, participant: '' };
+
+  /* The tabs, in the order an investigation is actually worked through: what
+   * happened, where, why, when, who, was it checked, on what evidence, and how
+   * well the method did against the reference. */
+  var TABS = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'reconstruction', label: 'Reconstruction' },
+    { id: 'graph', label: 'Causal graph' },
+    { id: 'timeline', label: 'Timeline' },
+    { id: 'attribution', label: 'Attribution' },
+    { id: 'checking', label: 'Model checking' },
+    { id: 'evidence', label: 'Evidence' },
+    { id: 'evaluation', label: 'Evaluation' }
+  ];
 
   var OUTCOME_TYPES = { COLLISION: 1, NEAR_MISS: 1, POST_IMPACT_STOP: 1 };
   var VEHICLE_L = 4.6;      // metres, drawn footprint only
@@ -121,9 +139,12 @@
   // ------------------------------------------------------------------- boot
 
   function boot() {
-    ['banner', 'run-title', 'run-meta', 'perspectives', 'app', 'map', 'map-source',
-     'map-legend', 'time', 'play', 'clock', 'signals', 'signals-source', 'events',
-     'graph', 'graph-detail', 'checking', 'identity', 'attribution', 'notes'
+    ['banner', 'run-title', 'run-meta', 'perspectives', 'tabs', 'app', 'map',
+     'map-source', 'map-legend', 'time', 'play', 'clock', 'speed', 'step-back',
+     'step-fwd', 'signals', 'signals-source', 'events', 'graph', 'graph-detail',
+     'graph-controls', 'checking', 'identity', 'attribution', 'answer', 'chains',
+     'glance', 'uncertainties', 'prevention', 'replays', 'clocks', 'evaluation',
+     'ablation', 'notes'
     ].forEach(function (id) { el[id] = $(id); });
 
     fetch('run_data.json')
@@ -131,14 +152,26 @@
         if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
         return r.json();
       })
-      .then(function (json) { DATA = json; start(); })
-      .catch(fatal);
+      .catch(cannotLoad)
+      .then(function (json) {
+        if (!json) return;
+        DATA = json;
+        // A rendering failure is a different thing from a missing bundle and
+        // must not be reported as one: telling a reader to start a web server
+        // when the data loaded fine and a panel threw would send them chasing
+        // entirely the wrong problem.
+        try {
+          start();
+        } catch (err) {
+          renderFailed(err);
+        }
+      });
   }
 
   /* A failed fetch is nearly always the browser's file:// restriction rather
    * than a missing file, so say exactly how to get past it instead of printing
    * a bare stack trace. */
-  function fatal(err) {
+  function cannotLoad(err) {
     var msg = (err && err.message) ? err.message : String(err);
     document.body.innerHTML =
       '<div id="fatal"><h2>Could not load run_data.json</h2>' +
@@ -150,6 +183,18 @@
       '# then open localhost:8000/index.html in the browser</pre>' +
       '<p>If the file really is absent, regenerate it with ' +
       '<code>cdf.viewer.bundle.write_bundle(run_dir, cfg)</code>.</p></div>';
+    return null;
+  }
+
+  /* The bundle arrived and a panel threw. Say which, and say plainly that the
+   * run is not the problem. */
+  function renderFailed(err) {
+    document.body.innerHTML =
+      '<div id="fatal"><h2>The run data loaded, but the page failed to render it</h2>' +
+      '<p>' + esc((err && err.message) ? err.message : String(err)) + '</p>' +
+      '<pre>' + esc((err && err.stack) ? err.stack : '') + '</pre>' +
+      '<p>This is a defect in <code>viewer/app.js</code>, not a problem with the ' +
+      'run: <code>run_data.json</code> was fetched successfully.</p></div>';
   }
 
   function start() {
@@ -158,10 +203,11 @@
     el.app.hidden = false;
     renderHeader();
     buildPerspectiveButtons();
+    buildTabs();
     setPerspective(defaultPerspective());
     renderNotes();
     wireTransport();
-    window.addEventListener('resize', drawMap);
+    window.addEventListener('resize', function () { if (TAB === 'reconstruction') drawMap(); });
   }
 
   function defaultPerspective() {
@@ -198,6 +244,34 @@
       var btn = ev.target.closest('.pbtn');
       if (btn) setPerspective(btn.getAttribute('data-view'));
     });
+  }
+
+  // --------------------------------------------------------------- tabs
+
+  function buildTabs() {
+    el.tabs.innerHTML = TABS.map(function (t) {
+      return '<button class="tab" type="button" role="tab" data-tab="' + t.id +
+             '" aria-selected="false">' + esc(t.label) + '</button>';
+    }).join('');
+    el.tabs.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('.tab');
+      if (btn) setTab(btn.getAttribute('data-tab'));
+    });
+  }
+
+  function setTab(id) {
+    TAB = id;
+    TABS.forEach(function (t) {
+      var pane = $('pane-' + t.id);
+      if (pane) pane.hidden = t.id !== id;
+    });
+    Array.prototype.forEach.call(el.tabs.querySelectorAll('.tab'), function (b) {
+      b.setAttribute('aria-selected', b.getAttribute('data-tab') === id ? 'true' : 'false');
+    });
+    // The canvas has no size while its pane is hidden, so the map is drawn on
+    // arrival rather than kept up to date behind a display:none.
+    if (id === 'reconstruction') drawMap();
+    if (id !== 'reconstruction') pause();
   }
 
   // ------------------------------------------------------------ view model
@@ -290,12 +364,22 @@
       b.setAttribute('aria-pressed', b.getAttribute('data-view') === id ? 'true' : 'false');
     });
     VIEW.bounds = null;
+    ZOOM = { k: 1, x: 0, y: 0 };
     renderSignals();
     renderEvents();
     renderGraph();
     renderChecking();
     renderIdentity();
     renderAttribution();
+    renderAnswer();
+    renderChains();
+    renderGlance();
+    renderUncertainties();
+    renderPrevention();
+    renderReplays();
+    renderClocks();
+    renderEvaluation();
+    renderAblation();
     drawMap();
     tick(T);
   }
@@ -310,13 +394,18 @@
     el.time.value = String(T);
     el.time.addEventListener('input', function () { pause(); tick(parseFloat(el.time.value)); });
     el.play.addEventListener('click', function () { PLAYING ? pause() : play(); });
+    el.speed.addEventListener('change', function () { SPEED = parseFloat(el.speed.value) || 1; });
+    el['step-back'].addEventListener('click', function () { pause(); tick(T - frameStep()); });
+    el['step-fwd'].addEventListener('click', function () { pause(); tick(T + frameStep()); });
     document.addEventListener('keydown', function (ev) {
       if (ev.target && /input|textarea/i.test(ev.target.tagName)) return;
       if (ev.code === 'Space') { ev.preventDefault(); PLAYING ? pause() : play(); }
-      else if (ev.code === 'ArrowRight') { pause(); tick(T + (DATA.run.dt || 0.05)); }
-      else if (ev.code === 'ArrowLeft') { pause(); tick(T - (DATA.run.dt || 0.05)); }
+      else if (ev.code === 'ArrowRight') { pause(); tick(T + frameStep()); }
+      else if (ev.code === 'ArrowLeft') { pause(); tick(T - frameStep()); }
     });
   }
+
+  function frameStep() { return DATA.run.dt || 0.05; }
 
   function play() {
     var span = runSpan();
@@ -332,12 +421,14 @@
     el.play.textContent = 'Play';
   }
 
-  /* Playback runs at 1x simulation time, driven by the wall clock delta rather
-   * than a fixed increment, so the animation keeps real-time meaning on a slow
-   * machine instead of silently running in slow motion. */
+  /* Playback is driven by the wall-clock delta rather than a fixed increment,
+   * so the animation keeps its real-time meaning on a slow machine instead of
+   * silently running in slow motion. SPEED scales that: at 0.1x a 50 ms
+   * simulator step takes half a second of wall time, which is what it takes to
+   * watch an impact happen. */
   function frame(now) {
     if (!PLAYING) return;
-    var dt = (now - LAST_FRAME) / 1000;
+    var dt = (now - LAST_FRAME) / 1000 * SPEED;
     LAST_FRAME = now;
     var span = runSpan();
     var next = T + dt;
@@ -846,9 +937,17 @@
       return;
     }
 
-    var nodes = graph.nodes.slice().sort(function (a, b) { return a.t_peak - b.t_peak; });
-    var edges = graph.edges || [];
-    GRAPH_INDEX = indexGraph(nodes, edges);
+    renderGraphControls(graph);
+    var visible = applyFilters(graph);
+    var nodes = visible.nodes, edges = visible.edges;
+    GRAPH_INDEX = indexGraph(graph.nodes.slice().sort(function (a, b) {
+      return a.t_peak - b.t_peak;
+    }), graph.edges || []);
+    if (!nodes.length) {
+      el.graph.innerHTML = '<div class="missing">No node passes the current filters. ' +
+        'Relax them to see the graph.</div>';
+      return;
+    }
 
     var lanesByKey = {}, laneOrder = [];
     var multiParticipant = uniqueCount(nodes, function (n) { return n.participant_id; }) > 1;
@@ -882,9 +981,16 @@
     });
     var H = y + AXIS;
 
-    var svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+    // The whole drawing lives inside one <g>, so pan and zoom are a single
+    // transform on it rather than a re-layout: the positions a reader learned
+    // do not move relative to each other when they zoom in on a junction.
+    var svg = '<svg id="gsvg" width="100%" height="' + Math.min(H, 560) +
+              '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMinYMin meet">';
     svg += '<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6.5" refY="2.5" orient="auto">' +
-           '<path d="M0,0 L6,2.5 L0,5 z" fill="' + cssVar('--muted') + '"></path></marker></defs>';
+           '<path d="M0,0 L6,2.5 L0,5 z" fill="' + cssVar('--muted') + '"></path></marker>' +
+           '<marker id="arrow-inferred" markerWidth="7" markerHeight="7" refX="6.5" refY="2.5" orient="auto">' +
+           '<path d="M0,0 L6,2.5 L0,5 z" fill="' + cssVar('--accent') + '"></path></marker></defs>';
+    svg += '<g id="gzoom">';
 
     laneBands.forEach(function (band) {
       svg += '<text x="6" y="' + (band.y0 + 16) + '" fill="' + cssVar('--muted') +
@@ -899,12 +1005,19 @@
       var x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2;
       var mx = (x1 + x2) / 2;
       var op = (0.12 + 0.88 * clamp(e.confidence, 0, 1)).toFixed(3);
-      svg += '<path class="gedge" data-edge="' + i + '" d="M' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
+      var inferred = edgeOrigin(e) === 'post_fusion_inference';
+      svg += '<path class="gedge' + (inferred ? ' inferred' : '') + '" data-edge="' + i +
+             '" d="M' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
              ' C' + mx.toFixed(1) + ' ' + y1.toFixed(1) + ' ' + mx.toFixed(1) + ' ' + y2.toFixed(1) +
-             ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1) + '" fill="none" stroke="' + cssVar('--muted') +
-             '" stroke-opacity="' + op + '" stroke-width="1.4" marker-end="url(#arrow)">' +
+             ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1) + '" fill="none" stroke="' +
+             (inferred ? cssVar('--accent') : cssVar('--muted')) +
+             '" stroke-opacity="' + op + '" stroke-width="1.4"' +
+             (inferred ? ' stroke-dasharray="4 3"' : '') +
+             ' marker-end="url(#' + (inferred ? 'arrow-inferred' : 'arrow') + ')">' +
              '<title>' + esc(e.edge_type + '  conf ' + num(e.confidence, 2) +
-             (e.rule ? '  rule ' + e.rule : '')) + '</title></path>';
+             (e.rule ? '  rule ' + e.rule : '') +
+             (inferred ? '  [inferred after fusion: no single vehicle claimed this]'
+                       : '  [claimed inside one vehicle\'s log]')) + '</title></path>';
     });
 
     nodes.forEach(function (n) {
@@ -934,13 +1047,136 @@
              '<text x="' + xv.toFixed(1) + '" y="' + (H - AXIS + 25) + '" fill="' + cssVar('--muted') +
              '" font-size="10">' + num(tv, 1) + ' s</text>';
     }
-    svg += '</svg>';
+    svg += '</g></svg>';
     el.graph.innerHTML = svg;
+    wireGraphNavigation(W, H);
 
     el.graph.onclick = function (ev) {
       var g = ev.target.closest('.gnode');
       if (g) selectNode(g.getAttribute('data-node'));
     };
+  }
+
+  /* An edge's origin lives in its detail block: 'local' for a claim a vehicle
+   * made inside its own log, 'post_fusion_inference' for one that only exists
+   * once the logs were merged. The distinction is the whole argument of the
+   * method, so it is drawn rather than buried in a tooltip. */
+  function edgeOrigin(e) {
+    return (e.detail && e.detail.origin) || e.origin || 'local';
+  }
+
+  function renderGraphControls(graph) {
+    var pids = {};
+    (graph.nodes || []).forEach(function (n) { pids[n.participant_id] = 1; });
+    var options = Object.keys(pids).sort().map(function (p) {
+      return '<option value="' + esc(p) + '"' +
+             (FILTERS.participant === p ? ' selected' : '') + '>' + esc(p) + '</option>';
+    }).join('');
+    el['graph-controls'].innerHTML =
+      '<label>min confidence <input id="f-conf" type="range" min="0" max="1" step="0.05" value="' +
+      FILTERS.minConfidence + '"><span id="f-conf-v">' + num(FILTERS.minConfidence, 2) +
+      '</span></label>' +
+      '<label><input id="f-inferred" type="checkbox"' +
+      (FILTERS.inferredOnly ? ' checked' : '') +
+      '> only edges no single vehicle claimed</label>' +
+      '<label>vehicle <select id="f-pid"><option value="">all</option>' + options +
+      '</select></label>' +
+      '<button id="f-reset" type="button">reset view</button>';
+
+    $('f-conf').addEventListener('input', function () {
+      FILTERS.minConfidence = parseFloat(this.value);
+      $('f-conf-v').textContent = num(FILTERS.minConfidence, 2);
+      renderGraph();
+    });
+    $('f-inferred').addEventListener('change', function () {
+      FILTERS.inferredOnly = this.checked;
+      renderGraph();
+    });
+    $('f-pid').addEventListener('change', function () {
+      FILTERS.participant = this.value;
+      renderGraph();
+    });
+    $('f-reset').addEventListener('click', function () {
+      FILTERS = { minConfidence: 0, inferredOnly: false, participant: '' };
+      ZOOM = { k: 1, x: 0, y: 0 };
+      renderGraph();
+    });
+  }
+
+  /* Filters hide, they never delete: the index used for path highlighting is
+   * built over the whole graph, so selecting a node still traces its real
+   * ancestry even when part of that ancestry is filtered out of view. */
+  function applyFilters(graph) {
+    var min = FILTERS.minConfidence;
+    var keepNode = function (n) {
+      if (n.confidence < min) return false;
+      if (FILTERS.participant && n.participant_id !== FILTERS.participant &&
+          n.subject !== FILTERS.participant) return false;
+      return true;
+    };
+    var nodes = (graph.nodes || []).filter(keepNode)
+      .sort(function (a, b) { return a.t_peak - b.t_peak; });
+    var ids = {};
+    nodes.forEach(function (n) { ids[n.event_id] = 1; });
+    var edges = (graph.edges || []).filter(function (e) {
+      if (!ids[e.source] || !ids[e.target]) return false;
+      if (e.confidence < min) return false;
+      if (FILTERS.inferredOnly && edgeOrigin(e) !== 'post_fusion_inference') return false;
+      return true;
+    });
+    return { nodes: nodes, edges: edges };
+  }
+
+  /* Pan with a drag, zoom with the wheel about the pointer. The transform is
+   * applied to one group, so nothing is re-laid out and the reader's mental
+   * map of the graph survives the gesture. */
+  function wireGraphNavigation(W, H) {
+    var svg = $('gsvg'), g = $('gzoom');
+    if (!svg || !g) return;
+    var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+    function apply() {
+      g.setAttribute('transform',
+        'translate(' + ZOOM.x.toFixed(2) + ',' + ZOOM.y.toFixed(2) + ') scale(' +
+        ZOOM.k.toFixed(4) + ')');
+    }
+    apply();
+
+    svg.addEventListener('wheel', function (ev) {
+      ev.preventDefault();
+      var rect = svg.getBoundingClientRect();
+      // Pointer position in the SVG's own user units, so the point under the
+      // cursor stays under the cursor.
+      var px = (ev.clientX - rect.left) / rect.width * W;
+      var py = (ev.clientY - rect.top) / rect.height * H;
+      var factor = ev.deltaY < 0 ? 1.15 : 1 / 1.15;
+      var k = clamp(ZOOM.k * factor, 0.3, 8);
+      ZOOM.x = px - (px - ZOOM.x) * (k / ZOOM.k);
+      ZOOM.y = py - (py - ZOOM.y) * (k / ZOOM.k);
+      ZOOM.k = k;
+      apply();
+    }, { passive: false });
+
+    svg.addEventListener('pointerdown', function (ev) {
+      if (ev.target.closest('.gnode')) return;   // a click on a node is a selection
+      dragging = true;
+      sx = ev.clientX; sy = ev.clientY; ox = ZOOM.x; oy = ZOOM.y;
+      svg.setPointerCapture(ev.pointerId);
+      svg.classList.add('dragging');
+    });
+    svg.addEventListener('pointermove', function (ev) {
+      if (!dragging) return;
+      var rect = svg.getBoundingClientRect();
+      ZOOM.x = ox + (ev.clientX - sx) / rect.width * W;
+      ZOOM.y = oy + (ev.clientY - sy) / rect.height * H;
+      apply();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (name) {
+      svg.addEventListener(name, function () {
+        dragging = false;
+        svg.classList.remove('dragging');
+      });
+    });
   }
 
   function indexGraph(nodes, edges) {
@@ -1189,82 +1425,684 @@
   /* The final answer, and the one place where saying nothing is the correct
    * output: without a counterfactual artifact the viewer must not name anybody.
    */
+  /* The verdict, the behaviours behind it, and the replays that established it.
+   *
+   * This reads cdf.causal.attribution's own field names. It used to probe a list
+   * of plausible aliases and fall through to INSUFFICIENT EVIDENCE when none
+   * matched, which meant a run with a perfectly good attribution rendered as
+   * though it had none -- the failure mode was indistinguishable from the honest
+   * answer, which is the worst possible way for a forensic tool to be wrong. */
   function renderAttribution() {
-    var cf = DATA.counterfactual;
-    var contribution = cf && cf.contribution;
-    var rows = contribution ? contributionRows(contribution) : [];
+    var cf = DATA.counterfactual && DATA.counterfactual.contribution;
+    var hypothesis = graphAttribution();
 
-    if (!rows.length) {
-      el.attribution.innerHTML =
-        '<div class="insufficient">INSUFFICIENT EVIDENCE' +
-        '<div class="why">' +
-        (contribution
-          ? 'A counterfactual analysis exists for this run but attributes no contribution that the evidence supports.'
-          : 'No counterfactual replay has been run for this run directory, so no causal contribution can be attributed to any participant.') +
-        noteHint('counterfactual') + '</div></div>';
+    if (!cf && !hypothesis) {
+      el.attribution.innerHTML = insufficient(
+        'No counterfactual replay and no graph-derived hypothesis exist for this ' +
+        'run, so no causal contribution can be attributed to anybody.',
+        'counterfactual');
       return;
     }
 
-    var max = rows.reduce(function (m, r) { return Math.max(m, Math.abs(r.score)); }, 0) || 1;
-    var html = '<table class="grid"><thead><tr><th>factor</th><th class="num">contribution</th>' +
-               '<th style="width:40%">share</th><th>detail</th></tr></thead><tbody>';
-    rows.forEach(function (r) {
-      html += '<tr><td class="mono">' + esc(r.label) + '</td>' +
-              '<td class="num">' + num(r.score, 3) + '</td>' +
-              '<td><span class="bar" style="width:' + (Math.abs(r.score) / max * 100).toFixed(1) + '%"></span></td>' +
-              '<td class="meta">' + esc(r.detail || '') + '</td></tr>';
-    });
-    html += '</tbody></table>' +
-      '<p class="missing">Contributions come from counterfactual replays of this scenario; they rank ' +
-      'interventions by their measured effect on the outcome, not people by blame.</p>';
+    var html = '';
+    if (cf) {
+      var cls = cf.classification || {};
+      html += '<div class="verdict">' +
+              '<div class="verdict-line"><span class="tag ' + esc(cls.attribution_class || '') +
+              '">' + esc(classLabel(cls.attribution_class)) + '</span>' +
+              '<span class="verdict-src">' +
+              esc(cls.source === 'multi_action_replay'
+                  ? 'established by replaying sets of actions'
+                  : 'established by replaying one action at a time') +
+              '</span></div>' +
+              '<div class="rationale">' + esc(cls.rationale || '') + '</div>' +
+              '<div class="disclaimer">' + esc(cls.disclaimer ||
+                'Causal contribution under controlled replay semantics. NOT legal ' +
+                'fault and NOT a fault percentage.') + '</div></div>';
+
+      var rows = (cf.contributions || []).slice().sort(function (a, b) {
+        return Math.abs(b.contribution_score || 0) - Math.abs(a.contribution_score || 0);
+      });
+      if (rows.length) {
+        var max = rows.reduce(function (m, r) {
+          return Math.max(m, Math.abs(r.contribution_score || 0));
+        }, 0) || 1;
+        html += '<table class="grid"><thead><tr><th>action removed</th>' +
+                '<th class="num">contribution</th><th style="width:26%"></th>' +
+                '<th>but-for</th><th>what the replay showed</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+          var score = r.contribution_score;
+          var outcome = r.outcome || {};
+          var effect = outcome.collision === false
+            ? 'the collision did not happen'
+            : (r.severity_reduction
+                ? 'the collision still happened, less severely'
+                : 'the collision still happened');
+          html += '<tr><td class="mono">' + esc(r.action_id || r.intervention_id) + '</td>' +
+                  '<td class="num">' + num(score, 3) + '</td>' +
+                  '<td><span class="bar" style="width:' +
+                  (Math.abs(score || 0) / max * 100).toFixed(1) + '%"></span></td>' +
+                  '<td>' + (r.but_for ? 'yes' : 'no') + '</td>' +
+                  '<td class="meta">' + esc(effect) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+      }
+    }
+
+    // The pre-replay hypothesis, shown beside the verdict so a reader can see
+    // what reasoning alone concluded and whether the simulator agreed with it.
+    if (hypothesis && (hypothesis.collisions || []).length) {
+      html += '<h3>Read off the merged graph, before any replay</h3>';
+      html += '<table class="grid"><thead><tr><th>outcome</th><th>class</th>' +
+              '<th>contributors</th><th class="num">confidence</th>' +
+              '<th>validated</th></tr></thead><tbody>';
+      hypothesis.collisions.forEach(function (block) {
+        var names = (block.contributors || []).map(function (c) {
+          return esc(c.participant_id) + ' <span class="meta">' +
+                 esc(c.description || c.episode_kind || '') + '</span>';
+        }).join('<br>') || '<span class="meta">none named</span>';
+        var conf = (block.contributors || []).reduce(function (m, c) {
+          return Math.max(m, c.confidence || 0);
+        }, 0);
+        var validation = (block.contributors || [])[0];
+        html += '<tr><td class="mono">' + esc((block.participants || []).join('/')) +
+                ' @ ' + num(block.t_common, 2) + ' s</td>' +
+                '<td><span class="tag ' + esc(block.attribution_class || '') + '">' +
+                esc(classLabel(block.attribution_class)) + '</span></td>' +
+                '<td>' + names + '</td>' +
+                '<td class="num">' + (conf ? num(conf, 2) : '--') + '</td>' +
+                '<td class="meta">' +
+                esc(validation && validation.validation ? validation.validation.status : '--') +
+                '</td></tr>';
+      });
+      html += '</tbody></table>';
+      if (hypothesis.note) {
+        html += '<p class="missing">' + esc(hypothesis.note) + '</p>';
+      }
+    }
     el.attribution.innerHTML = html;
   }
 
-  /* The counterfactual artifact is produced by a separate stage, so read it
-   * defensively: take the first recognised container of rows and require a
-   * numeric score. An unreadable shape yields no rows, which the caller turns
-   * into INSUFFICIENT EVIDENCE rather than a guess. */
-  function contributionRows(contribution) {
-    if (contribution.status === 'INSUFFICIENT_EVIDENCE' || contribution.insufficient_evidence === true) return [];
-    var containers = ['contributions', 'ranking', 'rows', 'per_participant', 'participants', 'factors'];
-    for (var i = 0; i < containers.length; i++) {
-      var c = contribution[containers[i]];
-      if (!c) continue;
-      var rows = [];
-      if (Array.isArray(c)) {
-        c.forEach(function (item) {
-          if (!item || typeof item !== 'object') return;
-          var score = firstNumber(item, ['contribution', 'score', 'value', 'weight', 'necessity', 'impact']);
-          var label = firstString(item, ['label', 'factor', 'event_id', 'intervention_id', 'action_id', 'participant_id']);
-          if (score !== null && label !== null) rows.push({ label: label, score: score, detail: item.reason || item.detail || '' });
-        });
-      } else if (typeof c === 'object') {
-        Object.keys(c).sort().forEach(function (k) {
-          var v = c[k];
-          if (typeof v === 'number') rows.push({ label: k, score: v, detail: '' });
-          else if (v && typeof v === 'object') {
-            var score = firstNumber(v, ['contribution', 'score', 'value', 'weight', 'necessity', 'impact']);
-            if (score !== null) rows.push({ label: k, score: score, detail: v.reason || v.detail || '' });
-          }
-        });
+  function insufficient(why, block) {
+    return '<div class="insufficient">INSUFFICIENT EVIDENCE<div class="why">' +
+           esc(why) + noteHint(block) + '</div></div>';
+  }
+
+  /* Which sets of changes would have prevented the outcome, and how firmly that
+   * can be claimed. A set whose subsets were never replayed is minimal only
+   * within what was tested, and says so: an untested subset might have been
+   * enough, and asserting otherwise would be a claim about a replay nobody ran. */
+  function renderPrevention() {
+    var cf = DATA.counterfactual && DATA.counterfactual.contribution;
+    var analysis = cf && cf.set_analysis;
+    var sets = (cf && cf.classification && cf.classification.minimal_prevention_sets) ||
+               (analysis && analysis.minimal_prevention_sets) || [];
+    if (!cf) {
+      el.prevention.innerHTML = insufficient(
+        'No counterfactual replay has been run for this run directory.',
+        'counterfactual');
+      return;
+    }
+    if (!sets.length) {
+      el.prevention.innerHTML =
+        '<div class="ok">No tested change, alone or in combination, prevented this ' +
+        'outcome' + (analysis && analysis.n_replays
+          ? ' across ' + analysis.n_replays + ' replay(s)' : '') + '.</div>';
+      return;
+    }
+    var html = '<table class="grid"><thead><tr><th>remove together</th>' +
+               '<th class="num">size</th><th>minimality</th><th>note</th>' +
+               '</tr></thead><tbody>';
+    sets.forEach(function (set) {
+      // A set whose subsets were never replayed is minimal only within what was
+      // tested, and the subsets nobody tried are named: an untested subset might
+      // have been enough, and leaving that unsaid would overstate the claim.
+      var untested = set.untested_subsets || [];
+      html += '<tr><td class="mono">' + esc((set.actions || []).join(' + ')) + '</td>' +
+              '<td class="num">' + esc(set.size) + '</td>' +
+              '<td><span class="tag ' + esc(set.minimality || '') + '">' +
+              esc(String(set.minimality || '').replace(/_/g, ' ')) + '</span></td>' +
+              '<td class="meta">' + esc(set.note || '') +
+              (untested.length
+                ? '<div class="meta">never replayed: ' +
+                  untested.map(function (sub) {
+                    return '<span class="mono">' + esc(sub.join(' + ')) + '</span>';
+                  }).join(', ') + '</div>'
+                : '') +
+              '</td></tr>';
+    });
+    html += '</tbody></table>';
+    el.prevention.innerHTML = html;
+  }
+
+  /* Every replay that was run, factual first. This is the evidence the verdict
+   * rests on, so it is shown whole rather than summarised. */
+  function renderReplays() {
+    var rows = (DATA.counterfactual && DATA.counterfactual.interventions) || [];
+    if (!rows.length) {
+      el.replays.innerHTML = '<div class="missing">No replay manifest for this run' +
+        noteHint('counterfactual') + '.</div>';
+      return;
+    }
+    var html = '<table class="grid"><thead><tr><th>replay</th><th>action(s)</th>' +
+               '<th>collision</th><th class="num">impact speed</th>' +
+               '<th class="num">min distance</th><th class="num">min TTC</th>' +
+               '<th>validation</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      var factual = String(r.intervention_id) === 'factual';
+      var collided = String(r.collision) === '1' || r.collision === true;
+      html += '<tr class="' + (factual ? 'factual' : '') + '">' +
+              '<td class="mono">' + esc(r.intervention_id) + (factual
+                ? ' <span class="tag factual">as recorded</span>' : '') + '</td>' +
+              '<td class="mono">' + esc(r.action_ids || r.action_id || '--') + '</td>' +
+              '<td>' + (collided ? '<span class="tag collided">collision</span>'
+                                 : '<span class="tag avoided">no collision</span>') + '</td>' +
+              '<td class="num">' + num(toNumber(r.impact_speed), 2) + '</td>' +
+              '<td class="num">' + num(toNumber(r.min_distance), 2) + '</td>' +
+              '<td class="num">' + num(toNumber(r.min_ttc), 2) + '</td>' +
+              '<td class="meta">' + (String(r.validation_passed) === '1' ? 'passed'
+                : (r.error ? esc(r.error) : 'not passed')) + '</td></tr>';
+    });
+    html += '</tbody></table>' +
+      '<p class="missing">Each row re-ran the scenario with exactly the listed ' +
+      'change and everything else held identical. A replay that no longer ' +
+      'produces the designed encounter is marked as failing validation, because ' +
+      'it no longer answers the question it was run to answer.</p>';
+    el.replays.innerHTML = html;
+  }
+
+  /* The replay manifest is written as CSV and read back as strings. */
+  function toNumber(value) {
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string' || value === '') return null;
+    var n = parseFloat(value);
+    return isFinite(n) ? n : null;
+  }
+
+  // ------------------------------------------------------------- overview
+
+  /* The reconstruction block, when fusion produced one. Local perspectives do
+   * not have it -- one vehicle cannot reconstruct a multi-vehicle incident --
+   * and saying so is more useful than showing an empty panel. */
+  function reconstruction() {
+    return (DATA.fusion && DATA.fusion.reconstruction) || null;
+  }
+
+  function graphAttribution() {
+    return (DATA.fusion && DATA.fusion.graph_attribution) || null;
+  }
+
+  function replayClassification() {
+    var cf = DATA.counterfactual && DATA.counterfactual.contribution;
+    return (cf && cf.classification) || null;
+  }
+
+  var CLASS_LABELS = {
+    single_initiator: 'single causal initiator',
+    single_cause: 'single causal initiator',
+    shared_contribution: 'shared causal contribution',
+    multiple_causes: 'shared causal contribution',
+    joint_contribution: 'joint causal contribution',
+    contributing_but_not_necessary: 'contributed without being necessary',
+    insufficient_evidence: 'insufficient evidence',
+    no_cause_identified: 'insufficient evidence'
+  };
+
+  function classLabel(value) {
+    return CLASS_LABELS[value] || (value ? String(value).replace(/_/g, ' ') : 'not classified');
+  }
+
+  /* "Why did this collision happen?" -- assembled from the reconstruction and
+   * the replay verdict, never invented here. Every sentence this renders is a
+   * field of an artifact; the viewer's job is to put them in reading order. */
+  function renderAnswer() {
+    var recon = reconstruction();
+    if (VIEW.kind === 'local') {
+      el.answer.innerHTML = '<div class="missing">' + esc(VIEW.id) +
+        ' sees only its own log. An incident involving more than one vehicle is ' +
+        'reconstructed after the logs are merged: switch to the FUSED perspective.' +
+        '</div>';
+      return;
+    }
+    if (!recon || !(recon.incidents || []).length) {
+      el.answer.innerHTML = '<div class="missing">No incident reconstruction for this run' +
+        noteHint('fusion.reconstruction') + '.</div>';
+      return;
+    }
+
+    var html = '';
+    (recon.incidents || []).forEach(function (inc) {
+      var who = (inc.participants || []).join(' and ') || 'the vehicles involved';
+      var kind = inc.outcome_type === 'COLLISION' ? 'collided' : 'came into conflict';
+      html += '<div class="answer-block" data-outcome="' + esc(inc.outcome_id) + '">';
+      html += '<div class="headline">' + esc(who) + ' ' + kind + ' at t = ' +
+              num(inc.t_common, 2) + ' s on the common clock.</div>';
+
+      var chains = (inc.chains || []).slice().sort(function (a, b) {
+        return (b.confidence || 0) - (a.confidence || 0);
+      });
+      if (chains.length) {
+        var best = chains[0];
+        html += '<div class="because">Because: <ol class="narrative">' +
+                (best.narrative || []).map(function (line) {
+                  return '<li>' + esc(line) + '</li>';
+                }).join('') + '</ol></div>';
+        html += '<div class="meta">' + chains.length + ' supported chain' +
+                (chains.length === 1 ? '' : 's') + ' lead' + (chains.length === 1 ? 's' : '') +
+                ' to this outcome; the strongest is shown (confidence ' +
+                num(best.confidence, 2) + ')' +
+                (best.cross_participant
+                  ? ', and it crosses more than one vehicle&apos;s log' : '') +
+                '. <a href="#" data-goto="graph" data-node="' +
+                esc((best.node_ids || [])[0] || '') + '">open it in the graph</a></div>';
+      } else {
+        html += '<div class="because insufficient-inline">The merged evidence does not ' +
+                'connect any earlier behaviour to this outcome.</div>';
       }
-      if (rows.length) return rows.sort(function (a, b) { return Math.abs(b.score) - Math.abs(a.score); });
+      html += '</div>';
+    });
+
+    // The verdict: the replay's if one was run, the graph's hypothesis if not.
+    var replay = replayClassification();
+    var hypothesis = graphAttribution();
+    html += '<div class="verdict">';
+    if (replay) {
+      html += '<div class="verdict-line"><span class="tag ' +
+              esc(replay.attribution_class || '') + '">' +
+              esc(classLabel(replay.attribution_class)) + '</span>' +
+              '<span class="verdict-src">established by counterfactual replay</span></div>' +
+              '<div class="rationale">' + esc(replay.rationale || '') + '</div>';
+    } else if (hypothesis && (hypothesis.collisions || []).length) {
+      var first = hypothesis.collisions[0];
+      html += '<div class="verdict-line"><span class="tag ' +
+              esc(first.attribution_class || '') + '">' +
+              esc(classLabel(first.attribution_class)) + '</span>' +
+              '<span class="verdict-src">hypothesis from the merged graph; no replay has been run</span></div>' +
+              '<div class="rationale">' + esc(first.rationale || '') + '</div>';
+    } else {
+      html += '<div class="verdict-line"><span class="tag insufficient_evidence">' +
+              'insufficient evidence</span></div>';
     }
-    return [];
+    html += '<div class="disclaimer">' +
+            esc((replay && replay.disclaimer) ||
+                (hypothesis && hypothesis.disclaimer) ||
+                'Causal contribution under controlled replay semantics. NOT legal fault ' +
+                'and NOT a fault percentage.') + '</div></div>';
+
+    el.answer.innerHTML = html;
+    wireCrossLinks(el.answer);
   }
 
-  function firstNumber(obj, keys) {
-    for (var i = 0; i < keys.length; i++) {
-      if (typeof obj[keys[i]] === 'number' && isFinite(obj[keys[i]])) return obj[keys[i]];
-    }
-    return null;
+  /* Episodes keyed by id, so a chain can name the behaviour at its root in
+   * words rather than by node id. */
+  function episodesById() {
+    var recon = reconstruction(), out = {};
+    ((recon && recon.episodes) || []).forEach(function (e) { out[e.episode_id] = e; });
+    return out;
   }
 
-  function firstString(obj, keys) {
-    for (var i = 0; i < keys.length; i++) {
-      if (typeof obj[keys[i]] === 'string' && obj[keys[i]]) return obj[keys[i]];
+  function renderChains() {
+    // The same rule as the answer panel: the reconstruction is a *fused*
+    // conclusion, and showing it while a local perspective is selected would
+    // quietly attribute it to a vehicle that never made it.
+    if (VIEW.kind === 'local') {
+      el.chains.innerHTML = '<div class="missing">Causal chains across vehicles ' +
+        'exist only after the logs are merged; ' + esc(VIEW.id) + ' has its own ' +
+        'graph under the Causal graph tab.</div>';
+      return;
     }
-    return null;
+    var recon = reconstruction();
+    if (!recon || !(recon.incidents || []).length) {
+      el.chains.innerHTML = '<div class="missing">No reconstructed chains for this run.</div>';
+      return;
+    }
+    var html = '';
+    (recon.incidents || []).forEach(function (inc) {
+      html += '<h3 class="outcome-head">' + esc((inc.participants || []).join(' / ')) +
+              '  -  ' + esc(inc.outcome_type) + ' at ' + num(inc.t_common, 2) + ' s</h3>';
+      var chains = (inc.chains || []);
+      if (!chains.length) {
+        html += '<div class="missing">nothing in the merged graph explains this outcome.</div>';
+        return;
+      }
+      var episodes = episodesById();
+      html += '<table class="grid"><thead><tr><th>chain</th><th class="num">confidence</th>' +
+              '<th>root behaviour</th><th>kind</th></tr></thead><tbody>';
+      chains.forEach(function (c) {
+        // One cell per link, each labelled with the link's own sentence and
+        // linked to the node it starts from.
+        var links = c.links || [];
+        var cells = links.map(function (link) {
+          var inferred = link.origin === 'post_fusion_inference';
+          return '<a href="#" class="step' + (inferred ? ' inferred' : '') +
+                 '" data-goto="graph" data-node="' + esc(link.source || '') +
+                 '" title="' + esc((link.edge_type || '') + '  rule ' + (link.rule || '') +
+                 '  confidence ' + num(link.confidence, 2) +
+                 (inferred ? '  [inferred after fusion]' : '  [claimed by a participant]')) +
+                 '">' + esc(link.sentence || link.edge_type || '') + '</a>';
+        }).join('<span class="arrow"> &rarr; </span>');
+        var root = episodes[c.root_episode_id];
+        html += '<tr' + (c.preventive ? ' class="preventive"' : '') + '>' +
+                '<td class="chain-cell">' + cells + '</td>' +
+                '<td class="num">' + num(c.confidence, 2) + '</td>' +
+                '<td>' + esc(root ? root.description : (c.root_episode_id || '')) +
+                (root ? ' <span class="meta">(' + esc(root.kind) + ')</span>' : '') + '</td>' +
+                '<td>' + (c.preventive ? '<span class="tag preventive">preventive</span>'
+                                       : '<span class="tag contributing">contributing</span>') +
+                (c.cross_participant ? ' <span class="tag cross">cross-vehicle</span>' : '') +
+                '</td></tr>';
+      });
+      html += '</tbody></table>';
+    });
+    el.chains.innerHTML = html;
+    wireCrossLinks(el.chains);
+  }
+
+  /* Clicking a chain step opens that node in the graph tab, selected and
+   * highlighted, so the sentence and the structure behind it stay connected. */
+  function wireCrossLinks(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-goto]'), function (a) {
+      a.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        var tab = a.getAttribute('data-goto');
+        var node = a.getAttribute('data-node');
+        setTab(tab);
+        if (node) selectNode(node);
+      });
+    });
+  }
+
+  function renderGlance() {
+    var r = DATA.run || {};
+    var recon = reconstruction();
+    var rows = [
+      ['scenario', (r.scenario_id || '?') + (r.variant ? ' / ' + r.variant : '')],
+      ['map', r.map || '?'],
+      ['seed', r.seed === null || r.seed === undefined ? '?' : String(r.seed)],
+      ['recorded outcome', r.outcome || 'unknown'],
+      ['duration', num(r.duration_s, 2) + ' s at dt ' + num(r.dt, 3) + ' s'],
+      ['participants', (r.participant_ids || []).join(', ')]
+    ];
+    if (recon) {
+      rows.push(['reconstructed collisions', String(recon.n_collisions === undefined
+        ? (recon.incidents || []).length : recon.n_collisions)]);
+      if (recon.time_reference) rows.push(['common clock gauge', recon.time_reference]);
+    }
+    var clock = DATA.fusion && DATA.fusion.clock;
+    if (clock && clock.reference) rows.push(['clock reference', clock.reference]);
+    rows.push(['config', r.config_hash || '?']);
+    el.glance.innerHTML = '<table class="grid kv"><tbody>' + rows.map(function (kv) {
+      return '<tr><th>' + esc(kv[0]) + '</th><td>' + esc(kv[1]) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+  }
+
+  /* What the evidence does not settle. This panel exists so that the honest
+   * answer to a question has somewhere to go other than silence. */
+  function renderUncertainties() {
+    // Fused-only, like the panels above it: the ambiguities listed here are the
+    // merge's, and a local perspective has no standing to report them.
+    if (VIEW.kind === 'local') {
+      el.uncertainties.innerHTML = '<div class="missing">What a single vehicle ' +
+        'could not determine is shown in its own graph and event list; the ' +
+        'ambiguities recorded here belong to the merge.</div>';
+      return;
+    }
+    var recon = reconstruction();
+    var items = [];
+    (recon ? recon.incidents || [] : []).forEach(function (inc) {
+      (inc.uncertainties || []).forEach(function (u) {
+        items.push({ where: (inc.participants || []).join('/') + ' ' + num(inc.t_common, 2) + ' s',
+                     text: typeof u === 'string' ? u : (u.message || JSON.stringify(u)) });
+      });
+    });
+    var diag = DATA.fusion && DATA.fusion.diagnostics_summary;
+    if (diag && diag.contradictions && diag.contradictions.length) {
+      diag.contradictions.forEach(function (c) {
+        items.push({ where: 'fusion', text: typeof c === 'string' ? c : (c.message || JSON.stringify(c)) });
+      });
+    }
+    var clock = DATA.fusion && DATA.fusion.clock;
+    if (clock) {
+      (clock.participants || []).forEach(function (p) {
+        if (p.drift_status && p.drift_status !== 'REFERENCE_GAUGE' &&
+            String(p.drift_status).indexOf('UNOBSERVABLE') >= 0) {
+          items.push({ where: 'clock ' + p.participant_id,
+                       text: 'clock drift is not observable from the shared evidence; ' +
+                             'the fit is an offset only (' + p.drift_status + ')' });
+        }
+      });
+    }
+    if (!items.length) {
+      el.uncertainties.innerHTML =
+        '<div class="ok">The reconstruction recorded no unresolved ambiguity for this run.</div>';
+      return;
+    }
+    el.uncertainties.innerHTML = '<ul class="uncertain">' + items.map(function (i) {
+      return '<li><span class="mono">' + esc(i.where) + '</span> ' + esc(i.text) + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  // ---------------------------------------------------------------- clocks
+
+  /* Every timestamp outside a vehicle's own panel has been through one of these
+   * transforms, so a reader has to be able to see them. An estimate shown
+   * without its residual is an assertion; the residual column is the point of
+   * this panel. */
+  function renderClocks() {
+    if (VIEW.kind === 'local') {
+      el.clocks.innerHTML = '<div class="missing">' + esc(VIEW.id) + ' keeps its own ' +
+        'clock and never sees another recorder&apos;s. The estimated transforms ' +
+        'onto a ' +
+        'common timeline are a product of fusion: switch to the FUSED perspective.' +
+        '</div>';
+      return;
+    }
+    var clock = DATA.fusion && DATA.fusion.clock;
+    if (!clock) {
+      el.clocks.innerHTML = '<div class="missing">No time alignment for this run' +
+        noteHint('fusion.clock') + '.</div>';
+      return;
+    }
+    var html = '<div class="meta">' + esc(clock.formula || '') +
+               '<br>reference recorder: <span class="mono">' + esc(clock.reference || '?') +
+               '</span>' + (clock.reference_rule ? ' (' + esc(clock.reference_rule) + ')' : '') +
+               '</div>';
+    html += '<table class="grid"><thead><tr><th>recorder</th><th class="num">scale</th>' +
+            '<th class="num">offset [s]</th><th class="num">residual [s]</th>' +
+            '<th class="num">confidence</th><th>status</th><th>drift</th>' +
+            '<th class="num">constraints</th><th>evidence used</th></tr></thead><tbody>';
+    (clock.participants || []).forEach(function (p) {
+      html += '<tr' + (p.is_reference ? ' class="reference"' : '') + '>' +
+              '<td class="mono">' + esc(p.participant_id) +
+              (p.is_reference ? ' <span class="tag reference">gauge</span>' : '') + '</td>' +
+              '<td class="num">' + num(p.scale, 6) + '</td>' +
+              '<td class="num">' + num(p.offset_s, 4) + '</td>' +
+              '<td class="num">' + num(p.residual_s, 4) + '</td>' +
+              '<td class="num">' + num(p.confidence, 2) + '</td>' +
+              '<td><span class="tag ' + esc(p.status || '') + '">' + esc(p.status || '?') +
+              '</span></td>' +
+              '<td class="meta">' + esc(p.drift_status || '') +
+              (p.drift_ppm ? ' (' + num(p.drift_ppm, 1) + ' ppm)' : '') + '</td>' +
+              '<td class="num">' + esc(p.n_constraints === null ||
+                p.n_constraints === undefined ? '--' : p.n_constraints) + '</td>' +
+              '<td class="meta">' + esc((p.methods || []).join(', ')) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    html += '<p class="missing">' + esc(clock.note || '') + '</p>';
+    el.clocks.innerHTML = html;
+  }
+
+  // ------------------------------------------------------------ evaluation
+
+  function renderEvaluation() {
+    var metrics = DATA.evaluation && DATA.evaluation.metrics;
+    if (!metrics) {
+      el.evaluation.innerHTML = '<div class="missing">This run has not been scored' +
+        noteHint('evaluation') + '.</div>';
+      return;
+    }
+    var html = '';
+
+    var graphs = metrics.graphs;
+    if (graphs) {
+      html += '<h3>Graph agreement</h3>';
+      html += '<table class="grid"><thead><tr><th>account</th>' +
+              '<th class="num">node F1</th><th class="num">edge P</th>' +
+              '<th class="num">edge R</th><th class="num">edge F1</th>' +
+              '<th class="num">SHD</th></tr></thead><tbody>';
+      var best = graphs.best_single_local && graphs.best_single_local.metrics;
+      if (best) html += graphRow('best single vehicle (' +
+        (graphs.best_local_participant_id || '?') + ')', best);
+      if (graphs.fused) html += graphRow('merged, with reasoning', graphs.fused);
+      html += '</tbody></table>';
+      if (graphs.canonical) {
+        html += '<p class="missing">A canonical-vocabulary comparison is also ' +
+                'recorded, in which the reference\'s scripted-action nodes are ' +
+                'mapped to the behaviour families they denote. It is strictly ' +
+                'weaker than the comparison above and is reported beside it, ' +
+                'never instead of it.</p>';
+      }
+    }
+
+    var scene = metrics.scene_reconstruction;
+    if (scene && scene.scored) {
+      html += '<h3>Scene reconstruction</h3><table class="grid kv"><tbody>';
+      var cross = scene.cross_view || {};
+      html += kvRow('cross-view trajectory RMSE',
+        num(cross.rmse_m, 3) + ' m over ' + (cross.n_samples || 0) + ' samples',
+        'where one vehicle\'s radar, resolved to an identity and placed on the ' +
+        'estimated common clock, put another vehicle');
+      html += kvRow('collision time error', num(scene.collision_time_error_s, 4) + ' s');
+      html += kvRow('collision location error', num(scene.collision_location_error_m, 4) + ' m');
+      html += kvRow('collision pair recall', num(scene.collision_pair_recall, 3));
+      html += kvRow('spurious collisions', String(scene.n_spurious_collisions));
+      if (scene.collision_order_correct !== null && scene.collision_order_correct !== undefined) {
+        html += kvRow('impact order', scene.collision_order_correct ? 'correct' : 'wrong');
+      }
+      html += '</tbody></table>';
+      if (scene.self_localisation && scene.self_localisation.note) {
+        html += '<p class="missing">' + esc(scene.self_localisation.note) + '</p>';
+      }
+    }
+
+    var paths = metrics.causal_paths;
+    if (paths && paths.scored) {
+      html += '<h3>Causal chains</h3><table class="grid kv"><tbody>';
+      html += kvRow('chain P / R / F1',
+        num(paths.path.precision, 3) + ' / ' + num(paths.path.recall, 3) +
+        ' / ' + num(paths.path.f1, 3));
+      html += kvRow('ancestry P / R / F1',
+        num(paths.ancestry.precision, 3) + ' / ' + num(paths.ancestry.recall, 3) +
+        ' / ' + num(paths.ancestry.f1, 3),
+        'whether each behaviour the reference blames appears anywhere upstream ' +
+        'of the impact');
+      if ((paths.ancestry.missing_families || []).length) {
+        html += kvRow('never reached', paths.ancestry.missing_families.join(', '));
+      }
+      html += '</tbody></table>';
+    }
+
+    var sets = metrics.attribution_sets;
+    if (sets) {
+      html += '<h3>Named contributors</h3><table class="grid kv"><tbody>';
+      html += kvRow('designed', (sets.truth_participants || []).join(', ') || 'none');
+      html += kvRow('named by replay', (sets.predicted_participants || []).join(', ') ||
+        (sets.scored ? 'none' : 'no replay was run'));
+      if (sets.graph_only) {
+        html += kvRow('named by the graph alone',
+          (sets.graph_only.predicted_participants || []).join(', ') || 'none',
+          'before any replay: what reasoning contributes without the simulator');
+      }
+      html += kvRow('P / R / F1', num(sets.precision, 3) + ' / ' + num(sets.recall, 3) +
+        ' / ' + num(sets.f1, 3) + (sets.vacuous ? '  (nothing to attribute)' : ''));
+      html += kvRow('exact set', sets.exact_set_match ? 'yes' : 'no');
+      if (sets.expect_collision === false) {
+        html += kvRow('invented a culprit',
+          sets.false_attribution ? 'YES -- a false attribution' : 'no');
+      }
+      html += '</tbody></table>';
+    }
+
+    el.evaluation.innerHTML = html ||
+      '<div class="missing">No comparable metric block in this run.</div>';
+  }
+
+  function graphRow(label, m) {
+    return '<tr><td>' + esc(label) + '</td>' +
+           '<td class="num">' + num(m.node_f1, 3) + '</td>' +
+           '<td class="num">' + num(m.edge_precision, 3) + '</td>' +
+           '<td class="num">' + num(m.edge_recall, 3) + '</td>' +
+           '<td class="num">' + num(m.edge_f1, 3) + '</td>' +
+           '<td class="num">' + esc(m.structural_hamming_distance) + '</td></tr>';
+  }
+
+  function kvRow(key, value, hint) {
+    return '<tr><th>' + esc(key) + '</th><td>' + esc(value) +
+           (hint ? '<div class="meta">' + esc(hint) + '</div>' : '') + '</td></tr>';
+  }
+
+  /* What each layer of the method was worth on this run. The panel shows the
+   * strict recall ceiling beside the achieved recall, because a large part of
+   * the reference is unmatchable by any reconstruction and a strict number read
+   * without that context says something untrue. */
+  function renderAblation() {
+    var ab = DATA.evaluation && DATA.evaluation.method_ablation;
+    if (!ab) {
+      el.ablation.innerHTML = '<div class="missing">No method ablation for this run. ' +
+        'Produce one with <code>scripts/reprocess_runs.py --stages ablate</code>.</div>';
+      return;
+    }
+    var labels = {
+      best_local: 'best single vehicle',
+      simple_fusion: 'merged logs, no added reasoning',
+      fusion_global_reasoning: 'merged logs + global causal reasoning'
+    };
+    var html = '<table class="grid"><thead><tr><th>account</th>' +
+               '<th class="num">node F1</th><th class="num">edge P</th>' +
+               '<th class="num">edge R</th><th class="num">edge F1</th>' +
+               '<th class="num">canonical edge R</th><th class="num">edges</th>' +
+               '</tr></thead><tbody>';
+    ['best_local', 'simple_fusion', 'fusion_global_reasoning'].forEach(function (name) {
+      var arm = (ab.arms || {})[name];
+      if (!arm) return;
+      var st = arm.strict || {}, cn = arm.canonical || {};
+      html += '<tr><td>' + esc(labels[name]) +
+              (arm.participant_id ? ' <span class="mono">(' + esc(arm.participant_id) + ')</span>' : '') +
+              '</td>' +
+              '<td class="num">' + num((st.nodes || {}).f1, 3) + '</td>' +
+              '<td class="num">' + num((st.edges || {}).precision, 3) + '</td>' +
+              '<td class="num">' + num((st.edges || {}).recall, 3) + '</td>' +
+              '<td class="num">' + num((st.edges || {}).f1, 3) + '</td>' +
+              '<td class="num">' + num((cn.edges || {}).recall, 3) + '</td>' +
+              '<td class="num">' + esc(arm.n_edges) +
+              (arm.n_inferred_edges ? ' <span class="meta">(+' +
+                esc(arm.n_inferred_edges) + ' inferred)</span>' : '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    var reach = ab.reference_reachability;
+    if (reach && reach.strict_edge_recall_ceiling !== null &&
+        reach.strict_edge_recall_ceiling !== undefined) {
+      var achieved = (((ab.arms || {}).fusion_global_reasoning || {}).strict || {}).edges || {};
+      var atCeiling = achieved.recall !== undefined && achieved.recall !== null &&
+        Math.abs(achieved.recall - reach.strict_edge_recall_ceiling) < 1e-6;
+      html += '<div class="ceiling' + (atCeiling ? ' reached' : '') + '">' +
+              'Strict edge recall ceiling for this run: <b>' +
+              num(reach.strict_edge_recall_ceiling, 3) + '</b>' +
+              ' &mdash; ' + esc(reach.n_edges_touching_a_scripted_action) + ' of ' +
+              esc(reach.n_reference_edges) + ' reference edges touch a scripted-action ' +
+              'node, which no reconstruction has a counterpart for. Achieved: <b>' +
+              num(achieved.recall, 3) + '</b>' +
+              (atCeiling ? ' &mdash; every strictly reachable edge was recovered.' : '.') +
+              '</div>';
+    }
+    if ((ab.notes || []).length) {
+      html += '<ul class="uncertain">' + ab.notes.map(function (n) {
+        return '<li>' + esc(n) + '</li>';
+      }).join('') + '</ul>';
+    }
+    html += '<p class="missing">' + esc(ab.note || '') + '</p>';
+    el.ablation.innerHTML = html;
   }
 
   // ------------------------------------------------------------------ notes

@@ -39,7 +39,22 @@ from cdf.viewer.bundle import (
     write_bundle,
 )
 
-REAL_RUN = repo_root() / "artifacts" / "S01_rear_end" / "seed_000_crash"
+def _reference_run() -> Path:
+    """The run these tests assert against.
+
+    The final campaign -- every recorder on its own clock -- is preferred when
+    it is present, because that is the pipeline being tested. The older
+    synchronized-clock baseline is the fallback so a checkout that only has the
+    historical artifacts still exercises everything those artifacts support.
+    """
+    for root in ("artifacts_independent_clocks", "artifacts"):
+        candidate = repo_root() / root / "S01_rear_end" / "seed_000_crash"
+        if candidate.exists():
+            return candidate
+    return repo_root() / "artifacts" / "S01_rear_end" / "seed_000_crash"
+
+
+REAL_RUN = _reference_run()
 
 
 @pytest.fixture(scope="module")
@@ -406,3 +421,142 @@ def test_app_js_fetches_the_bundle_and_badges_every_perspective() -> None:
     assert "LOCAL RECONSTRUCTION" in app
     assert "FUSED RECONSTRUCTION" in app
     assert "INSUFFICIENT EVIDENCE" in app
+
+
+# ---------------------------------------------------------------------------
+# The investigative blocks
+#
+# The viewer's job changed from showing a run to explaining an incident, and the
+# blocks below are what that needs. Each is optional -- a run that never got a
+# fusion stage has none of them -- but when present it must carry the fields the
+# page reads, because a page that silently renders nothing is indistinguishable
+# from a run that genuinely has nothing to show.
+# ---------------------------------------------------------------------------
+
+
+def test_the_bundle_carries_the_reconstruction_the_page_explains_from(
+    real_bundle: Dict[str, Any]
+) -> None:
+    recon = (real_bundle.get("fusion") or {}).get("reconstruction")
+    if recon is None:
+        pytest.skip("the reference run predates the reconstruction stage")
+    assert recon["incidents"], "a crash variant must reconstruct at least one outcome"
+    for incident in recon["incidents"]:
+        assert {"outcome_id", "outcome_type", "participants", "t_common",
+                "chains", "uncertainties"} <= set(incident)
+        for chain in incident["chains"]:
+            assert chain["links"], "a chain with no links explains nothing"
+            assert len(chain["narrative"]) == len(chain["links"]), (
+                "every link must carry the sentence the viewer prints for it"
+            )
+            for link in chain["links"]:
+                assert link["sentence"]
+                assert link["origin"] in {"local", "post_fusion_inference"}
+    assert recon["episodes"], "chains are rooted in behaviours, which must be present"
+    for episode in recon["episodes"]:
+        assert episode["description"], "an episode must be nameable in words"
+
+
+def test_the_bundle_carries_the_clock_transforms_with_their_residuals(
+    real_bundle: Dict[str, Any]
+) -> None:
+    """An estimate shown without its residual is an assertion."""
+    clock = (real_bundle.get("fusion") or {}).get("clock")
+    if clock is None:
+        pytest.skip("this run has no time alignment")
+    assert clock["reference"], "the common timeline needs a gauge"
+    assert clock["participants"]
+    references = [p for p in clock["participants"] if p["is_reference"]]
+    assert len(references) == 1, "exactly one recorder is the gauge"
+    for row in clock["participants"]:
+        assert {"scale", "offset_s", "residual_s", "confidence", "status"} <= set(row)
+        assert row["methods"] is not None, (
+            "the evidence an estimate rests on must travel with it"
+        )
+
+
+def test_the_bundle_carries_the_graph_only_attribution_hypothesis(
+    real_bundle: Dict[str, Any]
+) -> None:
+    hypothesis = (real_bundle.get("fusion") or {}).get("graph_attribution")
+    if hypothesis is None:
+        pytest.skip("the reference run predates the attribution hypothesis")
+    assert "disclaimer" in hypothesis
+    assert "not a fault percentage" in hypothesis["disclaimer"].lower()
+    for block in hypothesis["collisions"]:
+        assert block["attribution_class"]
+        for contributor in block["contributors"]:
+            assert contributor["participant_id"]
+            assert contributor["validation"]["status"], (
+                "a hypothesis must say whether a replay has confirmed it"
+            )
+
+
+def test_a_contribution_row_carries_the_field_the_page_reads(
+    real_bundle: Dict[str, Any]
+) -> None:
+    """The page reads ``contribution_score`` by name.
+
+    It used to probe a list of plausible aliases and fall through to
+    INSUFFICIENT EVIDENCE when none matched -- so a run with a perfectly good
+    attribution rendered as though it had none, and the bug was invisible
+    because its output was identical to the honest answer. This pins the name.
+    """
+    contribution = (real_bundle.get("counterfactual") or {}).get("contribution")
+    if not contribution:
+        pytest.skip("this run has no counterfactual attribution")
+    for row in contribution.get("contributions") or []:
+        assert "contribution_score" in row, sorted(row)
+        assert "action_id" in row and "but_for" in row
+    classification = contribution.get("classification") or {}
+    assert classification.get("attribution_class")
+    assert "fault percentage" in (classification.get("disclaimer") or "").lower()
+
+
+def test_the_page_reads_only_field_names_the_bundle_actually_writes() -> None:
+    """Every ``DATA.x.y`` path the page dereferences must exist in the writer.
+
+    This is a coarse check -- it compares identifier spellings, not structure --
+    but it is enough to catch the failure mode that produced the bug above: the
+    page reading a field nobody writes, and quietly rendering an empty panel.
+    """
+    import re
+
+    app = (viewer_assets_dir() / "app.js").read_text(encoding="utf-8")
+    writer = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "viewer"
+              / "bundle.py").read_text(encoding="utf-8")
+    reconstruction = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "graph"
+                      / "reconstruction.py").read_text(encoding="utf-8")
+    combinations = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "causal"
+                    / "combinations.py").read_text(encoding="utf-8")
+    ablation = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "evaluation"
+                / "method_ablation.py").read_text(encoding="utf-8")
+    attribution = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "causal"
+                   / "attribution.py").read_text(encoding="utf-8")
+    sources = writer + reconstruction + combinations + ablation + attribution
+
+    # Field names the page reads off bundle objects, spelled out so this test
+    # fails loudly if either side is renamed.
+    read_by_page = {
+        "reconstruction", "graph_attribution", "clock", "method_ablation",
+        "incidents", "episodes", "chains", "links", "narrative", "node_ids",
+        "root_episode_id", "cross_participant", "preventive", "outcome_id",
+        "outcome_type", "t_common", "uncertainties", "attribution_class",
+        "contributors", "participant_id", "episode_kind", "validation",
+        "contribution_score", "but_for", "severity_reduction",
+        "minimal_prevention_sets", "minimality", "untested_subsets",
+        "arms", "best_local", "simple_fusion", "fusion_global_reasoning",
+        "reference_reachability", "strict_edge_recall_ceiling",
+        "n_edges_touching_a_scripted_action", "n_reference_edges",
+        "n_inferred_edges", "is_reference", "residual", "offset_s",
+        "drift_status", "n_constraints",
+    }
+    missing = sorted(
+        name for name in read_by_page
+        if '"{0}"'.format(name) not in sources and "'{0}'".format(name) not in sources
+    )
+    assert missing == [], (
+        "the page reads field(s) no writer produces: {0}".format(missing)
+    )
+    for name in sorted(read_by_page):
+        assert name in app, "{0!r} is declared read by the page but never is".format(name)
