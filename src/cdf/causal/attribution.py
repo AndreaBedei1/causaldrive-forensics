@@ -253,11 +253,19 @@ def contribution_score(
     (default 0.5). Prevention therefore dominates, and a replay that only made
     the impact softer still scores above one that changed nothing.
 
-    When the replay prevented the collision outright the severity term is 1.0 by
-    definition (there was no impact left to be severe), even though
-    :func:`severity_reduction` returns ``None`` because the counterfactual has no
-    impact speed to compare. When severity is undefined for any other reason the
-    term is 0.0: an unmeasured reduction is not evidence of a reduction.
+    When the replay prevented the collision *by removing the action* the severity
+    term is 1.0 by definition (there was no impact left to be severe), even
+    though :func:`severity_reduction` returns ``None`` because the counterfactual
+    has no impact speed to compare. When severity is undefined for any other
+    reason the term is 0.0: an unmeasured reduction is not evidence of a
+    reduction.
+
+    A replay that prevented the collision by performing the action *sooner*
+    scores zero on both terms, which is correct and deliberate: it establishes
+    that the outcome was avoidable, not that the action caused it, and a score
+    is a ranking of candidate *causes*. The prevention itself is not discarded --
+    it is recorded on the contribution as ``prevented_collision`` with
+    ``establishes_causation`` false, so a reader can see both facts.
 
     **This is not a fault percentage.** It is a monotone summary of two
     measurements from controlled replays, on an arbitrary but fixed scale, and it
