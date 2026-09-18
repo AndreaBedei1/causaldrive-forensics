@@ -1,16 +1,17 @@
 # The incident viewer
 
-A static page, opened from a run directory, that answers *what happened and
-why*. No framework, no bundler, no CDN, no web font, no network request of any
-kind: the page is designed to open from an offline copy of the evidence.
+A static page, opened from a run directory, that answers *what happened and why*.
+No framework, no bundler, no CDN, no web font, no network request of any kind:
+the page is designed to open from an offline copy of the evidence.
 
 ```bash
-python -m cdf.cli viewer --run artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed
+python scripts/serve_viewer.py --run artifacts_v2/S10_single_stop_a/seed_000_rolls_through
 ```
 
 That builds the bundle, serves the run directory and opens a browser. Add
 `--port N` to choose the port (`--port 0` picks a free one) or `--no-browser` to
-just serve it.
+just serve it. `python -m cdf.cli viewer --run ...` is the same command; the
+script is a thin wrapper.
 
 The stage writes `run_data.json` and copies `index.html`, `app.js` and
 `styles.css` next to it, because the page fetches its data *relative to itself*.
@@ -19,192 +20,176 @@ rather than opened as a file; the page says so itself if you try. To serve a run
 that already has a bundle, any static server will do:
 
 ```bash
-cd artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed/viewer
+cd artifacts_v2/S10_single_stop_a/seed_000_rolls_through/viewer
 python -m http.server 8000
 ```
 
 ---
 
-## Perspective and tab are different questions
+## Four sections, because there are four questions
 
-Two controls, deliberately orthogonal.
+The V1 viewer had nine tabs and a perspective switcher that recoloured the whole
+page. It could show anything and answered nothing at a glance. This one has four
+sections, one per question the pipeline exists to answer:
 
-**Perspective** (header, top right) selects *whose account you are reading*:
+| Section | Question |
+|---|---|
+| **Reconstruction** | what did each vehicle record, and what does the merged account say? |
+| **Graph** | what contributed to what, and how much of that was recovered? |
+| **Responsibility** | which behaviours contributed, and which rules were broken? |
+| **Video** | what did the forward camera actually see? |
 
-- **A**, **B**, **C** — one vehicle's own log. It can reach that participant's
-  telemetry, its own radar tracks and its own graph, and nothing else.
-- **FUSED** — the merged reconstruction. The participants' exchanged logs, the
-  resolved identities, the common timeline, the fused causal graph.
-- **ORACLE** — privileged ground truth. Red hazard border, because it is not
-  something any vehicle knew.
+Two rules govern the whole page.
 
-The colour of the page changes with the perspective and a badge names it, because
-mistaking a privileged fact for a reconstructed one is the single worst error a
-reader of this tool can make. There is no code path that mixes them: the
-bundle's privileged material lives under one key and only the oracle perspective
-reads it, which a test verifies by walking the whole document.
+**It renders what the artifacts say and computes nothing it could get wrong.** A
+viewer that re-derived a metric could disagree with the run it is displaying, and
+then a reader would have no way to tell which was right. Every number on screen
+was read from `run_data.json`.
 
-A panel that shows a *fused* conclusion says so plainly when a local perspective
-is selected, rather than displaying the merge's answer under one vehicle's name.
-
-**Tabs** select *which question you are asking*, in the order an investigation
-works through them.
-
----
-
-## The tabs
-
-### Overview
-
-The answer, first, in words:
-
-> A and B collided at t = 6.51 s on the common clock.
->
-> Because:
-> 1. B braking contributed to B slowing
-> 2. B slowing led to A closing rapidly on B
-> 3. A closing rapidly on B contributed to A's time-to-collision with B becoming critical
-> 4. A's time-to-collision with B becoming critical resulted in the impact between A and B
-
-Every one of those sentences is a field of `fusion/incident_reconstruction.json`.
-The viewer puts them in reading order; it writes none of them and it has no
-language model. Beneath it sits the verdict — the counterfactual replay's when
-one has been run, the graph's hypothesis when it has not, always labelled with
-which — and the disclaimer that travels with every attribution.
-
-Also here: **At a glance** (scenario, map, seed, recorded outcome, clock gauge)
-and **What the evidence does not settle**, which exists so that an honest
-non-answer has somewhere to go other than silence.
-
-### Reconstruction
-
-Bird's-eye replay on canvas: trajectories, radar tracks, conflict regions, event
-markers, the impact. Transport with play/pause, a scrub bar, frame stepping, and
-a speed control from 0.1× to 4×. At 0.1× a 50 ms simulator step takes half a
-second of wall time, which is what it takes to actually watch an impact happen.
-
-Below it, the signals — speed, longitudinal acceleration, throttle, brake, range
-and TTC per tracked target — with a cursor locked to the transport.
-
-### Causal graph
-
-The DAG, laid out left to right in time and banded by vehicle.
-
-The distinction the whole method rests on is drawn rather than buried: an edge a
-vehicle claimed **inside its own log** is solid and grey; an edge that exists
-**only because the logs were merged** is dashed and accented. A filter isolates
-the latter, which is the quickest way to see what the reasoning stage
-contributed.
-
-Drag to pan, wheel to zoom about the pointer. Filters on confidence and on
-vehicle *hide* rather than delete — selecting a node still traces its real
-ancestry through parts that are filtered out of view, because a highlight that
-changed with the filter would be lying about the structure.
-
-Click any node: its path to the outcome is highlighted and the detail panel
-names the rule, the confidence, the evidence and — for an inferred edge — the
-supporting participants and the clock slack the inference was allowed.
-
-### Timeline
-
-Every event, ordered, with its type, subject, confidence and provenance. Click
-one to seek the reconstruction to it.
-
-### Attribution
-
-Three panels:
-
-1. **Causal contribution** — the verdict class, its rationale, the per-action
-   contribution scores with their but-for flags, and what each replay actually
-   showed. Below it, the hypothesis the graph produced *before* any replay, so
-   a reader can see what reasoning alone concluded and whether the simulator
-   agreed.
-2. **What would have prevented it** — the minimal prevention sets, each marked
-   `minimal` or `minimal_within_tested`, with the untested subsets named.
-3. **Counterfactual replays** — every replay including the factual one, with
-   impact speed, minimum distance, minimum TTC and validation status.
-
-### Model checking
-
-Per property, per participant: PASS, FAIL or UNKNOWN, with counterexample
-witnesses. `UNKNOWN` is a first-class verdict — a finite trace that never
-exhibits a property's premise can neither satisfy nor violate it — and is
-displayed as such rather than folded into a pass rate.
-
-### Evidence
-
-**Recorder clocks** — the estimated transform for each recorder onto the common
-timeline, with the residual of the fit beside it, the evidence families it was
-fitted from, and the drift status. Every timestamp elsewhere on the page has been
-through one of these transforms, so the table is not an appendix.
-
-**Reconstructed identity** — which radar track was resolved to which vehicle, the
-trajectory RMSE behind each claim, the margin over the runner-up, and the
-verdicts the association refused to make.
-
-### Evaluation
-
-Scored against the reference. Graph agreement for the best single vehicle and
-the merged account; the scene reconstruction errors; the causal chain metrics;
-the named contributors against the designed ones.
-
-Then the **method ablation**: the same recording re-fused under one changed key,
-scored three ways, with the strict edge-recall ceiling called out beside the
-achieved recall — because a large fraction of the reference's edges leave
-scripted-action nodes that no reconstruction can emit, and a strict recall
-number read without that context says something untrue.
-
-Everything on this tab is evaluation-only. None of it is ever an input to the
-reconstruction, and the bundle keeps it structurally separate.
+**Absence is shown, never filled in.** A run with no camera, no merged timeline
+or no responsibility layer says so in the place the content would have been. A
+blank panel looks identical whether nothing was found or nothing was run, and
+those are very different findings.
 
 ---
 
-## Cross-linking
+## Perspective badges
 
-Clicking a step of a causal chain on the Overview tab opens that node in the
-Causal graph tab, selected and highlighted. The sentence and the structure
-behind it stay connected, which is the difference between a narrative you can
-check and one you have to trust.
+The V1 perspective *switcher* is gone; the distinction it protected is not. Each
+section carries a badge naming whose account is on screen:
+
+- **LOCAL RECONSTRUCTION** — one vehicle, its own sensors, its own clock;
+- **FUSED RECONSTRUCTION** — the merged account, built only from what the
+  vehicles recorded;
+- **PRIVILEGED GROUND TRUTH – EVALUATION ONLY** — read from exact simulator
+  state, never available to inference.
+
+Mistaking a privileged fact for a reconstructed one is the worst error a reader
+of this tool can make, and the badge text is byte-identical to the string the
+bundle stamps on its oracle block — a test asserts that, so the two cannot drift.
+
+---
+
+## Reconstruction
+
+**Each vehicle's own log.** A vehicle switch (A / B / C) and a table:
+
+| Time | Event | Subject | Evidence | Value | Conf. |
+
+There is no common-time column, by construction: one vehicle has no way to know
+what another recorder's clock said. Outcome events are red, non-actions amber,
+road and traffic-control events blue. Clicking a row seeks the video to that
+instant where a clip exists.
+
+**The merged log.** The same table with common time and a `Who` column, in strict
+chronological order.
+
+Where no shared contact tied the recorders together, the table is replaced by a
+notice naming the recorders that stayed on their own clocks, and an unaligned row
+renders as a dash — never as `0.00`, which would be a fabricated timestamp.
+Simulator time is never substituted. A recorder the alignment excluded usually
+contributes no rows at all, so the log names it explicitly rather than reporting
+a clean timeline that silently omits a vehicle.
+
+---
+
+## Graph
+
+Time runs left to right, one horizontal band per vehicle, collisions drawn larger
+and in red. Labels are shortened to stay readable at that density and the full
+type is in the tooltip.
+
+Three modes:
+
+- **Reconstructed** — the fused physical causal graph;
+- **Ground truth** — the *observable* ground truth, not the scenario template.
+  The template asserts scripted actions no reconstruction can emit, so a diff
+  against it would be a wall of unmatchable nodes that told a reader nothing;
+- **Difference** — the ground-truth graph coloured by what the reconstruction
+  recovered: green matched, red missed, with the count of invented nodes beside
+  it.
+
+The counts line under the graph quotes recall and edge F1 straight from the
+comparison artifact. It also reports how many nodes the reconstruction invented,
+which is the figure a careless implementation most easily reports as zero.
+
+---
+
+## Responsibility
+
+A card per participant, with the eight findings the responsibility layer
+produces: physical contributor, but-for, rules broken, properties failed,
+non-actions, mitigating actions, prevention opportunities, and the summary
+evidence class — **supported**, **partial** or **insufficient**.
+
+The right-of-way verdict sits above the cards with the reason it was reached,
+including when that reason is that priority could not be decided.
+
+Below the cards, every temporal property with its verdict — PASS, FAIL, UNKNOWN
+or **vacuous** — the formula that was evaluated, and the reason. Vacuous is
+shown as its own state: a property whose trigger never fired has not passed.
+
+**A banner appears above the cards when the replay protocol was degraded**, in
+three states rather than two. A report predating the protocol record carries no
+block at all, and reading that as "it was fine" is exactly the mistake the record
+was added to prevent, so it gets its own message.
+
+No legal-fault language appears anywhere. A test walks every string of real
+output and permits *fault*, *guilt*, *liability* and *blame* only inside the
+disclaimers that say what this layer is not.
+
+---
+
+## Video
+
+A camera switch per vehicle, the 20 s + 5 s clip, and event markers on a
+timeline below it — outcome, non-action and road events only, since marking every
+event would produce an unreadable comb. Clicking a marker seeks; so does clicking
+a row in the Reconstruction table.
+
+A run recorded without a camera says so. That is a supported configuration: the
+V1 scenarios have no camera at all.
 
 ---
 
 ## What the bundle contains
 
-`cdf.viewer.bundle` assembles one JSON document per run. Blocks whose source
-artifacts are absent are **omitted and listed in `notes`**, so every panel
-renders "not available for this run, because —" rather than an empty chart.
+`run_data.json`, built by `cdf.viewer.bundle`. Blocks whose source artifacts are
+absent are omitted and listed under `notes`, which the footer link shows.
 
-| Key | Source |
+| Block | Source |
 |---|---|
-| `run`, `params` | manifest and configuration |
-| `participants.<id>` | that vehicle's telemetry, controls, tracks, events, graphs |
-| `fusion` | fused graphs, association, clock alignment, reconstruction, graph attribution |
-| `counterfactual` | replay manifest and the contribution verdict |
-| `checking` | property results and counterexamples |
-| `evaluation` | metrics and the method ablation |
-| `oracle` | **privileged**; badged, and the only place privileged data appears |
+| `run` | the manifest |
+| `participants` | telemetry, controls, tracks, decimated |
+| `logs` | `vehicle_*/local_log.json`, `fusion/global_log.json` |
+| `fusion` | the fused graphs, association, clock, reconstruction |
+| `formal` | `formal/properties.json`, `formal/results.json` |
+| `responsibility` | `fusion/responsibility_{graph,report}.json` |
+| `video` | per-vehicle frame index and clip path |
+| `oracle` | privileged, including the observable ground truth |
+| `evaluation` | metrics, matches, `graph_diff` |
+| `counterfactual` | replay results and the protocol they ran under |
 
-Series longer than `output.viewer_max_samples` are stride-decimated, never
-interpolated: every point the page draws was recorded. What was decimated, and
-at what stride, is printed in the footer.
+The video itself stays on disk and is referenced by relative path; a bundle
+embedding 20 MB of frames per vehicle would be unopenable for no benefit.
+
+---
 
 ## Tests
 
-`tests/unit/test_viewer_bundle.py` asserts that the bundle carries the fields
-the page reads, that privileged material appears nowhere outside the oracle
-block — walked recursively rather than trusted — and that no key outside that
-block is even *named* for the oracle.
+`tests/unit/test_viewer_bundle.py` covers both directions of the page/bundle
+contract: every field the page reads must be produced by some writer, and every
+field a writer declares the page reads must actually be read. It also asserts
+that the four sections exist, that each absence notice exists, that no privileged
+key appears outside the oracle block, and that map facts inside it appear only
+under a `map_context` key — present as context for interpreting a claim, never as
+the claim itself.
 
-One test pins every field name the page dereferences against the writers that
-produce them. It exists because of a real defect: the attribution panel used to
-probe a list of plausible field names and fall through to INSUFFICIENT EVIDENCE
-when none matched. The artifact writes `contribution_score`, which was not on the
-list, so every run with a perfectly good attribution rendered as though it had
-none — and the bug was invisible, because its output was identical to the honest
-answer.
+---
 
 ## Related
 
-- [DATA_BOUNDARY.md](DATA_BOUNDARY.md) — the split the perspectives render
-- [GRAPH_FUSION.md](GRAPH_FUSION.md) — what the fused perspective shows
-- [COUNTERFACTUALS.md](COUNTERFACTUALS.md) — what the attribution tab reports
+- `docs/EVENTS.md` — the vocabulary the tables and graph display
+- `docs/CLOCKS.md` — why a row can have no common time
+- `docs/FORMAL_METHODS.md` — what PASS, FAIL, UNKNOWN and vacuous mean
+- `docs/RESPONSIBILITY.md` — what the cards are and are not claiming
