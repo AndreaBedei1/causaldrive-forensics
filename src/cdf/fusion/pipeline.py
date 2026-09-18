@@ -42,6 +42,7 @@ from ..responsibility import (
     benchmark_priority, build_responsibility_graph, build_responsibility_report,
 )
 from .time_alignment import align_participants
+from .hybrid_alignment import align_hybrid
 from .contact_alignment import (
     CONTACT_DERIVED_STATUSES, align_by_acquisition_start, align_by_contact,
 )
@@ -128,42 +129,53 @@ def _choose_alignment(
 ) -> Dict[str, Any]:
     """The clock alignment to fuse on, and an honest record of where it came from.
 
-    Contact first, always. If no two recorders can be shown to have felt the same
-    impact then a contact-anchored method has nothing to work with, and this is
-    where a silent fallback would do the most damage: the no-collision runs are
-    the negative controls, and every one of them would look perfectly aligned
-    while resting on knowledge no vehicle has.
+    Contact first, always: two recorders that felt the same impact give the
+    difference between their clocks directly, with nothing fitted.
 
-    So the fallback is explicit, separately named, and off unless configured. The
-    experiment harness starts every recorder in one simulator tick, which makes
-    the first sample of each log a common instant; that is a declared property of
-    the harness rather than a reconstruction result, and the artifact says so.
-    Simulator time is never used: each recorder keeps its own clock and its own
-    jitter, and only the single constant relating them comes from outside.
+    Contact alone is not enough, and two recorded cases showed why -- a vehicle
+    that never collides has no anchor at all, and a chain can yield one anchor
+    where two impacts happened, which on the recorded three-car case moved a
+    whole timeline by exactly the 0.200 s between them. So where contact is
+    missing, ambiguous or impeached by its own caveat, an offset-only radar and
+    trajectory fit is tried, and each participant records which source placed it.
+    That hierarchy lives in :mod:`cdf.fusion.hybrid_alignment`.
+
+    If neither source is sufficient the recorder stays unresolved. There is no
+    hidden simulator-time fallback: the acquisition-start marker remains for the
+    negative controls, which have no contact *and* no useful radar geometry, and
+    it keeps its own status so it can never be read as a reconstruction result.
     """
-    contact = align_by_contact(run, cfg)
-    if contact.get("offsets_s"):
-        return contact
+    hybrid = align_hybrid(run, cfg)
+    if hybrid.get("offsets_s"):
+        return hybrid
 
+    contact = hybrid.get("contact_stage") or {}
     if not bool(cfg.get("fusion.contact_alignment.acquisition_start_fallback", True)):
         LOGGER.info(
-            "no shared contact and the acquisition-start fallback is disabled: "
-            "recorders stay on their own clocks"
+            "neither contact nor radar placed any recorder and the "
+            "acquisition-start fallback is disabled: recorders stay on their own "
+            "clocks"
         )
-        return contact
+        return hybrid
 
     fallback = align_by_acquisition_start(run, cfg)
     if not fallback.get("offsets_s"):
-        return contact
+        return hybrid
     fallback["contact_alignment_attempted"] = {
-        "status": contact["status"],
+        "status": contact.get("status"),
         "reason": contact.get("reason"),
         "n_contact_anchors": contact.get("n_contact_anchors", 0),
     }
+    fallback["hybrid_alignment_attempted"] = {
+        "status": hybrid.get("status"),
+        "clock_sources": hybrid.get("clock_sources"),
+        "decisions": hybrid.get("decisions"),
+    }
     LOGGER.info(
-        "no shared contact (%s); falling back to the declared acquisition-start "
-        "marker, which is reported apart from contact-aligned runs",
-        contact["status"],
+        "neither contact nor radar placed any recorder (%s); falling back to the "
+        "declared acquisition-start marker, which is reported apart from "
+        "reconstructed alignments",
+        hybrid.get("status"),
     )
     return fallback
 
@@ -185,9 +197,10 @@ def fuse_run(
             )
         )
 
-    # V2: contact is the primary anchor. The radar-based estimator is still run,
-    # because the clock ablation compares them, but it no longer decides the
-    # timeline the results are computed on.
+    # V2 final: contact is the primary anchor and an offset-only radar fit is the
+    # fallback behind it, per participant. The V1 whole-run radar estimator is
+    # still run unchanged, because the clock ablation compares against it, but it
+    # does not decide the timeline the results are computed on.
     alignment = _choose_alignment(run, cfg)
     radar_alignment: Optional[Dict[str, Any]] = None
     if bool(cfg.get("fusion.keep_radar_alignment_diagnostic", True)):

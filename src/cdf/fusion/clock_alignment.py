@@ -46,12 +46,35 @@ def estimate_track_clock(
     track_id: str,
     candidate: ParticipantEvidence,
     cfg: Config,
+    offset_only: bool = False,
 ) -> Optional[Dict[str, Any]]:
     """Fit t_observer = scale*t_candidate + offset for one identity hypothesis.
 
     Range is the track centroid's body-origin range. Range-rate retains the
     measured sign (negative closing) and sensor-origin line of sight. Robust
     loss tolerates surface/centre discrepancies and reports their residuals.
+
+    With ``offset_only`` the affine stage is not attempted at all: scale stays
+    1.0, ``drift_ppm`` stays 0.0 and the status stays
+    ``OFFSET_ONLY_UNOBSERVABLE_DRIFT``. This is the final V2 path. A rate fitted
+    over a twenty-second window from trajectory residuals is not a measurement of
+    a crystal, and a clock alignment that claims one is claiming more than its
+    evidence carries; the V1 behaviour is kept only so the ablation can show what
+    it did. Passed as an argument rather than read from config so it cannot be
+    switched back on by a configuration file that the final results then rest on.
+
+    ``offset_only`` also fits a constant line-of-sight **surface bias**, and that
+    is not an extra freedom for its own sake -- it repairs a measured error. A
+    radar return comes from the nearest surface of the target, not from the
+    trajectory point the candidate's own telemetry reports, so the two differ by
+    roughly half a vehicle plus the sensor mount. On the recorded partial-view
+    geometry that bias is -2.35 m, and with it unmodelled the fit paid for it in
+    time: it shifted the clock by +0.150 s to buy back 1.2 m, against a true
+    offset of zero. Position and time are exchangeable for a target at constant
+    speed, so nothing in the evidence separates them -- *until the target changes
+    speed*, and a vehicle that brakes from 14 m/s to rest separates them
+    decisively. The bias is a nuisance parameter: it is estimated, reported, and
+    never mistaken for a clock. The clock output stays offset-only.
     """
     get = lambda k, default: cfg.get("fusion.time_alignment." + k, default)
     samples = observer.tracks_by_id().get(track_id, [])
@@ -91,7 +114,7 @@ def estimate_track_clock(
         sensor_xy[:, 1] += mount.sensor_x * np.sin(yaw) + mount.sensor_y * np.cos(yaw)
     anchors = []
 
-    def channels(b, ppm):
+    def channels(b, ppm, surface=0.0):
         a = 1 + ppm * 1e-6
         other, valid = _interpolate(
             candidate.telemetry, (ts - b) / a, ("x", "y", "vx", "vy"), gap
@@ -102,8 +125,14 @@ def estimate_track_clock(
         los = other[:, :2] - sensor_xy
         los /= np.maximum(np.linalg.norm(los, axis=1)[:, None], 1e-6)
         predicted_rate = np.sum((other[:, 2:4] - own[:, 2:4]) * los, axis=1)
-        pos = target - other[:, :2]
-        rng = ranges - distance
+        # The return comes off the near surface, so the point the radar reports
+        # sits `surface` metres closer to the sensor than the candidate's own
+        # trajectory point. Shifting the prediction rather than the measurement
+        # keeps the position and range channels consistent: both are compared
+        # against the same predicted reflection point.
+        reflect = other[:, :2] - surface * los
+        pos = target - reflect
+        rng = ranges - (distance - surface)
         rate = rates - predicted_rate
         vel = velocity - other[:, 2:4]
         vnorm = np.linalg.norm(velocity, axis=1) * np.linalg.norm(other[:, 2:4], axis=1)
@@ -115,8 +144,10 @@ def estimate_track_clock(
         return valid, pos, rng, rate, vel, heading
 
     def residual(params):
-        b, ppm = float(params[0]), float(params[1]) if len(params) > 1 else 0.0
-        valid, pos, rng, rate, vel, heading = channels(b, ppm)
+        b = float(params[0])
+        ppm = float(params[1]) if len(params) > 1 else 0.0
+        surface = float(params[2]) if len(params) > 2 else 0.0
+        valid, pos, rng, rate, vel, heading = channels(b, ppm, surface)
         r = np.column_stack(
             [
                 pos / sigmas[0],
@@ -222,9 +253,43 @@ def estimate_track_clock(
         b = float(fit.x[0])
 
     ppm = 0.0
+    surface = 0.0
     drift_status = "OFFSET_ONLY_UNOBSERVABLE_DRIFT"
     uncertainty = None
-    drift_limit = float(get("max_drift_ppm", 2000))
+    if offset_only:
+        # Joint fit of the clock offset and the surface bias. Without this the
+        # bias is paid for in time; see the docstring for the measured case.
+        extent = float(get("max_surface_bias_m", 6.0))
+        if extent > 0:
+            # The coarse search above ran with the bias pinned at zero, and its
+            # minimum is not in the same basin as the joint one: on the recorded
+            # partial-view geometry it sat at +0.150 s with cost 0.212, while the
+            # joint optimum is at -0.000 s with a bias of 2.30 m and cost
+            # 0.000728. Refining from the pinned minimum converges to the wrong
+            # basin, because the `valid` mask makes the objective discontinuous
+            # between them. So the coarse stage is redone over both parameters.
+            bias_step = float(get("coarse_surface_step_m", 0.5))
+            bias_grid = np.arange(0.0, extent + 1e-9, max(0.05, bias_step))
+
+            def joint_objective(params):
+                r = residual([params[0], 0.0, params[1]])
+                return float(np.mean(robust_loss(r * r)[0]))
+
+            seed = min(
+                ((x, d) for x in coarse for d in bias_grid),
+                key=lambda p: (joint_objective(p), abs(p[0])),
+            )
+            joint = least_squares(
+                lambda p: residual([p[0], 0.0, p[1]]),
+                list(seed),
+                bounds=([-limit, 0.0], [limit, extent]),
+                loss=robust_loss,
+                ftol=1e-10, xtol=1e-10, gtol=1e-10,
+            )
+            if joint.cost <= fit.cost:
+                b, surface = float(joint.x[0]), float(joint.x[1])
+                fit = joint
+    drift_limit = 0.0 if offset_only else float(get("max_drift_ppm", 2000))
     if span >= float(get("min_drift_span_s", 15)) and drift_limit > 0:
         affine = least_squares(
             residual,
@@ -255,13 +320,13 @@ def estimate_track_clock(
             b, ppm = map(float, affine.x)
             fit = affine
             drift_status = "AFFINE_DRIFT_ESTIMATED"
-    valid, pos, rng, rate, vel, heading = channels(b, ppm)
+    valid, pos, rng, rate, vel, heading = channels(b, ppm, surface)
     n = int(np.count_nonzero(valid))
     if n < min_n or np.mean(valid) < float(get("min_overlap_fraction", 0.6)):
         return None
     if float(np.linalg.norm(fit.jac[:, 0])) < 0.1:
         return None
-    final_residual = residual([b, ppm])
+    final_residual = residual([b, ppm, surface])
     normalization = len(ts) * (7 + len(anchors))
     residual_value = float(np.sum(robust_loss(final_residual**2)[0]) / normalization)
     confidence = float(1 / (1 + residual_value) * np.mean(valid))
@@ -290,6 +355,14 @@ def estimate_track_clock(
             float((ts[valid][-1] - b) / (1 + ppm * 1e-6)),
         ],
         "collision_anchors": len(anchors),
+        "offset_only": bool(offset_only),
+        "surface_bias_m": round(float(surface), 6),
+        "surface_bias_note": (
+            "constant line-of-sight distance between the radar return and the "
+            "candidate's own trajectory point -- roughly half a vehicle plus the "
+            "sensor mount. A nuisance parameter, estimated so that it is not paid "
+            "for in the clock offset instead"
+        ),
         "methods": [
             "radar_position",
             "radar_range",

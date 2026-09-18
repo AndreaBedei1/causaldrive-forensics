@@ -277,6 +277,18 @@ sensors:
 fusion:
   # V2 primary clock method: shared physical contact. See
   # docs/CLOCKS.md and cdf.fusion.contact_alignment.
+  # Final V2 clock policy: contact first, radar second, unresolved last. The
+  # hierarchy is in cdf.fusion.hybrid_alignment; the two stages it selects
+  # between are configured below under contact_alignment and time_alignment.
+  hybrid_alignment:
+    radar_fallback: true             # false reproduces the contact-only ablation
+    radar_min_confidence: 0.4        # a poor fit is not evidence about a clock
+    # Two independent pairings are two looks at one constant. If they disagree by
+    # more than this the offset is not established and the recorder stays
+    # unresolved, rather than the more confident one being believed on no stated
+    # grounds. Averaging them is what produced +0.092 s on the recorded chain
+    # from a true +0.267 s and a spurious -0.083 s.
+    radar_max_disagreement_s: 0.15
   contact_alignment:
     max_separation_m: 12.0           # two recorders in one impact are this close
     max_offset_s: 30.0               # implausible beyond the recorded window
@@ -322,6 +334,11 @@ fusion:
     collision_anchor_tolerance_s: 0.3
     collision_anchor_sigma_s: 0.03
     max_clock_constraint_residual_s: 0.2
+    # Offset-only path: a radar return comes off the near surface, not the centre.
+    # Unmodelled, that bias is paid for in the clock offset. Bounded by about half
+    # a vehicle plus the sensor mount.
+    max_surface_bias_m: 6.0
+    coarse_surface_step_m: 0.5       # the coarse stage searches offset x bias jointly
   track_association:
     min_overlap_s: 1.0             # minimum temporal overlap to even consider
     max_rmse_m: 6.0                # gate on trajectory RMSE
