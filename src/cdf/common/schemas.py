@@ -32,7 +32,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 __all__ = [
     "SCHEMA_VERSIONS",
@@ -64,6 +64,7 @@ __all__ = [
     "make_event_id",
     "stable_digest",
     "to_jsonable",
+    "events_from_payload",
 ]
 
 
@@ -730,6 +731,20 @@ def _evidence_from_dict(d: Dict[str, Any]) -> Evidence:
         t_end=d.get("t_end"),
         detail=d.get("detail", {}) or {},
     )
+
+
+def events_from_payload(records: Sequence[Any]) -> List[Event]:
+    """Read events back from their serialised form.
+
+    Public because artifacts written during a run -- perception events, in
+    particular -- are read back by the analysis stage, and reaching into a
+    private helper to do it would leave that dependency undocumented.
+    """
+    out: List[Event] = []
+    for record in records or []:
+        if isinstance(record, Mapping):
+            out.append(_event_from_dict(dict(record)))
+    return out
 
 
 def _event_from_dict(d: Dict[str, Any]) -> Event:

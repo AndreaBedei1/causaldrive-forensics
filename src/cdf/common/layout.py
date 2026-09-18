@@ -235,12 +235,22 @@ class RunLayout:
 
     @property
     def physical_causal_graph(self) -> Path:
-        """What physical event contributed to what. Physical only: no obligations."""
-        return self.fusion_dir / "physical_causal_graph.json"
+        """What physical event contributed to what. No obligations, no norms.
+
+        The same file as :attr:`fused_causal_graph`, under the name V2 uses for
+        it. The brief asks for ``physical_causal_graph.json`` and the file on
+        disk is still ``fused_causal_graph.json``: renaming it would touch every
+        reader in the project and, worse, would stop the V1 campaign from being
+        re-read, which is how the two generations are compared. The substantive
+        requirement -- one file per concept, no redundant graphs with overlapping
+        meanings -- is met either way, and the alias makes the V2 vocabulary
+        usable in new code. Recorded as a deviation in docs/V2_REFACTOR_AUDIT.md.
+        """
+        return self.fused_causal_graph
 
     @property
     def physical_causal_graphml(self) -> Path:
-        return self.fusion_dir / "physical_causal_graph.graphml"
+        return self.fused_causal_graphml
 
     @property
     def responsibility_graph(self) -> Path:

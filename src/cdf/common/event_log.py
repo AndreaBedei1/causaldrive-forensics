@@ -205,7 +205,12 @@ def build_global_log(
     which rows are not on the same axis as the rest.
     """
     alignment = alignment or {}
+    # Prefer the published offsets over any callables handed in: the log then
+    # shows exactly the transform the alignment artifact states, and cannot drift
+    # from it. `converters` remains accepted so a test can supply one directly.
     converters = dict(alignment.get("converters") or {})
+    for pid, offset in (alignment.get("offsets_s") or {}).items():
+        converters[str(pid)] = (lambda t, _o=float(offset): float(t) + _o)
     rows = log_rows(list(events), to_common=converters)
 
     aligned = sorted({

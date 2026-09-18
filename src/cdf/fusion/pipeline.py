@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 
 from ..common.config import Config
 from ..common.evidence import RunEvidence, load_run
+from ..common.event_log import build_global_log
 from ..common.io import write_json
 from ..common.layout import RunLayout
 from ..common.schemas import GraphDocument, Provenance, SCHEMA_VERSIONS, to_jsonable
@@ -36,7 +37,14 @@ from ..graph.reconstruction import (
     build_attribution_hypothesis,
     build_incident_reconstruction,
 )
+from ..formal import EventTrace, check_all, describe_properties
+from ..responsibility import (
+    benchmark_priority, build_responsibility_graph, build_responsibility_report,
+)
 from .time_alignment import align_participants
+from .contact_alignment import (
+    CONTACT_DERIVED_STATUSES, align_by_acquisition_start, align_by_contact,
+)
 from .track_association import associate_tracks, association_report
 
 LOGGER = logging.getLogger(__name__)
@@ -114,6 +122,52 @@ class FusionResult(object):
         }
 
 
+def _choose_alignment(
+    run: RunEvidence,
+    cfg: Config,
+) -> Dict[str, Any]:
+    """The clock alignment to fuse on, and an honest record of where it came from.
+
+    Contact first, always. If no two recorders can be shown to have felt the same
+    impact then a contact-anchored method has nothing to work with, and this is
+    where a silent fallback would do the most damage: the no-collision runs are
+    the negative controls, and every one of them would look perfectly aligned
+    while resting on knowledge no vehicle has.
+
+    So the fallback is explicit, separately named, and off unless configured. The
+    experiment harness starts every recorder in one simulator tick, which makes
+    the first sample of each log a common instant; that is a declared property of
+    the harness rather than a reconstruction result, and the artifact says so.
+    Simulator time is never used: each recorder keeps its own clock and its own
+    jitter, and only the single constant relating them comes from outside.
+    """
+    contact = align_by_contact(run, cfg)
+    if contact.get("offsets_s"):
+        return contact
+
+    if not bool(cfg.get("fusion.contact_alignment.acquisition_start_fallback", True)):
+        LOGGER.info(
+            "no shared contact and the acquisition-start fallback is disabled: "
+            "recorders stay on their own clocks"
+        )
+        return contact
+
+    fallback = align_by_acquisition_start(run, cfg)
+    if not fallback.get("offsets_s"):
+        return contact
+    fallback["contact_alignment_attempted"] = {
+        "status": contact["status"],
+        "reason": contact.get("reason"),
+        "n_contact_anchors": contact.get("n_contact_anchors", 0),
+    }
+    LOGGER.info(
+        "no shared contact (%s); falling back to the declared acquisition-start "
+        "marker, which is reported apart from contact-aligned runs",
+        contact["status"],
+    )
+    return fallback
+
+
 def fuse_run(
     run_dir: Any,
     cfg: Config,
@@ -131,7 +185,24 @@ def fuse_run(
             )
         )
 
-    alignment = align_participants(run, cfg)
+    # V2: contact is the primary anchor. The radar-based estimator is still run,
+    # because the clock ablation compares them, but it no longer decides the
+    # timeline the results are computed on.
+    alignment = _choose_alignment(run, cfg)
+    radar_alignment: Optional[Dict[str, Any]] = None
+    if bool(cfg.get("fusion.keep_radar_alignment_diagnostic", True)):
+        try:
+            radar_alignment = align_participants(run, cfg)
+        except Exception as exc:  # pragma: no cover - diagnostic only
+            LOGGER.warning("radar alignment diagnostic failed: %s", exc)
+            radar_alignment = {"status": "FAILED", "error": str(exc)}
+
+    if not alignment.get("offsets_s"):
+        LOGGER.warning(
+            "no common timeline for %s (%s): the merged log will show separate "
+            "local timelines and say so",
+            layout.root.name, alignment["status"],
+        )
     run = AlignedRunEvidence(run, alignment)
     assignments = associate_tracks(run, cfg)
     subject_map = resolve_subjects(assignments)
@@ -173,6 +244,12 @@ def fuse_run(
 
     diagnostics = dict(diagnostics)
     diagnostics["time_alignment"] = alignment
+    diagnostics["clock_method"] = alignment.get("method")
+    diagnostics["clock_status"] = alignment.get("status")
+    diagnostics["clock_is_contact_derived"] = (
+        alignment.get("status") in CONTACT_DERIVED_STATUSES
+    )
+    diagnostics["radar_alignment_diagnostic"] = radar_alignment
     diagnostics["subject_map"] = subject_map
     diagnostics["event_graph_fusion"] = event_diag
     diagnostics["schema_version"] = SCHEMA_VERSIONS["fusion_diagnostics"]
@@ -180,16 +257,71 @@ def fuse_run(
     # What the merged account actually says happened, and which behaviours it
     # implicates. Both are read off the fused causal graph, so they are produced
     # here rather than in a separate pass that could drift out of step with it.
+    # The readable table, before any of the claims built on it. Written from the
+    # fused nodes because those are the events that survived deduplication, and
+    # on common time only where common time exists.
+    global_log = build_global_log(
+        fused_causal.nodes, alignment=alignment,
+        run_id=run.run_id, scenario_id=run.scenario_id, seed=run.seed,
+    )
+    global_log["clock_method"] = alignment.get("method")
+    if alignment.get("caveat"):
+        global_log["clock_caveat"] = alignment["caveat"]
+
+    # Temporal properties over the merged trace. The trace carries which clock it
+    # is on and which recorders share it, so a property relating two vehicles can
+    # refuse rather than compare timestamps from two different clocks.
+    trace = EventTrace.from_events(
+        fused_causal.nodes,
+        coverage=None,
+        time_axis="common" if alignment.get("offsets_s") else "local",
+        aligned_participants=alignment.get("aligned_participants", []),
+    )
+    formal = check_all(trace, cfg, scope=Provenance.FUSED)
+
     episodes = extract_episodes(fused_causal, cfg, run.participant_ids)
     reconstruction = build_incident_reconstruction(
         fused_causal, cfg, run.participant_ids, alignment, episodes
     )
     attribution = build_attribution_hypothesis(reconstruction, fused_causal, cfg)
 
+    # Normative reasoning, in its own graph. Built from the physical graph and the
+    # observed events, so a reader can accept the physics and dispute the norm.
+    priority = benchmark_priority(
+        fused_causal.nodes, participants=run.participant_ids, cfg=cfg,
+    )
+    responsibility = build_responsibility_graph(
+        fused_causal.nodes, physical_graph=fused_causal, formal_results=formal,
+        priority=priority, cfg=cfg, run_id=run.run_id,
+        scenario_id=run.scenario_id, seed=run.seed,
+    )
+    responsibility_report = build_responsibility_report(
+        responsibility, fused_causal.nodes, formal_results=formal,
+        attribution=attribution, priority=priority, cfg=cfg,
+        run_id=run.run_id, scenario_id=run.scenario_id, seed=run.seed,
+    )
+
     if persist:
         layout.fusion_dir.mkdir(parents=True, exist_ok=True)
         write_json(layout.association_report, association_report(assignments, run, cfg))
         write_json(layout.fusion_diagnostics, diagnostics)
+        write_json(layout.clock_alignment, alignment)
+        write_json(layout.global_log, global_log)
+        write_json(layout.identity_association, {
+            "schema_version": SCHEMA_VERSIONS["fusion_diagnostics"],
+            "subject_map": subject_map,
+            "note": (
+                "which anonymous local track turned out to be which participant. "
+                "Resolved from trajectory agreement, never from actor identity"
+            ),
+        })
+        layout.formal_dir.mkdir(parents=True, exist_ok=True)
+        write_json(layout.formal_properties, describe_properties())
+        write_json(layout.formal_results, formal)
+        write_json(layout.responsibility_graph, responsibility)
+        write_json(layout.responsibility_report, responsibility_report)
+        # Retained under its historical name as well, because the clock ablation
+        # reads it and because a V1 artifact tree has it.
         write_json(layout.fusion_dir / "time_alignment.json", alignment)
         write_json(
             layout.fused_events,

@@ -22,6 +22,7 @@ from cdf.fusion.contact_alignment import (
     align_by_contact,
     contact_anchors,
     converters_from,
+    converters_of,
 )
 
 
@@ -135,7 +136,7 @@ def test_the_converters_put_both_recorders_on_one_axis():
         participant("B", [impact("B", 7.20, 4100.0)], x=102.0, y=0.0),
     )
     result = align_by_contact(run, cfg())
-    to_common = result["converters"]
+    to_common = converters_of(result)
     # The one physical impact must land at one common time.
     assert to_common["A"](8.60) == pytest.approx(to_common["B"](7.20), abs=1e-6)
 
@@ -182,7 +183,7 @@ def test_three_cars_align_transitively_through_the_middle():
     assert set(result["aligned_participants"]) == {"A", "B", "C"}
     assert result["unaligned_participants"] == []
 
-    to_common = result["converters"]
+    to_common = converters_of(result)
     # A's impact and B's first impact are one event; likewise B's second and C's.
     assert to_common["A"](10.00) == pytest.approx(to_common["B"](8.00), abs=1e-6)
     assert to_common["C"](12.50) == pytest.approx(to_common["B"](9.00), abs=1e-6)
@@ -210,7 +211,7 @@ def test_a_recorder_no_chain_reaches_stays_unaligned_and_is_named():
     result = align_by_contact(run, cfg())
     assert result["status"] == "PARTIALLY_ALIGNED"
     assert result["unaligned_participants"] == ["C"]
-    assert "C" not in result["converters"]
+    assert "C" not in converters_of(result)
 
 
 # --- refusing what the evidence does not separate --------------------------
@@ -243,7 +244,7 @@ def test_a_clear_impulse_difference_does_separate_two_impacts():
     )
     result = align_by_contact(run, cfg())
     assert result["status"] == "CONTACT_ALIGNED"
-    to_common = result["converters"]
+    to_common = converters_of(result)
     assert to_common["A"](10.00) == pytest.approx(to_common["B"](8.00), abs=1e-6)
 
 
@@ -255,7 +256,7 @@ def test_impacts_far_apart_in_space_are_not_the_same_impact():
     )
     result = align_by_contact(run, cfg())
     assert result["status"] == "UNALIGNED_NO_SHARED_CONTACT"
-    assert result["converters"] == {}
+    assert converters_of(result) == {}
 
 
 def test_wildly_different_impulses_are_not_the_same_impact():
@@ -277,7 +278,7 @@ def test_a_run_with_no_contact_is_left_unaligned():
     result = align_by_contact(run, cfg())
     assert result["status"] == "UNALIGNED_NO_SHARED_CONTACT"
     assert result["offsets_s"] == {}
-    assert result["converters"] == {}
+    assert converters_of(result) == {}
     assert result["reference"] is None
     assert sorted(result["unaligned_participants"]) == ["A", "B"]
 
@@ -359,8 +360,7 @@ def test_no_privileged_collision_pair_identity_appears_anywhere():
         participant("A", [impact("A", 10.0, 4000.0)], x=100.0, y=0.0),
         participant("B", [impact("B", 8.0, 4050.0)], x=101.0, y=0.0),
     )
-    result = dict(align_by_contact(run, cfg()))
-    result.pop("converters")
+    result = align_by_contact(run, cfg())
     blob = json.dumps(result)
     for forbidden in ("actor_id", "collision_pair", "true_pair", "counterparty"):
         assert forbidden not in blob
@@ -453,7 +453,7 @@ def test_a_consistent_triangle_is_not_flagged_at_all():
     result = align_by_contact(run, cfg())
     assert result["inconsistent_pairings"] == []
     assert result["n_links_spare"] == 1
-    to_common = result["converters"]
+    to_common = converters_of(result)
     assert to_common["A"](10.00) == pytest.approx(to_common["C"](9.00), abs=1e-6)
 
 
@@ -467,3 +467,203 @@ def test_the_alignment_uses_exactly_one_link_fewer_than_it_has_recorders():
     )
     result = align_by_contact(run, cfg())
     assert result["n_links_used"] == len(result["aligned_participants"]) - 1
+
+
+# --- the no-contact runs, and the marker that is not simulator time --------
+
+
+def test_acquisition_start_alignment_relates_the_recorders():
+    """The harness starts every recorder in one tick, which is a declared fact."""
+    from cdf.fusion.contact_alignment import align_by_acquisition_start
+
+    run = run_of(
+        participant("A", [], t0=0.00, t1=20.0),
+        participant("B", [], t0=1.40, t1=21.4),
+    )
+    result = align_by_acquisition_start(run, cfg())
+    assert result["status"] == "ACQUISITION_START_ALIGNED"
+    to_common = converters_of(result)
+    assert to_common["A"](0.00) == pytest.approx(to_common["B"](1.40), abs=1e-6)
+
+
+def test_it_is_never_reported_as_a_contact_status():
+    """The distinction has to survive into the artifact, or it erodes."""
+    from cdf.fusion.contact_alignment import (
+        CONTACT_DERIVED_STATUSES, align_by_acquisition_start,
+    )
+
+    run = run_of(participant("A", [], t0=0.0), participant("B", [], t0=1.4))
+    result = align_by_acquisition_start(run, cfg())
+    assert result["status"] not in CONTACT_DERIVED_STATUSES
+    assert result["method"] == "acquisition_start_marker"
+
+
+def test_it_carries_the_caveat_that_says_where_the_common_time_came_from():
+    from cdf.fusion.contact_alignment import align_by_acquisition_start
+
+    run = run_of(participant("A", [], t0=0.0), participant("B", [], t0=1.4))
+    caveat = align_by_acquisition_start(run, cfg())["caveat"]
+    assert "experiment harness" in caveat
+    assert "not from anything the vehicles observed" in caveat
+    assert "reported apart" in caveat
+
+
+def test_it_is_not_simulator_time_because_each_clock_keeps_its_own_jitter():
+    """Simulator time would erase the offsets the experiment exists to work
+    against; this takes one constant and leaves everything else alone."""
+    from cdf.fusion.contact_alignment import align_by_acquisition_start
+
+    run = run_of(participant("A", [], t0=0.0), participant("B", [], t0=1.4))
+    result = align_by_acquisition_start(run, cfg())
+    assert result["scale"] == 1.0
+    assert result["drift"]["estimated"] is False
+    assert "own clock" in result["note"]
+    # One offset per recorder, and nothing else transformed.
+    assert set(result["offsets_s"]) == {"A", "B"}
+
+
+def test_one_recorder_alone_cannot_be_aligned_to_anything():
+    from cdf.fusion.contact_alignment import align_by_acquisition_start
+
+    run = run_of(participant("A", [], t0=0.0))
+    result = align_by_acquisition_start(run, cfg())
+    assert result["status"] == "UNALIGNED_NO_SHARED_CONTACT"
+    assert converters_of(result) == {}
+
+
+# --- the offsets block the fusion machinery consumes ----------------------
+
+
+def test_an_aligned_participant_gets_a_transform_with_scale_one():
+    run = run_of(
+        participant("A", [impact("A", 10.0, 4000.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 8.0, 4050.0)], x=101.0, y=0.0),
+    )
+    offsets = align_by_contact(run, cfg())["offsets"]
+    assert offsets["A"]["status"] == "ALIGNED"
+    assert offsets["A"]["scale"] == 1.0
+    assert offsets["A"]["drift_ppm"] is None
+
+
+def test_an_unaligned_participant_gets_no_offset_rather_than_zero():
+    """Defaulting to zero would silently align a recorder nobody could align."""
+    run = run_of(
+        participant("A", [impact("A", 10.0, 5000.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 8.0, 5100.0)], x=103.0, y=0.0),
+        participant("C", [impact("C", 4.0, 900.0)], x=-300.0, y=0.0),
+    )
+    offsets = align_by_contact(run, cfg())["offsets"]
+    assert offsets["C"]["status"] == "UNRESOLVED"
+    assert offsets["C"]["offset_s"] is None
+    assert offsets["C"]["confidence"] == 0.0
+
+
+def test_a_run_with_no_contact_leaves_every_transform_unresolved():
+    run = run_of(participant("A", []), participant("B", []))
+    offsets = align_by_contact(run, cfg())["offsets"]
+    assert {v["status"] for v in offsets.values()} == {"UNRESOLVED"}
+
+
+# --- telling an impact from resting contact -------------------------------
+
+
+def test_resting_contact_after_an_impact_is_not_an_impact():
+    """A real recording: one impact of 11 569 N*s, then 43 reports of 30-290 N*s
+    twice a second for the rest of the run as the vehicles sat touching."""
+    triggers = [impact("A", 6.17, 11569.0)]
+    triggers += [
+        impact("A", 6.87 + i * 0.55, 30.0 + (i * 37) % 260) for i in range(43)
+    ]
+    ev = participant("A", triggers, x=100.0, y=0.0, t1=30.0)
+    anchors = contact_anchors(ev)
+    assert [round(a.t_local, 2) for a in anchors] == [6.17]
+
+
+def test_the_impulse_floor_is_relative_so_it_needs_no_scenario_scale():
+    """A gentle scenario keeps its gentle impacts; the test is against its own peak."""
+    gentle = participant("A", [
+        impact("A", 6.0, 4000.0),
+        impact("A", 9.0, 2400.0),     # 60% of the peak: a real second impact
+        impact("A", 12.0, 90.0),      # 2% of the peak: contact, not impact
+    ], x=100.0, y=0.0, t1=20.0)
+    assert [round(a.impulse) for a in contact_anchors(gentle)] == [4000, 2400]
+
+
+def test_a_sustained_contact_within_the_merge_window_is_one_impact():
+    triggers = [impact("A", 6.00 + i * 0.05, 9000.0 + i) for i in range(6)]
+    anchors = contact_anchors(participant("A", triggers, x=100.0, y=0.0))
+    assert len(anchors) == 1
+    assert anchors[0].t_local == pytest.approx(6.00)
+    assert anchors[0].impulse == pytest.approx(9005.0)
+    assert anchors[0].n_triggers == 6
+
+
+def test_two_impacts_a_second_apart_stay_two():
+    triggers = [impact("A", 6.0, 9000.0), impact("A", 7.5, 8000.0)]
+    assert len(contact_anchors(participant("A", triggers, x=100.0, y=0.0))) == 2
+
+
+# --- disagreeing pairings are not averaged -------------------------------
+
+
+def test_pairings_that_disagree_use_the_better_one_rather_than_the_mean():
+    """The failure this prevents, from a real recording: a true impact implied
+    +0.267 s, a spurious pairing implied -0.083 s, and the median was +0.092 --
+    a value neither piece of evidence supported."""
+    run = run_of(
+        participant("A", [impact("A", 6.174, 11569.0), impact("A", 11.323, 9200.0)],
+                    x=100.0, y=0.0, t1=20.0),
+        participant("B", [impact("B", 5.906, 11569.0), impact("B", 11.406, 7400.0)],
+                    x=101.0, y=0.0, t1=20.0),
+    )
+    result = align_by_contact(run, cfg())
+    pair = result["pairs"]["B->A"]
+    assert pair["offsets_agree"] is False
+    assert "one of them is wrong" in pair["estimator"]
+    # The best-evidenced pairing is the exact-impulse one.
+    assert pair["offset_s"] == pytest.approx(0.2674, abs=1e-3)
+
+
+def test_pairings_that_agree_are_still_averaged():
+    run = run_of(
+        participant("A", [impact("A", 6.00, 9000.0), impact("A", 11.00, 8000.0)],
+                    x=100.0, y=0.0, t1=20.0),
+        participant("B", [impact("B", 5.90, 9050.0), impact("B", 10.92, 8050.0)],
+                    x=101.0, y=0.0, t1=20.0),
+    )
+    pair = align_by_contact(run, cfg())["pairs"]["B->A"]
+    assert pair["offsets_agree"] is True
+    assert "agree" in pair["estimator"]
+    assert pair["offset_s"] == pytest.approx(0.09, abs=0.01)
+
+
+# --- one impact doing duty for two --------------------------------------
+
+
+def test_an_anchor_used_by_two_links_is_flagged_with_an_error_bound():
+    """In a chain the middle vehicle often registers one impact, not two, so its
+    single anchor relates both neighbours and the second offset inherits an error
+    no larger than the interval between the impacts."""
+    run = run_of(
+        participant("A", [impact("A", 6.17, 11569.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 5.91, 11569.0)], x=101.0, y=0.0),
+        participant("C", [impact("C", 6.19, 10321.0)], x=102.0, y=0.0),
+    )
+    result = align_by_contact(run, cfg())
+    caveats = result["shared_anchor_caveats"]
+    assert caveats, "the middle recorder anchor is used by both links"
+    entry = caveats[0]
+    assert entry["n_impacts_this_recorder_registered"] == 1
+    assert entry["offset_error_bound_s"] == pytest.approx(0.02, abs=0.01)
+    assert "did not register its second impact" in entry["reason"]
+
+
+def test_a_recorder_with_its_own_anchor_per_link_is_not_flagged():
+    """The clean chain: the middle vehicle registered both of its impacts."""
+    run = run_of(
+        participant("A", [impact("A", 10.00, 9000.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 8.00, 9050.0), impact("B", 9.00, 3000.0)],
+                    x=103.0, y=0.0),
+        participant("C", [impact("C", 12.50, 3050.0)], x=106.0, y=0.0),
+    )
+    assert align_by_contact(run, cfg())["shared_anchor_caveats"] == []

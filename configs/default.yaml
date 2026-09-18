@@ -279,6 +279,20 @@ fusion:
     ambiguity_margin: 0.12           # 2nd-best pairing within this => ambiguous
     consistency_margin: 0.12         # a contradicting link this much weaker loses
     max_offset_disagreement_s: 0.15  # 3 frames at 20 Hz
+    trigger_merge_window_s: 0.3      # a sustained contact is one impact
+    # Resting contact after a pile-up reports twice a second for the rest of the
+    # run at a hundredth of the impact impulse. An anchor has to carry a real
+    # share of the momentum transfer, or it is contact rather than an impact.
+    min_impulse_fraction_of_peak: 0.05
+    min_impulse_ns: 300.0
+    # The negative controls have no contact to anchor on. The fallback is an
+    # explicit marker from the experiment harness, reported apart from
+    # contact-aligned runs; it is never simulator time. See section 14 of the
+    # brief and cdf.fusion.contact_alignment.align_by_acquisition_start.
+    acquisition_start_fallback: true
+  # Keep running the superseded radar estimator so the clock ablation can compare
+  # the two. It no longer decides the timeline results are computed on.
+  keep_radar_alignment_diagnostic: true
   # Superseded radar-based alignment, kept for the clock ablation only. It is no
   # longer the method the results are reported from; see docs/CLOCKS.md for why
   # a drift rate fitted to a 25 s window was more precision than the evidence.
