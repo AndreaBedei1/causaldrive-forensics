@@ -1447,6 +1447,14 @@
     var html = '';
     if (cf) {
       var cls = cf.classification || {};
+      // A verdict produced by replays that shared one simulator session is not
+      // reliably comparable, and a reader has no way to know that from the
+      // verdict itself. If the run recorded a degraded protocol, say so here.
+      var protocol = cf.replay_protocol || {};
+      if (protocol.warning) {
+        html += '<div class="protocol-warning"><b>Degraded replay protocol.</b> ' +
+                esc(protocol.warning) + '</div>';
+      }
       html += '<div class="verdict">' +
               '<div class="verdict-line"><span class="tag ' + esc(cls.attribution_class || '') +
               '">' + esc(classLabel(cls.attribution_class)) + '</span>' +

@@ -47,11 +47,31 @@ iteration over unordered sets that reaches an output. Ties in track association,
 event matching and rule application break on sorted identifiers so that two runs
 of the same analysis produce byte-identical artifacts.
 
-What is **not** guaranteed is bit-identical physics across CARLA builds, GPU
-drivers or operating systems. An impact speed may differ in the third decimal.
-Structural results — which vehicle collided with which, in what order, which
-behaviours are in the ancestry of the outcome — are stable; the metres and
-seconds may move slightly.
+What is **not** guaranteed is bit-identical physics, even on the same machine.
+This was measured rather than assumed: running one scenario's counterfactual
+suite twice, back to back, with a freshly started simulator per replay and an
+identical configuration, six of seven replays reproduced exactly and one differed
+in impact speed by several per cent. **No replay changed outcome class** — every
+collision was still a collision, every prevention still a prevention.
+
+So the guarantee this project actually offers is at the level of the *verdict*:
+which vehicle collided with which, in what order, which behaviours are in the
+ancestry of the outcome, and what the counterfactual established. Continuous
+quantities — impact speed, minimum distance — carry a few per cent of run-to-run
+variation, and a result that depended on the third decimal of one of them would
+not be reproducible.
+
+Across CARLA builds, GPU drivers or operating systems the variation should be
+expected to be larger, and nothing here bounds it.
+
+**A caution learned the hard way.** The per-replay simulator restart only happens
+when the session can start the server itself, which means `$CARLA_ROOT` must
+point at the installation. Without it, `fresh_world_for_map` logs a warning and
+silently falls back to reusing the current server — and replays recorded that way
+are not comparable, because the configuration's own comment explains that
+repeated runs in one session drift enough to change an outcome class. One
+scenario in this project produced a non-reproducible verdict that way before the
+variable was set. Check the warning is absent before trusting a sweep.
 
 ---
 
@@ -86,12 +106,18 @@ averaged together answer no question anyone asked.
 ### 3. Replay the counterfactuals
 
 ```bash
+export CARLA_ROOT=/path/to/CARLA_0.9.15/WindowsNoEditor   # required, see below
 python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
 ```
 
 One seed per variant by default: a replay sweep costs a full simulator run per
 intervention, and the verdict is a property of the scenario rather than of the
-seed.
+seed. `--fresh` re-records every replay instead of reusing one already on disk;
+`--force` re-runs a suite that already carries an attribution.
+
+`$CARLA_ROOT` is not optional here. Without it the session cannot restart the
+simulator between replays, and the comparison the whole stage rests on is
+quietly degraded — see the caution above.
 
 ### 4. Score, ablate, and build the viewer bundles
 

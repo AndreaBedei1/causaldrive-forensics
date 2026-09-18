@@ -114,11 +114,11 @@ must not be collapsed:
 
 The second is not a weaker version of the first, it is its opposite, and a report
 that folded both into "nothing changed" would discard half of what the replay
-established. S01 is the clearest case: replayed with a freshly started simulator
-per replay, no single removal prevents the crash and every removal raises the
-impact speed substantially. Both drivers braked; neither brake caused the
-collision; both made it less severe. The verdict is `insufficient_evidence` —
-correctly, because no initiator was established — and the rationale says why.
+established. `S06/b_rear_first` is the case in this campaign: no single removal
+prevents the chain collision, and removing some of the braking raises the impact
+speed. Those brakes did not cause the crash; they reduced one they did not bring
+about. The verdict is `insufficient_evidence` — correctly, because no initiator
+was established — and the rationale says which of the two it found.
 
 ## Negative controls
 

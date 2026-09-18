@@ -348,6 +348,33 @@ def run_counterfactual_suite(
             "session was supplied; replays will share one server and are NOT "
             "independently reproducible"
         )
+    # Whether the restart *can actually happen* is a property of how the session
+    # was started: `fresh_world_for_map` falls back to reusing the current
+    # server when no CARLA installation was found to restart, and only logs a
+    # warning about it. A warning in a log nobody reads is how a degraded sweep
+    # produces a verdict that does not reproduce, so the protocol that really
+    # ran is written into the report beside the verdict it produced.
+    server_restartable = bool(
+        getattr(getattr(session, "server", None), "available", False)
+    )
+    replay_protocol = {
+        "restart_server_per_replay_requested": restart_each,
+        "session_can_restart": can_restart,
+        "server_restartable": server_restartable,
+        "effective": (
+            "fresh_server_per_replay"
+            if restart_each and can_restart and server_restartable
+            else "shared_server_session"
+        ),
+    }
+    if replay_protocol["effective"] != "fresh_server_per_replay" and restart_each:
+        replay_protocol["warning"] = (
+            "replays shared one simulator session. Repeated runs in one session "
+            "drift enough to change an outcome class, so these replays are not "
+            "reliably comparable with each other. Set $CARLA_ROOT so the session "
+            "can restart the server between replays."
+        )
+        LOGGER.warning("%s", replay_protocol["warning"])
 
     resume = bool(cfg.get("counterfactual.resume", True))
 
@@ -439,6 +466,7 @@ def run_counterfactual_suite(
         variant=spec.variant,
         seed=int(seed),
     )
+    report["replay_protocol"] = replay_protocol
 
     manifest = {
         "schema_version": SCHEMA_VERSIONS["counterfactual"],

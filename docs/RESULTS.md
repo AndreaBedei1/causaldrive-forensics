@@ -76,17 +76,20 @@ severity. The chain happens either way; the braking cascade is what makes it
 hard. The report says exactly that, and names no initiator, because none was
 established.
 
-**S01, the rear-end, is `insufficient_evidence` — and the interesting part is
-why.** No single removal prevents the crash, and every removal makes it *worse*:
-take away either driver's braking and the impact speed rises substantially. Both
-drivers braked, neither brake caused the collision, and both reduced it. That is
-reported as a mitigating finding rather than as "nothing changed", because the
-two are opposites.
+**S06's other variant, `b_rear_first`, is `insufficient_evidence` for a reason
+worth stating.** No single removal prevents the crash, and removing some of the
+braking makes the impact *worse*. Those actions did not contribute to the
+collision; they reduced one they did not bring about. That is reported as a
+mitigating finding rather than as "nothing changed", because the two are
+opposites and a report that collapsed them would discard half of what the replay
+showed.
 
-Both of these differ from what the earlier back-to-back replay sweep reported,
-and the difference is the protocol rather than the method: each replay now runs
-on a freshly started simulator, which is what the configuration asks for and
-what a comparison between runs actually depends on.
+**S01, the rear-end, is `shared_contribution`.** Removing either driver's
+braking independently prevents the collision: B's emergency brake is what A
+fails to leave room for, and A's late brake is what fails to recover. Either
+change alone would have been enough, so no single initiator is named — which is
+a different finding from a joint contribution, where neither change alone would
+have sufficed.
 
 ### What went right
 

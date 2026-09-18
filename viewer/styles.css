@@ -644,3 +644,14 @@ tr.reference td, tr.factual td { background: rgba(255, 255, 255, 0.02); }
   line-height: 1.55;
   font-size: 12.5px;
 }
+
+/* A verdict from replays that shared one simulator session. Loud, because the
+ * verdict itself gives a reader no way to tell. */
+.protocol-warning {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--fail);
+  background: var(--panel-2);
+  line-height: 1.55;
+  font-size: 12.5px;
+}
