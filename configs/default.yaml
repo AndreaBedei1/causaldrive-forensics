@@ -205,6 +205,24 @@ causal_rules:
 # -----------------------------------------------------------------------------
 # Post-event fusion
 # -----------------------------------------------------------------------------
+# What each vehicle perceives of the road, from its own camera and lane sensor.
+# Nothing here reads the map: that is the point of having a camera at all. See
+# cdf.local.sign_perception and cdf.local.lane_events.
+perception:
+  signs:
+    min_area_px: 240               # smaller than this is a guess, not a reading
+    min_fill_ratio: 0.80           # contour area over hull area, for a solid face
+    min_redness: 0.28
+    min_confidence: 0.45
+    approx_epsilon: 0.025          # polygon simplification, fraction of perimeter
+    min_saturation: 90
+    min_value: 50
+    max_centre_gap_px: 60.0        # association across frames
+    max_time_gap_s: 0.6
+    min_detections_per_track: 3    # a one-frame detection is likelier a red van
+  lanes:
+    merge_window_s: 0.8            # reports closer than this are one crossing
+
 # Normative reasoning. See cdf.responsibility: the priority benchmark is a rule
 # adopted for this experiment, not a statement of law, and it is allowed to
 # return AMBIGUOUS_PRIORITY rather than break a tie it cannot see.
@@ -222,6 +240,22 @@ formal:
 # reported UNKNOWN rather than resolved either way.
 non_actions:
   min_evidence_coverage: 0.8
+
+# The forward camera. Off is a supported configuration, not a degraded one: the
+# V1 scenarios were recorded without one and stay runnable without one.
+sensors:
+  camera:
+    enabled: true
+    sensor_id: "front"
+    width: 800
+    height: 600
+    fov_deg: 90.0
+    mount_x: 1.4
+    mount_z: 1.4
+    jpeg_quality: 70
+    pre_event_s: 20.0              # the window the brief asks for
+    post_event_s: 5.0
+    max_frames: 1200               # backstop against a broken clock
 
 fusion:
   # V2 primary clock method: shared physical contact. See
