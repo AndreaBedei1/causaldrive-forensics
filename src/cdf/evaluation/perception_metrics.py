@@ -236,7 +236,14 @@ def _stop_line_expectations(
     if not layout.stop_lines_truth.exists():
         return []
     lines = read_json(layout.stop_lines_truth).get("stop_lines", []) or []
-    return [line for line in lines if str(line.get("governs")) == str(pid)]
+    # Only a verified line is scored. The rest are positions derived from the
+    # sign and the lane, and counting them as real would charge the detector with
+    # missing markings the map never painted.
+    return [
+        line for line in lines
+        if str(line.get("governs")) == str(pid)
+        and line.get("physically_verified", True)
+    ]
 
 
 def _counts(events: Sequence[Any]) -> Dict[str, int]:

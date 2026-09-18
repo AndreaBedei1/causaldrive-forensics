@@ -374,7 +374,21 @@ def _candidate_matches(
 ) -> List[ContactMatch]:
     """Every plausible pairing between two recorders' impacts, scored."""
     tolerance_m = float(cfg.get("fusion.contact_alignment.max_separation_m", 12.0))
-    max_offset = float(cfg.get("fusion.contact_alignment.max_offset_s", 30.0))
+    # How far apart two recorders' clocks can plausibly be. Derived from the
+    # declared clock protocol where there is one: the harness gives each recorder
+    # an offset of at most clocks.offset.max_abs_s, so a pair cannot exceed twice
+    # that, and a margin covers jitter. Without a declared protocol nothing
+    # bounds it and the gate stays wide.
+    #
+    # At the old flat 30 s the gate admitted pairings between impacts that had
+    # nothing to do with each other: on a no-collision run two vehicles each
+    # scraped something eight seconds apart, the matcher related them, and the
+    # run was reported CONTACT_ALIGNED with an offset 8.00 s wrong.
+    declared = cfg.get("clocks.offset.max_abs_s", None)
+    default_gate = 30.0 if declared is None else max(1.0, 2.5 * float(declared))
+    max_offset = float(
+        cfg.get("fusion.contact_alignment.max_offset_s", default_gate)
+    )
     min_impulse_ratio = float(
         cfg.get("fusion.contact_alignment.min_impulse_ratio", 0.05)
     )

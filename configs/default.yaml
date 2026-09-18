@@ -298,7 +298,13 @@ fusion:
     radar_max_disagreement_s: 0.15
   contact_alignment:
     max_separation_m: 12.0           # two recorders in one impact are this close
-    max_offset_s: 30.0               # implausible beyond the recorded window
+    # The harness gives each recorder an offset of at most clocks.offset.max_abs_s
+    # (0.4 s), so two recorders cannot be more than 0.8 s apart. At 30 s the gate
+    # admitted pairings between impacts that had nothing to do with each other --
+    # on a no-collision run two vehicles each scraped something eight seconds
+    # apart and the matcher related them, giving an offset 8.00 s wrong on a run
+    # reported as CONTACT_ALIGNED. One second is the same bound the radar path
+    # uses and is still generous against the declared 0.8.
     min_impulse_ratio: 0.05          # below this the two hits are not one hit
     ambiguity_margin: 0.12           # 2nd-best pairing within this => ambiguous
     consistency_margin: 0.12         # a contradicting link this much weaker loses
@@ -329,7 +335,6 @@ fusion:
   # longer the method the results are reported from; see docs/CLOCKS.md for why
   # a drift rate fitted to a 25 s window was more precision than the evidence.
   time_alignment:
-    max_offset_s: 1.0
     grid_dt: 0.05
     max_drift_ppm: 2000.0
     min_samples: 12

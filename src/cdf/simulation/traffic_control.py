@@ -391,6 +391,16 @@ def stop_lines_truth(
             "sign_id": str(sign.get("sign_id", "")),
             "governs": str(sign.get("governs", "")),
             "forward_of_sign_m": forward,
+            # A derived position: the lane point `forward` metres in front of the
+            # sign. Whether the map paints a stop bar there is a separate
+            # question, and Town05 does not at any junction where it renders a
+            # sign. Marking the reference unverified keeps a camera from being
+            # charged with missing a marking that was never painted.
+            "physically_verified": False,
+            "verification_note": (
+                "derived from the sign position and the lane geometry, not "
+                "confirmed against a painted marking; not scored as a miss"
+            ),
             "location": {
                 "x": round(float(transform.location.x), 3),
                 "y": round(float(transform.location.y), 3),
