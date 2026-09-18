@@ -20,11 +20,15 @@ byte-identical across every run and identical to the configuration in force now.
 
 A recording is also allowed to predate a *stage that did not exist yet*. The
 retained campaign under ``artifacts/`` is the synchronized-clock baseline; the
-clock protocol and post-fusion causal reasoning were added afterwards, so keys
-under :data:`MIGRATION_NAMESPACES` are permitted **only when the recording does
-not carry them at all**. A key the recording does carry must still match
-exactly: that is the difference between adding a stage and quietly retuning the
-one the campaign was recorded under.
+clock protocol and post-fusion causal reasoning were added afterwards, and the V2
+refactor then added the camera and lane sensor, sign and stop-line perception,
+contact-based alignment, non-actions, the executable temporal logic and the
+responsibility layer. Keys under :data:`MIGRATION_NAMESPACES` are permitted
+**only when the recording does not carry them at all**. A key the recording does
+carry must still match exactly: that is the difference between adding a stage and
+quietly retuning the one the campaign was recorded under, and it is the condition
+that gives this test its teeth. Widening the namespace list cannot hide a retune;
+it can only excuse an absence.
 
 Skipped when the artifacts are not present, so a fresh clone still passes.
 """
@@ -61,6 +65,19 @@ MIGRATION_NAMESPACES = (
     "graph.episodes.",
     "graph.reconstruction.",
     "graph.attribution.",
+    # Added by the V2 refactor, all of them stages the V1 baseline has no value
+    # for at all: a camera and lane sensor on each vehicle, the perception that
+    # reads signs and stop lines from that camera, contact-based clock alignment
+    # in place of the radar fit, non-actions, the evidence floor the temporal
+    # properties need, and the normative layer.
+    "sensors.camera.",
+    "sensors.lane_invasion.",
+    "perception.",
+    "fusion.contact_alignment.",
+    "fusion.keep_radar_alignment_diagnostic",
+    "non_actions.",
+    "formal.",
+    "responsibility.",
 )
 
 
