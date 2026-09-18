@@ -664,18 +664,49 @@ def test_oracle_only_event_types_absent_from_recorded_run(real_run: Path) -> Non
     )
 
 
+#: Every artifacts tree this repository produces. Both are scanned: `artifacts/`
+#: holds the synchronized-clock baseline and `artifacts_independent_clocks/` the
+#: final campaign, and it is the *final* campaign whose numbers are reported --
+#: scanning only the older one would be making the project's strongest data
+#: boundary claim about the wrong experiment.
+CAMPAIGN_ROOTS: Tuple[str, ...] = ("artifacts", "artifacts_independent_clocks")
+
+
 def _recorded_campaign_runs() -> List[Path]:
-    """Every recorded run under `artifacts/`, replays and ablation included.
+    """Every recorded run under either campaign, replays and ablation included.
 
     Replays and ablation runs ARE scanned here, unlike in the campaign
     aggregates: they are not part of the experiment, but they are artifacts this
     code wrote, and the boundary has to hold in everything it writes.
     """
-    root = Path(__file__).resolve().parents[1] / "artifacts"
-    if not root.is_dir():
-        return []
-    return [m.parent for m in sorted(root.rglob("manifest.json"))
-            if (m.parent / "fusion").is_dir() or list(m.parent.glob("vehicle_*"))]
+    repo = Path(__file__).resolve().parents[1]
+    out: List[Path] = []
+    for name in CAMPAIGN_ROOTS:
+        root = repo / name
+        if not root.is_dir():
+            continue
+        out.extend(
+            m.parent for m in sorted(root.rglob("manifest.json"))
+            if (m.parent / "fusion").is_dir() or list(m.parent.glob("vehicle_*"))
+        )
+    return out
+
+
+def test_the_scan_of_record_covers_the_campaign_whose_results_are_reported() -> None:
+    """A clean scan of the wrong campaign proves nothing about the right one.
+
+    The reported numbers come from `artifacts_independent_clocks/`. If that tree
+    is present, the whole-campaign scan below must actually be reaching into it.
+    """
+    repo = Path(__file__).resolve().parents[1]
+    final = repo / "artifacts_independent_clocks"
+    if not final.is_dir():
+        pytest.skip("the final campaign is not present in this checkout")
+    runs = _recorded_campaign_runs()
+    covered = [r for r in runs if final in r.parents]
+    assert covered, (
+        "the final campaign exists but the leakage scan reaches none of its runs"
+    )
 
 
 @pytest.mark.slow
@@ -690,7 +721,7 @@ def test_whole_recorded_campaign_carries_no_privileged_keys() -> None:
     """
     runs = _recorded_campaign_runs()
     if not runs:
-        pytest.skip("no recorded runs under artifacts/")
+        pytest.skip("no recorded runs under {0}".format(" or ".join(CAMPAIGN_ROOTS)))
     violations: List[str] = []
     scanned = 0
     for run_dir in runs:
@@ -708,7 +739,7 @@ def test_whole_recorded_campaign_carries_no_oracle_event_types() -> None:
     """No `ORACLE_*` event type anywhere on the unprivileged side of any run."""
     runs = _recorded_campaign_runs()
     if not runs:
-        pytest.skip("no recorded runs under artifacts/")
+        pytest.skip("no recorded runs under {0}".format(" or ".join(CAMPAIGN_ROOTS)))
     violations: List[str] = []
     for run_dir in runs:
         for subtree in local_and_fused_dirs(run_dir):
