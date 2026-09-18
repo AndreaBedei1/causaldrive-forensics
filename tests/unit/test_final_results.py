@@ -276,6 +276,16 @@ def test_the_published_copy_exists_and_matches_what_the_docs_link_to() -> None:
     The recorded artifacts are gitignored, so a results table that lived only
     beside them would be a broken link in every clone -- and the claim that the
     numbers are checkable would be one you could not check.
+
+    What is *not* asserted any more is that the tables are present. Between
+    generations they are legitimately absent: V2 changed the sensors and the
+    timing semantics, so the V1 tables were archived rather than left in place to
+    be mistaken for V2 results, and the V2 tables appear once a V2 campaign has
+    been recorded. An empty `results/` is a real state and must not fail.
+
+    What is asserted either way is that the directory explains itself and that
+    every documentation link into it resolves -- because the failure this test
+    exists to catch is a reader following a link to a number that is not there.
     """
     import re
 
@@ -285,11 +295,21 @@ def test_the_published_copy_exists_and_matches_what_the_docs_link_to() -> None:
     if not published.is_dir():
         pytest.skip("no published results in this checkout")
 
-    for name in ("final_results.md", "final_results.csv", "final_results.json"):
-        assert (published / name).is_file(), name
     assert (published / "README.md").is_file(), (
-        "a committed table with no provenance is a table nobody can trace"
+        "a results directory with no provenance is a directory nobody can trace"
     )
+    tables = sorted(p.name for p in published.glob("final_results.*"))
+    if not tables:
+        # Between campaigns. The README has to say so, or an empty directory
+        # reads as a campaign that produced nothing.
+        readme = (published / "README.md").read_text(encoding="utf-8")
+        assert "pending" in readme.lower() or "empty" in readme.lower(), (
+            "results/ is empty and its README does not say why"
+        )
+    else:
+        for name in ("final_results.md", "final_results.csv",
+                     "final_results.json"):
+            assert (published / name).is_file(), name
 
     # Every link the docs make into results/ must resolve.
     docs = list((repo_root() / "docs").glob("*.md")) + [repo_root() / "README.md"]
