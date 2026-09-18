@@ -175,6 +175,60 @@ def test_the_chain_of_two_impacts_is_recovered_without_naming_a_scenario(cfg) ->
     assert chain[0].source == "ab" and chain[0].target == "bc"
 
 
+def test_two_impacts_far_apart_in_time_are_not_chained(cfg) -> None:
+    """Sharing a vehicle is not enough; a chain reaction is also prompt.
+
+    S14's independent_impacts variant is built on this: B rear-ends A, and eight
+    seconds later C rolls into the stationary pile. The same three vehicles and
+    the same pair structure as the chain variant, and no causal link between the
+    two impacts. A rule that chained them on shared membership alone would give
+    the same answer to both variants, which is exactly what that pair of
+    scenarios exists to detect.
+    """
+    doc = graph([
+        node("ab", EventType.COLLISION, "A", 7.4, subject="B", owners=["A", "B"]),
+        node("bc", EventType.COLLISION, "C", 15.1, subject="B", owners=["C"]),
+    ])
+    edges, diag = infer(doc, cfg)
+    assert not [
+        e for e in edges if e.rule == "global_impact_propagates_to_next_impact"
+    ]
+
+
+def test_the_chain_window_is_what_separates_the_two_s14_variants(cfg) -> None:
+    """Directly at the boundary, so a widened lag cannot pass unnoticed.
+
+    Half a second apart chains; eight seconds apart does not. Whoever changes
+    the window has to change this test and say why.
+    """
+    close = graph([
+        node("ab", EventType.COLLISION, "A", 5.9, subject="B", owners=["A", "B"]),
+        node("bc", EventType.COLLISION, "C", 6.4, subject="B", owners=["C"]),
+    ])
+    far = graph([
+        node("ab", EventType.COLLISION, "A", 5.9, subject="B", owners=["A", "B"]),
+        node("bc", EventType.COLLISION, "C", 13.9, subject="B", owners=["C"]),
+    ])
+    chained = lambda doc: [
+        e for e in infer(doc, cfg)[0]
+        if e.rule == "global_impact_propagates_to_next_impact"
+    ]
+    assert len(chained(close)) == 1
+    assert chained(far) == []
+
+
+def test_two_impacts_sharing_no_vehicle_are_never_chained(cfg) -> None:
+    """Two unrelated pairs colliding a moment apart is a coincidence, not a chain."""
+    doc = graph([
+        node("ab", EventType.COLLISION, "A", 5.9, subject="B", owners=["A", "B"]),
+        node("cd", EventType.COLLISION, "C", 6.3, subject="D", owners=["C", "D"]),
+    ])
+    edges, _diag = infer(doc, cfg)
+    assert not [
+        e for e in edges if e.rule == "global_impact_propagates_to_next_impact"
+    ]
+
+
 def test_an_unorderable_pair_of_impacts_asserts_no_chain(cfg) -> None:
     """Two impacts closer together than the clock error are not evidence of order."""
     doc = graph([
