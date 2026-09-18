@@ -36,6 +36,9 @@ from ..common.schemas import (
     TriggerKind,
 )
 from ..oracle.logger import OracleLogger
+from .traffic_control import (
+    place_traffic_control, stop_lines_truth, traffic_control_truth,
+)
 from .carla_client import import_carla
 from .live_view import LiveScenarioView, LiveViewOptions
 from .scenario_base import (
@@ -207,6 +210,26 @@ def run_scenario(
 
         _assert_spawn_separation(placements, min_gap_m=float(cfg.get("simulation.min_spawn_gap_m", 5.0)))
 
+        # --- place the declared traffic control ---
+        # Before any vehicle: a prop cannot spawn into space a vehicle already
+        # occupies, and the sign is the fixed part of the scene. An approach with
+        # no sign on it cannot be perceived, so a sign that could not be placed
+        # is recorded rather than passed over -- a camera that finds nothing
+        # where the scenario says there is a sign has not failed, it has been
+        # asked an unanswerable question.
+        sign_placement = place_traffic_control(sworld, spec.traffic_control, cfg)
+        if spec.traffic_control and not sign_placement["all_placed"]:
+            missing = sign_placement["n_declared"] - sign_placement["n_placed"]
+            notes.append(
+                "{0} of {1} declared sign(s) could not be placed".format(
+                    missing, sign_placement["n_declared"])
+            )
+            LOGGER.warning(
+                "%s: %d of %d declared sign(s) could not be placed; the "
+                "traffic-control findings for those approaches will be empty",
+                spec.scenario_id, missing, sign_placement["n_declared"],
+            )
+
         # --- instantiate participants ---
         for pspec, transform, route in placements:
             controller = make_controller(pspec, route)
@@ -328,6 +351,18 @@ def run_scenario(
                 "formula": "t_local = true_scale * t_sim + true_offset_s + jitter",
                 "participants": {a.participant_id: a.clock.ground_truth() for a in agents},
             })
+            # What the traffic control really is, for scoring what the cameras
+            # made of it. Privileged, written only here, and read only by
+            # evaluation -- deleting oracle/ must leave every inference artifact
+            # byte-identical, which the anti-leakage suite checks.
+            write_json(
+                layout.traffic_control_truth,
+                traffic_control_truth(sworld, spec.traffic_control, sign_placement),
+            )
+            write_json(
+                layout.stop_lines_truth,
+                stop_lines_truth(sworld, spec.traffic_control),
+            )
 
     participants_manifest = [
         ParticipantManifest(

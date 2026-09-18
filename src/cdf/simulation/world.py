@@ -308,6 +308,25 @@ class ScenarioWorld:
         self._actors.append(actor)
         return actor
 
+    def spawn_prop(
+        self,
+        blueprint_id: str,
+        transform: Any,
+        attributes: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """Spawn a static prop and take ownership of it.
+
+        Unlike a vehicle, a prop that will not fit returns ``None`` rather than
+        raising. A blocked sign position is a scenario problem the run gate
+        should report, not a crash mid-run -- and the caller records which signs
+        it managed to place, so the failure is visible either way.
+        """
+        bp = self.blueprint(blueprint_id, attributes)
+        actor = self.world.try_spawn_actor(bp, transform)
+        if actor is not None:
+            self._actors.append(actor)
+        return actor
+
     def spawn_sensor(
         self,
         blueprint_id: str,
