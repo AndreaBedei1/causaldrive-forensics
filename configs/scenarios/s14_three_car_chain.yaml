@@ -102,13 +102,17 @@ scenario:
     c_pushes_b:
       participant_overrides:
         B:
+          # B must be free to roll when C strikes it, or the push this variant
+          # exists to demonstrate cannot happen: holding the brakes through the
+          # impact pins B in place and the second contact never occurs.
+          post_impact_stop: false
           actions:
             # B responds in time and would have stopped clear, so B's presence
             # in the second impact is entirely the consequence of being struck.
             - action_id: "B_brake"
               kind: "brake"
               t_start: 4.9
-              duration: 8.0
+              duration: 1.6
               params: { intensity: 0.95 }
         C:
           actions:

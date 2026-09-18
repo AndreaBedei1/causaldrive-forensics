@@ -47,7 +47,7 @@ scenario:
     # B starts ahead and one lane over, so a lane change puts it across A's path.
     - id: "B"
       blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 14.0, lane_offset: -1 }
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 11.0, lane_offset: -1 }
       route: { length_m: 150.0, step_m: 2.0 }
       initial_speed: 13.0
       target_speed: 13.0
