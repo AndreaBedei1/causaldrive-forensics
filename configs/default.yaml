@@ -206,6 +206,18 @@ causal_rules:
 # Post-event fusion
 # -----------------------------------------------------------------------------
 fusion:
+  # V2 primary clock method: shared physical contact. See
+  # docs/CLOCKS.md and cdf.fusion.contact_alignment.
+  contact_alignment:
+    max_separation_m: 12.0           # two recorders in one impact are this close
+    max_offset_s: 30.0               # implausible beyond the recorded window
+    min_impulse_ratio: 0.05          # below this the two hits are not one hit
+    ambiguity_margin: 0.12           # 2nd-best pairing within this => ambiguous
+    consistency_margin: 0.12         # a contradicting link this much weaker loses
+    max_offset_disagreement_s: 0.15  # 3 frames at 20 Hz
+  # Superseded radar-based alignment, kept for the clock ablation only. It is no
+  # longer the method the results are reported from; see docs/CLOCKS.md for why
+  # a drift rate fitted to a 25 s window was more precision than the evidence.
   time_alignment:
     max_offset_s: 1.0
     grid_dt: 0.05
