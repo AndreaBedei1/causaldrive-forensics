@@ -1,3 +1,18 @@
+> **Superseded by [CLOCKS.md](CLOCKS.md).**
+>
+> This describes the V1 radar-based clock estimator, which fitted range and
+> range rate against another vehicle's recorded trajectory and read both an
+> offset and a drift rate off that fit.
+> 
+> It is still accurate, and the estimator still runs as a diagnostic so the
+> clock ablation can compare the two. It is no longer the method the results
+> are computed from: a drift rate fitted over a 25 s window from noisy radar
+> is a number with more decimal places than evidence behind it. The V2 method
+> anchors on shared physical contact -- one equation, one unknown, no fitting.
+> Read [CLOCKS.md](CLOCKS.md).
+
+---
+
 # Clock synchronisation
 
 Three cars crash. Three recorders describe it. Nothing guarantees their clocks

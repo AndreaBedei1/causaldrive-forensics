@@ -1,3 +1,16 @@
+> **Superseded by [EVENTS.md](EVENTS.md).**
+>
+> This describes the V1 event vocabulary: own-behaviour, radar and outcome
+> events, before the road, traffic-control and non-action families were
+> added and before the comparable/sensor-relative/design-reference split
+> that makes the graph comparison fair in both directions.
+> 
+> It is kept because many code docstrings still point here. For what the
+> vocabulary is now, and why it is divided the way it is, read
+> [EVENTS.md](EVENTS.md).
+
+---
+
 # Event taxonomy
 
 `EventType` (`src/cdf/common/schemas.py`) is the complete, versioned vocabulary in

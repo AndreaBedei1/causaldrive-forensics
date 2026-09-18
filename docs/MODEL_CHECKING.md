@@ -1,3 +1,16 @@
+> **Superseded by [FORMAL_METHODS.md](FORMAL_METHODS.md).**
+>
+> This describes the V1 property layer, whose properties were hand-written
+> Python evaluators carrying an MTL-looking string beside them. Nothing
+> checked that the string and the code agreed, and the string appeared in
+> reports as though it had been evaluated.
+> 
+> V2 replaces it with an AST that is evaluated directly, so the rendering and
+> the verdict are the same object. Read
+> [FORMAL_METHODS.md](FORMAL_METHODS.md).
+
+---
+
 # Finite-trace property monitoring
 
 > **This is finite-trace property monitoring over recorded traces. It is NOT

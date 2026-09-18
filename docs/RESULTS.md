@@ -1,7 +1,20 @@
+> **These are V1 results.**
+>
+> Recorded from `artifacts_independent_clocks/` and, for the structural
+> figures, scored against the scenario template rather than against a
+> ground truth a reconstruction could match. `docs/EVENTS.md` explains why
+> that comparison was unfair in both directions; `results/README.md` gives
+> the same recordings rescored.
+>
+> Kept because the argument for the V2 refactor rests on being able to see
+> what it replaced.
+
+---
+
 # Results
 
 Every figure in this document is read from
-[`results/final_results.md`](../results/final_results.md), which
+[`results/final_results.md`](../legacy/results_v1/final_results.md), which
 `cdf.evaluation.final_results` generates from the campaign's own artifacts.
 Nothing here is transcribed by hand.
 
@@ -60,7 +73,7 @@ ablation, and both are reported.
 
 ## The results
 
-**[`results/final_results.md`](../results/final_results.md)** holds the two
+**[`results/final_results.md`](../legacy/results_v1/final_results.md)** holds the two
 tables this project is judged on — per-scenario attribution, and the method
 ablation — together with the campaign's headline figures, the clock ablation and
 the model-checking tally. It is the authoritative version of every number

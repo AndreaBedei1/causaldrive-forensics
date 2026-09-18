@@ -94,3 +94,63 @@ single-stop scenario and shares nothing with it but the number.
   simple fusion 0.613/0.301, fusion + global reasoning 0.613/0.358 (node/edge F1).
 - No camera, no sign perception, no lane/line events, no non-action nodes,
   no executable temporal logic, no responsibility layer. All are V2 work.
+
+## Deviations from the brief, and why
+
+Three places where what was built differs from what §1--§49 asked for. Each is a
+judgement, not an oversight, and each is recorded here so a reader can disagree
+with it.
+
+### The physical graph keeps its filename
+
+§34 asks for `fusion/physical_causal_graph.json`. The file on disk is still
+`fusion/fused_causal_graph.json`, with `physical_causal_graph` as an alias
+property pointing at it.
+
+Renaming it would touch 53 call sites across 18 files and -- the reason that
+decided it -- would stop the V1 campaign from being re-read, which is how the two
+generations are compared. The substantive requirement in §34 is "avoid multiple
+redundant graph files with overlapping meanings", and that is met either way:
+there is exactly one fused causal graph, plus the deliberately separate union
+baseline. The alias makes the V2 vocabulary usable in new code.
+
+### The legacy template scoring stays in `src/`, not `legacy/`
+
+§4 lists "old template-based graph scoring as the primary metric" among the
+things to remove or archive. It is no longer the primary metric -- the observable
+comparison is -- but the earlier brief required retaining it as
+`legacy_template_reference`, and the clock and method ablations still read it.
+
+Moving it under `legacy/` would mean either breaking those ablations or importing
+from `legacy/` in the active path, which is worse than leaving it where it is and
+labelling it. It is labelled: in `layout.py`, in `suite.py`, and in the artifact
+filename `legacy_template_edge_matches.csv`.
+
+### The V1 docs are pointers, not deletions
+
+§43 says to delete stale duplicates. `EVENT_TAXONOMY.md`,
+`CLOCK_SYNCHRONIZATION.md` and `MODEL_CHECKING.md` are superseded by `EVENTS.md`,
+`CLOCKS.md` and `FORMAL_METHODS.md`, but they are referenced from dozens of code
+docstrings. Deleting them would leave those references dangling, which §4 forbids
+in the same breath ("no broken docs"). Each now opens by naming its successor.
+
+## What real recordings corrected
+
+Offline reprocessing of the V1 campaign found four defects that no synthetic test
+had, all in contact alignment, and they are worth recording because they are the
+argument for validating against recordings rather than fixtures alone.
+
+1. **Resting contact is reported as impacts.** After a pile-up the collision
+   sensor fires roughly twice a second for the rest of the run at a hundredth of
+   the impact impulse -- 43 such reports beside one real impact of 11 569 N*s.
+2. **Averaging disagreeing pairings produces a number neither supports.** A true
+   impact implied +0.267 s, a spurious pairing -0.083 s, and the median +0.092.
+3. **Greedy matching cannot separate two similar impacts.** The impulses are
+   uninformative; only the joint consistency of the assignment decides.
+4. **The middle vehicle of a chain registers one impact, not two**, so one anchor
+   relates both neighbours and the second offset inherits a bounded error.
+
+## Test count
+
+677 at the starting HEAD; 922 offline at the time of writing, plus the
+leakage, freeze and blind-inference suites.

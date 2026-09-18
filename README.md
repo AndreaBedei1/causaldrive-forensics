@@ -1,217 +1,180 @@
-# carla-distributed-causal-forensics
+# CausalDrive Forensics
 
-Several vehicles crash. Each carried its own recorder, which kept its own log
-and its own clock. No vehicle saw the whole encounter and no two agree on what
-time it was. Afterwards the logs are pooled.
+Reconstructing a road incident from what the vehicles involved recorded, and
+nothing else.
 
-**What happened, and whose behaviour led to it?**
+## 1. The problem
 
-This project answers that question from the logs alone, in a CARLA simulation
-where the true answer is known but deliberately withheld from every stage that
-does the reasoning.
+After a collision there is no single record of what happened. There are several
+vehicles, each with a short buffer of its own sensor data, each on its own clock,
+none of which observed the others directly. The question is how much of the
+incident can be recovered from those separate accounts — and, just as importantly,
+what cannot be.
+
+This is a simulation study. CARLA provides the incidents and the exact state that
+grades the answers; the exact state is never available to the reconstruction.
+
+## 2. Inputs
+
+Each vehicle keeps, for a short rolling window:
+
+| Input | What it gives |
+|---|---|
+| telemetry | its own position, velocity, acceleration, yaw and yaw rate |
+| controls | its own throttle, brake, steer, handbrake, gear |
+| radar | range, bearing and range rate to anonymous local tracks |
+| front camera | 20 s before the event and 5 s after, for signs and road markings |
+| lane sensor | that a road marking was crossed, and what sort |
+| contact trigger | that an impact happened, when, and how hard — never who with |
+| its own clock | offset and jitter of its own, shared with nobody |
+
+What a vehicle may **not** see: any other vehicle's telemetry, the map, lane or
+road ids, waypoints, traffic-light state, CARLA actor identities, the scenario
+definition, or the simulator clock. `docs/DATA_BOUNDARY.md` states the boundary
+and the tests that enforce it.
+
+## 3. Pipeline
 
 ```
-  vehicle A            vehicle B            vehicle C
-  ┌─────────┐          ┌─────────┐          ┌─────────┐
-  │telemetry│          │telemetry│          │telemetry│    each sees only its own
-  │ controls│          │ controls│          │ controls│    instruments, and stamps
-  │  radar  │          │  radar  │          │  radar  │    them with its own clock
-  │own clock│          │own clock│          │own clock│
-  └────┬────┘          └────┬────┘          └────┬────┘
-       │  local events, local causal graph       │
-       └──────────────┬──────────┬───────────────┘
-                      │ exchanged logs
-                      ▼
-       ┌──────────────────────────────────────┐
-       │ FUSION                               │  no simulator clock
-       │  · estimate one common timeline      │  no actor ids
-       │  · resolve which track is which car  │  no map or lane ids
-       │  · merge the local graphs            │  no scenario label
-       │  · infer causal edges ACROSS vehicles│  no designed causal template
-       │  · reconstruct the chains            │
-       └──────────────────┬───────────────────┘
-                          ▼
-       ┌──────────────────────────────────────┐
-       │ ATTRIBUTION                          │
-       │  hypothesis from the graph, then     │
-       │  replay the encounter without each   │
-       │  candidate cause — and without SETS  │
-       └──────────────────┬───────────────────┘
-                          ▼
-     causal initiator · shared contribution · joint
-     contribution · insufficient evidence
-                          │
-                          ▼  scored against a privileged oracle
-                             the reconstruction never sees
+each vehicle          local events  →  local_log.json  →  physical graph
+                                            ↓
+fusion                contact-based clock alignment
+                      anonymous track → participant identity
+                                            ↓
+                                      global_log.json
+                                            ↓
+                                physical causal DAG
+                                            ↓
+formal methods        temporal properties: PASS / FAIL / UNKNOWN
+                                            ↓
+responsibility        obligations, violations, contribution
+                                            ↓
+counterfactual        replay, to test but-for causation
+                                            ↓
+evaluation            against privileged ground truth
 ```
 
-Nothing above the oracle line may read privileged state. That is enforced three
-ways: no inference module can import the code that writes it; no privileged
-field name appears in any local or fused artifact; and — the test that matters
-most — **deleting the oracle, relabelling the scenario and stripping the designed
-causal template out of the configuration produces byte-identical conclusions.**
+Five things about this are deliberate and are what the design turns on:
 
-## What it produces
+- **the log comes before the graph.** A DAG is what the project is for; a table of
+  timestamped facts is what a reader can check;
+- **clocks are anchored on shared contact**, not on a radar fit. One impact fixes
+  one offset and says nothing about drift (`docs/CLOCKS.md`);
+- **the physical graph and the responsibility graph are separate**, so the physics
+  can be accepted and the norm disputed (`docs/RESPONSIBILITY.md`);
+- **properties are three-valued.** Time nobody watched is UNKNOWN, never PASS
+  (`docs/FORMAL_METHODS.md`);
+- **the ground truth speaks the reconstruction's vocabulary**, or the comparison
+  measures the vocabulary gap instead of the method (`docs/EVENTS.md`).
 
-For each run, an account you can interrogate rather than a score you have to
-trust:
+## 4. Scenarios
 
-> A and B collided at t = 6.51 s on the common clock.
->
-> Because: B braking contributed to B slowing → B slowing led to A closing
-> rapidly on B → A closing rapidly on B contributed to A's time-to-collision
-> with B becoming critical → that resulted in the impact between A and B.
->
-> **Shared causal contribution.** Removing either driver's braking
-> independently prevented the collision in replay, so no single initiator is
-> named.
+Sixteen scenarios, 35 variants. S01–S09 are the original set and are hash-frozen:
+improving a metric must be a change to the method, never to the scenario.
+S10–S16 are new, and each isolates something the earlier nine could not
+(`docs/SCENARIOS.md`).
 
-Every sentence there is a field of an artifact, assembled in reading order.
-There is no language model anywhere in this project.
+| | |
+|---|---|
+| S01–S09 | rear-end, cut-in, crossing, chain collision, partial view, roundabout |
+| S10, S11 | single stop sign, with either approach controlled — mirrors of each other |
+| S12 | all-way stop, including an arrival too close to call |
+| S13 | disputed lane change, where the deciding evidence is split across vehicles |
+| S14 | three-car rear-end chain, with the pushed vehicle |
+| S15 | intersection pile-up, with a bystander that acts in no variant |
+| S16 | secondary collision: initiating versus consequential |
 
-The verdict is one of five, and two of them decline to name anybody. A
-three-vehicle chain where the braking made the impact worse rather than causing
-it comes back as *contributed without being necessary*; a run where nothing
-tested changed the outcome comes back as *insufficient evidence*, and stays
-there.
+## 5. Run one scenario
 
-**A contribution score states what changed when the encounter was re-run under a
-controlled modification. It is not legal fault and not a fault percentage.**
-
-## Install
+CARLA must already be running. Start it yourself — the campaign does not launch
+it:
 
 ```bash
-git clone <this repo> && cd carla-distributed-causal-forensics
-python -m pip install -e .
-python -m cdf.cli env        # checks the CARLA connection and version
+python scripts/run_scenario.py --scenario S10 --variant rolls_through --seed 0 --artifacts artifacts_v2
 ```
 
-Requires CARLA 0.9.15 and Python 3.8. Start the simulator first; see
-[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) for the flags this project assumes.
-
-## Quick start
+That records the run and then analyses, fuses, checks and builds the viewer
+bundle. To redo any of those stages later without a simulator:
 
 ```bash
-# one scenario, end to end
-python -m cdf.cli run --scenario S06 --variant a_front_pushed --seed 0
-
-# what would have prevented it
-python -m cdf.cli counterfactuals --run artifacts/S06_chain_collision/seed_000_a_front_pushed
-
-# look at it -- builds the bundle, serves it, opens a browser
-python -m cdf.cli viewer --run artifacts/S06_chain_collision/seed_000_a_front_pushed
+python scripts/reprocess_runs.py --artifacts artifacts_v2 --scenarios S10 --refactor
 ```
 
-The viewer is a static page with no framework and no network access, so it opens
-from an offline copy of the evidence. It has one tab per question an
-investigation asks: what happened, where, why, when, who, was it checked, on what
-evidence, and how well the method did. See [docs/VIEWER.md](docs/VIEWER.md).
-
-## The full campaign
+A three-car scenario is the same command with a different id:
 
 ```bash
-python scripts/run_campaign.py --artifacts artifacts_independent_clocks --seeds 0 1 2
-python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
-python scripts/reprocess_runs.py --artifacts artifacts_independent_clocks \
-                                 --stages evaluate ablate viewer
+python scripts/run_scenario.py --scenario S14 --variant c_pushes_b --seed 0 --artifacts artifacts_v2
 ```
 
-Thirteen scenario/variant combinations across nine scenarios, three seeds, 39
-runs. The generator writes the result tables into the campaign's `summary/` and
-publishes a committed copy to [`results/`](results/), so the numbers the
-documentation quotes are in the repository even though the recordings they come
-from are far too large to be.
-
-## The nine scenarios
-
-Frozen. `tests/test_scenario_freeze.py` pins the SHA-256 of each definition,
-because a method that is improved by adjusting the scenario it is measured on
-has not been improved.
-
-| | Scenario | What it tests |
-|---|---|---|
-| S01 | rear-end | the simplest chain; `avoided` is a negative control |
-| S02 | cut-in | a lateral manoeuvre as initiator; `avoided` is a control |
-| S03 | crossing | two vehicles, no shared lane |
-| S04 | crossing with braking | a **yield**: nobody collides, nobody may be blamed |
-| S05 | simultaneous crossing | two contributors, neither obviously first |
-| S06 | chain collision | three vehicles, two impacts, an order to recover |
-| S07 | partial view | one vehicle occluded at the moment of impact |
-| S08 | multi-direction crossing | three approach directions |
-| S09 | roundabout merge | a merge conflict with curved geometry |
-
-Details in [docs/SCENARIOS.md](docs/SCENARIOS.md).
-
-## Results in brief
-
-Full tables, generated from the artifacts, in [docs/RESULTS.md](docs/RESULTS.md).
-The headline findings, including the ones that did not go the project's way:
-
-- **Restraint holds.** Across the negative controls the system named nobody. A
-  false attribution there would be worse than a missed one, so it is counted
-  rather than averaged.
-- **Reasoning after fusion recovers relations no vehicle could claim.** Canonical
-  edge recall rises monotonically across best-local → merged → merged+reasoning.
-- **Strict edge F1 does not improve, and on two scenarios the best single
-  vehicle beats the merge.** This is reported rather than buried. The cause is
-  measured, not guessed: most of the reference graph's edges leave a
-  scripted-action node — a privileged event type no reconstruction can emit — so
-  strict recall has a ceiling well below 1.0, and the merged account reaches
-  that ceiling exactly on roughly half the campaign's runs. The exact counts are
-  in the generated table, not here: a number transcribed into prose is a number
-  that will eventually be wrong.
-- **Attribution is partly right, and the two methods disagree usefully.** The
-  replay-backed verdict names exactly the designed contributors on some
-  scenarios and a subset or superset on others. The graph-only hypothesis is
-  weaker in one specific and instructive way: when the designed cause is a
-  *non-action* — a vehicle entering a junction without slowing — there is no
-  event node to root a causal chain at, so the graph names the vehicle that
-  *reacted* instead. The replay gets it right. Both are reported, and where they
-  disagree the replay is the one to believe.
-- **Clock alignment buys seconds, not structure.** Estimating the common
-  timeline cuts offset error several-fold against taking timestamps at face
-  value, and leaves the graph metrics flat — the event matcher's tolerance is
-  far wider than the error involved. Reported both ways rather than as the
-  half that flatters it.
-
-## Tests
+Before the first run, check that the simulator is reachable and the versions
+match:
 
 ```bash
-python -m pytest tests/ --ignore=tests/integration      # ~600 tests, no simulator
-python -m pytest tests/integration                      # needs a running CARLA
+python -m cdf.cli env
 ```
+
+The full campaign — every scenario, every variant, every seed, one fresh
+simulator process per run:
+
+```bash
+python scripts/run_campaign.py --artifacts artifacts_v2 --seeds 0 1 2 --attempts 3
+```
+
+## 6. Open the viewer
+
+```bash
+python scripts/serve_viewer.py --run artifacts_v2/S10_single_stop_a/seed_000_rolls_through
+```
+
+Four sections — Reconstruction, Graph, Responsibility, Video — and nothing else.
+Each renders what the artifacts say; where something is absent it says so rather
+than showing an empty panel (`docs/VIEWER.md`).
+
+## 7. Results
+
+Committed under `results/`, regenerated from artifacts. Nothing there is
+hand-transcribed.
+
+V1 and V2 recordings are never mixed: V2 changed the sensors and the timing
+semantics, so a figure averaged over both would describe neither. The campaign
+refuses an artifacts root holding runs of both generations.
+
+## 8. Limitations
+
+The ones that most constrain how the results should be read
+(`docs/LIMITATIONS.md` has the rest):
+
+- **a contact-anchored clock cannot align a run with no contact.** The negative
+  controls fall back on an explicit marker from the experiment harness, which is
+  declared, labelled and reported apart. It is never simulator time;
+- **the sign detector is classical colour-and-shape**, deterministic and with no
+  training data. It will miss signs at distance and in shadow. Its precision and
+  recall are measured and reported rather than assumed;
+- **a stop-line crossing is inferred from the marking leaving the frame**, so the
+  detector is deliberately conservative: it misses crossings rather than
+  inventing them;
+- **in a chain the middle vehicle often registers one impact, not two**, so one
+  anchor relates both neighbours. The alignment bounds the error that leaves;
+- **nothing here is a finding of legal fault**, and no number is produced that
+  could be read as a share of one.
 
 ## Documentation
 
 | | |
 |---|---|
-| [OVERVIEW.md](docs/OVERVIEW.md) | the problem and the five claims |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | how the code is organised |
-| [DATA_BOUNDARY.md](docs/DATA_BOUNDARY.md) | what each layer may read, and how it is enforced |
-| [SCENARIOS.md](docs/SCENARIOS.md) | the nine encounters |
-| [CLOCK_SYNCHRONIZATION.md](docs/CLOCK_SYNCHRONIZATION.md) | placing independent recorders on one timeline |
-| [GRAPH_FUSION.md](docs/GRAPH_FUSION.md) | identity resolution and merging the graphs |
-| [CAUSAL_MODEL.md](docs/CAUSAL_MODEL.md) | what a causal edge is and where it comes from |
-| [COUNTERFACTUALS.md](docs/COUNTERFACTUALS.md) | replay, sets of actions, the five verdicts |
-| [MODEL_CHECKING.md](docs/MODEL_CHECKING.md) | properties over finite traces |
-| [VIEWER.md](docs/VIEWER.md) | the investigative interface |
-| [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) | how the campaign is run and scored |
-| [RESULTS.md](docs/RESULTS.md) | what it found |
-| [LIMITATIONS.md](docs/LIMITATIONS.md) | what it cannot do |
-| [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) | reproducing all of it |
+| `docs/ARCHITECTURE.md` | how the pieces fit together |
+| `docs/EVENTS.md` | the event vocabulary, and what may be compared |
+| `docs/CLOCKS.md` | contact-based alignment |
+| `docs/FORMAL_METHODS.md` | the temporal logic |
+| `docs/RESPONSIBILITY.md` | obligations, violations, the priority benchmark |
+| `docs/SCENARIOS.md` | what each scenario is for |
+| `docs/VIEWER.md` | the four sections |
+| `docs/REPRODUCIBILITY.md` | running it again and getting the same answer |
+| `docs/DATA_BOUNDARY.md` | what inference may not see, and how that is enforced |
+| `docs/COUNTERFACTUALS.md` | replay, but-for causation, prevention |
+| `docs/LIMITATIONS.md` | what this does not establish |
+| `docs/V2_REFACTOR_AUDIT.md` | what changed from V1, and what was deliberately not changed |
 
-## Limitations
-
-The short version: a simulator is not traffic; nine scenarios are not a
-distribution; radar and localisation are modelled, not real; and causal
-contribution under replay semantics is not legal fault. The long version is
-[docs/LIMITATIONS.md](docs/LIMITATIONS.md), and it is worth reading before
-quoting any number from here.
-
-## Author
-
-Andrea Bedei.
-
-## License
+## Licence
 
 See `LICENSE`.
