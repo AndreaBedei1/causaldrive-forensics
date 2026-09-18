@@ -52,6 +52,7 @@ class FusionResult(object):
         "assignments",
         "subject_map",
         "fused_causal",
+        "simple_fused_causal",
         "fused_event",
         "diagnostics",
         "local_causal",
@@ -71,6 +72,7 @@ class FusionResult(object):
         diagnostics: Dict[str, Any],
         local_causal: Dict[str, GraphDocument],
         local_event: Dict[str, GraphDocument],
+        simple_fused_causal: Optional[GraphDocument] = None,
         episodes: Optional[List[CausalEpisode]] = None,
         reconstruction: Optional[Dict[str, Any]] = None,
         attribution: Optional[Dict[str, Any]] = None,
@@ -79,6 +81,11 @@ class FusionResult(object):
         self.assignments = assignments
         self.subject_map = subject_map
         self.fused_causal = fused_causal
+        #: The union baseline the global graph was built on top of: same nodes,
+        #: local edges only. Kept so a caller can compare the two without
+        #: re-running fusion, and without reconstructing it by subtraction,
+        #: which would not give the same graph.
+        self.simple_fused_causal = simple_fused_causal
         self.fused_event = fused_event
         self.diagnostics = diagnostics
         self.local_causal = local_causal
@@ -214,6 +221,7 @@ def fuse_run(
         assignments=assignments,
         subject_map=subject_map,
         fused_causal=fused_causal,
+        simple_fused_causal=simple_fused_causal,
         fused_event=fused_event,
         diagnostics=diagnostics,
         local_causal=local_causal,
