@@ -85,7 +85,8 @@ _LIMITATIONS: Tuple[Tuple[str, str], ...] = (
     ("undecided_property",
      "a safety property could not be decided within the recorded window"),
     ("shared_anchor",
-     "one impact related two recorders, so one offset carries a bounded error"),
+     "one impact related two recorders, so {suspect} offset is out by the "
+     "interval between two impacts -- a quantity nothing recorded measures"),
 )
 
 
@@ -424,16 +425,26 @@ def _limitation(
     for key, text in _LIMITATIONS:
         if not flags.get(key):
             continue
-        if "{unaligned}" not in text:
-            return text
-        # Which recorder dropped out decides whether the row is usable at all:
-        # a run missing the vehicle that initiated the incident is a different
-        # matter from one missing a bystander, and "at least one" says neither.
-        names = (alignment or {}).get("unaligned_participants") or []
-        return text.format(
-            unaligned=", ".join(str(p) for p in names) if names
-            else "a recorder"
-        )
+        if "{unaligned}" in text:
+            # Which recorder dropped out decides whether the row is usable at
+            # all: a run missing the vehicle that initiated the incident is a
+            # different matter from one missing a bystander, and "at least one"
+            # says neither.
+            names = (alignment or {}).get("unaligned_participants") or []
+            return text.format(
+                unaligned=", ".join(str(p) for p in names) if names
+                else "a recorder"
+            )
+        if "{suspect}" in text:
+            names = sorted({
+                p
+                for caveat in ((alignment or {}).get("shared_anchor_caveats") or [])
+                for p in (caveat.get("participants_with_suspect_offset") or [])
+            })
+            return text.format(
+                suspect="{0}'s".format(", ".join(names)) if names else "one"
+            )
+        return text
     return "none identified"
 
 

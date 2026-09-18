@@ -148,7 +148,10 @@ argument for validating against recordings rather than fixtures alone.
 3. **Greedy matching cannot separate two similar impacts.** The impulses are
    uninformative; only the joint consistency of the assignment decides.
 4. **The middle vehicle of a chain registers one impact, not two**, so one anchor
-   relates both neighbours and the second offset inherits a bounded error.
+   relates both neighbours and the second offset inherits an error the recordings
+   do not bound. The bound this audit originally reported was computed by
+   subtracting two timestamps from two different clocks; it read 13 ms where the
+   true error was 200 ms, and has been removed rather than corrected.
 
 ## Test count
 

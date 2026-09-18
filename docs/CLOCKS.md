@@ -98,11 +98,28 @@ collision sensor reported a single event — so its single anchor relates both
 neighbours. That may be a genuine three-way impact or a missed second contact,
 and the recordings cannot distinguish them.
 
-The alignment says which anchor is doing double duty and bounds the error it
-leaves: no larger than the spread between the times the two counterparties
-reported. On the recorded chain the bound is **13 ms**, so the result stands. In
-a chain with a longer interval between impacts the bound would be larger, and a
-reader of that merged timeline would know.
+The alignment says which anchor is doing double duty, which pairing through it
+the impulse evidence favours, and which recorders therefore carry a suspect
+offset. It does **not** put a number on the error, and an earlier version did.
+
+That version took the two counterparties' local timestamps and subtracted them —
+two readings from two different clocks, which is the error this whole document
+exists to correct, committed inside the code that corrects it. On the recorded
+chain it reported a bound of **13 ms**. The offset was in fact out by **200 ms**,
+and the reassuring small number was worse than no number at all.
+
+The honest position: if the middle vehicle never registered its second impact, it
+has no measurement of when that impact happened, so nothing in the recordings
+bounds how far the derived offset is out. The interval between the two impacts
+*is* the error, and it is unobserved. The artifact therefore carries
+`offset_error_bound_s: null` and `error_bound_determinable: false`.
+
+What that cost on the recorded chain, measured against the privileged record: the
+A–B offset was exact to 0.000 s, and C's was out by exactly 0.200 s — the interval
+between the two impacts. Two impacts 0.200 s apart were reconstructed onto the
+same instant, so their order was not recovered. The supervisor table's
+`collision_order` column reports that as not established rather than printing the
+order a timestamp sort happens to produce.
 
 ## Statuses
 

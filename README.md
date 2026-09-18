@@ -154,7 +154,11 @@ The ones that most constrain how the results should be read
   detector is deliberately conservative: it misses crossings rather than
   inventing them;
 - **in a chain the middle vehicle often registers one impact, not two**, so one
-  anchor relates both neighbours. The alignment bounds the error that leaves;
+  anchor relates both neighbours. The alignment names the recorder whose offset
+  rests on that anchor and states that no error bound is determinable: a recorder
+  that never registered the second impact has no measurement of when it happened.
+  On the recorded chain this cost 200 ms on one offset and the order of two
+  impacts, which is reported rather than absorbed;
 - **nothing here is a finding of legal fault**, and no number is produced that
   could be read as a share of one.
 

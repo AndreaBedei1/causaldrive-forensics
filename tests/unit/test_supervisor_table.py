@@ -234,6 +234,33 @@ def test_an_ambiguous_contact_outranks_an_undecided_property(tmp_path):
 
 
 def test_a_shared_anchor_is_reported_when_nothing_worse_applies(tmp_path):
+    """And it names the recorder, and does not offer a bound. The bound this cell
+    used to promise was computed by subtracting two timestamps from two different
+    clocks; it read 13 ms where the true error was 200 ms."""
+    make_run(
+        tmp_path,
+        clock_alignment={
+            "status": "MULTI_CONTACT_ALIGNED", "method": "shared_physical_contact",
+            "offsets_s": {"A": 0.0, "B": 0.2},
+            "shared_anchor_caveats": [
+                {"anchor": "B#0", "participants_with_suspect_offset": ["C"]}
+            ],
+        },
+        perception_metrics={"scored": True, "signs": {"n_real": 0}},
+        responsibility_report={"findings": {
+            "A": {"physical_causal_contributor": "no",
+                  "responsibility_evidence": "insufficient",
+                  "but_for_contribution": {"verdict": "no"}},
+        }},
+        formal_results={"results": [], "summary": {}},
+    )
+    cell = one_row(tmp_path)["main_limitation"]
+    assert "C's offset is out by the interval between two impacts" in cell
+    assert "nothing recorded measures" in cell
+    assert "bounded" not in cell
+
+
+def test_a_shared_anchor_with_no_named_recorder_still_reads_as_a_sentence(tmp_path):
     make_run(
         tmp_path,
         clock_alignment={
@@ -249,7 +276,7 @@ def test_a_shared_anchor_is_reported_when_nothing_worse_applies(tmp_path):
         }},
         formal_results={"results": [], "summary": {}},
     )
-    assert "bounded error" in one_row(tmp_path)["main_limitation"]
+    assert "one offset is out by" in one_row(tmp_path)["main_limitation"]
 
 
 def test_a_clean_run_identifies_no_limitation(tmp_path):
