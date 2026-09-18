@@ -43,6 +43,7 @@ from ..common.config import repo_root
 from ..common.io import read_json, write_csv, write_json
 from ..common.layout import RunLayout
 from .suite import RUN_KIND_PRIMARY, _run_dirs, summary_dir
+from .v2_results import v2_blocks
 
 LOGGER = logging.getLogger(__name__)
 
@@ -477,6 +478,14 @@ def build_final_results(artifacts_root: PathLike) -> Dict[str, Any]:
         "artifacts_root": root.as_posix(),
         "campaign": _campaign_identity(root),
         "headline": headline,
+        # The V2 blocks: how each recorder was placed on common time and how far
+        # out it was, what the cameras made of real signs, whether the property
+        # verdicts matched the observable truth, who was named as a contributor
+        # physically and normatively, whether multi-impact orders were recovered,
+        # and what the replays established. Kept as their own blocks rather than
+        # folded into the headline, because they are scored against different
+        # references and a single aggregate would hide which.
+        "v2": v2_blocks(root),
         "method_ablation": _ablation_summary(runs),
         "clock_ablation": _clock_ablation_summary(runs),
         "model_checking": _model_check_summary(runs),
