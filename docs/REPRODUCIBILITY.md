@@ -64,14 +64,35 @@ not be reproducible.
 Across CARLA builds, GPU drivers or operating systems the variation should be
 expected to be larger, and nothing here bounds it.
 
-**A caution learned the hard way.** The per-replay simulator restart only happens
-when the session can start the server itself, which means `$CARLA_ROOT` must
-point at the installation. Without it, `fresh_world_for_map` logs a warning and
-silently falls back to reusing the current server — and replays recorded that way
-are not comparable, because the configuration's own comment explains that
-repeated runs in one session drift enough to change an outcome class. One
-scenario in this project produced a non-reproducible verdict that way before the
-variable was set. Check the warning is absent before trusting a sweep.
+**Two cautions, both learned the hard way, both now checked by the code.**
+
+*The restart must be possible.* It only happens when the session can start the
+server itself, which means `$CARLA_ROOT` must point at the installation. Without
+it, `fresh_world_for_map` falls back to reusing the current server.
+
+*The restart must also take effect.* `stop()` deliberately does not kill an
+engine that was already running when the session started — killing a server
+somebody else is using would be indefensible — but that engine keeps the RPC
+port, the newly started one cannot bind it, and the client reconnects to the old
+one. Every replay then shares accumulated state while every log line reports
+success. This happened during development and produced a verdict that did not
+reproduce.
+
+So the restart is now **verified rather than assumed**: a genuinely fresh engine
+has been ticking for seconds, and one that has served a campaign has not. The
+check is cheap, it runs on every restart, and its result is written into the
+attribution report as `replay_protocol.restarts_verified_fresh`. The viewer
+prints a banner above any verdict whose replays shared a session.
+
+Before a sweep, make sure nothing is already listening on the RPC port:
+
+```bash
+# Windows
+Get-NetTCPConnection -LocalPort 2000 -State Listen
+```
+
+and check `replay_protocol.effective` in the resulting report reads
+`fresh_server_per_replay`.
 
 ---
 

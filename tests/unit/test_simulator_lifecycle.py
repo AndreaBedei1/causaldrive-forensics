@@ -264,3 +264,82 @@ def test_close_releases_the_client_then_stops_the_server(
     assert session._client is None
     assert events == ["stop"]
 
+
+
+# ---------------------------------------------------------------------------
+# Was the restart real?
+#
+# `stop` deliberately leaves engines that were already running when this session
+# started -- killing a server somebody else is using would be indefensible. That
+# creates the failure this group guards: the pre-existing engine keeps the RPC
+# port, the new one cannot bind it, and the client reconnects to the old one
+# while every log line says the restart succeeded. A counterfactual comparison
+# run under that condition is measuring accumulated state, not the intervention.
+# ---------------------------------------------------------------------------
+
+
+class FakeWorld:
+    def __init__(self, elapsed: float) -> None:
+        self._elapsed = elapsed
+
+    def get_snapshot(self) -> Any:
+        elapsed = self._elapsed
+
+        class _Snapshot:
+            timestamp = type("_T", (), {"elapsed_seconds": elapsed})()
+
+        return _Snapshot()
+
+
+class FakeClient:
+    def __init__(self, elapsed: float) -> None:
+        self._world = FakeWorld(elapsed)
+
+    def get_world(self) -> FakeWorld:
+        return self._world
+
+
+def test_a_freshly_booted_engine_verifies(
+    server: carla_client.CarlaServer,
+) -> None:
+    assert server._verify_fresh(FakeClient(elapsed=1.3)) is True
+    assert server._verify_fresh(FakeClient(elapsed=0.0)) is True
+
+
+def test_an_engine_that_has_been_running_for_hours_does_not(
+    server: carla_client.CarlaServer, caplog: pytest.LogCaptureFixture
+) -> None:
+    """The exact failure: a stale server still holding the port."""
+    with caplog.at_level("WARNING"):
+        assert server._verify_fresh(FakeClient(elapsed=16_500.0)) is False
+    assert "restart did not take effect" in caplog.text
+    assert "pre-existing server" in caplog.text
+
+
+def test_a_probe_that_cannot_read_the_clock_does_not_claim_freshness(
+    server: carla_client.CarlaServer,
+) -> None:
+    """Unable to tell is not the same as verified, and must not be reported as it."""
+
+    class Broken:
+        def get_world(self) -> Any:
+            raise RuntimeError("no connection")
+
+    assert server._verify_fresh(Broken()) is False
+
+
+def test_restart_records_whether_it_worked(
+    server: carla_client.CarlaServer, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert server.last_restart_verified is None, "unknown until one is attempted"
+
+    monkeypatch.setattr(server, "stop", lambda grace_s=10.0: None)
+    monkeypatch.setattr(server, "start", lambda wait_s=180.0: FakeClient(elapsed=2.0))
+    server.restart()
+    assert server.last_restart_verified is True
+
+    monkeypatch.setattr(server, "start", lambda wait_s=180.0: FakeClient(elapsed=9_000.0))
+    server.restart()
+    assert server.last_restart_verified is False, (
+        "a restart that reconnected to a stale engine must not be recorded as fresh"
+    )

@@ -240,6 +240,9 @@ class CarlaServer:
         self._process: Optional[subprocess.Popen] = None
         self._pre_existing_pids: set = set()
         self._owned_pids: set = set()
+        #: Whether the most recent :meth:`restart` actually produced a fresh
+        #: engine. ``None`` until one has been attempted.
+        self.last_restart_verified: Optional[bool] = None
 
     @property
     def available(self) -> bool:
@@ -388,11 +391,47 @@ class CarlaServer:
             time.sleep(3.0)
         self._owned_pids = set()
 
+    #: A freshly booted engine has been ticking for at most a few seconds. Well
+    #: above that and the client is talking to something older.
+    FRESH_ENGINE_MAX_ELAPSED_S = 120.0
+
     def restart(self, wait_s: float = 180.0) -> Any:
-        """Stop (if we own the process) and start again; returns a new client."""
+        """Stop (if we own the process) and start again; returns a new client.
+
+        :meth:`stop` deliberately leaves engines that were already running when
+        this session started -- killing a server somebody else is using would be
+        indefensible. But that creates the failure this method must not hide: a
+        pre-existing engine still holding the RPC port means the new engine
+        cannot bind it, and the client reconnects to the *old* one. Every
+        subsequent "fresh" run then shares accumulated state, silently, while
+        every log line says the restart succeeded.
+
+        So the restart is verified rather than assumed. A genuinely fresh engine
+        has been ticking for seconds; one that has served a campaign has not.
+        """
         self.stop()
         time.sleep(3.0)
-        return self.start(wait_s=wait_s)
+        client = self.start(wait_s=wait_s)
+        self.last_restart_verified = self._verify_fresh(client)
+        return client
+
+    def _verify_fresh(self, client: Any) -> bool:
+        """Whether the client is talking to an engine this restart started."""
+        try:
+            elapsed = float(client.get_world().get_snapshot().timestamp.elapsed_seconds)
+        except Exception:  # noqa: BLE001 - a probe must never break the run
+            LOGGER.debug("could not read the world clock to verify the restart")
+            return False
+        if elapsed <= self.FRESH_ENGINE_MAX_ELAPSED_S:
+            return True
+        LOGGER.warning(
+            "restart did not take effect: the connected engine has been running "
+            "for %.0f s, so a pre-existing server is still holding port %d and "
+            "this run shares its accumulated state. Stop that server before "
+            "running a comparison that depends on independent runs.",
+            elapsed, self.port,
+        )
+        return False
 
     def __enter__(self) -> "CarlaServer":
         return self

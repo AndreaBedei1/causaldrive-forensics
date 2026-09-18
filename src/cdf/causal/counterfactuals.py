@@ -354,27 +354,13 @@ def run_counterfactual_suite(
     # warning about it. A warning in a log nobody reads is how a degraded sweep
     # produces a verdict that does not reproduce, so the protocol that really
     # ran is written into the report beside the verdict it produced.
-    server_restartable = bool(
-        getattr(getattr(session, "server", None), "available", False)
-    )
-    replay_protocol = {
+    server = getattr(session, "server", None)
+    server_restartable = bool(getattr(server, "available", False))
+    replay_protocol: Dict[str, Any] = {
         "restart_server_per_replay_requested": restart_each,
         "session_can_restart": can_restart,
         "server_restartable": server_restartable,
-        "effective": (
-            "fresh_server_per_replay"
-            if restart_each and can_restart and server_restartable
-            else "shared_server_session"
-        ),
     }
-    if replay_protocol["effective"] != "fresh_server_per_replay" and restart_each:
-        replay_protocol["warning"] = (
-            "replays shared one simulator session. Repeated runs in one session "
-            "drift enough to change an outcome class, so these replays are not "
-            "reliably comparable with each other. Set $CARLA_ROOT so the session "
-            "can restart the server between replays."
-        )
-        LOGGER.warning("%s", replay_protocol["warning"])
 
     resume = bool(cfg.get("counterfactual.resume", True))
 
@@ -466,6 +452,27 @@ def run_counterfactual_suite(
         variant=spec.variant,
         seed=int(seed),
     )
+    # Filled in only now, because whether the restarts *took effect* is not
+    # knowable before they have been attempted. A pre-existing engine holding
+    # the RPC port defeats every one of them while every log line claims
+    # success, so this records the verified outcome rather than the intent.
+    verified = getattr(server, "last_restart_verified", None)
+    replay_protocol["restarts_verified_fresh"] = verified
+    replay_protocol["effective"] = (
+        "fresh_server_per_replay"
+        if restart_each and can_restart and server_restartable and verified
+        else "shared_server_session"
+    )
+    if replay_protocol["effective"] != "fresh_server_per_replay" and restart_each:
+        replay_protocol["warning"] = (
+            "replays shared one simulator session. Repeated runs in one session "
+            "drift enough to change an outcome class, so these replays are not "
+            "reliably comparable with each other. Set $CARLA_ROOT so the session "
+            "can restart the server, and make sure no other simulator is already "
+            "holding the RPC port -- a pre-existing one is not killed, and every "
+            "restart silently reconnects to it."
+        )
+        LOGGER.warning("%s", replay_protocol["warning"])
     report["replay_protocol"] = replay_protocol
 
     manifest = {
