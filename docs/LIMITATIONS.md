@@ -352,43 +352,59 @@ The monitor is right and the scenarios are unrealistic in this specific respect.
 The failure counts in the results should be read as a statement about the
 scripted behaviour, not as a finding about driver conduct.
 
-## 22. A vehicle that never collides is not placed on the common timeline
+## 22. Contact alone cannot place a vehicle that never collides
+
+**Superseded as a limitation of the final method; retained because it is what the
+radar fallback exists for, and because the contact-only ablation still shows it.**
 
 V1 aligned the clocks by fitting radar tracks, so it could place a vehicle that
-never touched anything. V2 anchors on shared physical contact (`docs/CLOCKS.md`),
-and a vehicle with no contact has nothing to anchor on. This is the price of
-dropping an estimator that fitted its own geometry, and it is a real one.
+never touched anything. Contact-only V2 could not. In the partial-view scene A
+strikes B and C only brakes, so C has no anchor: the alignment reports
+`PARTIALLY_ALIGNED`, names C unaligned, and two things follow -- C appears nowhere
+in the fused graph, and B's radar track of C is never resolved to C, because
+association needs both ends on one clock.
 
-In the partial-view scene A strikes B and C only brakes. The alignment reports
-`PARTIALLY_ALIGNED`, names C as unaligned, and gives C no offset. Two consequences
-follow, both asserted in `tests/integration/test_fusion_improvement.py`:
+The final method keeps an **offset-only radar fit behind contact** for exactly
+this case, and on the recorded `S07/occluded` run it places C to 0.000101 s while
+A and B keep their contact anchors. The loss above is now reproduced only by
+disabling the fallback, which is how the ablation runs and how the tests assert
+it (`tests/integration/test_fusion_improvement.py`).
 
-1. **C's own account never reaches the merged timeline.** C appears nowhere in the
-   fused graph — not as a participant, an owner, or a subject.
-2. **B's radar track of C is never resolved to C.** Association needs both ends on
-   one clock, so the track stays `B::T001`.
+What remains a limitation is the residue: the fallback needs a tracked target
+whose geometry varies enough to separate an offset from a spatial bias. Where it
+does not, the recorder stays `UNRESOLVED` rather than being placed on a guess,
+and a whole account is still lost. The harness marker is **not** used to patch
+one participant of an otherwise physically aligned run: mixing provenances on one
+timeline and reporting them identically would be worse than an honest gap.
 
-The recovery claim survives in a weaker and more precise form. The *initiating
-event* does reach the participant that was blind to it: fusion contributes B's
-observation of a decelerating target, which A's own reconstruction does not
-contain. A reader of the merged graph learns that something ahead of B slowed
-down, not that C did.
+## 23. One all-way-stop variant does not produce its designed encounter
 
-The strong form — the fused collision's ancestry reaching C by name — holds on the
-recorded `S07/occluded` run, where C is in contact and can be aligned, and is
-asserted there rather than on the fixture. Reporting the strong claim only where
-it holds is the point.
+`S12/near_simultaneous` declares a collision and does not achieve one. Its
+closest approach is 11.08 m against the 6 m the variant requires.
 
-### Why there is no per-participant fallback
+The cause is geometry, not timing luck. The junction is the only one in Town05
+that renders stop signs on more than one approach, and it is a large T: the
+vehicle turning in has a merge point about 8 m beyond its stop line while the
+vehicle going straight has about 23 m. Six timing attempts on the development
+seed did not bring the two together, and the ones that came closest did so by
+making the two arrivals *not* near-simultaneous -- which is the one thing the
+variant is for.
 
-The harness marker (`docs/CLOCKS.md`) could place C: the experiment starts every
-recorder within one simulator tick, and that declared property is already used
-for runs with no contact at all. It is deliberately **not** applied to one
-participant of a run whose others rest on contact. Doing so would put offsets of
-two different provenances on a single timeline and report them identically, and a
-reader comparing C's rows against A's would have no way to know that one set came
-from physics and the other from the clapperboard. Refusing to place C is the
-conservative choice, and the alignment says so by name; the supervisor table's
-limitation column names the recorder that dropped out, because a run missing the
-vehicle that initiated the incident is a different matter from one missing a
-bystander.
+It is left as declared and recorded by the campaign as a scenario validation
+failure. The priority-ambiguity question it was written to ask is therefore not
+answered by this campaign. The other three S12 variants do run, and the
+clear-priority cases are covered by them.
+
+## 24. Town05 renders five stop signs, and none of them has a painted stop line
+
+The map carries 33 `traffic.stop` trigger actors and renders **5** sign meshes;
+a trigger volume is not something a camera can read. The packaged CARLA 0.9.15
+build also ships no stop-sign prop at all, so a scenario cannot place one.
+
+Both facts bound what the traffic-control scenarios can be. They must sit at one
+of five junctions, only one of which renders signs on more than one approach.
+And none of those junctions paints a stop bar, so `STOP_LINE_CROSSED` never fires
+on a real run -- which is why the stop property also accepts the lane sensor's
+record of crossing into the junction as its boundary (`docs/FORMAL_METHODS.md`).
+The stop-line detector still runs and still reports honestly; it simply has
+nothing to find at these junctions.

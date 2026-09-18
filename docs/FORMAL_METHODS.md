@@ -97,7 +97,7 @@ clocks.
 
 | | Title | Trigger | Notes |
 |---|---|---|---|
-| P1 | a stop sign seen means a full stop before the line | `STOP_LINE_CROSSED` | needs `Since` |
+| P1 | a stop sign seen means a full stop before the line | `STOP_LINE_CROSSED` or `LANE_MARKING_CROSSED` | needs `Since` |
 | P2 | a yield sign seen means yielding before conflict entry | `CONFLICT_REGION_ENTRY` | needs `Since` |
 | P3 | a critical time-to-collision gets a response | `CRITICAL_TTC` | braking or swerving both count |
 | P4 | no acceleration into a critical conflict | `CRITICAL_TTC` | distinct from P3 by design |
@@ -105,6 +105,37 @@ clocks.
 | P6 | a solid line is not crossed | `SOLID_LINE_CROSSED` | the trigger is the violation |
 | P7 | one impact per pair on the merged timeline | `COLLISION` | two vehicles |
 | P8 | a claimed missing braking response really had none | `NO_BRAKING_RESPONSE` | anchors at `t_start` |
+
+### Why P1 has two triggers
+
+The stop obligation's natural boundary is the painted stop line, and Town05
+paints no stop bar at any junction where it renders a stop sign
+(`docs/LIMITATIONS.md` §24). `STOP_LINE_CROSSED` therefore never fires on a real
+run, and the property was permanently vacuous -- not passing, not failing, simply
+never asked. The stop-line detector was behaving correctly throughout: it tracked
+a bright band, saw it leave the frame upward rather than pass beneath the
+vehicle, and refused to claim a crossing. Missing a crossing costs recall;
+inventing one would corrupt every non-action built on it.
+
+Crossing into the junction is the same boundary observed another way, and the
+vehicle's own lane sensor records it. So P1 accepts either.
+
+This does not weaken the property. Its formula is an implication whose antecedent
+is *a stop sign was seen in the last twelve seconds*, so a trigger firing where
+no sign was seen -- an ordinary lane change -- is vacuously satisfied rather than
+violated. The checker also deduplicates triggers landing on the same instant for
+the same vehicle, because a lane sensor reports the marking and the solid line
+together and one violation must not be counted twice.
+
+A measured witness, from `S10/rolls_through` on the development seed:
+
+```
+P1 = FAIL
+  STOP_SIGN_DETECTED    t = 0.570   (camera, confidence 0.90)
+  LANE_MARKING_CROSSED  t = 2.770   (lane sensor)
+  FULL_STOP             absent in [0.570, 2.770]
+```
+
 
 Three of these are worth a note.
 

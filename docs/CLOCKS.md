@@ -6,30 +6,82 @@ link them.
 
 ## The method
 
+Contact first, radar second, unresolved last -- chosen **per participant**, and
+every participant records which of the three placed it.
+
+### Contact, where there is one
+
 If A and B were in the same collision, both felt it, and both recorded *when* on
 their own clocks. The difference between those two timestamps is the offset
 between the clocks:
 
 ```
-offset(B → A) = t_contact_A − t_contact_B
-t_common      = t_local + offset
+offset(B -> A) = t_contact_A - t_contact_B
+t_common       = t_local + offset
 ```
 
-One equation, one unknown, no fitting. `scale` is fixed at exactly **1.0** and
-drift is reported as **unestimated** — not as zero, and not as a fitted ppm
-figure. A single impact constrains an offset and carries no information whatever
-about rate.
+One equation, one unknown, no fitting. This is the preferred source because it is
+direct and interpretable, and because nothing is modelled in between.
+
+### Radar, where contact cannot reach
+
+Contact alone is not enough, and two recorded cases show why. A vehicle that
+never collides has no anchor at all -- in the partial-view scene the leader only
+brakes, and contact-only leaves its whole account off the merged timeline. And a
+chain can yield one anchor where two impacts happened: on the recorded three-car
+case the middle vehicle registered a single contact, and the third vehicle's
+timeline moved by exactly the 0.200 s between the two impacts.
+
+So where a participant has no contact, or the contact matching was ambiguous, or
+its offset is impeached by the shared-anchor caveat, an **offset-only** radar and
+trajectory fit is tried. It estimates one number. If it does not clear its
+confidence floor, or two independent pairings disagree, the recorder stays
+unresolved rather than being placed on a guess.
+
+### Never both
+
+Contact and radar are not averaged. Averaging a good estimate with a bad one
+produces a value neither supports, and this project measured that happening: on
+the chain, a true impact implied +0.267 s, a spurious pairing -0.083 s, and the
+median +0.092 s. The chosen source, the estimate each source gave, and the reason
+for the choice are all recorded.
+
+### Scale and drift
+
+`scale` is fixed at exactly **1.0** on both paths and drift is reported as
+**unestimated** -- not as zero, and not as a fitted ppm figure. A single impact
+constrains an offset and carries no information about rate; a rate fitted over a
+twenty-second window from trajectory residuals is a number with more decimal
+places than evidence behind it. `offset_only` is an argument to the estimator
+rather than a configuration key, so it cannot be switched back on by a file the
+results then rest on.
+
+| source | meaning |
+|---|---|
+| `REFERENCE` | the gauge the common timeline is expressed in |
+| `CONTACT` | tied in by a shared physical impact |
+| `RADAR` | placed by an offset-only trajectory fit |
+| `UNRESOLVED` | neither source sufficed; the recorder stays on its own clock |
 
 ## What this replaced, and why
 
-V1 fitted the range and range-rate one vehicle measured against the trajectory
-another recorded of itself, and read both an offset and a drift rate off that
-fit. It worked. But a drift rate fitted over a 25 s window from noisy radar is a
-number with more decimal places than evidence behind it, and the method took a
-page to explain.
+V1 fitted range and range-rate against another vehicle's recorded trajectory and
+read **both** an offset and a drift rate off that fit. V2 keeps the estimator and
+drops the drift.
 
-The radar estimator is still run, as a diagnostic, so the clock ablation can
-compare the two. It no longer decides the timeline the results are computed on.
+It also fixed a defect that fit had carried all along. A radar return comes off
+the target's nearest surface, not the trajectory point its own telemetry reports,
+and on the partial-view geometry that is a -2.35 m bias. Unmodelled, the fit paid
+for it in *time*: +0.150 s against a true offset of zero, because position and
+time are exchangeable for a target at constant speed. They stop being
+exchangeable when the target changes speed, and a vehicle braking from 14 m/s to
+rest separates them decisively. The bias is now a fitted nuisance parameter,
+reported and never mistaken for a clock. That took the fallback from 0.150 s of
+error to 0.0011 s on the same geometry.
+
+The whole-run V1 estimator is still run unchanged, as a diagnostic, so the clock
+ablation can compare the two. It does not decide the timeline the results are
+computed on.
 
 ## Matching the anchors
 
@@ -123,59 +175,85 @@ order a timestamp sort happens to produce.
 
 ## Statuses
 
+Run level:
+
 | Status | Meaning |
 |---|---|
 | `CONTACT_ALIGNED` | one shared impact tied the recorders together |
 | `MULTI_CONTACT_ALIGNED` | more than one |
-| `PARTIALLY_ALIGNED` | some recorders aligned, at least one not |
+| `RADAR_ALIGNED` | every non-reference recorder was placed by the fallback |
+| `HYBRID_ALIGNED` | some on contact, some on radar |
+| `PARTIALLY_ALIGNED` | at least one recorder could not be placed at all |
+| `UNRESOLVED_TIME_ALIGNMENT` | none could |
 | `AMBIGUOUS_CONTACT_MATCH` | contacts were felt; which is which cannot be decided |
 | `UNALIGNED_NO_SHARED_CONTACT` | nothing physical links the clocks |
-| `ACQUISITION_START_ALIGNED` | the harness marker below, never a contact result |
+| `ACQUISITION_START_ALIGNED` | the harness marker below, never a reconstruction result |
 
-The first three are `CONTACT_DERIVED_STATUSES` — the ones whose results say
-something about what the method can do.
+Per participant, the `source` field carries `REFERENCE`, `CONTACT`, `RADAR` or
+`UNRESOLVED`. Reading the run status alone would hide that one vehicle on a
+timeline rests on a fitted trajectory while the others rest on a physical impact.
 
-## No collision, no offset
+## No collision, and no radar either
 
 A contact-anchored method cannot align recordings with no contact in them, and
-this is exactly where a silent fallback would do the most damage: the negative
-controls *are* those runs, and every one of them would appear perfectly aligned
-while resting on knowledge no vehicle has.
+the radar fallback needs a tracked target with enough varying geometry to
+separate an offset from a spatial bias. Where **neither** is available -- the
+negative controls are the clearest case -- a silent fallback would do the most
+damage: every one of those runs would appear perfectly aligned while resting on
+knowledge no vehicle has.
 
-So the fallback is explicit, separately named and separately reported. The
+So that last fallback is explicit, separately named and separately reported. The
 experiment harness starts every recorder in one simulator tick, which makes the
 first sample of each log a common instant. That is a declared property of the
-harness — a clapperboard — not a reconstruction result, and the artifact carries
-the caveat in words.
+harness -- a clapperboard -- not a reconstruction result, and the artifact carries
+the caveat in words. It is used only when no recorder could be placed by contact
+or radar, and it is **never** applied to one participant of a run whose others
+rest on physics: that would put offsets of two provenances on one timeline and
+report them identically.
 
 It is **not** simulator time. Simulator time would hand every recorder the engine
 clock, erasing the offsets and the jitter the experiment exists to work against.
 Here each recorder keeps its own clock and its own jitter; only the single
 constant relating them comes from outside.
 
-## What contact alignment costs
+## What contact alone costs, and what the fallback buys
 
-It aligns fewer recorders than radar alignment did, and that is asserted in the
-test suite rather than glossed. In the partial-view scene A and B collide and C
-never touches anything, so C stays on its own clock and is named as unaligned.
+This is measured rather than argued, and it is why the hierarchy exists.
 
-A recorder with no common time usually contributes no fused events at all, so the
-merged log takes its unaligned set from the alignment as well as from the rows —
-otherwise it would report a clean single timeline while silently omitting a whole
-vehicle. An unaligned row renders as a dash, never as 0.00.
+In the partial-view scene A and B collide and C never touches anything. With the
+fallback disabled -- which is how the ablation runs -- C stays on its own clock
+and is named unaligned, and the cost has two parts: C appears nowhere in the
+fused graph, not as a participant, an owner or a subject; and B's radar track of
+C is never resolved to C, because association needs both ends on one clock, so it
+stays `B::T001`.
 
-Measured on that scene, the cost has two parts. C appears nowhere in the fused
-graph — not as a participant, an owner or a subject. And B's radar track of C is
-never resolved to C, because association needs both ends on one clock, so it stays
-`B::T001`.
+With the fallback, on the recorded `S07/occluded` run:
 
-What survives is weaker and worth stating precisely: the initiating event still
-reaches the vehicle that was blind to it, as B's observation of a decelerating
-target rather than as C's own record of braking. A reader of the merged graph
-learns that something ahead of B slowed down, not that C did. The strong form of
-the claim holds on the recorded `S07/occluded` run, where C is in contact.
-`docs/LIMITATIONS.md` §22 carries the full statement, including why the harness
-marker is not applied to one participant of an otherwise contact-aligned run.
+| id | source | offset | true (relative) | error |
+|---|---|---|---|---|
+| A | `REFERENCE` | +0.000000 | −0.000000 | +0.000000 |
+| B | `CONTACT` | −0.077291 | −0.076949 | −0.000342 |
+| C | `RADAR` | +0.272543 | +0.272442 | **+0.000101** |
+
+C enters the merged log, B's track resolves to C, and C appears in the fused
+graph by name.
+
+On the recorded three-car chain, where the middle vehicle registered one contact
+for two impacts:
+
+| | contact only | hybrid |
+|---|---|---|
+| C clock error | −0.200000 s | **−0.001849 s** |
+| reconstructed inter-impact interval | −0.000001 s | **+0.198150 s** |
+| truth | +0.200000 s | +0.200000 s |
+| collision order | **not established** | **correct** |
+
+A recorder with no common time contributes no fused events, so the merged log
+takes its unaligned set from the alignment as well as from the rows -- otherwise
+it would report a clean single timeline while silently omitting a whole vehicle.
+An unaligned row renders as a dash, never as 0.00.
+
+`docs/LIMITATIONS.md` §22 carries the full statement of what contact alone costs.
 
 ## Where this is written down
 
