@@ -358,8 +358,19 @@ fuse_graphs(run, local_event,  assignments, cfg, graph_kind="event")   # optiona
 
 `fuse_graphs` (`cdf.fusion.graph_fusion`) itself runs
 `assert_non_oracle` → `resolve_subjects` → `align_event_records` →
-`_merge_nodes` → `_merge_edges` → `_enforce_dag` → `_fusion_added` →
-`_build_diagnostics`. The acyclicity policy is **delegated** to
+`_merge_nodes` → `_merge_edges` → `infer_global_causal_edges` → `_enforce_dag` →
+`_fusion_added` → `_build_diagnostics`.
+
+`infer_global_causal_edges` (`cdf.fusion.post_fusion_causal`) is the stage that
+makes fusion more than a union. Every edge a merge can produce was drawn inside
+one vehicle's log, because a causal rule can only relate two events the same
+recorder observed; this proposes edges *between* claims made by different
+participants, which is the only way to relate "B braked" to "the gap A was
+measuring closed". It runs after identities are resolved and timelines are
+common, refuses to make an observation a cause, refuses to run backwards in
+time beyond the clock's own admitted uncertainty, and never displaces an edge a
+participant actually claimed. One key switches it off
+(`fusion.post_fusion.enabled`), which is what the method ablation toggles. The acyclicity policy is **delegated** to
 `cdf.local.causal_graph.enforce_dag` (via `_delegate_enforce_dag`, which inspects
 the signature rather than assuming it) so a fused DAG is constrained exactly like
 a local one; `_greedy_acyclic` is the fallback. Full semantics:
@@ -371,8 +382,15 @@ converted by the aligned view before event matching; fused evidence retains
 local/common times and clock confidence. Unresolved clocks do not participate in
 cross-vehicle fusion; their original local graphs remain untouched.
 
-The persisted outputs are `association_report()`, `time_alignment.json`, the diagnostics,
-`fused_events.json` and both fused graphs in JSON and GraphML.
+After the graphs are fused, `cdf.graph.episodes.extract_episodes` groups each
+vehicle's nodes into named behaviours, `cdf.graph.reconstruction` walks the
+causal ancestry of every outcome into chains with templated narratives, and
+`build_attribution_hypothesis` names the behaviours at the roots of those chains
+— a hypothesis, stamped `not_validated` until a replay confirms it.
+
+The persisted outputs are `association_report()`, `time_alignment.json`, the
+diagnostics, `fused_events.json`, both fused graphs in JSON and GraphML,
+`incident_reconstruction.json` and `causal_attribution.json`.
 
 ---
 
@@ -440,6 +458,27 @@ in `cdf.graph.matching`.
 > both sides, and it must never write anything back into a local or fused artifact.
 
 ---
+
+### 8.1 What the evaluation layer contains
+
+| Module | Answers |
+|---|---|
+| `graph_metrics` | how much of the reference graph came back |
+| `event_metrics`, `association_metrics` | event matching and identity resolution |
+| `attribution_metrics` | the declared contributors, from the scenario's template |
+| `causal_metrics` | whether the *incident* was explained: scene reconstruction, causal chains, contributor sets, restraint on the negative controls |
+| `method_ablation` | best-local vs merged vs merged-plus-reasoning, over one recording, changing one key |
+| `clock_ablation` | the same recording scored under three clock protocols |
+| `final_results` | every reported number, derived from the artifacts rather than transcribed |
+| `suite`, `tables`, `figures` | per-run scoring, campaign CSVs, per-run plots |
+
+`cdf.causal.combinations` sits beside them on the privileged side: it is the
+vocabulary a *set* of removed actions is classified in, and the bounded search
+that decides which sets are worth replaying.
+
+`cdf.common.campaign` stamps an artifacts tree with the protocol it was recorded
+under, so a run recorded differently is reported as foreign rather than averaged
+into a campaign it does not belong to.
 
 ## 9. Shared foundations (`cdf.common`)
 
