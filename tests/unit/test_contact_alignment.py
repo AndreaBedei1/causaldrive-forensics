@@ -640,10 +640,16 @@ def test_pairings_that_agree_are_still_averaged():
 # --- one impact doing duty for two --------------------------------------
 
 
-def test_an_anchor_used_by_two_links_is_flagged_with_an_error_bound():
+def test_an_anchor_used_by_two_links_is_flagged():
     """In a chain the middle vehicle often registers one impact, not two, so its
-    single anchor relates both neighbours and the second offset inherits an error
-    no larger than the interval between the impacts."""
+    single anchor relates both neighbours and the second offset is derived
+    through a pairing of two different physical events.
+
+    What this test asserted originally was an error *bound* on that offset. There
+    is no such bound, and the number it checked was computed by subtracting two
+    counterparties' timestamps from two different clocks -- see
+    test_a_shared_anchor_reports_no_error_bound.
+    """
     run = run_of(
         participant("A", [impact("A", 6.17, 11569.0)], x=100.0, y=0.0),
         participant("B", [impact("B", 5.91, 11569.0)], x=101.0, y=0.0),
@@ -654,7 +660,7 @@ def test_an_anchor_used_by_two_links_is_flagged_with_an_error_bound():
     assert caveats, "the middle recorder anchor is used by both links"
     entry = caveats[0]
     assert entry["n_impacts_this_recorder_registered"] == 1
-    assert entry["offset_error_bound_s"] == pytest.approx(0.02, abs=0.01)
+    assert entry["participants_with_suspect_offset"] == ["C"]
     assert "did not register its second impact" in entry["reason"]
 
 
@@ -667,3 +673,52 @@ def test_a_recorder_with_its_own_anchor_per_link_is_not_flagged():
         participant("C", [impact("C", 12.50, 3050.0)], x=106.0, y=0.0),
     )
     assert align_by_contact(run, cfg())["shared_anchor_caveats"] == []
+
+
+# --- the shared anchor reports no bound, because there is none -------------
+
+
+def test_a_shared_anchor_reports_no_error_bound(monkeypatch):
+    """An earlier version put a number here by subtracting two counterparties'
+    local timestamps -- two readings from two different clocks, which is the
+    error this module exists to correct. On a recorded chain it produced 13 ms
+    for an offset that was out by 200 ms, and the reassuring small number was
+    worse than no number at all.
+    """
+    run = run_of(
+        participant("A", [impact("A", 6.174, 11569.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 5.906, 11569.0)], x=101.0, y=0.0),
+        participant("C", [impact("C", 6.187, 10321.0)], x=102.0, y=0.0),
+    )
+    caveat = align_by_contact(run, cfg())["shared_anchor_caveats"][0]
+    assert caveat["offset_error_bound_s"] is None
+    assert caveat["error_bound_determinable"] is False
+    assert "no measurement of when it happened" in caveat["reason"]
+
+
+def test_impulse_agreement_identifies_which_pairing_is_the_suspect():
+    """B's impulse matches A's exactly and C's only approximately, which is the
+    evidence that B's single anchor is the A-B impact and not the B-C one."""
+    run = run_of(
+        participant("A", [impact("A", 6.174, 11569.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 5.906, 11569.0)], x=101.0, y=0.0),
+        participant("C", [impact("C", 6.187, 10321.0)], x=102.0, y=0.0),
+    )
+    caveat = align_by_contact(run, cfg())["shared_anchor_caveats"][0]
+    assert caveat["best_supported_pairing"]["participant"] == "A"
+    assert caveat["best_supported_pairing"]["impulse_agreement"] == pytest.approx(1.0)
+    assert [p["participant"] for p in caveat["weaker_pairings"]] == ["C"]
+    assert caveat["participants_with_suspect_offset"] == ["C"]
+
+
+def test_the_well_supported_offset_is_still_accurate():
+    """The caveat is about the second pairing only. On the recorded chain the
+    A-B offset was right to 0.1 ms and it is the C offset that is suspect."""
+    run = run_of(
+        participant("A", [impact("A", 6.174, 11569.0)], x=100.0, y=0.0),
+        participant("B", [impact("B", 5.906, 11569.0)], x=101.0, y=0.0),
+        participant("C", [impact("C", 6.187, 10321.0)], x=102.0, y=0.0),
+    )
+    result = align_by_contact(run, cfg())
+    offsets = result["offsets_s"]
+    assert offsets["A"] - offsets["B"] == pytest.approx(-0.268, abs=1e-3)

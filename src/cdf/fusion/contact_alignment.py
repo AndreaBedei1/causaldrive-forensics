@@ -807,42 +807,73 @@ def _shared_anchor_caveats(
 
     The method cannot tell those two situations apart from the recordings, and
     should not pretend to. What it can do is say which anchor is doing double
-    duty and bound the error that leaves: at most the interval between the two
-    impacts, which is itself unknown but is no larger than the spread between the
-    times the two counterparties reported. Anyone reading a merged timeline from
-    such a run needs that, because the second vehicle's rows may be shifted by
-    roughly that much.
+    duty, which pairing through it the impulse evidence favours, and which
+    recorders therefore have a suspect offset.
+
+    What it must not do is put a number on the error, and an earlier version did.
+    It took the two counterparties' local timestamps and subtracted them -- two
+    readings from two different clocks, which is the very error this module
+    exists to correct, committed inside the code that corrects it. On a recorded
+    chain that produced a bound of 13 ms for an offset that was out by 200 ms,
+    and the reassuring small number was worse than no number at all.
+
+    The honest position: if B never registered its second impact, B has no
+    measurement of when that impact happened, so nothing in the recordings bounds
+    how far the derived offset is out. The interval between the two impacts is
+    exactly the error, and it is unobserved.
     """
     used: Dict[str, List[Tuple[str, str]]] = {}
-    times: Dict[str, List[float]] = {}
+    pairings: Dict[str, List[Dict[str, Any]]] = {}
     for edge in tree_edges:
         for match in pair_matches.get(edge, []):
+            agreement = _impulse_agreement(match.a, match.b)
             for anchor, other in ((match.a, match.b), (match.b, match.a)):
                 used.setdefault(anchor.key, []).append(edge)
-                times.setdefault(anchor.key, []).append(other.t_local)
+                pairings.setdefault(anchor.key, []).append({
+                    "with": other.key,
+                    "participant": other.participant_id,
+                    "impulse_agreement": round(agreement, 6),
+                    "link": list(edge),
+                })
 
     out: List[Dict[str, Any]] = []
     for key, edges in sorted(used.items()):
         distinct = sorted({e for e in edges})
         if len(distinct) < 2:
             continue
-        counterpart_times = sorted(times[key])
-        bound = float(counterpart_times[-1] - counterpart_times[0])
         participant = key.split("#")[0]
+        ranked = sorted(
+            pairings[key], key=lambda p: (-p["impulse_agreement"], p["with"])
+        )
+        best, rest = ranked[0], ranked[1:]
+        affected = sorted({p["participant"] for p in rest})
         out.append({
             "anchor": key,
             "participant": participant,
             "links_using_it": [list(e) for e in distinct],
             "n_impacts_this_recorder_registered": len(anchors.get(participant, [])),
-            "offset_error_bound_s": round(abs(bound), 6),
+            "best_supported_pairing": best,
+            "weaker_pairings": rest,
+            "participants_with_suspect_offset": affected,
+            # There is no number to put here, and putting one was worse than
+            # leaving it empty. See the reason below.
+            "offset_error_bound_s": None,
+            "error_bound_determinable": False,
             "reason": (
                 "this recorder registered one impact and it was matched to more "
                 "than one counterparty. Either the impact genuinely involved all "
                 "of them at once, or this recorder did not register its second "
                 "impact -- which is what happens in a chain, where the two "
-                "contacts are a fraction of a second apart. The recordings cannot "
-                "distinguish the two cases, so an offset derived through this "
-                "anchor may be out by up to the bound given"
+                "contacts are a fraction of a second apart. Impulse agreement "
+                "favours the pairing with {0} ({1:.3f}); the offset for {2} is "
+                "derived through the same anchor and, if the two impacts were in "
+                "fact distinct, is out by the interval between them. Nothing in "
+                "the recordings bounds that interval, so no error bound is "
+                "given: a recorder that never registered the second impact has "
+                "no measurement of when it happened".format(
+                    best["participant"], best["impulse_agreement"],
+                    ", ".join(affected) or "the other recorder(s)",
+                )
             ),
         })
     return out

@@ -18,7 +18,9 @@ different findings.
 | what happened | the recorded outcome and the collisions in the merged log |
 | reconstructed? | node and edge F1 against the observable ground truth |
 | clock aligned? | the alignment status, and by what method |
+| collision order | the order on the merged timeline, and whether it is right |
 | signs detected? | perception recall, or why it was not measured |
+| line evidence | what the onboard lane sensor reported |
 | key formal violation | the first property that failed, by id and title |
 | physical contributors | vehicles whose own behaviour reaches an outcome |
 | responsibility contributors | those with a rule broken *and* a causal path |
@@ -53,7 +55,9 @@ SUPERVISOR_COLUMNS: Tuple[str, ...] = (
     "what_happened",
     "reconstructed",
     "clock_aligned",
+    "collision_order",
     "signs_detected",
+    "line_evidence",
     "key_formal_violation",
     "physical_contributors",
     "responsibility_contributors",
@@ -117,6 +121,122 @@ def _what_happened(manifest: Mapping[str, Any],
     if unpaired:
         described += ", {0} impact(s) with no counterparty resolved".format(unpaired)
     return "{0}: {1}".format(outcome, described)
+
+
+def _pair(row_or_event: Mapping[str, Any]) -> Optional[str]:
+    """The unordered pair an impact record names, or ``None`` if it names one."""
+    who = row_or_event.get("participant") or row_or_event.get("participant_id")
+    other = row_or_event.get("subject")
+    if not who or not other:
+        return None
+    return "-".join(sorted([str(who), str(other)]))
+
+
+def _ordered_pairs(records: Sequence[Mapping[str, Any]], time_key: str) -> List[str]:
+    """Distinct impact pairs in the order they occurred, first occurrence wins."""
+    out: List[str] = []
+    for record in sorted(records, key=lambda r: float(r.get(time_key) or 0.0)):
+        pair = _pair(record)
+        if pair and pair not in out:
+            out.append(pair)
+    return out
+
+
+def _collision_order(
+    global_log: Optional[Mapping[str, Any]],
+    observable: Optional[Mapping[str, Any]],
+    alignment: Optional[Mapping[str, Any]] = None,
+) -> str:
+    """The order the reconstruction put the impacts in, and whether it is right.
+
+    This is the question §18's multi-impact property deliberately could not
+    answer: a consistently wrong order is still self-consistent, so nothing
+    inside the trace can catch it. Only the privileged record can, which is why
+    it is a metric rather than a property.
+
+    A single-impact run has no order to get wrong and says so, rather than
+    reporting a trivially correct one and inflating the column.
+    """
+    if not global_log:
+        return "not fused"
+    rows = [
+        r for r in global_log.get("rows", []) or []
+        if r.get("event_type") == "COLLISION"
+    ]
+    # The merged log is on common time where it exists and local time where it
+    # does not; either way the ordering within one log is what was reconstructed.
+    key = "t_common" if any(r.get("t_common") is not None for r in rows) else "t_local"
+    reconstructed = _ordered_pairs(rows, key)
+    if not reconstructed:
+        return "no impact"
+    if len(reconstructed) == 1:
+        return "single impact ({0})".format(reconstructed[0])
+
+    # An order built on a suspect offset is not an order this method established,
+    # however confidently the timestamps happen to be sorted. On a recorded chain
+    # the middle vehicle registered one impact and its anchor related both
+    # neighbours, which put the second vehicle 200 ms out and flipped two impacts
+    # that were 200 ms apart. The column has to say so, or the reader takes an
+    # artefact of a shared anchor for a finding.
+    suspect = sorted({
+        p for caveat in ((alignment or {}).get("shared_anchor_caveats") or [])
+        for p in (caveat.get("participants_with_suspect_offset") or [])
+    })
+    qualifier = ""
+    if suspect and any(
+        p in pair.split("-") for pair in reconstructed for p in suspect
+    ):
+        qualifier = (
+            "; not established -- {0} offset rests on a shared anchor".format(
+                ", ".join(suspect)
+            )
+        )
+
+    order = " then ".join(reconstructed)
+    truth = _ordered_pairs(
+        [e for e in (observable or {}).get("events", []) or []
+         if e.get("event_type") == "COLLISION"],
+        "t_peak",
+    ) if observable else []
+    if not truth:
+        return "{0} (no reference to check against{1})".format(order, qualifier)
+    verdict = "correct" if reconstructed == truth else "WRONG, truth {0}".format(
+        " then ".join(truth)
+    )
+    return "{0} ({1}{2})".format(order, verdict, qualifier)
+
+
+def _line_evidence(
+    layout: RunLayout, participants: Sequence[str]
+) -> str:
+    """What the onboard lane sensor reported, per vehicle.
+
+    Reported rather than scored: the lane sensor *is* the measurement, and there
+    is no separate privileged marking-crossing record to compare it against. A
+    run recorded without one says so instead of showing a zero, which would read
+    as a vehicle that crossed nothing.
+    """
+    seen = False
+    counts: Dict[str, int] = {}
+    for pid in participants:
+        path = layout.lane_events(pid)
+        if not path.exists():
+            continue
+        seen = True
+        payload = read_json(path)
+        for event in payload.get("events", []) or []:
+            key = str(event.get("event_type", ""))
+            counts[key] = counts.get(key, 0) + 1
+    if not seen:
+        return "no lane sensor"
+    if not counts:
+        return "no crossing reported"
+    order = ("SOLID_LINE_CROSSED", "LANE_MARKING_CROSSED", "ROAD_BOUNDARY_CROSSED")
+    parts = [
+        "{0} x{1}".format(k.replace("_CROSSED", "").lower().replace("_", " "), counts[k])
+        for k in order if k in counts
+    ]
+    return ", ".join(parts)
 
 
 def _reconstructed(metrics: Optional[Mapping[str, Any]]) -> str:
@@ -274,6 +394,7 @@ def build_supervisor_rows(
         formal = _maybe(layout.formal_results)
         report = _maybe(layout.responsibility_report)
 
+        observable = _maybe(layout.observable_events)
         physical, responsibility = _contributors(report)
         rows.append({
             "scenario": str(manifest.get("scenario_id", "")),
@@ -282,7 +403,9 @@ def build_supervisor_rows(
             "what_happened": _what_happened(manifest, global_log),
             "reconstructed": _reconstructed(metrics),
             "clock_aligned": _clock(alignment),
+            "collision_order": _collision_order(global_log, observable, alignment),
             "signs_detected": _signs(perception),
+            "line_evidence": _line_evidence(layout, layout.participant_ids()),
             "key_formal_violation": _formal(formal),
             "physical_contributors": physical,
             "responsibility_contributors": responsibility,

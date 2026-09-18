@@ -302,3 +302,101 @@ def test_the_table_is_written_as_csv_and_markdown(tmp_path):
     text = (out / "supervisor_table.md").read_text(encoding="utf-8")
     assert "Generated from artifacts" in text
     assert "different findings" in text
+
+
+# --- an order built on a suspect offset is not an order -------------------
+
+
+def test_an_order_resting_on_a_shared_anchor_is_not_reported_as_established(tmp_path):
+    """The middle vehicle of a chain often registers one impact, and its anchor
+    then relates both neighbours. On a recorded run that put the third vehicle
+    200 ms out and flipped two impacts 200 ms apart, so a column that simply
+    sorted the timestamps would present an artefact as a finding."""
+    make_run(
+        tmp_path,
+        global_log={"rows": [
+            {"event_type": "COLLISION", "participant": "C", "subject": "B",
+             "t_common": 5.625, "t_local": 5.906},
+            {"event_type": "COLLISION", "participant": "A", "subject": "B",
+             "t_common": 5.639, "t_local": 5.906},
+        ]},
+        observable_events={"events": [
+            {"event_type": "COLLISION", "participant_id": "A", "subject": "B",
+             "t_peak": 5.95},
+            {"event_type": "COLLISION", "participant_id": "B", "subject": "C",
+             "t_peak": 6.15},
+        ]},
+        clock_alignment={
+            "status": "MULTI_CONTACT_ALIGNED", "method": "shared_physical_contact",
+            "offsets_s": {"A": -0.267, "B": 0.0, "C": -0.281},
+            "shared_anchor_caveats": [
+                {"anchor": "B#0", "participants_with_suspect_offset": ["C"]}
+            ],
+        },
+    )
+    cell = one_row(tmp_path)["collision_order"]
+    assert "B-C then A-B" in cell
+    assert "WRONG, truth A-B then B-C" in cell
+    assert "not established" in cell
+    assert "C offset rests on a shared anchor" in cell
+
+
+def test_a_correct_order_on_sound_offsets_is_reported_plainly(tmp_path):
+    make_run(
+        tmp_path,
+        global_log={"rows": [
+            {"event_type": "COLLISION", "participant": "A", "subject": "B",
+             "t_common": 5.95, "t_local": 5.95},
+            {"event_type": "COLLISION", "participant": "B", "subject": "C",
+             "t_common": 6.15, "t_local": 6.15},
+        ]},
+        observable_events={"events": [
+            {"event_type": "COLLISION", "participant_id": "A", "subject": "B",
+             "t_peak": 5.95},
+            {"event_type": "COLLISION", "participant_id": "B", "subject": "C",
+             "t_peak": 6.15},
+        ]},
+        clock_alignment={
+            "status": "MULTI_CONTACT_ALIGNED", "method": "shared_physical_contact",
+            "offsets_s": {"A": 0.0, "B": 0.0, "C": 0.0},
+        },
+    )
+    assert one_row(tmp_path)["collision_order"] == "A-B then B-C (correct)"
+
+
+def test_a_single_impact_has_no_order_to_get_wrong(tmp_path):
+    make_run(tmp_path, global_log={"rows": [
+        {"event_type": "COLLISION", "participant": "A", "subject": "B",
+         "t_common": 5.95, "t_local": 5.95},
+    ]})
+    assert one_row(tmp_path)["collision_order"] == "single impact (A-B)"
+
+
+def test_a_run_with_no_impact_says_so(tmp_path):
+    make_run(tmp_path, outcome="near_miss", global_log={"rows": []})
+    assert one_row(tmp_path)["collision_order"] == "no impact"
+
+
+def test_line_evidence_reports_what_the_lane_sensor_said(tmp_path):
+    layout = make_run(tmp_path)
+    layout.perception_dir("A").mkdir(parents=True, exist_ok=True)
+    write_json(layout.lane_events("A"), {"events": [
+        {"event_type": "SOLID_LINE_CROSSED", "participant_id": "A"},
+        {"event_type": "LANE_MARKING_CROSSED", "participant_id": "A"},
+    ]})
+    cell = one_row(tmp_path)["line_evidence"]
+    assert "solid line x1" in cell
+    assert "lane marking x1" in cell
+
+
+def test_no_lane_sensor_is_distinguished_from_no_crossing(tmp_path):
+    """A zero would read as a vehicle that crossed nothing."""
+    make_run(tmp_path)
+    assert one_row(tmp_path)["line_evidence"] == "no lane sensor"
+
+
+def test_a_lane_sensor_that_saw_nothing_says_that_instead(tmp_path):
+    layout = make_run(tmp_path)
+    layout.perception_dir("A").mkdir(parents=True, exist_ok=True)
+    write_json(layout.lane_events("A"), {"events": []})
+    assert one_row(tmp_path)["line_evidence"] == "no crossing reported"
