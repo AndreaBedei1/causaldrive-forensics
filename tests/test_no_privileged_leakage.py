@@ -101,12 +101,33 @@ FORBIDDEN_CALL_NAMES: Tuple[str, ...] = (
 #: Camera sensing is out of scope for the whole project: the evidence model is
 #: radar plus own telemetry, and a camera would quietly reintroduce the ability
 #: to identify another vehicle.
-CAMERA_PATTERNS: Tuple[str, ...] = (
-    r"sensor\.camera",
+#: Camera modes that would hand perception an answer instead of an image.
+#:
+#: V2 gives every vehicle a forward RGB camera, so "no camera anywhere" is no
+#: longer the rule -- but the reason behind it is unchanged and now needs saying
+#: more precisely. An RGB frame is a picture of the world and a vehicle has to
+#: work out what is in it. A semantic-segmentation frame is the simulator's own
+#: labelling of every pixel, and a depth frame is exact range: using either for
+#: sign detection would be asking CARLA what the sign is while appearing to look
+#: at it, which is the most convincing possible way to fake this experiment.
+PRIVILEGED_CAMERA_PATTERNS: Tuple[str, ...] = (
     r"semantic_segmentation",
-    r"depth_camera",
+    r"sensor\.camera\.depth",
+    r"instance_segmentation",
     r"optical_flow",
-    r"\brgb\b",
+)
+
+#: Ways to ask the simulator what a sign is, rather than reading it off a frame.
+#: Matched against the CARLA API surface rather than against the word. Reading a
+#: file our own camera pipeline wrote is not a shortcut however it is named, and
+#: a pattern loose enough to flag `layout.traffic_sign_detections` would train a
+#: reader to ignore this test.
+PRIVILEGED_SIGN_PATTERNS: Tuple[str, ...] = (
+    r"TrafficSign",
+    r"get_traffic_light\w*",
+    r"get_landmarks?",
+    r"\.landmark",
+    r"TrafficLight",
 )
 
 #: Dataclasses a participant persists. None of them may be able to *hold* a
@@ -407,7 +428,42 @@ def test_inference_manifest_withholds_simulator_and_clock_configuration(analysed
     assert not {'config','duration_sim_s','fixed_delta_seconds','outcome_detail','participants'} & set(run.manifest)
     assert (analysed_run.oracle_dir / 'clock_ground_truth.json').exists()
     estimated=read_json(analysed_run.fusion_dir / 'time_alignment.json')
-    assert all(v['status']=='ALIGNED' for v in estimated['offsets'].values())
+    # Every transform is a plain translation: contact fixes an offset and says
+    # nothing about rate, so a scale other than 1.0 would be a claim the method
+    # cannot support.
+    assert all(v['scale'] == 1.0 for v in estimated['offsets'].values())
+    assert estimated['drift']['estimated'] is False
+
+
+def test_a_recorder_that_shared_no_contact_is_left_on_its_own_clock(analysed_run):
+    """The cost of anchoring on contact, asserted rather than glossed.
+
+    In this scene A and B collide and C never touches anything. Radar alignment
+    could tie C in from its trajectory; contact alignment cannot, and the honest
+    result is that C stays on its own clock and is named as unaligned. That is a
+    real reduction in what the method covers and it should be visible in a test
+    rather than discovered later from a confusing merged log.
+    """
+    alignment = read_json(analysed_run.fusion_dir / 'clock_alignment.json')
+    assert alignment['status'] == 'PARTIALLY_ALIGNED'
+    assert set(alignment['aligned_participants']) == {'A', 'B'}
+    assert alignment['unaligned_participants'] == ['C']
+    assert alignment['offsets']['C']['status'] == 'UNRESOLVED'
+    assert alignment['offsets']['C']['offset_s'] is None
+
+
+def test_the_merged_log_says_which_rows_are_not_on_the_shared_axis(analysed_run):
+    """A dash, not a zero. An unaligned row shown as 0.00 is a fabricated time."""
+    log = read_json(analysed_run.fusion_dir / 'global_log.json')
+    assert log['common_time_available'] is False
+    assert log['unaligned_participants'] == ['C']
+    # C contributes no rows at all here -- fusion has nowhere to put the events
+    # of a recorder with no common time -- which is precisely why the log has to
+    # name it. Derived from the rows alone this would read as a clean timeline.
+    assert log['participants_with_no_rows'] == ['C']
+    for row in log['rows']:
+        assert row['participant'] != 'C'
+        assert row['t_common'] is not None
 
 
 def test_clock_ground_truth_path_and_parameters_are_not_read_by_inference(src_root):
@@ -533,30 +589,69 @@ def test_forbidden_call_detector_actually_detects() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 3. No camera sensing anywhere in the package
+# 3. The camera may look, but never ask
 # ---------------------------------------------------------------------------
 
 
-def test_no_camera_sensor_anywhere_in_the_package(src_root: Path) -> None:
-    """The evidence model is radar plus own telemetry -- no camera, at all."""
-    patterns = [re.compile(p, re.IGNORECASE) for p in CAMERA_PATTERNS]
+def test_no_privileged_camera_mode_is_used_for_perception(src_root: Path) -> None:
+    """A vehicle may have a camera. It may not have the simulator's answer key.
+
+    The difference is the whole of the perception result. An RGB frame is a
+    picture the vehicle has to interpret, and its mistakes are part of what this
+    project measures. A semantic-segmentation frame already says which pixels are
+    a traffic sign, and a depth frame already gives exact range -- using either
+    would produce a detector with excellent measured precision that had
+    established nothing at all.
+    """
+    patterns = [re.compile(p, re.IGNORECASE) for p in PRIVILEGED_CAMERA_PATTERNS]
     offences: List[str] = []
     n_files = 0
     for path in sorted(src_root.rglob("*.py")):
+        # The oracle is allowed everything; it is the thing being compared to.
+        if path.parent.name == "oracle":
+            continue
         n_files += 1
-        text = path.read_text(encoding="utf-8")
-        for lineno, line in enumerate(text.splitlines(), start=1):
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             for pattern in patterns:
                 if pattern.search(line):
-                    offences.append(
-                        "{0}:{1} matches {2}".format(
-                            path.relative_to(src_root), lineno, pattern.pattern
-                        )
-                    )
+                    offences.append("{0}:{1} matches {2}".format(
+                        path.relative_to(src_root), lineno, pattern.pattern))
     assert n_files > 0, "no sources found under {0}".format(src_root)
-    assert not offences, "camera sensing referenced in the package:\n  " + "\n  ".join(
-        offences
+    assert not offences, (
+        "privileged camera mode outside the oracle:\n  " + "\n  ".join(offences)
     )
+
+
+def test_local_perception_never_asks_the_simulator_what_a_sign_is(
+    src_root: Path
+) -> None:
+    """The one shortcut that would make the traffic-control layer meaningless.
+
+    CARLA will name every sign and say which approach it governs. A vehicle that
+    consulted that would score perfectly on stop-sign detection and would not be
+    answering the question this project asks, which is what a vehicle can
+    establish for itself.
+    """
+    patterns = [re.compile(p) for p in PRIVILEGED_SIGN_PATTERNS]
+    offences: List[str] = []
+    for path in sorted((src_root / "local").rglob("*.py")):
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for pattern in patterns:
+                if pattern.search(line):
+                    offences.append("{0}:{1} matches {2}".format(
+                        path.relative_to(src_root), lineno, pattern.pattern))
+    assert not offences, (
+        "local inference reaches for a privileged sign source:\n  "
+        + "\n  ".join(offences)
+    )
+
+
+def test_the_sign_detector_works_from_an_image_and_says_so(src_root: Path) -> None:
+    """The method is part of the result, so it has to be stated in the artifact."""
+    source = (src_root / "local" / "sign_perception.py").read_text(encoding="utf-8")
+    assert "no privileged sign labels" in source
+    assert "no training data" in source
+
 
 
 # ---------------------------------------------------------------------------

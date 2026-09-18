@@ -1,160 +1,149 @@
-<!doctype html>
+<!DOCTYPE html>
+<!--
+  The incident viewer.
+
+  Four sections, because there are four questions: what each vehicle observed,
+  what happened globally, which properties were violated, and who contributed.
+  The previous viewer had a dozen panels and answered none of them at a glance.
+
+  Everything shown here is read from run_data.json. Nothing is recomputed in the
+  browser -- if a number on screen disagreed with the artifact, the artifact
+  would be right and the screen would be lying, so the screen does no arithmetic
+  it does not have to.
+-->
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CDF incident viewer</title>
-<!-- Local only: one stylesheet, one script, one fetch of run_data.json from
-     this same directory. There is deliberately no CDN, no web font and no
-     network request of any kind, so the page works from an offline evidence
-     copy. -->
-<link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Incident reconstruction</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body data-perspective="">
+<body>
 
-<!-- Perspective badge. Filled by app.js; it is the first thing on the page
-     because which epistemic layer you are looking at is the first thing a
-     reader has to know. -->
-<div id="banner">loading run data</div>
-
-<header>
-  <div>
-    <div id="run-title">&nbsp;</div>
-    <div id="run-meta"></div>
+<header id="masthead">
+  <div class="masthead-main">
+    <h1 id="scenario-title">Loading&hellip;</h1>
+    <p id="scenario-description"></p>
   </div>
-  <nav id="perspectives" aria-label="Perspective"></nav>
+  <div class="masthead-facts">
+    <div class="fact"><span class="fact-label">Outcome</span><span id="fact-outcome" class="fact-value">&mdash;</span></div>
+    <div class="fact"><span class="fact-label">Vehicles</span><span id="fact-vehicles" class="fact-value">&mdash;</span></div>
+    <div class="fact"><span class="fact-label">Clocks</span><span id="fact-clock" class="fact-value">&mdash;</span></div>
+  </div>
 </header>
 
-<!-- The investigation, in the order a reader works through it: what happened,
-     where, why, when, who, was it checked, on what evidence, and how well did
-     the method do. Each tab is one question. -->
-<nav id="tabs" role="tablist" aria-label="Investigation"></nav>
+<nav id="tabs" role="tablist">
+  <button class="tab" data-tab="reconstruction" role="tab" aria-selected="true">Reconstruction</button>
+  <button class="tab" data-tab="graph" role="tab" aria-selected="false">Graph</button>
+  <button class="tab" data-tab="responsibility" role="tab" aria-selected="false">Responsibility</button>
+  <button class="tab" data-tab="video" role="tab" aria-selected="false">Video</button>
+</nav>
 
-<main id="app" hidden>
+<main>
 
-  <!-- ------------------------------------------------ overview ---------- -->
-  <div class="tabpane" id="pane-overview">
-    <section class="panel span-2" id="answer-panel">
-      <h2>What happened, and why</h2>
-      <div id="answer"></div>
-    </section>
-    <section class="panel span-2" id="chain-panel">
-      <h2>Causal chains into the outcome <span class="hint">- click a step to open it in the graph</span></h2>
-      <div id="chains"></div>
-    </section>
-    <section class="panel" id="summary-panel">
-      <h2>At a glance</h2>
-      <div id="glance"></div>
-    </section>
-    <section class="panel" id="uncertainty-panel">
-      <h2>What the evidence does not settle</h2>
-      <div id="uncertainties"></div>
-    </section>
-  </div>
+  <!-- ================= RECONSTRUCTION ================= -->
+  <section id="panel-reconstruction" class="panel" role="tabpanel">
 
-  <!-- ------------------------------------------- reconstruction --------- -->
-  <div class="tabpane" id="pane-reconstruction" hidden>
-    <section class="panel span-2" id="map-panel">
-      <h2>Bird's-eye reconstruction <span class="hint" id="map-source"></span></h2>
-      <div id="map-wrap">
-        <canvas id="map" width="900" height="440"></canvas>
-      </div>
-      <div class="transport">
-        <button id="play" type="button">Play</button>
-        <input id="time" type="range" min="0" max="1" step="0.01" value="0" aria-label="Time">
-        <span id="clock">t = 0.00 s</span>
-        <label class="speed">speed
-          <select id="speed" aria-label="Playback speed">
-            <option value="0.1">0.1x</option>
-            <option value="0.25">0.25x</option>
-            <option value="0.5">0.5x</option>
-            <option value="1" selected>1x</option>
-            <option value="2">2x</option>
-            <option value="4">4x</option>
-          </select>
-        </label>
-        <button id="step-back" type="button" title="One frame back">&#9666;</button>
-        <button id="step-fwd" type="button" title="One frame forward">&#9656;</button>
-      </div>
-      <div id="map-legend"></div>
-    </section>
-    <section class="panel span-2" id="signals-panel">
-      <h2>Signals <span class="hint" id="signals-source"></span></h2>
-      <div id="signals"></div>
-    </section>
-  </div>
+    <h2>What each vehicle recorded</h2>
+    <p class="explain">
+      One vehicle's own account, on its own clock. No vehicle can see another's
+      clock, so there is no common-time column here.
+    </p>
+    <div id="local-badge"></div>
+    <div id="vehicle-switch" class="switch" role="group"></div>
+    <div id="local-log-wrap" class="table-wrap">
+      <table id="local-log" class="log">
+        <thead>
+          <tr><th class="t">Time</th><th>Event</th><th>Subject</th><th>Evidence</th><th>Value</th><th class="num">Conf.</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <!-- --------------------------------------------- causal graph --------- -->
-  <div class="tabpane" id="pane-graph" hidden>
-    <section class="panel span-2" id="graph-panel">
-      <h2>Causal graph
-        <span class="hint">- drag to pan, wheel to zoom, click a node for its path to the outcome</span>
-      </h2>
-      <div id="graph-controls"></div>
-      <div id="graph"></div>
-      <div id="graph-detail">No node selected.</div>
-    </section>
-  </div>
+    <h2>The merged account</h2>
+    <div id="global-badge"></div>
+    <p class="explain" id="global-log-explain"></p>
+    <div id="global-log-wrap" class="table-wrap">
+      <table id="global-log" class="log">
+        <thead>
+          <tr><th class="t">Common&nbsp;time</th><th>Who</th><th>Event</th><th>Subject</th><th>Evidence</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="global-log-missing" class="notice" hidden></div>
+  </section>
 
-  <!-- -------------------------------------------------- timeline -------- -->
-  <div class="tabpane" id="pane-timeline" hidden>
-    <section class="panel span-2" id="events-panel">
-      <h2>Event timeline <span class="hint">- click an event to seek to it</span></h2>
-      <div id="events" class="scroll-y tall"></div>
-    </section>
-  </div>
+  <!-- ================= GRAPH ================= -->
+  <section id="panel-graph" class="panel" hidden role="tabpanel">
+    <h2>Causal structure</h2>
+    <p class="explain">
+      Time runs left to right; each band is one vehicle. An edge is a claim that
+      the event on the left contributed to the one on the right. The ground truth
+      is the <em>observable</em> one &mdash; the physical events a reconstruction
+      could in principle recover &mdash; not the scenario script.
+    </p>
+    <div class="switch" role="group">
+      <button class="chip" data-graph="inferred">Reconstructed</button>
+      <button class="chip" data-graph="truth">Ground truth</button>
+      <button class="chip" data-graph="diff">Difference</button>
+    </div>
+    <div id="graph-badge"></div>
+    <div id="graph-legend" class="legend" hidden>
+      <span class="key"><i class="swatch matched"></i>recovered</span>
+      <span class="key"><i class="swatch missing"></i>missed</span>
+      <span class="key"><i class="swatch extra"></i>invented</span>
+    </div>
+    <div id="graph-canvas" class="graph-canvas"></div>
+    <div id="graph-missing" class="notice" hidden></div>
+    <div id="graph-counts" class="counts"></div>
+  </section>
 
-  <!-- ----------------------------------------------- attribution -------- -->
-  <div class="tabpane" id="pane-attribution" hidden>
-    <section class="panel span-2" id="verdict-panel">
-      <h2>Causal contribution</h2>
-      <div id="attribution"></div>
-    </section>
-    <section class="panel span-2" id="prevention-panel">
-      <h2>What would have prevented it</h2>
-      <div id="prevention"></div>
-    </section>
-    <section class="panel span-2" id="replays-panel">
-      <h2>Counterfactual replays</h2>
-      <div id="replays"></div>
-    </section>
-  </div>
+  <!-- ================= RESPONSIBILITY ================= -->
+  <section id="panel-responsibility" class="panel" hidden role="tabpanel">
+    <h2>Responsibility findings</h2>
+    <p class="explain">
+      Causal and normative findings, not statements of legal fault. A
+      contribution needs both a rule observed to be broken and an independent
+      physical path from the vehicle's own behaviour to the outcome.
+    </p>
+    <div id="protocol-warning" class="notice protocol-warning" hidden></div>
+    <div id="priority-card" class="priority"></div>
+    <div id="responsibility-cards" class="cards"></div>
+    <div id="responsibility-missing" class="notice" hidden></div>
 
-  <!-- -------------------------------------------- model checking -------- -->
-  <div class="tabpane" id="pane-checking" hidden>
-    <section class="panel span-2" id="checking-panel">
-      <h2>Model checking</h2>
-      <div id="checking"></div>
-    </section>
-  </div>
+    <h2>Temporal properties</h2>
+    <p class="explain">
+      Each formula is the object that was evaluated. A window that ran past the
+      end of the recording, or across a gap in the evidence, is UNKNOWN rather
+      than PASS.
+    </p>
+    <div id="formal-list" class="properties"></div>
+    <div id="formal-missing" class="notice" hidden></div>
+  </section>
 
-  <!-- -------------------------------------------------- evidence -------- -->
-  <div class="tabpane" id="pane-evidence" hidden>
-    <section class="panel span-2" id="clock-panel">
-      <h2>Recorder clocks <span class="hint">- every shared timestamp passed through these</span></h2>
-      <div id="clocks"></div>
-    </section>
-    <section class="panel span-2" id="identity-panel">
-      <h2>Reconstructed identity</h2>
-      <div id="identity"></div>
-    </section>
-  </div>
-
-  <!-- ------------------------------------------------ evaluation -------- -->
-  <div class="tabpane" id="pane-evaluation" hidden>
-    <section class="panel span-2" id="evaluation-panel">
-      <h2>Scored against the reference <span class="hint">- evaluation only; never an input to the reconstruction</span></h2>
-      <div id="evaluation"></div>
-    </section>
-    <section class="panel span-2" id="ablation-panel">
-      <h2>What each layer of the method was worth</h2>
-      <div id="ablation"></div>
-    </section>
-  </div>
+  <!-- ================= VIDEO ================= -->
+  <section id="panel-video" class="panel" hidden role="tabpanel">
+    <h2>Forward camera</h2>
+    <p class="explain">
+      Twenty seconds before the event and five after, on the recording vehicle's
+      own clock. Click an event marker to seek.
+    </p>
+    <div id="camera-switch" class="switch" role="group"></div>
+    <div id="video-stage" class="video-stage">
+      <video id="video-player" controls preload="metadata"></video>
+    </div>
+    <div id="video-timeline" class="timeline"></div>
+    <div id="video-missing" class="notice" hidden></div>
+  </section>
 
 </main>
 
-<footer id="notes"></footer>
+<footer id="footer">
+  <span id="footer-run"></span>
+  <button id="toggle-notes" class="linky">what is missing from this run</button>
+  <ul id="notes" hidden></ul>
+</footer>
 
 <script src="app.js"></script>
 </body>

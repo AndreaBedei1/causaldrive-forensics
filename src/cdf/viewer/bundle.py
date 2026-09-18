@@ -174,6 +174,49 @@ def build_run_bundle(run_dir: Union[str, Path], cfg: Config) -> Dict[str, Any]:
     if ablation_path.exists():
         bundle.setdefault("evaluation", {})["method_ablation"] = read_json(ablation_path)
 
+    # --- V2 blocks --------------------------------------------------------
+    # Each is omitted when its artifact is absent, and the absence is noted
+    # rather than silently producing an empty panel: a viewer that renders a
+    # blank Responsibility tab looks the same whether nothing was found or
+    # nothing was run.
+    # The ground truth the graph toggle compares against is the *observable*
+    # one, not the scenario template: the template asserts scripted actions no
+    # reconstruction can emit, so a diff against it would show a wall of
+    # unmatchable nodes and tell the reader nothing about the reconstruction.
+    if layout.observable_causal_graph.exists():
+        bundle.setdefault("oracle", {})["observable_causal_graph"] = read_json(
+            layout.observable_causal_graph
+        )
+    else:
+        notes.append({
+            "block": "oracle.observable_causal_graph",
+            "reason": (
+                "no observable ground truth; the graph toggle will offer the "
+                "scenario design reference instead, which is not comparable "
+                "node-for-node"
+            ),
+        })
+    if layout.graph_diff.exists():
+        bundle.setdefault("evaluation", {})["graph_diff"] = read_json(
+            layout.graph_diff
+        )
+
+    logs = _logs_block(layout, participant_ids, notes)
+    if logs is not None:
+        bundle["logs"] = logs
+
+    formal = _formal_block(layout, notes)
+    if formal is not None:
+        bundle["formal"] = formal
+
+    responsibility = _responsibility_block(layout, notes)
+    if responsibility is not None:
+        bundle["responsibility"] = responsibility
+
+    video = _video_block(layout, participant_ids, notes)
+    if video is not None:
+        bundle["video"] = video
+
     bundle["notes"] = notes
     # to_jsonable also maps NaN/Inf to null, which json.dump(allow_nan=False)
     # would otherwise refuse -- a single bad float must not lose the whole run.
@@ -976,3 +1019,133 @@ def _note(block: str, message: str, paths: Sequence[Path]) -> Dict[str, Any]:
         "message": message,
         "paths": [Path(p).name for p in paths],
     }
+
+# ---------------------------------------------------------------------------
+# V2 blocks
+# ---------------------------------------------------------------------------
+
+
+def _logs_block(
+    layout: RunLayout,
+    participant_ids: Sequence[str],
+    notes: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """The readable tables: each vehicle's own account, and the merged one.
+
+    Rows are passed through whole rather than summarised. They are already the
+    summary -- that is what the log is for -- and a viewer that re-derived them
+    could disagree with the artifact, which is the one thing a viewer must never
+    do.
+    """
+    per_participant: Dict[str, Any] = {}
+    for pid in participant_ids:
+        path = layout.local_log(pid)
+        if path.exists():
+            per_participant[pid] = read_json(path)
+
+    global_log = None
+    if layout.global_log.exists():
+        global_log = read_json(layout.global_log)
+
+    if not per_participant and global_log is None:
+        notes.append({
+            "block": "logs",
+            "reason": (
+                "no local_log.json or global_log.json; this run predates the "
+                "log-first pipeline, or the analysis stage has not been run"
+            ),
+        })
+        return None
+
+    if global_log is None:
+        notes.append({
+            "block": "logs.global",
+            "reason": (
+                "no merged log: fusion has not been run, so only the separate "
+                "local timelines are available"
+            ),
+        })
+    return {"local": per_participant, "global": global_log}
+
+
+def _formal_block(
+    layout: RunLayout, notes: List[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
+    """Property verdicts, with the formulae that produced them."""
+    if not layout.formal_results.exists():
+        notes.append({
+            "block": "formal",
+            "reason": "no formal/results.json; the property checker has not run",
+        })
+        return None
+    out = {"results": read_json(layout.formal_results)}
+    if layout.formal_properties.exists():
+        out["properties"] = read_json(layout.formal_properties)
+    return out
+
+
+def _responsibility_block(
+    layout: RunLayout, notes: List[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
+    """The normative account, graph and per-participant findings."""
+    if not layout.responsibility_report.exists():
+        notes.append({
+            "block": "responsibility",
+            "reason": (
+                "no fusion/responsibility_report.json; the normative layer has "
+                "not run for this run"
+            ),
+        })
+        return None
+    out = {"report": read_json(layout.responsibility_report)}
+    if layout.responsibility_graph.exists():
+        out["graph"] = read_json(layout.responsibility_graph)
+    return out
+
+
+def _video_block(
+    layout: RunLayout,
+    participant_ids: Sequence[str],
+    notes: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Where each vehicle's clip is, and which frame each instant maps to.
+
+    Only the index travels in the bundle; the video itself stays on disk and is
+    referenced by relative path. A bundle that embedded 20 MB of frames per
+    vehicle would be unopenable for no benefit.
+    """
+    per_participant: Dict[str, Any] = {}
+    for pid in participant_ids:
+        index_path = layout.frame_index(pid)
+        if not index_path.exists():
+            continue
+        index = read_json(index_path)
+        video = layout.front_video(pid)
+        per_participant[pid] = {
+            "frame_index": index,
+            "video_path": (
+                video.relative_to(layout.root).as_posix() if video.exists() else None
+            ),
+            "available": video.exists(),
+        }
+
+    if not per_participant:
+        notes.append({
+            "block": "video",
+            "reason": (
+                "no camera artifacts; this run was recorded without a camera, "
+                "which is a supported configuration"
+            ),
+        })
+        return None
+
+    missing = sorted(p for p, v in per_participant.items() if not v["available"])
+    if missing:
+        notes.append({
+            "block": "video",
+            "reason": (
+                "frame index present but no video file for {0}; the clip was "
+                "buffered and not encoded".format(", ".join(missing))
+            ),
+        })
+    return {"per_participant": per_participant}

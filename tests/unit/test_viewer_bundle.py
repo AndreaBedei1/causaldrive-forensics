@@ -221,10 +221,29 @@ def test_oracle_content_never_appears_outside_the_oracle_block(
     # ... and the word "oracle" itself is not a key anywhere outside it.
     assert [p for k, p in walk_keys(outside) if "oracle" in k.lower()] == []
 
-    # The oracle block itself carries no simulator bookkeeping either: the
-    # viewer is given where a vehicle truly was, not how CARLA numbered it.
-    inside = [p for k, p in walk_keys(real_bundle["oracle"]) if k.lower() in {"actor_id", "other_actor_id", "lane_id", "road_id", "traffic_light_state"}]
-    assert inside == []
+    # The oracle block itself carries no simulator bookkeeping: the viewer is
+    # given where a vehicle truly was, never how CARLA numbered it. An actor id
+    # is of no use to a reader and its presence anywhere is a leak waiting to
+    # happen, so it is forbidden even here.
+    bookkeeping = [
+        p for k, p in walk_keys(real_bundle["oracle"])
+        if k.lower() in {"actor_id", "other_actor_id", "traffic_light_state"}
+    ]
+    assert bookkeeping == [], bookkeeping
+
+    # Map facts are different, and V2 changed what to do with them. The ground
+    # truth is *supposed* to carry the map -- it is what lets a reader interpret
+    # a claim -- but a map fact must never be the claim itself, or the reference
+    # leaves the vocabulary a reconstruction shares and the comparison becomes
+    # unfair in the old way. So lane and road identity are allowed, and only
+    # underneath a `map_context` key, which is what marks them as context.
+    for key, path in walk_keys(real_bundle["oracle"]):
+        if key.lower() not in {"lane_id", "road_id", "junction_id"}:
+            continue
+        assert "map_context" in path, (
+            "map fact at {0} is not under a map_context key, so it reads as a "
+            "claim rather than as context".format(path)
+        )
 
 
 def test_missing_counterfactual_block_is_omitted_and_noted(
@@ -533,23 +552,55 @@ def test_the_page_reads_only_field_names_the_bundle_actually_writes() -> None:
                 / "method_ablation.py").read_text(encoding="utf-8")
     attribution = (Path(__file__).resolve().parents[2] / "src" / "cdf" / "causal"
                    / "attribution.py").read_text(encoding="utf-8")
-    sources = writer + reconstruction + combinations + ablation + attribution
+    # V2 writers. The page reads the log, formal and responsibility blocks now,
+    # and those are produced here rather than by the fusion bundle alone.
+    def _read(*parts: str) -> str:
+        return (Path(__file__).resolve().parents[2].joinpath(*parts)
+                ).read_text(encoding="utf-8")
+
+    sources = (
+        writer + reconstruction + combinations + ablation + attribution
+        + _read("src", "cdf", "common", "event_log.py")
+        + _read("src", "cdf", "formal", "report.py")
+        + _read("src", "cdf", "formal", "properties.py")
+        + _read("src", "cdf", "responsibility", "report.py")
+        + _read("src", "cdf", "responsibility", "graph.py")
+        + _read("src", "cdf", "responsibility", "priority.py")
+        + _read("src", "cdf", "evaluation", "graph_comparison.py")
+        + _read("src", "cdf", "fusion", "contact_alignment.py")
+        + _read("src", "cdf", "local", "video_buffer.py")
+        + _read("src", "cdf", "fusion", "pipeline.py")
+        + _read("src", "cdf", "evaluation", "suite.py")
+        + _read("src", "cdf", "causal", "counterfactuals.py")
+    )
 
     # Field names the page reads off bundle objects, spelled out so this test
-    # fails loudly if either side is renamed.
+    # fails loudly if either side is renamed. The list is the V2 page's: the
+    # simplification dropped the ablation and attribution dashboards, so the
+    # fields they read are no longer in it. What has not changed is the
+    # invariant -- a field the page reads must be a field some writer produces,
+    # or the panel renders empty and looks exactly like a run with nothing in it.
     read_by_page = {
-        "reconstruction", "graph_attribution", "clock", "method_ablation",
-        "incidents", "episodes", "chains", "links", "narrative", "node_ids",
-        "root_episode_id", "cross_participant", "preventive", "outcome_id",
-        "outcome_type", "t_common", "uncertainties", "attribution_class",
-        "contributors", "participant_id", "episode_kind", "validation",
-        "contribution_score", "but_for", "severity_reduction",
-        "minimal_prevention_sets", "minimality", "untested_subsets",
-        "arms", "best_local", "simple_fusion", "fusion_global_reasoning",
-        "reference_reachability", "strict_edge_recall_ceiling",
-        "n_edges_touching_a_scripted_action", "n_reference_edges",
-        "n_inferred_edges", "is_reference", "residual", "offset_s",
-        "drift_status", "n_constraints",
+        # the merged and local logs
+        "rows", "t_local", "t_common", "event_type", "source_sensor",
+        "participant", "subject", "confidence", "values",
+        "common_time_available", "unaligned_participants", "clock_method",
+        # the graphs and the comparison
+        "causal_graph", "observable_causal_graph", "graph_diff", "node_rows",
+        "global_inferred", "simple_fusion", "reference_id", "n_matched",
+        "n_reference", "recall", "event_id", "t_peak", "participant_id",
+        # the property layer
+        "property_id", "formula", "vacuous",
+        # the responsibility layer
+        "findings", "physical_causal_contributor", "but_for_contribution",
+        "traffic_control_violations", "temporal_property_failures",
+        "non_action_evidence", "mitigating_actions", "prevention_opportunities",
+        "responsibility_evidence", "has_priority", "node_type",
+        # the camera
+        "frame_index", "video_path", "t_first",
+        # the replay-protocol banner, which is the one that matters most: a
+        # rename here would silently stop warning about a degraded protocol.
+        "replay_protocol", "effective", "restarts_verified_fresh",
     }
     missing = sorted(
         name for name in read_by_page
@@ -560,6 +611,25 @@ def test_the_page_reads_only_field_names_the_bundle_actually_writes() -> None:
     )
     for name in sorted(read_by_page):
         assert name in app, "{0!r} is declared read by the page but never is".format(name)
+
+
+def test_the_page_shows_the_four_sections_the_brief_asks_for() -> None:
+    """Four questions, four sections. The old page had a dozen panels and
+    answered none of them at a glance."""
+    page = (viewer_assets_dir() / "index.html").read_text(encoding="utf-8")
+    for tab in ("reconstruction", "graph", "responsibility", "video"):
+        assert 'data-tab="{0}"'.format(tab) in page, tab
+        assert 'id="panel-{0}"'.format(tab) in page, tab
+
+
+def test_the_page_says_when_something_is_absent_rather_than_rendering_nothing() -> None:
+    """A blank panel looks identical whether nothing was found or nothing ran."""
+    page = (viewer_assets_dir() / "index.html").read_text(encoding="utf-8")
+    app = (viewer_assets_dir() / "app.js").read_text(encoding="utf-8")
+    for host in ("global-log-missing", "graph-missing", "responsibility-missing",
+                 "formal-missing", "video-missing"):
+        assert 'id="{0}"'.format(host) in page, host
+        assert host in app, host
 
 
 def test_the_bundle_carries_the_protocol_its_replays_ran_under(

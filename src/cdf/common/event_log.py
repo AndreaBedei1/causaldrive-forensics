@@ -216,9 +216,16 @@ def build_global_log(
     aligned = sorted({
         r["participant"] for r in rows if r.get("t_common") is not None
     })
-    unaligned = sorted({
-        r["participant"] for r in rows if r.get("t_common") is None
-    })
+    # Also from the alignment, not only from the rows. A recorder that could not
+    # be tied in often contributes no rows at all -- fusion has nowhere to put
+    # its events -- and a log that derived this from the rows alone would then
+    # report a clean single timeline while quietly omitting a whole vehicle.
+    # "C's events are missing from this table" is exactly what a reader needs.
+    unaligned = sorted(
+        {r["participant"] for r in rows if r.get("t_common") is None}
+        | {str(p) for p in (alignment.get("unaligned_participants") or [])}
+    )
+    aligned = [p for p in aligned if p not in set(unaligned)]
     by_type: Dict[str, int] = {}
     for row in rows:
         by_type[row["event_type"]] = by_type.get(row["event_type"], 0) + 1
@@ -239,6 +246,9 @@ def build_global_log(
         "columns": list(LOG_COLUMNS),
         "n_rows": len(rows),
         "counts_by_type": dict(sorted(by_type.items())),
+        "participants_with_no_rows": sorted(
+            set(unaligned) - {r["participant"] for r in rows}
+        ),
         "note": (
             "common time comes from shared physical contact between recorders. "
             "Where no contact tied a recorder to the rest, its rows keep only "

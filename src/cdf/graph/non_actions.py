@@ -322,18 +322,18 @@ def build_non_actions(
                 ref=opening.event_id,
                 t_start=t0,
                 t_end=t1,
-                detail={"role": "opened the obligation"},
+                detail={"why": "opened the obligation"},
             )]
             if closing is not None:
                 evidence.append(Evidence(
                     kind="event", ref=closing.event_id, t_start=t0, t_end=t1,
-                    detail={"role": "closed the window"},
+                    detail={"why": "closed the window"},
                 ))
             for support in supporting[:4]:
                 evidence.append(Evidence(
                     kind="event", ref=support.event_id,
                     t_start=float(support.t_start), t_end=float(support.t_peak),
-                    detail={"role": "the response that should not have continued"},
+                    detail={"why": "the response that should not have continued"},
                 ))
 
             out.append(Event(

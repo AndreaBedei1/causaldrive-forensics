@@ -269,3 +269,34 @@ def test_an_unaligned_row_is_rendered_as_a_dash_not_a_zero(two_vehicle_events):
         alignment={"converters": {"B": lambda t: t}},
     ))
     assert "    --  A" in text
+
+
+def test_a_recorder_the_alignment_excluded_is_named_even_with_no_rows():
+    """The case that only shows up on a real partial alignment.
+
+    A recorder with no common time usually contributes no fused events at all,
+    so a log deriving its aligned set from the rows would report a clean single
+    timeline while silently omitting a whole vehicle.
+    """
+    events = [
+        make_event("a1", EventType.BRAKE_ONSET, "A", 5.0),
+        make_event("b1", EventType.HARD_BRAKE, "B", 5.5),
+    ]
+    log = build_global_log(events, alignment={
+        "status": "PARTIALLY_ALIGNED",
+        "offsets_s": {"A": 0.0, "B": 0.2},
+        "unaligned_participants": ["C"],
+    })
+    assert log["unaligned_participants"] == ["C"]
+    assert log["participants_with_no_rows"] == ["C"]
+    assert log["common_time_available"] is False
+    assert sorted(log["aligned_participants"]) == ["A", "B"]
+
+
+def test_offsets_from_the_artifact_are_what_the_log_applies():
+    """The transform shown is the one the alignment published, not a copy."""
+    events = [make_event("b1", EventType.HARD_BRAKE, "B", 5.0)]
+    log = build_global_log(events, alignment={
+        "status": "CONTACT_ALIGNED", "offsets_s": {"B": 1.25},
+    })
+    assert log["rows"][0]["t_common"] == pytest.approx(6.25)

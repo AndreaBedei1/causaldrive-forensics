@@ -1,657 +1,273 @@
-/* Static styling for the CDF forensic viewer.
- *
- * No web fonts, no CDN, no imports: the page has to open from a local run
- * directory on a machine with no network. Everything is system fonts and
- * hand-written rules.
- *
- * The one rule that is not cosmetic: the perspective colour. A local
- * reconstruction, the fused reconstruction and privileged ground truth must
- * never be mistaken for one another at a glance, so the accent colour, the
- * badge and (for the oracle) a hazard border are all driven by the
- * `data-perspective` attribute on <body>.
- */
+/*
+  Plain, dense, readable. The previous stylesheet was 657 lines for a dashboard
+  nobody could read at a glance; this one is deliberately unambitious.
+*/
 
 :root {
-  --bg: #0d1117;
-  --panel: #151b24;
-  --panel-2: #1b222d;
-  --line: #262f3d;
-  --fg: #dde3ec;
-  --muted: #8a97a9;
-  --accent: #4aa3ff;
-
-  --local: #4aa3ff;
-  --fused: #b57bff;
-  --oracle: #ff4b4b;
-
-  --pass: #4cc38a;
-  --fail: #ff6b6b;
-  --unknown: #e0b341;
-
-  --p-a: #4aa3ff;
-  --p-b: #ffb454;
-  --p-c: #57d9a3;
-  --p-d: #ff7ab6;
-  --p-e: #9f8cff;
+  --ink: #16191d;
+  --ink-soft: #5a6270;
+  --ink-faint: #8b93a1;
+  --paper: #ffffff;
+  --paper-soft: #f6f7f9;
+  --rule: #dfe3e8;
+  --accent: #1f5f9e;
+  --accent-soft: #e8f0f8;
+  --good: #1f7a4d;
+  --bad: #b03a2e;
+  --unknown: #8a6d1f;
+  --vehicle-a: #1f5f9e;
+  --vehicle-b: #9e5b1f;
+  --vehicle-c: #4a1f9e;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
 
-html, body {
+/* A class that sets `display` beats the user-agent rule for [hidden], so an
+   element toggled with `.hidden = true` stays on screen. Every panel, legend
+   and notice here is toggled that way, so this has to be emphatic. */
+[hidden] { display: none !important; }
+
+body {
   margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.45;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--paper-soft);
 }
 
-body[data-perspective="FUSED"] { --accent: var(--fused); }
-body[data-perspective="ORACLE"] { --accent: var(--oracle); }
+/* --- masthead ---------------------------------------------------------- */
 
-/* The oracle view is framed in hazard red on every edge: it must be impossible
- * to screenshot a ground-truth panel and mistake it for a reconstruction. */
-body[data-perspective="ORACLE"]::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  border: 4px solid var(--oracle);
-  pointer-events: none;
-  z-index: 50;
-}
-
-a { color: var(--accent); }
-
-/* ---------------------------------------------------------------- banner */
-
-#banner {
-  padding: 10px 16px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel-2);
-  color: var(--accent);
-}
-
-#banner .sub {
-  display: block;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-body[data-perspective="ORACLE"] #banner {
-  background: repeating-linear-gradient(
-    135deg,
-    rgba(255, 75, 75, 0.22) 0 14px,
-    rgba(255, 75, 75, 0.10) 14px 28px
-  );
-  color: #ffd9d9;
-  border-bottom: 2px solid var(--oracle);
-  font-size: 16px;
-}
-
-/* ---------------------------------------------------------------- header */
-
-header {
+#masthead {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+  gap: 24px;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
+  padding: 20px 28px 16px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
 }
 
-#run-title { font-weight: 600; }
-#run-meta { color: var(--muted); font-size: 12px; }
+#masthead h1 { margin: 0 0 4px; font-size: 22px; font-weight: 650; }
+#scenario-description { margin: 0; max-width: 62ch; color: var(--ink-soft); }
 
-#perspectives { display: flex; gap: 6px; flex-wrap: wrap; }
-
-.pbtn {
-  border: 1px solid var(--line);
-  background: var(--panel-2);
-  color: var(--fg);
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
+.masthead-facts { display: flex; gap: 28px; }
+.fact { display: flex; flex-direction: column; gap: 2px; }
+.fact-label {
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-faint);
 }
-.pbtn:hover { border-color: var(--accent); }
-.pbtn[aria-pressed="true"] {
-  border-color: var(--accent);
-  color: #08121c;
-  background: var(--accent);
-  font-weight: 600;
-}
-.pbtn[data-kind="oracle"] { border-color: rgba(255, 75, 75, 0.55); color: #ffbcbc; }
-.pbtn[data-kind="oracle"][aria-pressed="true"] { background: var(--oracle); color: #200; }
+.fact-value { font-weight: 600; }
+.fact-value.collision { color: var(--bad); }
+.fact-value.near_miss, .fact-value.no_event { color: var(--good); }
 
-/* ---------------------------------------------------------------- layout */
-
-main {
-  display: grid;
-  grid-template-columns: minmax(420px, 1.25fr) minmax(360px, 1fr);
-  gap: 12px;
-  padding: 12px;
-  align-items: start;
-}
-
-@media (max-width: 1100px) {
-  main { grid-template-columns: 1fr; }
-}
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 10px 12px 12px;
-  min-width: 0;
-}
-
-.panel h2 {
-  margin: 0 0 8px;
-  font-size: 12px;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.panel h2 .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
-
-.span-2 { grid-column: 1 / -1; }
-
-.missing {
-  color: var(--muted);
-  font-style: italic;
-  padding: 8px 0;
-}
-
-.scroll-y { max-height: 320px; overflow-y: auto; }
-.scroll-x { overflow-x: auto; }
-
-/* ---------------------------------------------------------------- map */
-
-#map-wrap { position: relative; }
-
-canvas#map {
-  width: 100%;
-  height: 440px;
-  display: block;
-  background: #090c11;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-
-.transport {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.transport button {
-  font: inherit;
-  cursor: pointer;
-  border: 1px solid var(--line);
-  background: var(--panel-2);
-  color: var(--fg);
-  border-radius: 4px;
-  padding: 5px 12px;
-  min-width: 74px;
-}
-.transport button:hover { border-color: var(--accent); }
-
-.transport input[type="range"] { flex: 1; accent-color: var(--accent); }
-
-#clock {
-  font-variant-numeric: tabular-nums;
-  font-family: Consolas, "SF Mono", Menlo, monospace;
-  min-width: 96px;
-  text-align: right;
-}
-
-#map-legend {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.key { display: inline-flex; align-items: center; gap: 5px; }
-.swatch { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
-
-/* ---------------------------------------------------------------- plots */
-
-.plot { margin-bottom: 8px; position: relative; }
-.plot .plot-title {
-  font-size: 11px;
-  color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-}
-.plot .cursor {
-  position: absolute;
-  top: 14px;
-  bottom: 0;
-  width: 1px;
-  background: var(--accent);
-  pointer-events: none;
-}
-.plot svg { display: block; width: 100%; height: 58px; }
-
-/* ---------------------------------------------------------------- events */
-
-.event-row {
-  display: grid;
-  grid-template-columns: 62px 1fr auto;
-  gap: 8px;
-  align-items: baseline;
-  padding: 3px 6px;
-  border-left: 3px solid transparent;
-  cursor: pointer;
-  border-radius: 3px;
-}
-.event-row:hover { background: var(--panel-2); }
-.event-row.active { background: var(--panel-2); border-left-color: var(--accent); }
-.event-row .t {
-  font-family: Consolas, "SF Mono", Menlo, monospace;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.event-row .ty { font-weight: 600; }
-.event-row .meta { color: var(--muted); font-size: 12px; }
-.event-row.outcome .ty { color: var(--fail); }
-
-/* ---------------------------------------------------------------- graph */
-
-#graph { overflow: auto; max-height: 460px; border: 1px solid var(--line); border-radius: 4px; }
-#graph svg { display: block; }
-.gnode { cursor: pointer; }
-.gnode rect { stroke-width: 1; }
-.gnode text { font-size: 9px; fill: #0b0f14; font-weight: 600; }
-.gnode.dim { opacity: 0.22; }
-.gedge.dim { opacity: 0.07; }
-.gnode.hl rect { stroke: #fff; stroke-width: 2; }
-.gedge.hl { stroke: #fff !important; stroke-opacity: 0.95 !important; }
-
-#graph-detail {
-  margin-top: 8px;
-  font-size: 12px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 8px;
-  min-height: 46px;
-}
-#graph-detail dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; }
-#graph-detail dt { color: var(--muted); }
-#graph-detail dd { margin: 0; font-family: Consolas, "SF Mono", Menlo, monospace; }
-
-/* ---------------------------------------------------------------- tables */
-
-table.grid {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-table.grid th, table.grid td {
-  text-align: left;
-  padding: 4px 6px;
-  border-bottom: 1px solid var(--line);
-  vertical-align: top;
-}
-table.grid th { color: var(--muted); font-weight: 600; }
-table.grid tr.clickable { cursor: pointer; }
-table.grid tr.clickable:hover { background: var(--panel-2); }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: Consolas, "SF Mono", Menlo, monospace; }
-
-.chip {
-  display: inline-block;
-  padding: 1px 7px;
-  border-radius: 9px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.chip.PASS { background: rgba(76, 195, 138, 0.18); color: var(--pass); }
-.chip.FAIL { background: rgba(255, 107, 107, 0.18); color: var(--fail); }
-.chip.UNKNOWN { background: rgba(224, 179, 65, 0.18); color: var(--unknown); }
-.chip.RESOLVED { background: rgba(76, 195, 138, 0.18); color: var(--pass); }
-.chip.AMBIGUOUS { background: rgba(224, 179, 65, 0.18); color: var(--unknown); }
-.chip.UNRESOLVED { background: rgba(255, 107, 107, 0.18); color: var(--fail); }
-
-code, .mono {
-  font-family: Consolas, "SF Mono", Menlo, monospace;
-  font-size: 12px;
-}
-
-/* ------------------------------------------------------------ attribution */
-
-#attribution .insufficient {
-  border: 1px dashed var(--unknown);
-  color: var(--unknown);
-  background: rgba(224, 179, 65, 0.07);
-  padding: 12px;
-  border-radius: 4px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-align: center;
-}
-#attribution .why { color: var(--muted); font-size: 12px; margin-top: 8px; font-weight: 400; letter-spacing: 0; }
-
-.bar {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--accent);
-  display: block;
-}
-
-/* ---------------------------------------------------------------- notes */
-
-footer {
-  padding: 10px 16px 28px;
-  color: var(--muted);
-  font-size: 12px;
-  border-top: 1px solid var(--line);
-}
-footer ul { margin: 6px 0 0; padding-left: 18px; }
-
-#fatal {
-  margin: 40px auto;
-  max-width: 720px;
-  padding: 18px 22px;
-  border: 1px solid var(--fail);
-  border-radius: 6px;
-  background: rgba(255, 107, 107, 0.07);
-}
-#fatal pre {
-  white-space: pre-wrap;
-  background: var(--panel-2);
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-/* ---------------------------------------------------------------- tabs ----
- *
- * One tab per question an investigation asks. The tab strip is the primary
- * navigation; the perspective buttons in the header are orthogonal to it and
- * stay visible, because "which tab" and "whose viewpoint" are different
- * questions and a reader has to be able to change one without losing the other.
- */
+/* --- tabs -------------------------------------------------------------- */
 
 #tabs {
-  display: flex;
-  gap: 2px;
-  padding: 0 16px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
+  display: flex; gap: 2px;
+  padding: 0 28px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
 }
-
 .tab {
-  background: none;
-  border: none;
+  appearance: none; border: 0; background: none;
+  padding: 10px 16px; font: inherit; font-weight: 550;
+  color: var(--ink-soft); cursor: pointer;
   border-bottom: 2px solid transparent;
-  color: var(--muted);
-  padding: 10px 14px;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
 }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 
-.tab:hover { color: var(--fg); }
+main { padding: 22px 28px 60px; max-width: 1180px; }
 
-.tab[aria-selected="true"] {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+.panel h2 {
+  margin: 28px 0 4px; font-size: 16px; font-weight: 650;
 }
+.panel h2:first-child { margin-top: 0; }
+.explain { margin: 0 0 12px; color: var(--ink-soft); max-width: 78ch; }
 
-.tabpane {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 14px;
+/* --- switches ---------------------------------------------------------- */
+
+.switch { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.chip {
+  appearance: none; font: inherit; cursor: pointer;
+  padding: 5px 13px; border-radius: 14px;
+  border: 1px solid var(--rule); background: var(--paper); color: var(--ink-soft);
 }
+.chip:hover { border-color: var(--ink-faint); color: var(--ink); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip[disabled] { opacity: .45; cursor: default; }
 
-.tabpane[hidden] { display: none; }
+/* --- tables ------------------------------------------------------------ */
 
-/* ------------------------------------------------------------- overview ---
- *
- * The answer panel is the one thing a reader must not be able to miss, so it
- * gets the largest type on the page and the accent rule down its left edge.
- */
-
-.answer-block {
-  padding: 10px 0 14px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 12px;
+.table-wrap {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  max-height: 440px; overflow: auto;
 }
-
-.answer-block:last-of-type { border-bottom: none; }
-
-.headline {
-  font-size: 17px;
-  line-height: 1.45;
-  margin-bottom: 8px;
+table.log { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.log th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--paper); text-align: left; font-weight: 600;
+  padding: 8px 12px; border-bottom: 1px solid var(--rule);
+  font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ink-faint);
 }
+table.log td { padding: 6px 12px; border-bottom: 1px solid var(--paper-soft); }
+table.log tr:last-child td { border-bottom: 0; }
+table.log tr.seekable { cursor: pointer; }
+table.log tr.seekable:hover { background: var(--accent-soft); }
+th.t, td.t { font-variant-numeric: tabular-nums; width: 88px; white-space: nowrap; }
+th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; width: 62px; }
+td.event { font-family: var(--mono); font-size: 12.5px; }
+td.evidence, td.value { color: var(--ink-soft); font-size: 12.5px; }
+td.unaligned { color: var(--ink-faint); font-style: italic; }
 
-.because {
-  border-left: 3px solid var(--accent);
-  padding-left: 12px;
-  margin: 8px 0;
+tr.outcome td.event { color: var(--bad); font-weight: 600; }
+tr.nonaction td.event { color: var(--unknown); }
+tr.road td.event { color: var(--accent); }
+
+.who { font-weight: 600; }
+.who-A { color: var(--vehicle-a); }
+.who-B { color: var(--vehicle-b); }
+.who-C { color: var(--vehicle-c); }
+
+/* --- perspective badges ------------------------------------------------ */
+
+.perspective { display: flex; align-items: baseline; gap: 9px; margin-bottom: 9px; }
+.perspective .badge {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 3px; white-space: nowrap;
 }
+.perspective .note { font-size: 12.5px; color: var(--ink-soft); }
+.perspective.local .badge { background: var(--accent-soft); color: var(--accent); }
+.perspective.fused .badge { background: #e7f2ec; color: var(--good); }
+.perspective.truth .badge { background: #f3e4f7; color: #6b2d7a; }
 
-.narrative {
-  margin: 0;
-  padding-left: 20px;
-  line-height: 1.6;
-}
+/* --- notices ----------------------------------------------------------- */
 
-.narrative li { margin: 2px 0; }
-
-.insufficient-inline { border-left-color: var(--unknown); color: var(--muted); }
-
-.verdict {
-  margin-top: 14px;
-  padding: 12px;
-  background: var(--panel-2);
-  border-radius: 4px;
-}
-
-.verdict-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.verdict-src { color: var(--muted); font-size: 12px; }
-.rationale { margin-top: 8px; line-height: 1.5; }
-
-.disclaimer {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 11.5px;
-  font-style: italic;
-}
-
-.outcome-head {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  margin: 14px 0 6px;
-  text-transform: none;
-}
-
-.chain-cell { line-height: 1.9; }
-.chain-cell .arrow { color: var(--muted); }
-
-.step {
-  text-decoration: none;
-  border-bottom: 1px dotted var(--accent);
-  padding: 1px 2px;
-}
-
-.step.inferred {
-  border-bottom-style: dashed;
-  background: rgba(74, 163, 255, 0.08);
-}
-
-tr.preventive td { opacity: 0.75; }
-
-.uncertain { margin: 0; padding-left: 18px; line-height: 1.6; }
-.uncertain li { margin: 3px 0; }
-
-.ok { color: var(--pass); }
-
-.kv th {
-  text-align: left;
-  font-weight: 500;
-  color: var(--muted);
-  white-space: nowrap;
-  padding-right: 14px;
-}
-
-/* --------------------------------------------------------------- tags -----
- *
- * A verdict class is a controlled vocabulary term, so it is rendered as a
- * chip rather than prose. Colour follows meaning: a named contribution is
- * accented, an absence of evidence is muted, a preventive behaviour is green.
- */
-
-.tag {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 3px;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--fg);
-  white-space: nowrap;
-}
-
-.tag.single_initiator,
-.tag.single_cause { border-color: var(--accent); color: var(--accent); }
-
-.tag.shared_contribution,
-.tag.multiple_causes,
-.tag.joint_contribution { border-color: var(--p-b); color: var(--p-b); }
-
-.tag.contributing_but_not_necessary { border-color: var(--unknown); color: var(--unknown); }
-
-.tag.insufficient_evidence,
-.tag.no_cause_identified { border-color: var(--muted); color: var(--muted); }
-
-.tag.preventive { border-color: var(--pass); color: var(--pass); }
-.tag.contributing { border-color: var(--accent); color: var(--accent); }
-.tag.cross { border-color: var(--fused); color: var(--fused); }
-.tag.collided { border-color: var(--fail); color: var(--fail); }
-.tag.avoided { border-color: var(--pass); color: var(--pass); }
-.tag.factual { border-color: var(--muted); color: var(--muted); }
-.tag.reference { border-color: var(--accent); color: var(--accent); }
-.tag.ALIGNED { border-color: var(--pass); color: var(--pass); }
-.tag.minimal { border-color: var(--pass); color: var(--pass); }
-.tag.minimal_within_tested { border-color: var(--unknown); color: var(--unknown); }
-
-tr.reference td, tr.factual td { background: rgba(255, 255, 255, 0.02); }
-
-/* ------------------------------------------------------- graph controls ---*/
-
-#graph-controls {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 0 10px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-#graph-controls label { display: flex; align-items: center; gap: 6px; }
-#graph-controls input[type="range"] { width: 120px; accent-color: var(--accent); }
-
-#graph-controls button,
-.transport button {
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  color: var(--fg);
-  border-radius: 3px;
-  padding: 4px 10px;
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-#gsvg { cursor: grab; touch-action: none; }
-#gsvg.dragging { cursor: grabbing; }
-
-.gedge.inferred { stroke-dasharray: 4 3; }
-
-.speed { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12px; }
-.speed select {
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  color: var(--fg);
-  border-radius: 3px;
-  padding: 3px 6px;
-  font: inherit;
-  font-size: 12px;
-}
-
-.scroll-y.tall { max-height: 70vh; }
-
-/* ------------------------------------------------------------- ceiling ----
- *
- * The strict-recall ceiling is the context without which a strict recall
- * number says something untrue, so it is given a box of its own rather than a
- * footnote.
- */
-
-.ceiling {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-left: 3px solid var(--unknown);
-  background: var(--panel-2);
-  line-height: 1.55;
-  font-size: 12.5px;
-}
-
-.ceiling.reached { border-left-color: var(--pass); }
-
-@media (max-width: 1100px) {
-  .tabpane { grid-template-columns: 1fr; }
-}
-
-/* A behaviour that reduced an outcome it did not cause. Given its own box
- * rather than a footnote, because "nothing prevented it" and "these made it
- * less bad" are different findings and the second is easy to lose. */
-.mitigating {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-left: 3px solid var(--pass);
-  background: var(--panel-2);
-  line-height: 1.55;
-  font-size: 12.5px;
-}
-
-/* A verdict from replays that shared one simulator session. Loud, because the
- * verdict itself gives a reader no way to tell. */
 .protocol-warning {
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-left: 3px solid var(--fail);
-  background: var(--panel-2);
-  line-height: 1.55;
-  font-size: 12.5px;
+  background: #fae8e6; border-color: #e8b3ab; color: #7a2f26;
+  margin-bottom: 14px;
+}
+
+.notice {
+  background: #fdf6e3; border: 1px solid #e8d9a8; border-radius: 6px;
+  padding: 12px 14px; color: #6b5a1f; max-width: 78ch;
+}
+.notice strong { display: block; margin-bottom: 3px; }
+
+/* --- graph ------------------------------------------------------------- */
+
+.graph-canvas {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  overflow: auto; min-height: 220px;
+}
+.graph-canvas svg { display: block; }
+.legend { display: flex; gap: 16px; margin: 0 0 10px; font-size: 13px; color: var(--ink-soft); }
+.key { display: flex; align-items: center; gap: 6px; }
+.swatch { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+.swatch.matched { background: var(--good); }
+.swatch.missing { background: var(--bad); }
+.swatch.extra { background: var(--unknown); }
+.counts { margin-top: 10px; color: var(--ink-soft); font-size: 13px; }
+
+.node-label { font-family: var(--mono); font-size: 10.5px; fill: var(--ink); }
+.band-label { font-size: 12px; font-weight: 600; }
+.axis-tick { font-size: 10px; fill: var(--ink-faint); }
+.axis-line { stroke: var(--rule); }
+.edge { fill: none; stroke: var(--ink-faint); stroke-width: 1.2; }
+.edge.matched { stroke: var(--good); }
+.edge.missing { stroke: var(--bad); stroke-dasharray: 4 3; }
+.edge.extra { stroke: var(--unknown); stroke-dasharray: 2 3; }
+
+/* --- responsibility ---------------------------------------------------- */
+
+.priority {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 12px 16px; margin-bottom: 14px;
+}
+.priority .verdict { font-weight: 650; }
+.priority .why { color: var(--ink-soft); margin-top: 4px; }
+
+.cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
+.card {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 14px 16px;
+}
+.card h3 { margin: 0 0 2px; font-size: 15px; }
+.card .level {
+  display: inline-block; font-size: 11px; letter-spacing: .05em;
+  text-transform: uppercase; font-weight: 650; padding: 2px 8px;
+  border-radius: 10px; margin-bottom: 10px;
+}
+.level.supported { background: #fae8e6; color: var(--bad); }
+.level.partial { background: #fdf3dd; color: var(--unknown); }
+.level.insufficient { background: #e7f2ec; color: var(--good); }
+.card dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 3px 12px; }
+.card dt { color: var(--ink-faint); font-size: 12px; }
+.card dd { margin: 0; font-size: 13px; }
+.card .why { margin-top: 10px; color: var(--ink-soft); font-size: 12.5px; }
+.yes { color: var(--bad); font-weight: 600; }
+.no { color: var(--good); }
+.untested { color: var(--ink-faint); font-style: italic; }
+
+.properties { display: flex; flex-direction: column; gap: 8px; }
+.property {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px;
+}
+.property .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.property .verdict {
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  padding: 1px 7px; border-radius: 9px;
+}
+.verdict.PASS { background: #e7f2ec; color: var(--good); }
+.verdict.FAIL { background: #fae8e6; color: var(--bad); }
+.verdict.UNKNOWN { background: #fdf3dd; color: var(--unknown); }
+.verdict.vacuous { background: var(--paper-soft); color: var(--ink-faint); }
+.property .formula {
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft);
+  margin-top: 5px; word-break: break-word;
+}
+.property .reason { font-size: 12.5px; color: var(--ink-soft); margin-top: 4px; }
+
+/* --- video ------------------------------------------------------------- */
+
+.video-stage {
+  background: #000; border-radius: 6px; overflow: hidden;
+  display: flex; justify-content: center; max-height: 480px;
+}
+.video-stage video { max-width: 100%; max-height: 480px; }
+.timeline {
+  position: relative; height: 46px; margin-top: 10px;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+}
+.marker {
+  position: absolute; top: 6px; width: 2px; height: 20px;
+  background: var(--accent); cursor: pointer;
+}
+.marker[data-kind="outcome"] { background: var(--bad); height: 28px; }
+.marker[data-kind="nonaction"] { background: var(--unknown); }
+.marker .tip {
+  position: absolute; bottom: -20px; left: -4px; white-space: nowrap;
+  font-size: 10px; color: var(--ink-faint);
+}
+
+/* --- footer ------------------------------------------------------------ */
+
+#footer {
+  padding: 14px 28px 40px; color: var(--ink-faint); font-size: 12.5px;
+  border-top: 1px solid var(--rule); background: var(--paper);
+}
+#footer-run { font-family: var(--mono); margin-right: 14px; }
+.linky {
+  appearance: none; border: 0; background: none; padding: 0;
+  font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline;
+}
+#notes { margin: 10px 0 0; padding-left: 18px; max-width: 80ch; }
+#notes li { margin-bottom: 4px; }
+
+@media (max-width: 720px) {
+  #masthead, #tabs, main, #footer { padding-left: 16px; padding-right: 16px; }
+  .masthead-facts { gap: 18px; }
 }
