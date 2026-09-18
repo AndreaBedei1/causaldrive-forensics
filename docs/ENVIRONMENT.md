@@ -185,8 +185,26 @@ so they are recorded rather than left to be rediscovered.
    `CarlaServer` now records the engine pids present before it starts one,
    identifies the pid it started, and kills that on stop — leaving an engine the
    user started themselves alone. If you manage the simulator yourself, kill the
-   image name (`CarlaUE4-Win64-Shipping.exe`), not the launcher, and check the
-   port is actually free before assuming a restart took effect.
+   image name (`CarlaUE4-Win64-Shipping.exe`), not the launcher.
+
+   Leaving an engine alone is correct and it is also what makes the trap
+   possible, so **the restart is no longer assumed to have worked**. After every
+   restart `CarlaServer` reads the connected world's clock: a freshly booted
+   engine has been ticking for seconds, one that has served a campaign has not.
+   The verdict is exposed as `CarlaServer.last_restart_verified` and recorded in
+   each counterfactual report as `replay_protocol.restarts_verified_fresh`; the
+   sweep driver marks the affected runs and exits non-zero, and the viewer prints
+   a banner above any verdict produced that way.
+
+   This was not hypothetical. An orphaned engine from an interrupted run held
+   port 2000 for over an hour and served several sweeps whose reports claimed a
+   fresh server per replay, and one of them produced a verdict that did not
+   reproduce. Before a comparison that depends on independent runs, confirm
+   nothing is listening:
+
+   ```powershell
+   Get-NetTCPConnection -LocalPort 2000 -State Listen
+   ```
 
 
 10. **A client outlives the server it was talking to, and enough of them abort

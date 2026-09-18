@@ -219,6 +219,20 @@ suite that exhausts its retries would leave a partial contribution report; the
 driver reports such a run as `INCOMPLETE` rather than scoring it, and no
 incomplete suite is quoted.
 
+**A second, worse failure was found in this area and is now checked rather than
+trusted.** A simulator engine left running by an interrupted run keeps RPC port
+2000; every later "fresh" engine fails to bind it and the client silently
+reconnects to the old one. The restart appears to succeed, the log says so, and
+every replay of every later sweep shares one drifting session. It happened here
+and produced a verdict that did not reproduce.
+
+The restart is now verified against the connected world's clock, the result is
+written into every attribution report, the sweep driver exits non-zero when any
+run was degraded, and the viewer refuses to show such a verdict without a
+banner. What this limits is older artifacts: any counterfactual report that
+carries no `replay_protocol` block predates the check, and nothing in it
+establishes which protocol it ran under.
+
 ## 15. Self-localisation is exact, so one reported error is not a measurement
 
 This simulator models no localisation noise. Each recorder's exported position is
