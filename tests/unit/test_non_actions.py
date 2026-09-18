@@ -348,3 +348,32 @@ def test_events_belonging_to_other_participants_are_ignored():
         ev("1", EventType.CRITICAL_TTC, 8.42, pid="B", subject="A"),
     ]
     assert build_non_actions("A", events)["events"] == []
+
+
+def test_one_vehicle_can_owe_two_others_at_the_same_instant():
+    """Pairwise non-action ids must carry the subject.
+
+    With three vehicles, B can fail the same obligation towards A and towards C
+    in the same tick. Without the subject both got the id
+    `na-NA6-B-2.42`, and the graph matcher rejects a duplicate id outright --
+    which took four campaign runs' evaluation down with a ValueError rather than
+    a metric.
+    """
+    from cdf.graph.non_actions import NON_ACTION_RULES
+
+    pairwise = [rule for rule in NON_ACTION_RULES if rule.pairwise]
+    assert pairwise, "this test is about pairwise rules; there should be some"
+
+    rule = pairwise[0]
+    ids = {
+        "{0}-{1}-{2}{3}-{4:.2f}".format(
+            "na", rule.rule_id, "B",
+            "-{0}".format(subject) if (rule.pairwise and subject) else "",
+            2.42,
+        )
+        for subject in ("A", "C")
+    }
+    assert len(ids) == 2, (
+        "B's non-action towards A and towards C at the same instant must not "
+        "collide: {0}".format(ids)
+    )

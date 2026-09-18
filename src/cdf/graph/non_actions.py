@@ -337,8 +337,15 @@ def build_non_actions(
                 ))
 
             out.append(Event(
-                event_id="{0}-{1}-{2}-{3:.2f}".format(
-                    id_prefix, rule.rule_id, participant_id, t0
+                # The subject belongs in the id for a pairwise rule. Without it
+                # one vehicle's non-action towards two others, opening in the
+                # same tick, produces the same id twice -- which only happens
+                # with three vehicles, and which the graph matcher rejects
+                # outright because ids must be unique within a graph.
+                event_id="{0}-{1}-{2}{3}-{4:.2f}".format(
+                    id_prefix, rule.rule_id, participant_id,
+                    "-{0}".format(subject) if (rule.pairwise and subject) else "",
+                    t0,
                 ),
                 event_type=rule.event_type,
                 participant_id=str(participant_id),
