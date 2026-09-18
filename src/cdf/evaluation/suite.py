@@ -63,8 +63,10 @@ from .graph_comparison import (
     NODE_MATCH_COLUMNS,
     compare_graphs,
 )
+from .formal_metrics import aggregate_formal, measure_formal
 from .knowledge_gain import measure_knowledge_gain
 from .perception_metrics import measure_perception
+from .responsibility_metrics import aggregate_responsibility, measure_responsibility
 from .event_metrics import evaluate_events
 from .graph_metrics import evaluate_graphs, fusion_benefit
 from .clocks import load_clock_truth, simulator_evidence, map_event, map_graph, evaluate_clock_alignment
@@ -603,6 +605,33 @@ def evaluate_run(
         reasons["perception"] = perception.get("reason", "not scored")
     write_json(_assert_evaluation_path(layout, layout.perception_metrics), perception)
 
+    # --- were the property verdicts the right ones -------------------------
+    # The same formulae are run over the observable ground truth, so a
+    # disagreement is about the reconstruction rather than about two readings of
+    # the same word. A false violation -- accusing a vehicle of running a sign it
+    # stopped at -- is the expensive error and is counted apart from a missed one.
+    formal = measure_formal(layout, cfg)
+    if formal.get("scored"):
+        metrics["formal"] = formal
+    else:
+        reasons["formal"] = formal.get("reason", "not scored")
+    write_json(_assert_evaluation_path(layout, layout.formal_metrics), formal)
+
+    # --- did it name the vehicles the scenario designed --------------------
+    # Two comparisons, kept apart on purpose: the template's physical causes
+    # against the physical contributors, and its designed omissions against the
+    # responsibility findings. Scoring one against the other compares different
+    # quantities -- a vehicle that brakes hard is a designed physical cause and
+    # breaks no rule.
+    responsibility = measure_responsibility(layout, cfg)
+    if responsibility.get("scored"):
+        metrics["responsibility"] = responsibility
+    else:
+        reasons["responsibility"] = responsibility.get("reason", "not scored")
+    write_json(
+        _assert_evaluation_path(layout, layout.responsibility_metrics), responsibility
+    )
+
     # --- the explanation itself -------------------------------------------
     # Structural F1 says how much of the oracle graph came back. These three say
     # whether the incident was reconstructed, whether the chains into it were
@@ -1091,6 +1120,14 @@ def _campaign_summary(
             "n_runs": len(values),
         }
 
+    formal_runs = [
+        m["formal"] for m in collected if isinstance(m.get("formal"), Mapping)
+    ]
+    responsibility_runs = [
+        m["responsibility"] for m in collected
+        if isinstance(m.get("responsibility"), Mapping)
+    ]
+
     helped = [r.get("fusion_helped") for r in run_rows if r.get("fusion_helped") is not None]
     honest = [
         r.get("local_unknowns_honest")
@@ -1116,4 +1153,11 @@ def _campaign_summary(
         "n_runs_with_fusion_comparison": len(helped),
         "n_runs_epistemically_honest": sum(1 for v in honest if v),
         "n_runs_with_unknown_check": len(honest),
+        # Reported apart from the graph aggregates above. These two are scored
+        # against different references -- the observable ground truth for the
+        # properties, the scenario's own design for the contributors -- and
+        # folding them into one headline would hide which reference a number
+        # came from.
+        "formal": aggregate_formal(formal_runs),
+        "responsibility": aggregate_responsibility(responsibility_runs),
     }
