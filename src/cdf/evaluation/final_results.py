@@ -752,6 +752,9 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         lines.append(clocks.get("note", "").capitalize() + ".")
     lines.append("")
 
+    # -- the V2 blocks ---------------------------------------------------
+    _v2_markdown(lines, results.get("v2") or {})
+
     # -- headline figures ----------------------------------------------
     lines.append("## Headline figures")
     lines.append("")
@@ -898,3 +901,193 @@ def write_final_results(
         " (published to {0})".format(publish_dir) if publish_dir else "",
     )
     return paths
+
+
+
+def _pct(value):
+    return "--" if value is None else "{0:.1%}".format(value)
+
+
+def _secs(value):
+    return "--" if value is None else "{0:.6f} s".format(value)
+
+
+def _tally(mapping):
+    items = (mapping or {}).items()
+    return ", ".join("{0} x{1}".format(k, v) for k, v in items) or "none"
+
+
+def _prf_row(label, block):
+    return "| {0} | {1} | {2} | {3} | {4} | {5} |".format(
+        label,
+        block.get("n_true_positive", 0),
+        block.get("n_false_positive", 0),
+        block.get("n_false_negative", 0),
+        _pct(block.get("precision")),
+        _pct(block.get("recall")),
+    )
+
+
+def _v2_markdown(lines, v2):
+    """The V2 blocks. Each is scored against its own reference and kept apart,
+    because folding them into one headline would hide which reference a number
+    came from."""
+    if not v2:
+        return
+
+    clock = v2.get("clock") or {}
+    by_source = clock.get("offset_error_by_source") or {}
+    lines.append("## Clocks")
+    lines.append("")
+    lines.append(
+        "How each recorder reached common time. A vehicle placed by a fitted "
+        "trajectory is not making the same claim as one tied in by a physical "
+        "impact, so the source is reported per participant rather than averaged "
+        "away. Error is relative to each run's reference recorder: a common "
+        "timeline is only fixed up to a constant."
+    )
+    lines.append("")
+    lines.append("| Source | Participants | Offset MAE | Worst |")
+    lines.append("|---|---|---|---|")
+    for source, count in (clock.get("source_distribution") or {}).items():
+        stats = by_source.get(source) or {}
+        lines.append("| `{0}` | {1} | {2} | {3} |".format(
+            source, count, _secs(stats.get("mae_s")), _secs(stats.get("max_abs_s"))))
+    overall = clock.get("offset_error") or {}
+    lines.append("| **all** | {0} | {1} | {2} |".format(
+        clock.get("n_participants", 0),
+        _secs(overall.get("mae_s")), _secs(overall.get("max_abs_s"))))
+    lines.append("")
+    lines.append("Run status: {0}. Unresolved recorders: {1} of {2}.".format(
+        _tally(clock.get("run_status_distribution")),
+        clock.get("n_unresolved", 0), clock.get("n_participants", 0)))
+    lines.append("")
+
+    perception = v2.get("perception") or {}
+    lines.append("## Perception, from real campaign frames")
+    lines.append("")
+    lines.append("| What | TP | FP | FN | Precision | Recall |")
+    lines.append("|---|---|---|---|---|---|")
+    for key, label in (("stop_signs", "STOP signs"),
+                       ("yield_signs", "Give-way signs"),
+                       ("stop_lines", "Stop lines"),
+                       ("lane_markings", "Lane markings")):
+        lines.append(_prf_row(label, perception.get(key) or {}))
+    lines.append("")
+    lines.append("A rate over no instances is `--`, never zero. {0}".format(
+        perception.get("latency_note", "")))
+    lines.append("")
+
+    formal = v2.get("formal") or {}
+    lines.append("## Temporal properties")
+    lines.append("")
+    if not formal.get("scored"):
+        lines.append("_{0}_".format(formal.get("reason", "not scored")))
+    else:
+        lines.append(
+            "The same formulae run over the merged reconstruction and over the "
+            "observable ground truth, so a disagreement is about the "
+            "reconstruction rather than about two readings of the same word. "
+            "UNKNOWN is never folded into PASS."
+        )
+        lines.append("")
+        lines.append(
+            "| Comparable | Agree | Agreement | False violations | Missed violations |")
+        lines.append("|---|---|---|---|---|")
+        lines.append("| {0} | {1} | {2} | {3} ({4}) | {5} ({6}) |".format(
+            formal.get("n_comparable", 0), formal.get("n_agree", 0),
+            _pct(formal.get("agreement")),
+            formal.get("n_false_violations", 0),
+            _pct(formal.get("false_violation_rate")),
+            formal.get("n_missed_violations", 0),
+            _pct(formal.get("missed_violation_rate"))))
+        for label, key in (("False violations", "false_violations_by_property"),
+                           ("Missed violations", "missed_violations_by_property"),
+                           ("Undecided", "undecided_by_property")):
+            broken = formal.get(key) or {}
+            if broken:
+                lines.append("")
+                lines.append("{0} by property: {1}.".format(label, _tally(broken)))
+    lines.append("")
+
+    responsibility = v2.get("responsibility") or {}
+    sets = responsibility.get("sets") or {}
+    lines.append("## Contribution: physical and normative")
+    lines.append("")
+    lines.append(
+        "Two different claims, scored apart. A vehicle that brakes hard is a "
+        "physical cause of the crash behind it and has broken no rule. A scenario "
+        "designing no rule violation has nothing for the normative comparison to "
+        "score, and reports not applicable rather than zero."
+    )
+    lines.append("")
+    if sets.get("scored"):
+        physical = sets.get("physical_contributor_sets") or {}
+        normative = sets.get("normative_contributor_sets")
+        lines.append("| Comparison | Runs | Precision | Recall | F1 | Exact set match |")
+        lines.append("|---|---|---|---|---|---|")
+        lines.append("| Physical | {0} | {1} | {2} | {3} | {4} |".format(
+            sets.get("n_runs", 0), _pct(physical.get("precision")),
+            _pct(physical.get("recall")), _pct(physical.get("f1")),
+            _pct(sets.get("exact_physical_match_rate"))))
+        if normative:
+            lines.append("| Normative | {0} | {1} | {2} | {3} | -- |".format(
+                sets.get("n_runs_with_a_normative_reference", 0),
+                _pct(normative.get("precision")), _pct(normative.get("recall")),
+                _pct(normative.get("f1"))))
+        else:
+            lines.append("| Normative | 0 | -- | -- | -- | -- |")
+        lines.append("")
+        lines.append("Runs carrying a normative reference: {0} of {1}.".format(
+            sets.get("n_runs_with_a_normative_reference", 0), sets.get("n_runs", 0)))
+        for case in sets.get("hard_cases") or []:
+            lines.append("")
+            lines.append("- **{0}/{1}** -- {2}".format(
+                case.get("scenario"), case.get("variant"), case.get("why_it_is_hard")))
+    else:
+        lines.append("_{0}_".format(sets.get("reason", "not scored")))
+    classes = responsibility.get("evidence_classes") or {}
+    if classes:
+        lines.append("")
+        lines.append("Evidence classes over all findings: {0}.".format(_tally(classes)))
+    lines.append("")
+
+    order = v2.get("collision_order") or {}
+    lines.append("## Collision order")
+    lines.append("")
+    lines.append("Verdicts: {0}.".format(_tally(order.get("verdicts"))))
+    if order.get("n_multi_impact_runs"):
+        lines.append("")
+        lines.append("Multi-impact runs: {0}, correct on {1}.".format(
+            order["n_multi_impact_runs"], _pct(order.get("correct_rate"))))
+        lines.append("")
+        lines.append("| Scenario | Variant | Seed | Verdict |")
+        lines.append("|---|---|---|---|")
+        for row in order.get("multi_impact_runs") or []:
+            lines.append("| {0} | {1} | {2} | {3} |".format(
+                row.get("scenario"), row.get("variant"),
+                row.get("seed"), row.get("verdict")))
+    lines.append("")
+    lines.append(
+        "`not established` is its own verdict, not a failure: impacts closer "
+        "together than the recording can resolve, or an offset resting on a "
+        "shared anchor, leave an order the method did not claim."
+    )
+    lines.append("")
+
+    counterfactual = v2.get("counterfactual") or {}
+    lines.append("## Counterfactuals")
+    lines.append("")
+    lines.append("But-for verdicts: {0}.".format(
+        _tally(counterfactual.get("but_for_verdicts"))))
+    roles = counterfactual.get("counterfactual_roles") or {}
+    if roles:
+        lines.append("")
+        lines.append("Roles: {0}.".format(_tally(roles)))
+    lines.append("")
+    lines.append(
+        "A prevention opportunity is not factual causation, and the role records "
+        "which question each replay answered: removing what happened, supplying "
+        "what did not, or improving what did."
+    )
+    lines.append("")
