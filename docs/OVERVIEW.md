@@ -55,17 +55,19 @@ problem. It is a reconstruction problem with three properties that make it hard:
         │   candidate cause, and without SETS of them  │
         └───────────────────────┬──────────────────────┘
                                 ▼
-                    ┌───────────────────────┐
-                    │ causal initiator?     │      scored against a privileged
-                    │ shared contribution?  │  ◄── oracle that the reconstruction
-                    │ joint contribution?   │      never sees
-                    │ insufficient evidence?│
-                    └───────────────────────┘
+                    ┌────────────────────────────────┐
+                    │ single_initiator               │
+                    │ shared_contribution            │   scored against a
+                    │ joint_contribution             │ ◄─ privileged oracle the
+                    │ contributing_but_not_necessary │   reconstruction never sees
+                    │ insufficient_evidence          │
+                    └────────────────────────────────┘
 ```
 
-Every stage above the dashed line runs on vehicle-local evidence only. The
-oracle exists solely to score it, and a test suite fails the build if any
-inference module can so much as import the code that writes it.
+Everything from the recorders down to the verdict runs on vehicle-local evidence
+only. The oracle sits outside that chain: it exists solely to score the result,
+and a test suite fails the build if any inference module can so much as import
+the code that writes it.
 
 ## The five claims, and how each is checked
 
@@ -87,12 +89,23 @@ law, jurisdiction, duty of care, and what a driver could reasonably have
 foreseen — none of which is in a recorder's log and none of which is inferred
 here.
 
-The vocabulary is: *causal initiator*, *causal contributor*, *shared causal
-contribution*, *joint causal contribution*, *causal chain*, *insufficient
-evidence*. A contribution score states what changed when the simulator re-ran
-the encounter under a controlled modification. It is not a percentage of blame,
-and a test walks every artifact to make sure the words *guilty*, *fault*,
-*liable* and *responsible* never appear as a conclusion.
+A contribution score states what changed when the simulator re-ran the encounter
+under a controlled modification. It is not a percentage of blame, and a test
+walks every artifact to make sure the words *guilty*, *fault*, *liable* and
+*blame* never appear as a conclusion.
+
+The verdict is one of exactly five, and two of them name nobody:
+
+| Class | Means |
+|---|---|
+| `single_initiator` | one action, removed alone, prevents the collision |
+| `shared_contribution` | two or more each prevent it on their own — either would have been enough |
+| `joint_contribution` | no single action prevents it; some minimal set of two or more does |
+| `contributing_but_not_necessary` | nothing tested prevents it, but an action measurably changed its severity |
+| `insufficient_evidence` | nothing tested changed the outcome, or there was nothing testable |
+
+The last one is a result, not a failure to try, and it must never be rewritten
+into a culprit. Details in [COUNTERFACTUALS.md](COUNTERFACTUALS.md).
 
 ## Where to go next
 

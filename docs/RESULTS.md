@@ -217,9 +217,9 @@ the *reconstruction* claims and, at these offset magnitudes, neutral for the
 
 | Arm | What it has |
 |---|---|
-| Best Local | one vehicle's own graph; the strongest of them, not the mean |
-| Simple Fusion | identities resolved, clocks aligned, graphs merged — every edge still claimed inside one vehicle's log |
-| Fusion + Global Causal Reasoning | the same merge, plus edges between claims made by different vehicles |
+| Best Local (`best_local`) | one vehicle's own graph; the strongest of them, not the mean |
+| Simple Fusion (`simple_fusion`) | identities resolved, clocks aligned, graphs merged — every edge still claimed inside one vehicle's log |
+| Fusion + Global Causal Reasoning (`fusion_global_reasoning`) | the same merge, plus edges between claims made by different vehicles |
 
 The arms differ in exactly one configuration key
 (`fusion.post_fusion.enabled`), are derived from identical recordings, and are
