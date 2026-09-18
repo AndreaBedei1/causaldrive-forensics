@@ -91,10 +91,8 @@ python -m cdf.cli run --scenario S06 --variant a_front_pushed --seed 0
 # what would have prevented it
 python -m cdf.cli counterfactuals --run artifacts/S06_chain_collision/seed_000_a_front_pushed
 
-# look at it
-python -m cdf.cli viewer --scenario S06 --variant a_front_pushed --seed 0
-cd artifacts/S06_chain_collision/seed_000_a_front_pushed/viewer && python -m http.server 8000
-# open http://localhost:8000/index.html
+# look at it -- builds the bundle, serves it, opens a browser
+python -m cdf.cli viewer --run artifacts/S06_chain_collision/seed_000_a_front_pushed
 ```
 
 The viewer is a static page with no framework and no network access, so it opens
@@ -147,10 +145,12 @@ The headline findings, including the ones that did not go the project's way:
   edge recall rises monotonically across best-local → merged → merged+reasoning.
 - **Strict edge F1 does not improve, and on two scenarios the best single
   vehicle beats the merge.** This is reported rather than buried. The cause is
-  measured, not guessed: 55% of the reference graph's edges leave a
+  measured, not guessed: most of the reference graph's edges leave a
   scripted-action node — a privileged event type no reconstruction can emit — so
   strict recall has a ceiling well below 1.0, and the merged account reaches
-  that ceiling exactly on more than half the campaign's runs.
+  that ceiling exactly on roughly half the campaign's runs. The exact counts are
+  in the generated table, not here: a number transcribed into prose is a number
+  that will eventually be wrong.
 - **Attribution is partly right.** Exactly the designed contributors are named on
   some scenarios, a subset on others, and on one the wrong vehicle entirely.
   Per-scenario verdicts are in the results table.

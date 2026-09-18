@@ -98,12 +98,27 @@ a statement about a replay nobody performed.
 ## Severity, when prevention fails
 
 When no tested change prevents the collision, the replays are compared on
-severity instead — impact speed, relative impact speed, minimum distance. A
-change that measurably softened the impact is reported as
-`contributing_but_not_necessary`, with the threshold
-(`counterfactual.contribution.min_severity_reduction`) applied explicitly so a
-difference smaller than the noise is reported as nothing rather than as a weak
-contribution.
+severity instead — impact speed, relative impact speed, minimum distance — with
+the threshold `counterfactual.contribution.min_severity_reduction` applied
+explicitly, so a difference smaller than the noise is reported as nothing rather
+than as a weak contribution.
+
+The sign of that difference carries a finding of its own, and the two directions
+must not be collapsed:
+
+* removing the action **softened** the impact → `contributing_but_not_necessary`:
+  the action contributed to how bad it was, without being necessary for it to
+  happen at all;
+* removing the action made the impact **worse** → the action is reported in
+  `mitigating_actions`: it *reduced* an outcome it did not bring about.
+
+The second is not a weaker version of the first, it is its opposite, and a report
+that folded both into "nothing changed" would discard half of what the replay
+established. S01 is the clearest case: replayed with a freshly started simulator
+per replay, no single removal prevents the crash and every removal raises the
+impact speed substantially. Both drivers braked; neither brake caused the
+collision; both made it less severe. The verdict is `insufficient_evidence` —
+correctly, because no initiator was established — and the rationale says why.
 
 ## Negative controls
 
@@ -140,15 +155,32 @@ recordings and none of it is inferred here.
 
 ## Running it
 
+One recorded run:
+
 ```bash
-python -m cdf.cli counterfactual --scenario S06 --variant a_front_pushed --seed 0
+python -m cdf.cli counterfactuals --run artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed
 ```
+
+A whole campaign, one seed per variant:
+
+```bash
+python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
+```
+
+Add `--fresh` to re-record every replay instead of reusing one already on disk.
+Use it when the existing replays were recorded back-to-back on a single
+simulator session: the configuration warns that repeated runs in one session
+drift enough to change an outcome class, which would confound the very
+difference being measured. The per-replay restart only happens when the session
+can restart the server, which means `$CARLA_ROOT` must point at the
+installation; without it the restart degrades to reuse, with a warning.
 
 Outputs, per run:
 
 | File | Contents |
 |---|---|
-| `counterfactual/manifest.csv` | one row per replay, including the factual one |
+| `counterfactual/intervention_results.csv` | one row per replay, including the factual one |
+| `counterfactual/counterfactual_manifest.json` | what was requested, what completed, what failed |
 | `counterfactual/causal_contribution.json` | the verdict, the scores, the prevention sets |
 | `counterfactual/replays/<id>/` | each replay as a complete run |
 

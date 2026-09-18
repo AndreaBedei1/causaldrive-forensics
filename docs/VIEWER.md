@@ -5,18 +5,23 @@ why*. No framework, no bundler, no CDN, no web font, no network request of any
 kind: the page is designed to open from an offline copy of the evidence.
 
 ```bash
-python -m cdf.cli viewer --scenario S06 --variant a_front_pushed --seed 0
-# or, for a run that already has a bundle:
-cd artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed/viewer
-python -m http.server 8000
-# then open http://localhost:8000/index.html
+python -m cdf.cli viewer --run artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed
 ```
 
-The `viewer` stage writes `run_data.json` and copies `index.html`, `app.js` and
+That builds the bundle, serves the run directory and opens a browser. Add
+`--port N` to choose the port (`--port 0` picks a free one) or `--no-browser` to
+just serve it.
+
+The stage writes `run_data.json` and copies `index.html`, `app.js` and
 `styles.css` next to it, because the page fetches its data *relative to itself*.
-A browser refuses that fetch over `file://`, which is why the instruction above
-serves the directory rather than double-clicking the file; the page says so
-itself if you try.
+A browser refuses that fetch over `file://`, which is why the run is served
+rather than opened as a file; the page says so itself if you try. To serve a run
+that already has a bundle, any static server will do:
+
+```bash
+cd artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed/viewer
+python -m http.server 8000
+```
 
 ---
 
