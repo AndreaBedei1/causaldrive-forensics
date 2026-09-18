@@ -48,6 +48,8 @@ __all__ = [
     "OWN_BEHAVIOUR_EVENT_TYPES",
     "INTERACTION_EVENT_TYPES",
     "OBSERVATION_EVENT_TYPES",
+    "ROAD_CONTROL_EVENT_TYPES",
+    "NON_ACTION_EVENT_TYPES",
     "SUBJECT_FREE_EVENT_TYPES",
     "OVERRIDABLE_FIELDS",
     "load_rules",
@@ -73,6 +75,33 @@ OWN_BEHAVIOUR_EVENT_TYPES: Tuple[EventType, ...] = (
     EventType.STEER_ONSET,
     EventType.SIGNIFICANT_HEADING_CHANGE,
     EventType.LANE_CHANGE_LIKE_MANEUVER,
+    EventType.FULL_STOP,
+)
+
+#: What this vehicle saw of the road: signs from its camera, marking crossings
+#: from its lane sensor. Own-vehicle events too -- the other party is the road
+#: rather than a tracked object -- so they carry no subject either.
+ROAD_CONTROL_EVENT_TYPES: Tuple[EventType, ...] = (
+    EventType.STOP_SIGN_DETECTED,
+    EventType.YIELD_SIGN_DETECTED,
+    EventType.STOP_LINE_DETECTED,
+    EventType.STOP_LINE_CROSSED,
+    EventType.LANE_MARKING_CROSSED,
+    EventType.SOLID_LINE_CROSSED,
+    EventType.ROAD_BOUNDARY_CROSSED,
+)
+
+#: Derived assertions that a required response was absent. Most carry the
+#: subject they failed to respond to, so they are not subject-free; the two
+#: arising from traffic control rather than from another vehicle do not, which
+#: is why the group is listed separately from either side.
+NON_ACTION_EVENT_TYPES: Tuple[EventType, ...] = (
+    EventType.NO_STOP_AFTER_STOP_SIGN,
+    EventType.NO_BRAKING_RESPONSE,
+    EventType.NO_YIELD_RESPONSE,
+    EventType.NO_EVASIVE_RESPONSE,
+    EventType.CONFLICT_ENTRY_WITHOUT_DECELERATION,
+    EventType.CONTINUED_ACCELERATION_DURING_CONFLICT,
 )
 
 #: Events derived from a participant's own radar tracks. Each concerns one
@@ -101,7 +130,8 @@ OBSERVATION_EVENT_TYPES: Tuple[EventType, ...] = (
 #: track subject: its own behaviour plus the terminal outcome events. Used to
 #: validate ``require_self_effect`` rules.
 SUBJECT_FREE_EVENT_TYPES: Tuple[EventType, ...] = tuple(
-    list(OWN_BEHAVIOUR_EVENT_TYPES) + list(OUTCOME_EVENT_TYPES)
+    list(OWN_BEHAVIOUR_EVENT_TYPES) + list(ROAD_CONTROL_EVENT_TYPES)
+    + list(OUTCOME_EVENT_TYPES)
 )
 
 #: Per-rule fields that ``causal_rules.overrides.<name>`` may set. Cause/effect
@@ -593,6 +623,188 @@ DEFAULT_RULES: Tuple[CausalRule, ...] = (
             "what brings the vehicle to rest. TRIGGERS rather than "
             "CAUSES_OUTCOME because the standstill is a consequence of the "
             "outcome, not the forensic outcome under investigation."
+        ),
+    ),
+    # -- coming to rest -------------------------------------------------------
+    CausalRule(
+        name="braking_brings_vehicle_to_rest",
+        cause_types=(
+            EventType.BRAKE_ONSET, EventType.HARD_BRAKE,
+            EventType.DECELERATION, EventType.HARD_DECELERATION,
+        ),
+        effect_types=(EventType.FULL_STOP,),
+        edge_type=_TRIGGERS,
+        prior=0.85,
+        max_lag_s=6.0,
+        require_same_subject=False,
+        require_self_effect=True,
+        description=(
+            "Sustained braking ends in a standstill. The lag is generous "
+            "because how long it takes depends on the speed the braking began "
+            "at, which the rule does not know."
+        ),
+    ),
+    # -- traffic control, as seen rather than as known ------------------------
+    CausalRule(
+        name="traffic_control_prompts_slowing",
+        cause_types=(
+            EventType.STOP_SIGN_DETECTED, EventType.YIELD_SIGN_DETECTED,
+            EventType.STOP_LINE_DETECTED,
+        ),
+        effect_types=(
+            EventType.BRAKE_ONSET, EventType.DECELERATION,
+            EventType.HARD_DECELERATION, EventType.FULL_STOP,
+        ),
+        edge_type=_TRIGGERS,
+        prior=0.60,
+        max_lag_s=8.0,
+        require_same_subject=False,
+        require_self_effect=True,
+        description=(
+            "Seeing a sign or a stop line is what prompts a driver to slow. A "
+            "perception-to-reaction coupling, so the effect must be the "
+            "vehicle's own behaviour; the prior is moderate because plenty of "
+            "braking has nothing to do with a sign."
+        ),
+    ),
+    CausalRule(
+        name="crossing_a_stop_line_enters_the_conflict",
+        cause_types=(EventType.STOP_LINE_CROSSED,),
+        effect_types=(
+            EventType.CONFLICT_REGION_ENTRY, EventType.PREDICTED_PATH_CONFLICT,
+        ),
+        edge_type=_CONTRIBUTES_TO,
+        prior=0.70,
+        max_lag_s=5.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "A stop line marks the boundary of the area where paths meet, so "
+            "crossing it is how a vehicle comes to be in a conflict. "
+            "Geometrically true regardless of whether crossing it was allowed, "
+            "which is a separate question for the responsibility layer."
+        ),
+    ),
+    # -- steering and road markings ------------------------------------------
+    CausalRule(
+        name="steering_crosses_a_marking",
+        cause_types=(
+            EventType.STEER_ONSET, EventType.SIGNIFICANT_HEADING_CHANGE,
+            EventType.LANE_CHANGE_LIKE_MANEUVER,
+        ),
+        effect_types=(
+            EventType.LANE_MARKING_CROSSED, EventType.SOLID_LINE_CROSSED,
+            EventType.ROAD_BOUNDARY_CROSSED,
+        ),
+        edge_type=_TRIGGERS,
+        prior=0.80,
+        max_lag_s=3.0,
+        require_same_subject=False,
+        require_self_effect=True,
+        description=(
+            "Lateral movement is what takes a vehicle across a line. The "
+            "mechanical direction of the coupling: the steering comes first and "
+            "the crossing follows from it."
+        ),
+    ),
+    CausalRule(
+        name="leaving_the_lane_creates_a_path_conflict",
+        cause_types=(
+            EventType.LANE_MARKING_CROSSED, EventType.SOLID_LINE_CROSSED,
+            EventType.ROAD_BOUNDARY_CROSSED,
+        ),
+        effect_types=(
+            EventType.CUT_IN_LIKE_MOTION, EventType.PREDICTED_PATH_CONFLICT,
+            EventType.CONFLICT_REGION_ENTRY,
+        ),
+        edge_type=_INCREASES_RISK_OF,
+        prior=0.55,
+        max_lag_s=4.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "Crossing into another lane puts a vehicle where other traffic is "
+            "entitled to be. Risk-raising rather than triggering: most lane "
+            "changes conflict with nothing, and whether this one did depends on "
+            "what was there."
+        ),
+    ),
+    # -- non-actions ----------------------------------------------------------
+    CausalRule(
+        name="undischarged_obligation_puts_vehicle_in_conflict",
+        cause_types=(
+            EventType.NO_STOP_AFTER_STOP_SIGN, EventType.NO_YIELD_RESPONSE,
+        ),
+        effect_types=(
+            EventType.CONFLICT_REGION_ENTRY, EventType.PREDICTED_PATH_CONFLICT,
+            EventType.LOW_TTC, EventType.CRITICAL_TTC,
+        ),
+        edge_type=_CONTRIBUTES_TO,
+        prior=0.70,
+        max_lag_s=6.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "Not stopping where stopping was required is what leaves a vehicle "
+            "moving into the area where paths cross. The edge states a physical "
+            "consequence of the absent deceleration; whether the obligation was "
+            "binding is not asserted here."
+        ),
+    ),
+    CausalRule(
+        name="unresponsiveness_lets_the_conflict_run_out",
+        cause_types=(
+            EventType.NO_BRAKING_RESPONSE, EventType.NO_EVASIVE_RESPONSE,
+        ),
+        effect_types=(EventType.COLLISION,),
+        edge_type=_CAUSES_OUTCOME,
+        prior=0.75,
+        max_lag_s=4.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "Once a time-to-collision is critical, an impact follows unless "
+            "something changes. The absence of any response is therefore part "
+            "of the explanation of the impact rather than merely coincident "
+            "with it -- which is exactly the claim a non-action node makes, and "
+            "why it is only emitted where the interval was really watched."
+        ),
+    ),
+    CausalRule(
+        name="pressing_on_into_a_conflict_raises_the_risk",
+        cause_types=(
+            EventType.CONFLICT_ENTRY_WITHOUT_DECELERATION,
+            EventType.CONTINUED_ACCELERATION_DURING_CONFLICT,
+        ),
+        effect_types=(
+            EventType.LOW_TTC, EventType.CRITICAL_TTC, EventType.COLLISION,
+        ),
+        edge_type=_INCREASES_RISK_OF,
+        prior=0.65,
+        max_lag_s=4.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "Arriving at a conflict without having slowed, or accelerating once "
+            "inside one, leaves less time and more energy for whatever follows. "
+            "Risk-raising rather than causing: it worsens the situation without "
+            "being sufficient for an impact on its own."
+        ),
+    ),
+    CausalRule(
+        name="stopping_prevents_the_collision",
+        cause_types=(EventType.FULL_STOP,),
+        effect_types=(EventType.NEAR_MISS,),
+        edge_type=_PREVENTS,
+        prior=0.70,
+        max_lag_s=6.0,
+        require_same_subject=False,
+        require_self_effect=False,
+        description=(
+            "Coming to a complete stop and then having a near miss rather than "
+            "an impact is the clearest case of a behaviour acting against the "
+            "outcome. PREVENTS, in the same sense as the braking and steering "
+            "rules: it worked against what was developing."
         ),
     ),
 )

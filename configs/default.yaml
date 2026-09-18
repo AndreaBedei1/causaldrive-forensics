@@ -205,6 +205,13 @@ causal_rules:
 # -----------------------------------------------------------------------------
 # Post-event fusion
 # -----------------------------------------------------------------------------
+# Normative reasoning. See cdf.responsibility: the priority benchmark is a rule
+# adopted for this experiment, not a statement of law, and it is allowed to
+# return AMBIGUOUS_PRIORITY rather than break a tie it cannot see.
+responsibility:
+  priority:
+    clear_margin_s: 0.5            # closer than this is not "clearly first"
+
 # Executable temporal logic. See cdf.formal: a window that ran outside the
 # recording, or across a gap in the evidence, is UNKNOWN rather than PASS.
 formal:
