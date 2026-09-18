@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 from ..common.config import Config
 from ..common.schemas import Event, EventType, GraphDocument
 from ..graph.matching import match_edges, match_events
-from ..graph.ontology import OUTCOME_TYPES, comparable_view, family
+from ..graph.ontology import OUTCOME_TYPES, comparable_view
 from .causal_metrics import prf1
 
 LOGGER = logging.getLogger(__name__)

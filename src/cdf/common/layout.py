@@ -152,6 +152,34 @@ class RunLayout:
     def causal_graphml(self, participant_id: str) -> Path:
         return self.vehicle_dir(participant_id) / "causal_graph.graphml"
 
+    # V2: the log comes before the graph, and the graph is named for what it
+    # claims. `physical_graph` is this vehicle's own causal account; it is the
+    # same artifact `causal_graph` named, under a name that says what is in it.
+    def local_log(self, participant_id: str) -> Path:
+        """This vehicle's account as a readable table (see cdf.common.event_log)."""
+        return self.vehicle_dir(participant_id) / "local_log.json"
+
+    def video_dir(self, participant_id: str) -> Path:
+        return self.vehicle_dir(participant_id) / "video"
+
+    def front_video(self, participant_id: str) -> Path:
+        return self.video_dir(participant_id) / "front.mp4"
+
+    def frame_index(self, participant_id: str) -> Path:
+        """Per-frame local timestamps, so a viewer can seek by event time."""
+        return self.video_dir(participant_id) / "frame_index.json"
+
+    def perception_dir(self, participant_id: str) -> Path:
+        return self.vehicle_dir(participant_id) / "perception"
+
+    def traffic_sign_detections(self, participant_id: str) -> Path:
+        """What the camera made of the signs, tracked across frames."""
+        return self.perception_dir(participant_id) / "traffic_sign_detections.json"
+
+    def lane_events(self, participant_id: str) -> Path:
+        """Marking and boundary crossings from the onboard lane sensor."""
+        return self.perception_dir(participant_id) / "lane_events.json"
+
     def participant_ids(self) -> List[str]:
         """Participant ids discovered on disk, sorted (``["A", "B", ...]``)."""
         out = []
@@ -189,6 +217,41 @@ class RunLayout:
     @property
     def fused_causal_graphml(self) -> Path:
         return self.fusion_dir / "fused_causal_graph.graphml"
+
+    @property
+    def global_log(self) -> Path:
+        """The merged account, in order, before any causal claim is made."""
+        return self.fusion_dir / "global_log.json"
+
+    @property
+    def clock_alignment(self) -> Path:
+        """How the recorders were tied together, and how confidently."""
+        return self.fusion_dir / "clock_alignment.json"
+
+    @property
+    def identity_association(self) -> Path:
+        """Which anonymous local track turned out to be which participant."""
+        return self.fusion_dir / "identity_association.json"
+
+    @property
+    def physical_causal_graph(self) -> Path:
+        """What physical event contributed to what. Physical only: no obligations."""
+        return self.fusion_dir / "physical_causal_graph.json"
+
+    @property
+    def physical_causal_graphml(self) -> Path:
+        return self.fusion_dir / "physical_causal_graph.graphml"
+
+    @property
+    def responsibility_graph(self) -> Path:
+        """Normative reasoning, kept in its own graph and never mixed with the
+        physical one: an obligation is not an event, and a violation is not a
+        force."""
+        return self.fusion_dir / "responsibility_graph.json"
+
+    @property
+    def responsibility_report(self) -> Path:
+        return self.fusion_dir / "responsibility_report.json"
 
     @property
     def fusion_diagnostics(self) -> Path:
@@ -287,6 +350,24 @@ class RunLayout:
     def oracle_causal_graphml(self) -> Path:
         return self.oracle_dir / "oracle_causal_graph.graphml"
 
+    @property
+    def traffic_control_truth(self) -> Path:
+        """True signs, their positions and which approach each governs.
+
+        Privileged: read from the map and the TrafficSign actors. Used to score
+        perception, never to produce it.
+        """
+        return self.oracle_dir / "traffic_control_ground_truth.json"
+
+    @property
+    def stop_lines_truth(self) -> Path:
+        return self.oracle_dir / "stop_lines_ground_truth.json"
+
+    @property
+    def responsibility_reference(self) -> Path:
+        """What the scenario designed each participant to be responsible for."""
+        return self.oracle_dir / "responsibility_reference.json"
+
     # -- checking ---------------------------------------------------------
 
     @property
@@ -300,6 +381,22 @@ class RunLayout:
     @property
     def counterexamples(self) -> Path:
         return self.checking_dir / "counterexamples.json"
+
+    # -- formal methods ---------------------------------------------------
+
+    @property
+    def formal_dir(self) -> Path:
+        return self.root / "formal"
+
+    @property
+    def formal_properties(self) -> Path:
+        """The properties as written, so a reader can see the formulae checked."""
+        return self.formal_dir / "properties.json"
+
+    @property
+    def formal_results(self) -> Path:
+        """One PASS / FAIL / UNKNOWN per property, with witness or reason."""
+        return self.formal_dir / "results.json"
 
     # -- counterfactual ---------------------------------------------------
 
@@ -348,6 +445,23 @@ class RunLayout:
     def legacy_template_edge_matches(self) -> Path:
         """The superseded comparison against the scenario causal template."""
         return self.evaluation_dir / "legacy_template_edge_matches.csv"
+
+    @property
+    def reconstruction_metrics(self) -> Path:
+        return self.evaluation_dir / "reconstruction_metrics.json"
+
+    @property
+    def perception_metrics(self) -> Path:
+        """How well the camera and lane sensor did, against privileged truth."""
+        return self.evaluation_dir / "perception_metrics.json"
+
+    @property
+    def formal_metrics(self) -> Path:
+        return self.evaluation_dir / "formal_metrics.json"
+
+    @property
+    def responsibility_metrics(self) -> Path:
+        return self.evaluation_dir / "responsibility_metrics.json"
 
     @property
     def attribution_metrics(self) -> Path:

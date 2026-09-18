@@ -51,6 +51,8 @@ __all__ = [
     "COMPARABLE_EDGE_TYPES",
     "OWN_MOTION_TYPES",
     "PAIRWISE_TYPES",
+    "ROAD_CONTROL_TYPES",
+    "NON_ACTION_TYPES",
     "OUTCOME_TYPES",
     "SUBJECT_SEMANTICS",
     "is_comparable",
@@ -78,6 +80,48 @@ OWN_MOTION_TYPES: FrozenSet[str] = frozenset({
     EventType.STEER_ONSET.value,
     EventType.SIGNIFICANT_HEADING_CHANGE.value,
     EventType.LANE_CHANGE_LIKE_MANEUVER.value,
+    EventType.FULL_STOP.value,
+})
+
+# ---------------------------------------------------------------------------
+# What the vehicle met on the road
+# ---------------------------------------------------------------------------
+
+#: Traffic control and road geometry, as *observed*. Both sides may assert these
+#: and they mean the same thing on both sides, but they are reached by genuinely
+#: different routes: the vehicle reads a sign off its camera and a marking
+#: crossing off its lane sensor, while the privileged reference reads both off
+#: the exact map. That difference is the point -- it is what makes perception
+#: precision and recall a real measurement rather than a tautology.
+ROAD_CONTROL_TYPES: FrozenSet[str] = frozenset({
+    EventType.STOP_SIGN_DETECTED.value,
+    EventType.YIELD_SIGN_DETECTED.value,
+    EventType.STOP_LINE_DETECTED.value,
+    EventType.STOP_LINE_CROSSED.value,
+    EventType.LANE_MARKING_CROSSED.value,
+    EventType.SOLID_LINE_CROSSED.value,
+    EventType.ROAD_BOUNDARY_CROSSED.value,
+})
+
+# ---------------------------------------------------------------------------
+# What did not happen
+# ---------------------------------------------------------------------------
+
+#: An assertion that a required response was absent. Comparable, because the
+#: privileged reference derives the same claims from exact state and exact
+#: traffic control -- and because a method that invented non-actions would then
+#: be caught by precision rather than rewarded.
+#:
+#: These are the only event types whose *absence of a signal* is the claim, so
+#: they carry a monitored interval and an evidence-coverage figure in
+#: ``detail``. A non-action with insufficient coverage is not emitted at all.
+NON_ACTION_TYPES: FrozenSet[str] = frozenset({
+    EventType.NO_STOP_AFTER_STOP_SIGN.value,
+    EventType.NO_BRAKING_RESPONSE.value,
+    EventType.NO_YIELD_RESPONSE.value,
+    EventType.NO_EVASIVE_RESPONSE.value,
+    EventType.CONFLICT_ENTRY_WITHOUT_DECELERATION.value,
+    EventType.CONTINUED_ACCELERATION_DURING_CONFLICT.value,
 })
 
 # ---------------------------------------------------------------------------
@@ -107,7 +151,8 @@ OUTCOME_TYPES: FrozenSet[str] = frozenset({
 
 #: The primary comparison vocabulary: every type both sides may assert.
 COMPARABLE_EVENT_TYPES: FrozenSet[str] = (
-    OWN_MOTION_TYPES | PAIRWISE_TYPES | OUTCOME_TYPES
+    OWN_MOTION_TYPES | PAIRWISE_TYPES | ROAD_CONTROL_TYPES
+    | NON_ACTION_TYPES | OUTCOME_TYPES
 )
 
 
@@ -163,6 +208,16 @@ SUBJECT_SEMANTICS: Dict[str, str] = {
         "participant_id and subject are the two vehicles involved; the pair is "
         "unordered and a matcher must treat (A,B) and (B,A) as the same event"
     ),
+    "road_control": (
+        "participant_id is the vehicle that met the sign, line or marking; "
+        "subject is unused, because the other party is the road and not a "
+        "vehicle"
+    ),
+    "non_action": (
+        "participant_id is the vehicle that did not respond. subject names the "
+        "vehicle it failed to respond to when the obligation arose from another "
+        "vehicle, and is unused when the obligation came from traffic control"
+    ),
 }
 
 
@@ -176,12 +231,21 @@ def is_comparable(event_type: Any) -> bool:
 
 
 def family(event_type: Any) -> Optional[str]:
-    """``own_motion``, ``pairwise``, ``outcome``, or ``None`` if not comparable."""
+    """Which comparable family a type belongs to, or ``None`` if it is not one.
+
+    One of ``own_motion``, ``pairwise``, ``road_control``, ``non_action`` or
+    ``outcome``. :data:`SUBJECT_SEMANTICS` says what ``participant_id`` and
+    ``subject`` mean in each.
+    """
     value = _value(event_type)
     if value in OWN_MOTION_TYPES:
         return "own_motion"
     if value in PAIRWISE_TYPES:
         return "pairwise"
+    if value in ROAD_CONTROL_TYPES:
+        return "road_control"
+    if value in NON_ACTION_TYPES:
+        return "non_action"
     if value in OUTCOME_TYPES:
         return "outcome"
     return None

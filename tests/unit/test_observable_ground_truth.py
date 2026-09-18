@@ -90,10 +90,30 @@ def test_every_exclusion_states_a_reason() -> None:
         assert exclusion_reason(name) is None, name
 
 
+#: Every family a comparable type may belong to. Listed here rather than
+#: imported so that adding a family to the ontology without deciding what its
+#: subject means -- which is what a matcher needs -- fails this test.
+COMPARABLE_FAMILIES = {
+    "own_motion", "pairwise", "road_control", "non_action", "outcome",
+}
+
+
 def test_each_comparable_type_belongs_to_one_family() -> None:
     for name in sorted(COMPARABLE_EVENT_TYPES):
-        assert family(name) in {"own_motion", "pairwise", "outcome"}, name
+        assert family(name) in COMPARABLE_FAMILIES, name
     assert family("RADAR_TRACK_APPEARED") is None
+
+
+def test_every_family_says_what_its_subject_means() -> None:
+    """A matcher keys on participant and subject, so every family must define
+    them. A family without stated semantics is a family a matcher will guess at.
+    """
+    from cdf.graph.ontology import SUBJECT_SEMANTICS
+
+    assert set(SUBJECT_SEMANTICS) == COMPARABLE_FAMILIES
+    for name, text in SUBJECT_SEMANTICS.items():
+        assert "participant_id" in text, name
+        assert "subject" in text, name
 
 
 def test_the_causal_relation_vocabulary_is_shared_whole() -> None:

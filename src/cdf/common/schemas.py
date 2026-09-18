@@ -156,6 +156,7 @@ class EventType(str, Enum):
     STEER_ONSET = "STEER_ONSET"
     SIGNIFICANT_HEADING_CHANGE = "SIGNIFICANT_HEADING_CHANGE"
     LANE_CHANGE_LIKE_MANEUVER = "LANE_CHANGE_LIKE_MANEUVER"
+    FULL_STOP = "FULL_STOP"
 
     # --- radar / interaction (own radar tracks only) ---
     RADAR_TRACK_APPEARED = "RADAR_TRACK_APPEARED"
@@ -169,6 +170,31 @@ class EventType(str, Enum):
     PREDICTED_PATH_CONFLICT = "PREDICTED_PATH_CONFLICT"
     CONFLICT_REGION_ENTRY = "CONFLICT_REGION_ENTRY"
     TARGET_DECELERATION = "TARGET_DECELERATION"
+
+    # --- road and traffic control (own camera and own lane sensor only) ---
+    # What the vehicle saw of the road itself. A sign is read off the camera, a
+    # marking crossing off the onboard lane sensor. The map is never consulted:
+    # a vehicle that could ask CARLA which sign governs it would not be solving
+    # the problem this project is about.
+    STOP_SIGN_DETECTED = "STOP_SIGN_DETECTED"
+    YIELD_SIGN_DETECTED = "YIELD_SIGN_DETECTED"
+    STOP_LINE_DETECTED = "STOP_LINE_DETECTED"
+    STOP_LINE_CROSSED = "STOP_LINE_CROSSED"
+    LANE_MARKING_CROSSED = "LANE_MARKING_CROSSED"
+    SOLID_LINE_CROSSED = "SOLID_LINE_CROSSED"
+    ROAD_BOUNDARY_CROSSED = "ROAD_BOUNDARY_CROSSED"
+
+    # --- non-actions (derived; assert the absence of a required response) ---
+    # A non-action is a claim that something did *not* happen, which is only
+    # sayable when the interval was actually monitored. Each of these carries
+    # the interval it watched and the evidence coverage over it, and is not
+    # emitted at all when coverage was insufficient.
+    NO_STOP_AFTER_STOP_SIGN = "NO_STOP_AFTER_STOP_SIGN"
+    NO_BRAKING_RESPONSE = "NO_BRAKING_RESPONSE"
+    NO_YIELD_RESPONSE = "NO_YIELD_RESPONSE"
+    NO_EVASIVE_RESPONSE = "NO_EVASIVE_RESPONSE"
+    CONFLICT_ENTRY_WITHOUT_DECELERATION = "CONFLICT_ENTRY_WITHOUT_DECELERATION"
+    CONTINUED_ACCELERATION_DURING_CONFLICT = "CONTINUED_ACCELERATION_DURING_CONFLICT"
 
     # --- outcome ---
     NEAR_MISS = "NEAR_MISS"
@@ -577,6 +603,17 @@ class Event:
     values: Dict[str, float] = field(default_factory=dict)
     """Measured quantities that characterise the event (e.g. ``{"ttc": 1.2}``)."""
 
+    detail: Dict[str, Any] = field(default_factory=dict)
+    """Structured context that is not a scalar measurement.
+
+    Three kinds of thing live here. A non-action records the interval it
+    monitored, the obligation that opened it and how completely that interval was
+    covered, because "B never braked" is only sayable if B was being watched.
+    A perception event records the track it belongs to and the box it was seen
+    in. A privileged event may record map context -- lane, road, junction -- as
+    something a reader can use to interpret the claim, never as the claim itself.
+    """
+
     confidence: float = 1.0
     evidence: List[Evidence] = field(default_factory=list)
     provenance: Provenance = Provenance.LOCAL
@@ -697,6 +734,7 @@ def _evidence_from_dict(d: Dict[str, Any]) -> Evidence:
 
 def _event_from_dict(d: Dict[str, Any]) -> Event:
     return Event(
+        detail=d.get("detail", {}) or {},
         event_id=d["event_id"],
         event_type=EventType(d["event_type"]),
         participant_id=d["participant_id"],
