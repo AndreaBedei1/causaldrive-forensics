@@ -87,7 +87,7 @@ def test_an_unscored_run_says_not_scored_rather_than_zero(tmp_path):
     make_run(tmp_path)
     row = one_row(tmp_path)
     assert row["reconstructed"] == "not scored"
-    assert row["clock_aligned"] == "not fused"
+    assert row["clock_quality"] == "not fused"
     assert row["key_formal_violation"] == "not checked"
     assert row["physical_contributors"] == "not analysed"
 
@@ -102,12 +102,30 @@ def test_the_reconstruction_cell_reports_both_f1s(tmp_path):
 
 
 def test_the_clock_cell_names_the_method_not_only_the_status(tmp_path):
+    """The harness marker must never read as a reconstruction result."""
     make_run(tmp_path, clock_alignment={
         "status": "ACQUISITION_START_ALIGNED",
         "method": "acquisition_start_marker",
         "offsets_s": {"A": 0.0, "B": 0.2},
     })
-    assert one_row(tmp_path)["clock_aligned"] == "harness marker (not contact)"
+    row = one_row(tmp_path)
+    assert row["clock_quality"] == "harness marker (not a reconstruction result)"
+    assert row["clock_source"] == "harness marker (no contact, no radar)"
+
+
+def test_the_clock_source_names_what_placed_each_vehicle(tmp_path):
+    """A run status alone hides that one vehicle rests on a fitted trajectory
+    while the others rest on a physical impact."""
+    make_run(tmp_path, clock_alignment={
+        "status": "HYBRID_ALIGNED", "method": "hybrid_contact_then_radar",
+        "offsets_s": {"A": 0.0, "B": -0.08, "C": 0.27},
+        "clock_sources": {"A": "REFERENCE", "B": "CONTACT", "C": "RADAR"},
+        "contact_stage": {"n_shared_contacts": 1},
+    })
+    row = one_row(tmp_path)
+    assert row["clock_source"] == "A=reference, B=contact, C=radar"
+    assert "hybrid aligned" in row["clock_quality"]
+    assert "1 shared contact" in row["clock_quality"]
 
 
 def test_a_contact_aligned_run_says_how_many_contacts_it_rests_on(tmp_path):
@@ -115,7 +133,7 @@ def test_a_contact_aligned_run_says_how_many_contacts_it_rests_on(tmp_path):
         "status": "MULTI_CONTACT_ALIGNED", "method": "shared_physical_contact",
         "offsets_s": {"A": 0.0}, "n_shared_contacts": 2,
     })
-    assert one_row(tmp_path)["clock_aligned"] == "multi contact aligned (2 shared contacts)"
+    assert one_row(tmp_path)["clock_quality"] == "multi contact aligned (2 shared contacts)"
 
 
 def test_the_formal_cell_names_the_first_failure_and_counts_the_rest(tmp_path):

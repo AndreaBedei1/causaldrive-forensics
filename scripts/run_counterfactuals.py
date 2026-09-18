@@ -128,6 +128,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifacts", default="artifacts_independent_clocks")
     parser.add_argument(
+        "--run", dest="runs", action="append", default=[],
+        help=(
+            "replay one specific run directory; repeat for several. This is how "
+            "run_counterfactual_campaign.py drives it, one suite at a time, so "
+            "that a failed suite can be retried without redoing the others"
+        ),
+    )
+    parser.add_argument(
         "--seeds", type=int, nargs="+", default=[0],
         help="which seeds to replay; one seed per variant is the default because "
              "a replay sweep costs a full simulator run per intervention",
@@ -157,7 +165,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         LOGGER.error("artifacts root does not exist: %s", artifacts_root)
         return 2
 
-    runs = discover(artifacts_root, args.seeds)
+    if args.runs:
+        runs = []
+        for raw in args.runs:
+            candidate = Path(raw)
+            if not candidate.is_absolute():
+                candidate = (REPO / raw)
+            candidate = candidate.resolve()
+            if not (candidate / "manifest.json").is_file():
+                LOGGER.error("not a recorded run: %s", candidate)
+                return 2
+            runs.append(candidate)
+    else:
+        runs = discover(artifacts_root, args.seeds)
     if not runs:
         LOGGER.error("no run with seed(s) %s under %s", args.seeds, artifacts_root)
         return 2
