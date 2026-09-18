@@ -222,6 +222,18 @@ perception:
     min_detections_per_track: 3    # a one-frame detection is likelier a red van
   lanes:
     merge_window_s: 0.8            # reports closer than this are one crossing
+  stop_lines:
+    roi_top_fraction: 0.55         # only the near road can hold a line to cross
+    min_brightness: 165
+    min_row_bright_fraction: 0.30
+    min_width_fraction: 0.35       # transverse and broad, not a lane line
+    min_rows: 3
+    max_rows: 90                   # taller than this is a bright surface
+    min_confidence: 0.40
+    min_sightings: 3
+    crossing_row_fraction: 0.80    # lost above this is lost, not crossed
+    crossing_min_speed_mps: 0.5
+    lost_after_s: 0.4              # timing uncertainty of the inference
 
 # Normative reasoning. See cdf.responsibility: the priority benchmark is a rule
 # adopted for this experiment, not a statement of law, and it is allowed to
