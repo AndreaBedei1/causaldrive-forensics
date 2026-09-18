@@ -463,9 +463,14 @@ class ParticipantAgent:
     def triggered(self) -> bool:
         return self.recorder.triggered
 
-    @property
     def latch_video(self, local_t: float) -> None:
         """Stop the pre-event window rolling: the event has happened.
+
+        Not a property, though it sits among them: it takes the local time of the
+        contact. A stray ``@property`` here made ``self.latch_video`` evaluate to
+        a property object, so the call passed the timestamp as ``self`` and every
+        real run with a camera and a collision died on the first impact. No
+        synthetic test reached it, because the fixtures do not drive the camera.
 
         Called on the first contact. Only the first counts -- a chain fires
         several triggers, and re-arming on each would turn a bounded tail into an

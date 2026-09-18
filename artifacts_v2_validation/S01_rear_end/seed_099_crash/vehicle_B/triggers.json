@@ -1,0 +1,30 @@
+{
+  "participant_id": "B",
+  "schema_version": "1.0.0",
+  "triggers": [
+    {
+      "collision_detected": false,
+      "detail": {
+        "accel_long": -6.187572010923689,
+        "brake": 1.0,
+        "source": "local_control"
+      },
+      "frame": 257422631,
+      "impulse": 0.0,
+      "kind": "emergency_brake",
+      "participant_id": "B",
+      "t": 4.142183169320177
+    },
+    {
+      "collision_detected": true,
+      "detail": {
+        "source": "onboard_collision_sensor"
+      },
+      "frame": 257422679,
+      "impulse": 18237.498816408763,
+      "kind": "collision",
+      "participant_id": "B",
+      "t": 6.5424015826044934
+    }
+  ]
+}

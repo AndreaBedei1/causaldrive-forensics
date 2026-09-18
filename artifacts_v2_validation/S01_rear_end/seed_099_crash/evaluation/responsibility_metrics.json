@@ -1,0 +1,46 @@
+{
+  "evidence_classes": {
+    "A": "insufficient",
+    "B": "partial"
+  },
+  "hard_case": null,
+  "mechanism_caveat": null,
+  "normative": {
+    "applicable": false,
+    "designed": [],
+    "findings_the_design_does_not_cover": [],
+    "partial": [
+      "B"
+    ],
+    "supported": [],
+    "why_not": "this scenario designs no normative failing -- it has no traffic control and no designed omission -- so there is nothing to score the responsibility findings against. A finding here is not a false positive against a reference that says nothing on the subject; it is a finding the design does not cover"
+  },
+  "note": "scored against what the scenario intended, not against what happened. The weaker of the two references and reported apart for that reason. The physical and normative comparisons are separate because the template makes both kinds of claim and they are not interchangeable: a vehicle that brakes hard is a designed physical cause and breaks no rule",
+  "physical": {
+    "designed": [
+      "A",
+      "B"
+    ],
+    "designed_but_not_found": [
+      "A"
+    ],
+    "exact_set_match": false,
+    "found": [
+      "B"
+    ],
+    "found_but_not_designed": [],
+    "sets": {
+      "f1": 0.6667,
+      "n_expected": 2,
+      "n_found": 1,
+      "n_matched": 1,
+      "precision": 1.0,
+      "recall": 0.5
+    }
+  },
+  "scenario": "S01",
+  "scenario_mechanism_executed": true,
+  "schema_version": "1.0.0",
+  "scored": true,
+  "variant": "crash"
+}

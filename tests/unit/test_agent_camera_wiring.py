@@ -180,3 +180,54 @@ def test_the_frame_index_stands_on_its_own_if_encoding_never_happens(tmp_path):
     assert index["n_frames"] == 10
     assert len(index["frames"]) == 10
     assert index["frames"][-1]["t_local"] == pytest.approx(0.45)
+
+
+# --- the agent's own accessors ---------------------------------------------
+
+
+def test_latching_the_video_is_a_method_and_not_a_property():
+    """A stray decorator here killed every real run with a camera.
+
+    ``latch_video`` sits in the agent's block of result properties and had picked
+    up a ``@property``, so ``self.latch_video`` evaluated the descriptor and the
+    call passed the contact timestamp as ``self``. Every CARLA run with a camera
+    died on its first impact with a confusing TypeError, and nothing offline
+    caught it: the synthetic fixtures never drive the camera path, so the only
+    thing that exercises this line is a real collision.
+
+    Cheap to assert, and it fails fast if the decorator comes back.
+    """
+    import inspect
+
+    from cdf.simulation.vehicle_agent import ParticipantAgent
+
+    attribute = inspect.getattr_static(ParticipantAgent, "latch_video")
+    assert not isinstance(attribute, property), (
+        "latch_video takes the local time of the contact, so it cannot be a "
+        "property; as one, self.latch_video(t) binds t to self"
+    )
+    assert inspect.isfunction(attribute)
+    assert list(inspect.signature(attribute).parameters) == ["self", "local_t"]
+
+
+def test_no_accessor_that_takes_arguments_is_exposed_as_a_property():
+    """The general form of the same defect, so the next one is caught too.
+
+    A property whose getter needs more than ``self`` can never be read. It is
+    always a mistake, and it is invisible until something calls it.
+    """
+    import inspect
+
+    from cdf.simulation.vehicle_agent import ParticipantAgent
+
+    offenders = {}
+    for name, attribute in vars(ParticipantAgent).items():
+        if not isinstance(attribute, property) or attribute.fget is None:
+            continue
+        parameters = list(inspect.signature(attribute.fget).parameters)
+        if len(parameters) > 1:
+            offenders[name] = parameters
+    assert not offenders, (
+        "these properties require arguments, so reading them always raises: "
+        "{0}".format(offenders)
+    )

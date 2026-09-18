@@ -1,0 +1,216 @@
+{
+  "agreement": 1.0,
+  "false_violation_rate": 0.0,
+  "false_violations": [],
+  "missed_violation_rate": 0.0,
+  "missed_violations": [],
+  "n_agree": 1,
+  "n_comparable": 1,
+  "n_disagree": 0,
+  "note": "the same formulae are evaluated over the merged reconstruction and over the observable ground truth, so the comparison is about the reconstruction rather than about two definitions of the same word. UNKNOWN is never folded into PASS: declining to decide is not an error, and counting it as agreement would make a run that observed nothing look perfectly accurate",
+  "per_property": {
+    "P1": {
+      "comparison": "not_comparable",
+      "inferred": "PASS",
+      "inferred_vacuous": true,
+      "reference": "PASS",
+      "reference_vacuous": true,
+      "reference_witness": null,
+      "why": "the trigger fired on at most one side, so there is no shared obligation to agree or disagree about",
+      "witness": null
+    },
+    "P2": {
+      "comparison": "not_comparable",
+      "inferred": "PASS",
+      "inferred_vacuous": true,
+      "reference": "UNKNOWN",
+      "reference_vacuous": false,
+      "reference_witness": {
+        "interval": [
+          6.55,
+          6.55
+        ],
+        "participant": "A",
+        "reason": "the interval [-5.45, 6.55] runs outside the recording [0.05, 6.80], so what happened there was never observed",
+        "subject": "B",
+        "t": 6.55,
+        "trigger_event_id": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+        "witness_event_ids": []
+      },
+      "why": "the trigger fired on at most one side, so there is no shared obligation to agree or disagree about",
+      "witness": null
+    },
+    "P3": {
+      "comparison": "reference_undecided",
+      "inferred": "PASS",
+      "inferred_vacuous": false,
+      "reference": "UNKNOWN",
+      "reference_vacuous": false,
+      "reference_witness": {
+        "interval": [
+          6.7,
+          8.2
+        ],
+        "participant": "A",
+        "reason": "HARD_DECELERATION at t=6.75",
+        "subject": "B",
+        "t": 6.7,
+        "trigger_event_id": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+        "witness_event_ids": [
+          "oracle_obs:A:HARD_DECELERATION:956339891d",
+          "oracle_obs:A:DECELERATION:6de8359d3e"
+        ]
+      },
+      "why": "even with exact state the property could not be decided -- usually because its window ran past the end of the recording -- so there is nothing to score the reconstruction against",
+      "witness": {
+        "interval": [
+          6.9878,
+          8.4878
+        ],
+        "participant": "A",
+        "reason": "HARD_DECELERATION at t=7.09",
+        "subject": "B",
+        "t": 6.9878,
+        "trigger_event_id": "fused:A:CRITICAL_TTC:28df495a57",
+        "witness_event_ids": [
+          "fused:A:HARD_DECELERATION:036b9cd84c",
+          "fused:A:DECELERATION:f40dee2b11"
+        ]
+      }
+    },
+    "P4": {
+      "comparison": "reference_undecided",
+      "inferred": "UNKNOWN",
+      "inferred_vacuous": false,
+      "reference": "UNKNOWN",
+      "reference_vacuous": false,
+      "reference_witness": {
+        "interval": [
+          6.7,
+          8.7
+        ],
+        "participant": "A",
+        "reason": "the interval [6.70, 8.70] runs outside the recording [0.05, 6.80], so what happened there was never observed",
+        "subject": "B",
+        "t": 6.7,
+        "trigger_event_id": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+        "witness_event_ids": []
+      },
+      "why": "even with exact state the property could not be decided -- usually because its window ran past the end of the recording -- so there is nothing to score the reconstruction against",
+      "witness": {
+        "interval": [
+          6.9878,
+          8.9878
+        ],
+        "participant": "A",
+        "reason": "the interval [6.99, 8.99] runs outside the recording [0.89, 8.49], so what happened there was never observed",
+        "subject": "B",
+        "t": 6.9878,
+        "trigger_event_id": "fused:A:CRITICAL_TTC:28df495a57",
+        "witness_event_ids": []
+      }
+    },
+    "P5": {
+      "comparison": "agree",
+      "inferred": "PASS",
+      "inferred_vacuous": false,
+      "reference": "PASS",
+      "reference_vacuous": false,
+      "reference_witness": {
+        "interval": [
+          6.75,
+          14.75
+        ],
+        "participant": "A",
+        "reason": "POST_IMPACT_STOP at t=6.80",
+        "subject": "B",
+        "t": 6.75,
+        "trigger_event_id": "oracle_obs:A:COLLISION:93d8600309",
+        "witness_event_ids": [
+          "oracle_obs:A:POST_IMPACT_STOP:d1e2b443a1"
+        ]
+      },
+      "witness": {
+        "interval": [
+          7.0878,
+          15.0878
+        ],
+        "participant": "A",
+        "reason": "POST_IMPACT_STOP at t=7.14",
+        "subject": "B",
+        "t": 7.0878,
+        "trigger_event_id": "fused:A:COLLISION:98b5b8976f",
+        "witness_event_ids": [
+          "fused:A:POST_IMPACT_STOP:34c08384eb"
+        ]
+      }
+    },
+    "P6": {
+      "comparison": "not_comparable",
+      "inferred": "PASS",
+      "inferred_vacuous": true,
+      "reference": "PASS",
+      "reference_vacuous": true,
+      "reference_witness": null,
+      "why": "the trigger fired on at most one side, so there is no shared obligation to agree or disagree about",
+      "witness": null
+    },
+    "P7": {
+      "comparison": "reference_undecided",
+      "inferred": "UNKNOWN",
+      "inferred_vacuous": false,
+      "reference": "UNKNOWN",
+      "reference_vacuous": false,
+      "reference_witness": {
+        "interval": [
+          6.85,
+          11.75
+        ],
+        "participant": "A",
+        "reason": "the interval [6.85, 11.75] runs outside the recording [0.05, 6.80], so what happened there was never observed",
+        "subject": "B",
+        "t": 6.75,
+        "trigger_event_id": "oracle_obs:A:COLLISION:93d8600309",
+        "witness_event_ids": []
+      },
+      "why": "even with exact state the property could not be decided -- usually because its window ran past the end of the recording -- so there is nothing to score the reconstruction against",
+      "witness": {
+        "interval": [
+          7.1878,
+          12.0878
+        ],
+        "participant": "A",
+        "reason": "the interval [7.19, 12.09] runs outside the recording [0.89, 8.49], so what happened there was never observed",
+        "subject": "B",
+        "t": 7.0878,
+        "trigger_event_id": "fused:A:COLLISION:98b5b8976f",
+        "witness_event_ids": []
+      }
+    },
+    "P8": {
+      "comparison": "not_comparable",
+      "inferred": "PASS",
+      "inferred_vacuous": true,
+      "reference": "PASS",
+      "reference_vacuous": true,
+      "reference_witness": null,
+      "why": "the trigger fired on at most one side, so there is no shared obligation to agree or disagree about",
+      "witness": null
+    }
+  },
+  "reference_verdict_counts": {
+    "FAIL": 0,
+    "PASS": 1,
+    "UNKNOWN": 4,
+    "vacuous": 3
+  },
+  "schema_version": "1.0.0",
+  "scored": true,
+  "undecided_by_reconstruction": [],
+  "verdict_counts": {
+    "FAIL": 0,
+    "PASS": 2,
+    "UNKNOWN": 2,
+    "vacuous": 4
+  }
+}

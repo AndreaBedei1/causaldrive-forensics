@@ -1,0 +1,405 @@
+{
+  "events": [
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:DECELERATION:67ef2ff8ac",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 0.6918692002239718,
+          "t_start": 0.34183734828667556
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 0.6918692002239718,
+      "t_peak": 0.3918418985634321,
+      "t_start": 0.34183734828667556,
+      "values": {
+        "accel_long_mps2": -14.075272157542868
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:HARD_DECELERATION:aa9a7d08de",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 0.5918600996704585,
+          "t_start": 0.34183734828667556
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 0.5918600996704585,
+      "t_peak": 0.3918418985634321,
+      "t_start": 0.34183734828667556,
+      "values": {
+        "accel_long_mps2": -14.075272157542868
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:THROTTLE_ONSET:bec36830f8",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 3.992169518489908,
+          "t_start": -0.10820360420413389
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 3.992169518489908,
+      "t_peak": 0.3918418985634321,
+      "t_start": -0.10820360420413389,
+      "values": {
+        "throttle_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:ACCELERATION:8e5b252adb",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 1.2419192532682946,
+          "t_start": 0.8418828510542417
+        },
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 1.6919602057591039,
+          "t_start": 1.3919329040985642
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 1.6919602057591039,
+      "t_peak": 0.8918874013309982,
+      "t_start": 0.8418828510542417,
+      "values": {
+        "accel_long_mps2": 12.835628234579108
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:BRAKE_ONSET:169894f62a",
+      "event_type": "BRAKE_ONSET",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 9.142638196995836,
+          "t_start": 4.042174068766664
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 9.142638196995836,
+      "t_peak": 4.042174068766664,
+      "t_start": 4.042174068766664,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:HARD_BRAKE:6cb6c8efbf",
+      "event_type": "HARD_BRAKE",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 9.142638196995836,
+          "t_start": 4.042174068766664
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 9.142638196995836,
+      "t_peak": 4.042174068766664,
+      "t_start": 4.042174068766664,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:DECELERATION:43f42d65fc",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 5.1922787251320655,
+          "t_start": 4.092178619043421
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 5.1922787251320655,
+      "t_peak": 5.142274174855309,
+      "t_start": 4.092178619043421,
+      "values": {
+        "accel_long_mps2": -28.149275246895215
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:HARD_DECELERATION:7065433c5d",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 5.1922787251320655,
+          "t_start": 4.142183169320177
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 5.1922787251320655,
+      "t_peak": 5.142274174855309,
+      "t_start": 4.142183169320177,
+      "values": {
+        "accel_long_mps2": -28.149275246895215
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:COLLISION:4989b30fb3",
+      "event_type": "COLLISION",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "trigger",
+          "ref": "collision",
+          "t_end": 6.5424015826044934,
+          "t_start": 6.5424015826044934
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "collision"
+      ],
+      "subject": null,
+      "t_end": 6.5424015826044934,
+      "t_peak": 6.5424015826044934,
+      "t_start": 6.5424015826044934,
+      "values": {
+        "impulse": 18237.498816408763
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:B:POST_IMPACT_STOP:8c5082e8b2",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {},
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 6.5424015826044934,
+          "t_start": 6.5424015826044934
+        },
+        {
+          "detail": {},
+          "kind": "event",
+          "ref": "local:B:COLLISION:4989b30fb3",
+          "t_end": 6.5424015826044934,
+          "t_start": 6.5424015826044934
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "local",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry",
+        "collision"
+      ],
+      "subject": null,
+      "t_end": 6.5424015826044934,
+      "t_peak": 6.5424015826044934,
+      "t_start": 6.5424015826044934,
+      "values": {
+        "delay_s": 0.0,
+        "speed_mps": 0.009530714453466154
+      }
+    }
+  ],
+  "meta": {
+    "recorder": {
+      "buffer_capacity_samples": 400,
+      "counts": {
+        "controls": 187,
+        "radar": 187,
+        "telemetry": 187,
+        "tracks": 0,
+        "triggers": 2
+      },
+      "finished": true,
+      "max_radar_points_per_frame": 400,
+      "n_triggers": 2,
+      "participant_id": "B",
+      "post_capacity_samples": 101,
+      "post_event_s": 5.0,
+      "pre_event_s": 20.0,
+      "radar_points_discarded": 0,
+      "records_per_step": {
+        "controls": 1,
+        "radar": 1,
+        "telemetry": 1,
+        "tracks": 16
+      },
+      "sample_rate_hz": 20.0,
+      "samples_outside_window_discarded": 144,
+      "samples_over_capacity_discarded": 0,
+      "stream_capacity_samples": {
+        "controls": 400,
+        "radar": 400,
+        "telemetry": 400,
+        "tracks": 6400
+      },
+      "trigger_t": 4.142183169320177,
+      "triggered": true,
+      "triggers_discarded": 0,
+      "window_end": 9.142183169320177,
+      "window_start": -15.857816830679823
+    },
+    "time_domain": "participant_local"
+  },
+  "participant_id": "B",
+  "provenance": "local",
+  "schema_version": "1.0.0",
+  "summary": {
+    "event_types": {
+      "ACCELERATION": 1,
+      "BRAKE_ONSET": 1,
+      "COLLISION": 1,
+      "DECELERATION": 2,
+      "HARD_BRAKE": 1,
+      "HARD_DECELERATION": 2,
+      "POST_IMPACT_STOP": 1,
+      "THROTTLE_ONSET": 1
+    },
+    "n_causal_edges": 6,
+    "n_causal_nodes": 10,
+    "n_event_graph_edges": 24,
+    "n_events": 10,
+    "n_non_actions": 0,
+    "n_non_actions_unknown": 0,
+    "n_perception_events": 0,
+    "participant_id": "B",
+    "rejected_causal_edges": 0
+  }
+}

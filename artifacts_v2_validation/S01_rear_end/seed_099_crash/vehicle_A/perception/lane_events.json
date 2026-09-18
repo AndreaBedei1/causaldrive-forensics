@@ -1,0 +1,10 @@
+{
+  "crossings": [],
+  "events": [],
+  "merge_window_s": 0.8,
+  "n_crossings": 0,
+  "n_events": 0,
+  "n_raw_reports": 0,
+  "note": "the sensor reports on every tick a marking is being straddled, so raw reports are collapsed into crossings. A solid line crossed yields both the specific and the general event: the normative layer needs the first and the physical layer the second",
+  "participant_id": "A"
+}

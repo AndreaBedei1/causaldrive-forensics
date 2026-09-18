@@ -1,0 +1,63 @@
+{
+  "assignments": [
+    {
+      "assigned_participant": "B",
+      "candidates": [
+        {
+          "cost": 0.1895717711440782,
+          "heading_consistency": 0.9940737432697726,
+          "n_samples": 123,
+          "observer_id": "A",
+          "overlap_s": 6.100556101717789,
+          "participant_id": "B",
+          "rmse_m": 1.3755852393020869,
+          "score": 0.8406386434659958,
+          "track_id": "A::T001",
+          "velocity_rmse": 2.1157351245534337
+        }
+      ],
+      "confidence": 0.8406386434659958,
+      "observer_id": "A",
+      "overlap_s": 6.100556101717789,
+      "reason": "trajectory RMSE 1.376m over 6.10s (123 samples), heading consistency 0.994",
+      "rmse_m": 1.3755852393020869,
+      "runner_up": null,
+      "runner_up_margin": null,
+      "status": "RESOLVED",
+      "track_id": "A::T001"
+    }
+  ],
+  "config_hash": "0f59f8080162c85a",
+  "counts": {
+    "AMBIGUOUS": 0,
+    "RESOLVED": 1,
+    "UNRESOLVED": 0
+  },
+  "participants": [
+    "A",
+    "B"
+  ],
+  "per_observer": {
+    "A": {
+      "AMBIGUOUS": 0,
+      "RESOLVED": 1,
+      "UNRESOLVED": 0,
+      "n_tracks": 1
+    }
+  },
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "thresholds": {
+    "ambiguity_margin": 0.12,
+    "heading_weight": 0.15,
+    "max_rmse_m": 6.0,
+    "max_velocity_rmse_mps": 10.0,
+    "min_confidence": 0.4,
+    "min_evidence_parity": 0.5,
+    "min_overlap_s": 1.0,
+    "min_speed_for_heading_mps": 0.5,
+    "position_weight": 0.5,
+    "velocity_weight": 0.35
+  }
+}

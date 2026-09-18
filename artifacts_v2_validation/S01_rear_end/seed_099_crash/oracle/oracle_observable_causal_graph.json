@@ -1,0 +1,2647 @@
+{
+  "edges": [
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a brake command, where the exact velocity shows the vehicle slowed",
+        "lag_s": 1.1,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": -28.2005,
+          "accel_before_mps2": -1.0286,
+          "delta_mps2": -27.172
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "brake_decelerates_vehicle",
+      "source": "oracle_obs:B:BRAKE_ONSET:210b2044ea",
+      "target": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a brake command, where the exact velocity shows the vehicle slowed",
+        "lag_s": 1.1,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": -28.2005,
+          "accel_before_mps2": -1.0286,
+          "delta_mps2": -27.172
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "brake_decelerates_vehicle",
+      "source": "oracle_obs:B:BRAKE_ONSET:210b2044ea",
+      "target": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a brake command, where the exact velocity shows the vehicle slowed",
+        "lag_s": 1.1,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": -28.2005,
+          "accel_before_mps2": -1.0286,
+          "delta_mps2": -27.172
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "brake_decelerates_vehicle",
+      "source": "oracle_obs:B:HARD_BRAKE:a71edff237",
+      "target": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a brake command, where the exact velocity shows the vehicle slowed",
+        "lag_s": 1.1,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": -28.2005,
+          "accel_before_mps2": -1.0286,
+          "delta_mps2": -27.172
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "brake_decelerates_vehicle",
+      "source": "oracle_obs:B:HARD_BRAKE:a71edff237",
+      "target": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a throttle command, where the exact velocity shows the vehicle sped up",
+        "lag_s": 0.5,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": 12.9377,
+          "accel_before_mps2": -0.8983,
+          "delta_mps2": 13.8361
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "throttle_accelerates_vehicle",
+      "source": "oracle_obs:B:THROTTLE_ONSET:f9f62065d4",
+      "target": "oracle_obs:B:ACCELERATION:8206ca0841",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a throttle command, where the exact velocity shows the vehicle sped up",
+        "lag_s": 1.0,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": 10.6062,
+          "accel_before_mps2": -0.8983,
+          "delta_mps2": 11.5046
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "throttle_accelerates_vehicle",
+      "source": "oracle_obs:B:THROTTLE_ONSET:f9f62065d4",
+      "target": "oracle_obs:B:ACCELERATION:04a07c72f4",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a throttle command, where the exact velocity shows the vehicle sped up",
+        "lag_s": 0.1,
+        "relation": "same_actor",
+        "support": {
+          "accel_after_mps2": 2.8614,
+          "accel_before_mps2": -0.5666,
+          "delta_mps2": 3.428
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "throttle_accelerates_vehicle",
+      "source": "oracle_obs:A:THROTTLE_ONSET:1df9c6bb7a",
+      "target": "oracle_obs:A:ACCELERATION:b60aed3eab",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.4,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 4.3403,
+          "closing_before_mps": 1.6098,
+          "gain_mps": 2.7305
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:11da3bdfb4",
+      "target": "oracle_obs:A:RANGE_DECREASING:8eeef043a4",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.4,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 4.3403,
+          "closing_before_mps": 1.6098,
+          "gain_mps": 2.7305
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:11da3bdfb4",
+      "target": "oracle_obs:B:RANGE_DECREASING:38f3048439",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": -0.1053,
+          "gain_mps": 13.5016
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "target": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": -0.1053,
+          "gain_mps": 13.5016
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "target": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": -0.1053,
+          "gain_mps": 13.5016
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "target": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": -0.1053,
+          "gain_mps": 13.5016
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "target": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.4,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 4.3403,
+          "closing_before_mps": 1.6098,
+          "gain_mps": 2.7305
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:e3800363d4",
+      "target": "oracle_obs:A:RANGE_DECREASING:8eeef043a4",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.4,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 4.3403,
+          "closing_before_mps": 1.6098,
+          "gain_mps": 2.7305
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:e3800363d4",
+      "target": "oracle_obs:B:RANGE_DECREASING:38f3048439",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": 0.206,
+          "gain_mps": 13.1903
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "target": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": 0.206,
+          "gain_mps": 13.1903
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "target": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": 0.206,
+          "gain_mps": 13.1903
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "target": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "one vehicle slowing, where the exact geometry shows the gap then closed",
+        "lag_s": 0.5,
+        "relation": "actor_in_pair",
+        "support": {
+          "closing_after_mps": 13.3963,
+          "closing_before_mps": 0.206,
+          "gain_mps": 13.1903
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "deceleration_closes_gap",
+      "source": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "target": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing gap, where the exact time to collision then fell",
+        "lag_s": 0.85,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 1.0258
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "closing_shortens_ttc",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "paths that were going to cross, and the vehicle arriving where they do",
+        "lag_s": 0.0,
+        "relation": "same_pair",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "path_conflict_becomes_entry",
+      "source": "oracle_obs:A:PREDICTED_PATH_CONFLICT:13149deb6d",
+      "target": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "target": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "target": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "arriving in a shared region, where the time to collision then fell",
+        "lag_s": 0.15,
+        "relation": "same_pair",
+        "support": {
+          "ttc_after_s": 0.5598,
+          "ttc_before_s": 0.6413
+        },
+        "verified": true
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_shortens_ttc",
+      "source": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.1,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.95,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.95,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.95,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a closing threat and the braking that answered it",
+        "lag_s": 0.95,
+        "relation": "pair_to_actor",
+        "support": {},
+        "verified": false
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "risk_triggers_braking",
+      "source": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "target": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a critical time to collision that was in fact not resolved",
+        "lag_s": 0.05,
+        "relation": "same_pair",
+        "support": {
+          "range_at_cause_m": 4.496
+        },
+        "verified": true
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "critical_ttc_causes_collision",
+      "source": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "target": "oracle_obs:A:COLLISION:93d8600309",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "a critical time to collision that was in fact not resolved",
+        "lag_s": 0.05,
+        "relation": "same_pair",
+        "support": {
+          "range_at_cause_m": 4.496
+        },
+        "verified": true
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "critical_ttc_causes_collision",
+      "source": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "target": "oracle_obs:A:COLLISION:93d8600309",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "two vehicles arriving in the same place, and colliding there",
+        "lag_s": 0.2,
+        "relation": "same_pair",
+        "support": {
+          "range_at_cause_m": 5.764
+        },
+        "verified": true
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_causes_collision",
+      "source": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "target": "oracle_obs:A:COLLISION:93d8600309",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "two vehicles arriving in the same place, and colliding there",
+        "lag_s": 0.2,
+        "relation": "same_pair",
+        "support": {
+          "range_at_cause_m": 5.764
+        },
+        "verified": true
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "conflict_entry_causes_collision",
+      "source": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "target": "oracle_obs:A:COLLISION:93d8600309",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "an impact and the vehicle coming to rest after it",
+        "lag_s": 0.0,
+        "relation": "pair_to_actor",
+        "support": {
+          "speed_at_stop_mps": 0.0254
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "collision_forces_stop",
+      "source": "oracle_obs:A:COLLISION:93d8600309",
+      "target": "oracle_obs:B:POST_IMPACT_STOP:353e092bdc",
+      "temporal_relation": null
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "description": "an impact and the vehicle coming to rest after it",
+        "lag_s": 0.05,
+        "relation": "pair_to_actor",
+        "support": {
+          "speed_at_stop_mps": 0.1839
+        },
+        "verified": true
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [],
+      "merged_from": [],
+      "owners": [],
+      "provenance": "oracle",
+      "rule": "collision_forces_stop",
+      "source": "oracle_obs:A:COLLISION:93d8600309",
+      "target": "oracle_obs:A:POST_IMPACT_STOP:d1e2b443a1",
+      "temporal_relation": null
+    }
+  ],
+  "graph_kind": "causal",
+  "meta": {
+    "n_edges_refused_by_trace": 6,
+    "n_rules": 19,
+    "note": "physical ground truth in the comparable vocabulary. Built by general rules verified against the exact trace; no scenario template, no scripted action, no branch on scenario id",
+    "reference_kind": "oracle_observable",
+    "refused": [
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "acceleration_closes_gap",
+        "source": "oracle_obs:B:ACCELERATION:8206ca0841",
+        "target": "oracle_obs:A:RANGE_DECREASING:8eeef043a4"
+      },
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "acceleration_closes_gap",
+        "source": "oracle_obs:B:ACCELERATION:8206ca0841",
+        "target": "oracle_obs:B:RANGE_DECREASING:38f3048439"
+      },
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "ttc_escalates_to_critical",
+        "source": "oracle_obs:A:LOW_TTC:05c0286f00",
+        "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9"
+      },
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "ttc_escalates_to_critical",
+        "source": "oracle_obs:A:LOW_TTC:05c0286f00",
+        "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e"
+      },
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "ttc_escalates_to_critical",
+        "source": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+        "target": "oracle_obs:A:CRITICAL_TTC:67e94c05f9"
+      },
+      {
+        "reason": "the exact trace does not support the relation",
+        "rule": "ttc_escalates_to_critical",
+        "source": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+        "target": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e"
+      }
+    ],
+    "schema_version": "1.0.0"
+  },
+  "nodes": [
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:VEHICLE_STARTED:9476a3aaf5",
+      "event_type": "VEHICLE_STARTED",
+      "evidence": [
+        {
+          "detail": {
+            "threshold_mps": 0.8
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 0.05000000074505806,
+          "t_start": 0.05000000074505806
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 0.05000000074505806,
+      "t_peak": 0.05000000074505806,
+      "t_start": 0.05000000074505806,
+      "values": {
+        "speed_mps": 13.339712764183421
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:VEHICLE_STARTED:d5764c84d0",
+      "event_type": "VEHICLE_STARTED",
+      "evidence": [
+        {
+          "detail": {
+            "threshold_mps": 0.8
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 0.05000000074505806,
+          "t_start": 0.05000000074505806
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 0.05000000074505806,
+      "t_peak": 0.05000000074505806,
+      "t_start": 0.05000000074505806,
+      "values": {
+        "speed_mps": 12.852629753801484
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:THROTTLE_ONSET:f9f62065d4",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.25,
+            "n_samples": 83,
+            "release": 0.1875
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 4.250000063329935,
+          "t_start": 0.10000000149011612
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 4.250000063329935,
+      "t_peak": 0.6000000089406967,
+      "t_start": 0.10000000149011612,
+      "values": {
+        "throttle_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:DECELERATION:11da3bdfb4",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -1.8,
+            "n_samples": 7,
+            "release": -1.35
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 0.9500000141561031,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 0.9500000141561031,
+      "t_peak": 0.6000000089406967,
+      "t_start": 0.5500000081956387,
+      "values": {
+        "accel_mps2": -14.194829755036121
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:HARD_DECELERATION:e3800363d4",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -4.5,
+            "n_samples": 6,
+            "release": -3.375
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 0.850000012665987,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 0.850000012665987,
+      "t_peak": 0.6000000089406967,
+      "t_start": 0.5500000081956387,
+      "values": {
+        "accel_mps2": -14.194829755036121
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:RANGE_DECREASING:8eeef043a4",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.0,
+            "n_samples": 18,
+            "release": 0.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.6,
+          "t_start": 0.55
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 1.6,
+      "t_peak": 1.0,
+      "t_start": 0.55,
+      "values": {
+        "bearing_deg": 0.022722819120681085,
+        "closing_rate_mps": 4.340300985775677,
+        "range_m": 25.38899743917721
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:RANGE_DECREASING:38f3048439",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.0,
+            "n_samples": 18,
+            "release": 0.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.6,
+          "t_start": 0.55
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 1.6,
+      "t_peak": 1.0,
+      "t_start": 0.55,
+      "values": {
+        "bearing_deg": 179.98201236990192,
+        "closing_rate_mps": 4.340300985775677,
+        "range_m": 25.38899743917721
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:ACCELERATION:8206ca0841",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.5,
+            "n_samples": 9,
+            "release": 1.125
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.5000000223517418,
+          "t_start": 1.0500000156462193
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 1.5000000223517418,
+      "t_peak": 1.1000000163912773,
+      "t_start": 1.0500000156462193,
+      "values": {
+        "accel_mps2": 12.937726845465109
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:DECELERATION:0f52991d88",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -1.8,
+            "n_samples": 2,
+            "release": -1.35
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.2500000186264515,
+          "t_start": 1.1000000163912773
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 1.2500000186264515,
+      "t_peak": 1.1500000171363354,
+      "t_start": 1.1000000163912773,
+      "values": {
+        "accel_mps2": -4.100847890117433
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:THROTTLE_ONSET:1df9c6bb7a",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.25,
+            "n_samples": 111,
+            "release": 0.1875
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 5.900000087916851,
+          "t_start": 0.3500000052154064
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 5.900000087916851,
+      "t_peak": 1.3000000193715096,
+      "t_start": 0.3500000052154064,
+      "values": {
+        "throttle_cmd": 0.8821942806243896
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:ACCELERATION:b60aed3eab",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.5,
+            "n_samples": 5,
+            "release": 1.125
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.650000024586916,
+          "t_start": 1.3500000201165676
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 1.650000024586916,
+      "t_peak": 1.4000000208616257,
+      "t_start": 1.3500000201165676,
+      "values": {
+        "accel_mps2": 2.861442166290408
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:ACCELERATION:04a07c72f4",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.5,
+            "n_samples": 7,
+            "release": 1.125
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 1.9500000290572643,
+          "t_start": 1.600000023841858
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 1.9500000290572643,
+      "t_peak": 1.600000023841858,
+      "t_start": 1.600000023841858,
+      "values": {
+        "accel_mps2": 10.606215631319378
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:BRAKE_ONSET:210b2044ea",
+      "event_type": "BRAKE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.12,
+            "n_samples": 151,
+            "release": 0.09
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 11.750000175088644,
+          "t_start": 4.250000063329935
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 11.750000175088644,
+      "t_peak": 4.250000063329935,
+      "t_start": 4.250000063329935,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:HARD_BRAKE:a71edff237",
+      "event_type": "HARD_BRAKE",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.65,
+            "n_samples": 151,
+            "release": 0.48750000000000004
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 11.750000175088644,
+          "t_start": 4.250000063329935
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 11.750000175088644,
+      "t_peak": 4.250000063329935,
+      "t_start": 4.250000063329935,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:DECELERATION:cde5b40c31",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -1.8,
+            "n_samples": 23,
+            "release": -1.35
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 5.4500000812113285,
+          "t_start": 4.300000064074993
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 5.4500000812113285,
+      "t_peak": 5.350000079721212,
+      "t_start": 4.300000064074993,
+      "values": {
+        "accel_mps2": -28.200512971585255
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:HARD_DECELERATION:692b9169b8",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -4.5,
+            "n_samples": 22,
+            "release": -3.375
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 5.4500000812113285,
+          "t_start": 4.350000064820051
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 5.4500000812113285,
+      "t_peak": 5.350000079721212,
+      "t_start": 4.350000064820051,
+      "values": {
+        "accel_mps2": -28.200512971585255
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:RANGE_DECREASING:58f3fa4c0e",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.0,
+            "n_samples": 46,
+            "release": 0.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 4.45
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.75,
+      "t_peak": 5.85,
+      "t_start": 4.45,
+      "values": {
+        "bearing_deg": -0.004404160611039062,
+        "closing_rate_mps": 13.396313538870361,
+        "range_m": 13.741938463277249
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:RANGE_DECREASING:1461bc02c8",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.0,
+            "n_samples": 46,
+            "release": 0.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 4.45
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.75,
+      "t_peak": 5.85,
+      "t_start": 4.45,
+      "values": {
+        "bearing_deg": 179.7842768696624,
+        "closing_rate_mps": 13.396313538870361,
+        "range_m": 13.741938463277249
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:RAPID_CLOSING:3c349c4b6c",
+      "event_type": "RAPID_CLOSING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 6.0,
+            "n_samples": 34,
+            "release": 4.5
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.05
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.75,
+      "t_peak": 5.85,
+      "t_start": 5.05,
+      "values": {
+        "bearing_deg": -0.004404160611039062,
+        "closing_rate_mps": 13.396313538870361,
+        "range_m": 13.741938463277249
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:RAPID_CLOSING:83608f0de9",
+      "event_type": "RAPID_CLOSING",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 6.0,
+            "n_samples": 34,
+            "release": 4.5
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.05
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.75,
+      "t_peak": 5.85,
+      "t_start": 5.05,
+      "values": {
+        "bearing_deg": 179.7842768696624,
+        "closing_rate_mps": 13.396313538870361,
+        "range_m": 13.741938463277249
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:PREDICTED_PATH_CONFLICT:13149deb6d",
+      "event_type": "PREDICTED_PATH_CONFLICT",
+      "evidence": [
+        {
+          "detail": {
+            "map_context": {
+              "is_junction": false,
+              "junction_id": null,
+              "lane_id": -2,
+              "road_id": 37,
+              "section_id": 0
+            },
+            "note": "map context is privileged detail, not part of the comparable claim; the event type is one a reconstruction can also emit"
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.550000097602606,
+          "t_start": 4.050000097602606
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.550000097602606,
+      "t_peak": 6.550000097602606,
+      "t_start": 4.050000097602606,
+      "values": {
+        "arrival_gap_s": 0.0,
+        "conflict_x": -81.71281814575195,
+        "conflict_y": -204.05760192871094
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:PREDICTED_PATH_CONFLICT:7d785c0b9e",
+      "event_type": "PREDICTED_PATH_CONFLICT",
+      "evidence": [
+        {
+          "detail": {
+            "map_context": {
+              "is_junction": false,
+              "junction_id": null,
+              "lane_id": -2,
+              "road_id": 37,
+              "section_id": 0
+            },
+            "note": "map context is privileged detail, not part of the comparable claim; the event type is one a reconstruction can also emit"
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.550000097602606,
+          "t_start": 4.050000097602606
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.550000097602606,
+      "t_peak": 6.550000097602606,
+      "t_start": 4.050000097602606,
+      "values": {
+        "arrival_gap_s": 0.0,
+        "conflict_x": -81.71281814575195,
+        "conflict_y": -204.05760192871094
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:CONFLICT_REGION_ENTRY:2ef53e49d8",
+      "event_type": "CONFLICT_REGION_ENTRY",
+      "evidence": [
+        {
+          "detail": {
+            "map_context": {
+              "is_junction": false,
+              "junction_id": null,
+              "lane_id": -2,
+              "road_id": 37,
+              "section_id": 0
+            },
+            "note": "map context is privileged detail, not part of the comparable claim; the event type is one a reconstruction can also emit"
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.550000097602606,
+          "t_start": 6.550000097602606
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.550000097602606,
+      "t_peak": 6.550000097602606,
+      "t_start": 6.550000097602606,
+      "values": {
+        "arrival_gap_s": 0.0,
+        "conflict_x": -81.71281814575195,
+        "conflict_y": -204.05760192871094,
+        "region_radius_m": 6.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:CONFLICT_REGION_ENTRY:043435c9c1",
+      "event_type": "CONFLICT_REGION_ENTRY",
+      "evidence": [
+        {
+          "detail": {
+            "map_context": {
+              "is_junction": false,
+              "junction_id": null,
+              "lane_id": -2,
+              "road_id": 37,
+              "section_id": 0
+            },
+            "note": "map context is privileged detail, not part of the comparable claim; the event type is one a reconstruction can also emit"
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.550000097602606,
+          "t_start": 6.550000097602606
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.550000097602606,
+      "t_peak": 6.550000097602606,
+      "t_start": 6.550000097602606,
+      "values": {
+        "arrival_gap_s": 0.0,
+        "conflict_x": -81.71281814575195,
+        "conflict_y": -204.05760192871094,
+        "region_radius_m": 6.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:LOW_TTC:05c0286f00",
+      "event_type": "LOW_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 3.0,
+            "n_samples": 31,
+            "release": 3.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.2
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.75,
+      "t_peak": 6.7,
+      "t_start": 5.2,
+      "values": {
+        "bearing_deg": -0.01611975110037193,
+        "range_m": 4.496004621788936,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:LOW_TTC:ff9ec3fde0",
+      "event_type": "LOW_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 3.0,
+            "n_samples": 31,
+            "release": 3.75
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.2
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.75,
+      "t_peak": 6.7,
+      "t_start": 5.2,
+      "values": {
+        "bearing_deg": 179.77265283190746,
+        "range_m": 4.496004621788936,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:CRITICAL_TTC:67e94c05f9",
+      "event_type": "CRITICAL_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.6,
+            "n_samples": 27,
+            "release": 2.0
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.4
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.75,
+      "t_peak": 6.7,
+      "t_start": 5.4,
+      "values": {
+        "bearing_deg": -0.01611975110037193,
+        "range_m": 4.496004621788936,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:CRITICAL_TTC:d0278a1c7e",
+      "event_type": "CRITICAL_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 1.6,
+            "n_samples": 27,
+            "release": 2.0
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.75,
+          "t_start": 5.4
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "A",
+      "t_end": 6.75,
+      "t_peak": 6.7,
+      "t_start": 5.4,
+      "values": {
+        "bearing_deg": 179.77265283190746,
+        "range_m": 4.496004621788936,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:DECELERATION:6de8359d3e",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -1.8,
+            "n_samples": 19,
+            "release": -1.35
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.900000102818012,
+          "t_start": 5.950000088661909
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 6.900000102818012,
+      "t_peak": 6.750000100582838,
+      "t_start": 5.950000088661909,
+      "values": {
+        "accel_mps2": -135.7423754241118
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:HARD_DECELERATION:956339891d",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "enter": -4.5,
+            "n_samples": 17,
+            "release": -3.375
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.850000102072954,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 6.850000102072954,
+      "t_peak": 6.750000100582838,
+      "t_start": 6.000000089406967,
+      "values": {
+        "accel_mps2": -135.7423754241118
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:COLLISION:93d8600309",
+      "event_type": "COLLISION",
+      "evidence": [
+        {
+          "detail": {
+            "source": "oracle collision sensor"
+          },
+          "kind": "privileged_collision_record",
+          "ref": "oracle_trace",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 6.750000100582838,
+      "t_peak": 6.750000100582838,
+      "t_start": 6.750000100582838,
+      "values": {
+        "impact_speed_mps": 1.2687865844711348,
+        "other_speed_mps": 0.02537989739868228,
+        "relative_impact_speed_mps": 1.2578337368525399
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:B:POST_IMPACT_STOP:353e092bdc",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "threshold_mps": 0.6,
+            "within_s": 4.0
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 6.750000100582838,
+      "t_peak": 6.750000100582838,
+      "t_start": 6.750000100582838,
+      "values": {
+        "delay_s": 0.0,
+        "speed_mps": 0.02537989739868228
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:BRAKE_ONSET:81acbe6404",
+      "event_type": "BRAKE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.12,
+            "n_samples": 118,
+            "release": 0.09
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 11.750000175088644,
+          "t_start": 5.900000087916851
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 11.750000175088644,
+      "t_peak": 6.800000101327896,
+      "t_start": 5.900000087916851,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:HARD_BRAKE:7dd3c75a5b",
+      "event_type": "HARD_BRAKE",
+      "evidence": [
+        {
+          "detail": {
+            "enter": 0.65,
+            "n_samples": 118,
+            "release": 0.48750000000000004
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 11.750000175088644,
+          "t_start": 5.900000087916851
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 11.750000175088644,
+      "t_peak": 6.800000101327896,
+      "t_start": 5.900000087916851,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle_obs:A:POST_IMPACT_STOP:d1e2b443a1",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "threshold_mps": 0.6,
+            "within_s": 4.0
+          },
+          "kind": "privileged_state",
+          "ref": "oracle_trace",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": null,
+      "t_end": 6.800000101327896,
+      "t_peak": 6.800000101327896,
+      "t_start": 6.750000100582838,
+      "values": {
+        "delay_s": 0.05000000074505806,
+        "speed_mps": 0.18385041404135985
+      }
+    }
+  ],
+  "owner": null,
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "scope": "oracle",
+  "seed": 99
+}

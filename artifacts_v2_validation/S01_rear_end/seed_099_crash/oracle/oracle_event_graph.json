@@ -1,0 +1,3464 @@
+{
+  "edges": [
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "source",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:COLLISION:401a7e80ea",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.0
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "source",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:COLLISION:401a7e80ea",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "source",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:COLLISION:401a7e80ea",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "target": "oracle:A:COLLISION:401a7e80ea",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.0
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.05
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        },
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:HARD_DECELERATION:d239724528",
+      "target": "oracle:A:COLLISION:401a7e80ea",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.1
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:HARD_DECELERATION:d239724528",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.05
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:HARD_DECELERATION:d239724528",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:HARD_DECELERATION:d239724528",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.87365
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.02365
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.87365
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.92365
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.02365
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.02365
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "target": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 4.2
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "target": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 3.174935
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "target": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.0
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "target": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "target": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.85
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.85
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.85
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.9
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.0
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "target": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.05
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:A:COLLISION:401a7e80ea",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:A:COLLISION:401a7e80ea",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.0
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.0
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.1
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "source",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:CRITICAL_TTC:07864461e5",
+      "target": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 1.5
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.62635
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.62635
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.65
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.65
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.65
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "target": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.45
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+          "t_end": 0.7500000111758709,
+          "t_start": 0.5000000074505806
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+      "target": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.45
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+          "t_end": 0.7500000111758709,
+          "t_start": 0.5000000074505806
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+      "target": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 3.624935
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+          "t_end": 0.7500000111758709,
+          "t_start": 0.5000000074505806
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+      "target": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.45
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "source",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+          "t_end": 0.7500000111758709,
+          "t_start": 0.5000000074505806
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+      "target": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 2.525065
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 2.525065
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 1.651414
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 1.651414
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 1.675065
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 1.675065
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "target",
+            "participant": "A",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:RANGE_DECREASING:c56197fc45",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 1.025065
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "source",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "target": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.05
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "source",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.05
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "source",
+            "participant": "B",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.9
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:COLLISION:401a7e80ea",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:COLLISION:401a7e80ea",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.85
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.85
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "A",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.85
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.85
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "A",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:HARD_DECELERATION:d239724528",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:HARD_DECELERATION:d239724528",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "overlap_pad_s": 0.5,
+        "participants": [
+          "A",
+          "B"
+        ],
+        "peak_gap_s": 0.95
+      },
+      "edge_type": "INTERACTS_WITH",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "POST_IMPACT_STOP",
+            "part": "target",
+            "participant": "A",
+            "subject": null
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 0.85
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "part": "target",
+            "participant": "B",
+            "subject": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:CRITICAL_TTC:07864461e5",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "target": "oracle:B:CRITICAL_TTC:07864461e5",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 4.82635
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "A",
+            "subject": "A_late_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "target": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 4.2
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "part": "target",
+            "participant": "B",
+            "subject": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:HARD_DECELERATION:4089882e4a",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "target": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "gap_s": 3.174935
+      },
+      "edge_type": "PRECEDES",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "part": "source",
+            "participant": "B",
+            "subject": "closing"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        },
+        {
+          "detail": {
+            "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+            "part": "target",
+            "participant": "B",
+            "subject": "B_emergency_brake"
+          },
+          "kind": "oracle",
+          "ref": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "oracle",
+      "rule": null,
+      "source": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "target": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "temporal_relation": "before"
+    }
+  ],
+  "graph_kind": "event",
+  "meta": {
+    "edge_counts": {
+      "INTERACTS_WITH": 27,
+      "PRECEDES": 36
+    },
+    "limits": {
+      "interacts_max_per_event": 4,
+      "interacts_tolerance_s": 0.5,
+      "max_edges": 5000,
+      "precedes_fanout": 3
+    },
+    "n_nodes": 14,
+    "note": "privileged observational record: PRECEDES and INTERACTS_WITH are exact temporal relations over the true timeline, not causal claims",
+    "participants": [
+      "A",
+      "B"
+    ],
+    "relation_tolerance_s": 0.05,
+    "scenario_variant": "crash",
+    "truncated": false
+  },
+  "nodes": [
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:HARD_DECELERATION:8cc0091cc9",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "source": "exact_kinematics",
+            "state": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "decelerating:B",
+          "t_end": 0.7500000111758709,
+          "t_start": 0.5000000074505806
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "decelerating",
+      "t_end": 0.7500000111758709,
+      "t_peak": 0.5500000081956387,
+      "t_start": 0.5000000074505806,
+      "values": {
+        "accel_long_mps2": -13.880416938910832,
+        "duration_s": 0.2500000037252903,
+        "oracle_state": "decelerating",
+        "speed_at_end_mps": 9.136474855535354,
+        "speed_at_onset_mps": 12.282185211090184,
+        "threshold_mps2": -4.5
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:A:RANGE_DECREASING:2c745e5d1d",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "B",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "closing"
+          },
+          "kind": "oracle",
+          "ref": "closing:A",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "closing",
+      "t_end": 1.3500000201165676,
+      "t_peak": 1.0000000149011612,
+      "t_start": 0.5500000081956387,
+      "values": {
+        "min_distance_m": 24.541193953495114,
+        "oracle_state": "closing",
+        "range_rate_mps": -4.340300985775677,
+        "threshold_mps": -1.0
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:RANGE_DECREASING:6d9ec0a1e5",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "A",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "closing"
+          },
+          "kind": "oracle",
+          "ref": "closing:B",
+          "t_end": 1.3500000201165676,
+          "t_start": 0.5500000081956387
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "closing",
+      "t_end": 1.3500000201165676,
+      "t_peak": 1.0000000149011612,
+      "t_start": 0.5500000081956387,
+      "values": {
+        "min_distance_m": 24.541193953495114,
+        "oracle_state": "closing",
+        "range_rate_mps": -4.340300985775677,
+        "threshold_mps": -1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8",
+      "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+      "evidence": [
+        {
+          "detail": {
+            "action_kind": "brake",
+            "params": {
+              "intensity": 1.0
+            },
+            "participant": "B",
+            "source": "scripted_action"
+          },
+          "kind": "oracle",
+          "ref": "B_emergency_brake",
+          "t_end": 11.750000175088644,
+          "t_start": 4.174935238734116
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "B_emergency_brake",
+      "t_end": 11.750000175088644,
+      "t_peak": 4.174935238734116,
+      "t_start": 4.174935238734116,
+      "values": {
+        "duration_s": 8.182387148692579,
+        "intensity": 1.0,
+        "kind_is_brake": 1.0,
+        "kind_is_lateral": 0.0,
+        "kind_is_speed": 0.0
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:HARD_DECELERATION:4089882e4a",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "source": "exact_kinematics",
+            "state": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "decelerating:B",
+          "t_end": 5.4000000804662704,
+          "t_start": 4.300000064074993
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "decelerating",
+      "t_end": 5.4000000804662704,
+      "t_peak": 5.200000077486038,
+      "t_start": 4.300000064074993,
+      "values": {
+        "accel_long_mps2": -26.602932746730897,
+        "duration_s": 1.1000000163912773,
+        "oracle_state": "decelerating",
+        "speed_at_end_mps": 0.007890499536465473,
+        "speed_at_onset_mps": 13.421479153067478,
+        "threshold_mps2": -4.5
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d",
+      "event_type": "ORACLE_SCRIPTED_INTERVENTION",
+      "evidence": [
+        {
+          "detail": {
+            "action_kind": "brake",
+            "params": {
+              "intensity": 0.85
+            },
+            "participant": "A",
+            "source": "scripted_action"
+          },
+          "kind": "oracle",
+          "ref": "A_late_brake",
+          "t_end": 11.750000175088644,
+          "t_start": 5.8263497156067
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "A_late_brake",
+      "t_end": 11.750000175088644,
+      "t_peak": 5.8263497156067,
+      "t_start": 5.8263497156067,
+      "values": {
+        "duration_s": 6.1367903615194335,
+        "intensity": 0.85,
+        "kind_is_brake": 1.0,
+        "kind_is_lateral": 0.0,
+        "kind_is_speed": 0.0
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:A:RANGE_DECREASING:c56197fc45",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "B",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "closing"
+          },
+          "kind": "oracle",
+          "ref": "closing:A",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "closing",
+      "t_end": 6.70000009983778,
+      "t_peak": 5.850000087171793,
+      "t_start": 4.450000066310167,
+      "values": {
+        "min_distance_m": 4.496004621788936,
+        "oracle_state": "closing",
+        "range_rate_mps": -13.396313538870361,
+        "threshold_mps": -1.0
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:RANGE_DECREASING:3dcc708b8f",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "A",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "closing"
+          },
+          "kind": "oracle",
+          "ref": "closing:B",
+          "t_end": 6.70000009983778,
+          "t_start": 4.450000066310167
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "closing",
+      "t_end": 6.70000009983778,
+      "t_peak": 5.850000087171793,
+      "t_start": 4.450000066310167,
+      "values": {
+        "min_distance_m": 4.496004621788936,
+        "oracle_state": "closing",
+        "range_rate_mps": -13.396313538870361,
+        "threshold_mps": -1.0
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:A:CRITICAL_TTC:04ec65d3b5",
+      "event_type": "CRITICAL_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "B",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "critical_ttc:A",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "critical_ttc",
+      "t_end": 6.70000009983778,
+      "t_peak": 6.70000009983778,
+      "t_start": 5.4000000804662704,
+      "values": {
+        "min_distance_m": 4.496004621788936,
+        "oracle_state": "critical_ttc",
+        "threshold_s": 1.6,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:CRITICAL_TTC:07864461e5",
+      "event_type": "CRITICAL_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "counterpart": "A",
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "exact_kinematics",
+            "state": "critical_ttc"
+          },
+          "kind": "oracle",
+          "ref": "critical_ttc:B",
+          "t_end": 6.70000009983778,
+          "t_start": 5.4000000804662704
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B",
+        "A"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "critical_ttc",
+      "t_end": 6.70000009983778,
+      "t_peak": 6.70000009983778,
+      "t_start": 5.4000000804662704,
+      "values": {
+        "min_distance_m": 4.496004621788936,
+        "oracle_state": "critical_ttc",
+        "threshold_s": 1.6,
+        "ttc_s": 0.5597756481244347
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:A:HARD_DECELERATION:d239724528",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "source": "exact_kinematics",
+            "state": "decelerating"
+          },
+          "kind": "oracle",
+          "ref": "decelerating:A",
+          "t_end": 6.750000100582838,
+          "t_start": 6.000000089406967
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": "decelerating",
+      "t_end": 6.750000100582838,
+      "t_peak": 6.70000009983778,
+      "t_start": 6.000000089406967,
+      "values": {
+        "accel_long_mps2": -95.89980805851404,
+        "duration_s": 0.7500000111758709,
+        "oracle_state": "decelerating",
+        "speed_at_end_mps": 1.2687865844711348,
+        "speed_at_onset_mps": 13.028081668851861,
+        "threshold_mps2": -4.5
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "oracle:A:COLLISION:401a7e80ea",
+      "event_type": "COLLISION",
+      "evidence": [
+        {
+          "detail": {
+            "frame": 50740,
+            "impulse": 18237.498816408763,
+            "pair": [
+              "A",
+              "B"
+            ],
+            "source": "privileged_collision_sensor"
+          },
+          "kind": "oracle",
+          "ref": "collision:A|B",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": null,
+      "t_end": 6.750000100582838,
+      "t_peak": 6.750000100582838,
+      "t_start": 6.750000100582838,
+      "values": {
+        "impulse": 18237.498816408763,
+        "other_speed_mps": 0.00012716368067465365,
+        "own_speed_mps": 8.055905456812676,
+        "relative_speed_mps": 8.031797447518656,
+        "separation_m": 4.496004621788936
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:B:POST_IMPACT_STOP:4f6441918a",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "source": "exact_kinematics",
+            "t_impact": 6.750000100582838
+          },
+          "kind": "oracle",
+          "ref": "post_impact_stop:B",
+          "t_end": 6.750000100582838,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": null,
+      "t_end": 6.750000100582838,
+      "t_peak": 6.750000100582838,
+      "t_start": 6.750000100582838,
+      "values": {
+        "delay_s": 0.0,
+        "speed_mps": 0.02537989739868228,
+        "threshold_mps": 0.6
+      }
+    },
+    {
+      "confidence": 0.9,
+      "detail": {},
+      "event_id": "oracle:A:POST_IMPACT_STOP:e7f0b8dd35",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "source": "exact_kinematics",
+            "t_impact": 6.750000100582838
+          },
+          "kind": "oracle",
+          "ref": "post_impact_stop:A",
+          "t_end": 6.800000101327896,
+          "t_start": 6.750000100582838
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "oracle",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "oracle"
+      ],
+      "subject": null,
+      "t_end": 6.800000101327896,
+      "t_peak": 6.800000101327896,
+      "t_start": 6.750000100582838,
+      "values": {
+        "delay_s": 0.05000000074505806,
+        "speed_mps": 0.18385041404135985,
+        "threshold_mps": 0.6
+      }
+    }
+  ],
+  "owner": null,
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "scope": "oracle",
+  "seed": 99
+}

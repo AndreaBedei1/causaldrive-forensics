@@ -1,0 +1,86 @@
+{
+  "collision_pairs": [
+    {
+      "a": "A",
+      "b": "B",
+      "t": 6.750000100582838
+    }
+  ],
+  "collisions": [
+    {
+      "frame": 50740,
+      "impulse": 18237.498816408763,
+      "is_participant_pair": true,
+      "other_actor_id": 153,
+      "other_participant_id": "B",
+      "other_type_id": "vehicle.audi.tt",
+      "participant_id": "A",
+      "t": 6.750000100582838
+    },
+    {
+      "frame": 50740,
+      "impulse": 18237.498816408763,
+      "is_participant_pair": true,
+      "other_actor_id": 148,
+      "other_participant_id": "A",
+      "other_type_id": "vehicle.tesla.model3",
+      "participant_id": "B",
+      "t": 6.750000100582838
+    }
+  ],
+  "interventions": {
+    "A": {
+      "actions": [
+        {
+          "action_id": "A_late_brake",
+          "duration": 6.1367903615194335,
+          "enabled": true,
+          "kind": "brake",
+          "params": {
+            "intensity": 0.85
+          },
+          "t_start": 5.8263497156067
+        }
+      ],
+      "lookahead_base_m": 5.0,
+      "lookahead_time_s": 0.6,
+      "participant_id": "A",
+      "route_points": 75,
+      "target_speed": 13.687937024331085,
+      "type": "ScriptedController"
+    },
+    "B": {
+      "actions": [
+        {
+          "action_id": "B_emergency_brake",
+          "duration": 8.182387148692579,
+          "enabled": true,
+          "kind": "brake",
+          "params": {
+            "intensity": 1.0
+          },
+          "t_start": 4.174935238734116
+        }
+      ],
+      "lookahead_base_m": 5.0,
+      "lookahead_time_s": 0.6,
+      "participant_id": "B",
+      "route_points": 60,
+      "target_speed": 13.687937024331085,
+      "type": "ScriptedController"
+    }
+  },
+  "map_name": "Town05",
+  "n_frames": 235,
+  "notes": [],
+  "participants": [
+    "A",
+    "B"
+  ],
+  "provenance": "oracle",
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "seed": 99,
+  "variant": "crash"
+}

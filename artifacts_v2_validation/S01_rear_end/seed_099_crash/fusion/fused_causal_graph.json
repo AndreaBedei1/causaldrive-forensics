@@ -1,0 +1,5388 @@
+{
+  "edges": [
+    {
+      "confidence": 0.835949465602782,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.835949465602782,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:A:BRAKE_ONSET:9a571261e6",
+            "target": "local:A:DECELERATION:cddd620d6b",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:BRAKE_ONSET:9a571261e6",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.287760200263599,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:DECELERATION:cddd620d6b",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [
+        "A|local:A:BRAKE_ONSET:9a571261e6->local:A:DECELERATION:cddd620d6b|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "target": "fused:A:DECELERATION:f40dee2b11",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.835949465602782,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.835949465602782,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:A:BRAKE_ONSET:9a571261e6",
+            "target": "local:A:HARD_DECELERATION:84723328e8",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:BRAKE_ONSET:9a571261e6",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_DECELERATION:84723328e8",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [
+        "A|local:A:BRAKE_ONSET:9a571261e6->local:A:HARD_DECELERATION:84723328e8|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "target": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.85,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "collision_forces_stop"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.85,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "collision_forces_stop",
+            "source": "local:A:COLLISION:43d1d47c7f",
+            "target": "local:A:HARD_DECELERATION:84723328e8",
+            "temporal_relation": "during"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "COLLISION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_DECELERATION:84723328e8",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [
+        "A|local:A:COLLISION:43d1d47c7f->local:A:HARD_DECELERATION:84723328e8|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "collision_forces_stop",
+      "source": "fused:A:COLLISION:98b5b8976f",
+      "target": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 0.835949465602782,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "collision_forces_stop"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.835949465602782,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "collision_forces_stop",
+            "source": "local:A:COLLISION:43d1d47c7f",
+            "target": "local:A:POST_IMPACT_STOP:eded0257c1",
+            "temporal_relation": "during"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "COLLISION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "POST_IMPACT_STOP",
+            "local_t_end": 7.137837689847226,
+            "local_t_start": 7.087833131636424,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:POST_IMPACT_STOP:eded0257c1",
+          "t_end": 7.137837689847226,
+          "t_start": 7.087833131636424
+        }
+      ],
+      "merged_from": [
+        "A|local:A:COLLISION:43d1d47c7f->local:A:POST_IMPACT_STOP:eded0257c1|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "collision_forces_stop",
+      "source": "fused:A:COLLISION:98b5b8976f",
+      "target": "fused:A:POST_IMPACT_STOP:34c08384eb",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 0.85,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "collision_forces_stop"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.85,
+            "edge_type": "TRIGGERS",
+            "participant_id": "B",
+            "rule": "collision_forces_stop",
+            "source": "local:B:COLLISION:4989b30fb3",
+            "target": "local:B:POST_IMPACT_STOP:8c5082e8b2",
+            "temporal_relation": "equals"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "COLLISION",
+            "local_t_end": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:COLLISION:4989b30fb3",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "POST_IMPACT_STOP",
+            "local_t_end": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:POST_IMPACT_STOP:8c5082e8b2",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        }
+      ],
+      "merged_from": [
+        "B|local:B:COLLISION:4989b30fb3->local:B:POST_IMPACT_STOP:8c5082e8b2|TRIGGERS"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "collision_forces_stop",
+      "source": "fused:A:COLLISION:98b5b8976f",
+      "target": "fused:B:POST_IMPACT_STOP:4f5131efb7",
+      "temporal_relation": "equals"
+    },
+    {
+      "confidence": 0.8704918451728986,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "critical_ttc_causes_collision"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.8704918451728986,
+            "edge_type": "CAUSES_OUTCOME",
+            "participant_id": "A",
+            "rule": "critical_ttc_causes_collision",
+            "source": "local:A:CRITICAL_TTC:bf16a42b6a",
+            "target": "local:A:COLLISION:43d1d47c7f",
+            "temporal_relation": "before"
+          }
+        ]
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "CRITICAL_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "COLLISION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        }
+      ],
+      "merged_from": [
+        "A|local:A:CRITICAL_TTC:bf16a42b6a->local:A:COLLISION:43d1d47c7f|CAUSES_OUTCOME"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "critical_ttc_causes_collision",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "fused:A:COLLISION:98b5b8976f",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 0.8085413253154047,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "critical_ttc_triggers_hard_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.8085413253154047,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "critical_ttc_triggers_hard_braking",
+            "source": "local:A:CRITICAL_TTC:bf16a42b6a",
+            "target": "local:A:HARD_BRAKE:8b96a47beb",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "CRITICAL_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_BRAKE:8b96a47beb",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "A|local:A:CRITICAL_TTC:bf16a42b6a->local:A:HARD_BRAKE:8b96a47beb|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "critical_ttc_triggers_hard_braking",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "fused:A:HARD_BRAKE:ed54083554",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.8221311871077376,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "critical_ttc_triggers_hard_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.8221311871077376,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "critical_ttc_triggers_hard_braking",
+            "source": "local:A:CRITICAL_TTC:bf16a42b6a",
+            "target": "local:A:HARD_DECELERATION:84723328e8",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "CRITICAL_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_DECELERATION:84723328e8",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [
+        "A|local:A:CRITICAL_TTC:bf16a42b6a->local:A:HARD_DECELERATION:84723328e8|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "critical_ttc_triggers_hard_braking",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.835949465602782,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.835949465602782,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:A:HARD_BRAKE:8b96a47beb",
+            "target": "local:A:DECELERATION:cddd620d6b",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_BRAKE:8b96a47beb",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.287760200263599,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:DECELERATION:cddd620d6b",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [
+        "A|local:A:HARD_BRAKE:8b96a47beb->local:A:DECELERATION:cddd620d6b|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:A:HARD_BRAKE:ed54083554",
+      "target": "fused:A:DECELERATION:f40dee2b11",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.835949465602782,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.835949465602782,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:A:HARD_BRAKE:8b96a47beb",
+            "target": "local:A:HARD_DECELERATION:84723328e8",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_BRAKE:8b96a47beb",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_DECELERATION:84723328e8",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [
+        "A|local:A:HARD_BRAKE:8b96a47beb->local:A:HARD_DECELERATION:84723328e8|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:A:HARD_BRAKE:ed54083554",
+      "target": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.5703926121319167,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "low_ttc_triggers_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5703926121319167,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "low_ttc_triggers_braking",
+            "source": "local:A:LOW_TTC:d36b93ea8d",
+            "target": "local:A:BRAKE_ONSET:9a571261e6",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "LOW_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:BRAKE_ONSET:9a571261e6",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "A|local:A:LOW_TTC:d36b93ea8d->local:A:BRAKE_ONSET:9a571261e6|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "low_ttc_triggers_braking",
+      "source": "fused:A:LOW_TTC:71c3227f2e",
+      "target": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.79952,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "ttc_escalates_to_critical"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.79952,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "ttc_escalates_to_critical",
+            "source": "local:A:LOW_TTC:d36b93ea8d",
+            "target": "local:A:CRITICAL_TTC:bf16a42b6a",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "LOW_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "CRITICAL_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        }
+      ],
+      "merged_from": [
+        "A|local:A:LOW_TTC:d36b93ea8d->local:A:CRITICAL_TTC:bf16a42b6a|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "ttc_escalates_to_critical",
+      "source": "fused:A:LOW_TTC:71c3227f2e",
+      "target": "fused:A:CRITICAL_TTC:28df495a57",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.5799797000438632,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "low_ttc_triggers_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5799797000438632,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "low_ttc_triggers_braking",
+            "source": "local:A:LOW_TTC:d36b93ea8d",
+            "target": "local:A:DECELERATION:cddd620d6b",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "LOW_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "DECELERATION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.287760200263599,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:DECELERATION:cddd620d6b",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [
+        "A|local:A:LOW_TTC:d36b93ea8d->local:A:DECELERATION:cddd620d6b|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "low_ttc_triggers_braking",
+      "source": "fused:A:LOW_TTC:71c3227f2e",
+      "target": "fused:A:DECELERATION:f40dee2b11",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.3825684229942158,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "closing_range_increases_ttc_risk"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.3825684229942158,
+            "edge_type": "INCREASES_RISK_OF",
+            "participant_id": "A",
+            "rule": "closing_range_increases_ttc_risk",
+            "source": "local:A:RANGE_DECREASING:d3e1d7d57d",
+            "target": "local:A:LOW_TTC:d36b93ea8d",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "INCREASES_RISK_OF",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RANGE_DECREASING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 4.787623453939553,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RANGE_DECREASING:d3e1d7d57d",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "LOW_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RANGE_DECREASING:d3e1d7d57d->local:A:LOW_TTC:d36b93ea8d|INCREASES_RISK_OF"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "closing_range_increases_ttc_risk",
+      "source": "fused:A:RANGE_DECREASING:0c540086bd",
+      "target": "fused:A:LOW_TTC:71c3227f2e",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.4004853311644003,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "rapid_closing_triggers_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.4004853311644004,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "rapid_closing_triggers_braking",
+            "source": "local:A:RAPID_CLOSING:cb5d1580df",
+            "target": "local:A:BRAKE_ONSET:9a571261e6",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:BRAKE_ONSET:9a571261e6",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RAPID_CLOSING:cb5d1580df->local:A:BRAKE_ONSET:9a571261e6|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "rapid_closing_triggers_braking",
+      "source": "fused:A:RAPID_CLOSING:1545bede33",
+      "target": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.370196944255234,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "unmitigated_conflict_causes_collision"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.370196944255234,
+            "edge_type": "CAUSES_OUTCOME",
+            "participant_id": "A",
+            "rule": "unmitigated_conflict_causes_collision",
+            "source": "local:A:RAPID_CLOSING:cb5d1580df",
+            "target": "local:A:COLLISION:43d1d47c7f",
+            "temporal_relation": "before"
+          }
+        ]
+      },
+      "edge_type": "CAUSES_OUTCOME",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "COLLISION",
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RAPID_CLOSING:cb5d1580df->local:A:COLLISION:43d1d47c7f|CAUSES_OUTCOME"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "unmitigated_conflict_causes_collision",
+      "source": "fused:A:RAPID_CLOSING:1545bede33",
+      "target": "fused:A:COLLISION:98b5b8976f",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 0.612393559668161,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "ttc_escalates_to_critical"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.612393559668161,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "ttc_escalates_to_critical",
+            "source": "local:A:RAPID_CLOSING:cb5d1580df",
+            "target": "local:A:CRITICAL_TTC:bf16a42b6a",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "CRITICAL_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RAPID_CLOSING:cb5d1580df->local:A:CRITICAL_TTC:bf16a42b6a|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "ttc_escalates_to_critical",
+      "source": "fused:A:RAPID_CLOSING:1545bede33",
+      "target": "fused:A:CRITICAL_TTC:28df495a57",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.4004853311644003,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "rapid_closing_triggers_braking"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.4004853311644004,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "rapid_closing_triggers_braking",
+            "source": "local:A:RAPID_CLOSING:cb5d1580df",
+            "target": "local:A:HARD_BRAKE:8b96a47beb",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_BRAKE:8b96a47beb",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RAPID_CLOSING:cb5d1580df->local:A:HARD_BRAKE:8b96a47beb|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "rapid_closing_triggers_braking",
+      "source": "fused:A:RAPID_CLOSING:1545bede33",
+      "target": "fused:A:HARD_BRAKE:ed54083554",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.5737743028155657,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "rapid_closing_shortens_ttc"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5737743028155657,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "rapid_closing_shortens_ttc",
+            "source": "local:A:RAPID_CLOSING:cb5d1580df",
+            "target": "local:A:LOW_TTC:d36b93ea8d",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "LOW_TTC",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        }
+      ],
+      "merged_from": [
+        "A|local:A:RAPID_CLOSING:cb5d1580df->local:A:LOW_TTC:d36b93ea8d|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "rapid_closing_shortens_ttc",
+      "source": "fused:A:RAPID_CLOSING:1545bede33",
+      "target": "fused:A:LOW_TTC:71c3227f2e",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.8221311871077376,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "throttle_command_accelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.8221311871077376,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "A",
+            "rule": "throttle_command_accelerates_vehicle",
+            "source": "local:A:THROTTLE_ONSET:e888319708",
+            "target": "local:A:ACCELERATION:9e745ff01c",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "THROTTLE_ONSET",
+            "local_t_end": 6.187751083841996,
+            "local_t_start": 0.6872496806538259,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:THROTTLE_ONSET:e888319708",
+          "t_end": 6.187751083841996,
+          "t_start": 0.6872496806538259
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "ACCELERATION",
+            "local_t_end": 1.9373636359238646,
+            "local_t_start": 1.687340844869857,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:ACCELERATION:9e745ff01c",
+          "t_end": 1.9373636359238646,
+          "t_start": 1.687340844869857
+        }
+      ],
+      "merged_from": [
+        "A|local:A:THROTTLE_ONSET:e888319708->local:A:ACCELERATION:9e745ff01c|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "throttle_command_accelerates_vehicle",
+      "source": "fused:A:THROTTLE_ONSET:7f7a5d55d3",
+      "target": "fused:A:ACCELERATION:b53766b18d",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.5890648704188065,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5890648704188065,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "B",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:B:BRAKE_ONSET:169894f62a",
+            "target": "local:B:DECELERATION:43f42d65fc",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:BRAKE_ONSET:169894f62a",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "DECELERATION",
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.092178619043421,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:DECELERATION:43f42d65fc",
+          "t_end": 5.737710725132065,
+          "t_start": 4.6376106190434205
+        }
+      ],
+      "merged_from": [
+        "B|local:B:BRAKE_ONSET:169894f62a->local:B:DECELERATION:43f42d65fc|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:B:BRAKE_ONSET:35eafbd066",
+      "target": "fused:B:DECELERATION:21abbe462d",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.5890648704188065,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5890648704188065,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "B",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:B:BRAKE_ONSET:169894f62a",
+            "target": "local:B:HARD_DECELERATION:7065433c5d",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "BRAKE_ONSET",
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:BRAKE_ONSET:169894f62a",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.142183169320177,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_DECELERATION:7065433c5d",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        }
+      ],
+      "merged_from": [
+        "B|local:B:BRAKE_ONSET:169894f62a->local:B:HARD_DECELERATION:7065433c5d|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:B:BRAKE_ONSET:35eafbd066",
+      "target": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.6651877094345658,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "target_deceleration_closes_gap"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.6651877094345658,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "target_deceleration_closes_gap",
+            "source": "local:A:TARGET_DECELERATION:944dccd58e",
+            "target": "local:A:RANGE_DECREASING:d3e1d7d57d",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "TARGET_DECELERATION",
+            "local_t_end": 5.737710059944782,
+            "local_t_start": 4.5876052210963465,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:TARGET_DECELERATION:944dccd58e",
+          "t_end": 5.737710059944782,
+          "t_start": 4.5876052210963465
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RANGE_DECREASING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 4.787623453939553,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RANGE_DECREASING:d3e1d7d57d",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        }
+      ],
+      "merged_from": [
+        "A|local:A:TARGET_DECELERATION:944dccd58e->local:A:RANGE_DECREASING:d3e1d7d57d|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "target_deceleration_closes_gap",
+      "source": "fused:B:DECELERATION:21abbe462d",
+      "target": "fused:A:RANGE_DECREASING:0c540086bd",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.665096893794681,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "target_deceleration_closes_gap"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.665096893794681,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "target_deceleration_closes_gap",
+            "source": "local:A:TARGET_DECELERATION:944dccd58e",
+            "target": "local:A:RAPID_CLOSING:cb5d1580df",
+            "temporal_relation": "overlaps"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "TARGET_DECELERATION",
+            "local_t_end": 5.737710059944782,
+            "local_t_start": 4.5876052210963465,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:TARGET_DECELERATION:944dccd58e",
+          "t_end": 5.737710059944782,
+          "t_start": 4.5876052210963465
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RAPID_CLOSING",
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        }
+      ],
+      "merged_from": [
+        "A|local:A:TARGET_DECELERATION:944dccd58e->local:A:RAPID_CLOSING:cb5d1580df|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "target_deceleration_closes_gap",
+      "source": "fused:B:DECELERATION:21abbe462d",
+      "target": "fused:A:RAPID_CLOSING:1545bede33",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.5655118356109733,
+      "detail": {
+        "contributing_participants": [
+          "A"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "target_deceleration_closes_gap"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5655118356109733,
+            "edge_type": "TRIGGERS",
+            "participant_id": "A",
+            "rule": "target_deceleration_closes_gap",
+            "source": "local:A:TARGET_DECELERATION:91dcdc8007",
+            "target": "local:A:RANGE_DECREASING:83ad289a0e",
+            "temporal_relation": "during"
+          }
+        ]
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "TARGET_DECELERATION",
+            "local_t_end": 1.1372907045510399,
+            "local_t_start": 0.887267913497032,
+            "part": "cause",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:TARGET_DECELERATION:91dcdc8007",
+          "t_end": 1.1372907045510399,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "RANGE_DECREASING",
+            "local_t_end": 1.687340844869857,
+            "local_t_start": 0.887267913497032,
+            "part": "effect",
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RANGE_DECREASING:83ad289a0e",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        }
+      ],
+      "merged_from": [
+        "A|local:A:TARGET_DECELERATION:91dcdc8007->local:A:RANGE_DECREASING:83ad289a0e|TRIGGERS"
+      ],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "target_deceleration_closes_gap",
+      "source": "fused:B:DECELERATION:4cb9f85671",
+      "target": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 0.5890648704188065,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5890648704188065,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "B",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:B:HARD_BRAKE:6cb6c8efbf",
+            "target": "local:B:DECELERATION:43f42d65fc",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_BRAKE:6cb6c8efbf",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "DECELERATION",
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.092178619043421,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:DECELERATION:43f42d65fc",
+          "t_end": 5.737710725132065,
+          "t_start": 4.6376106190434205
+        }
+      ],
+      "merged_from": [
+        "B|local:B:HARD_BRAKE:6cb6c8efbf->local:B:DECELERATION:43f42d65fc|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:B:HARD_BRAKE:e5295c6141",
+      "target": "fused:B:DECELERATION:21abbe462d",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.5890648704188065,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "brake_command_decelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.5890648704188065,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "B",
+            "rule": "brake_command_decelerates_vehicle",
+            "source": "local:B:HARD_BRAKE:6cb6c8efbf",
+            "target": "local:B:HARD_DECELERATION:7065433c5d",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_BRAKE",
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_BRAKE:6cb6c8efbf",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "HARD_DECELERATION",
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.142183169320177,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_DECELERATION:7065433c5d",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        }
+      ],
+      "merged_from": [
+        "B|local:B:HARD_BRAKE:6cb6c8efbf->local:B:HARD_DECELERATION:7065433c5d|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "brake_command_decelerates_vehicle",
+      "source": "fused:B:HARD_BRAKE:e5295c6141",
+      "target": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.7194985530157851,
+      "detail": {
+        "contributing_participants": [
+          "B"
+        ],
+        "n_contributors": 1,
+        "origin": "local",
+        "rules": [
+          "throttle_command_accelerates_vehicle"
+        ],
+        "source_edges": [
+          {
+            "confidence": 0.7194985530157851,
+            "edge_type": "CONTRIBUTES_TO",
+            "participant_id": "B",
+            "rule": "throttle_command_accelerates_vehicle",
+            "source": "local:B:THROTTLE_ONSET:bec36830f8",
+            "target": "local:B:ACCELERATION:8e5b252adb",
+            "temporal_relation": "contains"
+          }
+        ]
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "THROTTLE_ONSET",
+            "local_t_end": 3.992169518489908,
+            "local_t_start": -0.10820360420413389,
+            "part": "cause",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:THROTTLE_ONSET:bec36830f8",
+          "t_end": 4.537601518489908,
+          "t_start": 0.43722839579586614
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "event_type": "ACCELERATION",
+            "local_t_end": 1.6919602057591039,
+            "local_t_start": 0.8418828510542417,
+            "part": "effect",
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:ACCELERATION:8e5b252adb",
+          "t_end": 2.237392205759104,
+          "t_start": 1.3873148510542417
+        }
+      ],
+      "merged_from": [
+        "B|local:B:THROTTLE_ONSET:bec36830f8->local:B:ACCELERATION:8e5b252adb|CONTRIBUTES_TO"
+      ],
+      "owners": [
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "throttle_command_accelerates_vehicle",
+      "source": "fused:B:THROTTLE_ONSET:14b380d2d6",
+      "target": "fused:B:ACCELERATION:b987e7db06",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.686669,
+      "detail": {
+        "cause_vehicles": [
+          "A",
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 1.0,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.85,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 1.0
+        },
+        "cross_participant": true,
+        "delta_t_s": -0.0,
+        "effect_vehicles": [
+          "A"
+        ],
+        "max_lag_s": 2.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "pair_to_actor",
+        "rule": "global_impact_forces_deceleration",
+        "rule_description": "The impact itself decelerates the vehicles that were struck.",
+        "source_t_common": 7.087833,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:A:COLLISION:98b5b8976f",
+          "fused:A:DECELERATION:f40dee2b11"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 7.087833,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "COLLISION",
+            "owners": [
+              "A",
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:COLLISION:98b5b8976f",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "event_type": "DECELERATION",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:DECELERATION:f40dee2b11",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "global_impact_forces_deceleration",
+      "source": "fused:A:COLLISION:98b5b8976f",
+      "target": "fused:A:DECELERATION:f40dee2b11",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 0.38436,
+      "detail": {
+        "cause_vehicles": [
+          "A",
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 0.85,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.951225
+        },
+        "cross_participant": false,
+        "delta_t_s": 0.150014,
+        "effect_vehicles": [
+          "A"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 1,
+        "origin": "post_fusion_inference",
+        "relation": "pair_to_actor",
+        "rule": "global_risk_triggers_braking",
+        "rule_description": "A vehicle that sees the margin collapse brakes. After fusion the risk may have been measured by the other vehicle in the pair.",
+        "source_t_common": 6.987824,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:A:CRITICAL_TTC:28df495a57",
+          "fused:A:BRAKE_ONSET:24e212e5b4"
+        ],
+        "supporting_participants": [
+          "A"
+        ],
+        "target_t_common": 7.137838,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "owners": [
+              "A"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:CRITICAL_TTC:28df495a57",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "event_type": "BRAKE_ONSET",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:BRAKE_ONSET:24e212e5b4",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "global_risk_triggers_braking",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.38436,
+      "detail": {
+        "cause_vehicles": [
+          "A",
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 0.85,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.951225
+        },
+        "cross_participant": false,
+        "delta_t_s": 0.150014,
+        "effect_vehicles": [
+          "A"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 1,
+        "origin": "post_fusion_inference",
+        "relation": "pair_to_actor",
+        "rule": "global_risk_triggers_braking",
+        "rule_description": "A vehicle that sees the margin collapse brakes. After fusion the risk may have been measured by the other vehicle in the pair.",
+        "source_t_common": 6.987824,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:A:LOW_TTC:71c3227f2e",
+          "fused:A:HARD_BRAKE:ed54083554"
+        ],
+        "supporting_participants": [
+          "A"
+        ],
+        "target_t_common": 7.137838,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "LOW_TTC",
+            "owners": [
+              "A"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:LOW_TTC:71c3227f2e",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "event_type": "HARD_BRAKE",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:HARD_BRAKE:ed54083554",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "global_risk_triggers_braking",
+      "source": "fused:A:LOW_TTC:71c3227f2e",
+      "target": "fused:A:HARD_BRAKE:ed54083554",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.39082,
+      "detail": {
+        "cause_vehicles": [
+          "A",
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 0.85,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.967213
+        },
+        "cross_participant": false,
+        "delta_t_s": 0.100009,
+        "effect_vehicles": [
+          "A"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 1,
+        "origin": "post_fusion_inference",
+        "relation": "pair_to_actor",
+        "rule": "global_risk_triggers_braking",
+        "rule_description": "A vehicle that sees the margin collapse brakes. After fusion the risk may have been measured by the other vehicle in the pair.",
+        "source_t_common": 6.987824,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:A:LOW_TTC:71c3227f2e",
+          "fused:A:HARD_DECELERATION:036b9cd84c"
+        ],
+        "supporting_participants": [
+          "A"
+        ],
+        "target_t_common": 7.087833,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "LOW_TTC",
+            "owners": [
+              "A"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:LOW_TTC:71c3227f2e",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:HARD_DECELERATION:036b9cd84c",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "global_risk_triggers_braking",
+      "source": "fused:A:LOW_TTC:71c3227f2e",
+      "target": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.353691,
+      "detail": {
+        "cause_vehicles": [
+          "A",
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.8,
+          "support_factor": 0.85,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.76591
+        },
+        "cross_participant": false,
+        "delta_t_s": 0.800073,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 1,
+        "origin": "post_fusion_inference",
+        "relation": "same_pair",
+        "rule": "global_ttc_escalates_to_critical",
+        "rule_description": "A low time-to-collision that is not resolved becomes critical.",
+        "source_t_common": 6.187751,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:A:RANGE_DECREASING:0c540086bd",
+          "fused:A:CRITICAL_TTC:28df495a57"
+        ],
+        "supporting_participants": [
+          "A"
+        ],
+        "target_t_common": 6.987824,
+        "time_domain": "common"
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:0c540086bd",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        },
+        {
+          "detail": {
+            "event_type": "CRITICAL_TTC",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:CRITICAL_TTC:28df495a57",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A"
+      ],
+      "provenance": "fused",
+      "rule": "global_ttc_escalates_to_critical",
+      "source": "fused:A:RANGE_DECREASING:0c540086bd",
+      "target": "fused:A:CRITICAL_TTC:28df495a57",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.251582,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.9518,
+          "node_weight": 0.6,
+          "rule_prior": 0.4,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.967213
+        },
+        "cross_participant": true,
+        "delta_t_s": -0.10001,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_acceleration_closes_gap",
+        "rule_description": "Closure is relative: a vehicle speeding up shortens the gap to whatever is ahead of it just as the vehicle ahead braking does. Stated so the reconstruction stays symmetric.",
+        "source_t_common": 1.437319,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:ACCELERATION:b987e7db06",
+          "fused:A:RANGE_DECREASING:2d7f46f6d5"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 1.337309,
+        "time_domain": "common"
+      },
+      "edge_type": "INCREASES_RISK_OF",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "ACCELERATION",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:ACCELERATION:b987e7db06",
+          "t_end": 2.237392205759104,
+          "t_start": 1.3873148510542417
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_acceleration_closes_gap",
+      "source": "fused:B:ACCELERATION:b987e7db06",
+      "target": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.250454,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.65,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.567385
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.700154,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "global_braking_prevents_collision",
+        "rule_description": "Braking hard enough that the encounter ends without contact is preventive behaviour, and is reported as such rather than as a contribution to an outcome that did not happen.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:BRAKE_ONSET:35eafbd066",
+          "fused:A:NEAR_MISS:4d84636778"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.28776,
+        "time_domain": "common"
+      },
+      "edge_type": "PREVENTS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "BRAKE_ONSET",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:BRAKE_ONSET:35eafbd066",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "NEAR_MISS",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:NEAR_MISS:4d84636778",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "global_braking_prevents_collision",
+      "source": "fused:B:BRAKE_ONSET:35eafbd066",
+      "target": "fused:A:NEAR_MISS:4d84636778",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.278863,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.586618
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.600145,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_braking_contributes_to_closing",
+        "rule_description": "The braking command itself is only ever in the braking vehicle's own log; the gap it closes is only ever in the follower's. Linking them is the clearest example of a claim that needs both accounts.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:BRAKE_ONSET:35eafbd066",
+          "fused:A:RANGE_DECREASING:0c540086bd"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "BRAKE_ONSET",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:BRAKE_ONSET:35eafbd066",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:0c540086bd",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_braking_contributes_to_closing",
+      "source": "fused:B:BRAKE_ONSET:35eafbd066",
+      "target": "fused:A:RANGE_DECREASING:0c540086bd",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.278863,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.586618
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.600145,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_braking_contributes_to_closing",
+        "rule_description": "The braking command itself is only ever in the braking vehicle's own log; the gap it closes is only ever in the follower's. Linking them is the clearest example of a claim that needs both accounts.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:BRAKE_ONSET:35eafbd066",
+          "fused:A:RAPID_CLOSING:1545bede33"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "BRAKE_ONSET",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:BRAKE_ONSET:35eafbd066",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "RAPID_CLOSING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RAPID_CLOSING:1545bede33",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_braking_contributes_to_closing",
+      "source": "fused:B:BRAKE_ONSET:35eafbd066",
+      "target": "fused:A:RAPID_CLOSING:1545bede33",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.250454,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.65,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.567385
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.700154,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "global_braking_prevents_collision",
+        "rule_description": "Braking hard enough that the encounter ends without contact is preventive behaviour, and is reported as such rather than as a contribution to an outcome that did not happen.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_BRAKE:e5295c6141",
+          "fused:A:NEAR_MISS:4d84636778"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.28776,
+        "time_domain": "common"
+      },
+      "edge_type": "PREVENTS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_BRAKE",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_BRAKE:e5295c6141",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "NEAR_MISS",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:NEAR_MISS:4d84636778",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "global_braking_prevents_collision",
+      "source": "fused:B:HARD_BRAKE:e5295c6141",
+      "target": "fused:A:NEAR_MISS:4d84636778",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.278863,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.586618
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.600145,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_braking_contributes_to_closing",
+        "rule_description": "The braking command itself is only ever in the braking vehicle's own log; the gap it closes is only ever in the follower's. Linking them is the clearest example of a claim that needs both accounts.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_BRAKE:e5295c6141",
+          "fused:A:RANGE_DECREASING:0c540086bd"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_BRAKE",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_BRAKE:e5295c6141",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:0c540086bd",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_braking_contributes_to_closing",
+      "source": "fused:B:HARD_BRAKE:e5295c6141",
+      "target": "fused:A:RANGE_DECREASING:0c540086bd",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.278863,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.7,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.586618
+        },
+        "cross_participant": true,
+        "delta_t_s": 1.600145,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_braking_contributes_to_closing",
+        "rule_description": "The braking command itself is only ever in the braking vehicle's own log; the gap it closes is only ever in the follower's. Linking them is the clearest example of a claim that needs both accounts.",
+        "source_t_common": 4.587606,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_BRAKE:e5295c6141",
+          "fused:A:RAPID_CLOSING:1545bede33"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "CONTRIBUTES_TO",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_BRAKE",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_BRAKE:e5295c6141",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "event_type": "RAPID_CLOSING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RAPID_CLOSING:1545bede33",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_braking_contributes_to_closing",
+      "source": "fused:B:HARD_BRAKE:e5295c6141",
+      "target": "fused:A:RAPID_CLOSING:1545bede33",
+      "temporal_relation": "contains"
+    },
+    {
+      "confidence": 0.455277,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.9518,
+          "node_weight": 0.6,
+          "rule_prior": 0.8,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.875163
+        },
+        "cross_participant": true,
+        "delta_t_s": 0.400035,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_deceleration_closes_gap",
+        "rule_description": "A vehicle slowing shortens the gap to anything following it. The deceleration and the closing range are routinely measured by different vehicles, which is why this edge cannot be proposed before fusion.",
+        "source_t_common": 0.937274,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_DECELERATION:58461a17f0",
+          "fused:A:RANGE_DECREASING:2d7f46f6d5"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 1.337309,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_DECELERATION:58461a17f0",
+          "t_end": 1.1372920996704585,
+          "t_start": 0.8872693482866756
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_deceleration_closes_gap",
+      "source": "fused:B:HARD_DECELERATION:58461a17f0",
+      "target": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+      "temporal_relation": "during"
+    },
+    {
+      "confidence": 0.361397,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.65,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.818716
+        },
+        "cross_participant": true,
+        "delta_t_s": 0.600054,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 3.0,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "global_braking_prevents_collision",
+        "rule_description": "Braking hard enough that the encounter ends without contact is preventive behaviour, and is reported as such rather than as a contribution to an outcome that did not happen.",
+        "source_t_common": 5.687706,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_DECELERATION:95bc3c4133",
+          "fused:A:NEAR_MISS:4d84636778"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.28776,
+        "time_domain": "common"
+      },
+      "edge_type": "PREVENTS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_DECELERATION:95bc3c4133",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        },
+        {
+          "detail": {
+            "event_type": "NEAR_MISS",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:NEAR_MISS:4d84636778",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "global_braking_prevents_collision",
+      "source": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "target": "fused:A:NEAR_MISS:4d84636778",
+      "temporal_relation": "before"
+    },
+    {
+      "confidence": 0.459874,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.8,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.846469
+        },
+        "cross_participant": true,
+        "delta_t_s": 0.500045,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_deceleration_closes_gap",
+        "rule_description": "A vehicle slowing shortens the gap to anything following it. The deceleration and the closing range are routinely measured by different vehicles, which is why this edge cannot be proposed before fusion.",
+        "source_t_common": 5.687706,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_DECELERATION:95bc3c4133",
+          "fused:A:RANGE_DECREASING:0c540086bd"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_DECELERATION:95bc3c4133",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        },
+        {
+          "detail": {
+            "event_type": "RANGE_DECREASING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RANGE_DECREASING:0c540086bd",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_deceleration_closes_gap",
+      "source": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "target": "fused:A:RANGE_DECREASING:0c540086bd",
+      "temporal_relation": "overlaps"
+    },
+    {
+      "confidence": 0.459874,
+      "detail": {
+        "cause_vehicles": [
+          "B"
+        ],
+        "clock_slack_s": 0.0,
+        "confidence_terms": {
+          "clock_factor": 0.812722,
+          "identity_factor": 0.840639,
+          "node_factor": 0.994,
+          "node_weight": 0.6,
+          "rule_prior": 0.8,
+          "support_factor": 1.0,
+          "temporal_decay_s": 3.0,
+          "temporal_factor": 0.846469
+        },
+        "cross_participant": true,
+        "delta_t_s": 0.500045,
+        "effect_vehicles": [
+          "A",
+          "B"
+        ],
+        "max_lag_s": 2.5,
+        "n_independent_observers": 2,
+        "origin": "post_fusion_inference",
+        "relation": "actor_in_pair",
+        "rule": "remote_deceleration_closes_gap",
+        "rule_description": "A vehicle slowing shortens the gap to anything following it. The deceleration and the closing range are routinely measured by different vehicles, which is why this edge cannot be proposed before fusion.",
+        "source_t_common": 5.687706,
+        "subject_participants": [
+          "A",
+          "B"
+        ],
+        "supporting_events": [
+          "fused:B:HARD_DECELERATION:95bc3c4133",
+          "fused:A:RAPID_CLOSING:1545bede33"
+        ],
+        "supporting_participants": [
+          "A",
+          "B"
+        ],
+        "target_t_common": 6.187751,
+        "time_domain": "common"
+      },
+      "edge_type": "TRIGGERS",
+      "evidence": [
+        {
+          "detail": {
+            "event_type": "HARD_DECELERATION",
+            "owners": [
+              "B"
+            ],
+            "part": "cause",
+            "time_domain": "common",
+            "vehicles": [
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:B:HARD_DECELERATION:95bc3c4133",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        },
+        {
+          "detail": {
+            "event_type": "RAPID_CLOSING",
+            "owners": [
+              "A"
+            ],
+            "part": "effect",
+            "time_domain": "common",
+            "vehicles": [
+              "A",
+              "B"
+            ]
+          },
+          "kind": "event",
+          "ref": "fused:A:RAPID_CLOSING:1545bede33",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        }
+      ],
+      "merged_from": [],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "provenance": "fused",
+      "rule": "remote_deceleration_closes_gap",
+      "source": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "target": "fused:A:RAPID_CLOSING:1545bede33",
+      "temporal_relation": "overlaps"
+    }
+  ],
+  "graph_kind": "causal",
+  "meta": {
+    "fusion": {
+      "confidence_method": "noisy_or",
+      "config_hash": "0f59f8080162c85a",
+      "enforced_dag": true,
+      "n_contradictions": 0,
+      "n_inferred_edges": 16,
+      "n_merged_groups": 3,
+      "n_rejected_edges": 0,
+      "post_fusion_reasoning": true
+    },
+    "graph_role": "global_inferred",
+    "time_domain": "common",
+    "time_reference": "A"
+  },
+  "nodes": [
+    {
+      "confidence": 0.48,
+      "detail": {},
+      "event_id": "fused:A:RADAR_TRACK_APPEARED:7cc87e90ba",
+      "event_type": "RADAR_TRACK_APPEARED",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 0.887267913497032,
+            "local_t_start": 0.887267913497032,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 0.887267913497032,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 0.887267913497032,
+            "common_t_peak": 0.887267913497032,
+            "common_t_start": 0.887267913497032,
+            "local_t_end": 0.887267913497032,
+            "local_t_peak": 0.887267913497032,
+            "local_t_start": 0.887267913497032,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 0.887267913497032,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "confidence": 0.48,
+            "event_type": "RADAR_TRACK_APPEARED",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RADAR_TRACK_APPEARED:d50963eaad",
+          "t_end": 0.887267913497032,
+          "t_start": 0.887267913497032
+        }
+      ],
+      "merged_from": [
+        "local:A:RADAR_TRACK_APPEARED:d50963eaad"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 0.887267913497032,
+      "t_peak": 0.887267913497032,
+      "t_start": 0.887267913497032,
+      "values": {
+        "lateral_offset_m": -0.2727352285431137,
+        "longitudinal_m": 25.406178503707476,
+        "range_m": 25.40764236734956
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:DECELERATION:4cb9f85671",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.1372907045510399,
+            "local_t_start": 0.887267913497032,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 1.1372907045510399,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.1372907045510399,
+            "common_t_peak": 0.887267913497032,
+            "common_t_start": 0.887267913497032,
+            "local_t_end": 1.1372907045510399,
+            "local_t_peak": 0.887267913497032,
+            "local_t_start": 0.887267913497032,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 1.1372907045510399,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 0.6918692002239718,
+            "local_t_start": 0.34183734828667556,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 1.2373012002239718,
+          "t_start": 0.8872693482866756
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.2373012002239718,
+            "common_t_peak": 0.9372738985634321,
+            "common_t_start": 0.8872693482866756,
+            "local_t_end": 0.6918692002239718,
+            "local_t_peak": 0.3918418985634321,
+            "local_t_start": 0.34183734828667556,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 1.2373012002239718,
+          "t_start": 0.8872693482866756
+        },
+        {
+          "detail": {
+            "confidence": 0.555,
+            "event_type": "TARGET_DECELERATION",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:TARGET_DECELERATION:91dcdc8007",
+          "t_end": 1.1372907045510399,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "DECELERATION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:DECELERATION:67ef2ff8ac",
+          "t_end": 1.2373012002239718,
+          "t_start": 0.8872693482866756
+        }
+      ],
+      "merged_from": [
+        "local:A:TARGET_DECELERATION:91dcdc8007",
+        "local:B:DECELERATION:67ef2ff8ac"
+      ],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar",
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 1.2373012002239718,
+      "t_peak": 0.919426103250344,
+      "t_start": 0.887267913497032,
+      "values": {
+        "accel_long_mps2": -14.075272157542868,
+        "target_accel_long_mps2": -14.690743115145258
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:HARD_DECELERATION:58461a17f0",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 0.5918600996704585,
+            "local_t_start": 0.34183734828667556,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 1.1372920996704585,
+          "t_start": 0.8872693482866756
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.1372920996704585,
+            "common_t_peak": 0.9372738985634321,
+            "common_t_start": 0.8872693482866756,
+            "local_t_end": 0.5918600996704585,
+            "local_t_peak": 0.3918418985634321,
+            "local_t_start": 0.34183734828667556,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 1.1372920996704585,
+          "t_start": 0.8872693482866756
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "HARD_DECELERATION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_DECELERATION:aa9a7d08de",
+          "t_end": 1.1372920996704585,
+          "t_start": 0.8872693482866756
+        }
+      ],
+      "merged_from": [
+        "local:B:HARD_DECELERATION:aa9a7d08de"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 1.1372920996704585,
+      "t_peak": 0.9372738985634321,
+      "t_start": 0.8872693482866756,
+      "values": {
+        "accel_long_mps2": -14.075272157542868
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:THROTTLE_ONSET:14b380d2d6",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 3.992169518489908,
+            "local_t_start": -0.10820360420413389,
+            "participant": "B"
+          },
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 4.537601518489908,
+          "t_start": 0.43722839579586614
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 4.537601518489908,
+            "common_t_peak": 0.9372738985634321,
+            "common_t_start": 0.43722839579586614,
+            "local_t_end": 3.992169518489908,
+            "local_t_peak": 0.3918418985634321,
+            "local_t_start": -0.10820360420413389,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 4.537601518489908,
+          "t_start": 0.43722839579586614
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "THROTTLE_ONSET",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:THROTTLE_ONSET:bec36830f8",
+          "t_end": 4.537601518489908,
+          "t_start": 0.43722839579586614
+        }
+      ],
+      "merged_from": [
+        "local:B:THROTTLE_ONSET:bec36830f8"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 4.537601518489908,
+      "t_peak": 0.9372738985634321,
+      "t_start": 0.43722839579586614,
+      "values": {
+        "throttle_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 0.8493333333333334,
+      "detail": {},
+      "event_id": "fused:A:RANGE_DECREASING:2d7f46f6d5",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.687340844869857,
+            "local_t_start": 0.887267913497032,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.687340844869857,
+            "common_t_peak": 1.337308937394246,
+            "common_t_start": 0.887267913497032,
+            "local_t_end": 1.687340844869857,
+            "local_t_peak": 1.337308937394246,
+            "local_t_start": 0.887267913497032,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        },
+        {
+          "detail": {
+            "confidence": 0.8493333333333334,
+            "event_type": "RANGE_DECREASING",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RANGE_DECREASING:83ad289a0e",
+          "t_end": 1.687340844869857,
+          "t_start": 0.887267913497032
+        }
+      ],
+      "merged_from": [
+        "local:A:RANGE_DECREASING:83ad289a0e"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 1.687340844869857,
+      "t_peak": 1.337308937394246,
+      "t_start": 0.887267913497032,
+      "values": {
+        "closing_rate_mps": 4.302663856082493
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:ACCELERATION:b987e7db06",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.2419192532682946,
+            "local_t_start": 0.8418828510542417,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 1.7873512532682945,
+          "t_start": 1.3873148510542417
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.6919602057591039,
+            "local_t_start": 1.3919329040985642,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 2.237392205759104,
+          "t_start": 1.937364904098564
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 2.237392205759104,
+            "common_t_peak": 1.4373194013309982,
+            "common_t_start": 1.3873148510542417,
+            "local_t_end": 1.6919602057591039,
+            "local_t_peak": 0.8918874013309982,
+            "local_t_start": 0.8418828510542417,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 2.237392205759104,
+          "t_start": 1.3873148510542417
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "ACCELERATION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:ACCELERATION:8e5b252adb",
+          "t_end": 2.237392205759104,
+          "t_start": 1.3873148510542417
+        }
+      ],
+      "merged_from": [
+        "local:B:ACCELERATION:8e5b252adb"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 2.237392205759104,
+      "t_peak": 1.4373194013309982,
+      "t_start": 1.3873148510542417,
+      "values": {
+        "accel_long_mps2": 12.835628234579108
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:DECELERATION:9f9fc3cad0",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.5373271702374525,
+            "local_t_start": 1.437318053815849,
+            "participant": "A"
+          },
+          "kind": "telemetry",
+          "ref": "A",
+          "t_end": 1.5373271702374525,
+          "t_start": 1.437318053815849
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.5373271702374525,
+            "common_t_peak": 1.4873226120266505,
+            "common_t_start": 1.437318053815849,
+            "local_t_end": 1.5373271702374525,
+            "local_t_peak": 1.4873226120266505,
+            "local_t_start": 1.437318053815849,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 1.5373271702374525,
+          "t_start": 1.437318053815849
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "DECELERATION",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:DECELERATION:18a44fa366",
+          "t_end": 1.5373271702374525,
+          "t_start": 1.437318053815849
+        }
+      ],
+      "merged_from": [
+        "local:A:DECELERATION:18a44fa366"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 1.5373271702374525,
+      "t_peak": 1.4873226120266505,
+      "t_start": 1.437318053815849,
+      "values": {
+        "accel_long_mps2": -4.117863754824
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:THROTTLE_ONSET:7f7a5d55d3",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.187751083841996,
+            "local_t_start": 0.6872496806538259,
+            "participant": "A"
+          },
+          "kind": "controls",
+          "ref": "A",
+          "t_end": 6.187751083841996,
+          "t_start": 0.6872496806538259
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.187751083841996,
+            "common_t_peak": 1.6373362866590555,
+            "common_t_start": 0.6872496806538259,
+            "local_t_end": 6.187751083841996,
+            "local_t_peak": 1.6373362866590555,
+            "local_t_start": 0.6872496806538259,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.187751083841996,
+          "t_start": 0.6872496806538259
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "THROTTLE_ONSET",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:THROTTLE_ONSET:e888319708",
+          "t_end": 6.187751083841996,
+          "t_start": 0.6872496806538259
+        }
+      ],
+      "merged_from": [
+        "local:A:THROTTLE_ONSET:e888319708"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 6.187751083841996,
+      "t_peak": 1.6373362866590555,
+      "t_start": 0.6872496806538259,
+      "values": {
+        "throttle_cmd": 0.8821942806243896
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:ACCELERATION:b53766b18d",
+      "event_type": "ACCELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 1.9373636359238646,
+            "local_t_start": 1.687340844869857,
+            "participant": "A"
+          },
+          "kind": "telemetry",
+          "ref": "A",
+          "t_end": 1.9373636359238646,
+          "t_start": 1.687340844869857
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 1.9373636359238646,
+            "common_t_peak": 1.7373454030806585,
+            "common_t_start": 1.687340844869857,
+            "local_t_end": 1.9373636359238646,
+            "local_t_peak": 1.7373454030806585,
+            "local_t_start": 1.687340844869857,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 1.9373636359238646,
+          "t_start": 1.687340844869857
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "ACCELERATION",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:ACCELERATION:9e745ff01c",
+          "t_end": 1.9373636359238646,
+          "t_start": 1.687340844869857
+        }
+      ],
+      "merged_from": [
+        "local:A:ACCELERATION:9e745ff01c"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 1.9373636359238646,
+      "t_peak": 1.7373454030806585,
+      "t_start": 1.687340844869857,
+      "values": {
+        "accel_long_mps2": 2.760721798566615
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:BRAKE_ONSET:35eafbd066",
+      "event_type": "BRAKE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "participant": "B"
+          },
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 9.688070196995836,
+            "common_t_peak": 4.5876060687666635,
+            "common_t_start": 4.5876060687666635,
+            "local_t_end": 9.142638196995836,
+            "local_t_peak": 4.042174068766664,
+            "local_t_start": 4.042174068766664,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "BRAKE_ONSET",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:BRAKE_ONSET:169894f62a",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        }
+      ],
+      "merged_from": [
+        "local:B:BRAKE_ONSET:169894f62a"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 9.688070196995836,
+      "t_peak": 4.5876060687666635,
+      "t_start": 4.5876060687666635,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:HARD_BRAKE:e5295c6141",
+      "event_type": "HARD_BRAKE",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 9.142638196995836,
+            "local_t_start": 4.042174068766664,
+            "participant": "B"
+          },
+          "kind": "controls",
+          "ref": "B",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 9.688070196995836,
+            "common_t_peak": 4.5876060687666635,
+            "common_t_start": 4.5876060687666635,
+            "local_t_end": 9.142638196995836,
+            "local_t_peak": 4.042174068766664,
+            "local_t_start": 4.042174068766664,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "HARD_BRAKE",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_BRAKE:6cb6c8efbf",
+          "t_end": 9.688070196995836,
+          "t_start": 4.5876060687666635
+        }
+      ],
+      "merged_from": [
+        "local:B:HARD_BRAKE:6cb6c8efbf"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 9.688070196995836,
+      "t_peak": 4.5876060687666635,
+      "t_start": 4.5876060687666635,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:DECELERATION:21abbe462d",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 5.737710059944782,
+            "local_t_start": 4.5876052210963465,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 5.737710059944782,
+          "t_start": 4.5876052210963465
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 5.737710059944782,
+            "common_t_peak": 5.637700943523179,
+            "common_t_start": 4.5876052210963465,
+            "local_t_end": 5.737710059944782,
+            "local_t_peak": 5.637700943523179,
+            "local_t_start": 4.5876052210963465,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 5.737710059944782,
+          "t_start": 4.5876052210963465
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.092178619043421,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 5.737710725132065,
+          "t_start": 4.6376106190434205
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 5.737710725132065,
+            "common_t_peak": 5.687706174855309,
+            "common_t_start": 4.6376106190434205,
+            "local_t_end": 5.1922787251320655,
+            "local_t_peak": 5.142274174855309,
+            "local_t_start": 4.092178619043421,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 5.737710725132065,
+          "t_start": 4.6376106190434205
+        },
+        {
+          "detail": {
+            "confidence": 0.9973913043478262,
+            "event_type": "TARGET_DECELERATION",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:TARGET_DECELERATION:944dccd58e",
+          "t_end": 5.737710059944782,
+          "t_start": 4.5876052210963465
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "DECELERATION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:DECELERATION:43f42d65fc",
+          "t_end": 5.737710725132065,
+          "t_start": 4.6376106190434205
+        }
+      ],
+      "merged_from": [
+        "local:A:TARGET_DECELERATION:944dccd58e",
+        "local:B:DECELERATION:43f42d65fc"
+      ],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar",
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 5.737710725132065,
+      "t_peak": 5.662736213889722,
+      "t_start": 4.5876052210963465,
+      "values": {
+        "accel_long_mps2": -28.149275246895215,
+        "target_accel_long_mps2": -26.425252711474947
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:HARD_DECELERATION:95bc3c4133",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 5.1922787251320655,
+            "local_t_start": 4.142183169320177,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 5.737710725132065,
+            "common_t_peak": 5.687706174855309,
+            "common_t_start": 4.687615169320177,
+            "local_t_end": 5.1922787251320655,
+            "local_t_peak": 5.142274174855309,
+            "local_t_start": 4.142183169320177,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "HARD_DECELERATION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:HARD_DECELERATION:7065433c5d",
+          "t_end": 5.737710725132065,
+          "t_start": 4.687615169320177
+        }
+      ],
+      "merged_from": [
+        "local:B:HARD_DECELERATION:7065433c5d"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 5.737710725132065,
+      "t_peak": 5.687706174855309,
+      "t_start": 4.687615169320177,
+      "values": {
+        "accel_long_mps2": -28.149275246895215
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:RANGE_DECREASING:0c540086bd",
+      "event_type": "RANGE_DECREASING",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 4.787623453939553,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.987824015214821,
+            "common_t_peak": 6.187751083841996,
+            "common_t_start": 4.787623453939553,
+            "local_t_end": 6.987824015214821,
+            "local_t_peak": 6.187751083841996,
+            "local_t_start": 4.787623453939553,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        },
+        {
+          "detail": {
+            "confidence": 0.9986363636363635,
+            "event_type": "RANGE_DECREASING",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RANGE_DECREASING:d3e1d7d57d",
+          "t_end": 6.987824015214821,
+          "t_start": 4.787623453939553
+        }
+      ],
+      "merged_from": [
+        "local:A:RANGE_DECREASING:d3e1d7d57d"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.987824015214821,
+      "t_peak": 6.187751083841996,
+      "t_start": 4.787623453939553,
+      "values": {
+        "closing_rate_mps": 13.510986474844126
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:RAPID_CLOSING:1545bede33",
+      "event_type": "RAPID_CLOSING",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.33767359425837,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.987824015214821,
+            "common_t_peak": 6.187751083841996,
+            "common_t_start": 5.33767359425837,
+            "local_t_end": 6.987824015214821,
+            "local_t_peak": 6.187751083841996,
+            "local_t_start": 5.33767359425837,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        },
+        {
+          "detail": {
+            "confidence": 0.9981818181818181,
+            "event_type": "RAPID_CLOSING",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RAPID_CLOSING:cb5d1580df",
+          "t_end": 6.987824015214821,
+          "t_start": 5.33767359425837
+        }
+      ],
+      "merged_from": [
+        "local:A:RAPID_CLOSING:cb5d1580df"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.987824015214821,
+      "t_peak": 6.187751083841996,
+      "t_start": 5.33767359425837,
+      "values": {
+        "closing_rate_mps": 13.510986474844126
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:NEAR_MISS:4d84636778",
+      "event_type": "NEAR_MISS",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.287760200263599,
+            "local_t_start": 6.287760200263599,
+            "participant": "A"
+          },
+          "kind": "trigger",
+          "ref": "near_miss",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.287760200263599,
+            "common_t_peak": 6.287760200263599,
+            "common_t_start": 6.287760200263599,
+            "local_t_end": 6.287760200263599,
+            "local_t_peak": 6.287760200263599,
+            "local_t_start": 6.287760200263599,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "NEAR_MISS",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:NEAR_MISS:fae234d2dd",
+          "t_end": 6.287760200263599,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [
+        "local:A:NEAR_MISS:fae234d2dd"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.287760200263599,
+      "t_peak": 6.287760200263599,
+      "t_start": 6.287760200263599,
+      "values": {
+        "range_m": 11.573888158924076,
+        "ttc": 0.863396267357099
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:CRITICAL_TTC:28df495a57",
+      "event_type": "CRITICAL_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.987824015214821,
+            "common_t_peak": 6.987824015214821,
+            "common_t_start": 5.687705501733981,
+            "local_t_end": 6.987824015214821,
+            "local_t_peak": 6.987824015214821,
+            "local_t_start": 5.687705501733981,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "CRITICAL_TTC",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 6.987824015214821,
+          "t_start": 5.687705501733981
+        }
+      ],
+      "merged_from": [
+        "local:A:CRITICAL_TTC:bf16a42b6a"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.987824015214821,
+      "t_peak": 6.987824015214821,
+      "t_start": 5.687705501733981,
+      "values": {
+        "ttc_s": 0.4402955565569671
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:LOW_TTC:71c3227f2e",
+      "event_type": "LOW_TTC",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.987824015214821,
+            "common_t_peak": 6.987824015214821,
+            "common_t_start": 5.487687268890775,
+            "local_t_end": 6.987824015214821,
+            "local_t_peak": 6.987824015214821,
+            "local_t_start": 5.487687268890775,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        },
+        {
+          "detail": {
+            "confidence": 0.9979999999999999,
+            "event_type": "LOW_TTC",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:LOW_TTC:d36b93ea8d",
+          "t_end": 6.987824015214821,
+          "t_start": 5.487687268890775
+        }
+      ],
+      "merged_from": [
+        "local:A:LOW_TTC:d36b93ea8d"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.987824015214821,
+      "t_peak": 6.987824015214821,
+      "t_start": 5.487687268890775,
+      "values": {
+        "ttc_s": 0.4402955565569671
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:RADAR_TRACK_LOST:e4fdaaf6b5",
+      "event_type": "RADAR_TRACK_LOST",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.987824015214821,
+            "local_t_start": 6.987824015214821,
+            "participant": "A"
+          },
+          "kind": "track",
+          "ref": "A::T001",
+          "t_end": 6.987824015214821,
+          "t_start": 6.987824015214821
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 6.987824015214821,
+            "common_t_peak": 6.987824015214821,
+            "common_t_start": 6.987824015214821,
+            "local_t_end": 6.987824015214821,
+            "local_t_peak": 6.987824015214821,
+            "local_t_start": 6.987824015214821,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 6.987824015214821,
+          "t_start": 6.987824015214821
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "RADAR_TRACK_LOST",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:RADAR_TRACK_LOST:6a1a317473",
+          "t_end": 6.987824015214821,
+          "t_start": 6.987824015214821
+        }
+      ],
+      "merged_from": [
+        "local:A:RADAR_TRACK_LOST:6a1a317473"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "radar"
+      ],
+      "subject": "B",
+      "t_end": 6.987824015214821,
+      "t_peak": 6.987824015214821,
+      "t_start": 6.987824015214821,
+      "values": {
+        "range_m": 3.6037924416660534,
+        "track_duration_s": 6.100556101717789
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:DECELERATION:f40dee2b11",
+      "event_type": "DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.287760200263599,
+            "participant": "A"
+          },
+          "kind": "telemetry",
+          "ref": "A",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.087833131636424,
+            "common_t_peak": 7.087833131636424,
+            "common_t_start": 6.287760200263599,
+            "local_t_end": 7.087833131636424,
+            "local_t_peak": 7.087833131636424,
+            "local_t_start": 6.287760200263599,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "DECELERATION",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:DECELERATION:cddd620d6b",
+          "t_end": 7.087833131636424,
+          "t_start": 6.287760200263599
+        }
+      ],
+      "merged_from": [
+        "local:A:DECELERATION:cddd620d6b"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 7.087833131636424,
+      "t_peak": 7.087833131636424,
+      "t_start": 6.287760200263599,
+      "values": {
+        "accel_long_mps2": -185.96614901017344
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:HARD_DECELERATION:036b9cd84c",
+      "event_type": "HARD_DECELERATION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "participant": "A"
+          },
+          "kind": "telemetry",
+          "ref": "A",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.087833131636424,
+            "common_t_peak": 7.087833131636424,
+            "common_t_start": 6.337764758474401,
+            "local_t_end": 7.087833131636424,
+            "local_t_peak": 7.087833131636424,
+            "local_t_start": 6.337764758474401,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "HARD_DECELERATION",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_DECELERATION:84723328e8",
+          "t_end": 7.087833131636424,
+          "t_start": 6.337764758474401
+        }
+      ],
+      "merged_from": [
+        "local:A:HARD_DECELERATION:84723328e8"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 7.087833131636424,
+      "t_peak": 7.087833131636424,
+      "t_start": 6.337764758474401,
+      "values": {
+        "accel_long_mps2": -185.96614901017344
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:COLLISION:98b5b8976f",
+      "event_type": "COLLISION",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "participant": "A"
+          },
+          "kind": "trigger",
+          "ref": "collision",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.087833131636424,
+            "common_t_peak": 7.087833131636424,
+            "common_t_start": 7.087833131636424,
+            "local_t_end": 7.087833131636424,
+            "local_t_peak": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "participant": "B"
+          },
+          "kind": "trigger",
+          "ref": "collision",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.087833582604493,
+            "common_t_peak": 7.087833582604493,
+            "common_t_start": 7.087833582604493,
+            "local_t_end": 6.5424015826044934,
+            "local_t_peak": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "COLLISION",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "COLLISION",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:COLLISION:4989b30fb3",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        }
+      ],
+      "merged_from": [
+        "local:A:COLLISION:43d1d47c7f",
+        "local:B:COLLISION:4989b30fb3"
+      ],
+      "owners": [
+        "A",
+        "B"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "collision"
+      ],
+      "subject": "B",
+      "t_end": 7.087833582604493,
+      "t_peak": 7.087833357120459,
+      "t_start": 7.087833131636424,
+      "values": {
+        "impulse": 18237.498816408763
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:B:POST_IMPACT_STOP:4f5131efb7",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "participant": "B"
+          },
+          "kind": "telemetry",
+          "ref": "B",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "participant": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:COLLISION:4989b30fb3",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.087833582604493,
+            "common_t_peak": 7.087833582604493,
+            "common_t_start": 7.087833582604493,
+            "local_t_end": 6.5424015826044934,
+            "local_t_peak": 6.5424015826044934,
+            "local_t_start": 6.5424015826044934,
+            "participant": "B",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "B",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "POST_IMPACT_STOP",
+            "local_subject": "",
+            "participant_id": "B"
+          },
+          "kind": "event",
+          "ref": "local:B:POST_IMPACT_STOP:8c5082e8b2",
+          "t_end": 7.087833582604493,
+          "t_start": 7.087833582604493
+        }
+      ],
+      "merged_from": [
+        "local:B:POST_IMPACT_STOP:8c5082e8b2"
+      ],
+      "owners": [
+        "B"
+      ],
+      "participant_id": "B",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "collision",
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 7.087833582604493,
+      "t_peak": 7.087833582604493,
+      "t_start": 7.087833582604493,
+      "values": {
+        "delay_s": 0.0,
+        "speed_mps": 0.009530714453466154
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:BRAKE_ONSET:24e212e5b4",
+      "event_type": "BRAKE_ONSET",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "participant": "A"
+          },
+          "kind": "controls",
+          "ref": "A",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 11.288216021343755,
+            "common_t_peak": 7.137837689847226,
+            "common_t_start": 6.2377556420527975,
+            "local_t_end": 11.288216021343755,
+            "local_t_peak": 7.137837689847226,
+            "local_t_start": 6.2377556420527975,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "BRAKE_ONSET",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:BRAKE_ONSET:9a571261e6",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "local:A:BRAKE_ONSET:9a571261e6"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 11.288216021343755,
+      "t_peak": 7.137837689847226,
+      "t_start": 6.2377556420527975,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:HARD_BRAKE:ed54083554",
+      "event_type": "HARD_BRAKE",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 11.288216021343755,
+            "local_t_start": 6.2377556420527975,
+            "participant": "A"
+          },
+          "kind": "controls",
+          "ref": "A",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 11.288216021343755,
+            "common_t_peak": 7.137837689847226,
+            "common_t_start": 6.2377556420527975,
+            "local_t_end": 11.288216021343755,
+            "local_t_peak": 7.137837689847226,
+            "local_t_start": 6.2377556420527975,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "HARD_BRAKE",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:HARD_BRAKE:8b96a47beb",
+          "t_end": 11.288216021343755,
+          "t_start": 6.2377556420527975
+        }
+      ],
+      "merged_from": [
+        "local:A:HARD_BRAKE:8b96a47beb"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "controls"
+      ],
+      "subject": null,
+      "t_end": 11.288216021343755,
+      "t_peak": 7.137837689847226,
+      "t_start": 6.2377556420527975,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:POST_IMPACT_STOP:34c08384eb",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 7.137837689847226,
+            "local_t_start": 7.087833131636424,
+            "participant": "A"
+          },
+          "kind": "telemetry",
+          "ref": "A",
+          "t_end": 7.137837689847226,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 7.087833131636424,
+            "local_t_start": 7.087833131636424,
+            "participant": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:COLLISION:43d1d47c7f",
+          "t_end": 7.087833131636424,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 7.137837689847226,
+            "common_t_peak": 7.137837689847226,
+            "common_t_start": 7.087833131636424,
+            "local_t_end": 7.137837689847226,
+            "local_t_peak": 7.137837689847226,
+            "local_t_start": 7.087833131636424,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 7.137837689847226,
+          "t_start": 7.087833131636424
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "POST_IMPACT_STOP",
+            "local_subject": "",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "local:A:POST_IMPACT_STOP:eded0257c1",
+          "t_end": 7.137837689847226,
+          "t_start": 7.087833131636424
+        }
+      ],
+      "merged_from": [
+        "local:A:POST_IMPACT_STOP:eded0257c1"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [
+        "collision",
+        "telemetry"
+      ],
+      "subject": null,
+      "t_end": 7.137837689847226,
+      "t_peak": 7.137837689847226,
+      "t_start": 7.087833131636424,
+      "values": {
+        "delay_s": 0.05000455821080152,
+        "speed_mps": 0.18269263824575663
+      }
+    },
+    {
+      "confidence": 0.99,
+      "detail": {},
+      "event_id": "fused:A:NO_EVASIVE_RESPONSE:3ee2edf898",
+      "event_type": "NO_EVASIVE_RESPONSE",
+      "evidence": [
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "local_t_end": 8.487824015214821,
+            "local_t_start": 6.987824015214821,
+            "participant": "A",
+            "why": "opened the obligation"
+          },
+          "kind": "event",
+          "ref": "local:A:CRITICAL_TTC:bf16a42b6a",
+          "t_end": 8.487824015214821,
+          "t_start": 6.987824015214821
+        },
+        {
+          "detail": {
+            "clock_confidence": 0.812722,
+            "common_t_end": 8.487824015214821,
+            "common_t_peak": 8.487824015214821,
+            "common_t_start": 6.987824015214821,
+            "local_t_end": 8.487824015214821,
+            "local_t_peak": 8.487824015214821,
+            "local_t_start": 6.987824015214821,
+            "participant": "A",
+            "time_domain": "common"
+          },
+          "kind": "clock_alignment",
+          "ref": "A",
+          "t_end": 8.487824015214821,
+          "t_start": 6.987824015214821
+        },
+        {
+          "detail": {
+            "confidence": 1.0,
+            "event_type": "NO_EVASIVE_RESPONSE",
+            "local_subject": "A::T001",
+            "participant_id": "A"
+          },
+          "kind": "event",
+          "ref": "na-A-NA3-A-6.99",
+          "t_end": 8.487824015214821,
+          "t_start": 6.987824015214821
+        }
+      ],
+      "merged_from": [
+        "na-A-NA3-A-6.99"
+      ],
+      "owners": [
+        "A"
+      ],
+      "participant_id": "A",
+      "provenance": "fused",
+      "schema_version": "1.0.0",
+      "source_sensors": [],
+      "subject": "B",
+      "t_end": 8.487824015214821,
+      "t_peak": 8.487824015214821,
+      "t_start": 6.987824015214821,
+      "values": {
+        "evidence_coverage": 1.0,
+        "monitored_s": 1.5
+      }
+    }
+  ],
+  "owner": null,
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "scope": "fused",
+  "seed": 99
+}

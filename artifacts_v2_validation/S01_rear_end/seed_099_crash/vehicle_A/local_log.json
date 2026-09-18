@@ -1,0 +1,386 @@
+{
+  "clock": "participant-local; this vehicle has no access to any other recorder's clock",
+  "columns": [
+    "t_local",
+    "participant",
+    "subject",
+    "event_type",
+    "source_sensor",
+    "confidence",
+    "values",
+    "evidence"
+  ],
+  "counts_by_type": {
+    "ACCELERATION": 1,
+    "BRAKE_ONSET": 1,
+    "COLLISION": 1,
+    "CRITICAL_TTC": 1,
+    "DECELERATION": 2,
+    "HARD_BRAKE": 1,
+    "HARD_DECELERATION": 1,
+    "LOW_TTC": 1,
+    "NEAR_MISS": 1,
+    "NO_EVASIVE_RESPONSE": 1,
+    "POST_IMPACT_STOP": 1,
+    "RADAR_TRACK_APPEARED": 1,
+    "RADAR_TRACK_LOST": 1,
+    "RANGE_DECREASING": 2,
+    "RAPID_CLOSING": 1,
+    "TARGET_DECELERATION": 2,
+    "THROTTLE_ONSET": 1
+  },
+  "log_kind": "local",
+  "n_rows": 20,
+  "participant_id": "A",
+  "provenance": "local",
+  "rows": [
+    {
+      "confidence": 0.48,
+      "detail": {},
+      "event_id": "local:A:RADAR_TRACK_APPEARED:d50963eaad",
+      "event_type": "RADAR_TRACK_APPEARED",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 0.8873,
+      "t_local": 0.8873,
+      "t_start": 0.8873,
+      "values": {
+        "lateral_offset_m": -0.2727,
+        "longitudinal_m": 25.4062,
+        "range_m": 25.4076
+      }
+    },
+    {
+      "confidence": 0.555,
+      "detail": {},
+      "event_id": "local:A:TARGET_DECELERATION:91dcdc8007",
+      "event_type": "TARGET_DECELERATION",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 1.1373,
+      "t_local": 0.8873,
+      "t_start": 0.8873,
+      "values": {
+        "target_accel_long_mps2": -14.6907
+      }
+    },
+    {
+      "confidence": 0.8493,
+      "detail": {},
+      "event_id": "local:A:RANGE_DECREASING:83ad289a0e",
+      "event_type": "RANGE_DECREASING",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 1.6873,
+      "t_local": 1.3373,
+      "t_start": 0.8873,
+      "values": {
+        "closing_rate_mps": 4.3027
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:DECELERATION:18a44fa366",
+      "event_type": "DECELERATION",
+      "evidence": "telemetry:A",
+      "participant": "A",
+      "source_sensor": "telemetry",
+      "subject": "",
+      "t_end": 1.5373,
+      "t_local": 1.4873,
+      "t_start": 1.4373,
+      "values": {
+        "accel_long_mps2": -4.1179
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:THROTTLE_ONSET:e888319708",
+      "event_type": "THROTTLE_ONSET",
+      "evidence": "controls:A",
+      "participant": "A",
+      "source_sensor": "controls",
+      "subject": "",
+      "t_end": 6.1878,
+      "t_local": 1.6373,
+      "t_start": 0.6872,
+      "values": {
+        "throttle_cmd": 0.8822
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:ACCELERATION:9e745ff01c",
+      "event_type": "ACCELERATION",
+      "evidence": "telemetry:A",
+      "participant": "A",
+      "source_sensor": "telemetry",
+      "subject": "",
+      "t_end": 1.9374,
+      "t_local": 1.7373,
+      "t_start": 1.6873,
+      "values": {
+        "accel_long_mps2": 2.7607
+      }
+    },
+    {
+      "confidence": 0.9974,
+      "detail": {},
+      "event_id": "local:A:TARGET_DECELERATION:944dccd58e",
+      "event_type": "TARGET_DECELERATION",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 5.7377,
+      "t_local": 5.6377,
+      "t_start": 4.5876,
+      "values": {
+        "target_accel_long_mps2": -26.4253
+      }
+    },
+    {
+      "confidence": 0.9986,
+      "detail": {},
+      "event_id": "local:A:RANGE_DECREASING:d3e1d7d57d",
+      "event_type": "RANGE_DECREASING",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.9878,
+      "t_local": 6.1878,
+      "t_start": 4.7876,
+      "values": {
+        "closing_rate_mps": 13.511
+      }
+    },
+    {
+      "confidence": 0.9982,
+      "detail": {},
+      "event_id": "local:A:RAPID_CLOSING:cb5d1580df",
+      "event_type": "RAPID_CLOSING",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.9878,
+      "t_local": 6.1878,
+      "t_start": 5.3377,
+      "values": {
+        "closing_rate_mps": 13.511
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:NEAR_MISS:fae234d2dd",
+      "event_type": "NEAR_MISS",
+      "evidence": "trigger:near_miss",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.2878,
+      "t_local": 6.2878,
+      "t_start": 6.2878,
+      "values": {
+        "range_m": 11.5739,
+        "ttc": 0.8634
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:CRITICAL_TTC:bf16a42b6a",
+      "event_type": "CRITICAL_TTC",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.9878,
+      "t_local": 6.9878,
+      "t_start": 5.6877,
+      "values": {
+        "ttc_s": 0.4403
+      }
+    },
+    {
+      "confidence": 0.998,
+      "detail": {},
+      "event_id": "local:A:LOW_TTC:d36b93ea8d",
+      "event_type": "LOW_TTC",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.9878,
+      "t_local": 6.9878,
+      "t_start": 5.4877,
+      "values": {
+        "ttc_s": 0.4403
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:RADAR_TRACK_LOST:6a1a317473",
+      "event_type": "RADAR_TRACK_LOST",
+      "evidence": "track:A::T001",
+      "participant": "A",
+      "source_sensor": "radar",
+      "subject": "A::T001",
+      "t_end": 6.9878,
+      "t_local": 6.9878,
+      "t_start": 6.9878,
+      "values": {
+        "range_m": 3.6038,
+        "track_duration_s": 6.1006
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:COLLISION:43d1d47c7f",
+      "event_type": "COLLISION",
+      "evidence": "trigger:collision",
+      "participant": "A",
+      "source_sensor": "collision",
+      "subject": "",
+      "t_end": 7.0878,
+      "t_local": 7.0878,
+      "t_start": 7.0878,
+      "values": {
+        "impulse": 18237.4988
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:DECELERATION:cddd620d6b",
+      "event_type": "DECELERATION",
+      "evidence": "telemetry:A",
+      "participant": "A",
+      "source_sensor": "telemetry",
+      "subject": "",
+      "t_end": 7.0878,
+      "t_local": 7.0878,
+      "t_start": 6.2878,
+      "values": {
+        "accel_long_mps2": -185.9661
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:HARD_DECELERATION:84723328e8",
+      "event_type": "HARD_DECELERATION",
+      "evidence": "telemetry:A",
+      "participant": "A",
+      "source_sensor": "telemetry",
+      "subject": "",
+      "t_end": 7.0878,
+      "t_local": 7.0878,
+      "t_start": 6.3378,
+      "values": {
+        "accel_long_mps2": -185.9661
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:BRAKE_ONSET:9a571261e6",
+      "event_type": "BRAKE_ONSET",
+      "evidence": "controls:A",
+      "participant": "A",
+      "source_sensor": "controls",
+      "subject": "",
+      "t_end": 11.2882,
+      "t_local": 7.1378,
+      "t_start": 6.2378,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:HARD_BRAKE:8b96a47beb",
+      "event_type": "HARD_BRAKE",
+      "evidence": "controls:A",
+      "participant": "A",
+      "source_sensor": "controls",
+      "subject": "",
+      "t_end": 11.2882,
+      "t_local": 7.1378,
+      "t_start": 6.2378,
+      "values": {
+        "brake_cmd": 1.0
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {},
+      "event_id": "local:A:POST_IMPACT_STOP:eded0257c1",
+      "event_type": "POST_IMPACT_STOP",
+      "evidence": "telemetry:A event:local:A:COLLISION:43d1d47c7f",
+      "participant": "A",
+      "source_sensor": "collision,telemetry",
+      "subject": "",
+      "t_end": 7.1378,
+      "t_local": 7.1378,
+      "t_start": 7.0878,
+      "values": {
+        "delay_s": 0.05,
+        "speed_mps": 0.1827
+      }
+    },
+    {
+      "confidence": 1.0,
+      "detail": {
+        "closed_by": null,
+        "evidence_coverage": 1.0,
+        "monitored_interval": [
+          6.9878,
+          8.4878
+        ],
+        "obligation": "time-to-collision became critical",
+        "opened_by": "local:A:CRITICAL_TTC:bf16a42b6a",
+        "required_coverage": 0.8,
+        "rule_id": "NA3",
+        "verdict": "ASSERTED",
+        "would_have_been_discharged_by": [
+          "LANE_CHANGE_LIKE_MANEUVER",
+          "SIGNIFICANT_HEADING_CHANGE",
+          "STEER_ONSET"
+        ]
+      },
+      "event_id": "na-A-NA3-A-6.99",
+      "event_type": "NO_EVASIVE_RESPONSE",
+      "evidence": "event:local:A:CRITICAL_TTC:bf16a42b6a",
+      "participant": "A",
+      "source_sensor": "derived",
+      "subject": "A::T001",
+      "t_end": 8.4878,
+      "t_local": 8.4878,
+      "t_start": 6.9878,
+      "values": {
+        "evidence_coverage": 1.0,
+        "monitored_s": 1.5
+      }
+    }
+  ],
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "seed": 99,
+  "undecidable_non_actions": []
+}

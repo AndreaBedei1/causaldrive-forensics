@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d23" for="edge" attr.name="shadowed" attr.type="string" />
+  <key id="d22" for="edge" attr.name="owners" attr.type="string" />
+  <key id="d21" for="edge" attr.name="temporal_relation" attr.type="string" />
+  <key id="d20" for="edge" attr.name="rule" attr.type="string" />
+  <key id="d19" for="edge" attr.name="provenance" attr.type="string" />
+  <key id="d18" for="edge" attr.name="confidence" attr.type="double" />
+  <key id="d17" for="edge" attr.name="edge_type" attr.type="string" />
+  <key id="d16" for="node" attr.name="values" attr.type="string" />
+  <key id="d15" for="node" attr.name="owners" attr.type="string" />
+  <key id="d14" for="node" attr.name="provenance" attr.type="string" />
+  <key id="d13" for="node" attr.name="confidence" attr.type="double" />
+  <key id="d12" for="node" attr.name="t_end" attr.type="double" />
+  <key id="d11" for="node" attr.name="t_peak" attr.type="double" />
+  <key id="d10" for="node" attr.name="t_start" attr.type="double" />
+  <key id="d9" for="node" attr.name="subject" attr.type="string" />
+  <key id="d8" for="node" attr.name="participant_id" attr.type="string" />
+  <key id="d7" for="node" attr.name="event_type" attr.type="string" />
+  <key id="d6" for="graph" attr.name="schema_version" attr.type="string" />
+  <key id="d5" for="graph" attr.name="seed" attr.type="long" />
+  <key id="d4" for="graph" attr.name="scenario_id" attr.type="string" />
+  <key id="d3" for="graph" attr.name="run_id" attr.type="string" />
+  <key id="d2" for="graph" attr.name="owner" attr.type="string" />
+  <key id="d1" for="graph" attr.name="scope" attr.type="string" />
+  <key id="d0" for="graph" attr.name="graph_kind" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="oracle:B:HARD_DECELERATION:8cc0091cc9">
+      <data key="d7">HARD_DECELERATION</data>
+      <data key="d8">B</data>
+      <data key="d9">decelerating</data>
+      <data key="d10">0.5000000074505806</data>
+      <data key="d11">0.5500000081956387</data>
+      <data key="d12">0.7500000111758709</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B"]</data>
+      <data key="d16">{"accel_long_mps2":-13.880416938910832,"duration_s":0.2500000037252903,"oracle_state":"decelerating","speed_at_end_mps":9.136474855535354,"speed_at_onset_mps":12.282185211090184,"threshold_mps2":-4.5}</data>
+    </node>
+    <node id="oracle:A:RANGE_DECREASING:2c745e5d1d">
+      <data key="d7">RANGE_DECREASING</data>
+      <data key="d8">A</data>
+      <data key="d9">closing</data>
+      <data key="d10">0.5500000081956387</data>
+      <data key="d11">1.0000000149011612</data>
+      <data key="d12">1.3500000201165676</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A","B"]</data>
+      <data key="d16">{"min_distance_m":24.541193953495114,"oracle_state":"closing","range_rate_mps":-4.340300985775677,"threshold_mps":-1.0}</data>
+    </node>
+    <node id="oracle:B:RANGE_DECREASING:6d9ec0a1e5">
+      <data key="d7">RANGE_DECREASING</data>
+      <data key="d8">B</data>
+      <data key="d9">closing</data>
+      <data key="d10">0.5500000081956387</data>
+      <data key="d11">1.0000000149011612</data>
+      <data key="d12">1.3500000201165676</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B","A"]</data>
+      <data key="d16">{"min_distance_m":24.541193953495114,"oracle_state":"closing","range_rate_mps":-4.340300985775677,"threshold_mps":-1.0}</data>
+    </node>
+    <node id="oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8">
+      <data key="d7">ORACLE_SCRIPTED_INTERVENTION</data>
+      <data key="d8">B</data>
+      <data key="d9">B_emergency_brake</data>
+      <data key="d10">4.174935238734116</data>
+      <data key="d11">4.174935238734116</data>
+      <data key="d12">11.750000175088644</data>
+      <data key="d13">1.0</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B"]</data>
+      <data key="d16">{"duration_s":8.182387148692579,"intensity":1.0,"kind_is_brake":1.0,"kind_is_lateral":0.0,"kind_is_speed":0.0}</data>
+    </node>
+    <node id="oracle:B:HARD_DECELERATION:4089882e4a">
+      <data key="d7">HARD_DECELERATION</data>
+      <data key="d8">B</data>
+      <data key="d9">decelerating</data>
+      <data key="d10">4.300000064074993</data>
+      <data key="d11">5.200000077486038</data>
+      <data key="d12">5.4000000804662704</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B"]</data>
+      <data key="d16">{"accel_long_mps2":-26.602932746730897,"duration_s":1.1000000163912773,"oracle_state":"decelerating","speed_at_end_mps":0.007890499536465473,"speed_at_onset_mps":13.421479153067478,"threshold_mps2":-4.5}</data>
+    </node>
+    <node id="oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d">
+      <data key="d7">ORACLE_SCRIPTED_INTERVENTION</data>
+      <data key="d8">A</data>
+      <data key="d9">A_late_brake</data>
+      <data key="d10">5.8263497156067</data>
+      <data key="d11">5.8263497156067</data>
+      <data key="d12">11.750000175088644</data>
+      <data key="d13">1.0</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A"]</data>
+      <data key="d16">{"duration_s":6.1367903615194335,"intensity":0.85,"kind_is_brake":1.0,"kind_is_lateral":0.0,"kind_is_speed":0.0}</data>
+    </node>
+    <node id="oracle:A:RANGE_DECREASING:c56197fc45">
+      <data key="d7">RANGE_DECREASING</data>
+      <data key="d8">A</data>
+      <data key="d9">closing</data>
+      <data key="d10">4.450000066310167</data>
+      <data key="d11">5.850000087171793</data>
+      <data key="d12">6.70000009983778</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A","B"]</data>
+      <data key="d16">{"min_distance_m":4.496004621788936,"oracle_state":"closing","range_rate_mps":-13.396313538870361,"threshold_mps":-1.0}</data>
+    </node>
+    <node id="oracle:B:RANGE_DECREASING:3dcc708b8f">
+      <data key="d7">RANGE_DECREASING</data>
+      <data key="d8">B</data>
+      <data key="d9">closing</data>
+      <data key="d10">4.450000066310167</data>
+      <data key="d11">5.850000087171793</data>
+      <data key="d12">6.70000009983778</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B","A"]</data>
+      <data key="d16">{"min_distance_m":4.496004621788936,"oracle_state":"closing","range_rate_mps":-13.396313538870361,"threshold_mps":-1.0}</data>
+    </node>
+    <node id="oracle:A:CRITICAL_TTC:04ec65d3b5">
+      <data key="d7">CRITICAL_TTC</data>
+      <data key="d8">A</data>
+      <data key="d9">critical_ttc</data>
+      <data key="d10">5.4000000804662704</data>
+      <data key="d11">6.70000009983778</data>
+      <data key="d12">6.70000009983778</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A","B"]</data>
+      <data key="d16">{"min_distance_m":4.496004621788936,"oracle_state":"critical_ttc","threshold_s":1.6,"ttc_s":0.5597756481244347}</data>
+    </node>
+    <node id="oracle:B:CRITICAL_TTC:07864461e5">
+      <data key="d7">CRITICAL_TTC</data>
+      <data key="d8">B</data>
+      <data key="d9">critical_ttc</data>
+      <data key="d10">5.4000000804662704</data>
+      <data key="d11">6.70000009983778</data>
+      <data key="d12">6.70000009983778</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B","A"]</data>
+      <data key="d16">{"min_distance_m":4.496004621788936,"oracle_state":"critical_ttc","threshold_s":1.6,"ttc_s":0.5597756481244347}</data>
+    </node>
+    <node id="oracle:A:HARD_DECELERATION:d239724528">
+      <data key="d7">HARD_DECELERATION</data>
+      <data key="d8">A</data>
+      <data key="d9">decelerating</data>
+      <data key="d10">6.000000089406967</data>
+      <data key="d11">6.70000009983778</data>
+      <data key="d12">6.750000100582838</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A"]</data>
+      <data key="d16">{"accel_long_mps2":-95.89980805851404,"duration_s":0.7500000111758709,"oracle_state":"decelerating","speed_at_end_mps":1.2687865844711348,"speed_at_onset_mps":13.028081668851861,"threshold_mps2":-4.5}</data>
+    </node>
+    <node id="oracle:A:COLLISION:401a7e80ea">
+      <data key="d7">COLLISION</data>
+      <data key="d8">A</data>
+      <data key="d9" />
+      <data key="d10">6.750000100582838</data>
+      <data key="d11">6.750000100582838</data>
+      <data key="d12">6.750000100582838</data>
+      <data key="d13">1.0</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A","B"]</data>
+      <data key="d16">{"impulse":18237.498816408763,"other_speed_mps":0.00012716368067465365,"own_speed_mps":8.055905456812676,"relative_speed_mps":8.031797447518656,"separation_m":4.496004621788936}</data>
+    </node>
+    <node id="oracle:B:POST_IMPACT_STOP:4f6441918a">
+      <data key="d7">POST_IMPACT_STOP</data>
+      <data key="d8">B</data>
+      <data key="d9" />
+      <data key="d10">6.750000100582838</data>
+      <data key="d11">6.750000100582838</data>
+      <data key="d12">6.750000100582838</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["B"]</data>
+      <data key="d16">{"delay_s":0.0,"speed_mps":0.02537989739868228,"threshold_mps":0.6}</data>
+    </node>
+    <node id="oracle:A:POST_IMPACT_STOP:e7f0b8dd35">
+      <data key="d7">POST_IMPACT_STOP</data>
+      <data key="d8">A</data>
+      <data key="d9" />
+      <data key="d10">6.750000100582838</data>
+      <data key="d11">6.800000101327896</data>
+      <data key="d12">6.800000101327896</data>
+      <data key="d13">0.9</data>
+      <data key="d14">oracle</data>
+      <data key="d15">["A"]</data>
+      <data key="d16">{"delay_s":0.05000000074505806,"speed_mps":0.18385041404135985,"threshold_mps":0.6}</data>
+    </node>
+    <edge source="oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8" target="oracle:A:RANGE_DECREASING:c56197fc45">
+      <data key="d17">CONTRIBUTES_TO</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">scenario_causal_template</data>
+      <data key="d21">contains</data>
+      <data key="d22">["A","B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:B:ORACLE_SCRIPTED_INTERVENTION:d49d4c7ec8" target="oracle:B:HARD_DECELERATION:4089882e4a">
+      <data key="d17">CONTRIBUTES_TO</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">oracle_measured_mechanics</data>
+      <data key="d21">contains</data>
+      <data key="d22">["B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d" target="oracle:A:COLLISION:401a7e80ea">
+      <data key="d17">PREVENTS</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">scenario_causal_template</data>
+      <data key="d21">contains</data>
+      <data key="d22">["A","B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:A:ORACLE_SCRIPTED_INTERVENTION:bd1318f26d" target="oracle:A:HARD_DECELERATION:d239724528">
+      <data key="d17">CONTRIBUTES_TO</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">oracle_measured_mechanics</data>
+      <data key="d21">contains</data>
+      <data key="d22">["A"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:A:RANGE_DECREASING:c56197fc45" target="oracle:A:CRITICAL_TTC:04ec65d3b5">
+      <data key="d17">CONTRIBUTES_TO</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">scenario_causal_template</data>
+      <data key="d21">contains</data>
+      <data key="d22">["A","B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:A:CRITICAL_TTC:04ec65d3b5" target="oracle:A:COLLISION:401a7e80ea">
+      <data key="d17">CAUSES_OUTCOME</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">scenario_causal_template</data>
+      <data key="d21">before</data>
+      <data key="d22">["A","B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <edge source="oracle:A:COLLISION:401a7e80ea" target="oracle:A:POST_IMPACT_STOP:e7f0b8dd35">
+      <data key="d17">TRIGGERS</data>
+      <data key="d18">1.0</data>
+      <data key="d19">oracle</data>
+      <data key="d20">oracle_measured_mechanics</data>
+      <data key="d21">during</data>
+      <data key="d22">["A","B"]</data>
+      <data key="d23">[]</data>
+    </edge>
+    <data key="d0">causal</data>
+    <data key="d1">oracle</data>
+    <data key="d2" />
+    <data key="d3">S01-crash-seed099-0f59f808</data>
+    <data key="d4">S01</data>
+    <data key="d5">99</data>
+    <data key="d6">1.0.0</data>
+  </graph>
+</graphml>

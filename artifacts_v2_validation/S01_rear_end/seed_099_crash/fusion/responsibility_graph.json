@@ -1,0 +1,151 @@
+{
+  "edges": [
+    {
+      "rationale": "the threat is what the response answered",
+      "relation": "PROMPTED",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "mit-A-7.09"
+    },
+    {
+      "rationale": "the threat is what the response answered",
+      "relation": "PROMPTED",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "mit-A-7.14"
+    },
+    {
+      "rationale": "the threat is what the response answered",
+      "relation": "PROMPTED",
+      "source": "fused:A:CRITICAL_TTC:28df495a57",
+      "target": "mit-A-7.14"
+    }
+  ],
+  "graph_kind": "responsibility",
+  "node_types": [
+    "STOP_REQUIRED",
+    "YIELD_REQUIRED",
+    "PRIORITY_GRANTED",
+    "PRIORITY_AMBIGUOUS",
+    "STOP_RULE_VIOLATION",
+    "YIELD_RULE_VIOLATION",
+    "SOLID_LINE_VIOLATION",
+    "UNSAFE_CONFLICT_ENTRY",
+    "RESPONSIBILITY_CONTRIBUTION",
+    "MITIGATING_RESPONSE"
+  ],
+  "nodes": [
+    {
+      "basis": [
+        "fused:A:HARD_DECELERATION:036b9cd84c",
+        "fused:A:CRITICAL_TTC:28df495a57"
+      ],
+      "confidence": 1.0,
+      "detail": {
+        "note": "a response to a threat this vehicle was facing. Recorded as mitigating, which is not the same as establishing that it prevented anything"
+      },
+      "node_id": "mit-A-7.09",
+      "node_type": "MITIGATING_RESPONSE",
+      "participant": "A",
+      "subject": "B",
+      "t": 7.0878
+    },
+    {
+      "basis": [
+        "fused:A:BRAKE_ONSET:24e212e5b4",
+        "fused:A:CRITICAL_TTC:28df495a57"
+      ],
+      "confidence": 1.0,
+      "detail": {
+        "note": "a response to a threat this vehicle was facing. Recorded as mitigating, which is not the same as establishing that it prevented anything"
+      },
+      "node_id": "mit-A-7.14",
+      "node_type": "MITIGATING_RESPONSE",
+      "participant": "A",
+      "subject": "B",
+      "t": 7.1378
+    },
+    {
+      "basis": [
+        "fused:A:HARD_BRAKE:ed54083554",
+        "fused:A:CRITICAL_TTC:28df495a57"
+      ],
+      "confidence": 1.0,
+      "detail": {
+        "note": "a response to a threat this vehicle was facing. Recorded as mitigating, which is not the same as establishing that it prevented anything"
+      },
+      "node_id": "mit-A-7.14",
+      "node_type": "MITIGATING_RESPONSE",
+      "participant": "A",
+      "subject": "B",
+      "t": 7.1378
+    }
+  ],
+  "note": "normative reasoning, kept apart from the physical graph on purpose: a reader must be able to accept the physics and dispute the norm. A responsibility contribution requires both a rule that was broken and a physical path from the vehicle's own behaviour to the outcome; neither alone is enough. This is never a finding of legal fault",
+  "participants": [
+    "A",
+    "B"
+  ],
+  "per_participant": {
+    "A": {
+      "impacts_this_vehicle_caused": [],
+      "normative_violations": [],
+      "outcomes": {
+        "fused:A:COLLISION:98b5b8976f": {
+          "path": [],
+          "reached": false
+        },
+        "fused:A:NEAR_MISS:4d84636778": {
+          "path": [],
+          "reached": false
+        }
+      },
+      "outcomes_not_reached": [
+        "fused:A:COLLISION:98b5b8976f",
+        "fused:A:NEAR_MISS:4d84636778"
+      ],
+      "outcomes_reached": [],
+      "path": [],
+      "physically_relevant": false,
+      "property_failures": []
+    },
+    "B": {
+      "impacts_this_vehicle_caused": [
+        "fused:A:COLLISION:98b5b8976f"
+      ],
+      "normative_violations": [],
+      "outcomes": {
+        "fused:A:COLLISION:98b5b8976f": {
+          "path": [
+            "fused:B:BRAKE_ONSET:35eafbd066",
+            "fused:A:RAPID_CLOSING:1545bede33",
+            "fused:A:COLLISION:98b5b8976f"
+          ],
+          "reached": true
+        },
+        "fused:A:NEAR_MISS:4d84636778": {
+          "path": [
+            "fused:B:BRAKE_ONSET:35eafbd066",
+            "fused:A:NEAR_MISS:4d84636778"
+          ],
+          "reached": true
+        }
+      },
+      "outcomes_not_reached": [],
+      "outcomes_reached": [
+        "fused:A:COLLISION:98b5b8976f",
+        "fused:A:NEAR_MISS:4d84636778"
+      ],
+      "path": [
+        "fused:B:BRAKE_ONSET:35eafbd066",
+        "fused:A:RAPID_CLOSING:1545bede33",
+        "fused:A:COLLISION:98b5b8976f"
+      ],
+      "physically_relevant": true,
+      "property_failures": []
+    }
+  },
+  "run_id": "S01-crash-seed099-0f59f808",
+  "scenario_id": "S01",
+  "schema_version": "1.0.0",
+  "scope": "fused",
+  "seed": 99
+}

@@ -1,0 +1,207 @@
+{
+  "note": "a vacuous property is one whose trigger never fired; it is counted apart from the pass rate, because otherwise a run containing few obligations would score better than one that met many and handled them correctly",
+  "results": [
+    {
+      "formula": "(O[0,12] STOP_SIGN_DETECTED(self) -> !((!(FULL_STOP(self)) S[0,12] STOP_SIGN_DETECTED(self))))",
+      "instances": [],
+      "n_instances": 0,
+      "property_id": "P1",
+      "reason": "no STOP_LINE_CROSSED occurred, so the obligation never arose. Vacuous rather than satisfied",
+      "status": "PASS",
+      "title": "a stop sign seen means a full stop before the line",
+      "vacuous": true
+    },
+    {
+      "formula": "(O[0,12] YIELD_SIGN_DETECTED(self) -> !((!((FULL_STOP(self) | DECELERATION(self) | HARD_DECELERATION(self) | BRAKE_ONSET(self))) S[0,12] YIELD_SIGN_DETECTED(self))))",
+      "instances": [],
+      "n_instances": 0,
+      "property_id": "P2",
+      "reason": "no CONFLICT_REGION_ENTRY occurred, so the obligation never arose. Vacuous rather than satisfied",
+      "status": "PASS",
+      "title": "a yield sign seen means yielding before conflict entry",
+      "vacuous": true
+    },
+    {
+      "benchmark_rule": null,
+      "counterexamples": [],
+      "formula": "F[0,1.5] (BRAKE_ONSET(self) | HARD_BRAKE(self) | HARD_DECELERATION(self) | DECELERATION(self) | STEER_ONSET(self) | SIGNIFICANT_HEADING_CHANGE(self))",
+      "instances": [
+        {
+          "anchor": "t_peak",
+          "coverage": null,
+          "interval": [
+            6.9878,
+            8.4878
+          ],
+          "participant": "A",
+          "reason": "HARD_DECELERATION at t=7.09",
+          "status": "PASS",
+          "subject": "B",
+          "t": 6.9878,
+          "trigger_event_id": "fused:A:CRITICAL_TTC:28df495a57",
+          "unobserved": false,
+          "witness": [
+            "fused:A:HARD_DECELERATION:036b9cd84c",
+            "fused:A:DECELERATION:f40dee2b11"
+          ]
+        }
+      ],
+      "n_fail": 0,
+      "n_instances": 1,
+      "n_pass": 1,
+      "n_unknown": 0,
+      "property_id": "P3",
+      "reason": "all 1 instance(s) satisfied the property",
+      "status": "PASS",
+      "title": "a critical time-to-collision gets a response",
+      "vacuous": false
+    },
+    {
+      "benchmark_rule": null,
+      "counterexamples": [],
+      "formula": "G[0,2] (!(THROTTLE_ONSET(self)) & !(ACCELERATION(self)))",
+      "instances": [
+        {
+          "anchor": "t_peak",
+          "coverage": 1.0,
+          "interval": [
+            6.9878,
+            8.9878
+          ],
+          "participant": "A",
+          "reason": "the interval [6.99, 8.99] runs outside the recording [0.89, 8.49], so what happened there was never observed",
+          "status": "UNKNOWN",
+          "subject": "B",
+          "t": 6.9878,
+          "trigger_event_id": "fused:A:CRITICAL_TTC:28df495a57",
+          "unobserved": true,
+          "witness": []
+        }
+      ],
+      "n_fail": 0,
+      "n_instances": 1,
+      "n_pass": 0,
+      "n_unknown": 1,
+      "property_id": "P4",
+      "reason": "1 of 1 instance(s) could not be decided, and none failed. A pass here would be a claim about time that was not observed",
+      "status": "UNKNOWN",
+      "title": "no acceleration into a critical conflict",
+      "vacuous": false
+    },
+    {
+      "benchmark_rule": null,
+      "counterexamples": [],
+      "formula": "F[0,8] (POST_IMPACT_STOP(self) | FULL_STOP(self))",
+      "instances": [
+        {
+          "anchor": "t_peak",
+          "coverage": null,
+          "interval": [
+            7.0878,
+            15.0878
+          ],
+          "participant": "A",
+          "reason": "POST_IMPACT_STOP at t=7.14",
+          "status": "PASS",
+          "subject": "B",
+          "t": 7.0878,
+          "trigger_event_id": "fused:A:COLLISION:98b5b8976f",
+          "unobserved": false,
+          "witness": [
+            "fused:A:POST_IMPACT_STOP:34c08384eb"
+          ]
+        }
+      ],
+      "n_fail": 0,
+      "n_instances": 1,
+      "n_pass": 1,
+      "n_unknown": 0,
+      "property_id": "P5",
+      "reason": "all 1 instance(s) satisfied the property",
+      "status": "PASS",
+      "title": "a collision is followed by coming to rest",
+      "vacuous": false
+    },
+    {
+      "formula": "!(SOLID_LINE_CROSSED(self))",
+      "instances": [],
+      "n_instances": 0,
+      "property_id": "P6",
+      "reason": "no SOLID_LINE_CROSSED occurred, so the obligation never arose. Vacuous rather than satisfied",
+      "status": "PASS",
+      "title": "a solid line is not crossed",
+      "vacuous": true
+    },
+    {
+      "benchmark_rule": null,
+      "counterexamples": [],
+      "formula": "G[0.1,5] !(COLLISION(self, subject))",
+      "instances": [
+        {
+          "anchor": "t_peak",
+          "coverage": 1.0,
+          "interval": [
+            7.1878,
+            12.0878
+          ],
+          "participant": "A",
+          "reason": "the interval [7.19, 12.09] runs outside the recording [0.89, 8.49], so what happened there was never observed",
+          "status": "UNKNOWN",
+          "subject": "B",
+          "t": 7.0878,
+          "trigger_event_id": "fused:A:COLLISION:98b5b8976f",
+          "unobserved": true,
+          "witness": []
+        }
+      ],
+      "n_fail": 0,
+      "n_instances": 1,
+      "n_pass": 0,
+      "n_unknown": 1,
+      "property_id": "P7",
+      "reason": "1 of 1 instance(s) could not be decided, and none failed. A pass here would be a claim about time that was not observed",
+      "status": "UNKNOWN",
+      "title": "one impact per pair on the merged timeline",
+      "vacuous": false
+    },
+    {
+      "formula": "(O[0,3] CRITICAL_TTC(self) & !(F[0,1.5] (BRAKE_ONSET(self) | HARD_BRAKE(self) | HARD_DECELERATION(self) | DECELERATION(self))))",
+      "instances": [],
+      "n_instances": 0,
+      "property_id": "P8",
+      "reason": "no NO_BRAKING_RESPONSE occurred, so the obligation never arose. Vacuous rather than satisfied",
+      "status": "PASS",
+      "title": "a claimed missing braking response really had no response",
+      "vacuous": true
+    }
+  ],
+  "schema_version": "1.0.0",
+  "scope": "fused",
+  "summary": {
+    "n_checked": 4,
+    "n_fail": 0,
+    "n_pass": 2,
+    "n_properties": 8,
+    "n_unknown": 2,
+    "n_vacuous": 4,
+    "unknown_rate": 0.5,
+    "violations": []
+  },
+  "trace": {
+    "aligned_participants": [
+      "A",
+      "B"
+    ],
+    "duration_s": 7.6006,
+    "has_coverage_model": false,
+    "multi_participant_safe": true,
+    "n_events": 27,
+    "participants": [
+      "A",
+      "B"
+    ],
+    "t_end": 8.4878,
+    "t_start": 0.8873,
+    "time_axis": "common"
+  }
+}
