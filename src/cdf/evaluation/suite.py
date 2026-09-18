@@ -64,6 +64,7 @@ from .graph_comparison import (
     compare_graphs,
 )
 from .knowledge_gain import measure_knowledge_gain
+from .perception_metrics import measure_perception
 from .event_metrics import evaluate_events
 from .graph_metrics import evaluate_graphs, fusion_benefit
 from .clocks import load_clock_truth, simulator_evidence, map_event, map_graph, evaluate_clock_alignment
@@ -86,6 +87,7 @@ _BLOCKS = (
     "attribution",
     "observable_comparison",
     "knowledge_gain",
+    "perception",
     "scene_reconstruction",
     "causal_paths",
     "attribution_sets",
@@ -589,6 +591,17 @@ def evaluate_run(
             ).items()
             if k not in ("node_rows", "edge_rows")
         }
+
+    # --- what the cameras made of the road ---------------------------------
+    # Written to its own artifact as well as into the metrics, because the
+    # supervisor table reads it per run and a table that had to open the whole
+    # metrics document for one figure would be slow and fragile.
+    perception = measure_perception(layout, cfg)
+    if perception.get("scored"):
+        metrics["perception"] = perception
+    else:
+        reasons["perception"] = perception.get("reason", "not scored")
+    write_json(_assert_evaluation_path(layout, layout.perception_metrics), perception)
 
     # --- the explanation itself -------------------------------------------
     # Structural F1 says how much of the oracle graph came back. These three say
