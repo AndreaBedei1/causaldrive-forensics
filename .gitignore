@@ -14,6 +14,11 @@ artifacts_independent_clocks/**
 # neither. scripts/run_campaign.py refuses a root holding both.
 artifacts_v2/**
 !artifacts_v2/.gitkeep
+# Development and calibration runs, on seed 99. Kept out of artifacts_v2/ so that
+# a threshold tuned here can never be tuned on a seed the final metrics are
+# computed from, and untracked for the same reason as the roots above.
+artifacts_v2_validation/**
+!artifacts_v2_validation/.gitkeep
 
 # Python
 __pycache__/
