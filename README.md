@@ -38,7 +38,7 @@ and the tests that enforce it.
 ```
 each vehicle          local events  →  local_log.json  →  physical graph
                                             ↓
-fusion                contact-based clock alignment
+fusion                hybrid clock alignment: contact, then radar
                       anonymous track → participant identity
                                             ↓
                                       global_log.json
@@ -58,7 +58,8 @@ Five things about this are deliberate and are what the design turns on:
 
 - **the log comes before the graph.** A DAG is what the project is for; a table of
   timestamped facts is what a reader can check;
-- **clocks are anchored on shared contact**, not on a radar fit. One impact fixes
+- **clocks are anchored on shared contact first**, and on an offset-only radar
+  fit only where contact cannot reach. One impact fixes
   one offset and says nothing about drift (`docs/CLOCKS.md`);
 - **the physical graph and the responsibility graph are separate**, so the physics
   can be accepted and the norm disputed (`docs/RESPONSIBILITY.md`);
@@ -144,7 +145,10 @@ refuses an artifacts root holding runs of both generations.
 The ones that most constrain how the results should be read
 (`docs/LIMITATIONS.md` has the rest):
 
-- **a contact-anchored clock cannot align a run with no contact.** The negative
+- **a vehicle that neither collides nor presents usable radar geometry stays
+  unresolved.** Contact places it where there is an impact and an offset-only
+  radar fit places it where there is not; where neither works the recorder keeps
+  its own clock and says so, rather than being placed on a guess. The negative
   controls fall back on an explicit marker from the experiment harness, which is
   declared, labelled and reported apart. It is never simulator time;
 - **the sign detector is classical colour-and-shape**, deterministic and with no
@@ -168,7 +172,7 @@ The ones that most constrain how the results should be read
 |---|---|
 | `docs/ARCHITECTURE.md` | how the pieces fit together |
 | `docs/EVENTS.md` | the event vocabulary, and what may be compared |
-| `docs/CLOCKS.md` | contact-based alignment |
+| `docs/CLOCKS.md` | hybrid alignment: contact, then radar, then unresolved |
 | `docs/FORMAL_METHODS.md` | the temporal logic |
 | `docs/RESPONSIBILITY.md` | obligations, violations, the priority benchmark |
 | `docs/SCENARIOS.md` | what each scenario is for |
