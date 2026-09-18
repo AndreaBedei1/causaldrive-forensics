@@ -13,10 +13,15 @@
 # that only had the second could not tell a stop sign run beside an unrelated
 # collision from one that produced it.
 #
-# Geometry: junction 720 of Town05 at (101.6, 0.3). Four clean approaches,
-# maximum bearing error 0.7 deg, and no traffic light -- so signal state cannot
-# confound the result, which matters because signal state is privileged and a
-# vehicle could not observe it.
+# Geometry: junction 359 of Town05 at (152.54, -0.23), on the eastbound
+# approach carrying BP_Stop4_7_SM_1 at (142.2, 6.0) -- 11.9 m back from the
+# junction, and one of only five stop signs Town05 actually renders. The map
+# holds 33 traffic.stop trigger actors and 5 sign meshes, and a trigger volume is
+# not something a camera can read; the junction this scenario used before had
+# seven triggers and no mesh at all, so there was nothing on A's approach to
+# detect. No traffic light lies within 35 m, so signal state cannot confound the
+# result -- which matters because signal state is privileged and a vehicle could
+# not observe it.
 # =============================================================================
 
 scenario:
@@ -38,10 +43,10 @@ scenario:
       blueprint: "vehicle.tesla.model3"
       spawn:
         anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
+        junction_x: 152.54
+        junction_y: -0.23
         bearing_deg: 0.0
-        back_m: 48.0
+        back_m: 30.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
       initial_speed: 9.0
       target_speed: 9.0
@@ -51,8 +56,8 @@ scenario:
       blueprint: "vehicle.audi.tt"
       spawn:
         anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
+        junction_x: 152.54
+        junction_y: -0.23
         bearing_deg: -90.0
         back_m: 44.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
@@ -71,11 +76,15 @@ scenario:
         governs: "A"
         anchor:
           anchor: "junction_approach"
-          junction_x: 101.6
-          junction_y: 0.3
+          junction_x: 152.54
+          junction_y: -0.23
           bearing_deg: 0.0
           back_m: 12.0
-        spawn_prop: true
+        # The map renders a real stop sign on this approach, so none is
+        # spawned. place_traffic_control verifies the mesh is there and
+        # records physically_present from what it found, not from this
+        # declaration.
+        spawn_prop: false
         stop_line_forward_m: 4.0
     # Only one approach is controlled, so arrival order never has to break a
     # tie and no tie-break convention is declared.

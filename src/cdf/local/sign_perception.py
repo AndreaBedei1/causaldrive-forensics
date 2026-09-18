@@ -216,6 +216,14 @@ class SignDetector:
         )
         self.min_saturation = int(cfg.get(p + "min_saturation", 90))
         self.min_value = int(cfg.get(p + "min_value", 50))
+        # A stop sign's red is an annulus: a white border outside it and white
+        # lettering inside. Closing the mask with a 3x3 kernel left the letters
+        # as holes and the border ragged, so the contour came out concave and
+        # filled only about half its bounding box -- while the classifier looks
+        # for the 0.83 an octagon should fill. On the recorded approach that cost
+        # all but two frames of a twenty-two frame sighting. Treating the
+        # lettering as part of the face is what a reader of the sign does.
+        self.close_kernel_px = int(cfg.get(p + "close_kernel_px", 9))
 
     def red_mask(self, image: Any) -> Any:
         """Pixels plausibly belonging to a red sign face."""
@@ -231,9 +239,9 @@ class SignDetector:
                 np.array([hi, 255, 255], dtype=np.uint8),
             )
             mask = band if mask is None else cv2.bitwise_or(mask, band)
-        kernel = np.ones((3, 3), np.uint8)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        k = max(1, int(self.close_kernel_px))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((k, k), np.uint8))
         return mask
 
     def detect(self, image: Any, frame: int = 0, t: float = 0.0) -> List[SignDetection]:

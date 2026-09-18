@@ -219,7 +219,11 @@ perception:
     min_value: 50
     max_centre_gap_px: 60.0        # association across frames
     max_time_gap_s: 0.6
-    min_detections_per_track: 3    # a one-frame detection is likelier a red van
+    min_detections_per_track: 3
+    # Bridge the white lettering and border so the red face reads as one octagon.
+    # At 3 px the letters stayed as holes and the contour filled half its
+    # bounding box against the 0.83 the classifier looks for.
+    close_kernel_px: 9    # a one-frame detection is likelier a red van
   lanes:
     merge_window_s: 0.8            # reports closer than this are one crossing
   stop_lines:

@@ -31,8 +31,8 @@ scenario:
       blueprint: "vehicle.tesla.model3"
       spawn:
         anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
+        junction_x: 152.54
+        junction_y: -0.23
         bearing_deg: 0.0
         back_m: 44.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
@@ -44,8 +44,8 @@ scenario:
       blueprint: "vehicle.audi.tt"
       spawn:
         anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
+        junction_x: 152.54
+        junction_y: -0.23
         bearing_deg: -90.0
         back_m: 48.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
@@ -60,11 +60,15 @@ scenario:
         governs: "B"
         anchor:
           anchor: "junction_approach"
-          junction_x: 101.6
-          junction_y: 0.3
+          junction_x: 152.54
+          junction_y: -0.23
           bearing_deg: -90.0
           back_m: 12.0
-        spawn_prop: true
+        # The map renders a real stop sign on this approach, so none is
+        # spawned. place_traffic_control verifies the mesh is there and
+        # records physically_present from what it found, not from this
+        # declaration.
+        spawn_prop: false
         stop_line_forward_m: 4.0
     tie_break: null
 
