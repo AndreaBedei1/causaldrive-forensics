@@ -158,9 +158,19 @@ The headline findings, including the ones that did not go the project's way:
   that ceiling exactly on roughly half the campaign's runs. The exact counts are
   in the generated table, not here: a number transcribed into prose is a number
   that will eventually be wrong.
-- **Attribution is partly right.** Exactly the designed contributors are named on
-  some scenarios, a subset on others, and on one the wrong vehicle entirely.
-  Per-scenario verdicts are in the results table.
+- **Attribution is partly right, and the two methods disagree usefully.** The
+  replay-backed verdict names exactly the designed contributors on some
+  scenarios and a subset or superset on others. The graph-only hypothesis is
+  weaker in one specific and instructive way: when the designed cause is a
+  *non-action* — a vehicle entering a junction without slowing — there is no
+  event node to root a causal chain at, so the graph names the vehicle that
+  *reacted* instead. The replay gets it right. Both are reported, and where they
+  disagree the replay is the one to believe.
+- **Clock alignment buys seconds, not structure.** Estimating the common
+  timeline cuts offset error several-fold against taking timestamps at face
+  value, and leaves the graph metrics flat — the event matcher's tolerance is
+  far wider than the error involved. Reported both ways rather than as the
+  half that flatters it.
 
 ## Tests
 
