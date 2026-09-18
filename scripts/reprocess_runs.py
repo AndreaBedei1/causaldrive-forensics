@@ -14,6 +14,8 @@ Stages, each independently selectable:
 ``oracle``   privileged events and the oracle reference graph
 ``check``    finite-trace property monitoring
 ``evaluate`` scoring against the oracle
+``ablate``   re-derive fusion with and without post-fusion causal reasoning and
+             score both against the oracle, beside the best single viewpoint
 ``figures``  per-run figures
 ``viewer``   the viewer bundle
 
@@ -37,6 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from cdf.common.config import load_run_config  # noqa: E402
 from cdf.common.io import read_json, write_json  # noqa: E402
 from cdf.common.layout import RunLayout  # noqa: E402
+from cdf.evaluation.method_ablation import ablate_run  # noqa: E402
 
 LOGGER = logging.getLogger("reprocess")
 
@@ -45,8 +48,8 @@ def _round(value, digits=4):
     return None if value is None else round(float(value), digits)
 
 
-ALL_STAGES = ("analyse", "fuse", "oracle", "check", "evaluate", "figures",
-              "viewer", "manifest")
+ALL_STAGES = ("analyse", "fuse", "oracle", "check", "evaluate", "ablate",
+              "figures", "viewer", "manifest")
 
 
 def discover_runs(artifacts_root: Path) -> List[Path]:
@@ -145,6 +148,15 @@ def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
                     "best_local_edge_f1": _round(best.get("edge_f1")),
                     "delta_edge_f1": _round(graphs.get("delta_edge_f1")),
                     "best_local": graphs.get("best_local_participant_id"),
+                }
+            elif stage == "ablate":
+                ablation = ablate_run(layout, cfg, persist=True)
+                arms = ablation["arms"]
+                result[stage] = {
+                    arm: _round((arms.get(arm, {}).get("strict", {})
+                                 .get("edges") or {}).get("f1"))
+                    for arm in ("best_local", "simple_fusion",
+                                "fusion_global_reasoning")
                 }
             elif stage == "figures":
                 made = render_run_figures(layout.root, cfg)
