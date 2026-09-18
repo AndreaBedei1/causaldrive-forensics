@@ -54,12 +54,14 @@ SUPERVISOR_COLUMNS: Tuple[str, ...] = (
     "seed",
     "what_happened",
     "reconstructed",
-    "clock_aligned",
+    "clock_source",
+    "clock_quality",
     "collision_order",
     "signs_detected",
     "line_evidence",
     "key_formal_violation",
     "physical_contributors",
+    "normative_violation",
     "responsibility_contributors",
     "counterfactual_validation",
     "main_limitation",
@@ -307,17 +309,47 @@ def _reconstructed(metrics: Optional[Mapping[str, Any]]) -> str:
     )
 
 
+def _clock_source(alignment: Optional[Mapping[str, Any]]) -> str:
+    """Which source placed each recorder: the method, per vehicle.
+
+    A run status alone would hide that one vehicle on a timeline rests on a
+    fitted trajectory while the others rest on a physical impact, and those are
+    not the same claim.
+    """
+    if not alignment:
+        return "not fused"
+    if str(alignment.get("method", "")) == "acquisition_start_marker":
+        return "harness marker (no contact, no radar)"
+    sources = alignment.get("clock_sources") or {}
+    if not sources:
+        return "contact only (no per-vehicle provenance recorded)"
+    return ", ".join(
+        "{0}={1}".format(pid, str(sources[pid]).lower()) for pid in sorted(sources)
+    )
+
+
 def _clock(alignment: Optional[Mapping[str, Any]]) -> str:
+    """How good the alignment is: the status and what it rests on."""
     if not alignment:
         return "not fused"
     status = str(alignment.get("status", "?"))
-    method = str(alignment.get("method", ""))
-    if method == "acquisition_start_marker":
-        return "harness marker (not contact)"
-    n = alignment.get("n_shared_contacts") or 0
-    return "{0} ({1} shared contact{2})".format(
+    if str(alignment.get("method", "")) == "acquisition_start_marker":
+        return "harness marker (not a reconstruction result)"
+    # The hybrid keeps the contact stage's own counts in a nested block, so a
+    # reader is told how many shared contacts the physical part actually had
+    # rather than a zero that means "look somewhere else".
+    stage = alignment.get("contact_stage") or alignment
+    n = stage.get("n_shared_contacts") or 0
+    unresolved = alignment.get("unaligned_participants") or []
+    text = "{0} ({1} shared contact{2})".format(
         status.replace("_", " ").lower(), n, "" if n == 1 else "s"
     )
+    if unresolved:
+        text += "; {0} unresolved".format(", ".join(str(p) for p in unresolved))
+    caveats = stage.get("shared_anchor_caveats") or []
+    if caveats:
+        text += "; shared anchor"
+    return text
 
 
 def _signs(perception: Optional[Mapping[str, Any]]) -> str:
@@ -371,6 +403,38 @@ def _contributors(report: Optional[Mapping[str, Any]]) -> Tuple[str, str]:
     if partial:
         responsibility += " ({0} partial)".format(", ".join(partial))
     return (", ".join(physical) or "none"), responsibility
+
+
+def _normative(
+    report: Optional[Mapping[str, Any]],
+    formal: Optional[Mapping[str, Any]],
+) -> str:
+    """Which rule was observed to be broken, and by whom.
+
+    Kept apart from the responsibility column on purpose. A violation is a
+    finding about a rule; a contribution additionally requires an independent
+    physical path to the outcome, and reporting them in one cell would let a
+    reader read the first as the second.
+    """
+    who = sorted(
+        pid for pid, finding in ((report or {}).get("findings") or {}).items()
+        if finding.get("traffic_control_violations")
+        or finding.get("temporal_property_failures")
+    )
+    failed = sorted({
+        str(result.get("property_id"))
+        for result in (formal or {}).get("results", []) or []
+        if result.get("status") == "FAIL" and not result.get("vacuous")
+    })
+    if not who and not failed:
+        return "none observed"
+    if not who:
+        return "property {0} failed; no vehicle carries a violation finding".format(
+            ", ".join(failed)
+        )
+    return "{0} ({1})".format(
+        ", ".join(who), ", ".join(failed) if failed else "no property failed"
+    )
 
 
 def _counterfactual(report: Optional[Mapping[str, Any]]) -> str:
@@ -475,7 +539,8 @@ def build_supervisor_rows(
             "seed": manifest.get("seed"),
             "what_happened": _what_happened(manifest, global_log),
             "reconstructed": _reconstructed(metrics),
-            "clock_aligned": _clock(alignment),
+            "clock_source": _clock_source(alignment),
+            "clock_quality": _clock(alignment),
             "collision_order": _collision_order(
                 global_log, observable, alignment,
                 manifest.get("fixed_delta_seconds"),
@@ -484,6 +549,7 @@ def build_supervisor_rows(
             "line_evidence": _line_evidence(layout, layout.participant_ids()),
             "key_formal_violation": _formal(formal),
             "physical_contributors": physical,
+            "normative_violation": _normative(report, formal),
             "responsibility_contributors": responsibility,
             "counterfactual_validation": _counterfactual(report),
             "main_limitation": _limitation(alignment, perception, formal, report),
@@ -516,10 +582,23 @@ def write_supervisor_table(
     publish_dir: Any = "results",
     cfg: Optional[Config] = None,
 ) -> Dict[str, Any]:
-    """Build the table and write it as CSV and markdown."""
+    """Build the table and write it as CSV and markdown.
+
+    ``publish_dir`` of ``None`` builds the rows and writes nothing, which is what
+    a scratch campaign wants: the table is worth looking at without committing a
+    copy of it.
+    """
     from pathlib import Path
 
     rows = build_supervisor_rows(artifacts_root, cfg)
+    if publish_dir is None:
+        return {
+            "schema_version": SCHEMA_VERSIONS["evaluation"],
+            "n_rows": len(rows),
+            "columns": list(SUPERVISOR_COLUMNS),
+            "published": False,
+            "rows": rows,
+        }
     out = Path(publish_dir)
     out.mkdir(parents=True, exist_ok=True)
     write_csv(out / "supervisor_table.csv", rows, SUPERVISOR_COLUMNS)

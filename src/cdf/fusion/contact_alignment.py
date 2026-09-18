@@ -218,7 +218,7 @@ def contact_anchors(
     ev: ParticipantEvidence,
     merge_window_s: float = 0.3,
     min_impulse_fraction: float = 0.05,
-    min_impulse_ns: float = 300.0,
+    min_impulse_ns: float = 50.0,
 ) -> List[ContactAnchor]:
     """Every impact this recorder felt, in the order it felt them.
 
@@ -901,7 +901,7 @@ def align_by_contact(
                         0.05)
             ),
             min_impulse_ns=float(
-                cfg.get("fusion.contact_alignment.min_impulse_ns", 300.0)
+                cfg.get("fusion.contact_alignment.min_impulse_ns", 50.0)
             ),
         )
         for pid in participants

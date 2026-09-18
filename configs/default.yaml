@@ -308,7 +308,15 @@ fusion:
     # run at a hundredth of the impact impulse. An anchor has to carry a real
     # share of the momentum transfer, or it is contact rather than an impact.
     min_impulse_fraction_of_peak: 0.05
-    min_impulse_ns: 300.0
+    # A noise floor, not a resting-contact filter. Rejecting resting contact is
+    # what min_impulse_fraction_of_peak is for, and it does it on the ratio: on
+    # the recorded chain the resting reports were 30-290 N*s against a peak of
+    # 11569, i.e. 0.003-0.025 of it, well under the 0.05 fraction. An absolute
+    # floor of 300 additionally threw away real collisions that happened to be
+    # gentle -- the all-way-stop merge impact measures 120.3 N*s and was being
+    # read as "no recorder felt a contact", which dropped the whole run onto the
+    # harness marker.
+    min_impulse_ns: 50.0
     # The negative controls have no contact to anchor on. The fallback is an
     # explicit marker from the experiment harness, reported apart from
     # contact-aligned runs; it is never simulator time. See section 14 of the

@@ -722,3 +722,63 @@ def test_the_well_supported_offset_is_still_accurate():
     result = align_by_contact(run, cfg())
     offsets = result["offsets_s"]
     assert offsets["A"] - offsets["B"] == pytest.approx(-0.268, abs=1e-3)
+
+
+# --- a gentle collision is still a collision --------------------------------
+
+
+def test_a_low_energy_impact_is_not_discarded_as_resting_contact():
+    """The absolute impulse floor is a noise floor, not a resting-contact filter.
+
+    It used to sit at 300 N*s, chosen because resting contact after a pile-up
+    reports 30-290. But a real collision can land inside that band: the recorded
+    all-way-stop merge measures 120.3 N*s, and at 300 the run reported that no
+    recorder had felt a contact at all and fell through to the harness marker --
+    a collision run presented as a no-collision run.
+
+    Rejecting resting contact is what the *relative* test does, and it does it
+    properly, on the ratio to the recorder's own peak.
+    """
+    ev = ParticipantEvidence(
+        participant_id="A",
+        telemetry=telemetry("A", 0.0, 10.0, 0.0, 0.0),
+        triggers=[impact("A", 5.0, 120.3)],
+    )
+    assert [a.t_local for a in contact_anchors(ev)] == [5.0], (
+        "a 120 N*s impact is the only contact this recorder felt, so it is that "
+        "recorder's peak and cannot be resting contact"
+    )
+
+
+def test_resting_contact_beside_a_real_impact_is_still_rejected():
+    """The case the floor was written for, and the relative test still catches it.
+
+    On the recorded chain the resting reports were 30-290 N*s against a peak of
+    11569 -- 0.003 to 0.025 of it, well under the 0.05 fraction.
+    """
+    ev = ParticipantEvidence(
+        participant_id="B",
+        telemetry=telemetry("B", 0.0, 20.0, 0.0, 0.0),
+        triggers=[
+            impact("B", 5.9, 11569.0),
+            impact("B", 6.5, 290.0),
+            impact("B", 7.1, 120.0),
+            impact("B", 7.7, 30.0),
+        ],
+    )
+    assert [a.t_local for a in contact_anchors(ev)] == [5.9], (
+        "everything after the real impact is the vehicles still touching, and "
+        "each is a hundredth of the momentum this recorder actually felt"
+    )
+
+
+def test_a_gentle_shared_impact_aligns_two_recorders():
+    """End to end: the all-way-stop case that was dropping to the harness marker."""
+    run = run_of(
+        participant("A", [impact("A", 7.545511, 120.341)], x=-263.5, y=-10.9),
+        participant("B", [impact("B", 7.420784, 120.341)], x=-265.3, y=-8.9),
+    )
+    result = align_by_contact(run, Config({}))
+    assert result["status"] == "CONTACT_ALIGNED", result.get("reason")
+    assert result["n_contact_anchors"] == 2
+    assert result["offsets_s"]["B"] == pytest.approx(0.124727, abs=1e-6)
