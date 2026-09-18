@@ -901,24 +901,77 @@ def _imported_modules(path: Path) -> List[str]:
     return out
 
 
+#: The inference machinery the reference exists to score. Written as module
+#: paths rather than bare tokens: the oracle has modules of its own whose names
+#: legitimately contain "causal_graph", and a substring match would flag those
+#: while telling us nothing about where they came from.
+FORBIDDEN_INFERENCE_MODULES = (
+    "cdf.local.causal_rules",
+    "cdf.local.causal_graph",
+    "cdf.local.event_extractor",
+    "cdf.local.event_graph",
+    "cdf.local.pipeline",
+    "cdf.fusion.graph_fusion",
+    "cdf.fusion.post_fusion_causal",
+)
+
+
+def _resolves_into(name: str, module: str) -> str:
+    """The absolute module a possibly-relative import refers to.
+
+    Python's rule, which is easy to get subtly wrong: the anchor is the
+    *package* containing ``module``, not the module itself. So from
+    ``cdf.oracle.x``, a single dot means ``cdf.oracle`` and two dots mean
+    ``cdf``. Resolving one level too few would quietly let ``..local.foo``
+    look like an oracle module and defeat the check.
+    """
+    if not name.startswith("."):
+        return name
+    depth = len(name) - len(name.lstrip("."))
+    package = module.split(".")[:-1]
+    base = package[: len(package) - (depth - 1)] if depth > 1 else package
+    tail = name.lstrip(".")
+    return ".".join(base + ([tail] if tail else [])).rstrip(".")
+
+
 def test_oracle_does_not_import_the_local_causal_engine():
     """The reference must not be built by the machinery it is used to score.
 
     Asserted by reading the source rather than by inspecting ``sys.modules``: an
     import made inside a function would never show up in a runtime check on a
     code path the test happens not to take.
+
+    The oracle builds its own causal graph, from its own rules, over exact state.
+    That is not the thing this forbids -- what it forbids is the oracle reaching
+    into ``cdf.local`` or ``cdf.fusion``, which would make agreement true by
+    construction and the whole comparison vacuous.
     """
     package = Path(oracle_events.__file__).parent
-    forbidden = ("causal_rules", "causal_graph", "local.event_extractor", "local.event_graph")
 
     for path in sorted(package.glob("*.py")):
-        imported = _imported_modules(path)
-        for name in imported:
-            for token in forbidden:
-                assert token not in name, (
-                    "{0} imports {1!r}; the oracle must not reuse the local inference "
-                    "machinery it is the reference for".format(path.name, name)
+        module = "cdf.oracle." + path.stem
+        for name in _imported_modules(path):
+            resolved = _resolves_into(name, module)
+            for forbidden in FORBIDDEN_INFERENCE_MODULES:
+                assert not resolved.startswith(forbidden), (
+                    "{0} imports {1!r} (resolving to {2}); the oracle must not "
+                    "reuse the inference machinery it is the reference "
+                    "for".format(path.name, name, resolved)
                 )
+
+
+def test_the_import_check_would_catch_a_real_violation() -> None:
+    """A guard that cannot fail is not a guard."""
+    assert _resolves_into("cdf.local.causal_rules", "cdf.oracle.x").startswith(
+        "cdf.local.causal_rules"
+    )
+    assert _resolves_into("..local.causal_graph", "cdf.oracle.x").startswith(
+        "cdf.local.causal_graph"
+    )
+    # ...and the oracle's own graph module is not mistaken for the local one.
+    assert not _resolves_into(
+        ".observable_graph", "cdf.oracle.ground_truth_package"
+    ).startswith("cdf.local")
 
 
 def test_oracle_analysis_modules_do_not_need_carla():

@@ -195,6 +195,62 @@ class RunLayout:
         return self.fusion_dir / "fusion_diagnostics.json"
 
     @property
+    def simple_fused_causal_graph(self) -> Path:
+        """The union baseline: local graphs merged, nothing inferred.
+
+        Kept beside the global inferred graph rather than derived from it, so
+        the ablation between the two compares two things that were each built
+        the way they claim to have been built.
+        """
+        return self.fusion_dir / "simple_fused_causal_graph.json"
+
+    @property
+    def simple_fused_causal_graphml(self) -> Path:
+        return self.fusion_dir / "simple_fused_causal_graph.graphml"
+
+    @property
+    def observable_events(self) -> Path:
+        """Privileged ground truth in the vocabulary a reconstruction shares."""
+        return self.oracle_dir / "oracle_observable_events.json"
+
+    @property
+    def observable_causal_graph(self) -> Path:
+        return self.oracle_dir / "oracle_observable_causal_graph.json"
+
+    @property
+    def observable_causal_graphml(self) -> Path:
+        return self.oracle_dir / "oracle_observable_causal_graph.graphml"
+
+    @property
+    def radar_truth(self) -> Path:
+        """Exact radar-equivalent geometry for every ordered pair."""
+        return self.oracle_dir / "radar_truth.jsonl.gz"
+
+    @property
+    def map_context(self) -> Path:
+        """Privileged map facts, kept out of the comparable claim."""
+        return self.oracle_dir / "map_context.json"
+
+    @property
+    def scenario_design_graph(self) -> Path:
+        """What the scenario intended, for checking the mechanism executed."""
+        return self.oracle_dir / "scenario_design_graph.json"
+
+    @property
+    def graph_diff(self) -> Path:
+        """Row-by-row comparison of each account with the ground truth."""
+        return self.evaluation_dir / "graph_diff.json"
+
+    @property
+    def node_matches(self) -> Path:
+        return self.evaluation_dir / "node_matches.csv"
+
+    @property
+    def knowledge_gain(self) -> Path:
+        """Which account first recovered each ground-truth node and edge."""
+        return self.evaluation_dir / "knowledge_gain.json"
+
+    @property
     def incident_reconstruction(self) -> Path:
         """What happened, reconstructed from the exchanged logs alone."""
         return self.fusion_dir / "incident_reconstruction.json"

@@ -150,9 +150,12 @@ def fuse_run(
             "(cdf.local.pipeline.analyse_run)".format(layout.root)
         )
 
+    products: Dict[str, Any] = {}
     fused_causal, diagnostics = fuse_graphs(
-        run, local_causal, assignments, cfg, graph_kind="causal"
+        run, local_causal, assignments, cfg, graph_kind="causal",
+        products=products,
     )
+    simple_fused_causal = products.get("simple_fusion")
 
     fused_event: Optional[GraphDocument] = None
     event_diag: Dict[str, Any] = {}
@@ -192,6 +195,12 @@ def fuse_run(
         write_json(layout.incident_reconstruction, reconstruction)
         write_json(layout.causal_attribution, attribution)
         save_graph(fused_causal, layout.fused_causal_graph, layout.fused_causal_graphml)
+        if simple_fused_causal is not None:
+            save_graph(
+                simple_fused_causal,
+                layout.simple_fused_causal_graph,
+                layout.simple_fused_causal_graphml,
+            )
         if fused_event is not None:
             save_graph(fused_event, layout.fused_event_graph, layout.fused_event_graphml)
 

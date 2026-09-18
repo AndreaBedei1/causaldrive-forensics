@@ -73,8 +73,26 @@ def fuse_graphs(
     assignments: Mapping[str, TrackAssignment],
     cfg: Config,
     graph_kind: str = "causal",
+    products: Optional[Dict[str, Any]] = None,
 ) -> Tuple[GraphDocument, Dict[str, Any]]:
     """Fuse the participants' local graphs into one ``FUSED`` graph document.
+
+    Two graphs come out of this, and only one of them is returned. The returned
+    one is the **global inferred** graph: the merge plus the cross-vehicle causal
+    relations reasoning proposes afterwards. The other is the **simple fusion**
+    baseline -- the same merge with every local edge preserved and nothing
+    invented -- which answers "what does pooling the logs alone give us?".
+
+    The baseline is handed back through ``products`` rather than the return
+    value because almost no caller wants it and changing what everybody unpacks
+    to serve the one that does would be the wrong trade. Pass a dict to receive
+    ``{"simple_fusion": GraphDocument}``; pass nothing and nothing changes.
+
+    It cannot be reconstructed afterwards by dropping the inferred edges from
+    the returned graph: acyclicity is enforced over whatever edge set it is
+    given, and a denser set can force a different edge out. A baseline that
+    quietly differed from the thing it claims to be would make the ablation
+    between them meaningless.
 
     Parameters
     ----------
@@ -154,6 +172,15 @@ def fuse_graphs(
         edges=list(fused_edges),
         meta={},
     )
+    # The union baseline: identities resolved, clocks aligned, nodes merged,
+    # every local causal edge preserved, and nothing invented. It is captured
+    # here, before inference runs, rather than derived afterwards by removing
+    # the inferred edges -- those two are not the same graph, because acyclicity
+    # is enforced over whatever edge set it is given and a denser set can force
+    # a different edge to be dropped. A baseline that quietly differed from the
+    # thing it claims to be would make the ablation between them meaningless.
+    union_edges = list(fused_edges)
+
     inferred_edges, post_fusion_diag = infer_global_causal_edges(
         fused_doc_for_inference,
         fused_edges,
@@ -176,10 +203,34 @@ def fuse_graphs(
         meta={},
     )
 
+    simple_fused = GraphDocument(
+        graph_kind=graph_kind,
+        scope=Provenance.FUSED,
+        owner=None,
+        run_id=run.run_id,
+        scenario_id=run.scenario_id,
+        seed=run.seed,
+        nodes=fused_nodes,
+        edges=union_edges,
+        meta={},
+    )
+
     enforce = bool(cfg.get("fusion.enforce_dag", graph_kind == "causal"))
     dag_notes: List[str] = []
     if enforce:
         fused, dag_notes = _enforce_dag(fused, cfg, rejected_edges)
+        simple_fused, _union_notes = _enforce_dag(simple_fused, cfg, [])
+    simple_fused.meta = {
+        "graph_role": "simple_fusion",
+        "note": (
+            "the union baseline: local graphs merged on a common timeline with "
+            "identities resolved, every local causal edge preserved and no "
+            "cross-vehicle relation invented. What a reconstruction gets from "
+            "pooling the logs alone"
+        ),
+        "n_local_edges": len(union_edges),
+        "config_hash": cfg.hash,
+    }
 
     added = _fusion_added(fused, docs, node_map, cfg)
     diagnostics = _build_diagnostics(
@@ -212,6 +263,12 @@ def fuse_graphs(
         }
     }
     diagnostics["post_fusion_causal"] = post_fusion_diag
+    diagnostics["simple_fusion"] = {
+        "n_nodes": len(simple_fused.nodes),
+        "n_edges": len(simple_fused.edges),
+        "n_edges_added_by_reasoning": len(fused.edges) - len(simple_fused.edges),
+    }
+    fused.meta["graph_role"] = "global_inferred"
     fused.meta["fusion"]["n_inferred_edges"] = len(inferred_edges)
     fused.meta["fusion"]["post_fusion_reasoning"] = bool(post_fusion_diag.get("enabled"))
     diagnostics["unresolved_time_participants"] = unresolved
@@ -219,6 +276,8 @@ def fuse_graphs(
         p: {"n_nodes":len(local_docs[p].nodes),"n_edges":len(local_docs[p].edges),
             "status":"UNRESOLVED_TIME_ALIGNMENT","retained":"original local graph; excluded from common-time fusion"}
         for p in unresolved}
+    if products is not None:
+        products["simple_fusion"] = simple_fused
     return fused, diagnostics
 
 
