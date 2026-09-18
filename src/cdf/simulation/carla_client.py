@@ -140,6 +140,13 @@ def connect_with_retry(
     A short per-probe timeout is used while waiting and the caller's real timeout
     is applied once the handshake succeeds, so a cold start does not block for
     the full ``timeout_s`` on every attempt.
+
+    The handshake alone is not readiness. ``get_server_version`` answers while
+    the engine is still bringing a map up, and the caller's first ``get_map``
+    then blocks for the full sixty seconds and raises -- which on the campaign
+    looked like a scenario that hung, retried three times and stalled the whole
+    run. So the probe asks for the world as well, and a server that cannot yet
+    produce one is treated as still booting rather than as connected.
     """
     carla = import_carla()
     last_error: Optional[BaseException] = None
@@ -155,6 +162,8 @@ def connect_with_retry(
                     server_version,
                     client_version,
                 )
+            # Readiness, not just reachability: ask for the world.
+            client.get_world().get_map().name
             client.set_timeout(float(timeout_s))
             LOGGER.info(
                 "connected to CARLA %s at %s:%d after %d attempt(s)",
