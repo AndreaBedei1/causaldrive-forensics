@@ -267,7 +267,9 @@ def contribution_of(
 
 
 def classify_attribution(
-    results: Sequence[CausalContribution], cfg: Optional[Config] = None
+    results: Sequence[CausalContribution],
+    cfg: Optional[Config] = None,
+    factual_collision: bool = True,
 ) -> Dict[str, Any]:
     """Turn per-replay contributions into an attribution verdict.
 
@@ -290,6 +292,14 @@ def classify_attribution(
     The last case is a real result, not a failure to try. It is what an honest
     system returns when the crash survived every intervention it was able to
     make, and it must never be rewritten into a culprit.
+
+    ``factual_collision`` says whether the run being attributed collided at all.
+    It does not change the verdict -- a run with no outcome has nothing to
+    attribute and reaches ``insufficient_evidence`` either way -- but it does
+    change the *reason given*, and a reason is not a decoration. The viewer
+    prints this sentence to a reader, and telling them "the collision still
+    occurred in all six replays" about a run that never collided is a plain
+    falsehood, even though the class beside it is right.
     """
     for item in results:
         if not isinstance(item, CausalContribution):
@@ -328,6 +338,14 @@ def classify_attribution(
         rationale = (
             "no counterfactual replay produced a usable outcome, so no causal "
             "contribution could be measured"
+        )
+    elif not factual_collision:
+        attribution_class = "insufficient_evidence"
+        primary = None
+        rationale = (
+            "the factual run produced no collision, so there is no outcome to "
+            "attribute; the {0} replay(s) are reported for what they show about "
+            "the encounter, not as evidence against anybody".format(len(results))
         )
     elif len(necessary) == 1:
         attribution_class = "single_initiator"
@@ -409,7 +427,9 @@ def attribution_report(
         }
     else:
         contributions = [contribution_of(factual, cf, cfg) for cf in counterfactuals]
-        classification = classify_attribution(contributions, cfg)
+        classification = classify_attribution(
+            contributions, cfg, factual_collision=bool(factual.collision)
+        )
 
     notes: List[str] = []
     if failures:

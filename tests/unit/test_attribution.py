@@ -383,3 +383,46 @@ def test_attribution_report_is_json_serialisable(cfg: Config, tmp_path) -> None:
     )
     path = write_json(tmp_path / "causal_contribution.json", report)
     assert read_json(path)["classification"]["primary_initiator"] == "B_emergency_brake"
+
+
+def test_a_run_that_never_collided_is_not_told_that_a_collision_survived() -> None:
+    """The class was always right here; the sentence beside it was a falsehood.
+
+    A negative control produces no collision, so every replay leaves the outcome
+    unchanged and no action is ever but-for necessary -- which reaches
+    ``insufficient_evidence`` correctly. The rationale, however, described "the
+    collision still occurred in all N replays" about a run in which no collision
+    ever occurred, and that sentence is what the viewer prints to a reader.
+    """
+    from cdf.causal.attribution import classify_attribution, contribution_of
+    from cdf.causal.counterfactuals import CounterfactualOutcome
+
+    factual = CounterfactualOutcome(
+        intervention_id="factual", collision=False, near_miss=False,
+        min_distance=20.0, min_ttc=3.0, impact_speed=None,
+        relative_impact_speed=None, t_collision=None, collision_pairs=[],
+        validation_passed=True, notes=[],
+    )
+    replays = [
+        CounterfactualOutcome(
+            intervention_id="{0}__disable".format(action), action_id=action,
+            op="disable", collision=False, near_miss=False, min_distance=18.0,
+            min_ttc=2.5, impact_speed=None, relative_impact_speed=None,
+            t_collision=None, collision_pairs=[], validation_passed=True, notes=[],
+        )
+        for action in ("A_late_brake", "B_emergency_brake")
+    ]
+    contributions = [contribution_of(factual, cf, None) for cf in replays]
+
+    verdict = classify_attribution(contributions, None, factual_collision=False)
+    assert verdict["attribution_class"] == "insufficient_evidence"
+    assert verdict["necessary_actions"] == []
+    assert "no collision" in verdict["rationale"]
+    assert "still occurred" not in verdict["rationale"], (
+        "the rationale must not describe a collision that never happened"
+    )
+
+    # The collided case keeps its own, equally truthful sentence.
+    collided = classify_attribution(contributions, None, factual_collision=True)
+    assert collided["attribution_class"] == "insufficient_evidence"
+    assert "still occurred" in collided["rationale"]

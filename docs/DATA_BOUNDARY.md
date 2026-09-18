@@ -329,6 +329,40 @@ equal a CARLA actor id recorded in the oracle trace for that run.
 
 ---
 
+## 4.5 The dynamic argument: `tests/test_inference_is_blind.py`
+
+Everything in section 4 is a *static* argument. It proves the inference packages
+never import, name, or serialise anything privileged, which is strong — but it
+cannot by itself rule out a subtler dependency. A stage might behave differently
+when the oracle's files happen to be on disk. A rule might quietly key on the
+scenario label. Some part of the pipeline might have come to rely on the
+designed causal template being available in the configuration.
+
+So a second suite argues the opposite way. It removes the privileged input
+entirely, runs the **real** pipeline over the same recordings, and requires the
+result to be *identical*.
+
+| Test | What is removed | What must be unchanged |
+|---|---|---|
+| no oracle on disk | the whole `oracle/` subtree is deleted | every node, edge, confidence, chain, named contributor, clock estimate and diagnostic |
+| relabelled scenario | `scenario_id` is replaced with another scenario's, with nonsense, and with the empty string | the same, and the pipeline must not create the oracle subtree |
+| no causal template | `scenario.causal_template`, `expected_outcome` and `expected_culprit` are emptied out of the configuration | the same |
+
+All three pass. The only fields that differ are the ones an artifact records
+*about its own inputs* — `scenario_id`, `variant`, `config_hash` — which is the
+bookkeeping an artifact should carry, and which the tests assert on separately
+rather than ignore. An artifact that did not record which run produced it would
+be worse, not better.
+
+Two further checks close the obvious gaps. One requires the relabelled runs to
+still reconstruct something — equality is worthless if the pipeline produced an
+empty graph in both cases. The other scans the inference packages for a scenario
+identifier used as a *value* rather than in a docstring, because a rule keyed on
+`S01` would be a lookup table wearing a causal model's clothes.
+
+An equality failure in this suite is not a style violation. It means a number
+somewhere in the campaign was produced with knowledge of the answer.
+
 ## 5. What the boundary costs, and why that is the point
 
 The boundary is not free, and the committed S01 run shows the bill:

@@ -240,6 +240,78 @@ explains nothing" is itself a finding.
 
 ---
 
+## 4.5 From a graph to an account
+
+A DAG is not an explanation. `fused:B:HARD_BRAKE:1c2f...` is a node id, and "B
+applied hard braking at 4.0 s" is an answer; the step between them is where a
+reconstruction becomes something a person can check.
+
+### Behavioural episodes
+
+`cdf.graph.episodes` groups a vehicle's nodes into named behaviours. The
+vocabulary is deliberately small and deliberately descriptive:
+
+`emergency_braking`, `braking_response`, `late_braking_response`,
+`sustained_acceleration`, `lane_change_like_motion`,
+`conflict_entry_without_deceleration`, `closing_without_deceleration`,
+`defensive_stop`.
+
+There is no `failure_to_yield`, and there never will be. Right of way is a
+property of the map and the traffic code, and fusion has neither — a kinematic
+reconstruction that emitted `failure_to_yield` would be smuggling a legal
+judgement in under a physical-sounding name. `conflict_entry_without_deceleration`
+says the observable thing instead, and leaves the normative reading to a reader
+who has the map.
+
+`defensive_stop` carries a related caution: a vehicle that braked hard and then
+collided anyway is not labelled defensive, because the label would be
+describing an intention the evidence does not support.
+
+### Chains
+
+`cdf.graph.reconstruction` walks the causal ancestry of each outcome node and
+reports the root-to-outcome paths. Each chain carries its links, the rule and
+origin behind each link, the confidence of the weakest link, whether it crosses
+more than one vehicle's log, and a **narrative**: one templated sentence per
+link, generated from a fixed phrase table.
+
+No language model is involved anywhere. The sentences are deterministic; two
+runs of the same reconstruction produce the same words.
+
+A chain built only of `PREVENTS` links is reported as **preventive**, not
+contributing. A vehicle that braked and avoided the crash is not a contributor
+to it, and folding the two together would be the single most misleading thing
+this project could do.
+
+### The hypothesis, before any replay
+
+`build_attribution_hypothesis` names, per collision, the behavioural episodes at
+the roots of the supported chains into it. That is a *hypothesis*: it says the
+graph supports this reading, and every contributor it names is stamped
+`validation.status = "not_validated"` until a counterfactual replay confirms,
+weakens or fails to resolve it.
+
+Reporting it separately is what makes the contribution of reasoning measurable
+on its own. The evaluation scores the graph-only hypothesis beside the
+replay-backed verdict, so the question "how much does the simulator add?" has an
+answer rather than an assumption.
+
+### The canonical vocabulary (evaluation only)
+
+Three layers describe the same fact in three ways. The privileged oracle knows a
+scripted action fired and emits `ORACLE_SCRIPTED_INTERVENTION`; the vehicle that
+executed it recorded a `HARD_BRAKE`. These are the same physical event, and a
+strict structural metric can never match them.
+
+`cdf.graph.canonical` maps node and edge types onto semantic families so the two
+can be compared by what they *mean*. It is applied symmetrically to both sides,
+it never touches a fused artifact, and it never travels back into inference.
+
+It is also, unavoidably, a **weaker** test: collapsing `LOW_TTC` and
+`CRITICAL_TTC` into one family forgives a distinction a reconstruction might
+have got wrong. Canonical numbers are therefore always reported *beside* strict
+ones, never instead of them, and the strict figures remain the headline.
+
 ## 5. Counterfactuals: interventional semantics
 
 ### 5.1 What `do(·)` means here
@@ -321,6 +393,13 @@ replay is reported as missing, never replaced by an assumption.
 ---
 
 ## 6. The contribution score, written out
+
+> The score below ranks single actions. What *classifies* an incident is the
+> set analysis in [COUNTERFACTUALS.md](COUNTERFACTUALS.md): a single action can
+> be scored zero and still be half of the only set that would have prevented
+> the collision. When a multi-action replay has been run, its verdict is the
+> verdict, and this score becomes a per-action detail rather than the answer.
+
 
 `cdf.causal.attribution.contribution_score(factual, cf, cfg)`:
 

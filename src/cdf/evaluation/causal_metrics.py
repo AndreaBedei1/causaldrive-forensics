@@ -392,12 +392,19 @@ def _cross_view_reconstruction(
     per_pair: List[Dict[str, Any]] = []
     squared: List[float] = []
     unresolved = 0
+    unaligned: List[str] = []
     for observer in sorted(raw_run.participant_ids):
         block = offsets.get(observer) or {}
-        if "scale" not in block:
+        scale, offset = block.get("scale"), block.get("offset_s")
+        if scale is None or offset is None:
+            # The alignment could not place this recorder on the common
+            # timeline. Its observations therefore have no common-clock time at
+            # all, and defaulting to the identity transform would silently score
+            # an unaligned recorder as a perfectly aligned one -- understating
+            # exactly the error this metric exists to measure.
+            unaligned.append(observer)
             continue
-        scale = float(block.get("scale", 1.0))
-        offset = float(block.get("offset_s", 0.0))
+        scale, offset = float(scale), float(offset)
         evidence = raw_run.get(observer)
         for track_id in evidence.track_ids():
             subject = subject_map.get("{0}::{1}".format(observer, track_id))
@@ -431,15 +438,25 @@ def _cross_view_reconstruction(
                 }
             )
     per_pair.sort(key=lambda row: (row["observer"], row["track_id"]))
+    reason = None
+    if not squared:
+        reason = (
+            "no recorder could be placed on the common timeline ({0})".format(
+                ", ".join(unaligned)
+            )
+            if unaligned and len(unaligned) == len(list(raw_run.participant_ids))
+            else "no resolved track produced a comparable sample"
+        )
     return {
         "scored": bool(squared),
-        "reason": None if squared else "no resolved track produced a comparable sample",
+        "reason": reason,
         "rmse_m": (
             round(math.sqrt(sum(squared) / len(squared)), 6) if squared else None
         ),
         "n_samples": len(squared),
         "n_scored_tracks": len(per_pair),
         "n_unresolved_tracks": unresolved,
+        "unaligned_recorders": unaligned,
         "per_track": per_pair,
         "note": (
             "radar-derived position of another vehicle, placed on the estimated "
@@ -704,15 +721,30 @@ def evaluate_attribution_sets(
         out["false_attribution"] = bool(predicted)
         out["restraint_correct"] = not predicted
     if graph_hypothesis is not None:
+        blocks = graph_hypothesis.get("collisions") or []
         named = {
             str(c.get("participant_id"))
-            for block in graph_hypothesis.get("collisions") or []
+            for block in blocks
             for c in block.get("contributors") or []
             if c.get("participant_id")
         }
+        classes = [
+            ATTRIBUTION_CLASS_ALIASES.get(str(b.get("attribution_class")))
+            for b in blocks
+            if b.get("attribution_class")
+        ]
+        classes = [c for c in classes if c]
         graph_scores = prf1(truth, named)
         out["graph_only"] = {
             "predicted_participants": sorted(named),
+            "attribution_class": (
+                classes[0] if len(set(classes)) == 1 and classes
+                else ("mixed" if classes else None)
+            ),
+            "class_correct": (
+                None if not classes or not acceptable
+                else all(c in acceptable for c in classes)
+            ),
             "precision": graph_scores["precision"],
             "recall": graph_scores["recall"],
             "f1": graph_scores["f1"],

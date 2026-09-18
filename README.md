@@ -1,359 +1,198 @@
 # carla-distributed-causal-forensics
 
-Multi-vehicle forensic reconstruction in CARLA, in which **every involved vehicle
-is its own ego vehicle**.
+Several vehicles crash. Each carried its own recorder, which kept its own log
+and its own clock. No vehicle saw the whole encounter and no two agree on what
+time it was. Afterwards the logs are pooled.
 
-Each participant records only the evidence a real car could have recorded —
-its own telemetry, its own control commands, its own radar — keeps it in a
-rolling event-data-recorder buffer, and builds its **own** event graph and
-**own** causal DAG from that alone. Only afterwards are the independent local
-reconstructions fused into a single multi-vehicle causal DAG. A separate
-privileged **oracle** layer holds simulator ground truth and is used *only* to
-score the result.
+**What happened, and whose behaviour led to it?**
 
-CARLA itself advances on one simulator clock, but each virtual vehicle exports
-evidence through an independently perturbed local recorder clock. The shared
-simulator time is withheld from fusion. Radar-based joint identity/time fitting
-and a global clock graph establish a common recorder timeline before final
-association and graph merging. Unobservable alignment is reported explicitly,
-not replaced by zero offset. See [GRAPH_FUSION.md](docs/GRAPH_FUSION.md).
+This project answers that question from the logs alone, in a CARLA simulation
+where the true answer is known but deliberately withheld from every stage that
+does the reasoning.
 
-The question the project is built to answer:
-
-> Can incomplete vehicle-local observations be fused to reconstruct the causal
-> structure of a multi-vehicle road incident, and identify which vehicle actions
-> causally contributed to the outcome, **without using privileged simulator
-> ground truth during inference**?
-
-The system reports **causal contribution**, **contributing actions**, a
-**causal initiator** where one exists, **shared causal contribution** where
-several actions each suffice, and **insufficient evidence** where the onboard
-evidence cannot decide. It does **not** determine legal liability, and it makes
-no claim to formally verify the simulator.
-
-## Architecture
-
-```mermaid
-flowchart TB
-    subgraph SIM["Scenario generation (privileged by construction)"]
-        SC["configs/scenarios/*.yaml<br/>routes, scripted actions, causal template"]
-        RUN["cdf.simulation.runner<br/>synchronous 20 Hz loop"]
-        SC --> RUN
-    end
-
-    subgraph LOCAL["LOCAL - one instance per participant, onboard evidence only"]
-        direction TB
-        SENS["own telemetry + own controls + own radar"]
-        FE["radar front-end<br/>filter, stationary-target test, cluster"]
-        TR["tracker<br/>anonymous track ids A::T001"]
-        REC["rolling recorder<br/>20 s pre / 5 s post"]
-        EV["event extractor<br/>typed events, hysteresis"]
-        LG["event graph + causal DAG"]
-        SENS --> FE --> TR --> REC --> EV --> LG
-    end
-
-    subgraph FUSE["FUSION - post-event, from exchanged logs only"]
-        TA["time alignment"]
-        AS["track to participant association<br/>trajectory evidence, no actor ids"]
-        EA["event identity resolution"]
-        GF["fused event graph + fused causal DAG"]
-        TA --> AS --> EA --> GF
-    end
-
-    subgraph ANA["Analysis"]
-        MC["finite-trace model checking<br/>PASS / FAIL / UNKNOWN"]
-        CF["counterfactual replays<br/>one intervention at a time"]
-        AT["causal contribution + attribution"]
-        CF --> AT
-    end
-
-    subgraph ORA["ORACLE - privileged, evaluation only"]
-        OT["exact poses, true collision pairs,<br/>map, traffic-light state"]
-        OG["oracle causal graph<br/>from the scenario causal template"]
-        OT --> OG
-    end
-
-    EVAL["evaluation<br/>event / association / graph / attribution metrics<br/>fusion benefit + knowledge gain"]
-
-    RUN --> SENS
-    RUN -. privileged .-> OT
-    LG --> TA
-    LG --> MC
-    GF --> CF
-    GF --> EVAL
-    LG --> EVAL
-    OG --> EVAL
-    MC --> EVAL
-    AT --> EVAL
-
-    style ORA fill:#7a1f1f,color:#fff
-    style LOCAL fill:#14532d,color:#fff
-    style FUSE fill:#1e3a5f,color:#fff
+```
+  vehicle A            vehicle B            vehicle C
+  ┌─────────┐          ┌─────────┐          ┌─────────┐
+  │telemetry│          │telemetry│          │telemetry│    each sees only its own
+  │ controls│          │ controls│          │ controls│    instruments, and stamps
+  │  radar  │          │  radar  │          │  radar  │    them with its own clock
+  │own clock│          │own clock│          │own clock│
+  └────┬────┘          └────┬────┘          └────┬────┘
+       │  local events, local causal graph       │
+       └──────────────┬──────────┬───────────────┘
+                      │ exchanged logs
+                      ▼
+       ┌──────────────────────────────────────┐
+       │ FUSION                               │  no simulator clock
+       │  · estimate one common timeline      │  no actor ids
+       │  · resolve which track is which car  │  no map or lane ids
+       │  · merge the local graphs            │  no scenario label
+       │  · infer causal edges ACROSS vehicles│  no designed causal template
+       │  · reconstruct the chains            │
+       └──────────────────┬───────────────────┘
+                          ▼
+       ┌──────────────────────────────────────┐
+       │ ATTRIBUTION                          │
+       │  hypothesis from the graph, then     │
+       │  replay the encounter without each   │
+       │  candidate cause — and without SETS  │
+       └──────────────────┬───────────────────┘
+                          ▼
+     causal initiator · shared contribution · joint
+     contribution · insufficient evidence
+                          │
+                          ▼  scored against a privileged oracle
+                             the reconstruction never sees
 ```
 
-## The data boundary
+Nothing above the oracle line may read privileged state. That is enforced three
+ways: no inference module can import the code that writes it; no privileged
+field name appears in any local or fused artifact; and — the test that matters
+most — **deleting the oracle, relabelling the scenario and stripping the designed
+causal template out of the configuration produces byte-identical conclusions.**
 
-This separation is the scientific claim of the project, so it is enforced
-structurally rather than by convention. See [docs/DATA_BOUNDARY.md](docs/DATA_BOUNDARY.md).
+## What it produces
 
-| Layer | May use | May never use |
+For each run, an account you can interrogate rather than a score you have to
+trust:
+
+> A and B collided at t = 6.51 s on the common clock.
+>
+> Because: B braking contributed to B slowing → B slowing led to A closing
+> rapidly on B → A closing rapidly on B contributed to A's time-to-collision
+> with B becoming critical → that resulted in the impact between A and B.
+>
+> **Single causal initiator.** Removing B's emergency brake alone prevented the
+> collision in replay, and no other single action did.
+
+Every sentence there is a field of an artifact, assembled in reading order.
+There is no language model anywhere in this project.
+
+**A contribution score states what changed when the encounter was re-run under a
+controlled modification. It is not legal fault and not a fault percentage.**
+
+## Install
+
+```bash
+git clone <this repo> && cd carla-distributed-causal-forensics
+python -m pip install -e .
+python -m cdf.cli env        # checks the CARLA connection and version
+```
+
+Requires CARLA 0.9.15 and Python 3.8. Start the simulator first; see
+[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) for the flags this project assumes.
+
+## Quick start
+
+```bash
+# one scenario, end to end
+python -m cdf.cli run --scenario S06 --variant a_front_pushed --seed 0
+
+# what would have prevented it
+python -m cdf.cli counterfactuals --run artifacts/S06_chain_collision/seed_000_a_front_pushed
+
+# look at it
+python -m cdf.cli viewer --scenario S06 --variant a_front_pushed --seed 0
+cd artifacts/S06_chain_collision/seed_000_a_front_pushed/viewer && python -m http.server 8000
+# open http://localhost:8000/index.html
+```
+
+The viewer is a static page with no framework and no network access, so it opens
+from an offline copy of the evidence. It has one tab per question an
+investigation asks: what happened, where, why, when, who, was it checked, on what
+evidence, and how well the method did. See [docs/VIEWER.md](docs/VIEWER.md).
+
+## The full campaign
+
+```bash
+python scripts/run_campaign.py --artifacts artifacts_independent_clocks --seeds 0 1 2
+python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
+python scripts/reprocess_runs.py --artifacts artifacts_independent_clocks \
+                                 --stages evaluate ablate viewer
+```
+
+Thirteen scenario/variant combinations across nine scenarios, three seeds, 39
+runs. Results land in `artifacts_independent_clocks/summary/final_results.md`,
+generated from the artifacts rather than transcribed.
+
+## The nine scenarios
+
+Frozen. `tests/test_scenario_freeze.py` pins the SHA-256 of each definition,
+because a method that is improved by adjusting the scenario it is measured on
+has not been improved.
+
+| | Scenario | What it tests |
 |---|---|---|
-| **Local** (`cdf.local`) | own pose/velocity/acceleration/yaw-rate, own throttle/brake/steer, own radar returns, own collision-sensor trigger | any other actor's id, pose or velocity; any camera; map, lane, road or junction data; traffic-light state; scenario labels |
-| **Fusion** (`cdf.fusion`) | the local logs and graphs participants exported, their own shared trajectories, timestamps, provenance, confidence | CARLA actor ids; map data; traffic-light state; oracle labels |
-| **Oracle** (`cdf.oracle`) | everything the simulator knows | — (its output must never re-enter inference) |
+| S01 | rear-end | the simplest chain; `avoided` is a negative control |
+| S02 | cut-in | a lateral manoeuvre as initiator; `avoided` is a control |
+| S03 | crossing | two vehicles, no shared lane |
+| S04 | crossing with braking | a **yield**: nobody collides, nobody may be blamed |
+| S05 | simultaneous crossing | two contributors, neither obviously first |
+| S06 | chain collision | three vehicles, two impacts, an order to recover |
+| S07 | partial view | one vehicle occluded at the moment of impact |
+| S08 | multi-direction crossing | three approach directions |
+| S09 | roundabout merge | a merge conflict with curved geometry |
 
-How it is enforced:
+Details in [docs/SCENARIOS.md](docs/SCENARIOS.md).
 
-* **Records have no field for privileged data.** A local telemetry or track
-  record simply cannot carry another actor's identity.
-* **Collision identity is split at the sensor.** `CollisionSensor.drain_local()`
-  returns that an impact happened, when, and how hard. The other party's
-  identity is available only through `drain_privileged()`, which only the oracle
-  calls.
-* **Every graph carries its scope.** `load_graph(path, expect_scope=LOCAL)`
-  raises if handed an oracle graph, so a mis-wired path fails loudly.
-* **Track identity is anonymous.** `A::T001` records only that participant A's
-  tracker opened its first hypothesis. Cross-vehicle identity is established by
-  fusion, from trajectory evidence.
-* **`tests/test_no_privileged_leakage.py`** parses every module under
-  `cdf.local`, `cdf.fusion`, `cdf.graph` and `cdf.checking` with `ast` and fails
-  on an import of `carla`, `cdf.oracle` or `cdf.simulation` (including relative
-  imports), on calls such as `get_actors`/`get_map`/`get_waypoint`, and on any
-  camera blueprint anywhere in the tree. It then walks every persisted local and
-  fused artifact and fails on any forbidden field name at any nesting depth —
-  and asserts the oracle subtree *does* contain them, so the scan cannot pass
-  vacuously.
+## Results in brief
 
-## Installation
+Full tables, generated from the artifacts, in [docs/RESULTS.md](docs/RESULTS.md).
+The headline findings, including the ones that did not go the project's way:
 
-```bash
-conda env create -f environment.yml
-conda activate cdf
-pip install -e .
-```
-
-Install the CARLA API from your simulator distribution (the wheel must match the
-server build — CARLA 0.9.15 ships cp37/cp38 wheels only, which is why this
-project targets Python 3.8):
-
-```bash
-pip install "<CARLA>/PythonAPI/carla/dist/carla-0.9.15-cp38-cp38-win_amd64.whl"
-```
-
-Check everything:
-
-```bash
-python scripts/check_environment.py
-```
-
-## CARLA startup assumptions
-
-The simulator is expected at `$CARLA_ROOT` (or a conventional location) and is
-launched offscreen:
-
-```bash
-CarlaUE4.exe -carla-server -quality-level=Low -RenderOffScreen -nosound
-```
-
-`python scripts/check_environment.py --start-server` will start one for you.
-
-Map handling is deliberately defensive, because this build is fragile about it:
-reloading the map already running crashes the server, and a second switch in one
-process is unreliable, so `SimulatorSession` switches once and restarts the
-process if another map is needed. **S09 is configured for Town03_Opt**, the
-stable optimized variant of the Town03 map in the tested build.
-Details and measurements in
-[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
-
-## Quick start — one scenario
-
-```bash
-python scripts/run_scenario.py --scenario S01 --seed 0 --variant crash
-```
-
-That records the run and then, by default, runs local analysis, fusion, the
-oracle graph build, model checking and the viewer bundle. It exits non-zero if
-scenario validation fails.
-
-### Watching scenarios live
-
-Use CARLA's native spectator to observe a run while it executes:
-
-```powershell
-python scripts/run_scenario.py --scenario S01 --variant crash --seed 0 --live --realtime
-```
-
-```powershell
-python scripts/run_scenario.py --scenario S07 --variant occluded --seed 0 --live --realtime
-```
-
-```powershell
-python scripts/run_scenario.py --scenario S02 --variant crash --seed 0 --live --realtime --spectator follow --follow-vehicle A
-```
-
-The CARLA spectator is visualization-only and is never used by local forensic
-inference, graph fusion, or evaluation. `--playback-speed 0.5` and `2.0` select
-slow motion and 2x playback respectively; both require `--realtime`.
-
-## Full experiment suite
-
-```bash
-python scripts/run_suite.py --all --seeds 0 1 2 --continue-on-error
-```
-
-Runs are grouped by map so the simulator switches as rarely as possible. Seed 0
-is the nominal specification; higher seeds apply a small, reproducible
-perturbation of approach speeds and action timings (`cdf.simulation.variation`)
-— because these scenarios are deterministic, so repeating them under a different
-seed alone would reproduce the same trace and measure nothing.
-
-Then:
-
-```bash
-python scripts/run_counterfactuals.py --run artifacts/S01_rear_end/seed_000_crash
-python scripts/evaluate.py            --run artifacts/S01_rear_end/seed_000_crash
-python scripts/generate_report.py     --artifacts artifacts
-```
-
-For several runs at once, use the campaign driver rather than a shell loop:
-
-```bash
-python scripts/run_counterfactual_campaign.py     --run artifacts/S01_rear_end/seed_000_crash     --run artifacts/S06_chain_collision/seed_000_b_rear_first     --max-interventions 4 --attempts 4 --report artifacts/summary/counterfactual_campaign.json
-```
-
-It runs each suite as a subprocess and retries it, because on the tested build
-the native CARLA client aborts the whole interpreter part-way through a suite
-(`docs/ENVIRONMENT.md`, finding 10). It also kills orphaned engine processes
-between attempts, which is required for correctness and not tidiness: an
-orphaned engine holds the RPC port, and the next "fresh" server would silently
-reconnect to it.
-
-The equivalent package CLI is `cdf run`, `cdf suite`, `cdf counterfactuals`,
-`cdf evaluate`, `cdf report`, `cdf viewer`, `cdf analyse`, `cdf fuse`.
-
-## Viewer
-
-```bash
-python scripts/serve_viewer.py --run artifacts/S01_rear_end/seed_000_crash
-```
-
-A static, dependency-free page bound to `127.0.0.1`. **There is no camera
-panel** — this project has no camera; the scene is reconstructed from telemetry,
-radar tracks and fused trajectories only.
-
-It offers a 2D bird's-eye reconstruction with a timeline, signal plots, the event
-timeline, the causal-graph panel, model-checking verdicts with their
-counterexample intervals, and the causal-contribution summary. The perspective
-selector switches between each participant, the fused reconstruction and the
-oracle; every view is badged **LOCAL RECONSTRUCTION**, **FUSED RECONSTRUCTION**
-or **PRIVILEGED GROUND TRUTH — EVALUATION ONLY**. A local view draws only that
-participant's own telemetry and its own radar tracks. Where a reconstructed
-identity is uncertain it is shown as uncertain, and where attribution cannot be
-decided the panel reads **INSUFFICIENT EVIDENCE**.
-
-## Output layout
-
-```
-artifacts/S01_rear_end/seed_000_crash/
-  manifest.json  scenario_validation.json  evidence_manifest.json
-  vehicle_A/   telemetry.jsonl.gz controls.jsonl.gz radar.jsonl.gz tracks.jsonl.gz
-               triggers.json events.json
-               event_graph.json|.graphml causal_graph.json|.graphml
-  vehicle_B/   ...
-  fusion/      association_report.json fused_events.json
-               fused_event_graph.json|.graphml fused_causal_graph.json|.graphml
-               fusion_diagnostics.json
-  oracle/      oracle_trace.jsonl.gz oracle_summary.json oracle_events.json
-               oracle_event_graph.json oracle_causal_graph.json|.graphml
-  checking/    model_check_results.json counterexamples.json
-  counterfactual/ counterfactual_manifest.json intervention_results.csv
-                  causal_contribution.json
-  evaluation/  metrics.json event_matches.csv edge_matches.csv attribution_metrics.json
-  figures/     *.png
-  viewer/      run_data.json
-```
-
-Aggregates land in `artifacts/summary/`. Generated artifacts are gitignored;
-regenerate them with the commands above.
+- **Restraint holds.** Across the negative controls the system named nobody. A
+  false attribution there would be worse than a missed one, so it is counted
+  rather than averaged.
+- **Reasoning after fusion recovers relations no vehicle could claim.** Canonical
+  edge recall rises monotonically across best-local → merged → merged+reasoning.
+- **Strict edge F1 does not improve, and on two scenarios the best single
+  vehicle beats the merge.** This is reported rather than buried. The cause is
+  measured, not guessed: 55% of the reference graph's edges leave a
+  scripted-action node — a privileged event type no reconstruction can emit — so
+  strict recall has a ceiling well below 1.0, and the merged account reaches
+  that ceiling exactly on more than half the campaign's runs.
+- **Attribution is partly right.** Exactly the designed contributors are named on
+  some scenarios, a subset on others, and on one the wrong vehicle entirely.
+  Per-scenario verdicts are in the results table.
 
 ## Tests
 
 ```bash
-make test           # everything (CARLA tests skip when no server is reachable)
-make test-fast      # excludes CARLA-marked and slow tests; the edit/run loop
-make leakage        # the data-boundary suite only
+python -m pytest tests/ --ignore=tests/integration      # ~600 tests, no simulator
+python -m pytest tests/integration                      # needs a running CARLA
 ```
-
-Unit tests cover the ring buffer, radar geometry, tracking, event hysteresis,
-graph invariants, fusion, model checking and metrics. Integration tests drive
-the **real** pipeline end to end on synthetic runs that need no simulator.
-
-Two tests are marked `slow` because they scan every artifact of every recorded
-run for privileged keys and oracle-only event types -- about 95 s, and the
-strongest statement this project makes about its data boundary. They run in
-`make test` and are excluded from `make test-fast`.
-
-## Reproducibility
-
-Every run records its scenario, variant, seed, complete resolved configuration
-and configuration hash, map, time step, git commit, package version, and Python
-and CARLA versions. `evidence_manifest.json` carries a SHA-256 digest of every
-artifact file, and `python scripts/verify_evidence.py --artifacts artifacts`
-re-hashes a run directory and reports anything missing or altered. Simulation is synchronous at a fixed 20 Hz with seeded
-randomness throughout; safety-critical timing comes from scripted controllers,
-never from the Traffic Manager.
-
-Recorder clocks use seeded configurable experimental perturbations (default
-offset up to 0.4 s, drift up to 100 ppm, optional jitter disabled). These are not
-measured real-world clock specifications. Existing campaign artifacts remain a
-synchronized-clock baseline; new independent-clock results must be generated
-separately before making claims about the new protocol. Smoke runs can be isolated:
-
-```powershell
-python scripts/run_scenario.py --scenario S01 --seed 0 --artifacts artifacts/independent_clock_smoke
-python scripts/run_clock_ablation.py --run-dir <printed-run-directory>
-```
-
-The evaluation-only A/B/C driver compares oracle-restamped synchronized timing,
-deliberately uncorrected independent timing, and the normal evidence-aligned path
-on the same physical recording. It writes only under `evaluation/` and cannot
-enable an uncorrected normal fusion mode. See
-[EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md).
 
 ## Documentation
 
-| Document | Contents |
+| | |
 |---|---|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | the pipeline module by module, with the real call chain |
-| [DATA_BOUNDARY.md](docs/DATA_BOUNDARY.md) | allowed/forbidden inputs per layer and how they are enforced |
-| [EVENT_TAXONOMY.md](docs/EVENT_TAXONOMY.md) | every event type, its signal, thresholds and hysteresis |
-| [CAUSAL_MODEL.md](docs/CAUSAL_MODEL.md) | event graph vs causal DAG, the rule table, interventional semantics |
-| [GRAPH_FUSION.md](docs/GRAPH_FUSION.md) | association cost function, merging, provenance, knowledge gain |
-| [MODEL_CHECKING.md](docs/MODEL_CHECKING.md) | properties, finite-trace semantics, why UNKNOWN is first class |
-| [SCENARIOS.md](docs/SCENARIOS.md) | S01–S09: map, participants, intent, expected outcome, interventions |
-| [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) | seeds, variants, metrics, radar calibration procedure |
-| [ENVIRONMENT.md](docs/ENVIRONMENT.md) | tested versions and measured simulator behaviour |
-| [EXPERIMENTAL_FINDINGS.md](docs/EXPERIMENTAL_FINDINGS.md) | results, generated from actual runs |
-| [LIMITATIONS.md](docs/LIMITATIONS.md) | what this does not show |
-| [REFERENCES.md](docs/REFERENCES.md) | the supplied reading list and why each entry mattered |
+| [OVERVIEW.md](docs/OVERVIEW.md) | the problem and the five claims |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | how the code is organised |
+| [DATA_BOUNDARY.md](docs/DATA_BOUNDARY.md) | what each layer may read, and how it is enforced |
+| [SCENARIOS.md](docs/SCENARIOS.md) | the nine encounters |
+| [CLOCK_SYNCHRONIZATION.md](docs/CLOCK_SYNCHRONIZATION.md) | placing independent recorders on one timeline |
+| [GRAPH_FUSION.md](docs/GRAPH_FUSION.md) | identity resolution and merging the graphs |
+| [CAUSAL_MODEL.md](docs/CAUSAL_MODEL.md) | what a causal edge is and where it comes from |
+| [COUNTERFACTUALS.md](docs/COUNTERFACTUALS.md) | replay, sets of actions, the five verdicts |
+| [MODEL_CHECKING.md](docs/MODEL_CHECKING.md) | properties over finite traces |
+| [VIEWER.md](docs/VIEWER.md) | the investigative interface |
+| [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) | how the campaign is run and scored |
+| [RESULTS.md](docs/RESULTS.md) | what it found |
+| [LIMITATIONS.md](docs/LIMITATIONS.md) | what it cannot do |
+| [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) | reproducing all of it |
 
 ## Limitations
 
-Simulated radar, scripted scenarios, at most three vehicles, no camera, no local
-semantic map, and causal claims that hold only under the stated intervention
-semantics. See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) — reading it before the
-results is recommended.
+The short version: a simulator is not traffic; nine scenarios are not a
+distribution; radar and localisation are modelled, not real; and causal
+contribution under replay semantics is not legal fault. The long version is
+[docs/LIMITATIONS.md](docs/LIMITATIONS.md), and it is worth reading before
+quoting any number from here.
 
-## Attribution
+## Author
 
-The idea originates from the read-only reference project
-[svs-forensic-viewer](https://github.com/DilaverShtini/svs-forensic-viewer),
-MIT licensed, Copyright (c) 2026 Marco Costantini, Chiara Giangiulli, Dilaver
-Shtini. That project's CARLA startup, radar attachment, telemetry logging,
-collision triggering and forensic-viewer layout informed the design here. The
-implementation in this repository is written independently; the MIT attribution
-is preserved in [LICENSE](LICENSE).
+Andrea Bedei.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+See `LICENSE`.

@@ -17,10 +17,12 @@ flowchart LR
     A3["resolve_subjects<br/>RESOLVED + AMBIGUOUS only"] --> A4
     A4["align_event_records<br/>which local events are one physical event"] --> A5
     A5["_merge_nodes"] --> A6
-    A6["_merge_edges<br/>contradictions retained"] --> A7
+    A6["_merge_edges<br/>contradictions retained"] --> A6b
+    A6b["infer_global_causal_edges<br/>relations no single vehicle could claim"] --> A7
     A7["_enforce_dag<br/>delegated to cdf.local.causal_graph"] --> A8
-    A8["_fusion_added<br/>bridged paths"] --> OUT
-    OUT["fusion/  association_report · fused graphs · diagnostics"]
+    A8["_fusion_added<br/>bridged paths"] --> A9
+    A9["extract_episodes · build_incident_reconstruction<br/>build_attribution_hypothesis"] --> OUT
+    OUT["fusion/  association_report · fused graphs · diagnostics<br/>incident_reconstruction · causal_attribution"]
 ```
 
 `fuse_run` requires **at least two participants** and refuses to run otherwise.
@@ -444,6 +446,92 @@ somehow returned a cyclic graph, and the diagnostics report `dag.is_dag`.
 controls whether the stage runs at all.
 
 ---
+
+## 6.5 Post-fusion causal reasoning
+
+Merging is a union. Every edge it produces was drawn **inside one vehicle's
+log**, because a causal rule can only relate two events the same recorder
+observed. That is a real limit, and it is the reason a naive fusion stage
+produces a bigger graph without producing a better explanation.
+
+The incident that actually happened is cross-vehicle: *B braked, so the gap A
+was measuring closed*. B recorded its own braking. A recorded its own closing
+gap. Neither could relate them, because neither saw both — and before fusion,
+"the vehicle A is tracking" and "B" were different objects.
+
+`cdf.fusion.post_fusion_causal` runs after identities are resolved and the
+timelines are common, and proposes edges between claims made by *different*
+participants.
+
+### What a node is about
+
+A rule cannot fire on event types alone, because an event's meaning depends on
+which vehicles it concerns. `node_subjects` answers that:
+
+- a **unary** event (`HARD_BRAKE` on B) is about `{B}`;
+- a **relational** event (`CRITICAL_TTC` recorded by A about B) is about the
+  *pair* `{A, B}`;
+- an event whose subject is still an unresolved track id is about nothing
+  usable, and takes part in no inference at all.
+
+Rules then relate nodes by how those sets stand to one another —
+`same_actor`, `actor_in_pair`, `pair_to_actor`, `same_pair`, `shared_member` —
+rather than by naming participants, which is what keeps a rule general across
+the nine scenarios and across vehicle counts.
+
+### The three refusals
+
+A stage that proposes edges freely would inflate the graph and the metrics with
+it. Three things are refused outright:
+
+**An observation is never a cause.** `RADAR_TRACK_APPEARED` and
+`RADAR_TRACK_LOST` are facts about a sensor, not about the world. They are
+evidence; they are never an endpoint of an inferred causal edge.
+
+**Nothing runs backwards in time.** A cause may be *timestamped* slightly after
+its effect, because an event peak is an estimate — `min_lag_s` is that
+allowance. Beyond it, nothing is concluded. The allowance widens by exactly the
+clock alignment's own residual, so a pair of recorders that reconciled badly is
+given a correspondingly wider benefit of the doubt instead of a fixed constant,
+and the amount used is written onto the edge as `clock_slack_s`.
+
+**A participant's own claim is never displaced.** If a vehicle already drew an
+edge between two events, the inference stage leaves it alone and records
+`already_claimed_by_participants`. Fusion adds; it does not overrule.
+
+A chain rule has a fourth: two impacts closer together than the clock
+uncertainty are **not** evidence of an order, and asserting one would be a claim
+about a timeline nobody established. The diagnostic reads
+`order_not_resolved_beyond_clock_uncertainty`.
+
+### Confidence
+
+```
+confidence = rule_prior
+           × node_factor      (how confident the two endpoints are)
+           × temporal_factor  (exp(-|lag| / tau))
+           × identity_factor  (how firmly the identities were resolved)
+           × clock_factor     (the alignment's own confidence)
+           × support_factor   (whether a second vehicle corroborates)
+```
+
+Every term is stored on the edge under `detail.confidence_terms`, so a weak
+inferred edge can be read rather than guessed at: a reader can see whether it is
+weak because the rule is speculative, because the events are far apart, or
+because the clocks barely agree.
+
+### Provenance, and why it is visible
+
+Every inferred edge carries `detail.origin = "post_fusion_inference"`, the rule
+that produced it, the cause and effect vehicles, the supporting events and
+participants, and the lag on the common clock. The viewer draws these edges
+**dashed and accented** and offers a filter that isolates them, because the
+distinction between "a vehicle said this" and "we concluded this after merging"
+is the entire argument of the method.
+
+The stage is switched by one key, `fusion.post_fusion.enabled`, which is what
+the method ablation in `cdf.evaluation.method_ablation` toggles to measure what
+it is worth.
 
 ## 7. Provenance
 
