@@ -15,6 +15,12 @@ Three files are produced under ``<artifacts_root>/summary``:
 ``final_results.md``
     the two tables the write-up quotes, plus the campaign's headline figures.
 
+The recorded artifacts are far too large to commit, so the same three files are
+also published to ``results/`` in the repository, which *is* committed. That is
+the only reason the documentation can link to a results table at all: without it
+every reference would point into a directory a fresh clone does not have, and
+the claim that the numbers are checkable would be untrue.
+
 Averaging rules, which are the part that can quietly mislead:
 
 * A scenario designed **not** to collide has nothing to attribute. Its
@@ -33,6 +39,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 
+from ..common.config import repo_root
 from ..common.io import read_json, write_csv, write_json
 from ..common.layout import RunLayout
 from .suite import RUN_KIND_PRIMARY, _run_dirs, summary_dir
@@ -804,8 +811,15 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_final_results(artifacts_root: PathLike) -> Dict[str, Path]:
-    """Build the results and write the three files; returns their paths."""
+def write_final_results(
+    artifacts_root: PathLike, publish_dir: Optional[PathLike] = "results"
+) -> Dict[str, Path]:
+    """Build the results, write the three files, and publish a committed copy.
+
+    ``publish_dir`` is where the committed copy goes -- ``results/`` by default,
+    relative to the repository root. Pass ``None`` to skip it, which is right
+    for a scratch campaign nobody is going to quote.
+    """
     results = build_final_results(artifacts_root)
     out_dir = summary_dir(artifacts_root)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -831,10 +845,47 @@ def write_final_results(artifacts_root: PathLike) -> Dict[str, Path]:
     )
     md_path.write_text(render_markdown(results), encoding="utf-8")
 
+    paths = {"json": json_path, "csv": csv_path, "markdown": md_path}
+
+    if publish_dir is not None:
+        published = Path(publish_dir)
+        if not published.is_absolute():
+            published = repo_root() / published
+        published.mkdir(parents=True, exist_ok=True)
+        for kind, source in list(paths.items()):
+            target = published / source.name
+            target.write_bytes(source.read_bytes())
+            paths["published_" + kind] = target
+        # A committed copy that does not say which campaign it came from is a
+        # table with no provenance, so the stamp travels with it.
+        (published / "README.md").write_text(
+            "# Generated results\n\n"
+            "These files are written by `cdf.evaluation.final_results` from the\n"
+            "artifacts of a recorded campaign. They are committed because the\n"
+            "artifacts themselves are not: without them the documentation would\n"
+            "link to tables a fresh clone does not have.\n\n"
+            "Do not edit them by hand. Regenerate with:\n\n"
+            "```bash\n"
+            "python -c \"import sys; sys.path.insert(0,'src'); \\\n"
+            "           from cdf.evaluation.final_results import write_final_results; \\\n"
+            "           write_final_results('{0}')\"\n"
+            "```\n\n"
+            "Campaign: `{1}`, clock protocol `{2}`, {3} runs over {4} "
+            "scenario/variant combinations.\n".format(
+                results["artifacts_root"],
+                (results.get("campaign") or {}).get("campaign_id", "?"),
+                (results.get("campaign") or {}).get("clock_protocol", "?"),
+                results["headline"]["n_runs"],
+                results["headline"]["n_scenario_variants"],
+            ),
+            encoding="utf-8",
+        )
+
     LOGGER.info(
-        "final results: %d runs over %d scenario variants -> %s",
+        "final results: %d runs over %d scenario variants -> %s%s",
         results["headline"]["n_runs"],
         results["headline"]["n_scenario_variants"],
         out_dir,
+        " (published to {0})".format(publish_dir) if publish_dir else "",
     )
-    return {"json": json_path, "csv": csv_path, "markdown": md_path}
+    return paths

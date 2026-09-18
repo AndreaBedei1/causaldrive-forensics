@@ -268,3 +268,48 @@ def test_every_declared_csv_column_is_produced_per_scenario() -> None:
         assert column in FINAL_COLUMNS
         assert all(column in s for s in results["per_scenario"])
     assert isinstance(missing, list)
+
+
+def test_the_published_copy_exists_and_matches_what_the_docs_link_to() -> None:
+    """The documentation links to `results/`; a fresh clone must find it there.
+
+    The recorded artifacts are gitignored, so a results table that lived only
+    beside them would be a broken link in every clone -- and the claim that the
+    numbers are checkable would be one you could not check.
+    """
+    import re
+
+    from cdf.common.config import repo_root
+
+    published = repo_root() / "results"
+    if not published.is_dir():
+        pytest.skip("no published results in this checkout")
+
+    for name in ("final_results.md", "final_results.csv", "final_results.json"):
+        assert (published / name).is_file(), name
+    assert (published / "README.md").is_file(), (
+        "a committed table with no provenance is a table nobody can trace"
+    )
+
+    # Every link the docs make into results/ must resolve.
+    docs = list((repo_root() / "docs").glob("*.md")) + [repo_root() / "README.md"]
+    broken = []
+    for doc in docs:
+        for match in re.finditer(r"\]\(([^)]*results/[^)]+)\)",
+                                 doc.read_text(encoding="utf-8")):
+            target = (doc.parent / match.group(1).split("#")[0]).resolve()
+            if not target.exists():
+                broken.append("{0} -> {1}".format(doc.name, match.group(1)))
+    assert broken == [], "broken links into results/: {0}".format(broken)
+
+
+def test_the_published_markdown_carries_the_tables_the_docs_promise() -> None:
+    from cdf.common.config import repo_root
+
+    path = repo_root() / "results" / "final_results.md"
+    if not path.is_file():
+        pytest.skip("no published results in this checkout")
+    text = path.read_text(encoding="utf-8")
+    assert "| Scenario | Incident reconstructed |" in text
+    assert "| Method | Node F1 | Edge F1 |" in text
+    assert "not a fault percentage" in text

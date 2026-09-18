@@ -117,8 +117,10 @@ python scripts/reprocess_runs.py --artifacts artifacts_independent_clocks \
 ```
 
 Thirteen scenario/variant combinations across nine scenarios, three seeds, 39
-runs. Results land in `artifacts_independent_clocks/summary/final_results.md`,
-generated from the artifacts rather than transcribed.
+runs. The generator writes the result tables into the campaign's `summary/` and
+publishes a committed copy to [`results/`](results/), so the numbers the
+documentation quotes are in the repository even though the recordings they come
+from are far too large to be.
 
 ## The nine scenarios
 
