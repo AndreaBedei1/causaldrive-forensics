@@ -944,3 +944,91 @@ def test_recorded_oracle_subtree_is_also_flagged(real_run: Path) -> None:
         "the recorded oracle trace carries no privileged field; it cannot be "
         "ground truth"
     )
+
+
+# ---------------------------------------------------------------------------
+# Vocabulary
+#
+# The boundary this file mostly guards is epistemic: what a layer may read. This
+# last one is a different boundary and just as load-bearing -- what a conclusion
+# may *say*. A system that reconstructs an incident correctly and then reports it
+# as "B is 70% at fault" has made a claim about law and duty of care from
+# telemetry and radar, which is not a claim the evidence can support.
+# ---------------------------------------------------------------------------
+
+#: Words that would turn a causal statement into a legal one.
+BLAME_WORDS: Tuple[str, ...] = (
+    "guilty", "guilt", "at fault", "fault percentage", "liable", "liability",
+    "blame", "culpab",
+)
+
+#: The only fields allowed to contain them -- the disclaimer exists to deny them,
+#: and a note may quote the denial.
+DISCLAIMER_KEYS = frozenset({"disclaimer", "note", "_warning"})
+
+
+def _conclusion_strings(value: Any, key: Optional[str] = None):
+    """Every string in a document that is not a disclaimer."""
+    if isinstance(value, str):
+        if key not in DISCLAIMER_KEYS:
+            yield key, value
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            for item in _conclusion_strings(v, k):
+                yield item
+    elif isinstance(value, list):
+        for v in value:
+            for item in _conclusion_strings(v, key):
+                yield item
+
+
+@pytest.mark.slow
+def test_no_conclusion_is_stated_in_the_language_of_blame() -> None:
+    """Walk every fused and attribution artifact of every recorded campaign."""
+    repo = Path(__file__).resolve().parents[1]
+    paths: List[Path] = []
+    for name in CAMPAIGN_ROOTS:
+        root = repo / name
+        if not root.is_dir():
+            continue
+        paths.extend(sorted(root.glob("*/seed_*/fusion/*.json")))
+        paths.extend(sorted(root.glob("*/seed_*/counterfactual/causal_contribution.json")))
+    if not paths:
+        pytest.skip("no recorded campaign to scan")
+
+    offenders: List[str] = []
+    for path in paths:
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for key, text in _conclusion_strings(doc):
+            lowered = text.lower()
+            for word in BLAME_WORDS:
+                if word in lowered:
+                    offenders.append(
+                        "{0} [{1}]: {2!r}".format(path.name, key, text[:80])
+                    )
+    assert offenders == [], (
+        "{0} conclusion(s) use the language of blame: {1}".format(
+            len(offenders), offenders[:5]
+        )
+    )
+
+
+def test_the_blame_scanner_would_catch_a_planted_verdict() -> None:
+    """A scanner that cannot fail proves nothing about the artifacts it passes."""
+    planted = {
+        "classification": {
+            "attribution_class": "single_initiator",
+            "rationale": "B is 70% at fault for the collision",
+            "disclaimer": "NOT legal fault and NOT a fault percentage.",
+        }
+    }
+    found = [
+        text for _key, text in _conclusion_strings(planted)
+        if any(w in text.lower() for w in BLAME_WORDS)
+    ]
+    assert found, "the scanner missed a planted blame statement"
+    # ...and the disclaimer, which must deny those words, is not itself flagged.
+    assert all("NOT legal fault" not in t for t in found)
