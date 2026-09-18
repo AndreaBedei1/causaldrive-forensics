@@ -1,4 +1,12 @@
-# Experimental findings
+# Experimental findings — the synchronized-clock baseline
+
+> **This page describes the earlier campaign in `artifacts/`, in which every
+> recorder read one shared simulator clock.** It is retained as a historical
+> baseline and is not the project's final result. The final campaign — every
+> recorder on its own clock, with the common timeline estimated from shared
+> observations alone — is in [RESULTS.md](RESULTS.md), and the two are
+> deliberately never averaged together: `cdf.common.campaign` marks a run
+> recorded under a different clock protocol as foreign rather than folding it in.
 
 Technical results only. This is not a paper and contains no related work. Every
 number below was read from a persisted artifact; `scripts/extract_findings.py`

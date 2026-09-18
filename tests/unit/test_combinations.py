@@ -98,6 +98,54 @@ def test_nothing_that_was_tried_changed_anything() -> None:
     )
 
 
+def test_a_change_that_made_the_impact_worse_is_reported_as_mitigating() -> None:
+    """Removing an action and getting a worse crash is the opposite of a cause.
+
+    Folding this into "nothing changed" would discard a real finding: these are
+    the behaviours that reduced an outcome they did not bring about, and a
+    forensic report that cannot say so is missing half of what the replay
+    established.
+    """
+    result = classify_from_set_outcomes(
+        True,
+        [outcome(["a"], False, severity_reduction=-0.7),
+         outcome(["b"], False, severity_reduction=-0.7)],
+        None,
+    )
+    assert result["attribution_class"] == "insufficient_evidence"
+    assert result["mitigating_actions"] == ["a", "b"]
+    assert result["contributing_actions"] == []
+    assert result["necessary_actions"] == []
+    assert "more severe" in result["rationale"]
+    assert "did not cause" in result["rationale"]
+
+
+def test_a_change_that_did_nothing_is_not_called_mitigating() -> None:
+    result = classify_from_set_outcomes(
+        True, [outcome(["a"], False, severity_reduction=0.0)], None
+    )
+    assert result["mitigating_actions"] == []
+    assert "altered the outcome or its severity" in result["rationale"]
+
+
+def test_every_verdict_carries_the_mitigating_field() -> None:
+    """A consumer must be able to read it without checking which branch ran."""
+    cases = [
+        (True, [outcome(["a"], True)]),
+        (True, [outcome(["a"], True), outcome(["b"], True)]),
+        (True, [outcome(["a"], False), outcome(["b"], False), outcome(["a", "b"], True)]),
+        (True, [outcome(["a"], False, 0.4)]),
+        (True, [outcome(["a"], False, -0.4)]),
+        (True, [outcome(["a"], False)]),
+        (False, [outcome(["a"], False)]),
+        (True, []),
+    ]
+    for factual, outcomes in cases:
+        result = classify_from_set_outcomes(factual, outcomes, None)
+        assert "mitigating_actions" in result, result["attribution_class"]
+        assert isinstance(result["mitigating_actions"], list)
+
+
 def test_a_marginal_severity_change_is_noise_not_a_contribution() -> None:
     """Below the configured threshold, a severity difference says nothing."""
     from cdf.common.config import load_run_config

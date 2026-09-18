@@ -632,3 +632,15 @@ tr.reference td, tr.factual td { background: rgba(255, 255, 255, 0.02); }
 @media (max-width: 1100px) {
   .tabpane { grid-template-columns: 1fr; }
 }
+
+/* A behaviour that reduced an outcome it did not cause. Given its own box
+ * rather than a footnote, because "nothing prevented it" and "these made it
+ * less bad" are different findings and the second is easy to lose. */
+.mitigating {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--pass);
+  background: var(--panel-2);
+  line-height: 1.55;
+  font-size: 12.5px;
+}

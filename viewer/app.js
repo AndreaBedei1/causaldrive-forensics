@@ -1473,11 +1473,21 @@
         rows.forEach(function (r) {
           var score = r.contribution_score;
           var outcome = r.outcome || {};
-          var effect = outcome.collision === false
-            ? 'the collision did not happen'
-            : (r.severity_reduction
-                ? 'the collision still happened, less severely'
-                : 'the collision still happened');
+          // A severity *reduction* can be negative, and that is not a detail:
+          // it means removing the action made the impact worse, which is the
+          // opposite of a contribution and must not be printed as one.
+          var reduction = typeof r.severity_reduction === 'number'
+            ? r.severity_reduction : null;
+          var effect;
+          if (outcome.collision === false) {
+            effect = 'the collision did not happen';
+          } else if (reduction === null || Math.abs(reduction) < 1e-6) {
+            effect = 'the collision still happened, no measurable change';
+          } else if (reduction > 0) {
+            effect = 'the collision still happened, less severely';
+          } else {
+            effect = 'the collision still happened, and was more severe';
+          }
           html += '<tr><td class="mono">' + esc(r.action_id || r.intervention_id) + '</td>' +
                   '<td class="num">' + num(score, 3) + '</td>' +
                   '<td><span class="bar" style="width:' +
@@ -1544,10 +1554,22 @@
       return;
     }
     if (!sets.length) {
-      el.prevention.innerHTML =
-        '<div class="ok">No tested change, alone or in combination, prevented this ' +
-        'outcome' + (analysis && analysis.n_replays
+      var mitigating = (cf.classification && cf.classification.mitigating_actions) ||
+                       (analysis && analysis.mitigating_actions) || [];
+      var html = '<div class="ok">No tested change, alone or in combination, ' +
+        'prevented this outcome' + (analysis && analysis.n_replays
           ? ' across ' + analysis.n_replays + ' replay(s)' : '') + '.</div>';
+      if (mitigating.length) {
+        // The opposite finding, and worth as much: removing these made the
+        // impact worse, so they reduced an outcome they did not bring about.
+        html += '<div class="mitigating">Removing <span class="mono">' +
+          mitigating.map(esc).join('</span>, <span class="mono">') +
+          '</span> made the impact measurably <b>more</b> severe. On this ' +
+          'evidence ' + (mitigating.length > 1 ? 'they' : 'it') + ' mitigated an ' +
+          'outcome ' + (mitigating.length > 1 ? 'they' : 'it') + ' did not cause.' +
+          '</div>';
+      }
+      el.prevention.innerHTML = html;
       return;
     }
     var html = '<table class="grid"><thead><tr><th>remove together</th>' +

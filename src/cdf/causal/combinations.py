@@ -154,6 +154,7 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": [],
             "minimal_prevention_sets": [],
             "contributing_actions": [],
+            "mitigating_actions": [],
             "n_replays": 0,
             "disclaimer": _DISCLAIMER,
         }
@@ -168,6 +169,7 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": [],
             "minimal_prevention_sets": [],
             "contributing_actions": [],
+            "mitigating_actions": [],
             "n_replays": len(outcomes),
             "disclaimer": _DISCLAIMER,
         }
@@ -184,6 +186,17 @@ def classify_from_set_outcomes(
         and o.severity_reduction is not None
         and float(o.severity_reduction) >= min_severity
     )
+    # An action whose *removal* makes the impact worse did not contribute to the
+    # collision -- it reduced it. Reporting that as "nothing changed" would
+    # discard a real and opposite finding: these are the behaviours that
+    # mitigated an outcome they did not cause.
+    mitigating = sorted(
+        a
+        for a, o in singles.items()
+        if not o.prevented
+        and o.severity_reduction is not None
+        and float(o.severity_reduction) <= -min_severity
+    )
 
     if len(sufficient_singles) == 1:
         return {
@@ -196,6 +209,7 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": list(sufficient_singles),
             "minimal_prevention_sets": minimal_sets,
             "contributing_actions": severity_contributors,
+            "mitigating_actions": mitigating,
             "n_replays": len(outcomes),
             "disclaimer": _DISCLAIMER,
         }
@@ -210,6 +224,7 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": list(sufficient_singles),
             "minimal_prevention_sets": minimal_sets,
             "contributing_actions": severity_contributors,
+            "mitigating_actions": mitigating,
             "n_replays": len(outcomes),
             "disclaimer": _DISCLAIMER,
         }
@@ -227,6 +242,7 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": [],
             "minimal_prevention_sets": minimal_sets,
             "contributing_actions": severity_contributors,
+            "mitigating_actions": mitigating,
             "n_replays": len(outcomes),
             "disclaimer": _DISCLAIMER,
         }
@@ -241,6 +257,27 @@ def classify_from_set_outcomes(
             "sufficient_single_actions": [],
             "minimal_prevention_sets": [],
             "contributing_actions": severity_contributors,
+            "mitigating_actions": mitigating,
+            "n_replays": len(outcomes),
+            "disclaimer": _DISCLAIMER,
+        }
+    if mitigating:
+        return {
+            "attribution_class": "insufficient_evidence",
+            "rationale": (
+                "no tested change prevented the collision, and removing {0} made "
+                "the impact measurably more severe: on this evidence {1} "
+                "mitigated an outcome {1} did not cause, and no initiator is "
+                "attributed".format(
+                    ", ".join(mitigating),
+                    "they" if len(mitigating) > 1 else "it",
+                )
+            ),
+            "necessary_actions": [],
+            "sufficient_single_actions": [],
+            "minimal_prevention_sets": [],
+            "contributing_actions": [],
+            "mitigating_actions": mitigating,
             "n_replays": len(outcomes),
             "disclaimer": _DISCLAIMER,
         }
@@ -254,6 +291,7 @@ def classify_from_set_outcomes(
         "sufficient_single_actions": [],
         "minimal_prevention_sets": [],
         "contributing_actions": [],
+        "mitigating_actions": [],
         "n_replays": len(outcomes),
         "disclaimer": _DISCLAIMER,
     }

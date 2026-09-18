@@ -1,7 +1,8 @@
 # Limitations
 
 Read this before the results. Everything below constrains what the numbers in
-`docs/EXPERIMENTAL_FINDINGS.md` can support.
+[RESULTS.md](RESULTS.md) — and the generated tables they come from — can
+support.
 
 ## 1. Simulation-to-reality gap
 
@@ -26,10 +27,12 @@ The old campaign remains a synchronized-clock baseline; independent-clock smoke
 tests do not replace a full newly generated campaign or establish real-world
 clock robustness.
 
-In the seed-0 clock smoke ablation, offset accuracy improves over deliberately
-uncorrected clocks, but fused edge F1 does not consistently improve and decreases
-in both S06 variants. The existing causal/temporal rules were not adjusted to
-hide this result. See the measured A/B/C table in `EXPERIMENT_PROTOCOL.md`.
+The A/B/C ablation has since been run over the whole campaign rather than a
+seed-0 smoke test, and the conclusion is sharper than the smoke test suggested:
+estimated alignment improves offset accuracy substantially and leaves the graph
+metrics flat, for the reason given in §16. The causal and temporal rules were not
+adjusted to make either half of that look better. The measured table is in
+[RESULTS.md](RESULTS.md) and regenerates from the artifacts.
 
 Every result comes from CARLA 0.9.15. The vehicle dynamics, tyre model, impact
 response and — especially — the radar model are simulator approximations. A
@@ -215,3 +218,92 @@ the comparison actually depends on, but not in one uninterrupted session. And a
 suite that exhausts its retries would leave a partial contribution report; the
 driver reports such a run as `INCOMPLETE` rather than scoring it, and no
 incomplete suite is quoted.
+
+## 15. Self-localisation is exact, so one reported error is not a measurement
+
+This simulator models no localisation noise. Each recorder's exported position is
+the true pose, byte for byte, which means the self-localisation RMSE reported by
+the evaluation is exactly zero on every run.
+
+That number verifies the recorder copies the pose faithfully. It says nothing
+whatever about reconstruction quality, and quoting it as a trajectory accuracy
+result would be badly misleading. It is labelled as such in every artifact and
+kept out of the headline; the reported trajectory error is the **cross-view** one
+instead, which does carry radar error, identity resolution and clock error.
+
+The consequence for the collision *location* error is subtler and worth stating.
+Because the positions are exact, the location error is the distance the vehicles
+travelled during the reconstruction's time error — it measures the clock, not the
+sensors. In scenarios where the impact happens at near-zero closing speed it is
+sub-millimetre, which looks like an extraordinary result and is really a
+statement about how slowly the vehicles were moving.
+
+A real deployment would have GNSS and odometry error on every self-reported
+position, and every figure that currently depends on exact self-localisation
+would degrade. Nothing here establishes by how much.
+
+## 16. The structural metrics are insensitive to the clock at these magnitudes
+
+The clock ablation shows the estimated alignment cutting mean absolute offset
+error roughly fourfold, and it shows node F1, edge F1 and edge recall completely
+flat across all three protocols.
+
+Both are true and they are not in tension: the event matcher's tolerance is
+1.5 s, the uncorrected offset is an order of magnitude smaller, and a
+misalignment that never moves an event across the matching threshold cannot
+change the match. So this campaign does **not** demonstrate that clock alignment
+improves graph reconstruction. It demonstrates that alignment is necessary for
+the quantities measured in seconds and metres, and that at these offset
+magnitudes the structural metrics cannot see it either way.
+
+Showing a structural effect would need larger offsets, a tighter matching
+tolerance, or both — and a tighter tolerance would change every other number in
+the campaign, so it is not a change that can be made for one ablation alone.
+
+## 17. Drift is declined rather than estimated
+
+Over a ten-to-fifteen-second encounter a realistic crystal deviation of tens of
+parts per million moves a timestamp by well under a millisecond, far below the
+radar noise the alignment is fitted from. The solver therefore pins `scale` to
+1.0 and fits the offset only, recording `OFFSET_ONLY_UNOBSERVABLE_DRIFT`.
+
+This is the right refusal — fitting a two-parameter model to data that constrains
+one parameter produces a number that looks like a measurement and is noise — but
+it means the drift error the evaluation reports is the error of a parameter that
+was never estimated. It should not be read as a drift-estimation result.
+
+## 18. One variant is not reconstructed at all, and some clocks do not align
+
+In `S02/avoided` the two recorders share too few observations for the alignment
+to place one of them on the common timeline. The run reports
+`UNRESOLVED_TIME_ALIGNMENT` and produces no reconstruction rather than a guessed
+one, which is correct behaviour and also a gap in coverage: a variant that
+cannot be reconstructed contributes nothing to any claim about reconstruction
+quality, and the campaign is one variant smaller than it looks.
+
+The same applies within a run to the cross-view figure, which is reported as
+unscored with the unaligned recorders named, never as zero error.
+
+## 19. Attribution is right on a minority of scenarios
+
+The campaign names exactly the designed contributors on a small number of the
+scenario variants designed to collide. On most it names a subset or a superset,
+and on one it names the wrong vehicle entirely.
+
+Restraint on the negative controls is complete — nobody is ever named where
+nobody contributed — and ancestry recall is near-total, meaning the behaviours
+the template blames are almost always somewhere in the reconstructed ancestry of
+the impact. What the method is weaker at is selecting *which* of the behaviours
+in that ancestry to name, which is the harder half of the problem and is not
+solved here.
+
+## 20. Post-crash behaviour is not modelled, and the property monitor says so
+
+The scenario scripts drive each vehicle through the encounter; they do not model
+what a driver does after an impact. Vehicles therefore keep applying throttle
+after a collision, which the `P3_post_collision_stop` property correctly reports
+as a violation on many runs.
+
+The monitor is right and the scenarios are unrealistic in this specific respect.
+The failure counts in the results should be read as a statement about the
+scripted behaviour, not as a finding about driver conduct.
