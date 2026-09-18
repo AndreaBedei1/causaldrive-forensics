@@ -58,6 +58,12 @@ from .causal_metrics import (
     evaluate_causal_paths,
     evaluate_scene_reconstruction,
 )
+from .graph_comparison import (
+    EDGE_MATCH_COLUMNS,
+    NODE_MATCH_COLUMNS,
+    compare_graphs,
+)
+from .knowledge_gain import measure_knowledge_gain
 from .event_metrics import evaluate_events
 from .graph_metrics import evaluate_graphs, fusion_benefit
 from .clocks import load_clock_truth, simulator_evidence, map_event, map_graph, evaluate_clock_alignment
@@ -78,6 +84,8 @@ _BLOCKS = (
     "fusion_benefit",
     "association",
     "attribution",
+    "observable_comparison",
+    "knowledge_gain",
     "scene_reconstruction",
     "causal_paths",
     "attribution_sets",
@@ -185,6 +193,24 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
     oracle_causal: Optional[GraphDocument] = None
     if layout.oracle_causal_graph.exists():
         oracle_causal = load_graph(layout.oracle_causal_graph, expect_scope=Provenance.ORACLE)
+
+    # The primary reference: physical ground truth in the vocabulary a
+    # reconstruction shares. The template-based graph above is retained as the
+    # scenario design reference and is no longer the primary comparison.
+    observable_causal: Optional[GraphDocument] = None
+    if layout.observable_causal_graph.exists():
+        observable_causal = load_graph(
+            layout.observable_causal_graph, expect_scope=Provenance.ORACLE
+        )
+    simple_fused: Optional[GraphDocument] = None
+    if layout.simple_fused_causal_graph.exists():
+        simple_fused = load_graph(
+            layout.simple_fused_causal_graph, expect_scope=Provenance.FUSED
+        )
+    scenario_design: Optional[Dict[str, Any]] = (
+        read_json(layout.scenario_design_graph)
+        if layout.scenario_design_graph.exists() else None
+    )
     oracle_events: List[Event] = []
     if layout.oracle_events.exists():
         oracle_events = _load_events_file(layout.oracle_events)
@@ -267,6 +293,12 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
             fused_causal = map_graph(fused_causal, a, b)
             fused_event = map_graph(fused_event, a, b)
             fused_events = [map_event(e, a, b) for e in fused_events]
+            # The union baseline lives on the same common clock as the graph
+            # built on top of it, so it needs the same inversion. Comparing one
+            # of them on the common clock and the other on simulator time would
+            # score two accounts of one run on two different timelines, and the
+            # ablation between them would be measuring the clock.
+            simple_fused = map_graph(simple_fused, a, b)
 
     return {
         "manifest": manifest,
@@ -282,6 +314,9 @@ def _load_run_inputs(layout: RunLayout, cfg: Config, spec: Any) -> Dict[str, Any
         "fused_event": fused_event,
         "fused_events": fused_events,
         "oracle_causal": oracle_causal,
+        "observable_causal": observable_causal,
+        "simple_fused_causal": simple_fused,
+        "scenario_design": scenario_design,
         "oracle_events": oracle_events,
         "oracle_trace": oracle_trace,
         "subject_map": subject_map,
@@ -496,6 +531,65 @@ def evaluate_run(
             data["attribution"], data["oracle_causal"], data["spec"], cfg
         )
 
+    # --- the primary graph comparison --------------------------------------
+    # Every account against the observable ground truth, in the vocabulary both
+    # sides share. This replaces the template-based comparison as the headline
+    # structural result; the old one is kept under `graphs` as the legacy
+    # template reference so the two can be read side by side.
+    if data["observable_causal"] is None:
+        reasons["observable_comparison"] = (
+            "no observable ground truth at {0}; build it with "
+            "scripts/reprocess_runs.py --stages oracle-observable".format(
+                layout.observable_causal_graph.as_posix()
+            )
+        )
+        reasons["knowledge_gain"] = reasons["observable_comparison"]
+    else:
+        reference = data["observable_causal"]
+        accounts: Dict[str, Any] = {}
+        for pid, doc in sorted(data["local_causal"].items()):
+            accounts["local:" + pid] = compare_graphs(
+                doc, reference, cfg, label="local:" + pid,
+                subject_map=data["subject_map"],
+            )
+        if data["simple_fused_causal"] is not None:
+            accounts["simple_fusion"] = compare_graphs(
+                data["simple_fused_causal"], reference, cfg,
+                label="simple_fusion", subject_map=data["subject_map"],
+            )
+        if data["fused_causal"] is not None:
+            accounts["global_inferred"] = compare_graphs(
+                data["fused_causal"], reference, cfg, label="global_inferred",
+                subject_map=data["subject_map"],
+            )
+        best_local = _best_local_account(accounts)
+        metrics["observable_comparison"] = {
+            "reference": {
+                "n_nodes": len(reference.nodes),
+                "n_edges": len(reference.edges),
+                "kind": (reference.meta or {}).get("reference_kind", "oracle_observable"),
+            },
+            "best_local": best_local,
+            "accounts": {
+                name: {k: v for k, v in result.items()
+                       if k not in ("node_rows", "edge_rows")}
+                for name, result in accounts.items()
+            },
+        }
+        _persist_graph_diff(layout, accounts, reference)
+
+        metrics["knowledge_gain"] = {
+            k: v for k, v in measure_knowledge_gain(
+                reference,
+                data["local_causal"],
+                data["simple_fused_causal"],
+                data["fused_causal"],
+                cfg,
+                subject_map=data["subject_map"],
+            ).items()
+            if k not in ("node_rows", "edge_rows")
+        }
+
     # --- the explanation itself -------------------------------------------
     # Structural F1 says how much of the oracle graph came back. These three say
     # whether the incident was reconstructed, whether the chains into it were
@@ -600,6 +694,85 @@ def evaluate_run(
     return metrics
 
 
+def _best_local_account(accounts: Mapping[str, Any]) -> Optional[str]:
+    """The single viewpoint that agrees best with the reference.
+
+    Ranked on edge F1 first, because an incident is a structure and not a bag of
+    events, with node F1 and then the participant id as tie-breaks so the choice
+    is reproducible. Taking the best rather than the mean makes the baseline as
+    hard for fusion to beat as the evidence allows.
+    """
+    locals_only = {
+        name: r for name, r in accounts.items()
+        if name.startswith("local:") and r.get("scored")
+    }
+    if not locals_only:
+        return None
+
+    def key(name: str) -> Any:
+        result = locals_only[name]
+        return (
+            float((result.get("edges") or {}).get("f1") or 0.0),
+            float((result.get("nodes") or {}).get("f1") or 0.0),
+        )
+
+    return sorted(sorted(locals_only), key=key, reverse=True)[0]
+
+
+def _persist_graph_diff(
+    layout: RunLayout,
+    accounts: Mapping[str, Any],
+    reference: GraphDocument,
+) -> None:
+    """Write the row-by-row comparison every headline number came from.
+
+    A metric nobody can check is a metric nobody should believe, so the rows are
+    written next to the summary: one per reference node and per inferred node,
+    one per edge on either side, each naming what it matched and how far apart
+    the two sides put it.
+    """
+    diff = {
+        "schema_version": SCHEMA_VERSIONS["evaluation"],
+        "reference": {
+            "kind": (reference.meta or {}).get("reference_kind", "oracle_observable"),
+            "n_nodes": len(reference.nodes),
+            "n_edges": len(reference.edges),
+        },
+        "accounts": {
+            name: {
+                "nodes": result.get("nodes"),
+                "edges": result.get("edges"),
+                "paths": result.get("paths"),
+                "ontology": result.get("ontology"),
+                "node_rows": result.get("node_rows") or [],
+                "edge_rows": result.get("edge_rows") or [],
+            }
+            for name, result in accounts.items()
+        },
+        "note": (
+            "every number in observable_comparison is backed by a row here, "
+            "naming the two events behind it and how far apart they were put"
+        ),
+    }
+    write_json(_assert_evaluation_path(layout, layout.graph_diff), diff)
+
+    # The account the headline quotes gets its rows as CSV too, because that is
+    # the one a reader opens in a spreadsheet to argue with.
+    headline = accounts.get("global_inferred") or accounts.get("simple_fusion")
+    if headline is None:
+        return
+    write_csv(
+        _assert_evaluation_path(layout, layout.node_matches),
+        headline.get("node_rows") or [],
+        NODE_MATCH_COLUMNS,
+    )
+    write_csv(
+        _assert_evaluation_path(layout, layout.edge_matches),
+        headline.get("edge_rows") or [],
+        EDGE_MATCH_COLUMNS,
+    )
+
+
 def _expects_collision(spec: Any, oracle_trace: Optional[Mapping[str, Any]]) -> bool:
     """Whether this run is one where there is an outcome to attribute at all.
 
@@ -649,8 +822,12 @@ def _persist(layout: RunLayout, metrics: Mapping[str, Any]) -> None:
         tables.event_match_rows(metrics),
         tables.EVENT_MATCH_COLUMNS,
     )
+    # The template-based comparison, kept under its own name. It is no longer
+    # the primary result -- most of its reference edges leave scripted-action
+    # nodes no reconstruction can emit -- but overwriting it with numbers that
+    # mean something different would make the history unreadable.
     write_csv(
-        _assert_evaluation_path(layout, layout.edge_matches),
+        _assert_evaluation_path(layout, layout.legacy_template_edge_matches),
         tables.edge_match_rows(metrics),
         tables.EDGE_MATCH_COLUMNS,
     )

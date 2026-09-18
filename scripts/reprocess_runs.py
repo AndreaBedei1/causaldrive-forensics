@@ -11,7 +11,11 @@ Stages, each independently selectable:
 
 ``analyse``  local event extraction and local graphs (``cdf.local.pipeline``)
 ``fuse``     association and graph fusion (``cdf.fusion.pipeline``)
-``oracle``   privileged events and the oracle reference graph
+``oracle``   privileged events and the scenario-design reference graph
+``oracle-observable``
+             the primary reference: physical ground truth in the vocabulary a
+             reconstruction shares, plus the exact pairwise geometry it was
+             measured from, the map context and the scenario design reference
 ``check``    finite-trace property monitoring
 ``evaluate`` scoring against the oracle
 ``ablate``   re-derive fusion with and without post-fusion causal reasoning and
@@ -43,6 +47,7 @@ from cdf.common.config import load_run_config  # noqa: E402
 from cdf.common.io import read_json, write_json  # noqa: E402
 from cdf.common.layout import RunLayout  # noqa: E402
 from cdf.evaluation.clock_ablation import run_clock_ablation  # noqa: E402
+from cdf.oracle.ground_truth_package import build_ground_truth_package  # noqa: E402
 from cdf.evaluation.method_ablation import ablate_run  # noqa: E402
 
 LOGGER = logging.getLogger("reprocess")
@@ -52,8 +57,14 @@ def _round(value, digits=4):
     return None if value is None else round(float(value), digits)
 
 
-ALL_STAGES = ("analyse", "fuse", "oracle", "check", "evaluate", "ablate",
-              "clocks", "figures", "viewer", "manifest")
+ALL_STAGES = ("analyse", "fuse", "oracle", "oracle-observable", "check",
+              "evaluate", "ablate", "clocks", "figures", "viewer", "manifest")
+
+#: The stages that rebuild everything this refactor changed, in dependency
+#: order. Every one of them runs off the recorded artifacts: no CARLA server is
+#: needed, because the privileged trace already holds the exact state the new
+#: reference is measured from.
+REFACTOR_STAGES = ("oracle-observable", "fuse", "evaluate", "ablate", "viewer")
 
 
 def discover_runs(artifacts_root: Path) -> List[Path]:
@@ -138,6 +149,20 @@ def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
                     "template": cg.meta.get("n_realised_template_edges"),
                     "mechanical": cg.meta.get("n_mechanical_edges"),
                 }
+            elif stage == "oracle-observable":
+                spec = ScenarioSpec.from_config(cfg, variant=variant)
+                package = build_ground_truth_package(
+                    layout.root, cfg, spec=spec, persist=True
+                )
+                design = package.get("scenario_design") or {}
+                result[stage] = {
+                    "n_events": len(package["events"]),
+                    "n_edges": len(package["causal_graph"].edges),
+                    "n_refused": package["causal_graph"].meta.get(
+                        "n_edges_refused_by_trace", 0
+                    ),
+                    "mechanism_executed": design.get("mechanism_executed"),
+                }
             elif stage == "check":
                 run = load_run(layout.root, with_radar=False)
                 report = TraceChecker(cfg).check_and_persist(layout, run)
@@ -145,13 +170,25 @@ def run_stages(run_dir: Path, stages: Sequence[str]) -> Dict[str, Any]:
             elif stage == "evaluate":
                 spec = ScenarioSpec.from_config(cfg, variant=variant)
                 metrics = evaluate_run(layout.root, cfg, spec=spec)
-                graphs = metrics.get("graphs") or {}
-                best = (graphs.get("best_single_local") or {}).get("metrics") or {}
+                # The primary comparison is against the observable ground truth.
+                # The template-based numbers are still computed and kept, but
+                # printing them here would put the superseded result in front of
+                # a reader every time the stage runs.
+                comparison = metrics.get("observable_comparison") or {}
+                accounts = comparison.get("accounts") or {}
+                best_local = comparison.get("best_local")
+
+                def _edge_f1(name):
+                    return _round(
+                        ((accounts.get(name) or {}).get("edges") or {}).get("f1")
+                    )
+
                 result[stage] = {
-                    "fused_edge_f1": _round(( graphs.get("fused") or {}).get("edge_f1")),
-                    "best_local_edge_f1": _round(best.get("edge_f1")),
-                    "delta_edge_f1": _round(graphs.get("delta_edge_f1")),
-                    "best_local": graphs.get("best_local_participant_id"),
+                    "reference": "observable",
+                    "best_local": best_local,
+                    "best_local_edge_f1": _edge_f1(best_local) if best_local else None,
+                    "simple_fusion_edge_f1": _edge_f1("simple_fusion"),
+                    "global_edge_f1": _edge_f1("global_inferred"),
                 }
             elif stage == "ablate":
                 ablation = ablate_run(layout, cfg, persist=True)
@@ -197,6 +234,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifacts", default="artifacts")
     parser.add_argument("--stages", nargs="+", default=["oracle", "evaluate"])
+    parser.add_argument(
+        "--refactor", action="store_true",
+        help=(
+            "run the stages that rebuild the observable ground truth and "
+            "everything derived from it ({0}), in dependency order and without "
+            "a simulator".format(", ".join(REFACTOR_STAGES))
+        ),
+    )
     parser.add_argument("--all-stages", action="store_true")
     parser.add_argument("--scenarios", nargs="+", default=None)
     parser.add_argument("-v", "--verbose", action="count", default=0)
@@ -207,7 +252,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         format="%(levelname)s %(name)s: %(message)s",
     )
 
-    stages = list(ALL_STAGES) if args.all_stages else list(args.stages)
+    if args.refactor:
+        stages = list(REFACTOR_STAGES)
+    else:
+        stages = list(ALL_STAGES) if args.all_stages else list(args.stages)
     root = Path(args.artifacts)
     runs = discover_runs(root)
     if args.scenarios:

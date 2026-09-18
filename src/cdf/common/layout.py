@@ -335,7 +335,19 @@ class RunLayout:
 
     @property
     def edge_matches(self) -> Path:
+        """Edge-by-edge comparison with the observable ground truth.
+
+        This is the primary comparison. The template-based one it replaced is
+        retained beside it under :attr:`legacy_template_edge_matches`, because
+        the historical numbers should stay readable rather than be overwritten
+        by numbers that mean something different.
+        """
         return self.evaluation_dir / "edge_matches.csv"
+
+    @property
+    def legacy_template_edge_matches(self) -> Path:
+        """The superseded comparison against the scenario causal template."""
+        return self.evaluation_dir / "legacy_template_edge_matches.csv"
 
     @property
     def attribution_metrics(self) -> Path:
