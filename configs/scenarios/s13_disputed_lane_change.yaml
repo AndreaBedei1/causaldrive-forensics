@@ -1,0 +1,161 @@
+# =============================================================================
+# S13 -- DISPUTED LANE CHANGE  (2 vehicles)
+# =============================================================================
+# The case the accident-attribution literature treats as genuinely contested: two
+# vehicles converge on the same piece of road and each account is consistent with
+# the damage. B says A accelerated into a gap B was already entering; A says B cut
+# across with no room. Both are describing the same closing gap from opposite ends.
+#
+# What makes it a useful test rather than a rhetorical one is that the two
+# variants are physically distinguishable and the distinguishing evidence is
+# distributed. B's lane change is visible in B's own steering and in B's lane
+# sensor; A's acceleration is visible in A's own controls. Neither vehicle can see
+# both. So this is the scenario where fusion has to earn its place -- a single log
+# supports one story and the merged log supports one account of the pair.
+#
+# The line-crossing evidence matters here specifically. In the cut_in variant B
+# crosses a marking; in the accelerates_into_gap variant B stays in lane and it is
+# A that closes the distance. That is the same kind of evidence the supervisor
+# asked for -- crossing a road line -- and it is what separates the two.
+#
+# Geometry: the three-lane straight on Town05 around y = -204 (spawn point 265),
+# measured to offer ~160 m of junction-free travel. The same stretch S01 and S02
+# use, deliberately: the geometry is known good and the difference here is the
+# behaviour, not the road.
+# =============================================================================
+
+scenario:
+  scenario_id: "S13"
+  name: "disputed_lane_change"
+  description: >
+    A travels in the right lane; B is alongside in the left. In the disputed
+    variants the gap between them closes and they touch, and which behaviour
+    closed it differs. The safe variant keeps the same manoeuvre with room.
+  map: "Town05"
+  default_variant: "cut_in"
+  max_duration_s: 26.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
+      route: { length_m: 150.0, step_m: 2.0 }
+      initial_speed: 13.0
+      target_speed: 13.0
+      actions: []
+
+    # B starts ahead and one lane over, so a lane change puts it across A's path.
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 14.0, lane_offset: -1 }
+      route: { length_m: 150.0, step_m: 2.0 }
+      initial_speed: 13.0
+      target_speed: 13.0
+      actions: []
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 5.0
+
+  intervention_candidates:
+    - "B_cut_in"
+
+  causal_template:
+    - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
+      effect: { kind: "state", participant: "A", name: "closing" }
+      edge: "CONTRIBUTES_TO"
+      rationale: "B moving laterally into A's lane is what collapses the gap"
+    - cause: { kind: "state", participant: "A", name: "closing" }
+      effect: { kind: "state", participant: "A", name: "critical_ttc" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  notes:
+    - "the evidence that separates the variants is distributed: B's steering and A's throttle"
+    - "no single log supports a complete account, which is the point of the scenario"
+
+  variants:
+    # ---- B changes lane into a gap that was not there --------------------
+    cut_in:
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_cut_in"
+              kind: "lane_shift"
+              t_start: 4.0
+              duration: 3.0
+              params: { lateral_offset: 3.5 }
+      notes:
+        - "B has room ahead but not beside: the lateral move is what creates the conflict"
+        - "A holds a constant speed throughout, so nothing A did contributed"
+
+    # ---- A closes a gap B was legitimately entering ----------------------
+    accelerates_into_gap:
+      intervention_candidates:
+        - "B_cut_in"
+        - "A_accelerate"
+      participant_overrides:
+        A:
+          actions:
+            # A speeds up as the gap opens, closing it again from behind.
+            - action_id: "A_accelerate"
+              kind: "set_speed"
+              t_start: 3.4
+              duration: 10.0
+              params: { target_speed: 17.5 }
+        B:
+          actions:
+            # The same manoeuvre as cut_in, begun with more room and taken more
+            # gently -- so that what differs between the variants is A, not B.
+            - action_id: "B_cut_in"
+              kind: "lane_shift"
+              t_start: 4.6
+              duration: 4.0
+              params: { lateral_offset: 3.5 }
+      causal_template:
+        - cause: { kind: "state", participant: "A", name: "closing" }
+          effect: { kind: "state", participant: "A", name: "critical_ttc" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "A", name: "critical_ttc" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+        - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
+          effect: { kind: "state", participant: "A", name: "closing" }
+          edge: "CONTRIBUTES_TO"
+          rationale: "both behaviours contribute here, which is what makes the case contested"
+      notes:
+        - "B performs the same lane change with more room; A accelerates into what is left"
+        - "the designed answer has both as contributors, not one"
+        - "a method that always names a single initiator will be wrong on this variant"
+
+    # ---- the same manoeuvre, safely --------------------------------------
+    safe_lane_change:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 12.0
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_cut_in"
+              kind: "lane_shift"
+              t_start: 6.0
+              duration: 5.0
+              params: { lateral_offset: 3.5 }
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
+          effect: { kind: "state", participant: "A", name: "closing" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "A", name: "closing" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+          rationale: "the gap closes but never to contact, so the encounter is real and stays short of it"
+      notes:
+        - "the negative control: identical manoeuvre, begun later and taken slower"
+        - "the line crossing still appears in B's log, so the normative layer sees the same evidence"

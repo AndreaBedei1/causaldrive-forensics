@@ -9,6 +9,11 @@ artifacts/**
 !artifacts/example/**
 artifacts_independent_clocks/**
 !artifacts_independent_clocks/.gitkeep
+# The V2 campaign. Kept apart from the V1 roots above on purpose: V2 changed the
+# sensors and the timing semantics, so a result averaged over both describes
+# neither. scripts/run_campaign.py refuses a root holding both.
+artifacts_v2/**
+!artifacts_v2/.gitkeep
 
 # Python
 __pycache__/

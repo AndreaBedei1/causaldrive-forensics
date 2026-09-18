@@ -1,0 +1,187 @@
+# =============================================================================
+# S10 -- SINGLE STOP, A CONTROLLED  (2 vehicles)
+# =============================================================================
+# The first scenario in which traffic control is part of the causal account, and
+# the simplest case of the supervisor's right-of-way benchmark: one approach has
+# a stop sign and the other does not.
+#
+# What makes it worth running is that two questions come apart here which the
+# earlier scenarios could not separate. "Did A cause the collision?" is physical
+# and answered from the trajectories. "Should A have stopped?" is normative and
+# answered from what A's camera saw and what A then did. A method that only had
+# the first would call the crash-variant outcome a symmetric conflict; a method
+# that only had the second could not tell a stop sign run beside an unrelated
+# collision from one that produced it.
+#
+# Geometry: junction 720 of Town05 at (101.6, 0.3). Four clean approaches,
+# maximum bearing error 0.7 deg, and no traffic light -- so signal state cannot
+# confound the result, which matters because signal state is privileged and a
+# vehicle could not observe it.
+# =============================================================================
+
+scenario:
+  scenario_id: "S10"
+  name: "single_stop_a"
+  description: >
+    A faces a stop sign on its approach; B does not and has benchmark priority.
+    The variants differ only in what A does about the sign: stop properly, roll
+    through it, or stop and then pull out correctly.
+  map: "Town05"
+  default_variant: "rolls_through"
+  max_duration_s: 28.0
+
+  participants:
+    # A is the controlled approach. It arrives at a speed from which stopping is
+    # possible, so that failing to stop is a choice rather than a physical
+    # impossibility -- otherwise the normative finding would be unfair.
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 48.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 44.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+  # Privileged. Scenario construction uses it to place what the map may not
+  # provide; evaluation uses it as the traffic-control ground truth. Local
+  # inference sees signs only through the camera, which is the entire point of
+  # the camera: the gap between the two is the perception measurement.
+  traffic_control:
+    signs:
+      - sign_id: "stop_A"
+        kind: "stop"
+        governs: "A"
+        anchor:
+          anchor: "junction_approach"
+          junction_x: 101.6
+          junction_y: 0.3
+          bearing_deg: 0.0
+          back_m: 12.0
+        spawn_prop: true
+        stop_line_forward_m: 4.0
+    # Only one approach is controlled, so arrival order never has to break a
+    # tie and no tie-break convention is declared.
+    tie_break: null
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "A_roll_through"
+
+  # Designed structure. Every state here maps onto a comparable event type, so
+  # each designed edge has a counterpart a reconstruction could in principle
+  # recover. A template edge nothing could match would measure the vocabulary
+  # rather than the method.
+  causal_template:
+    - cause: { kind: "state", participant: "A", name: "no_stop" }
+      effect: { kind: "state", participant: "A", name: "stop_line_crossed" }
+      edge: "CONTRIBUTES_TO"
+      rationale: "not stopping is what leaves A still moving at the line"
+    - cause: { kind: "state", participant: "A", name: "stop_line_crossed" }
+      effect: { kind: "state", participant: "A", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "A", name: "conflict_entry" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  notes:
+    - "the benchmark right-of-way rule for this case is that the uncontrolled approach has priority"
+    - "A arrives at 9 m/s, from which a stop is comfortably achievable"
+
+  variants:
+    # ---- A rolls through the sign and is struck ---------------------------
+    rolls_through:
+      participant_overrides:
+        A:
+          actions:
+            # A slows a little, as a rolling stop does, and continues. Modelled
+            # as a speed change rather than a brake so that the trace shows
+            # deceleration without ever reaching rest -- which is exactly the
+            # signature NO_STOP_AFTER_STOP_SIGN has to catch.
+            - action_id: "A_roll_through"
+              kind: "set_speed"
+              t_start: 3.0
+              duration: 12.0
+              params: { target_speed: 5.5 }
+      notes:
+        - "A decelerates but never reaches rest, which is what makes this a rolling stop rather than a stop"
+
+    # ---- A stops properly; no conflict ------------------------------------
+    stops_safely:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 18.0
+      intervention_candidates:
+        - "A_full_stop"
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_full_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 7.0
+              params: { intensity: 0.9 }
+      causal_template:
+        - cause: { kind: "state", participant: "A", name: "stopped" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+          rationale: "coming to rest before the line is what keeps A out of the conflict"
+      notes:
+        - "the negative control: identical geometry, and A discharges the obligation"
+        - "B passes unobstructed, so the separation stays large"
+
+    # ---- A stops, then enters after B has cleared -------------------------
+    stops_then_proceeds:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 14.0
+      intervention_candidates:
+        - "A_full_stop"
+        - "A_pull_away"
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_full_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 4.2
+              params: { intensity: 0.9 }
+            - action_id: "A_pull_away"
+              kind: "set_speed"
+              t_start: 7.4
+              duration: 10.0
+              params: { target_speed: 9.0 }
+      causal_template:
+        - cause: { kind: "state", participant: "A", name: "stopped" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+      notes:
+        - "the case that distinguishes 'stopped' from 'stopped and then proceeded safely'"
+        - "A pulls away after B has cleared the junction, so both the stop and the crossing appear in the log"

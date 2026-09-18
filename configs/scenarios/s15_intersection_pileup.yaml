@@ -1,0 +1,195 @@
+# =============================================================================
+# S15 -- INTERSECTION PILE-UP  (3 vehicles)
+# =============================================================================
+# The pushed-vehicle case again, but across a junction instead of along a lane,
+# and with traffic control in play. A and B collide in the intersection; the
+# impact deflects one of them into C, which was waiting or passing.
+#
+# Two things make this different from S14 rather than a restatement of it.
+#
+# The second impact is lateral, not longitudinal. In a rear-end chain the shunt
+# is along the direction both vehicles were already travelling, and a method
+# could plausibly get the right answer by following momentum in one dimension.
+# Here the deflection changes direction, so the physical graph has to connect an
+# impact to a subsequent one whose geometry does not resemble it.
+#
+# And C is a bystander. In S14 every vehicle was part of the traffic stream that
+# produced the incident. Here C did nothing at all -- so if C appears as a
+# contributor, something is treating presence as participation.
+#
+# Junction 720 of Town05 at (101.6, 0.3), with a stop sign on B's approach so the
+# initiating impact has a normative account and not only a physical one.
+# =============================================================================
+
+scenario:
+  scenario_id: "S15"
+  name: "intersection_pileup"
+  description: >
+    B fails to stop and strikes A in the junction. The impact deflects A into C,
+    which is approaching the same junction from a third direction.
+  map: "Town05"
+  default_variant: "deflected_into_c"
+  max_duration_s: 32.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 42.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 11.0
+      target_speed: 11.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.nissan.patrol"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 44.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+    # C approaches from the third arm, slowly, and is struck by whatever comes
+    # out of the junction. It takes no action in any variant.
+    - id: "C"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 180.0
+        back_m: 30.0
+      route: { length_m: 80.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 6.0
+      target_speed: 6.0
+      actions: []
+
+  traffic_control:
+    signs:
+      - sign_id: "stop_B"
+        kind: "stop"
+        governs: "B"
+        anchor:
+          anchor: "junction_approach"
+          junction_x: 101.6
+          junction_y: 0.3
+          bearing_deg: -90.0
+          back_m: 12.0
+        spawn_prop: true
+        stop_line_forward_m: 4.0
+    tie_break: null
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"], ["A", "C"]]
+  expected_collision_order: [["A", "B"], ["A", "C"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "B_roll_through"
+
+  causal_template:
+    - cause: { kind: "state", participant: "B", name: "no_stop" }
+      effect: { kind: "state", participant: "B", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+    - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
+      edge: "CONTRIBUTES_TO"
+      rationale: "the first impact deflects A out of its path and into C"
+
+  notes:
+    - "C takes no action in any variant: if C appears as a contributor, presence is being read as participation"
+    - "the second impact is lateral, so the physical graph has to link impacts whose geometry differs"
+    - "A is the recorder that feels both impacts, so A ties B and C onto one timeline"
+
+  variants:
+    # ---- B runs the stop, strikes A, A is deflected into C ---------------
+    deflected_into_c:
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_roll_through"
+              kind: "set_speed"
+              t_start: 3.0
+              duration: 12.0
+              params: { target_speed: 7.0 }
+      notes:
+        - "designed answer: B contributes to both impacts, A to neither, C to neither"
+        - "A was struck and then struck C, which is the pushed-vehicle shape across a junction"
+
+    # ---- the same impact, and A is not deflected into anyone -------------
+    single_impact:
+      expected_collision_pairs: [["A", "B"]]
+      expected_collision_order: [["A", "B"]]
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 6.0
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_roll_through"
+              kind: "set_speed"
+              t_start: 3.0
+              duration: 12.0
+              params: { target_speed: 7.0 }
+        C:
+          # C is far enough back that the deflection misses it. Everything else
+          # is identical, so the difference in the account is attributable to
+          # the second impact alone.
+          spawn:
+            anchor: "junction_approach"
+            junction_x: 101.6
+            junction_y: 0.3
+            bearing_deg: 180.0
+            back_m: 70.0
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "no_stop" }
+          effect: { kind: "state", participant: "B", name: "conflict_entry" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+      notes:
+        - "the control for deflected_into_c: one impact instead of two, same initiating behaviour"
+        - "C is present and uninvolved, and here there is no impact to be wrongly attributed to it"
+        - "also a partial-alignment case: C feels no contact, so C cannot be tied to the common timeline at all"
+
+    # ---- B stops; no impact at all --------------------------------------
+    b_stops:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      expected_collision_order: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 16.0
+      intervention_candidates:
+        - "B_full_stop"
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_full_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 8.0
+              params: { intensity: 0.9 }
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "stopped" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+      notes:
+        - "the negative control, and also the no-collision timing case"
+        - "with no contact anywhere, no recorder can be tied to another and the merged log says so"

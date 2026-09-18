@@ -1,0 +1,211 @@
+# =============================================================================
+# S16 -- SECONDARY COLLISION AFTER INITIAL IMPACT  (3 vehicles)
+# =============================================================================
+# The distinction this whole set of scenarios has been working towards: telling an
+# initiating collision from a consequence of one. S14 and S15 both contain that
+# shape, but in each it is bundled with something else -- a chain in one lane, a
+# junction and a stop sign in the other. Here it is isolated and the variants
+# differ in nothing but whether the second impact is a consequence.
+#
+# Three vehicles, one impact that starts things and a second that follows. Across
+# the variants the second impact is:
+#
+#   consequential   the first impact throws B into C's path; B could not have
+#                   avoided it and C did nothing
+#   independent     B recovers, drives on, and hits C several seconds later
+#                   through its own inattention
+#   avoided         B recovers and stops clear; C is untouched
+#
+# In all three the *same pair* collides second and the final positions are
+# similar. The only thing that separates them is the causal relationship between
+# the two impacts, so a method that reads the layout rather than the structure
+# will give the same answer to all three -- which is exactly what this scenario
+# is for.
+#
+# The clock story is also at its hardest here. In the consequential variant the
+# two impacts are close together in time and B is party to both, so the contact
+# matching has to tell B's two impacts apart on impulse and position. That is the
+# case the alignment's ambiguity check exists for, and if the evidence does not
+# separate them the honest answer is AMBIGUOUS_CONTACT_MATCH rather than a guess.
+#
+# Geometry: the three-lane straight on Town05 around y = -204 (spawn point 265),
+# with C in the adjacent lane so the second impact is lateral.
+# =============================================================================
+
+scenario:
+  scenario_id: "S16"
+  name: "secondary_collision"
+  description: >
+    A brakes hard and B runs into it. What happens next to B -- deflected into C,
+    driving on into C, or stopping clear -- is what the variants change.
+  map: "Town05"
+  default_variant: "consequential"
+  max_duration_s: 34.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 26.0, lane_offset: 0 }
+      route: { length_m: 120.0, step_m: 2.0 }
+      initial_speed: 13.0
+      target_speed: 13.0
+      actions:
+        - action_id: "A_emergency_brake"
+          kind: "brake"
+          t_start: 4.0
+          duration: 8.0
+          params: { intensity: 1.0 }
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
+      route: { length_m: 140.0, step_m: 2.0 }
+      initial_speed: 13.0
+      target_speed: 13.0
+      actions:
+        # B reacts too late for the first impact in every variant, so the
+        # initiating event is held constant and only the sequel changes.
+        - action_id: "B_late_brake"
+          kind: "brake"
+          t_start: 5.9
+          duration: 5.0
+          params: { intensity: 0.9 }
+
+    # C is in the adjacent lane, slightly ahead, travelling steadily. The second
+    # impact is therefore lateral rather than another rear-end.
+    - id: "C"
+      blueprint: "vehicle.nissan.patrol"
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 34.0, lane_offset: -1 }
+      route: { length_m: 130.0, step_m: 2.0 }
+      initial_speed: 12.0
+      target_speed: 12.0
+      actions: []
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"], ["B", "C"]]
+  expected_collision_order: [["A", "B"], ["B", "C"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 5.0
+
+  intervention_candidates:
+    - "A_emergency_brake"
+    - "B_late_brake"
+
+  causal_template:
+    - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
+      effect: { kind: "state", participant: "B", name: "closing" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "B", name: "no_braking" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+    - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
+      edge: "CONTRIBUTES_TO"
+      rationale: "the first impact is what puts B across into C"
+
+  notes:
+    - "the initiating impact is identical in all three variants; only its sequel changes"
+    - "the second impact involves the same pair in all variants, so the layout cannot distinguish them"
+    - "B is party to both impacts, which is what the contact-matching ambiguity check has to handle"
+
+  variants:
+    # ---- the second impact is a consequence of the first -----------------
+    consequential:
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_late_brake"
+              kind: "brake"
+              t_start: 5.9
+              duration: 5.0
+              params: { intensity: 0.9 }
+            # A small lateral displacement standing in for the deflection the
+            # impact produces. Scripted rather than left to the physics so that
+            # the variant is reproducible: an emergent deflection would vary
+            # between runs and the comparison between variants would be with
+            # something other than what was designed.
+            - action_id: "B_deflected"
+              kind: "lane_shift"
+              t_start: 7.4
+              duration: 2.0
+              params: { lateral_offset: 3.2 }
+      notes:
+        - "designed answer: B contributes to the first impact and not to the second"
+        - "B's displacement into C follows from being unable to stop after the impact"
+        - "the two impacts are about 1.5 s apart, close enough that contact matching has real work to do"
+
+    # ---- the second impact is B's own doing, later -----------------------
+    independent:
+      max_duration_s: 38.0
+      intervention_candidates:
+        - "A_emergency_brake"
+        - "B_late_brake"
+        - "B_changes_lane"
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_late_brake"
+              kind: "brake"
+              t_start: 5.9
+              duration: 5.0
+              params: { intensity: 0.9 }
+            # B recovers, then changes lane into C of its own accord, seconds
+            # later. Same pair, same kind of impact, different cause.
+            - action_id: "B_resume"
+              kind: "set_speed"
+              t_start: 13.0
+              duration: 8.0
+              params: { target_speed: 11.0 }
+            - action_id: "B_changes_lane"
+              kind: "lane_shift"
+              t_start: 17.0
+              duration: 3.0
+              params: { lateral_offset: 3.2 }
+        C:
+          # C is further ahead so it is still there when B catches up.
+          spawn: { anchor: "spawn_index", index: 265, forward_m: 52.0, lane_offset: -1 }
+      causal_template:
+        - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
+          effect: { kind: "state", participant: "B", name: "closing" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "B", name: "no_braking" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+        - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
+          effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
+          edge: "CAUSES_OUTCOME"
+          rationale: "the second impact is B's own lane change, not a consequence of the first"
+      notes:
+        - "designed answer: B contributes to both impacts, for two unrelated reasons"
+        - "the pair and the geometry of the second impact match the consequential variant"
+        - "what differs is that a path from B's own behaviour reaches it without passing through the first impact"
+
+    # ---- no second impact -----------------------------------------------
+    avoided:
+      expected_collision_pairs: [["A", "B"]]
+      expected_collision_order: [["A", "B"]]
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 5.0
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_late_brake"
+              kind: "brake"
+              t_start: 5.9
+              duration: 9.0
+              params: { intensity: 1.0 }
+        C:
+          spawn: { anchor: "spawn_index", index: 265, forward_m: 52.0, lane_offset: -1 }
+      causal_template:
+        - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
+          effect: { kind: "state", participant: "B", name: "closing" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "B", name: "no_braking" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+      notes:
+        - "one impact only; B stops clear and C is untouched"
+        - "C never feels a contact, so C stays off the common timeline and the merged log says so"

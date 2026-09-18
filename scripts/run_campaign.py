@@ -3,12 +3,23 @@
 
 ::
 
-    python scripts/run_campaign.py --artifacts artifacts_independent_clocks \\
+    python scripts/run_campaign.py --artifacts artifacts_v2 \\
         --seeds 0 1 2 --attempts 3
 
 The combinations are enumerated from the scenario files, never written down: the
-campaign is defined as "every variant each of S01-S09 declares, at every seed",
-and :func:`cdf.cli.suite_combinations` is the single source of that list.
+campaign is "every variant every scenario declares, at every seed", and
+:func:`cdf.cli.suite_combinations` is the single source of that list. Adding a
+scenario file therefore adds it to the campaign, with no list to keep in step.
+
+V1 and V2 do not share a root
+-----------------------------
+
+V2 changes the sensor suite and the timing semantics, so a V1 recording is not a
+V2 result and averaging the two would produce a number describing neither. The
+default root is now ``artifacts_v2``, and recording into a root that already
+holds runs from the other generation is refused rather than merged -- the failure
+mode being guarded against is the quiet one, where a campaign resumes into an old
+directory and the summary tables come out of a mixture.
 
 Why one subprocess per run rather than ``cdf suite``
 ---------------------------------------------------
@@ -135,11 +146,60 @@ def record_one(
         return subprocess.call(cmd, env=env, stdout=handle, stderr=subprocess.STDOUT)
 
 
+#: A run recorded with a camera is V2; one recorded without is V1. The marker is
+#: the artifact rather than the directory name, because a directory can be
+#: renamed and a recording cannot be re-sensored.
+def run_generation(run_dir: Path) -> Optional[str]:
+    """``"v2"``, ``"v1"``, or ``None`` when the directory holds no run."""
+    if not (run_dir / "manifest.json").is_file():
+        return None
+    for vehicle in sorted(run_dir.glob("vehicle_*")):
+        if (vehicle / "video").is_dir() or (vehicle / "perception").is_dir():
+            return "v2"
+        if (vehicle / "local_log.json").is_file():
+            return "v2"
+    return "v1"
+
+
+def generation_conflict(artifacts_root: Path) -> Optional[str]:
+    """Whether this root already holds runs of a different generation.
+
+    Returns the message to print, or ``None`` when the root is empty or
+    consistent. Reported as a refusal rather than a warning: a campaign that
+    resumed into the wrong root would produce summary tables computed over a
+    mixture, and nothing downstream could tell.
+    """
+    if not artifacts_root.is_dir():
+        return None
+    found = {}
+    # scenario / run only. The deeper manifests under counterfactual/replays are
+    # replays of a run rather than runs, and counting them would let one V1 run
+    # look like a dozen.
+    for manifest in artifacts_root.glob("*/*/manifest.json"):
+        generation = run_generation(manifest.parent)
+        if generation:
+            found.setdefault(generation, []).append(
+                manifest.parent.relative_to(artifacts_root).as_posix()
+            )
+    if len(found) < 2:
+        return None
+    return (
+        "{0} already holds runs of both generations: {1} v1 and {2} v2 (for "
+        "example {3} and {4}). V2 changed the sensors and the timing semantics, "
+        "so results averaged over a mixture describe neither campaign. Use a "
+        "fresh root, or --allow-mixed-generations if the mixture is "
+        "deliberate".format(
+            artifacts_root, len(found["v1"]), len(found["v2"]),
+            sorted(found["v1"])[0], sorted(found["v2"])[0],
+        )
+    )
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--artifacts", default="artifacts_independent_clocks")
+    parser.add_argument("--artifacts", default="artifacts_v2")
     parser.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
     parser.add_argument("--scenarios", nargs="+", default=None)
     parser.add_argument("--attempts", type=int, default=3)
@@ -147,6 +207,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--fresh", action="store_true",
                         help="re-record every run, ignoring what is on disk")
     parser.add_argument("--keep-stray-engines", action="store_true")
+    parser.add_argument(
+        "--allow-mixed-generations", action="store_true",
+        help=(
+            "record into a root that already holds runs from the other "
+            "generation. Only for deliberately re-recording one scenario in "
+            "place; the resulting root must not be used for campaign averages"
+        ),
+    )
     parser.add_argument("--logs", default=None, help="per-run log directory")
     args = parser.parse_args(argv)
 
@@ -158,6 +226,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     scenarios = list(args.scenarios) if args.scenarios else available_scenarios()
     combinations = suite_combinations(scenarios, args.config_overrides)
     artifacts_root = Path(args.artifacts)
+    conflict = generation_conflict(artifacts_root)
+    if conflict and not args.allow_mixed_generations:
+        print("REFUSING: " + conflict)
+        return 2
     log_dir = Path(args.logs) if args.logs else artifacts_root / "logs"
 
     plan = [

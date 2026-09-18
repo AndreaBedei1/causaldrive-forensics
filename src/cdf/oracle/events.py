@@ -99,6 +99,17 @@ STATE_EVENT_TYPES: Dict[str, EventType] = {
     "critical_ttc": EventType.CRITICAL_TTC,
     "conflict_entry": EventType.CONFLICT_REGION_ENTRY,
     "decelerating": EventType.HARD_DECELERATION,
+    # V2: the states the stop-sign and lane-marking scenarios are designed
+    # around. Every one is comparable, so a designed edge through it has a
+    # counterpart a reconstruction could in principle recover -- which is the
+    # standard the whole ontology is built to.
+    "stopped": EventType.FULL_STOP,
+    "stop_line_crossed": EventType.STOP_LINE_CROSSED,
+    "solid_line_crossed": EventType.SOLID_LINE_CROSSED,
+    "no_stop": EventType.NO_STOP_AFTER_STOP_SIGN,
+    "no_braking": EventType.NO_BRAKING_RESPONSE,
+    "no_yield": EventType.NO_YIELD_RESPONSE,
+    "unsafe_entry": EventType.CONFLICT_ENTRY_WITHOUT_DECELERATION,
 }
 
 #: ``kind: "oracle_state"`` names. These have no local counterpart at all: they

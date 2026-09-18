@@ -1,0 +1,268 @@
+# =============================================================================
+# S12 -- ALL-WAY STOP  (2 vehicles)
+# =============================================================================
+# Both approaches are controlled, so stopping is no longer the question -- both
+# vehicles are obliged to stop, and in three of the four variants both do. What
+# has to be decided instead is who then had priority, and that is the first
+# question in this project whose honest answer is sometimes "cannot be decided".
+#
+# The near_simultaneous variant exists specifically to be undecidable. Two
+# vehicles that completed their stops a tenth of a second apart did not arrive in
+# a clear order, and no amount of reconstruction quality changes that; the
+# benchmark returns AMBIGUOUS_PRIORITY and the responsibility layer records it.
+# A method tuned to always produce a verdict would score *better* on a naive
+# metric here while being wrong, which is why the variant is in the set.
+#
+# Note also what stays separate. In a_arrives_first the stopping property passes
+# for both vehicles and the priority property fails for one. Collapsing those
+# into a single "did the vehicle behave correctly" verdict would lose exactly the
+# distinction this scenario is built to expose.
+#
+# Junction 720 of Town05 at (101.6, 0.3), as S10 and S11.
+# =============================================================================
+
+scenario:
+  scenario_id: "S12"
+  name: "all_way_stop"
+  description: >
+    Both A and B face stop signs. Variants differ in who stops first, whether the
+    two arrivals are distinguishable at all, and whether one vehicle stops.
+  map: "Town05"
+  default_variant: "a_arrives_first"
+  max_duration_s: 32.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 46.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 46.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions: []
+
+  traffic_control:
+    signs:
+      - sign_id: "stop_A"
+        kind: "stop"
+        governs: "A"
+        anchor:
+          anchor: "junction_approach"
+          junction_x: 101.6
+          junction_y: 0.3
+          bearing_deg: 0.0
+          back_m: 12.0
+        spawn_prop: true
+        stop_line_forward_m: 4.0
+      - sign_id: "stop_B"
+        kind: "stop"
+        governs: "B"
+        anchor:
+          anchor: "junction_approach"
+          junction_x: 101.6
+          junction_y: 0.3
+          bearing_deg: -90.0
+          back_m: 12.0
+        spawn_prop: true
+        stop_line_forward_m: 4.0
+    # Null on purpose, and in every variant. A right-side convention would
+    # resolve the near-simultaneous case, and applying one the experiment has
+    # not declared would put a jurisdiction's rule into results that name none.
+    tie_break: null
+
+  expected_outcome: "near_miss"
+  expected_collision_pairs: []
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 16.0
+
+  intervention_candidates:
+    - "A_stop"
+    - "B_stop"
+
+  causal_template:
+    - cause: { kind: "state", participant: "A", name: "stopped" }
+      effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+      edge: "PREVENTS"
+    - cause: { kind: "state", participant: "B", name: "stopped" }
+      effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+      edge: "PREVENTS"
+
+  notes:
+    - "both approaches controlled, so the benchmark falls to arrival order"
+    - "no tie-break is configured in any variant, so a close arrival stays ambiguous"
+
+  variants:
+    # ---- A stops clearly first, and goes first: correct ------------------
+    a_arrives_first:
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_stop"
+              kind: "brake"
+              t_start: 2.4
+              duration: 3.0
+              params: { intensity: 0.9 }
+            - action_id: "A_proceed"
+              kind: "set_speed"
+              t_start: 6.0
+              duration: 12.0
+              params: { target_speed: 8.0 }
+        B:
+          actions:
+            - action_id: "B_stop"
+              kind: "brake"
+              t_start: 4.0
+              duration: 4.5
+              params: { intensity: 0.9 }
+            - action_id: "B_proceed"
+              kind: "set_speed"
+              t_start: 10.0
+              duration: 12.0
+              params: { target_speed: 8.0 }
+      notes:
+        - "A completes its stop about 1.6 s before B, which clears the margin"
+        - "A then proceeds first, so both the stopping and the priority properties pass"
+
+    # ---- B stops clearly first, and goes first: correct, mirrored --------
+    b_arrives_first:
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_stop"
+              kind: "brake"
+              t_start: 4.0
+              duration: 4.5
+              params: { intensity: 0.9 }
+            - action_id: "A_proceed"
+              kind: "set_speed"
+              t_start: 10.0
+              duration: 12.0
+              params: { target_speed: 8.0 }
+        B:
+          actions:
+            - action_id: "B_stop"
+              kind: "brake"
+              t_start: 2.4
+              duration: 3.0
+              params: { intensity: 0.9 }
+            - action_id: "B_proceed"
+              kind: "set_speed"
+              t_start: 6.0
+              duration: 12.0
+              params: { target_speed: 8.0 }
+
+    # ---- neither arrival is clearly first --------------------------------
+    near_simultaneous:
+      expected_outcome: "collision"
+      expected_collision_pairs: [["A", "B"]]
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 6.0
+      intervention_candidates:
+        - "A_stop"
+        - "B_stop"
+        - "A_proceed"
+        - "B_proceed"
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 2.6
+              params: { intensity: 0.95 }
+            - action_id: "A_proceed"
+              kind: "set_speed"
+              t_start: 5.6
+              duration: 12.0
+              params: { target_speed: 9.0 }
+        B:
+          actions:
+            - action_id: "B_stop"
+              kind: "brake"
+              t_start: 2.7
+              duration: 2.6
+              params: { intensity: 0.95 }
+            - action_id: "B_proceed"
+              kind: "set_speed"
+              t_start: 5.7
+              duration: 12.0
+              params: { target_speed: 9.0 }
+      causal_template:
+        - cause: { kind: "state", participant: "A", name: "conflict_entry" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+        - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+      notes:
+        - "both stopped correctly, 0.1 s apart, and both then pulled away together"
+        - "the designed answer is AMBIGUOUS_PRIORITY: the stopping properties pass and priority cannot be decided"
+        - "a method that always produces a priority verdict scores better here while being wrong"
+
+    # ---- one vehicle does not stop at all --------------------------------
+    b_fails_to_stop:
+      expected_outcome: "collision"
+      expected_collision_pairs: [["A", "B"]]
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 6.0
+      intervention_candidates:
+        - "A_stop"
+        - "B_roll_through"
+      participant_overrides:
+        A:
+          actions:
+            - action_id: "A_stop"
+              kind: "brake"
+              t_start: 2.4
+              duration: 3.0
+              params: { intensity: 0.9 }
+            - action_id: "A_proceed"
+              kind: "set_speed"
+              t_start: 6.0
+              duration: 12.0
+              params: { target_speed: 8.0 }
+        B:
+          actions:
+            - action_id: "B_roll_through"
+              kind: "set_speed"
+              t_start: 3.0
+              duration: 12.0
+              params: { target_speed: 6.0 }
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "no_stop" }
+          effect: { kind: "state", participant: "B", name: "stop_line_crossed" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "B", name: "stop_line_crossed" }
+          effect: { kind: "state", participant: "B", name: "conflict_entry" }
+          edge: "CONTRIBUTES_TO"
+        - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "CAUSES_OUTCOME"
+        - cause: { kind: "state", participant: "A", name: "stopped" }
+          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+          rationale: "A discharged its own obligation, which acts against the outcome without averting it"
+      notes:
+        - "A stops and has priority by arrival; B rolls through and strikes it"
+        - "the asymmetry is in the normative layer, not in the physical one: both entered the junction"

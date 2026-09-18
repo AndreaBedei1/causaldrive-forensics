@@ -1,0 +1,153 @@
+# =============================================================================
+# S11 -- SINGLE STOP, B CONTROLLED  (2 vehicles)
+# =============================================================================
+# The mirror of S10: the sign is on B's approach instead of A's, and B is the
+# vehicle that may or may not stop.
+#
+# A mirror is worth recording rather than assumed, for one specific reason. The
+# reconstruction has no map and no notion of which approach is "the main road";
+# the only thing that distinguishes A from B anywhere in this system is which
+# recorder a log came from. So if S10 and S11 do not produce mirrored findings,
+# something is keying on participant identity that should not be -- a rule that
+# happens to name A, an ordering assumption, a tie-break that is not symmetric.
+# This scenario is the test for that, and it is cheap.
+#
+# Same junction as S10 (720 of Town05, at 101.6, 0.3), same speeds, sign moved.
+# =============================================================================
+
+scenario:
+  scenario_id: "S11"
+  name: "single_stop_b"
+  description: >
+    B faces a stop sign on its approach; A does not and has benchmark priority.
+    Structurally identical to S10 with the roles exchanged, which is what makes
+    it a check on symmetry rather than an extra data point.
+  map: "Town05"
+  default_variant: "rolls_through"
+  max_duration_s: 28.0
+
+  participants:
+    - id: "A"
+      blueprint: "vehicle.tesla.model3"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: 0.0
+        back_m: 44.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 10.0
+      target_speed: 10.0
+      actions: []
+
+    - id: "B"
+      blueprint: "vehicle.audi.tt"
+      spawn:
+        anchor: "junction_approach"
+        junction_x: 101.6
+        junction_y: 0.3
+        bearing_deg: -90.0
+        back_m: 48.0
+      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      initial_speed: 9.0
+      target_speed: 9.0
+      actions: []
+
+  traffic_control:
+    signs:
+      - sign_id: "stop_B"
+        kind: "stop"
+        governs: "B"
+        anchor:
+          anchor: "junction_approach"
+          junction_x: 101.6
+          junction_y: 0.3
+          bearing_deg: -90.0
+          back_m: 12.0
+        spawn_prop: true
+        stop_line_forward_m: 4.0
+    tie_break: null
+
+  expected_outcome: "collision"
+  expected_collision_pairs: [["A", "B"]]
+
+  validation:
+    encounter_pair: ["A", "B"]
+    min_separation_below_m: 6.0
+
+  intervention_candidates:
+    - "B_roll_through"
+
+  causal_template:
+    - cause: { kind: "state", participant: "B", name: "no_stop" }
+      effect: { kind: "state", participant: "B", name: "stop_line_crossed" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "B", name: "stop_line_crossed" }
+      effect: { kind: "state", participant: "B", name: "conflict_entry" }
+      edge: "CONTRIBUTES_TO"
+    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
+      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
+      edge: "CAUSES_OUTCOME"
+
+  notes:
+    - "exists to check that nothing in the method keys on participant identity"
+    - "findings should mirror S10 exactly with A and B exchanged"
+
+  variants:
+    rolls_through:
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_roll_through"
+              kind: "set_speed"
+              t_start: 3.0
+              duration: 12.0
+              params: { target_speed: 5.5 }
+
+    stops_safely:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 18.0
+      intervention_candidates:
+        - "B_full_stop"
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_full_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 7.0
+              params: { intensity: 0.9 }
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "stopped" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"
+
+    stops_then_proceeds:
+      expected_outcome: "near_miss"
+      expected_collision_pairs: []
+      validation:
+        encounter_pair: ["A", "B"]
+        min_separation_below_m: 14.0
+      intervention_candidates:
+        - "B_full_stop"
+        - "B_pull_away"
+      participant_overrides:
+        B:
+          actions:
+            - action_id: "B_full_stop"
+              kind: "brake"
+              t_start: 2.6
+              duration: 4.2
+              params: { intensity: 0.9 }
+            - action_id: "B_pull_away"
+              kind: "set_speed"
+              t_start: 7.4
+              duration: 10.0
+              params: { target_speed: 9.0 }
+      causal_template:
+        - cause: { kind: "state", participant: "B", name: "stopped" }
+          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
+          edge: "PREVENTS"

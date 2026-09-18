@@ -1,14 +1,22 @@
-"""The nine scenario specifications are frozen.
+"""S01-S09 are frozen. The V2 scenarios are new files, and may not edit them.
 
-S01-S09 were checked and corrected by hand. Every method improvement in this
-project has to be a change to the *method*; calibrating a scenario until an
-attribution comes out right would be the opposite of an experiment. The
-SHA-256 of each YAML is therefore pinned here, and the suite fails the moment
-one of them changes.
+S01-S09 were checked and corrected by hand. Every method improvement has to be a
+change to the *method*; calibrating a scenario until an attribution comes out
+right would be the opposite of an experiment. The SHA-256 of each YAML is pinned
+here and the suite fails the moment one changes. Updating a hash is a deliberate
+act with a written reason, never a side effect of making a metric move.
 
-Updating a hash is a deliberate act with a written reason, never a side
-effect of making a metric move. S10 was removed on purpose and must not come
-back under any name.
+What this test does *not* forbid any more is adding scenarios. V2 introduces
+S10-S16 -- single stop, all-way stop, disputed lane change, three-car chain,
+intersection pile-up, secondary collision -- and they are additions rather than
+edits. The distinction is the one that matters: a new scenario cannot make an old
+result look better, because the old results are computed from the old scenarios
+and those are byte-identical. A retuned scenario could, which is why the hashes
+stay.
+
+An earlier, unrelated scenario also numbered S10 was removed from this repository
+for a different reason. The V2 S10 is a fresh single-stop scenario and shares
+nothing with it but the number.
 """
 
 from __future__ import annotations
@@ -55,8 +63,102 @@ def test_scenario_yaml_is_unchanged(name: str) -> None:
     )
 
 
-def test_no_scenario_was_added_or_removed() -> None:
-    """Exactly the nine frozen files, and nothing that looks like S10."""
-    present = sorted(p.name for p in SCENARIO_DIR.glob("*.yaml"))
-    assert present == sorted(FROZEN_SHA256), present
-    assert not [p for p in present if p.startswith("s10")], "S10 must not return"
+#: The V2 additions. Listed so that adding a scenario is as deliberate as
+#: changing one: a file here that nobody expected fails the test.
+V2_SCENARIOS = {
+    "s10_single_stop_a.yaml",
+    "s11_single_stop_b.yaml",
+    "s12_all_way_stop.yaml",
+    "s13_disputed_lane_change.yaml",
+    "s14_three_car_chain.yaml",
+    "s15_intersection_pileup.yaml",
+    "s16_secondary_collision.yaml",
+}
+
+
+def test_none_of_the_frozen_nine_went_missing() -> None:
+    present = {p.name for p in SCENARIO_DIR.glob("*.yaml")}
+    assert set(FROZEN_SHA256).issubset(present), sorted(
+        set(FROZEN_SHA256) - present
+    )
+
+
+def test_the_scenario_set_is_exactly_the_nine_plus_the_declared_additions() -> None:
+    """No scenario appears that nobody wrote down here."""
+    present = {p.name for p in SCENARIO_DIR.glob("*.yaml")}
+    unexpected = sorted(present - set(FROZEN_SHA256) - V2_SCENARIOS)
+    assert unexpected == [], (
+        "undeclared scenario file(s) {0}. Adding a scenario is deliberate: list "
+        "it in V2_SCENARIOS with the reason it exists".format(unexpected)
+    )
+
+
+def test_every_declared_v2_scenario_is_present_and_loads() -> None:
+    """A declared scenario that does not exist, or does not parse, is a bug."""
+    from cdf.common.config import Config, deep_merge, load_yaml
+    from cdf.simulation.scenario_base import ScenarioSpec
+
+    base = load_yaml(str(REPO_ROOT / "configs" / "default.yaml"))
+    for name in sorted(V2_SCENARIOS):
+        path = SCENARIO_DIR / name
+        assert path.is_file(), name
+        block = load_yaml(str(path))["scenario"]
+        variants = list((block.get("variants") or {}).keys()) or ["default"]
+        for variant in variants:
+            cfg = Config(deep_merge(base, load_yaml(str(path))))
+            spec = ScenarioSpec.from_config(cfg, variant=variant)
+            assert spec.participants, (name, variant)
+
+
+def test_the_v2_scenarios_use_two_or_three_vehicles() -> None:
+    """The brief caps it there, and the alignment story is built around it."""
+    from cdf.common.config import Config, deep_merge, load_yaml
+    from cdf.simulation.scenario_base import ScenarioSpec
+
+    base = load_yaml(str(REPO_ROOT / "configs" / "default.yaml"))
+    for name in sorted(V2_SCENARIOS):
+        cfg = Config(deep_merge(base, load_yaml(str(SCENARIO_DIR / name))))
+        spec = ScenarioSpec.from_config(cfg)
+        assert 2 <= len(spec.participants) <= 3, (name, len(spec.participants))
+
+
+def test_no_v2_causal_template_references_an_uncomparable_state() -> None:
+    """A designed edge nothing could match measures the vocabulary, not the method.
+
+    This is the check that keeps the new scenarios honest about what they are
+    asking of a reconstruction: every state a template names has to map onto an
+    event type both a privileged trace and an onboard reconstruction can assert.
+    """
+    from cdf.common.config import Config, deep_merge, load_yaml
+    from cdf.graph.ontology import is_comparable
+    from cdf.oracle.events import STATE_EVENT_TYPES
+    from cdf.simulation.scenario_base import ScenarioSpec
+
+    base = load_yaml(str(REPO_ROOT / "configs" / "default.yaml"))
+    for name in sorted(V2_SCENARIOS):
+        block = load_yaml(str(SCENARIO_DIR / name))["scenario"]
+        variants = list((block.get("variants") or {}).keys()) or ["default"]
+        for variant in variants:
+            cfg = Config(deep_merge(base, load_yaml(str(SCENARIO_DIR / name))))
+            spec = ScenarioSpec.from_config(cfg, variant=variant)
+            for edge in spec.causal_template:
+                for side in ("cause", "effect"):
+                    node = edge.get(side) or {}
+                    if node.get("kind") != "state":
+                        continue
+                    state = str(node.get("name"))
+                    assert state in STATE_EVENT_TYPES, (name, variant, state)
+                    assert is_comparable(STATE_EVENT_TYPES[state]), (name, state)
+
+
+def test_no_v2_scenario_declares_an_unimplemented_sign_kind() -> None:
+    """Only stop and give-way are detected, so only those may be placed."""
+    from cdf.common.config import Config, deep_merge, load_yaml
+    from cdf.simulation.scenario_base import ScenarioSpec
+
+    base = load_yaml(str(REPO_ROOT / "configs" / "default.yaml"))
+    for name in sorted(V2_SCENARIOS):
+        cfg = Config(deep_merge(base, load_yaml(str(SCENARIO_DIR / name))))
+        spec = ScenarioSpec.from_config(cfg)
+        for sign in (spec.traffic_control or {}).get("signs", []) or []:
+            assert str(sign["kind"]).lower() in ("stop", "yield"), (name, sign)
