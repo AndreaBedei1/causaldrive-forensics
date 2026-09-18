@@ -205,6 +205,12 @@ causal_rules:
 # -----------------------------------------------------------------------------
 # Post-event fusion
 # -----------------------------------------------------------------------------
+# Deriving "this did not happen" from onboard evidence. See
+# cdf.graph.non_actions: a window whose evidence falls below the bar is
+# reported UNKNOWN rather than resolved either way.
+non_actions:
+  min_evidence_coverage: 0.8
+
 fusion:
   # V2 primary clock method: shared physical contact. See
   # docs/CLOCKS.md and cdf.fusion.contact_alignment.
