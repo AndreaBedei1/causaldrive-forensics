@@ -76,7 +76,8 @@ _LIMITATIONS: Tuple[Tuple[str, str], ...] = (
     ("ambiguous_contact",
      "which impact is which could not be decided from the recordings"),
     ("partial_alignment",
-     "at least one recorder could not be tied to the others"),
+     "{unaligned} could not be tied to the others, so nothing it recorded "
+     "reaches the merged timeline"),
     ("no_camera",
      "recorded without a camera, so no sign or stop-line evidence exists"),
     ("no_counterfactual",
@@ -421,8 +422,18 @@ def _limitation(
         "shared_anchor": bool((alignment or {}).get("shared_anchor_caveats")),
     }
     for key, text in _LIMITATIONS:
-        if flags.get(key):
+        if not flags.get(key):
+            continue
+        if "{unaligned}" not in text:
             return text
+        # Which recorder dropped out decides whether the row is usable at all:
+        # a run missing the vehicle that initiated the incident is a different
+        # matter from one missing a bystander, and "at least one" says neither.
+        names = (alignment or {}).get("unaligned_participants") or []
+        return text.format(
+            unaligned=", ".join(str(p) for p in names) if names
+            else "a recorder"
+        )
     return "none identified"
 
 

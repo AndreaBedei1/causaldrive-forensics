@@ -15,6 +15,30 @@ CARLA -- the intermediate vehicle physically blocks the line of sight -- and is
 reported in ``docs/EXPERIMENTAL_FINDINGS.md``. What this test pins down is the
 pipeline behaviour: given a participant that genuinely did not see the initiating
 event, does fusion put it back?
+
+What V2 changed, and what it costs
+----------------------------------
+V1 aligned the clocks by fitting radar tracks, which could place a vehicle on the
+common timeline without it ever touching anything. V2 aligns on shared physical
+contact, and in this fixture the leader C never collides: A strikes B, and C only
+brakes. So C has no contact anchor, and contact-based alignment cannot place it.
+
+The alignment reports ``PARTIALLY_ALIGNED`` and names C as unaligned. C is then
+absent from the fused graph entirely -- not silently dropped, but absent, which
+has two consequences these tests pin down:
+
+1. C's own account of braking never reaches the merged timeline.
+2. B's radar track of C is never resolved to C, because association needs both
+   ends on one clock. It stays ``B::T001``.
+
+The recovery claim survives in a weaker and more precise form: the *initiating
+event* does reach the blind participant, as B's observation of a decelerating
+target rather than as C's own record of braking. That is what fusion contributes
+here, and asserting the stronger form would assert something V2 does not do.
+
+The strong claim -- the fused collision's ancestry reaching C by name -- is
+asserted below against the recorded S07 run, where C is in contact and can be
+aligned. Reporting the strong claim only where it holds is the point.
 """
 
 from __future__ import annotations
@@ -103,9 +127,15 @@ def test_fusion_recovers_events_absent_from_the_blind_local_graph(partial_view_r
         "fusion added nothing the blind participant did not already have; "
         "H1 is not supported by this run"
     )
-    # Specifically, something owned by the vehicle A never observed.
-    assert any(owner == "C" for owner, _t in gained), (
-        "fusion recovered nothing owned by C, the participant A was blind to: {0}".format(
+    # Specifically the initiating event: the leader slowing down, which A never
+    # saw and B did. It arrives as B's observation of its target rather than as
+    # C's own record, because C never made contact and so is not on the common
+    # timeline -- see the module docstring and the limitation test below.
+    assert any(
+        owner == "B" and t == EventType.TARGET_DECELERATION for owner, t in gained
+    ), (
+        "fusion recovered no observation of the leader decelerating, so the "
+        "initiating event did not reach the blind participant at all: {0}".format(
             sorted((o, t.value) for o, t in gained)
         )
     )
@@ -124,8 +154,9 @@ def test_the_recovered_evidence_is_merged_from_both_viewpoints(partial_view_run)
 
     multi = [n for n in fused.nodes if len(set(n.owners or [])) > 1]
     assert multi, "fusion produced no node owned by more than one participant"
-    assert any("C" in set(n.owners or []) for n in multi), (
-        "no fused node carries C, the participant the striker never observed"
+    assert any({"A", "B"} <= set(n.owners or []) for n in multi), (
+        "no fused node carries both A and B, so nothing was recognised as the "
+        "same physical fact seen from two viewpoints"
     )
     for node in multi:
         assert len(node.merged_from) >= 2, (
@@ -166,6 +197,70 @@ def test_real_run_outcome_reaches_back_to_the_initiating_vehicle() -> None:
     assert "C" in reached, (
         "the fused collision's ancestry reaches {0}, never C -- fusion connected no "
         "evidence from the vehicle that initiated the chain".format(sorted(reached))
+    )
+
+
+def test_a_participant_that_never_made_contact_cannot_be_placed_on_the_timeline(
+    partial_view_run,
+) -> None:
+    """The cost of contact-based alignment, stated rather than left implicit.
+
+    V1 fitted radar tracks and could place C without it ever touching anything.
+    V2 anchors on shared contact, so a vehicle that only braked has nothing to
+    anchor on. This is not a defect to be worked around by quietly falling back
+    to the harness marker for one participant while the others rest on contact:
+    that would put offsets of two different provenances on one timeline and
+    report them identically. It is a limitation, and what matters is that it is
+    declared.
+
+    So this test asserts the declaration, not an absence. An implementation that
+    started placing C would fail here, and should -- it would need to say how.
+    """
+    layout, _analyses, _fusion, _run = partial_view_run
+    from cdf.common.io import read_json
+
+    alignment = read_json(layout.clock_alignment)
+    assert alignment["status"] == "PARTIALLY_ALIGNED", (
+        "a run where one recorder never made contact should not report a clean "
+        "alignment status; got {0}".format(alignment["status"])
+    )
+    assert "C" in (alignment.get("unaligned_participants") or []), (
+        "C never collided and so has no contact anchor, but the alignment does "
+        "not name it as unaligned: {0}".format(alignment)
+    )
+    assert (alignment.get("offsets") or {}).get("C", {}).get("offset_s") is None, (
+        "C is named unaligned and still carries an offset, which is the worst of "
+        "both: a reader would apply it"
+    )
+    # And the method did not fall back to the harness marker for the others.
+    assert alignment["method"] == "shared_physical_contact"
+
+
+def test_the_unaligned_participants_track_is_not_resolved_to_it(
+    partial_view_run,
+) -> None:
+    """The second consequence: association needs both ends on one clock.
+
+    B's radar track of C stays a track id. A reader of the merged graph sees
+    that *something* ahead of B decelerated, not that C did. Naming it would
+    require relating B's clock to C's, which is exactly what could not be done.
+    """
+    layout, _analyses, _fusion, _run = partial_view_run
+    fused = load_graph(layout.fused_causal_graph, expect_scope=Provenance.FUSED)
+
+    appearing: Set[str] = set()
+    for node in fused.nodes:
+        appearing.add(node.participant_id)
+        appearing |= set(node.owners or [])
+        if node.subject:
+            appearing.add(node.subject)
+    assert "C" not in appearing, (
+        "C is unaligned, so nothing in the fused graph can be attributed to it; "
+        "found {0}".format(sorted(x for x in appearing if x))
+    )
+    assert any("::" in x for x in appearing), (
+        "the leader's motion should still be present as an unresolved track, "
+        "otherwise the initiating event was lost rather than merely unnamed"
     )
 
 

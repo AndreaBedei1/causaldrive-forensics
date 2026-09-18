@@ -351,3 +351,44 @@ as a violation on many runs.
 The monitor is right and the scenarios are unrealistic in this specific respect.
 The failure counts in the results should be read as a statement about the
 scripted behaviour, not as a finding about driver conduct.
+
+## 22. A vehicle that never collides is not placed on the common timeline
+
+V1 aligned the clocks by fitting radar tracks, so it could place a vehicle that
+never touched anything. V2 anchors on shared physical contact (`docs/CLOCKS.md`),
+and a vehicle with no contact has nothing to anchor on. This is the price of
+dropping an estimator that fitted its own geometry, and it is a real one.
+
+In the partial-view scene A strikes B and C only brakes. The alignment reports
+`PARTIALLY_ALIGNED`, names C as unaligned, and gives C no offset. Two consequences
+follow, both asserted in `tests/integration/test_fusion_improvement.py`:
+
+1. **C's own account never reaches the merged timeline.** C appears nowhere in the
+   fused graph — not as a participant, an owner, or a subject.
+2. **B's radar track of C is never resolved to C.** Association needs both ends on
+   one clock, so the track stays `B::T001`.
+
+The recovery claim survives in a weaker and more precise form. The *initiating
+event* does reach the participant that was blind to it: fusion contributes B's
+observation of a decelerating target, which A's own reconstruction does not
+contain. A reader of the merged graph learns that something ahead of B slowed
+down, not that C did.
+
+The strong form — the fused collision's ancestry reaching C by name — holds on the
+recorded `S07/occluded` run, where C is in contact and can be aligned, and is
+asserted there rather than on the fixture. Reporting the strong claim only where
+it holds is the point.
+
+### Why there is no per-participant fallback
+
+The harness marker (`docs/CLOCKS.md`) could place C: the experiment starts every
+recorder within one simulator tick, and that declared property is already used
+for runs with no contact at all. It is deliberately **not** applied to one
+participant of a run whose others rest on contact. Doing so would put offsets of
+two different provenances on a single timeline and report them identically, and a
+reader comparing C's rows against A's would have no way to know that one set came
+from physics and the other from the clapperboard. Refusing to place C is the
+conservative choice, and the alignment says so by name; the supervisor table's
+limitation column names the recorder that dropped out, because a run missing the
+vehicle that initiated the incident is a different matter from one missing a
+bystander.

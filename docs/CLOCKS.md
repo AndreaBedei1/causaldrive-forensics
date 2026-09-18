@@ -147,6 +147,19 @@ merged log takes its unaligned set from the alignment as well as from the rows �
 otherwise it would report a clean single timeline while silently omitting a whole
 vehicle. An unaligned row renders as a dash, never as 0.00.
 
+Measured on that scene, the cost has two parts. C appears nowhere in the fused
+graph — not as a participant, an owner or a subject. And B's radar track of C is
+never resolved to C, because association needs both ends on one clock, so it stays
+`B::T001`.
+
+What survives is weaker and worth stating precisely: the initiating event still
+reaches the vehicle that was blind to it, as B's observation of a decelerating
+target rather than as C's own record of braking. A reader of the merged graph
+learns that something ahead of B slowed down, not that C did. The strong form of
+the claim holds on the recorded `S07/occluded` run, where C is in contact.
+`docs/LIMITATIONS.md` §22 carries the full statement, including why the harness
+marker is not applied to one participant of an otherwise contact-aligned run.
+
 ## Where this is written down
 
 | Concern | File |

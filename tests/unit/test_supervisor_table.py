@@ -485,3 +485,31 @@ def test_a_lane_sensor_that_saw_nothing_says_that_instead(tmp_path):
     layout.perception_dir("A").mkdir(parents=True, exist_ok=True)
     write_json(layout.lane_events("A"), {"events": []})
     assert one_row(tmp_path)["line_evidence"] == "no crossing reported"
+
+
+def test_the_limitation_names_the_recorder_that_could_not_be_tied_in(tmp_path):
+    """"At least one recorder" is not actionable. A run missing the vehicle that
+    initiated the incident is a different matter from one missing a bystander,
+    and contact-based alignment drops any vehicle that never touched anything."""
+    make_run(
+        tmp_path,
+        clock_alignment={
+            "status": "PARTIALLY_ALIGNED", "method": "shared_physical_contact",
+            "offsets_s": {"A": 0.0, "B": 0.0},
+            "unaligned_participants": ["C"],
+        },
+    )
+    cell = one_row(tmp_path)["main_limitation"]
+    assert cell.startswith("C could not be tied to the others")
+    assert "nothing it recorded reaches the merged timeline" in cell
+
+
+def test_a_partial_alignment_with_no_names_still_reads_as_a_sentence(tmp_path):
+    make_run(
+        tmp_path,
+        clock_alignment={
+            "status": "PARTIALLY_ALIGNED", "method": "shared_physical_contact",
+            "offsets_s": {"A": 0.0},
+        },
+    )
+    assert "a recorder could not be tied" in one_row(tmp_path)["main_limitation"]
