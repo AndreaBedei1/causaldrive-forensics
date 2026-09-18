@@ -92,6 +92,13 @@ class CausalContribution:
     score: float
     outcome: CounterfactualOutcome
     prevented_collision: bool = False
+    #: Whether this replay is the *kind* that can establish causation at all --
+    #: a removal or a weakening, rather than the same action performed sooner.
+    #: A replay that prevented the collision without establishing causation is a
+    #: prevention opportunity, and the difference matters: counting the second
+    #: as the first makes the method name whoever could most easily have avoided
+    #: the outcome, which is usually the vehicle that was hit.
+    establishes_causation: bool = True
     notes: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -105,6 +112,7 @@ class CausalContribution:
             "severity_reduction": self.severity_reduction,
             "contribution_score": round(float(self.score), 6),
             "prevented_collision": bool(self.prevented_collision),
+            "establishes_causation": bool(self.establishes_causation),
             "outcome": self.outcome.to_dict(),
             "notes": list(self.notes),
         }
@@ -115,13 +123,62 @@ class CausalContribution:
 # ---------------------------------------------------------------------------
 
 
-def but_for(factual: CounterfactualOutcome, cf: CounterfactualOutcome) -> int:
-    """The but-for test: 1 when the intervention prevented the collision.
+#: Operations that make an action *less* than it was -- absent, weaker, or later.
+#: Only these bear on but-for causation, because only these approximate the
+#: question "what if this had not been done?".
+COUNTERFACTUAL_REMOVALS: Tuple[str, ...] = ("disable", "scale", "delay", "set")
 
-    Returns 1 exactly when the factual run collided and the counterfactual replay
-    -- identical in every respect except the single intervened action -- did not.
-    Otherwise 0 (both collided, neither collided, or the factual run never
-    collided in the first place, in which case there is nothing to be but-for).
+#: Operations that make an action *more* than it was: earlier, or stronger.
+#: A replay of this kind answers "would more of this have helped?", which is
+#: useful prevention advice and is not evidence that the action caused anything.
+COUNTERFACTUAL_IMPROVEMENTS: Tuple[str, ...] = ("advance",)
+
+
+def establishes_but_for(cf: CounterfactualOutcome) -> bool:
+    """Whether this replay is the kind that can establish but-for causation.
+
+    Removing an action, weakening it, or delaying it all approximate its absence.
+    *Advancing* it does not: it is a stronger version of the same behaviour, and
+    a collision avoided by doing something sooner says the driver could have done
+    better, not that what they did caused the crash.
+
+    The distinction is load-bearing. In the rear-end scenario, disabling the
+    following driver's late brake changes nothing and weakening it changes
+    nothing -- but braking a second earlier avoids the collision entirely. Count
+    that as but-for causation and the system names the vehicle that was hit,
+    which is precisely what the oracle's own attribution rules exclude and
+    exactly the wrong answer.
+    """
+    op = str(getattr(cf, "op", "") or "").lower()
+    if op in COUNTERFACTUAL_IMPROVEMENTS:
+        return False
+    if op == "scale":
+        # Scaling up intensifies; only scaling down weakens.
+        factor = None
+        params = getattr(cf, "params", None) or {}
+        if isinstance(params, Mapping):
+            factor = params.get("factor")
+        if factor is not None:
+            try:
+                return float(factor) < 1.0
+            except (TypeError, ValueError):
+                return True
+    return True
+
+
+def but_for(factual: CounterfactualOutcome, cf: CounterfactualOutcome) -> int:
+    """The but-for test: 1 when *removing* the action prevented the collision.
+
+    Returns 1 exactly when the factual run collided, the replay -- identical in
+    every respect except the single intervened action -- did not, **and** the
+    intervention was one that removes, weakens or delays the action rather than
+    strengthening it. Otherwise 0.
+
+    That last condition is not a technicality. But-for causation asks what would
+    have happened had the action not occurred; a replay in which the driver acts
+    *sooner* answers a different question, and treating its answer as causation
+    makes the method name whoever could most easily have avoided the outcome --
+    usually the victim. See :func:`establishes_but_for`.
 
     This is a **causal contribution under the stated intervention semantics**:
     "had this scripted action not been performed as it was, no collision would
@@ -131,7 +188,9 @@ def but_for(factual: CounterfactualOutcome, cf: CounterfactualOutcome) -> int:
     """
     _require_outcome(factual, "factual")
     _require_outcome(cf, "counterfactual")
-    return 1 if (factual.collision and not cf.collision) else 0
+    if not (factual.collision and not cf.collision):
+        return 0
+    return 1 if establishes_but_for(cf) else 0
 
 
 def severity_reduction(
@@ -247,6 +306,14 @@ def contribution_of(
         notes.append(
             "collision prevented, but the replay still produced a near miss"
         )
+    prevented = bool(factual.collision and not cf.collision)
+    if prevented and not establishes_but_for(cf):
+        notes.append(
+            "this replay prevented the collision by performing the action "
+            "*sooner*, not by removing it. That shows the outcome was "
+            "avoidable, not that the action caused it, so it does not count "
+            "towards but-for causation"
+        )
     return CausalContribution(
         intervention_id=cf.intervention_id,
         action_id=cf.action_id,
@@ -256,7 +323,8 @@ def contribution_of(
         severity_reduction=severity_reduction(factual, cf, cfg),
         score=contribution_score(factual, cf, cfg),
         outcome=cf,
-        prevented_collision=bool(factual.collision and not cf.collision),
+        prevented_collision=prevented,
+        establishes_causation=establishes_but_for(cf),
         notes=notes,
     )
 

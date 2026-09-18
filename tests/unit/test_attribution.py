@@ -426,3 +426,84 @@ def test_a_run_that_never_collided_is_not_told_that_a_collision_survived() -> No
     collided = classify_attribution(contributions, None, factual_collision=True)
     assert collided["attribution_class"] == "insufficient_evidence"
     assert "still occurred" in collided["rationale"]
+
+
+# ---------------------------------------------------------------------------
+# What kind of replay can establish causation
+# ---------------------------------------------------------------------------
+
+
+def _outcome(op: str, collision: bool, action_id: str = "a") -> Any:
+    from cdf.causal.counterfactuals import CounterfactualOutcome
+
+    return CounterfactualOutcome(
+        intervention_id="{0}__{1}".format(action_id, op), action_id=action_id,
+        op=op, collision=collision, near_miss=False, min_distance=5.0,
+        min_ttc=1.0, impact_speed=8.0 if collision else None,
+        relative_impact_speed=8.0 if collision else None,
+        t_collision=5.0 if collision else None, collision_pairs=[],
+        validation_passed=True, notes=[],
+    )
+
+
+def test_removing_weakening_or_delaying_an_action_can_establish_causation() -> None:
+    from cdf.causal.attribution import establishes_but_for
+
+    for op in ("disable", "scale", "delay", "set"):
+        assert establishes_but_for(_outcome(op, collision=False)) is True, op
+
+
+def test_performing_an_action_sooner_cannot() -> None:
+    """Braking earlier avoiding a crash says it was avoidable, not that it caused it."""
+    from cdf.causal.attribution import establishes_but_for
+
+    assert establishes_but_for(_outcome("advance", collision=False)) is False
+
+
+def test_the_victim_is_not_named_because_it_could_have_reacted_sooner() -> None:
+    """The rear-end shape, which is where this goes wrong if it goes wrong.
+
+    A follows B. B brakes hard, A brakes too late, A hits B. Removing or
+    weakening A's brake changes nothing -- A was reacting, not causing. Only
+    advancing it avoids the crash. Count that as but-for causation and the
+    method names the vehicle that was hit.
+    """
+    from cdf.causal.attribution import but_for, classify_attribution, contribution_of
+
+    factual = _outcome("none", collision=True)
+    replays = [
+        _outcome("disable", collision=True, action_id="A_late_brake"),
+        _outcome("scale", collision=True, action_id="A_late_brake"),
+        _outcome("advance", collision=False, action_id="A_late_brake"),
+        _outcome("disable", collision=False, action_id="B_emergency_brake"),
+        _outcome("scale", collision=False, action_id="B_emergency_brake"),
+        _outcome("advance", collision=True, action_id="B_emergency_brake"),
+    ]
+    contributions = [contribution_of(factual, cf, None) for cf in replays]
+    verdict = classify_attribution(contributions, None, factual_collision=True)
+
+    assert verdict["attribution_class"] == "single_initiator"
+    assert verdict["necessary_actions"] == ["B_emergency_brake"]
+    assert "A_late_brake" not in verdict["necessary_actions"], (
+        "the vehicle that braked too late did not cause the collision it was in"
+    )
+
+    advanced = next(c for c in contributions
+                    if c.op == "advance" and c.action_id == "A_late_brake")
+    assert advanced.prevented_collision is True, "the replay did avoid the crash"
+    assert advanced.establishes_causation is False
+    assert but_for(factual, advanced.outcome) == 0
+    assert any("sooner" in note for note in advanced.notes), (
+        "a prevention that is not a cause must say which it is"
+    )
+
+
+def test_a_replay_that_prevents_by_removal_still_establishes_causation() -> None:
+    from cdf.causal.attribution import but_for, contribution_of
+
+    factual = _outcome("none", collision=True)
+    removed = _outcome("disable", collision=False, action_id="B_emergency_brake")
+    record = contribution_of(factual, removed, None)
+    assert record.prevented_collision is True
+    assert record.establishes_causation is True
+    assert but_for(factual, removed) == 1

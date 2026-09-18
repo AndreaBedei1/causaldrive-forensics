@@ -15,12 +15,35 @@ actual output.
 
 An **intervention** is a controlled modification of one scripted action:
 
-| Operation | Effect |
-|---|---|
-| `disable` | the action never fires |
-| `delay` / `advance` | its `t_start` moves by *n* seconds |
-| `scale` | one of its parameters is multiplied |
-| `set` | one of its parameters is assigned |
+| Operation | Effect | Can establish causation? |
+|---|---|---|
+| `disable` | the action never fires | yes |
+| `delay` | its `t_start` moves later | yes |
+| `scale` | one of its parameters is multiplied | yes, when scaled down |
+| `set` | one of its parameters is assigned | yes |
+| `advance` | its `t_start` moves earlier | **no** |
+
+That last row is not a technicality, and getting it wrong makes the method name
+the wrong vehicle.
+
+But-for causation asks what would have happened had the action **not occurred**.
+Removing it, weakening it or delaying it all approximate that. *Advancing* it
+does not — it is a stronger version of the same behaviour, and a collision
+avoided by doing something sooner shows the outcome was avoidable, not that the
+action caused it.
+
+The rear-end scenario is the clean case. A follows B; B brakes hard; A brakes
+too late and hits B. Disabling A's brake changes nothing. Weakening it changes
+nothing. Advancing it by a second avoids the collision entirely — because A
+*could* have avoided it. Count that as but-for causation and the system names
+the vehicle that was hit, which is exactly the answer the scenario's own ground
+truth excludes.
+
+So a replay that prevents the collision without being a removal is recorded as
+what it is: a **prevention opportunity**, carried on the contribution record as
+`prevented_collision: true, establishes_causation: false`, with a note saying
+which of the two it found. It is useful — it says the crash was avoidable and by
+how much lead time — and it is not evidence of a cause.
 
 Everything else — map, spawn points, routes, seeds, controller gains, sensor
 configuration, the clock profiles — is byte-identical to the factual run. The
