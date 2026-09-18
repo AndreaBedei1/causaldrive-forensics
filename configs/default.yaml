@@ -409,6 +409,13 @@ checking:
 # -----------------------------------------------------------------------------
 counterfactual:
   max_interventions: 8
+  # Supplying a behaviour that did not happen, to test whether an omission
+  # mattered. See cdf.causal.interventions.omission_repairs: a repair is
+  # proposed only for a non-action the reconstruction actually supports, which
+  # is what separates it from adding safe behaviour to any run.
+  omission_repair:
+    min_confidence: 0.8            # a hedged omission does not support a claim
+    lead_in_s: 0.6                 # a stop made as the window opens is too late
   # Restart the simulator before each replay. A counterfactual is a comparison,
   # and repeated runs on one server session drift enough to change an outcome
   # class (docs/ENVIRONMENT.md), which would confound the very difference being

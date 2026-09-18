@@ -609,6 +609,11 @@ def _apply_intervention(spec: ScenarioSpec, intervention: Dict[str, Any]) -> Sce
     return out
 
 
+def _intervention_targets_existing_action(intervention: Dict[str, Any]) -> bool:
+    """Whether this operation edits an action the scenario already declares."""
+    return str(intervention.get("op", "disable")) != "insert_action"
+
+
 def _apply_one_step(out: ScenarioSpec, intervention: Dict[str, Any]) -> ScenarioSpec:
     """Apply exactly one operation to exactly one scripted action, in place.
 
@@ -616,6 +621,12 @@ def _apply_one_step(out: ScenarioSpec, intervention: Dict[str, Any]) -> Scenario
     """
     action_id = intervention.get("action_id")
     op = intervention.get("op", "disable")
+
+    if op == "insert_action":
+        # The one op with no existing action to find: it supplies a behaviour
+        # that never happened. Everything below looks the target up and fails
+        # when it is missing, which is right for the other five and wrong here.
+        return _insert_action(out, intervention)
 
     target = None
     for p in out.participants:
@@ -645,6 +656,66 @@ def _apply_one_step(out: ScenarioSpec, intervention: Dict[str, Any]) -> Scenario
     else:
         raise ValueError("unknown intervention op {0!r}".format(op))
 
+    return out
+
+
+def _insert_action(out: ScenarioSpec, intervention: Dict[str, Any]) -> ScenarioSpec:
+    """Add a scripted action that the factual run did not contain.
+
+    This is what an omission counterfactual needs. Every other operation edits
+    something that happened; the interesting question about a stop-sign
+    violation is about something that did not, and there is no factual action to
+    weaken. So the replay supplies one.
+
+    Generic on purpose. There is no scenario id anywhere in here and no special
+    case for stopping: the caller says which participant, what kind of action,
+    when and for how long, and this places it. Seven scenario-specific operations
+    would have been easier to write and impossible to defend.
+    """
+    from .controllers import ScriptedAction
+
+    participant_id = str(intervention.get("participant", ""))
+    participant = None
+    for p in out.participants:
+        if p.participant_id == participant_id:
+            participant = p
+            break
+    if participant is None:
+        raise KeyError(
+            "intervention inserts an action for unknown participant {0!r}; this "
+            "scenario has {1}".format(
+                participant_id, [p.participant_id for p in out.participants]
+            )
+        )
+
+    action_id = str(intervention.get("action_id") or "")
+    existing = {a.action_id for p in out.participants for a in p.actions}
+    if action_id in existing:
+        raise ValueError(
+            "intervention inserts an action with id {0!r}, which the scenario "
+            "already declares. An inserted action must be distinguishable from "
+            "the factual ones, or the attribution cannot say which it "
+            "measured".format(action_id)
+        )
+
+    params = dict(intervention.get("params") or {})
+    participant.actions.append(ScriptedAction(
+        action_id=action_id,
+        kind=str(intervention["kind"]),
+        t_start=float(intervention["t_start"]),
+        duration=float(intervention["duration"]),
+        params={k: float(v) for k, v in params.items()},
+        enabled=True,
+    ))
+    # Scripted actions are evaluated in declaration order, so keeping the
+    # schedule sorted by start time means an inserted action interleaves the way
+    # a declared one would rather than always running last.
+    participant.actions.sort(key=lambda a: (float(a.t_start), a.action_id))
+    LOGGER.info(
+        "counterfactual: inserted %s %s for %s at t=%.2f for %.2fs",
+        intervention["kind"], action_id, participant_id,
+        float(intervention["t_start"]), float(intervention["duration"]),
+    )
     return out
 
 

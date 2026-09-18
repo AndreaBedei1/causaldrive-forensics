@@ -101,7 +101,25 @@ class CounterfactualOutcome:
     #: the first of them so every existing consumer keeps working.
     action_ids: List[str] = field(default_factory=list)
     op: str = "none"
+    params: Dict[str, Any] = field(default_factory=dict)
+    """The intervention's own parameters, carried so attribution can read them.
+
+    ``establishes_but_for`` needs the scale factor to tell weakening from
+    strengthening, and until this field existed it read an attribute that was
+    never populated -- so the guard fell through and *any* scale counted as
+    establishing causation. Latent rather than live, since the enumerated
+    factors are 0.4 and 0.8, but both are configurable and a value above 1.0
+    would have been counted as causation silently.
+    """
     targets_participant: str = ""
+    repairs_non_action: str = ""
+    """The non-action this replay supplied the missing behaviour for, if any.
+
+    Empty for every replay that modifies something the vehicle actually did. It
+    travels with the outcome because the attribution layer cannot otherwise tell
+    an omission repair from an ordinary safety improvement: both insert braking,
+    and only one of them is about a behaviour the evidence says was required.
+    """
 
     collision: bool = False
     collision_pairs: List[List[str]] = field(default_factory=list)
@@ -230,7 +248,12 @@ def outcome_from_run(
         action_id=intervention.action_id if intervention else "",
         action_ids=list(getattr(intervention, "action_ids", ()) or ()) if intervention else [],
         op=intervention.op if intervention else "none",
+        params=dict(getattr(intervention, "params", {}) or {}) if intervention else {},
         targets_participant=intervention.targets_participant if intervention else "",
+        repairs_non_action=(
+            str(getattr(intervention, "repairs_non_action", "") or "")
+            if intervention else ""
+        ),
         collision=collided,
         collision_pairs=pairs,
         t_collision=t_collision,

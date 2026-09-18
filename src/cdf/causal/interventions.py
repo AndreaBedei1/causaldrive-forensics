@@ -47,16 +47,28 @@ LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "RUNNER_OPS",
+    "INSERTABLE_KINDS",
+    "COUNTERFACTUAL_ROLES",
     "InterventionSpec",
     "enumerate_interventions",
     "interventions_for_action",
+    "omission_repairs",
 ]
 
 #: Operations understood by :func:`cdf.simulation.runner._apply_intervention`.
 #: ``disable`` removes the action, ``delay``/``advance`` shift its start time by
-#: ``seconds``, ``scale`` multiplies ``param`` by ``factor`` and ``set`` assigns
-#: ``param`` the given ``value``.
-RUNNER_OPS: Tuple[str, ...] = ("disable", "delay", "advance", "scale", "set")
+#: ``seconds``, ``scale`` multiplies ``param`` by ``factor``, ``set`` assigns
+#: ``param`` the given ``value``, and ``insert_action`` adds a behaviour that did
+#: not occur at all.
+#:
+#: The last one exists because every other op modifies something that happened,
+#: and the most interesting causal question about a stop-sign violation is about
+#: something that did not: "what if the vehicle had performed the required
+#: stop?". There is no factual action to weaken, so without insertion the
+#: omission could be described and never tested.
+RUNNER_OPS: Tuple[str, ...] = (
+    "disable", "delay", "advance", "scale", "set", "insert_action",
+)
 
 #: Required extra keys per operation, enforced at construction so that a broken
 #: intervention fails here rather than after a two-minute simulator replay.
@@ -66,11 +78,43 @@ _REQUIRED_PARAMS: Dict[str, Tuple[str, ...]] = {
     "advance": ("seconds",),
     "scale": ("param", "factor"),
     "set": ("param", "value"),
+    "insert_action": ("participant", "kind", "t_start", "duration"),
 }
+
+#: Action kinds :class:`~cdf.simulation.controllers.ScriptedController` can
+#: execute. Checked at construction: an inserted action of an unknown kind would
+#: be silently ignored by the controller and the replay would look like a
+#: counterfactual that changed nothing, which is the most misleading possible
+#: failure.
+INSERTABLE_KINDS: Tuple[str, ...] = (
+    "brake", "stop", "hold", "set_speed", "lane_shift",
+)
 
 #: Replay order within one action: the strongest, most interpretable
 #: intervention first, so that a truncated budget keeps the informative ones.
-_OP_RANK: Dict[str, int] = {"disable": 0, "scale": 1, "advance": 2, "delay": 3, "set": 4}
+_OP_RANK: Dict[str, int] = {
+    "disable": 0, "insert_action": 1, "scale": 2, "advance": 3, "delay": 4,
+    "set": 5,
+}
+
+#: What kind of causal question a replay is asking. The distinction is the whole
+#: point of the counterfactual layer and is carried on every intervention.
+#:
+#: ``factual_removal``
+#:     remove, weaken or delay something that happened. Approximates its absence,
+#:     so it can establish but-for causation.
+#: ``prevention_opportunity``
+#:     do more of a safety behaviour than was actually done -- sooner, harder. A
+#:     collision avoided this way says the driver could have done better, not
+#:     that what they did caused the crash.
+#: ``omission_repair``
+#:     supply a behaviour that did not occur *and was required*. This can
+#:     establish the causal relevance of the omission -- but only where the
+#:     omission itself is supported by evidence, which is what separates it from
+#:     a prevention opportunity wearing the same clothes.
+COUNTERFACTUAL_ROLES: Tuple[str, ...] = (
+    "factual_removal", "prevention_opportunity", "omission_repair",
+)
 
 
 @dataclass
@@ -95,6 +139,39 @@ class InterventionSpec:
     targets_participant: str = ""
     #: ``[{action_id, op, **params}, ...]``; empty means the single-action form.
     steps: List[Dict[str, Any]] = field(default_factory=list)
+    repairs_non_action: str = ""
+    """The event id of the non-action this insertion discharges, if any.
+
+    Empty for every op that modifies a factual action. Set only when the replay
+    supplies a behaviour the evidence says was required and absent, and it is
+    what lets the attribution layer tell an omission repair from an ordinary
+    safety improvement: both insert braking, and only one of them is about
+    something the vehicle was obliged to do.
+    """
+
+    @property
+    def counterfactual_role(self) -> str:
+        """Which causal question this replay asks. See :data:`COUNTERFACTUAL_ROLES`.
+
+        Derived rather than stored, so it cannot disagree with the operation it
+        describes. An insertion that names no non-action is a prevention
+        opportunity however safe the inserted behaviour is -- adding a brake for
+        a vehicle under no obligation to brake answers "could this have been
+        avoided?", not "did the omission matter?".
+        """
+        if self.op == "insert_action":
+            return "omission_repair" if self.repairs_non_action else (
+                "prevention_opportunity"
+            )
+        if self.op == "advance":
+            return "prevention_opportunity"
+        if self.op == "scale":
+            try:
+                if float(self.params.get("factor", 0.0)) > 1.0:
+                    return "prevention_opportunity"
+            except (TypeError, ValueError):
+                pass
+        return "factual_removal"
 
     @property
     def action_ids(self) -> Tuple[str, ...]:
@@ -155,6 +232,53 @@ class InterventionSpec:
                     self.intervention_id
                 )
             )
+        if self.op == "insert_action":
+            self._validate_insertion()
+
+    def _validate_insertion(self) -> None:
+        """Check an insertion before a replay spends two minutes discovering it.
+
+        An inserted action of an unknown kind is the failure worth catching here:
+        the controller would ignore it silently and the replay would look like a
+        counterfactual that changed nothing -- indistinguishable from a genuine
+        finding that the behaviour would not have helped.
+        """
+        kind = str(self.params.get("kind", ""))
+        if kind not in INSERTABLE_KINDS:
+            raise ValueError(
+                "intervention {0!r} inserts an action of kind {1!r}, which no "
+                "controller executes; a replay would silently change nothing. "
+                "Known kinds: {2}".format(
+                    self.intervention_id, kind, list(INSERTABLE_KINDS)
+                )
+            )
+        if not str(self.params.get("participant", "")):
+            raise ValueError(
+                "intervention {0!r} inserts an action for no participant".format(
+                    self.intervention_id
+                )
+            )
+        for key in ("t_start", "duration"):
+            try:
+                value = float(self.params[key])
+            except (TypeError, ValueError, KeyError):
+                raise ValueError(
+                    "intervention {0!r} has a non-numeric {1}".format(
+                        self.intervention_id, key
+                    )
+                )
+            if value < 0.0:
+                raise ValueError(
+                    "intervention {0!r} has a negative {1}; an action cannot "
+                    "start before the run or last a negative time".format(
+                        self.intervention_id, key
+                    )
+                )
+        if float(self.params["duration"]) <= 0.0:
+            raise ValueError(
+                "intervention {0!r} inserts an action of zero duration, which "
+                "the controller would never execute".format(self.intervention_id)
+            )
 
     def as_runner_dict(self) -> Dict[str, Any]:
         """Exactly the mapping :func:`run_scenario` expects as ``intervention``.
@@ -187,6 +311,8 @@ class InterventionSpec:
             "targets_participant": self.targets_participant,
             "steps": [dict(step) for step in self.steps],
             "composite": self.is_composite,
+            "counterfactual_role": self.counterfactual_role,
+            "repairs_non_action": self.repairs_non_action,
         }
 
 
@@ -552,3 +678,121 @@ def _describe(
     return "{0}; everything else in the run is held identical{1}".format(
         what, " [{0}]".format(reason) if reason else ""
     )
+
+
+# ---------------------------------------------------------------------------
+# Omission repair
+# ---------------------------------------------------------------------------
+
+#: What behaviour would have discharged each kind of omission, and for how long.
+#: Stated once, in general terms, because a table keyed on scenario id would be
+#: the scenario-specific rule the brief forbids.
+#:
+#: The durations are what it takes for the behaviour to be physically real: a
+#: stop has to be held long enough to be a stop rather than a hesitation, and a
+#: braking response has to last long enough to change the outcome it is being
+#: tested against.
+_REPAIR_FOR_NON_ACTION: Dict[str, Dict[str, Any]] = {
+    "NO_STOP_AFTER_STOP_SIGN": {
+        "kind": "stop", "duration": 2.5, "params": {},
+        "why": "perform the stop the sign required",
+    },
+    "NO_YIELD_RESPONSE": {
+        "kind": "stop", "duration": 2.0, "params": {},
+        "why": "give way before entering the conflict",
+    },
+    "NO_BRAKING_RESPONSE": {
+        "kind": "brake", "duration": 3.0, "params": {"intensity": 0.9},
+        "why": "brake in response to the critical time-to-collision",
+    },
+    "CONFLICT_ENTRY_WITHOUT_DECELERATION": {
+        "kind": "brake", "duration": 2.0, "params": {"intensity": 0.7},
+        "why": "slow on the approach to the conflict",
+    },
+}
+
+
+def omission_repairs(
+    spec: ScenarioSpec,
+    fused_causal: Optional[GraphDocument] = None,
+    cfg: Optional[Config] = None,
+) -> List[InterventionSpec]:
+    """Propose an inserted behaviour for each supported non-action in the graph.
+
+    Read off the *reconstruction*, not off the scenario. A non-action node exists
+    only where an obligation was observed, the interval was bounded and the
+    evidence covered it, so proposing a repair for one is proposing to test
+    something the data already supports. Proposing repairs from the scenario
+    definition instead would be testing the experiment's intent.
+
+    Each proposal names the non-action it discharges, which is what makes it an
+    omission repair rather than an ordinary safety improvement. The same inserted
+    brake, offered for a vehicle under no obligation, is a prevention opportunity
+    -- and :attr:`InterventionSpec.counterfactual_role` says so.
+    """
+    cfg = cfg if cfg is not None else Config({})
+    if fused_causal is None:
+        return []
+    min_confidence = float(
+        cfg.get("counterfactual.omission_repair.min_confidence", 0.8)
+    )
+    lead_in = float(cfg.get("counterfactual.omission_repair.lead_in_s", 0.6))
+    participants = {p.participant_id for p in spec.participants}
+
+    out: List[InterventionSpec] = []
+    seen: set = set()
+    for node in sorted(fused_causal.nodes, key=lambda n: (n.t_peak, n.event_id)):
+        kind = (
+            node.event_type.value if hasattr(node.event_type, "value")
+            else str(node.event_type)
+        )
+        repair = _REPAIR_FOR_NON_ACTION.get(kind)
+        if repair is None:
+            continue
+        pid = str(node.participant_id)
+        if pid not in participants:
+            continue
+        if float(node.confidence) < min_confidence:
+            # The node exists but the interval was not watched well enough to
+            # stand on. Repairing an omission the evidence only half supports
+            # would attribute causation to a claim that was itself hedged.
+            LOGGER.debug(
+                "omission repair skipped for %s: confidence %.2f below %.2f",
+                node.event_id, float(node.confidence), min_confidence,
+            )
+            continue
+
+        # The repair begins a little before the window opened, because a stop
+        # performed at the instant the obligation came due is already too late
+        # to be the stop that was required.
+        interval = (node.detail or {}).get("monitored_interval") or [
+            node.t_start, node.t_peak
+        ]
+        t_start = max(0.0, float(interval[0]) - lead_in)
+        key = (pid, kind, round(t_start, 2))
+        if key in seen:
+            continue
+        seen.add(key)
+
+        action_id = "{0}_repair_{1}".format(pid, kind.lower())
+        out.append(InterventionSpec(
+            intervention_id="{0}__omission_repair".format(action_id),
+            action_id=action_id,
+            op="insert_action",
+            params={
+                "participant": pid,
+                "kind": repair["kind"],
+                "t_start": round(t_start, 3),
+                "duration": repair["duration"],
+                "params": dict(repair["params"]),
+            },
+            description=(
+                "insert the behaviour {0} did not perform: {1} (repairing {2} "
+                "asserted over {3})".format(
+                    pid, repair["why"], kind, interval
+                )
+            ),
+            targets_participant=pid,
+            repairs_non_action=node.event_id,
+        ))
+    return out

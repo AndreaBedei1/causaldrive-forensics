@@ -133,6 +133,19 @@ COUNTERFACTUAL_REMOVALS: Tuple[str, ...] = ("disable", "scale", "delay", "set")
 #: useful prevention advice and is not evidence that the action caused anything.
 COUNTERFACTUAL_IMPROVEMENTS: Tuple[str, ...] = ("advance",)
 
+#: The one operation that supplies a behaviour which did not occur at all.
+#:
+#: Whether it can establish causation depends on *what* it supplies. Inserting
+#: the stop a vehicle was required to make, where the evidence supports that it
+#: did not, tests the causal relevance of the omission -- which is a real
+#: but-for question and the only way to ask it, since there is no factual action
+#: to remove. Inserting a brake for a vehicle under no obligation to brake asks
+#: "could someone have avoided this?", which is prevention advice wearing the
+#: same clothes.
+#:
+#: The two are told apart by whether the replay names the non-action it repairs.
+COUNTERFACTUAL_INSERTION: str = "insert_action"
+
 
 def establishes_but_for(cf: CounterfactualOutcome) -> bool:
     """Whether this replay is the kind that can establish but-for causation.
@@ -148,8 +161,24 @@ def establishes_but_for(cf: CounterfactualOutcome) -> bool:
     that as but-for causation and the system names the vehicle that was hit,
     which is precisely what the oracle's own attribution rules exclude and
     exactly the wrong answer.
+
+    Insertion is the third case and needs care, because it looks like the second
+    and behaves like the first. A vehicle that ran a stop sign performed no
+    action to weaken: the only way to ask whether the omission mattered is to
+    supply the stop and see. That is a genuine but-for test *of the omission* --
+    but only where the omission is itself supported, which is why an insertion
+    counts only when it names the non-action it repairs. An insertion that names
+    none is adding safe behaviour to a run, and if that established causation
+    then every vehicle would have caused every collision it could have avoided.
     """
     op = str(getattr(cf, "op", "") or "").lower()
+    if op == COUNTERFACTUAL_INSERTION:
+        # An insertion establishes causation only when it repairs an omission
+        # the evidence supports. Without that, adding safe behaviour to any run
+        # would "establish" that every vehicle caused every collision it could
+        # have prevented -- which is the same error as counting an advanced
+        # brake, arriving by a different route.
+        return bool(str(getattr(cf, "repairs_non_action", "") or ""))
     if op in COUNTERFACTUAL_IMPROVEMENTS:
         return False
     if op == "scale":

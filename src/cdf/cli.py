@@ -974,11 +974,25 @@ def cmd_counterfactuals(args: argparse.Namespace) -> int:
     artifacts_root = layout.root.parent.parent
 
     fused = _load_graph_if(layout.fused_causal_graph, Provenance.FUSED)
-    interventions = planner.enumerate_interventions(spec, fused, cfg)
+    interventions = list(planner.enumerate_interventions(spec, fused, cfg))
+
+    # Omission repairs come last and come from the *reconstruction*: a
+    # non-action node exists only where an obligation was observed and the
+    # interval was covered, so proposing to supply the missing behaviour is
+    # proposing to test something the data already supports. Enumerated from the
+    # scenario instead, they would be testing the experiment's intent.
+    repairs = list(planner.omission_repairs(spec, fused, cfg))
+    if repairs:
+        print("  {0} omission repair(s) proposed from the reconstruction".format(
+            len(repairs)
+        ))
+    interventions.extend(repairs)
+
     if not interventions:
         raise CliError(
-            "scenario {0} declares no intervention candidates, so there is "
-            "nothing to replay".format(spec.scenario_id)
+            "scenario {0} declares no intervention candidates and the "
+            "reconstruction supports no omission repair, so there is nothing "
+            "to replay".format(spec.scenario_id)
         )
     print("counterfactual replays for {0} (config {1})".format(_rel(layout.root), cfg.hash))
     print("  {0} intervention(s): {1}".format(
