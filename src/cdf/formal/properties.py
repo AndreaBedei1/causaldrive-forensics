@@ -58,12 +58,38 @@ class TemporalProperty:
     t_start instead. Evaluating it at the peak would look for the response after
     the window it was supposed to be inside.
     """
+    also_triggered_by: Tuple[EventType, ...] = ()
+    """Further events that open the same obligation.
+
+    One obligation can have more than one observable boundary, and insisting on a
+    single one can make a property unfalsifiable in practice. The stop rule is
+    the case that forced this: its natural boundary is the painted stop line, and
+    Town05 paints no stop bar at any junction where it renders a stop sign, so
+    ``STOP_LINE_CROSSED`` never fires on a real run and P1 was permanently
+    vacuous. The vehicle still crosses into the junction, and its lane sensor
+    records that.
+
+    Adding a boundary does not weaken the property. The formula is an
+    implication whose antecedent is "a stop sign was seen in the last twelve
+    seconds", so a trigger that fires where no sign was seen -- an ordinary lane
+    change -- is vacuously satisfied rather than violated.
+    """
+
+    @property
+    def trigger_types(self) -> Tuple[EventType, ...]:
+        """Every event that opens this obligation, the primary one first."""
+        out = [self.trigger]
+        for extra in self.also_triggered_by:
+            if extra not in out:
+                out.append(extra)
+        return tuple(out)
 
     def describe(self) -> Dict[str, Any]:
         return {
             "property_id": self.property_id,
             "title": self.title,
             "trigger": self.trigger.value,
+            "triggers": [t.value for t in self.trigger_types],
             "formula": render(self.formula),
             "rationale": self.rationale,
             "benchmark_rule": self.benchmark_rule,
@@ -81,6 +107,11 @@ P1 = TemporalProperty(
     property_id="P1",
     title="a stop sign seen means a full stop before the line",
     trigger=EventType.STOP_LINE_CROSSED,
+    # Town05 paints no stop bar at any junction where it renders a stop sign, so
+    # on a real run the line is never seen to be crossed and this property could
+    # never fire. Crossing into the junction is the same boundary by another
+    # observation, and the lane sensor records it.
+    also_triggered_by=(EventType.LANE_MARKING_CROSSED,),
     formula=Implies(
         Once(0.0, 12.0, Occurs(EventType.STOP_SIGN_DETECTED, who=SELF)),
         Not(Since(

@@ -102,7 +102,23 @@ def check_property(
             ),
         }
 
-    triggers = trace.of_type(prop.trigger.value)
+    triggers = [
+        event
+        for trigger_type in prop.trigger_types
+        for event in trace.of_type(trigger_type.value)
+    ]
+    # One instant can carry two boundary events -- a lane sensor reports the
+    # marking and the solid line together -- and evaluating the same obligation
+    # twice at the same time would double-count one violation.
+    seen_at = set()
+    deduped = []
+    for event in sorted(triggers, key=lambda e: (e.t_peak, str(e.participant_id))):
+        key = (str(event.participant_id), round(float(event.t_peak), 4))
+        if key in seen_at:
+            continue
+        seen_at.add(key)
+        deduped.append(event)
+    triggers = deduped
     if participant_filter is not None:
         triggers = [
             e for e in triggers if str(e.participant_id) == str(participant_filter)
@@ -119,7 +135,9 @@ def check_property(
             "instances": [],
             "reason": (
                 "no {0} occurred, so the obligation never arose. Vacuous rather "
-                "than satisfied".format(prop.trigger.value)
+                "than satisfied".format(
+                    " or ".join(t.value for t in prop.trigger_types)
+                )
             ),
         }
 
