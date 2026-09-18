@@ -224,6 +224,18 @@ class SignDetector:
         # all but two frames of a twenty-two frame sighting. Treating the
         # lettering as part of the face is what a reader of the sign does.
         self.close_kernel_px = int(cfg.get(p + "close_kernel_px", 9))
+        # A sign stands on a post, so its face projects near or above the optical
+        # centre at every range a detector can use it at. Bodywork does not: after
+        # a collision the struck vehicle fills the lower frame, and a red car rear
+        # is a red blob that fills its bounding box and approximates to few
+        # vertices -- which is the give-way signature. On the recorded all-way
+        # stop that produced a 91-detection YIELD track starting the moment the
+        # cars touched, with its centre at row 475 of 600 while the real stop
+        # sign had been at row 275. A horizon is the cheapest way to tell a sign
+        # from a car, and it uses no map and no privileged label.
+        self.max_centre_row_fraction = float(
+            cfg.get(p + "max_centre_row_fraction", 0.62)
+        )
 
     def red_mask(self, image: Any) -> Any:
         """Pixels plausibly belonging to a red sign face."""
@@ -271,6 +283,9 @@ class SignDetector:
 
             x, y, w, h = (int(v) for v in cv2.boundingRect(contour))
             if w <= 0 or h <= 0:
+                continue
+            height = int(image.shape[0]) if image is not None else 0
+            if height and (y + h / 2.0) > self.max_centre_row_fraction * height:
                 continue
             redness = float(mask[y:y + h, x:x + w].mean() / 255.0)
             if redness < self.min_redness:

@@ -40,7 +40,12 @@ scenario:
         junction_y: 1.23
         bearing_deg: 180.0
         back_m: 46.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+      # Junction 1930 is a T: the east-west road ends here and its only exits
+      # turn. A therefore turns right onto the north-south road, which is the
+      # road B is travelling straight down -- so the two paths still conflict,
+      # and they conflict in the way the variants describe: whoever stopped
+      # first pulls out across the other.
+      route: { length_m: 110.0, step_m: 2.0, turns: ["right"] }
       initial_speed: 9.0
       target_speed: 9.0
       actions: []
@@ -158,11 +163,11 @@ scenario:
             - action_id: "A_stop"
               kind: "brake"
               t_start: 4.0
-              duration: 4.5
+              duration: 3.4
               params: { intensity: 0.9 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 10.0
+              t_start: 7.6
               duration: 12.0
               params: { target_speed: 8.0 }
         B:
@@ -195,12 +200,12 @@ scenario:
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 2.6
-              duration: 2.6
+              t_start: 1.6
+              duration: 3.4
               params: { intensity: 0.95 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 5.6
+              t_start: 5.0
               duration: 12.0
               params: { target_speed: 9.0 }
         B:
@@ -208,11 +213,11 @@ scenario:
             - action_id: "B_stop"
               kind: "brake"
               t_start: 2.7
-              duration: 2.6
+              duration: 1.2
               params: { intensity: 0.95 }
             - action_id: "B_proceed"
               kind: "set_speed"
-              t_start: 5.7
+              t_start: 3.9
               duration: 12.0
               params: { target_speed: 9.0 }
       causal_template:
@@ -243,11 +248,11 @@ scenario:
             - action_id: "A_stop"
               kind: "brake"
               t_start: 2.4
-              duration: 3.0
+              duration: 4.2
               params: { intensity: 0.9 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 6.0
+              t_start: 6.6
               duration: 12.0
               params: { target_speed: 8.0 }
         B:

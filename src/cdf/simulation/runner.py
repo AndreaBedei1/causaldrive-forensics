@@ -286,6 +286,18 @@ def run_scenario(
         hard_cap = float(cfg.get("simulation.max_duration_s", 45.0))
         limit = min(max_duration, hard_cap) if hard_cap > 0 else max_duration
         post_event_s = float(cfg.get("recorder.post_event_s", 5.0))
+        # A run must not end while the scenario still has something scripted
+        # to do. The post-event window is anchored on triggers, and a stop
+        # scenario trips one the moment the vehicle brakes -- so at an all-way
+        # stop the five seconds expired while a vehicle was still waiting at
+        # the line and its pull-away had not begun, and the encounter the
+        # scenario exists to produce happened after the recording stopped.
+        # The schedule is declared, so the runner can wait for it.
+        scheduled_end = max(
+            [float(a.t_start) + float(getattr(a, "duration", 0.0) or 0.0)
+             for p in spec.participants for a in (p.actions or [])],
+            default=0.0,
+        )
 
         while True:
             snapshot = sworld.tick()
@@ -309,10 +321,13 @@ def run_scenario(
             # An early near-miss trigger must not end the run before the
             # collision it was warning about has happened and been recorded.
             last_trigger = _latest_trigger_time(agents)
-            if last_trigger is not None and t >= last_trigger + post_event_s:
+            if (last_trigger is not None
+                    and t >= last_trigger + post_event_s
+                    and t >= scheduled_end):
                 notes.append(
                     "run ended: post-event window complete "
-                    "({0:.2f}s after the last trigger at t={1:.2f}s)".format(post_event_s, last_trigger)
+                    "({0:.2f}s after the last trigger at t={1:.2f}s; the last scripted action ended at t={2:.2f}s)".format(
+                        post_event_s, last_trigger, scheduled_end)
                 )
                 break
             if t >= limit:

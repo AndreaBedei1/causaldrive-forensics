@@ -223,7 +223,10 @@ perception:
     # Bridge the white lettering and border so the red face reads as one octagon.
     # At 3 px the letters stayed as holes and the contour filled half its
     # bounding box against the 0.83 the classifier looks for.
-    close_kernel_px: 9    # a one-frame detection is likelier a red van
+    close_kernel_px: 9
+    # A sign is on a post; bodywork is not. After a collision the struck car
+    # fills the lower frame and a red rear reads as a give-way triangle.
+    max_centre_row_fraction: 0.62    # a one-frame detection is likelier a red van
   lanes:
     merge_window_s: 0.8            # reports closer than this are one crossing
   stop_lines:
