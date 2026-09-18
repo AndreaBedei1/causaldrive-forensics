@@ -63,6 +63,31 @@ for the two mandated tables — per-scenario attribution, and the method ablatio
 the command at the top of this page and is the authoritative version of every
 number quoted below.
 
+### What the replays established
+
+The counterfactual sweep is where the vocabulary earns its keep, and the answers
+it produced are more varied than a single-verdict system could express.
+
+**S06, the three-vehicle chain, is `contributing_but_not_necessary`.** Eight
+single-action replays and three pairwise composites — the bounded joint search
+ran, because no single removal had prevented anything — and none of the eleven
+prevented the collision. All three drivers' braking substantially reduced its
+severity. The chain happens either way; the braking cascade is what makes it
+hard. The report says exactly that, and names no initiator, because none was
+established.
+
+**S01, the rear-end, is `insufficient_evidence` — and the interesting part is
+why.** No single removal prevents the crash, and every removal makes it *worse*:
+take away either driver's braking and the impact speed rises substantially. Both
+drivers braked, neither brake caused the collision, and both reduced it. That is
+reported as a mitigating finding rather than as "nothing changed", because the
+two are opposites.
+
+Both of these differ from what the earlier back-to-back replay sweep reported,
+and the difference is the protocol rather than the method: each replay now runs
+on a freshly started simulator, which is what the configuration asks for and
+what a comparison between runs actually depends on.
+
 ### What went right
 
 **Restraint holds completely.** Across the negative controls the system named

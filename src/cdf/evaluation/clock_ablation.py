@@ -23,7 +23,6 @@ from .clocks import (
     load_clock_truth,
     simulator_evidence,
     map_graph,
-    map_event,
     evaluate_clock_alignment,
 )
 

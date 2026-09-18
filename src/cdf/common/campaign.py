@@ -19,7 +19,7 @@ every other run", which is still worth having.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Optional
 
 from .io import read_json, write_json
 

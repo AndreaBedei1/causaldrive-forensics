@@ -53,7 +53,6 @@ from ..common.schemas import (
 from .confidence import fuse_confidence
 from .event_alignment import EventGroup, align_event_records, resolve_subjects
 from .post_fusion_causal import (
-    ORIGIN_INFERRED,
     ORIGIN_LOCAL,
     infer_global_causal_edges,
 )

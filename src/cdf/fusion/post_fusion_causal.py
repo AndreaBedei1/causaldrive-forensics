@@ -73,7 +73,7 @@ effect's vehicles -- ``same_actor``, ``actor_in_pair``, ``pair_to_actor``,
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, FrozenSet, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 from ..common.config import Config

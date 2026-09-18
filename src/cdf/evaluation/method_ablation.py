@@ -29,7 +29,7 @@ penalised for the oracle's vocabulary. Where the two disagree, both are shown.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Optional
 
 from ..common.config import Config
 from ..common.io import write_json

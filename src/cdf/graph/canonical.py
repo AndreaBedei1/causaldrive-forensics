@@ -44,7 +44,7 @@ ignore this one.
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from ..common.schemas import CausalEdgeType, Event, EventType, GraphDocument
 

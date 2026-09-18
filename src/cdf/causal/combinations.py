@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, FrozenSet, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, FrozenSet, List, Optional, Sequence, Tuple
 
 from ..common.config import Config
 
