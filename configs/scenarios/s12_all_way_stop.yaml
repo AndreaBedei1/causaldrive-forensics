@@ -38,7 +38,7 @@ scenario:
         anchor: "junction_approach"
         junction_x: -283.42
         junction_y: 1.23
-        bearing_deg: 0.0
+        bearing_deg: 180.0
         back_m: 46.0
       route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
       initial_speed: 9.0
@@ -67,8 +67,8 @@ scenario:
           anchor: "junction_approach"
           junction_x: -283.42
           junction_y: 1.23
-          bearing_deg: 0.0
-          back_m: 12.0
+          bearing_deg: 180.0
+          back_m: 26.0
         # The map renders a real stop sign on this approach, so none is
         # spawned. place_traffic_control verifies the mesh is there and
         # records physically_present from what it found, not from this
@@ -83,7 +83,7 @@ scenario:
           junction_x: -283.42
           junction_y: 1.23
           bearing_deg: -90.0
-          back_m: 12.0
+          back_m: 22.0
         # The map renders a real stop sign on this approach, so none is
         # spawned. place_traffic_control verifies the mesh is there and
         # records physically_present from what it found, not from this
