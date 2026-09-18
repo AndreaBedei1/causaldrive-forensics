@@ -78,6 +78,9 @@ MIGRATION_NAMESPACES = (
     "non_actions.",
     "formal.",
     "responsibility.",
+    # The final clock policy: contact first, offset-only radar second. The
+    # recordings predate the hierarchy, and none of them carries a value for it.
+    "fusion.hybrid_alignment.",
 )
 
 

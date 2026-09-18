@@ -16,29 +16,35 @@ reported in ``docs/EXPERIMENTAL_FINDINGS.md``. What this test pins down is the
 pipeline behaviour: given a participant that genuinely did not see the initiating
 event, does fusion put it back?
 
-What V2 changed, and what it costs
-----------------------------------
-V1 aligned the clocks by fitting radar tracks, which could place a vehicle on the
-common timeline without it ever touching anything. V2 aligns on shared physical
-contact, and in this fixture the leader C never collides: A strikes B, and C only
-brakes. So C has no contact anchor, and contact-based alignment cannot place it.
+Which clock the recovery rests on
+---------------------------------
+This scene is also the one that decided the final clock architecture, so the
+tests below cover both sides of it.
 
-The alignment reports ``PARTIALLY_ALIGNED`` and names C as unaligned. C is then
-absent from the fused graph entirely -- not silently dropped, but absent, which
-has two consequences these tests pin down:
+V1 aligned the clocks by fitting radar tracks. V2 made shared physical contact
+the anchor, which is right -- an impact fixes an instant with no geometric model
+in between -- but here the leader C never collides: A strikes B, and C only
+brakes. Contact alone therefore cannot place C, the alignment reports
+``PARTIALLY_ALIGNED``, and C's whole account is lost: absent from the merged log,
+absent from the fused graph, and its radar track never resolved to it, because
+association needs both ends on one clock.
 
-1. C's own account of braking never reaches the merged timeline.
-2. B's radar track of C is never resolved to C, because association needs both
-   ends on one clock. It stays ``B::T001``.
+The final method keeps an offset-only radar fit *behind* contact for exactly this
+case (:mod:`cdf.fusion.hybrid_alignment`). C is placed by radar, A and B stay on
+their contact anchors, and every participant records which source placed it. With
+that, the strong recovery claim holds on this fixture: fusion contributes C's own
+record of braking to a participant that never saw C, and recognises B's
+observation of C decelerating and C's own deceleration as one node with two
+owners.
 
-The recovery claim survives in a weaker and more precise form: the *initiating
-event* does reach the blind participant, as B's observation of a decelerating
-target rather than as C's own record of braking. That is what fusion contributes
-here, and asserting the stronger form would assert something V2 does not do.
+So the contact-only loss is asserted as an **ablation**, with the fallback
+switched off, and the recovery is asserted on the method the results are actually
+computed with. Neither is left as a remembered fact.
 
-The strong claim -- the fused collision's ancestry reaching C by name -- is
-asserted below against the recorded S07 run, where C is in contact and can be
-aligned. Reporting the strong claim only where it holds is the point.
+The fused collision's *ancestry* reaching C by name is a further claim again, and
+it does not hold on this fixture -- the shortened chain does not reproduce the
+full causal path. It is asserted below against the recorded S07 run instead.
+Reporting each claim only where it holds is the point.
 """
 
 from __future__ import annotations
@@ -127,15 +133,22 @@ def test_fusion_recovers_events_absent_from_the_blind_local_graph(partial_view_r
         "fusion added nothing the blind participant did not already have; "
         "H1 is not supported by this run"
     )
-    # Specifically the initiating event: the leader slowing down, which A never
-    # saw and B did. It arrives as B's observation of its target rather than as
-    # C's own record, because C never made contact and so is not on the common
-    # timeline -- see the module docstring and the limitation test below.
-    assert any(
-        owner == "B" and t == EventType.TARGET_DECELERATION for owner, t in gained
-    ), (
-        "fusion recovered no observation of the leader decelerating, so the "
-        "initiating event did not reach the blind participant at all: {0}".format(
+    # Specifically the initiating event: the leader braking, which A never saw.
+    # It arrives as C's own record rather than as B's observation of a target,
+    # because with C on the common timeline the two are recognised as one fact --
+    # see the merge test below, which asserts that node carries both owners.
+    assert any(owner == "C" for owner, _t in gained), (
+        "fusion recovered nothing owned by C, the participant A was blind to. "
+        "With the radar fallback behind contact C is on the common timeline, so "
+        "its own account should arrive: {0}".format(
+            sorted((o, t.value) for o, t in gained)
+        )
+    )
+    braking = {EventType.BRAKE_ONSET, EventType.HARD_BRAKE, EventType.DECELERATION}
+    assert any(owner == "C" and t in braking for owner, t in gained), (
+        "the leader's braking is what initiates this chain, and it is the one "
+        "thing A could not see. Recovering C's presence without it would not be "
+        "recovering the initiating event: {0}".format(
             sorted((o, t.value) for o, t in gained)
         )
     )
@@ -157,6 +170,11 @@ def test_the_recovered_evidence_is_merged_from_both_viewpoints(partial_view_run)
     assert any({"A", "B"} <= set(n.owners or []) for n in multi), (
         "no fused node carries both A and B, so nothing was recognised as the "
         "same physical fact seen from two viewpoints"
+    )
+    assert any("C" in set(n.owners or []) for n in multi), (
+        "no fused node carries C. B's observation of C decelerating and C's own "
+        "record of decelerating are the same physical fact seen twice, and that "
+        "is the asymmetric merge this test exists for"
     )
     for node in multi:
         assert len(node.merged_from) >= 2, (
@@ -200,54 +218,58 @@ def test_real_run_outcome_reaches_back_to_the_initiating_vehicle() -> None:
     )
 
 
-def test_a_participant_that_never_made_contact_cannot_be_placed_on_the_timeline(
-    partial_view_run,
+@pytest.fixture(scope="module")
+def contact_only_run(tmp_path_factory, default_config):
+    """The same scene with the radar fallback switched off: the ablation."""
+    from cdf.common.config import Config, deep_merge
+
+    root = tmp_path_factory.mktemp("partial_view_contact_only")
+    layout = synthetic_partial_view(root, seed=0, cfg=default_config)
+    cfg = Config(deep_merge(
+        default_config.data,
+        {"fusion": {"hybrid_alignment": {"radar_fallback": False}}},
+    ))
+    analyse_run(layout.root, cfg)
+    fuse_run(layout.root, cfg)
+    return layout
+
+
+def test_contact_alone_cannot_place_a_participant_that_never_collided(
+    contact_only_run,
 ) -> None:
-    """The cost of contact-based alignment, stated rather than left implicit.
+    """The measured reason the final method keeps a fallback.
 
-    V1 fitted radar tracks and could place C without it ever touching anything.
-    V2 anchors on shared contact, so a vehicle that only braked has nothing to
-    anchor on. This is not a defect to be worked around by quietly falling back
-    to the harness marker for one participant while the others rest on contact:
-    that would put offsets of two different provenances on one timeline and
-    report them identically. It is a limitation, and what matters is that it is
-    declared.
-
-    So this test asserts the declaration, not an absence. An implementation that
-    started placing C would fail here, and should -- it would need to say how.
+    A vehicle that only braked has no contact anchor, so contact alignment leaves
+    it on its own clock. That is honest and it is expensive: a whole account goes
+    missing. The loss is asserted here, with the fallback disabled, so it stays a
+    measured quantity rather than a remembered one -- and so that the pair of
+    tests below genuinely measures what the fallback buys.
     """
-    layout, _analyses, _fusion, _run = partial_view_run
     from cdf.common.io import read_json
 
-    alignment = read_json(layout.clock_alignment)
-    assert alignment["status"] == "PARTIALLY_ALIGNED", (
-        "a run where one recorder never made contact should not report a clean "
-        "alignment status; got {0}".format(alignment["status"])
-    )
+    alignment = read_json(contact_only_run.clock_alignment)
     assert "C" in (alignment.get("unaligned_participants") or []), (
         "C never collided and so has no contact anchor, but the alignment does "
-        "not name it as unaligned: {0}".format(alignment)
+        "not name it as unaligned: {0}".format(alignment.get("clock_sources"))
     )
     assert (alignment.get("offsets") or {}).get("C", {}).get("offset_s") is None, (
         "C is named unaligned and still carries an offset, which is the worst of "
         "both: a reader would apply it"
     )
-    # And the method did not fall back to the harness marker for the others.
-    assert alignment["method"] == "shared_physical_contact"
+    # No silent substitution: with the fallback off, nothing else placed C.
+    assert alignment.get("clock_sources", {}).get("C") == "UNRESOLVED"
 
 
-def test_the_unaligned_participants_track_is_not_resolved_to_it(
-    partial_view_run,
-) -> None:
-    """The second consequence: association needs both ends on one clock.
+def test_contact_alone_leaves_the_leaders_track_unresolved(contact_only_run) -> None:
+    """The second cost: association needs both ends on one clock.
 
-    B's radar track of C stays a track id. A reader of the merged graph sees
-    that *something* ahead of B decelerated, not that C did. Naming it would
-    require relating B's clock to C's, which is exactly what could not be done.
+    Without a common time for C, B's radar track of it stays a track id. A reader
+    of the merged graph sees that *something* ahead of B decelerated, not that C
+    did.
     """
-    layout, _analyses, _fusion, _run = partial_view_run
-    fused = load_graph(layout.fused_causal_graph, expect_scope=Provenance.FUSED)
-
+    fused = load_graph(
+        contact_only_run.fused_causal_graph, expect_scope=Provenance.FUSED
+    )
     appearing: Set[str] = set()
     for node in fused.nodes:
         appearing.add(node.participant_id)
@@ -255,12 +277,61 @@ def test_the_unaligned_participants_track_is_not_resolved_to_it(
         if node.subject:
             appearing.add(node.subject)
     assert "C" not in appearing, (
-        "C is unaligned, so nothing in the fused graph can be attributed to it; "
-        "found {0}".format(sorted(x for x in appearing if x))
+        "with contact only, C is unaligned and nothing in the fused graph can be "
+        "attributed to it; found {0}".format(sorted(x for x in appearing if x))
     )
     assert any("::" in x for x in appearing), (
         "the leader's motion should still be present as an unresolved track, "
         "otherwise the initiating event was lost rather than merely unnamed"
+    )
+
+
+def test_the_hybrid_places_the_non_colliding_participant_by_radar(
+    partial_view_run,
+) -> None:
+    """And what the fallback buys, on the method the results are computed with.
+
+    Read against the two ablation tests above, this is the measurement: contact
+    alone loses C entirely; contact-then-radar places it, names the source, and
+    keeps A and B on their physical anchors.
+    """
+    layout, _analyses, _fusion, _run = partial_view_run
+    from cdf.common.io import read_json
+
+    alignment = read_json(layout.clock_alignment)
+    assert alignment["status"] == "HYBRID_ALIGNED"
+    assert alignment["clock_sources"]["C"] == "RADAR"
+    assert alignment["clock_sources"]["A"] in ("CONTACT", "REFERENCE")
+    assert alignment["clock_sources"]["B"] in ("CONTACT", "REFERENCE")
+    assert alignment["unaligned_participants"] == []
+    # Offset only. A fallback that fitted a rate would claim more than a
+    # twenty-second trajectory window supports.
+    assert alignment["offsets"]["C"]["scale"] == 1.0
+    assert alignment["offsets"]["C"]["drift_ppm"] is None
+    assert alignment["drift"]["estimated"] is False
+    # And the decision is on the record, not just its outcome.
+    decision = alignment["decisions"]["C"]
+    assert decision["source"] == "RADAR"
+    assert decision["contact_offset_s"] is None
+    assert decision["radar_evidence"]["confidence"] > 0.4
+
+
+def test_the_hybrid_resolves_the_leaders_track_to_the_leader(
+    partial_view_run,
+) -> None:
+    """With C on the common timeline, B's anonymous track can be named."""
+    layout, _analyses, _fusion, _run = partial_view_run
+    from cdf.common.io import read_json
+
+    report = read_json(layout.association_report)
+    resolved = {
+        a["track_id"]: a["assigned_participant"]
+        for a in report.get("assignments", [])
+        if a.get("status") == "RESOLVED"
+    }
+    assert resolved.get("B::T001") == "C", (
+        "B's track of the leader should resolve to C now that both ends are on "
+        "one clock; resolved map was {0}".format(resolved)
     )
 
 

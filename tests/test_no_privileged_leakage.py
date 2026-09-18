@@ -435,16 +435,53 @@ def test_inference_manifest_withholds_simulator_and_clock_configuration(analysed
     assert estimated['drift']['estimated'] is False
 
 
-def test_a_recorder_that_shared_no_contact_is_left_on_its_own_clock(analysed_run):
-    """The cost of anchoring on contact, asserted rather than glossed.
+@pytest.fixture(scope="module")
+def contact_only_run(tmp_path_factory, default_config) -> RunLayout:
+    """The same scene fused with the radar fallback switched off.
 
-    In this scene A and B collide and C never touches anything. Radar alignment
-    could tie C in from its trajectory; contact alignment cannot, and the honest
-    result is that C stays on its own clock and is named as unaligned. That is a
-    real reduction in what the method covers and it should be visible in a test
-    rather than discovered later from a confusing merged log.
+    This is the ablation, and it is what the two tests below need: with the final
+    hybrid method C *is* placed, so a scene where a recorder stays on its own
+    clock has to be constructed deliberately rather than found by accident.
     """
-    alignment = read_json(analysed_run.fusion_dir / 'clock_alignment.json')
+    from cdf.common.config import Config, deep_merge
+
+    root = tmp_path_factory.mktemp("contact_only_artifacts")
+    layout = synthetic_partial_view(root, seed=0, cfg=default_config)
+    profiles = {}
+    for pid in layout.participant_ids():
+        ev = load_participant(layout, pid)
+        clock = LocalClock.for_participant(
+            default_config, 0, pid, 'synthetic_partial_view'
+        )
+        for name in ('telemetry', 'controls', 'radar', 'tracks', 'triggers'):
+            for sample in sorted(getattr(ev, name), key=lambda s: s.t):
+                sample.t, sample.frame = clock.stamp(sample.t, sample.frame)
+        ev.meta['time_domain'] = 'participant_local'
+        save_participant(layout, ev)
+        profiles[pid] = clock
+    cfg = Config(deep_merge(
+        default_config.data,
+        {"fusion": {"hybrid_alignment": {"radar_fallback": False}}},
+    ))
+    analyse_run(layout.root, cfg)
+    fuse_run(layout.root, cfg)
+    return layout
+
+
+def test_a_recorder_that_shared_no_contact_is_left_on_its_own_clock(
+    contact_only_run
+):
+    """The cost of anchoring on contact alone, asserted rather than glossed.
+
+    In this scene A and B collide and C never touches anything, so contact
+    alignment cannot tie C in and the honest result is that C stays on its own
+    clock and is named as unaligned. That is a real reduction in coverage and it
+    is why the final method keeps an offset-only radar fallback behind contact --
+    see :mod:`cdf.fusion.hybrid_alignment`. The reduction is asserted here, with
+    the fallback disabled, so the ablation stays a measured thing rather than a
+    remembered one.
+    """
+    alignment = read_json(contact_only_run.fusion_dir / 'clock_alignment.json')
     assert alignment['status'] == 'PARTIALLY_ALIGNED'
     assert set(alignment['aligned_participants']) == {'A', 'B'}
     assert alignment['unaligned_participants'] == ['C']
@@ -452,9 +489,16 @@ def test_a_recorder_that_shared_no_contact_is_left_on_its_own_clock(analysed_run
     assert alignment['offsets']['C']['offset_s'] is None
 
 
-def test_the_merged_log_says_which_rows_are_not_on_the_shared_axis(analysed_run):
-    """A dash, not a zero. An unaligned row shown as 0.00 is a fabricated time."""
-    log = read_json(analysed_run.fusion_dir / 'global_log.json')
+def test_the_merged_log_says_which_rows_are_not_on_the_shared_axis(
+    contact_only_run
+):
+    """A dash, not a zero. An unaligned row shown as 0.00 is a fabricated time.
+
+    Exercised on the ablation, because the guard is worth nothing if it runs on a
+    scene where every recorder happens to be aligned: the assertion would pass
+    vacuously and stop protecting anything.
+    """
+    log = read_json(contact_only_run.fusion_dir / 'global_log.json')
     assert log['common_time_available'] is False
     assert log['unaligned_participants'] == ['C']
     # C contributes no rows at all here -- fusion has nowhere to put the events
@@ -464,6 +508,33 @@ def test_the_merged_log_says_which_rows_are_not_on_the_shared_axis(analysed_run)
     for row in log['rows']:
         assert row['participant'] != 'C'
         assert row['t_common'] is not None
+
+
+def test_the_final_method_places_the_non_colliding_recorder_by_radar(analysed_run):
+    """And the same scene, fused the way the results are actually computed.
+
+    The pair of tests above and this one are the ablation: contact alone loses C,
+    the hybrid recovers it, and each participant says which source placed it so a
+    reader is never left to assume they were all tied in the same way.
+    """
+    alignment = read_json(analysed_run.fusion_dir / 'clock_alignment.json')
+    assert alignment['status'] == 'HYBRID_ALIGNED'
+    assert alignment['clock_sources']['C'] == 'RADAR'
+    assert alignment['clock_sources']['B'] in ('CONTACT', 'REFERENCE')
+    assert alignment['unaligned_participants'] == []
+    assert alignment['offsets']['C']['offset_s'] is not None
+    # Still offset-only. A fallback that started fitting a rate would be claiming
+    # more than a twenty-second trajectory window can support.
+    assert alignment['offsets']['C']['scale'] == 1.0
+    assert alignment['offsets']['C']['drift_ppm'] is None
+    assert alignment['drift']['estimated'] is False
+
+    log = read_json(analysed_run.fusion_dir / 'global_log.json')
+    assert log['common_time_available'] is True
+    assert log['unaligned_participants'] == []
+    assert 'C' not in (log['participants_with_no_rows'] or []), (
+        "C is on the common timeline now, so its rows must reach the merged log"
+    )
 
 
 def test_clock_ground_truth_path_and_parameters_are_not_read_by_inference(src_root):

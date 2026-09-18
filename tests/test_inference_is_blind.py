@@ -164,6 +164,48 @@ def test_the_whole_pipeline_runs_and_agrees_with_no_oracle_on_disk(
     assert not copy.oracle_dir.exists(), "inference must not create the oracle subtree"
 
 
+def test_the_chosen_clock_source_and_offset_are_blind_to_the_oracle(
+    baseline, tmp_path, default_config
+) -> None:
+    """The hybrid picks contact or radar per participant. That decision, and the
+    offset it yields, must not move when the answer is taken off the disk.
+
+    This is the check the radar fallback most needs. Contact alignment reads
+    collision triggers, which are local; the radar fallback fits an *identity
+    hypothesis* -- this anonymous track is that vehicle -- and an implementation
+    that resolved the hypothesis by consulting the oracle's actor identities would
+    still produce plausible offsets. It would simply be cheating, and only an
+    equality test over a run with no oracle on it can tell the difference.
+    """
+    source, _expected = baseline
+    copy = _copy_of(source, tmp_path / "blind_clock")
+
+    analyse_run(copy.root, default_config)
+    fuse_run(copy.root, default_config)
+    before = read_json(copy.clock_alignment)
+
+    shutil.rmtree(copy.oracle_dir)
+    analyse_run(copy.root, default_config)
+    fuse_run(copy.root, default_config)
+    after = read_json(copy.clock_alignment)
+
+    assert after.get("clock_sources") == before.get("clock_sources"), (
+        "the clock source chosen per participant changed once the oracle was "
+        "removed: {0} became {1}".format(
+            before.get("clock_sources"), after.get("clock_sources")
+        )
+    )
+    assert after.get("offsets_s") == before.get("offsets_s"), (
+        "the chosen offsets changed once the oracle was removed: {0} became "
+        "{1}".format(before.get("offsets_s"), after.get("offsets_s"))
+    )
+    # And the fallback must actually have been exercised, or this proves nothing.
+    assert "RADAR" in set((before.get("clock_sources") or {}).values()), (
+        "this scene has a non-colliding participant, so one recorder should rest "
+        "on radar; if none does, the test is not covering the fallback"
+    )
+
+
 def test_the_incident_is_still_reconstructed_without_the_oracle(
     baseline, tmp_path, default_config
 ) -> None:
