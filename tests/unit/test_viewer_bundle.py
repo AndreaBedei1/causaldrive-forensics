@@ -560,3 +560,45 @@ def test_the_page_reads_only_field_names_the_bundle_actually_writes() -> None:
     )
     for name in sorted(read_by_page):
         assert name in app, "{0!r} is declared read by the page but never is".format(name)
+
+
+def test_the_bundle_carries_the_protocol_its_replays_ran_under(
+    real_bundle: Dict[str, Any]
+) -> None:
+    """A verdict from replays that shared a simulator session is not comparable.
+
+    The verdict itself gives a reader no way to tell, so the protocol travels
+    with it and the page prints a banner when it was degraded. A report written
+    before the check existed carries no block at all, which is a third state and
+    must not be read as "it was fine".
+    """
+    contribution = (real_bundle.get("counterfactual") or {}).get("contribution")
+    if not contribution:
+        pytest.skip("this run has no counterfactual attribution")
+    protocol = contribution.get("replay_protocol")
+    if protocol is None:
+        pytest.skip("this attribution predates the replay-protocol record")
+    assert protocol["effective"] in {"fresh_server_per_replay", "shared_server_session"}
+    if "restarts_verified_fresh" not in protocol:
+        # An older artifact recorded what was *configured*. That is a third
+        # state and reading it as "the restarts worked" is exactly the mistake
+        # the field was added to prevent, so it is named rather than passed.
+        pytest.skip(
+            "this attribution predates the restart verification: its protocol "
+            "records the configuration, not what occurred"
+        )
+    if protocol["effective"] != "fresh_server_per_replay":
+        assert protocol.get("warning"), "a degraded protocol must say so in words"
+    else:
+        assert protocol["restarts_verified_fresh"] is True, (
+            "a protocol may only be called fresh when the restarts were verified"
+        )
+
+
+def test_the_page_warns_about_a_degraded_replay_protocol() -> None:
+    """The banner is the only thing standing between a reader and a bad verdict."""
+    app = (viewer_assets_dir() / "app.js").read_text(encoding="utf-8")
+    assert "replay_protocol" in app
+    assert "protocol-warning" in app
+    styles = (viewer_assets_dir() / "styles.css").read_text(encoding="utf-8")
+    assert ".protocol-warning" in styles
