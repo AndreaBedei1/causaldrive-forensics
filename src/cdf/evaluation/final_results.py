@@ -687,15 +687,28 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     # -- per scenario --------------------------------------------------
     lines.append("## Attribution against the scenario design")
     lines.append("")
+    collide = [r for r in results["per_scenario"] if r.get("expect_collision")]
+    with_reference = [r for r in collide if r.get("contributors_ground_truth")]
     lines.append(
-        "Scored against each scenario's declared causal template, which says what "
-        "the experiment intended. That is a different question from the one the "
-        "responsibility layer answers, and the two can disagree. On "
-        "`S10/rolls_through` this table reads *incorrect* while the "
-        "responsibility analysis reports A as supported, because a template names "
-        "physical causes and the responsibility layer names normative "
-        "contributors. The reconstruction itself is scored against the observable "
-        "ground truth, in the sections below."
+        "Scored against each scenario's declared causal template. The template "
+        "names contributors only through edges whose cause is a *scripted "
+        "action*, and S10 to S15 express their design in states instead, so "
+        "this reference is empty on most of the new scenarios: of {0} variants "
+        "designed to collide, {1} declare a contributor here."
+        .format(len(collide), len(with_reference))
+    )
+    lines.append("")
+    lines.append(
+        "A row whose reference is empty cannot be a measurement of the method. "
+        "Anything the system names there counts as a false positive by "
+        "construction, which is why `S10/rolls_through` reads *incorrect* here "
+        "while the responsibility analysis reports A as supported: A did roll "
+        "through the stop. The column below marks those rows, and they should "
+        "be read as saying that this reference does not reach that scenario. "
+        "The reference that does reach it is the normative one, under "
+        "*Contribution*, on the {2} runs that carry it."
+        .format("", "", results.get("v2", {}).get("responsibility", {})
+                .get("sets", {}).get("n_runs_with_a_normative_reference", 0))
     )
     lines.append("")
     lines.append(
@@ -704,11 +717,18 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     )
     lines.append("|---|---|---|---|---|---|---|---|---|")
     for row in results["per_scenario"]:
+        # A collision variant whose template declares nobody has no reference
+        # here. Printing its scores without saying so invites the reader to
+        # take a property of the reference for a property of the method.
+        unreferenced = (
+            row.get("expect_collision") and not row.get("contributors_ground_truth")
+        )
         lines.append(
             "| {0} / {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} |".format(
                 row["scenario_id"], row["variant"],
                 _fmt(row["incident_reconstructed"]),
-                _fmt(row["contributors_ground_truth"]),
+                "*no reference*" if unreferenced
+                else _fmt(row["contributors_ground_truth"]),
                 _fmt(row["contributors_inferred"]),
                 _fmt(row["attribution_class"]),
                 _fmt(row["attribution_precision"]),
@@ -724,6 +744,29 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         "is measured for it is whether the system named anybody, reported as "
         "`restrained` or `false attribution`."
     )
+    wrong = [r for r in results["per_scenario"] if r.get("verdict") == "incorrect"]
+    unref_wrong = [
+        r for r in wrong
+        if r.get("expect_collision") and not r.get("contributors_ground_truth")
+    ]
+    if wrong:
+        lines.append("")
+        lines.append(
+            "**{0} of the {1} `incorrect` verdicts sit on a row with no design "
+            "reference**, where naming anybody scores zero by construction. The "
+            "{2} remaining {3} against a reference that exists: {4}. Read the "
+            "`incorrect` count as a statement about how far this reference "
+            "reaches, and take the responsibility figures for how well "
+            "contributors were actually named."
+            .format(
+                len(unref_wrong), len(wrong), len(wrong) - len(unref_wrong),
+                "is" if len(wrong) - len(unref_wrong) == 1 else "are",
+                ", ".join(
+                    "`{0}/{1}`".format(r["scenario_id"], r["variant"])
+                    for r in wrong if r not in unref_wrong
+                ) or "none",
+            )
+        )
     lines.append("")
 
     # -- method ablation -----------------------------------------------

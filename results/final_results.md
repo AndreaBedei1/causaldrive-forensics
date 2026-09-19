@@ -124,7 +124,9 @@ A scenario's causal template says what the experiment intended to stage. Scoring
 
 ## Attribution against the scenario design
 
-Scored against each scenario's declared causal template, which says what the experiment intended. That is a different question from the one the responsibility layer answers, and the two can disagree. On `S10/rolls_through` this table reads *incorrect* while the responsibility analysis reports A as supported, because a template names physical causes and the responsibility layer names normative contributors. The reconstruction itself is scored against the observable ground truth, in the sections below.
+Scored against each scenario's declared causal template. The template names contributors only through edges whose cause is a *scripted action*, and S10 to S15 express their design in states instead, so this reference is empty on most of the new scenarios: of 26 variants designed to collide, 13 declare a contributor here.
+
+A row whose reference is empty cannot be a measurement of the method. Anything the system names there counts as a false positive by construction, which is why `S10/rolls_through` reads *incorrect* here while the responsibility analysis reports A as supported: A did roll through the stop. The column below marks those rows, and they should be read as saying that this reference does not reach that scenario. The reference that does reach it is the normative one, under *Contribution*, on the 42 runs that carry it.
 
 | Scenario | Incident reconstructed | Design-template contributors | Inferred | Attribution class | P | R | F1 | Verdict |
 |---|---|---|---|---|---|---|---|---|
@@ -141,30 +143,32 @@ Scored against each scenario's declared causal template, which says what the exp
 | S07 / occluded | yes | B, C | B, C | shared_contribution | 1.000 | 1.000 | 1.000 | correct |
 | S08 / crash | yes | B | A | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
 | S09 / merge_conflict | yes | B | B | mixed: insufficient_evidence, single_initiator | 0.333 | 0.333 | 0.333 | partial |
-| S10 / rolls_through | yes | none | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | incorrect |
+| S10 / rolls_through | yes | *no reference* | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | incorrect |
 | S10 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
 | S10 / stops_then_proceeds | yes | none | B | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | false attribution |
-| S11 / rolls_through | yes | none | B | mixed: shared_contribution, single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
+| S11 / rolls_through | yes | *no reference* | B | mixed: shared_contribution, single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
 | S11 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S11 / stops_then_proceeds | yes | none | none | mixed: insufficient_evidence, single_initiator | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S11 / stops_then_proceeds | yes | *no reference* | none | mixed: insufficient_evidence, single_initiator | 1.000 | 1.000 | 1.000 | insufficient evidence |
 | S12 / a_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
 | S12 / b_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S12 / b_fails_to_stop | yes | none | none | mixed: insufficient_evidence, shared_contribution | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S12 / b_fails_to_stop | yes | *no reference* | none | mixed: insufficient_evidence, shared_contribution | 1.000 | 1.000 | 1.000 | insufficient evidence |
 | S12 / near_simultaneous | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S13 / accelerates_into_gap | yes | none | A | mixed | 0.000 | 0.000 | 0.000 | incorrect |
-| S13 / cut_in | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S13 / safe_lane_change | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S14 / b_hits_a_first | yes | none | A | single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
-| S14 / c_pushes_b | yes | none | A, B | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
-| S14 / independent_impacts | yes | none | A | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
-| S15 / b_stops | yes | none | C | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S15 / deflected_into_c | yes | none | B | single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S15 / single_impact | yes | none | A, B | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S13 / accelerates_into_gap | yes | *no reference* | A | mixed | 0.000 | 0.000 | 0.000 | incorrect |
+| S13 / cut_in | yes | *no reference* | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S13 / safe_lane_change | yes | *no reference* | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S14 / b_hits_a_first | yes | *no reference* | A | single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
+| S14 / c_pushes_b | yes | *no reference* | A, B | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
+| S14 / independent_impacts | yes | *no reference* | A | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
+| S15 / b_stops | yes | *no reference* | C | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S15 / deflected_into_c | yes | *no reference* | B | single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S15 / single_impact | yes | *no reference* | A, B | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
 | S16 / avoided | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
 | S16 / consequential | yes | A | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | partial |
 | S16 / independent | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
 
 A negative control has no designed contributor. Its precision, recall and F1 are vacuously 1.0 and are excluded from the means below; what is measured for it is whether the system named anybody, reported as `restrained` or `false attribution`.
+
+**9 of the 10 `incorrect` verdicts sit on a row with no design reference**, where naming anybody scores zero by construction. The 1 remaining is against a reference that exists: `S08/crash`. Read the `incorrect` count as a statement about how far this reference reaches, and take the responsibility figures for how well contributors were actually named.
 
 ## What each layer of the method was worth (legacy design-reference structural ablation)
 

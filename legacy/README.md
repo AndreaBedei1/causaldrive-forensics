@@ -10,13 +10,14 @@ it replaced.
 | | |
 |---|---|
 | `FINAL_STATUS_v1.md` | the V1 status report, written before the observable ground truth existed. Its headline structural numbers were computed against the scenario template and are not comparable with anything under `results/` |
+| `RESULTS_v1.md` | the V1 results page, written against the scenario template. Superseded by [`docs/RESULTS.md`](../docs/RESULTS.md) |
 | `results_v1/` | the V1 result tables, from `artifacts_independent_clocks/` |
 
 ## Why these are not simply deleted
 
 The V1 numbers are the reason the V2 refactor happened. Scored against the
 scenario template, the same recordings gave best-local 0.065 and fusion 0.051 on
-edge F1 -- with fusion appearing to *hurt*. Scored against a ground truth that
+edge F1, with fusion appearing to *hurt*. Scored against a ground truth that
 speaks the reconstruction's vocabulary, the same recordings give 0.153 and 0.358.
 The method did not change between those two figures; only what it was compared
 against did.
@@ -27,7 +28,7 @@ Keeping the first set visible is what makes that argument checkable.
 
 The radar-based clock estimator, the template-based graph scoring and the
 canonical-vocabulary machinery are all still under `src/`. They are no longer the
-primary path but they are still *run* -- the clock and method ablations compare
-against them -- so archiving them would mean either breaking those ablations or
+primary path but they are still *run*, since the clock and method ablations compare
+against them, so archiving them would mean either breaking those ablations or
 importing from `legacy/` in the active path. They are labelled where they live
 instead. See the deviations section of `../docs/V2_REFACTOR_AUDIT.md`.
