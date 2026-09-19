@@ -150,7 +150,7 @@ averaged together answer no question anyone asked.
 
 ```bash
 export CARLA_ROOT=/path/to/CARLA_0.9.15/WindowsNoEditor   # required, see below
-python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
+python scripts/run_counterfactuals.py --artifacts artifacts_v2 --seeds 0
 ```
 
 One seed per variant by default: a replay sweep costs a full simulator run per
@@ -165,7 +165,7 @@ quietly degraded — see the caution above.
 ### 4. Score, ablate, and build the viewer bundles
 
 ```bash
-python scripts/reprocess_runs.py --artifacts artifacts_independent_clocks \
+python scripts/reprocess_runs.py --artifacts artifacts_v2 \
                                  --stages evaluate ablate viewer
 ```
 
@@ -178,7 +178,7 @@ reference.
 ```bash
 python -c "import sys; sys.path.insert(0,'src'); \
            from cdf.evaluation.final_results import write_final_results; \
-           write_final_results('artifacts_independent_clocks')"
+           write_final_results('artifacts_v2')"
 ```
 
 Writes `summary/final_results.{json,csv,md}`. The markdown is what

@@ -200,7 +200,7 @@ version, platform, git commit, package version).
 
 ### Gate 1: the scenario is well formed
 
-`ScenarioSpec.validate_static()`: 2--3 participants, unique participant ids,
+`ScenarioSpec.validate_static()`: 2 to 3 participants, unique participant ids,
 unique action ids, `expected_collision_pairs` naming real participants, every
 `intervention_candidates` entry a declared action, a known `expected_outcome`.
 A problem **raises** before the simulator is touched.
@@ -706,34 +706,45 @@ produced a run and what evaluated it is visible rather than silent.
 
 ### What the recorded campaign actually is
 
-The 39 runs under `artifacts/` were **not** recorded in one pass under one
-commit. They were recorded over a working day, across eleven commits, as the
-scenarios were developed and defects were fixed; `manifest.json` records the
-commit for each one. That is only legitimate if nothing which governs a
-recording or its evaluation changed between them, and that is checkable, because
-every run stores its own fully merged configuration rather than a reference to
-one.
+**The V2 campaign is a single-commit campaign.** All 105 runs under
+`artifacts_v2/` were recorded at commit `a76be77a`, between 2026-09-18T23:49 and
+2026-09-19T01:03. Every run's `manifest.json` records that commit, and there are
+16 distinct configuration hashes across the campaign, exactly one per scenario,
+so no scenario was recorded under two different configurations.
 
-It was checked. Across all 39 runs and against the configuration in force at
-HEAD, the *only* keys that differ anywhere are
+That property is what makes the campaign comparable run to run without further
+argument. It is also not free: it was reached by re-recording. When the audit of
+scenario validity found that S11 and S15 declared a stop sign on an approach
+where Town05 renders no mesh, the affected seeds were re-recorded rather than
+patched in the evaluation, and the whole campaign was re-recorded afterwards so
+that it remained one experiment rather than two stitched together.
 
-* `counterfactual.resume` (all runs: the key did not exist yet), and *
+Every run still stores its own fully merged configuration rather than a
+reference to one, so the claim above is checkable from the artifacts and not
+only from the commit stamp. The configuration hash is written into the
+association report, the fusion diagnostics, the checking report and the
+counterfactual manifest as well as the run manifest, so a mismatch between what
+produced a run and what evaluated it is visible rather than silent.
+
+Evaluation is re-derived offline over every run in one pass
+(`python scripts/reprocess_runs.py --artifacts artifacts_v2 --stages evaluate
+figures viewer`), so all 105 runs are scored by one build of the metrics code
+rather than by whatever was current when each was recorded.
+
+#### Historical: the V1 campaign was not
+
+The 39 runs under `artifacts/` were recorded over a working day across eleven
+commits, as the scenarios were developed and defects were fixed. That was only
+legitimate because nothing governing a recording or its evaluation changed
+between them, and it was checked: across all 39 runs and against the
+configuration in force at the time, the only keys that differed anywhere were
+`counterfactual.resume` (all runs: the key did not exist yet) and
 `counterfactual.restart_server_per_replay` (the two earliest S01 crash runs).
+Both govern how a counterfactual replay is executed, and neither can reach a
+recording, a local reconstruction, a fusion, a model check or a metric.
 
-Both govern how a counterfactual replay is *executed*. Neither can reach a
-recording, a local reconstruction, a fusion, a model check or a metric. Every
-simulation, radar, event, graph, fusion, checking and evaluation parameter, and
-every scenario specification, is identical across the whole campaign and
-identical to HEAD.
-
-`tests/integration/test_recorded_campaign_config.py` asserts exactly this, so
-the claim fails loudly if a future edit changes a parameter that the recorded
-campaign depended on. Evaluation is re-derived offline over every run in one
-pass (`python scripts/reprocess_runs.py --stages evaluate figures viewer`), so
-all 39 runs are scored by one build of the metrics code rather than by whatever
-was current when each was recorded.
-
-The honest summary is that the campaign is reproducible run-by-run from its
-recorded parameters, and internally comparable, but it is not a single-commit
-campaign. Re-recording all 39 runs at HEAD would make it one; it was not done,
-and the artifacts say so.
+`tests/integration/test_recorded_campaign_config.py` asserts exactly that over
+`artifacts/`, so the claim fails loudly if a future edit changes a parameter the
+V1 campaign depended on. It is kept because the V1 numbers are still quoted in
+[`legacy/RESULTS_v1.md`](../legacy/RESULTS_v1.md), and a quoted number needs its
+campaign's caveats to travel with it.

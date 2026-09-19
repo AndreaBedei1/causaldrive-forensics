@@ -181,13 +181,13 @@ recordings and none of it is inferred here.
 One recorded run:
 
 ```bash
-python -m cdf.cli counterfactuals --run artifacts_independent_clocks/S06_chain_collision/seed_000_a_front_pushed
+python -m cdf.cli counterfactuals --run artifacts_v2/S06_chain_collision/seed_000_a_front_pushed
 ```
 
 A whole campaign, one seed per variant:
 
 ```bash
-python scripts/run_counterfactuals.py --artifacts artifacts_independent_clocks --seeds 0
+python scripts/run_counterfactuals.py --artifacts artifacts_v2 --seeds 0
 ```
 
 Add `--fresh` to re-record every replay instead of reusing one already on disk.

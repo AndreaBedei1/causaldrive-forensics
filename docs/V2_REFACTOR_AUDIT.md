@@ -42,7 +42,7 @@ timestamps and cannot check a DAG.
 | Component | Replaced by | Why |
 |---|---|---|
 | `fusion/clock_alignment.py` (radar-primary, `soft_l1` global fit, drift in ppm) | `fusion/contact_alignment.py` | §12. One collision cannot estimate drift over a 25 s window; claiming a ppm rate from it overstates what the evidence supports. V2 anchors on contact, fixes `scale = 1.0`, and reports drift as *unestimated, assumed negligible*. |
-| `checking/properties.py` (1517 lines of hand-written P1--P4/O1--O2 evaluators) | `formal/` (syntax, trace, evaluator, properties, report) | §17. The current layer computes verdicts but has no logic to read: the properties are Python, not formulae. V2 uses executable MTL over a finite trace so a property is a term a reader can check. |
+| `checking/properties.py` (1517 lines of hand-written evaluators for P1 to P4 and O1 to O2) | `formal/` (syntax, trace, evaluator, properties, report) | §17. The current layer computes verdicts but has no logic to read: the properties are Python, not formulae. V2 uses executable MTL over a finite trace so a property is a term a reader can check. |
 | Graph-first pipeline (local graph -> fused graph) | Log-first (`local_log.json` -> `global_log.json` -> graph) | §15. |
 | `evaluation/graph_metrics.py` as primary scoring | `evaluation/graph_comparison.py` | Already demoted at HEAD; V2 removes the template path from the primary result entirely. |
 
@@ -77,15 +77,20 @@ timestamps and cannot check a DAG.
 
 ## Scenarios
 
-S01--S09 are kept and **not retuned** (§24, §47). V2 changes sensors and timing
+S01 to S09 are kept and **not retuned** (§24, §47). V2 changes sensors and timing
 semantics, so the V1 recordings under `artifacts_independent_clocks/` are *not*
 V2 results and are not mixed with them (§47); V2 records into `artifacts_v2/`.
 
-S10--S16 are new (§23). Note that an earlier, unrelated scenario also called S10
+S10 to S16 are new (§23). Note that an earlier, unrelated scenario also called S10
 was removed from this repository for a different reason; the V2 S10 is a fresh
 single-stop scenario and shares nothing with it but the number.
 
 ## Known state at audit time
+
+A snapshot from when this audit was written, kept as written. Every line below
+describes the repository *before* the V2 work listed above was done, so none of
+it is a current figure: the campaign, the test count and the capability list have
+all moved on. For where the project stands now, see [RESULTS.md](RESULTS.md).
 
 - 630 offline unit tests, plus scenario-freeze, blind-inference and
   leakage suites.
