@@ -71,8 +71,10 @@ a normative violation lies on a physical causal path. Kept separate so the
 physics can be accepted while the rule is disputed.
 [RESPONSIBILITY.md](RESPONSIBILITY.md).
 
-**9. Counterfactual replay.** The encounter is re-run with one action or
-non-action changed, to test whether the outcome depended on it.
+**9. Counterfactual replay.** The encounter is re-run with one or more selected
+actions or non-actions changed, to test whether the outcome depended on them.
+Single changes are tried first; bounded combinations follow only where no single
+change prevented the outcome.
 [COUNTERFACTUALS.md](COUNTERFACTUALS.md).
 
 **10. Oracle and evaluation.** Only now is the privileged record opened, to score

@@ -13,7 +13,8 @@ actual output.
 
 ## One replay
 
-An **intervention** is a controlled modification of one scripted action:
+An **intervention** is a controlled modification of one scripted action. Sets
+of them are replayed too, and are covered below:
 
 | Operation | Effect | Can establish causation? |
 |---|---|---|

@@ -147,28 +147,60 @@ system would fuse map data and would not face this particular limit.
   confidences and the noisy-OR fusion rule are evidence-accumulation heuristics.
   They order claims sensibly; they do not carry frequentist or Bayesian meaning,
   and they have not been validated against observed frequencies.
-* **The oracle graph is itself a model.** Ground truth here is the scenario's
-  designed causal template instantiated with measured kinematics. It is a
-  defensible reference because the scenarios were *constructed* to have that
-  structure, but it is a designer's account of causation, not an independent one.
+* **There are two references, and neither is "the" ground truth on its own.**
+  The **observable ground truth** is the primary reference: it is what the
+  simulator recorded as having happened, expressed in the vocabulary the
+  reconstruction itself speaks, and it is what the reconstructable events and
+  the physical causal structure are scored against. The **scenario design
+  template** is a separate and weaker reference: it says what the scenario was
+  built to exercise, and it is what the contributor and normative claims are
+  compared with where nothing observable settles them. The template is a
+  designer's account of causation rather than an independent one, so a figure
+  scored against it measures agreement with an intention, not with an event.
+  Section 28 states how the two are kept apart, and
+  [RESULTS.md](RESULTS.md) labels which reference every table used.
 
 ## 9. Counterfactual intervention semantics
 
 A but-for claim here means exactly: *re-running the identical scenario — same
 map, same spawn state, same seed, same everything — with one named scripted
-action disabled, delayed or weakened changes the outcome.*
+action, or a tested set of them, disabled, delayed or weakened changes the
+outcome.*
 
 It does **not** mean:
 
 * that the action was necessary in any broader sense;
 * that a real driver could have taken the alternative;
 * that the counterfactual world is the nearest possible world in any formal
-  sense — it is the nearest world *reachable by editing one scripted action*;
+  sense — it is the nearest world *reachable by editing the scripted actions
+  that were replayed*;
 * anything about other interventions that were not tried. Only the declared
   `intervention_candidates` are tested, and the number tested is capped.
 
-Interventions are also tested one at a time, so joint effects and interaction
-between two contributing actions are not measured.
+Interventions are not limited to one action. The search runs in this order:
+
+1. **single actions first.** Each declared candidate is disabled, delayed or
+   weakened on its own. If one of them prevents the collision, the search stops
+   there, because a larger set would not be minimal.
+2. **bounded multi-action combinations when singles are insufficient.** Two
+   vehicles can each contribute without either being individually decisive, and
+   single-action replay reports that as insufficient evidence, which is true and
+   uninformative. So where no single removal prevented the collision, sets of
+   actions are replayed together, up to
+   `counterfactual.combinations.max_combination_size` (2 by default) and
+   `counterfactual.combinations.max_replays` (6).
+3. **minimal prevention sets.** A set whose joint removal prevented the
+   collision is reported as minimal only when every proper subset of it was
+   also replayed and none of those prevented it. Where a proper subset was never
+   replayed, the set is reported as minimal *within what was tested*, because
+   the untested subset might have sufficed and claiming otherwise would be a
+   statement about a replay nobody ran.
+
+What this bounds: **joint effects are established only within the replay budget
+that was actually spent.** A combination larger than the size cap, or one the
+replay ceiling cut off, was not tried, and an untried combination is unknown
+rather than ruled out. The artifact lists which sets were replayed, so the
+boundary between tested and untested is on the record rather than inferred.
 
 ## 10. Not legal liability
 

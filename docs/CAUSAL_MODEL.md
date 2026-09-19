@@ -332,8 +332,9 @@ replayed in the simulator, same map, same spawn state, same seed, same
 controller gains, same sensor configuration, with one named scripted action
 modified. The outcome is then *measured*, not inferred.
 
-`cdf.simulation.runner._apply_intervention` supports five operations on exactly
-one `action_id` (`RUNNER_OPS` in `cdf.causal.interventions`):
+`cdf.simulation.runner._apply_intervention` supports five operations
+(`RUNNER_OPS` in `cdf.causal.interventions`), applied to one `action_id` or, for
+a joint counterfactual, to each action in a `steps` list:
 
 | op | Effect |
 |---|---|
@@ -345,8 +346,10 @@ one `action_id` (`RUNNER_OPS` in `cdf.causal.interventions`):
 
 The modification is applied **before the world is created**, so it changes
 behaviour from the first tick and never has to be injected mid-run. Targeting
-exactly one action is what isolates a single candidate cause. Unknown action ids
-raise, listing the declared actions.
+one action is what isolates a single candidate cause, which is why singles are
+replayed first; a `steps` list edits several at once, each action at most once,
+and that is what a joint counterfactual is. Unknown action ids raise, listing the
+declared actions.
 
 ### 5.3 Which interventions are worth replaying
 

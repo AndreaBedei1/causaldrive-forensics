@@ -5,7 +5,7 @@ and scripted controllers by `cdf.simulation.scenario_base`. Keeping them
 declarative buys three things the experiment protocol depends on:
 reproducibility (the whole spec is hashed into the run manifest), interventions
 (every behaviour is a named `ScriptedAction`, so a counterfactual is "the same
-spec with one action disabled, delayed or weakened") and validation (the spec
+spec with one action, or a set of them, disabled, delayed or weakened") and validation (the spec
 states what is *supposed* to happen, so a scenario that silently stops producing
 its intended encounter fails loudly).
 
