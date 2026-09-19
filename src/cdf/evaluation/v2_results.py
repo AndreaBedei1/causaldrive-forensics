@@ -50,7 +50,34 @@ def _rate(numerator: int, denominator: int) -> Optional[float]:
     return round(numerator / denominator, 4) if denominator else None
 
 
-def _prf(matched: int, found: int, expected: int) -> Dict[str, Any]:
+def _prf(matched: int, found: int, expected: int,
+         reference: bool = True,
+         no_reference_note: Optional[str] = None) -> Dict[str, Any]:
+    """Precision and recall, or an honest statement that there is no reference.
+
+    With ``reference=False`` nothing verified exists to score against. The
+    detections are still reported, because how many there were is a fact; what
+    cannot be said is whether they were right. Calling them false positives, or
+    printing a precision of zero, would turn a missing reference into a measured
+    failure. The stop-line detector is exactly this case: its reference is a
+    position derived from the sign and the lane, and Town05 paints no bar there.
+    """
+    if not reference:
+        return {
+            "n_detected": found,
+            "n_true_positive": None,
+            "n_false_positive": None,
+            "n_false_negative": None,
+            "n_real": None,
+            "precision": None,
+            "recall": None,
+            "f1": None,
+            "reference": "unavailable",
+            "note": no_reference_note or (
+                "no reference exists for this quantity, so the detections are "
+                "reported and not scored"
+            ),
+        }
     precision = _rate(matched, found)
     recall = _rate(matched, expected)
     f1 = None
@@ -65,6 +92,7 @@ def _prf(matched: int, found: int, expected: int) -> Dict[str, Any]:
         "precision": precision,
         "recall": recall,
         "f1": f1,
+        "reference": "verified",
     }
 
 
@@ -209,8 +237,29 @@ def perception_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
         "source": "real CARLA campaign frames",
         "stop_signs": _prf(kinds["stop"][0], kinds["stop"][1], kinds["stop"][2]),
         "yield_signs": _prf(kinds["yield"][0], kinds["yield"][1], kinds["yield"][2]),
-        "stop_lines": _prf(stop_lines[0], stop_lines[1], stop_lines[2]),
-        "lane_markings": _prf(markings[0], markings[1], markings[2]),
+        # Neither of the next two has a reference in this campaign, for two
+        # different reasons, and each says which.
+        "stop_lines": _prf(
+            stop_lines[0], stop_lines[1], stop_lines[2],
+            reference=bool(stop_lines[2]),
+            no_reference_note=(
+                "the stop-line reference is a position derived from the sign "
+                "and the lane, and Town05 paints no bar at these junctions, so "
+                "no line here is physically verified. The crossings the "
+                "detector reported are counted and not scored: calling them "
+                "false positives would charge the detector with missing "
+                "markings the map never painted"
+            ),
+        ),
+        "lane_markings": _prf(
+            markings[0], markings[1], markings[2],
+            reference=False,
+            no_reference_note=(
+                "the lane sensor is an onboard ADAS signal, so the sensor is "
+                "the measurement and there is no independent reference to "
+                "score it against. Crossings are reported by type"
+            ),
+        ),
         "n_participants_with_measurable_latency": latency_measurable,
         "latency_note": (
             "detection latency needs a baseline for when each sign first became "

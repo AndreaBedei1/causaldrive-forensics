@@ -215,10 +215,27 @@ def results_fixture() -> Dict[str, Any]:
 
 def test_the_markdown_carries_both_mandated_tables() -> None:
     text = render_markdown(results_fixture())
-    assert "| Scenario | Incident reconstructed | Causal contributors GT |" in text
+    assert "| Scenario | Incident reconstructed | Design-template contributors |" in text
     assert "| Method | Node F1 | Edge F1 |" in text
     for label in ("Best Local", "Simple Fusion", "Fusion + Global Causal Reasoning"):
         assert label in text
+
+
+def test_the_tables_name_the_reference_they_are_scored_against() -> None:
+    """A reader must never have to guess which reference a number used."""
+    text = render_markdown(results_fixture())
+    assert "## Attribution against the scenario design" in text
+    assert "(design reference)" in text
+    assert "design-template attribution P / R / F1" in text
+    # And the two aggregations of the same clock error must be distinguishable.
+    assert "scenario-aggregated clock offset MAE" in text
+
+
+def test_drift_is_reported_as_unmodelled_rather_than_as_an_estimation_error() -> None:
+    """Scale is pinned to 1 on purpose, so calling the residue an error lies."""
+    text = render_markdown(results_fixture())
+    assert "not estimated; scale pinned to 1" in text
+    assert "clock drift error" not in text
 
 
 def test_the_ablated_arms_do_not_claim_a_causal_path_or_attribution_score() -> None:
@@ -333,3 +350,71 @@ def test_the_published_markdown_carries_the_tables_the_docs_promise() -> None:
     assert "| Scenario | Incident reconstructed |" in text
     assert "| Method | Node F1 | Edge F1 |" in text
     assert "not a fault percentage" in text
+
+
+# --- a missing reference must never be reported as a failing score ----------
+
+
+def test_an_unreferenced_quantity_is_not_scored_as_a_precision_of_zero() -> None:
+    """Twenty-six crossings against no painted line is not 0% precision.
+
+    The stop-line reference is a position derived from the sign and the lane. Where
+    the map paints no bar, nothing establishes whether a reported crossing was
+    right, and charging the detector with a false positive would turn a missing
+    reference into a measured failure.
+    """
+    from cdf.evaluation.v2_results import _prf
+
+    block = _prf(0, 26, 0, reference=False, no_reference_note="no bar is painted")
+    assert block["reference"] == "unavailable"
+    assert block["n_detected"] == 26
+    assert block["precision"] is None
+    assert block["n_false_positive"] is None
+    assert "no bar is painted" in block["note"]
+
+
+def test_a_real_reference_still_scores_a_false_positive() -> None:
+    """The exemption is for a missing reference, not for an inconvenient one."""
+    from cdf.evaluation.v2_results import _prf
+
+    block = _prf(2, 5, 4)
+    assert block["reference"] == "verified"
+    assert block["n_false_positive"] == 3
+    assert block["precision"] == 0.4
+
+
+def test_the_unscored_row_states_its_reason_in_the_markdown() -> None:
+    from cdf.evaluation.final_results import _prf_row, _sentence
+
+    row = _prf_row("Stop lines", {"reference": "unavailable", "n_detected": 26})
+    assert "26 detections" in row
+    assert "no reference" in row
+    assert _sentence("the map paints no bar") == "The map paints no bar"
+
+
+def _scored_run(scenario: str, variant: str, seed: int, why: str) -> Dict[str, Any]:
+    return {
+        "scored": True, "scenario": scenario, "variant": variant, "seed": seed,
+        "hard_case": why,
+        "physical": {
+            "sets": {"n_expected": 1, "n_found": 1, "n_matched": 1},
+            "exact_set_match": True, "designed": ["B"], "found": ["B"],
+        },
+        "normative": {
+            "applicable": True, "designed": ["B"], "supported": ["B"],
+            "sets": {"n_expected": 1, "n_found": 1, "n_matched": 1},
+        },
+    }
+
+
+def test_a_hard_case_is_stated_once_per_scenario_variant() -> None:
+    """Three seeds of one scenario are one finding, not three."""
+    from cdf.evaluation.responsibility_metrics import aggregate_responsibility
+
+    runs = [_scored_run("S14", "c_pushes_b", seed, "the pushed vehicle") for seed in (0, 1, 2)]
+    runs.append(_scored_run("S14", "independent_impacts", 0, "two impacts, one vehicle"))
+    out = aggregate_responsibility(runs)
+
+    assert out["n_runs"] == 4, "every run is still counted"
+    variants = [(h["scenario"], h["variant"]) for h in out["hard_cases"]]
+    assert variants == [("S14", "c_pushes_b"), ("S14", "independent_impacts")]

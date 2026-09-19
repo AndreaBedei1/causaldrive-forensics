@@ -643,7 +643,7 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     if campaign:
         lines.append(
             "Campaign `{0}`, clock protocol `{1}`.".format(
-                campaign.get("campaign_id", "?"),
+                campaign.get("campaign_id", campaign.get("campaign", "?")),
                 campaign.get("clock_protocol", "?"),
             )
         )
@@ -658,11 +658,22 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     lines.append("")
 
     # -- per scenario --------------------------------------------------
-    lines.append("## Per scenario")
+    lines.append("## Attribution against the scenario design")
     lines.append("")
     lines.append(
-        "| Scenario | Incident reconstructed | Causal contributors GT | "
-        "Causal contributors inferred | Attribution class | P | R | F1 | Verdict |"
+        "Scored against each scenario's declared causal template, which says what "
+        "the experiment intended. That is a different question from the one the "
+        "responsibility layer answers, and the two can disagree. On "
+        "`S10/rolls_through` this table reads *incorrect* while the "
+        "responsibility analysis reports A as supported, because a template names "
+        "physical causes and the responsibility layer names normative "
+        "contributors. The reconstruction itself is scored against the observable "
+        "ground truth, in the sections below."
+    )
+    lines.append("")
+    lines.append(
+        "| Scenario | Incident reconstructed | Design-template contributors | "
+        "Inferred | Attribution class | P | R | F1 | Verdict |"
     )
     lines.append("|---|---|---|---|---|---|---|---|---|")
     for row in results["per_scenario"]:
@@ -690,7 +701,15 @@ def render_markdown(results: Mapping[str, Any]) -> str:
 
     # -- method ablation -----------------------------------------------
     ablation = results.get("method_ablation") or {}
-    lines.append("## What each layer of the method was worth")
+    lines.append("## What each layer of the method was worth (design reference)")
+    lines.append("")
+    lines.append(
+        "Structural figures here are scored against the scenario design "
+        "reference, not against the observable ground truth. They are kept "
+        "because a three-arm comparison is only meaningful against one fixed "
+        "reference, and they should be read as a comparison between arms rather "
+        "than as the V2 reconstruction result."
+    )
     lines.append("")
     if not ablation.get("n_runs"):
         lines.append("_{0}_".format(ablation.get("note", "no ablation available")))
@@ -785,7 +804,15 @@ def render_markdown(results: Mapping[str, Any]) -> str:
     _v2_markdown(lines, results.get("v2") or {})
 
     # -- headline figures ----------------------------------------------
-    lines.append("## Headline figures")
+    lines.append("## Headline figures (design reference, scenario-aggregated)")
+    lines.append("")
+    lines.append(
+        "Aggregated per scenario variant and scored against the scenario design. "
+        "The participant-weighted clock figures, the perception counts and the "
+        "property verdicts are in their own sections above. The two clock "
+        "averages differ because they average different populations, not because "
+        "they disagree."
+    )
     lines.append("")
     recon = headline["reconstruction"]
     attribution = headline["attribution"]
@@ -800,14 +827,20 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         ("collision pair recall", _fmt(recon["collision_pair_recall"])),
         ("spurious collisions", str(recon["n_spurious_collisions"])),
         ("cross-view trajectory RMSE", _fmt(recon["cross_view_rmse_m"]) + " m"),
-        ("clock offset MAE", _fmt(headline["clock"]["offset_mae_s"], 5) + " s"),
-        ("clock drift error", _fmt(headline["clock"]["drift_mae_ppm"], 2) + " ppm"),
+        ("scenario-aggregated clock offset MAE",
+         _fmt(headline["clock"]["offset_mae_s"], 5) + " s"),
+        # Not an estimation error: the aligner pins scale to 1 on purpose, so
+        # this figure is the true relative drift that choice leaves unmodelled.
+        ("clock drift",
+         "not estimated; scale pinned to 1 "
+         "(unmodelled true drift {0} ppm)".format(
+             _fmt(headline["clock"]["drift_mae_ppm"], 2))),
         ("clock fit residual (self-reported)",
          _fmt(headline["clock"]["alignment_residual_s"], 4) + " s"),
         ("causal path P / R / F1", "{0} / {1} / {2}".format(
             _fmt(paths["precision"]), _fmt(paths["recall"]), _fmt(paths["f1"]))),
         ("causal ancestry recall", _fmt(paths["ancestry_recall"])),
-        ("attribution P / R / F1", "{0} / {1} / {2}".format(
+        ("design-template attribution P / R / F1", "{0} / {1} / {2}".format(
             _fmt(attribution["precision"]), _fmt(attribution["recall"]),
             _fmt(attribution["f1"]))),
         ("exact contributor-set accuracy", _fmt(attribution["exact_set_accuracy"])),
@@ -944,12 +977,23 @@ def _secs(value):
     return "--" if value is None else "{0:.6f} s".format(value)
 
 
+def _sentence(text):
+    """Capitalise a note written to be embedded, so it reads as a sentence."""
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
 def _tally(mapping):
     items = (mapping or {}).items()
     return ", ".join("{0} x{1}".format(k, v) for k, v in items) or "none"
 
 
 def _prf_row(label, block):
+    """One perception row. A quantity with no reference says so."""
+    if block.get("reference") == "unavailable":
+        return "| {0} | {1} detections | no reference | -- | -- | -- |".format(
+            label, block.get("n_detected", 0)
+        )
     return "| {0} | {1} | {2} | {3} | {4} | {5} |".format(
         label,
         block.get("n_true_positive", 0),
@@ -969,7 +1013,7 @@ def _v2_markdown(lines, v2):
 
     clock = v2.get("clock") or {}
     by_source = clock.get("offset_error_by_source") or {}
-    lines.append("## Clocks")
+    lines.append("## Clocks (participant-weighted)")
     lines.append("")
     lines.append(
         "How each recorder reached common time. A vehicle placed by a fitted "
@@ -979,15 +1023,25 @@ def _v2_markdown(lines, v2):
         "timeline is only fixed up to a constant."
     )
     lines.append("")
-    lines.append("| Source | Participants | Offset MAE | Worst |")
-    lines.append("|---|---|---|---|")
+    lines.append(
+        "Participant-weighted: every recorder counts once, so a three-vehicle run "
+        "contributes three rows and a two-vehicle run two. *Recorders* is how "
+        "many were placed by that source; *scored* is how many the error could be "
+        "measured on, since an unresolved recorder has no offset to score. The "
+        "headline table averages per scenario variant instead, which is why the "
+        "two figures differ."
+    )
+    lines.append("")
+    lines.append("| Source | Recorders | Scored | Offset MAE | Worst |")
+    lines.append("|---|---|---|---|---|")
     for source, count in (clock.get("source_distribution") or {}).items():
         stats = by_source.get(source) or {}
-        lines.append("| `{0}` | {1} | {2} | {3} |".format(
-            source, count, _secs(stats.get("mae_s")), _secs(stats.get("max_abs_s"))))
+        lines.append("| `{0}` | {1} | {2} | {3} | {4} |".format(
+            source, count, stats.get("n", 0),
+            _secs(stats.get("mae_s")), _secs(stats.get("max_abs_s"))))
     overall = clock.get("offset_error") or {}
-    lines.append("| **all** | {0} | {1} | {2} |".format(
-        clock.get("n_participants", 0),
+    lines.append("| **all** | {0} | {1} | {2} | {3} |".format(
+        clock.get("n_participants", 0), overall.get("n", 0),
         _secs(overall.get("mae_s")), _secs(overall.get("max_abs_s"))))
     lines.append("")
     lines.append("Run status: {0}. Unresolved recorders: {1} of {2}.".format(
@@ -998,16 +1052,31 @@ def _v2_markdown(lines, v2):
     perception = v2.get("perception") or {}
     lines.append("## Perception, from real campaign frames")
     lines.append("")
+    lines.append(
+        "A row reading *no reference* has nothing to score against. Its "
+        "detections are counted, because how many there were is a fact, but "
+        "whether they were right is not established; printing a precision of "
+        "zero there would turn a missing reference into a measured failure. The "
+        "reason is given under the table."
+    )
+    lines.append("")
     lines.append("| What | TP | FP | FN | Precision | Recall |")
     lines.append("|---|---|---|---|---|---|")
+    unscored = []
     for key, label in (("stop_signs", "STOP signs"),
                        ("yield_signs", "Give-way signs"),
                        ("stop_lines", "Stop lines"),
                        ("lane_markings", "Lane markings")):
-        lines.append(_prf_row(label, perception.get(key) or {}))
+        block = perception.get(key) or {}
+        lines.append(_prf_row(label, block))
+        if block.get("reference") == "unavailable" and block.get("note"):
+            unscored.append((label, block["note"]))
     lines.append("")
-    lines.append("A rate over no instances is `--`, never zero. {0}".format(
-        perception.get("latency_note", "")))
+    for label, note in unscored:
+        lines.append("*{0}, not scored.* {1}.".format(label, _sentence(note)))
+        lines.append("")
+    lines.append("A rate over no instances is `--`, never zero. {0}.".format(
+        _sentence(perception.get("latency_note", "").rstrip("."))))
     lines.append("")
 
     formal = v2.get("formal") or {}
@@ -1074,7 +1143,7 @@ def _v2_markdown(lines, v2):
             sets.get("n_runs_with_a_normative_reference", 0), sets.get("n_runs", 0)))
         for case in sets.get("hard_cases") or []:
             lines.append("")
-            lines.append("- **{0}/{1}** -- {2}".format(
+            lines.append("- **{0}/{1}**: {2}".format(
                 case.get("scenario"), case.get("variant"), case.get("why_it_is_hard")))
     else:
         lines.append("_{0}_".format(sets.get("reason", "not scored")))

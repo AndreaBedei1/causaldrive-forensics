@@ -312,6 +312,9 @@ def aggregate_responsibility(
         if run["normative"]["applicable"]:
             n_normative += 1
 
+    # One explanation per scenario and variant. Repeating it once per seed makes
+    # a three-seed campaign read as three separate findings.
+    seen_hard = set()
     hard = [
         {
             "scenario": r.get("scenario"), "variant": r.get("variant"),
@@ -321,7 +324,10 @@ def aggregate_responsibility(
             "supported": r["normative"]["supported"],
             "why_it_is_hard": r["hard_case"],
         }
-        for r in scored if r.get("hard_case")
+        for r in scored
+        if r.get("hard_case")
+        and (r.get("scenario"), r.get("variant")) not in seen_hard
+        and not seen_hard.add((r.get("scenario"), r.get("variant")))
     ]
 
     # Normative totals over only the runs where a normative reference exists.

@@ -13547,12 +13547,14 @@
       "lane_markings": {
         "f1": null,
         "n_detected": 0,
-        "n_false_negative": 0,
-        "n_false_positive": 0,
-        "n_real": 0,
-        "n_true_positive": 0,
+        "n_false_negative": null,
+        "n_false_positive": null,
+        "n_real": null,
+        "n_true_positive": null,
+        "note": "the lane sensor is an onboard ADAS signal, so the sensor is the measurement and there is no independent reference to score it against. Crossings are reported by type",
         "precision": null,
-        "recall": null
+        "recall": null,
+        "reference": "unavailable"
       },
       "latency_note": "detection latency needs a baseline for when each sign first became visible from the approach, which depends on speed and geometry and is not in the privileged record. Reported as unmeasurable rather than computed against a baseline that was never recorded",
       "n_participants_with_measurable_latency": 0,
@@ -13563,12 +13565,14 @@
       "stop_lines": {
         "f1": null,
         "n_detected": 26,
-        "n_false_negative": 0,
-        "n_false_positive": 26,
-        "n_real": 0,
-        "n_true_positive": 0,
-        "precision": 0.0,
-        "recall": null
+        "n_false_negative": null,
+        "n_false_positive": null,
+        "n_real": null,
+        "n_true_positive": null,
+        "note": "the stop-line reference is a position derived from the sign and the lane, and Town05 paints no bar at these junctions, so no line here is physically verified. The crossings the detector reported are counted and not scored: calling them false positives would charge the detector with missing markings the map never painted",
+        "precision": null,
+        "recall": null,
+        "reference": "unavailable"
       },
       "stop_signs": {
         "f1": 0.6866,
@@ -13578,7 +13582,8 @@
         "n_real": 51,
         "n_true_positive": 46,
         "precision": 0.5542,
-        "recall": 0.902
+        "recall": 0.902,
+        "reference": "verified"
       },
       "yield_signs": {
         "f1": null,
@@ -13588,7 +13593,8 @@
         "n_real": 0,
         "n_true_positive": 0,
         "precision": 0.0,
-        "recall": null
+        "recall": null,
+        "reference": "verified"
       }
     },
     "responsibility": {
@@ -13613,100 +13619,6 @@
             "why_it_is_hard": "priority must stay ambiguous; a method that always names a winner scores better on a naive metric while being wrong"
           },
           {
-            "designed_normative": [],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [],
-            "scenario": "S12",
-            "supported": [],
-            "variant": "near_simultaneous",
-            "why_it_is_hard": "priority must stay ambiguous; a method that always names a winner scores better on a naive metric while being wrong"
-          },
-          {
-            "designed_normative": [],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [],
-            "scenario": "S12",
-            "supported": [],
-            "variant": "near_simultaneous",
-            "why_it_is_hard": "priority must stay ambiguous; a method that always names a winner scores better on a naive metric while being wrong"
-          },
-          {
-            "designed_normative": [
-              "C"
-            ],
-            "designed_physical": [
-              "C"
-            ],
-            "found_physical": [
-              "A",
-              "B"
-            ],
-            "scenario": "S14",
-            "supported": [
-              "B"
-            ],
-            "variant": "c_pushes_b",
-            "why_it_is_hard": "the pushed vehicle must not be an initiating contributor merely because it physically struck the vehicle ahead"
-          },
-          {
-            "designed_normative": [
-              "B",
-              "C"
-            ],
-            "designed_physical": [
-              "B",
-              "C"
-            ],
-            "found_physical": [
-              "A"
-            ],
-            "scenario": "S14",
-            "supported": [],
-            "variant": "independent_impacts",
-            "why_it_is_hard": "two impacts sharing a vehicle but nothing else must not be chained"
-          },
-          {
-            "designed_normative": [
-              "C"
-            ],
-            "designed_physical": [
-              "C"
-            ],
-            "found_physical": [
-              "A",
-              "B"
-            ],
-            "scenario": "S14",
-            "supported": [
-              "B"
-            ],
-            "variant": "c_pushes_b",
-            "why_it_is_hard": "the pushed vehicle must not be an initiating contributor merely because it physically struck the vehicle ahead"
-          },
-          {
-            "designed_normative": [
-              "B",
-              "C"
-            ],
-            "designed_physical": [
-              "B",
-              "C"
-            ],
-            "found_physical": [
-              "A"
-            ],
-            "scenario": "S14",
-            "supported": [],
-            "variant": "independent_impacts",
-            "why_it_is_hard": "two impacts sharing a vehicle but nothing else must not be chained"
-          },
-          {
             "designed_normative": [
               "C"
             ],
@@ -13763,115 +13675,11 @@
               "B"
             ],
             "designed_physical": [
-              "B"
-            ],
-            "found_physical": [
-              "B"
-            ],
-            "scenario": "S15",
-            "supported": [
-              "B"
-            ],
-            "variant": "deflected_into_c",
-            "why_it_is_hard": "the deflected vehicle and the bystander are both uninvolved in the normative account"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
-              "B"
-            ],
-            "found_physical": [
-              "A",
-              "B"
-            ],
-            "scenario": "S15",
-            "supported": [
-              "A",
-              "B"
-            ],
-            "variant": "deflected_into_c",
-            "why_it_is_hard": "the deflected vehicle and the bystander are both uninvolved in the normative account"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
               "A",
               "B"
             ],
             "found_physical": [
               "A"
-            ],
-            "scenario": "S16",
-            "supported": [],
-            "variant": "consequential",
-            "why_it_is_hard": "the second impact is a consequence, so its participant contributes to the first and not to the second"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [
-              "A"
-            ],
-            "scenario": "S16",
-            "supported": [],
-            "variant": "independent",
-            "why_it_is_hard": "the same pair, the same geometry, and the second impact is that vehicle's own doing"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [
-              "A"
-            ],
-            "scenario": "S16",
-            "supported": [],
-            "variant": "consequential",
-            "why_it_is_hard": "the second impact is a consequence, so its participant contributes to the first and not to the second"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [
-              "A",
-              "B"
-            ],
-            "scenario": "S16",
-            "supported": [
-              "A"
-            ],
-            "variant": "independent",
-            "why_it_is_hard": "the same pair, the same geometry, and the second impact is that vehicle's own doing"
-          },
-          {
-            "designed_normative": [
-              "B"
-            ],
-            "designed_physical": [
-              "A",
-              "B"
-            ],
-            "found_physical": [
-              "A",
-              "B"
             ],
             "scenario": "S16",
             "supported": [],
