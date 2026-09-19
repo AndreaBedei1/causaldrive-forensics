@@ -9,7 +9,7 @@ it replaced.
 
 | | |
 |---|---|
-| `FINAL_STATUS_v1.md` | the V1 status report, written before the observable ground truth existed. Its headline structural numbers were computed against the scenario template and are not comparable with anything under `results/` |
+| [`FINAL_STATUS_v1.md`](FINAL_STATUS_v1.md) | the V1 status report, written before the observable ground truth existed. Its headline structural numbers were computed against the scenario template and are not comparable with anything under `results/` |
 | `RESULTS_v1.md` | the V1 results page, written against the scenario template. Superseded by [`docs/RESULTS.md`](../docs/RESULTS.md) |
 | `results_v1/` | the V1 result tables, from `artifacts_independent_clocks/` |
 

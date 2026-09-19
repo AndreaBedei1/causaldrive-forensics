@@ -1,5 +1,10 @@
 # Overview
 
+The [README](../README.md) is the one-minute version. This page is the longer
+one: what makes the problem hard, what the pipeline does about it, what is
+claimed and how each claim is checked, and what the project deliberately refuses
+to do.
+
 ## The problem
 
 Several vehicles are involved in a collision. Each carried its own recorder,
@@ -32,7 +37,9 @@ problem. It is a reconstruction problem with three properties that make it hard:
   │ telemetry│             │ telemetry│             │ telemetry│     each vehicle
   │ controls │             │ controls │             │ controls │     sees only its
   │ radar    │             │ radar    │             │ radar    │     own instruments
-  │ own clock│             │ own clock│             │ own clock│     and its own clock
+  │ camera   │             │ camera   │             │ camera   │     and its own clock
+  │ lane     │             │ lane     │             │ lane     │
+  │ own clock│             │ own clock│             │ own clock│
   └────┬─────┘             └────┬─────┘             └────┬─────┘
        │ local events            │                        │
        │ local causal graph      │                        │
@@ -73,10 +80,10 @@ the code that writes it.
 
 | Claim | Checked by |
 |---|---|
-| Independent recorders can be placed on one timeline from shared observations alone | offset and drift error against the true clock profiles |
+| Independent recorders can be placed on one timeline from shared observations alone | offset error against the true clock profiles. Drift is not estimated, and what that leaves unmodelled is measured as a control |
 | Merged logs reconstruct more of the incident than any single vehicle's | three-arm ablation over identical recordings |
 | Causal reasoning *after* fusion recovers relations no vehicle could claim | the same ablation, changing one configuration key |
-| The reconstruction names the right contributors | contributor sets against the scenario's designed causal template |
+| The reconstruction names the right contributors | contributor sets, against the observable ground truth where one exists and against the scenario's designed causal template where it does not. The two are never mixed |
 | It stays silent when there is nothing to attribute | false-attribution count on the negative controls |
 
 Results for all five are in [RESULTS.md](RESULTS.md), generated from the
@@ -113,8 +120,10 @@ into a culprit. Details in [COUNTERFACTUALS.md](COUNTERFACTUALS.md).
 |---|---|
 | What can each layer legally read? | [DATA_BOUNDARY.md](DATA_BOUNDARY.md) |
 | How is the code organised? | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| What are the nine scenarios? | [SCENARIOS.md](SCENARIOS.md) |
+| What are the sixteen scenarios? | [SCENARIOS.md](SCENARIOS.md) |
 | How is the common timeline estimated? | [CLOCKS.md](CLOCKS.md) |
+| What is an event, and what may be compared? | [EVENTS.md](EVENTS.md) |
+| Who violated what, and does it matter causally? | [RESPONSIBILITY.md](RESPONSIBILITY.md) |
 | How are the logs merged? | [GRAPH_FUSION.md](GRAPH_FUSION.md) |
 | What is a causal edge, and where does it come from? | [CAUSAL_MODEL.md](CAUSAL_MODEL.md) |
 | How is contribution established? | [COUNTERFACTUALS.md](COUNTERFACTUALS.md) |

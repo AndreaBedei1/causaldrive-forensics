@@ -338,6 +338,8 @@ constrain how this page should be read:
 ## Related
 
 - [`results/final_results.md`](../results/final_results.md), the generated tables
+- [`results/supervisor_table.md`](../results/supervisor_table.md), one row per run,
+  for when an aggregate needs tracing back to the runs behind it
 - [LIMITATIONS.md](LIMITATIONS.md), what this does not establish
 - [SCENARIOS.md](SCENARIOS.md), what each scenario is for
 - [REPRODUCIBILITY.md](REPRODUCIBILITY.md), running it again

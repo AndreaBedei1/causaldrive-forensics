@@ -102,6 +102,7 @@ Full tables, case studies and negative results in [Results](docs/RESULTS.md).
 
 | | |
 |---|---|
+| [Overview](docs/OVERVIEW.md) | the longer version of this page: what makes the problem hard, and what is claimed |
 | [Architecture](docs/ARCHITECTURE.md) | how the pieces fit together |
 | [Events](docs/EVENTS.md) | the event vocabulary, and what may be compared |
 | [Time synchronization](docs/CLOCKS.md) | contact first, radar second, unresolved last |
@@ -114,6 +115,8 @@ Full tables, case studies and negative results in [Results](docs/RESULTS.md).
 | [Viewer](docs/VIEWER.md) | the four sections: reconstruction, graph, responsibility, video |
 | [Reproducibility](docs/REPRODUCIBILITY.md) | running it again and getting the same answer |
 | [Data boundary](docs/DATA_BOUNDARY.md) | what inference may not see, and how that is enforced |
+| [What changed from V1](docs/V2_REFACTOR_AUDIT.md) | the refactor, and what was deliberately not changed |
+| [References](docs/REFERENCES.md) | the reading behind the design choices |
 
 Earlier V1 material is kept under [`legacy/`](legacy/README.md). V1 and V2
 recordings are never mixed: V2 changed the sensors and the timing semantics, so a
