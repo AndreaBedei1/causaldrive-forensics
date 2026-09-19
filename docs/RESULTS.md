@@ -56,9 +56,15 @@ This is the part that works.
 | Collision location error | 0.0211 m mean |
 | Spurious collisions | 42, spread over 33 of the 105 runs |
 | Cross-view trajectory RMSE | 1.503 m |
+| Multi-impact order | claimed on 12 of 14 multi-impact runs, right on all 12; declined on 2 |
 
 An incident is a collision or a near miss, so the 32 includes the negative
 controls where the correct answer is a near miss and no collision.
+
+Ordering two impacts is the harder half of a chain. Where the method claimed an
+order it was right every time; where the offset it would have to rest on was
+impeached, it declined rather than sorting two timestamps. Section 8 works
+through why.
 
 Recall is near perfect and precision is the weak side. The 42 spurious
 collisions concentrate in a few scenarios: S13 contributes 12, S12 and S16 six
