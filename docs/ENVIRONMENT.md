@@ -236,7 +236,7 @@ so they are recorded rather than left to be rediscovered.
 
     The obvious hypothesis is that the accumulating clients are the cause, so
     `SimulatorSession.release_client()` now drops the client and forces a
-    collection *before* the server is replaced -- and callers holding their own
+    collection *before* the server is replaced, and callers holding their own
     reference drop it first, or the session's release is not the last one and
     the C++ destructor never runs.
 

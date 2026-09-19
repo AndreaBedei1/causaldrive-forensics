@@ -138,8 +138,8 @@ Two things made the default protocol fragile and are fixed rather than worked
 around. `connect_with_retry` probed `get_server_version`, which answers while the
 engine is still bringing a map up, so the caller's first `get_map` blocked for
 sixty seconds and raised; it now asks for the world as well. And running a second
-engine alongside the campaign's own -- easy to do by accident -- leaves two
-processes contending for port 2000 and neither can serve.
+engine alongside the campaign's own, easy to do by accident, leaves two processes
+contending for port 2000 and neither can serve.
 
 The tree is stamped `campaign.json` with `clock_protocol:
 independent_local_clocks`. A run recorded under a different protocol is reported

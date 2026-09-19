@@ -117,7 +117,7 @@ The seed is a single integer threaded through everything the client controls:
 |---|---|
 | `ScenarioWorld.rng` | deterministic blueprint colour selection |
 | Traffic Manager | `set_random_device_seed(seed)` (background behaviour only; never in the safety-critical path) |
-| `ParticipantAgent._rng` | `(seed * 1000003) ^ (hash(participant_id) & 0xFFFF)` -- a **separate stream per participant**, so adding a third vehicle cannot perturb the first two's degraded-radar draws |
+| `ParticipantAgent._rng` | `(seed * 1000003) ^ (hash(participant_id) & 0xFFFF)`: a **separate stream per participant**, so adding a third vehicle cannot perturb the first two's degraded-radar draws |
 | `RadarFrontEnd` | consumes that stream for `apply_degradation` |
 
 The recommended campaign is `SEEDS = 0 1 2` (`make suite SEEDS="0 1 2"`). Repeated
@@ -131,14 +131,14 @@ depends on one lucky initial condition.
 Reproducibility is conditional on that "given a fresh simulator", and it was
 measured rather than assumed. Running S05 three times **in one server session**
 with an identical specification and seed gave minimum separations of 6.996 m,
-6.687 m and 6.228 m -- drifting monotonically, with final positions a metre
+6.687 m and 6.228 m: drifting monotonically, with final positions a metre
 apart. Running the same specification twice, each on a **freshly started server
-process**, reproduced it exactly: 3.453 m minimum separation, collision at
-t = 3.75 s, identical final pose.
+process**, reproduced it exactly: 3.453 m minimum separation, collision at t =
+3.75 s, identical final pose.
 
 The drift is accumulated simulator state we cannot reach through the API: actors
 are destroyed and world settings restored between runs regardless. And it is not
-a small numerical nuisance -- the drifted result and the reproducible one differ
+a small numerical nuisance: the drifted result and the reproducible one differ
 by enough to flip the outcome class (near miss versus collision).
 
 Every recorded run therefore starts its own simulator process, at a cost of about
@@ -191,21 +191,21 @@ radar?" is a controlled, re-runnable experiment.
 Each gate must hold before the next result means anything. Every gate is a
 recorded artifact, not a judgement call.
 
-### Gate 0 -- environment
+### Gate 0: environment
 
 `import_carla()` succeeds; a server answers at `simulation.host:port`;
 `connect_with_retry` reports matching client/server versions.
 **Artifact:** `environment_block()` inside `manifest.json` (Python version, CARLA
 version, platform, git commit, package version).
 
-### Gate 1 -- the scenario is well formed
+### Gate 1: the scenario is well formed
 
 `ScenarioSpec.validate_static()`: 2--3 participants, unique participant ids,
 unique action ids, `expected_collision_pairs` naming real participants, every
 `intervention_candidates` entry a declared action, a known `expected_outcome`.
 A problem **raises** before the simulator is touched.
 
-### Gate 2 -- the run produced its declared encounter
+### Gate 2: the run produced its declared encounter
 
 `validate_run(spec, oracle, agents, cfg)` → `scenario_validation.json` with
 `passed` and an explicit `problems` list, also copied into `RunManifest.notes`:
@@ -219,43 +219,43 @@ A problem **raises** before the simulator is touched.
 * every participant actually moved (privileged max speed ≥ 0.5 m/s).
 
 **A failed Gate 2 invalidates every downstream number for that run.** This is what
-stops a scenario that quietly stopped colliding -- because a controller gain or a
-map changed -- from poisoning a campaign average.
+stops a scenario that quietly stopped colliding, because a controller gain or a
+map changed, from poisoning a campaign average.
 
-### Gate 3 -- the evidence is usable
+### Gate 3: the evidence is usable
 
 Per participant: the recorder's `meta["recorder"]` block (retained counts, window,
 discards) and `sensor_health` (frames seen, missed, queue drops). A participant
-with zero tracks is *not* a gate failure -- it is a legitimate result (B in S01) --
-but a participant with zero *radar frames* is.
+with zero tracks is *not* a gate failure, it is a legitimate result (B in S01), but
+a participant with zero *radar frames* is.
 
-### Gate 4 -- local inference ran
+### Gate 4: local inference ran
 
 `vehicle_*/events.json`, `event_graph.json`, `causal_graph.json` exist with
 `scope = local`; the causal graph is acyclic (verified, not assumed, by
 `build_causal_graph`).
 
-### Gate 5 -- fusion ran
+### Gate 5: fusion ran
 
 `fusion/association_report.json`, `fused_causal_graph.json` (scope `fused`) and
 `fusion_diagnostics.json` exist; `diagnostics["dag"]["is_dag"]` is true; the
 time-alignment diagnostics carry no `error`-severity entry.
 
-### Gate 6 -- the oracle exists
+### Gate 6: the oracle exists
 
 `oracle/oracle_trace.jsonl.gz` and `oracle/oracle_summary.json` exist.
 `load_oracle_trace()` raises rather than returning an empty trace, because a
 silent empty trace would turn every downstream comparison into a vacuous pass.
 
-### Gate 7 -- evaluation
+### Gate 7: evaluation
 
-`evaluate_run` writes `evaluation/metrics.json`. Its central discipline:
-**absent is not zero.** Every metric block is computed only when its inputs exist;
-when they do not, the block is `None` and a `reasons` entry names the missing
-artifact. A run whose oracle graph was never built must not be reported as a
-reconstruction that scored 0.0 -- that is a fabricated result and it would drag
-every campaign average down. `_assert_evaluation_path` enforces that nothing is
-ever written back into `vehicle_*/` or `fusion/`.
+`evaluate_run` writes `evaluation/metrics.json`. Its central discipline: **absent
+is not zero.** Every metric block is computed only when its inputs exist; when
+they do not, the block is `None` and a `reasons` entry names the missing artifact.
+A run whose oracle graph was never built must not be reported as a reconstruction
+that scored 0.0: that is a fabricated result and it would drag every campaign
+average down. `_assert_evaluation_path` enforces that nothing is ever written back
+into `vehicle_*/` or `fusion/`.
 
 ---
 
@@ -321,7 +321,7 @@ edge_type)`:
 | Class | Meaning |
 |---|---|
 | `matched` | the same triple on both sides |
-| `extra` | in the prediction only -- a false positive |
+| `extra` | in the prediction only: a false positive |
 | `missing` | in the reference only |
 | `reversed` | the *swapped* triple exists in the reference while the straight one does not |
 
@@ -333,7 +333,7 @@ wrong, which is a different failure.
 SHD = n_missing + n_extra + n_reversed
 ```
 
-A reversal costs **one** edit, not two -- flipping an arrow is a single operation,
+A reversal costs **one** edit, not two: flipping an arrow is a single operation,
 and charging it twice would make a graph that found every causal pair but got one
 direction wrong look worse than a graph that missed the pair entirely.
 
@@ -345,7 +345,7 @@ positives:
 edge_precision/recall = prf1( n_matched , n_extra + n_reversed , n_missing + n_reversed )
 ```
 
-**Edges touching an unmatched node.** By default they are still counted -- a
+**Edges touching an unmatched node.** By default they are still counted: a
 reference edge onto a node the prediction never found is a genuine miss. This
 matters for the central experiment: a vehicle that observed one third of a crash
 must not be able to report perfect edge recall on the third it saw, because that
@@ -359,7 +359,7 @@ after the fact.
 
 `compare_local_vs_fused` scores every local graph, the fused graph, and their
 difference. **Fusion is only worth its complexity if it beats the *best* single
-onboard reconstruction, not the average one** -- averaging would let a participant
+onboard reconstruction, not the average one**: averaging would let a participant
 that saw nothing flatter the fused result. The best local graph is therefore
 selected explicitly by `_rank_key`: edge F1 first (the structural claim under
 test), node F1 as a tie-break, then the *lower* SHD, then the participant id for
@@ -376,9 +376,9 @@ Deliberately strict. A run where fusion changes nothing reports `False` with zer
 deltas; a run where fusion makes things *worse* reports negative deltas. **Both are
 results, not bugs, and both survive into the aggregate tables.** Alongside it,
 `knowledge_gain` names the oracle-relevant nodes and edges the fused graph
-recovered and the best local baseline lacks (see `docs/GRAPH_FUSION.md` §8) --
-claims the fused graph adds that the *reference* does not contain are false
-positives, not gains.
+recovered and the best local baseline lacks (see `docs/GRAPH_FUSION.md` §8): claims
+the fused graph adds that the *reference* does not contain are false positives, not
+gains.
 
 ### 3.6 Association metrics
 
@@ -386,9 +386,9 @@ Identity resolution is scored against the oracle's true track identities, and th
 true identity is looked up **only after** the inference has been made and
 persisted. Because `UNRESOLVED` is a legitimate verdict, this cannot be scored as
 plain classification: per-track verdicts are `correct`, `incorrect`, `unresolved`
-and **`no_ground_truth`** -- a track the oracle cannot attribute to any
-participant (road furniture, a reflection) is *not* evidence that association was
-wrong. `evaluation.association.count_unresolved_as_miss` (true) decides whether an
+and **`no_ground_truth`**, a track the oracle cannot attribute to any participant
+(road furniture, a reflection) is *not* evidence that association was wrong.
+`evaluation.association.count_unresolved_as_miss` (true) decides whether an
 abstention counts against recall. Reported: the four counts, precision, recall,
 F1, mean assignment confidence, mean trajectory RMSE, and a per-track table
 carrying both the claimed and the true identity.
@@ -397,16 +397,15 @@ carrying both the claimed and the true identity.
 
 `evaluate_attribution` compares the causal actions the counterfactual layer put
 forward against the scenario's designed initiators (`causal_template`), and
-reports -- **separately, on purpose**:
+reports, **separately, on purpose**:
 
-* the causal-action **set** score (precision / recall / F1);
-* **primary-initiator accuracy**, only where the scenario declares exactly one
-  initiator; elsewhere `None` with a reason, because there is no unambiguous right
-  answer to be accurate about;
-* whether the **single-vs-shared** classification was right (S05 must come out
-  `shared_contribution`);
-* the count of **insufficient-evidence** cases -- a first-class result: a system
-  that abstains on an undecidable action is behaving correctly.
+* the causal-action **set** score (precision / recall / F1); * **primary-initiator
+accuracy**, only where the scenario declares exactly one initiator; elsewhere
+`None` with a reason, because there is no unambiguous right answer to be accurate
+about; * whether the **single-vs-shared** classification was right (S05 must come
+out `shared_contribution`); * the count of **insufficient-evidence** cases, a
+first-class result: a system that abstains on an undecidable action is behaving
+correctly.
 
 An action linked to the outcome by a `PREVENTS` edge is **not** an initiator
 (`DEFAULT_PREVENTIVE_EDGE_TYPES`): in S01, A's late brake acted against the crash
@@ -429,7 +428,7 @@ rather than an anecdote.
 
 The verdict counts per property and per participant from
 `checking/model_check_results.json`, with all three keys (`PASS` / `FAIL` /
-`UNKNOWN`) always emitted -- a consumer must never have to guess whether a missing
+`UNKNOWN`) always emitted: a consumer must never have to guess whether a missing
 key means zero or means the checker did not run. `UNKNOWN` rates are a *reported
 result*, not a defect rate.
 
@@ -554,24 +553,22 @@ alone.
 ## 4. Evaluation methodology
 
 1. **The oracle is read last, and never by inference.** `cdf.evaluation` is the
-   only layer that opens local, fused and oracle artifacts in one process, and it
-   writes exclusively under `evaluation/` (and `artifacts/summary/` for a
-   campaign).
+only layer that opens local, fused and oracle artifacts in one process, and it
+writes exclusively under `evaluation/` (and `artifacts/summary/` for a campaign).
 2. **One contract per campaign.** `event_match_tolerance(cfg)` and
-   `graph_match_settings(cfg)` return the settings as a *tuple*, read once and
-   threaded through every comparison, so no call site can read one setting and
-   forget the other and make two "identical" comparisons incomparable.
-3. **Absent blocks are `None` with a reason**, never zero-filled. A block with no
-   rows produces **no rows** in the CSV rather than a row of zeros: an empty table
-   says "not measured", a table full of zeros says "measured, and it failed".
-4. **Stable columns.** Every table declares its columns explicitly in
-   `cdf.evaluation.tables`, so results directories stay diffable and concatenable
-   across scenarios.
-5. **Ground truth is measured, not assumed.** `build_oracle_events` shares **no
-   code** with the local extractor -- scoring a reconstruction against a reference
-   produced by the same code would measure nothing but numerical noise -- and it
-   reads the scripted action schedule from the *trace*, not from the spec, so a
-   counterfactual replay is scored against what the controller actually executed.
+`graph_match_settings(cfg)` return the settings as a *tuple*, read once and
+threaded through every comparison, so no call site can read one setting and forget
+the other and make two "identical" comparisons incomparable. 3. **Absent blocks
+are `None` with a reason**, never zero-filled. A block with no rows produces **no
+rows** in the CSV rather than a row of zeros: an empty table says "not measured",
+a table full of zeros says "measured, and it failed". 4. **Stable columns.** Every
+table declares its columns explicitly in `cdf.evaluation.tables`, so results
+directories stay diffable and concatenable across scenarios. 5. **Ground truth is
+measured, not assumed.** `build_oracle_events` shares **no code** with the local
+extractor, scoring a reconstruction against a reference produced by the same code
+would measure nothing but numerical noise, and it reads the scripted action
+schedule from the *trace*, not from the spec, so a counterfactual replay is scored
+against what the controller actually executed.
 
 Per-run artifacts: `evaluation/metrics.json`, `event_matches.csv`,
 `edge_matches.csv`, `attribution_metrics.json`.
@@ -615,26 +612,25 @@ the sensor itself reported. Nothing about the observed object is required.
 Three implementation details matter:
 
 * the test pairs the measured range rate with **the bearing it was measured
-  along** -- the sensor-frame azimuth rotated into the body frame by the mounting
-  yaw. Using the body-frame centroid bearing instead introduces a parallax error
-  of the order of the mounting offset (~2 m), which at short range is large enough
-  to make roadside clutter look like a moving object;
-* a cluster's verdict uses the **median** member residual, so a handful of returns
-  smeared by a neighbouring moving object cannot drag a wall's verdict;
-* the test gates **track birth only**
-  (`radar_processing.stationary.reject_new_tracks = true`). An already-established
-  track that later stops -- a vehicle braking to a halt, which is precisely the
-  situation this project studies -- still associates normally and is never lost.
+along**: the sensor-frame azimuth rotated into the body frame by the mounting yaw.
+Using the body-frame centroid bearing instead introduces a parallax error of the
+order of the mounting offset (~2 m), which at short range is large enough to make
+roadside clutter look like a moving object; * a cluster's verdict uses the
+**median** member residual, so a handful of returns smeared by a neighbouring
+moving object cannot drag a wall's verdict; * the test gates **track birth only**
+(`radar_processing.stationary.reject_new_tracks = true`). An already-established
+track that later stops, a vehicle braking to a halt, which is precisely the
+situation this project studies, still associates normally and is never lost.
 
 Tolerance: `radar_processing.stationary.tolerance_mps = 1.5`.
 
 **Measured effect.** On S01 this test reduced participant A from **45 spurious
 tracks to 1 correct one**, at **1.32 m mean position error**.
 
-*(For reference, the committed `S01 / seed 0 / crash` artifact -- produced with
-this calibration -- shows that single track `A::T001` associated to B with a
-trajectory **RMSE of 1.356 m over 5.90 s** across 119 comparison samples. RMSE over
-the association window and the calibration's mean position error are different
+*(For reference, the committed `S01 / seed 0 / crash` artifact, produced with this
+calibration, shows that single track `A::T001` associated to B with a trajectory
+**RMSE of 1.356 m over 5.90 s** across 119 comparison samples. RMSE over the
+association window and the calibration's mean position error are different
 statistics; both are quoted as measured.)*
 
 ### 5.3 Clustering and tracking parameters
@@ -647,10 +643,10 @@ Tuned against the same measured frames:
 | | `cluster.min_points` | 3 | DBSCAN `minPts` (the point itself counts) |
 | | `cluster.velocity_weight` | 0.6 | seconds converting a range-rate difference into a pseudo-metre, so two objects at the same place moving differently do not merge |
 | | `cluster.max_clusters` | 24 | a saturated frame is exactly where far-field returns matter least, so the cap keeps the closest |
-| Track | `tracking.gate_m` | 4.5 | association gate on the **global-frame** prediction -- gating in the body frame would let own yaw rate dominate the frame-to-frame displacement of a stationary object and blow the gate |
+| Track | `tracking.gate_m` | 4.5 | association gate on the **global-frame** prediction: gating in the body frame would let own yaw rate dominate the frame-to-frame displacement of a stationary object and blow the gate |
 | | `tracking.max_misses` | 6 | coast through a dropout rather than shredding a track on one missed frame |
 | | `tracking.min_hits_to_confirm` | 3 | with `confidence.min_confirm` 0.35; confirmation **latches**, because flickering confirmation would fragment the event stream built on top of it |
-| | `tracking.position_alpha` / `velocity_alpha` | 0.55 / 0.35 | alpha-beta smoothing -- the right complexity for radar clusters at 20 Hz: no covariance to mis-initialise, graceful under the dropouts the degraded profiles inject |
+| | `tracking.position_alpha` / `velocity_alpha` | 0.55 / 0.35 | alpha-beta smoothing, the right complexity for radar clusters at 20 Hz: no covariance to mis-initialise, graceful under the dropouts the degraded profiles inject |
 | | `tracking.max_tracks` | 16 | capacity bound; least-confident evicted first, ties by creation order so an established track is never evicted by a fresh one of equal confidence |
 | | `confidence.hit_gain` / `miss_decay` | 0.16 / 0.22 | decay faster than growth, so a fading track is dropped rather than lingering |
 
@@ -661,14 +657,14 @@ claim built on the track.
 
 ### 5.4 Recorder sizing, measured
 
-Raw CARLA radar produces roughly 145 detections per frame per sensor; at 20 Hz
-over a 45 s run that is ~130k detections per vehicle. The recorder must run inside
-the simulation loop without unbounded growth, so each stream's ring buffer is
-sized once at `pre_event_s * sample_rate_hz * records_per_step` and the multiplicity
-is read from **the same configuration keys the producers use** -- with 16 tracks
-per step, sizing the track buffer in plain samples would silently shorten its
-history to 1.25 s instead of 20 s, and the track stream is precisely the
-interaction evidence the extractor depends on.
+Raw CARLA radar produces roughly 145 detections per frame per sensor; at 20 Hz over
+a 45 s run that is ~130k detections per vehicle. The recorder must run inside the
+simulation loop without unbounded growth, so each stream's ring buffer is sized once
+at `pre_event_s * sample_rate_hz * records_per_step` and the multiplicity is read
+from **the same configuration keys the producers use**: with 16 tracks per step,
+sizing the track buffer in plain samples would silently shorten its history to 1.25
+s instead of 20 s, and the track stream is precisely the interaction evidence the
+extractor depends on.
 
 Observed on the committed S01 run: `stream_capacity_samples` = 400 for telemetry,
 controls and radar, **6400** for tracks; `radar_points_discarded = 0` (the 400
@@ -687,29 +683,26 @@ A result counts as reproducible in this project when all of the following hold,
 and all of them are checkable from the artifacts alone:
 
 1. `manifest.json` carries the run id, the seed, the **full merged configuration**
-   and its hash, the environment block and the git commit;
-2. `scenario_validation.json` shows `passed: true` (Gate 2);
-3. `evidence_manifest.json` carries a SHA-256 for every file in the run
-   directory (`write_evidence_manifest`), and
-   `python scripts/verify_evidence.py --artifacts artifacts` re-hashes them and
-   reports any file that is missing or changed. The manifest records the stage
-   that wrote it: a run writes one at the end of recording, and
-   `scripts/reprocess_runs.py --stages manifest` rewrites it to cover the
-   artifacts that analysis, fusion, the oracle, checking, evaluation and the
-   viewer bundle add afterwards. A file on disk that the manifest does not list
-   is reported as *unlisted*, not as a failure, because that is what a stale
-   manifest looks like -- only a missing or altered file fails verification;
-4. re-running the same seed **on a freshly started simulator** produces
-   byte-comparable artifacts -- `write_json` sorts keys and writes atomically,
-   `write_jsonl_gz` pins `mtime = 0`, event ids are SHA-256 digests of
-   scope/owner/type/rounded-time/subject, and every sort in the pipeline carries
-   explicit tie-breakers. Re-running against a server that has already executed
-   other runs does **not** qualify: see "The simulator must be restarted between
-   runs" above;
-5. the configuration hash is stamped into the association report, the fusion
-   diagnostics, the checking report and the counterfactual manifest as well as
-   the run manifest, so a mismatch between what produced a run and what
-   evaluated it is visible rather than silent.
+and its hash, the environment block and the git commit; 2.
+`scenario_validation.json` shows `passed: true` (Gate 2); 3.
+`evidence_manifest.json` carries a SHA-256 for every file in the run directory
+(`write_evidence_manifest`), and `python scripts/verify_evidence.py --artifacts
+artifacts` re-hashes them and reports any file that is missing or changed. The
+manifest records the stage that wrote it: a run writes one at the end of
+recording, and `scripts/reprocess_runs.py --stages manifest` rewrites it to cover
+the artifacts that analysis, fusion, the oracle, checking, evaluation and the
+viewer bundle add afterwards. A file on disk that the manifest does not list is
+reported as *unlisted*, not as a failure, because that is what a stale manifest
+looks like: only a missing or altered file fails verification; 4. re-running the
+same seed **on a freshly started simulator** produces byte-comparable artifacts:
+`write_json` sorts keys and writes atomically, `write_jsonl_gz` pins `mtime = 0`,
+event ids are SHA-256 digests of scope/owner/type/rounded-time/subject, and every
+sort in the pipeline carries explicit tie-breakers. Re-running against a server
+that has already executed other runs does **not** qualify: see "The simulator must
+be restarted between runs" above; 5. the configuration hash is stamped into the
+association report, the fusion diagnostics, the checking report and the
+counterfactual manifest as well as the run manifest, so a mismatch between what
+produced a run and what evaluated it is visible rather than silent.
 
 ### What the recorded campaign actually is
 
@@ -724,8 +717,8 @@ one.
 It was checked. Across all 39 runs and against the configuration in force at
 HEAD, the *only* keys that differ anywhere are
 
-* `counterfactual.resume` (all runs -- the key did not exist yet), and
-* `counterfactual.restart_server_per_replay` (the two earliest S01 crash runs).
+* `counterfactual.resume` (all runs: the key did not exist yet), and *
+`counterfactual.restart_server_per_replay` (the two earliest S01 crash runs).
 
 Both govern how a counterfactual replay is *executed*. Neither can reach a
 recording, a local reconstruction, a fusion, a model check or a metric. Every

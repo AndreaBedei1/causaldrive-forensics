@@ -11,37 +11,32 @@ suite must assert.
 
 ## 1. Allowed and forbidden inputs, per layer
 
-### `cdf.local` -- per-participant inference
+### `cdf.local`: per-participant inference
 
 **Allowed** (all of it produced by, and about, one participant):
 
-* its own `TelemetrySample` stream -- pose `(x, y, z, yaw, pitch, roll)`,
-  velocity, acceleration, `speed`, `accel_long`, `accel_lat`, `yaw_rate`;
-* its own `ControlSample` stream -- throttle, brake, steer, hand brake, reverse,
-  gear;
-* its own `RadarFrame` stream -- `(depth, azimuth, altitude, velocity)` returns
-  plus that participant's own sensor extrinsics (`sensor_id`, `sensor_yaw`,
-  `sensor_x/y/z`);
-* its own `TrackSample` stream -- tracks produced by *its own* tracker, labelled
-  with *its own* anonymous ids (`make_track_id("A", 3)` → `"A::T003"`);
-* its own `LocalTriggerRecord`s -- that an impact occurred, when, and how hard;
-* the resolved `Config` thresholds.
+* its own `TelemetrySample` stream, pose `(x, y, z, yaw, pitch, roll)`,
+velocity, acceleration, `speed`, `accel_long`, `accel_lat`, `yaw_rate`; * its
+own `ControlSample` stream, throttle, brake, steer, hand brake, reverse, gear; *
+its own `RadarFrame` stream, `(depth, azimuth, altitude, velocity)` returns plus
+that participant's own sensor extrinsics (`sensor_id`, `sensor_yaw`,
+`sensor_x/y/z`); * its own `TrackSample` stream, tracks produced by *its own*
+tracker, labelled with *its own* anonymous ids (`make_track_id("A", 3)` →
+`"A::T003"`); * its own `LocalTriggerRecord`s: that an impact occurred, when,
+and how hard; * the resolved `Config` thresholds.
 
 **Forbidden:**
 
-* any other actor's true pose, velocity, controls or intent;
-* any CARLA actor id, including the identity of a collision partner;
-* map data of any kind -- lane id, road id, section id, junction id, waypoints,
-  lane topology;
-* traffic-light state, phase or id;
-* scenario labels -- roles, expected outcomes, causal templates, fault
-  assignments;
-* anything under `oracle/`.
+* any other actor's true pose, velocity, controls or intent; * any CARLA actor
+id, including the identity of a collision partner; * map data of any kind, lane
+id, road id, section id, junction id, waypoints, lane topology; * traffic-light
+state, phase or id; * scenario labels, roles, expected outcomes, causal
+templates, fault assignments; * anything under `oracle/`.
 
-### `cdf.fusion` -- post-event merge
+### `cdf.fusion`: post-event merge
 
 **Allowed:** every participant's *exported local logs and graphs*, i.e. exactly
-what the participants could have handed over after an incident -- their own
+what the participants could have handed over after an incident: their own
 telemetry (the trajectory each one self-reports), their own track streams, their
 own events and their own graph documents, plus the `Config`.
 
@@ -50,7 +45,7 @@ identity may **only** be established from observable trajectory evidence
 (`cdf.fusion.track_association`), never from a simulator id. `cdf.fusion` may not
 import `cdf.oracle`, `cdf.simulation` or `carla`.
 
-### `cdf.graph`, `cdf.checking` -- inference support
+### `cdf.graph`, `cdf.checking`: inference support
 
 **Allowed:** whatever their caller hands them from the two layers above.
 `cdf.checking` additionally evaluates *privileged* properties, but does so over a
@@ -59,7 +54,7 @@ import `cdf.oracle`, `cdf.simulation` or `carla`.
 
 **Forbidden:** importing `cdf.oracle`, `cdf.simulation` or `carla`.
 
-### `cdf.oracle`, `cdf.simulation` -- privileged
+### `cdf.oracle`, `cdf.simulation`: privileged
 
 **Allowed:** everything. `cdf.simulation` is *test-generation* code: it
 legitimately reads the map, places vehicles on lane waypoints, scripts their
@@ -70,7 +65,7 @@ behaviour and knows the intended outcome, because it creates all of it.
 under `oracle/`, carry `Provenance.ORACLE`, and are refused at every inference
 boundary.
 
-### `cdf.evaluation` -- the comparison layer
+### `cdf.evaluation`: the comparison layer
 
 **Allowed:** both sides. It is the one layer permitted to read a reconstruction
 and the ground truth in the same process, because comparing them is its purpose.
@@ -80,7 +75,7 @@ output belongs under `evaluation/`. A pipeline in which an evaluation stage coul
 edit `vehicle_*/causal_graph.json` or `fusion/fused_causal_graph.json` would make
 every published metric circular.
 
-### `cdf.causal` -- the counterfactual layer (privileged)
+### `cdf.causal`: the counterfactual layer (privileged)
 
 **Allowed:** both sides, like `cdf.evaluation`, and additionally the simulator.
 It imports `cdf.simulation.runner` because a counterfactual claim in this project
@@ -133,19 +128,17 @@ detached scoring copy and never an input to normal inference.
 format, and the local record types simply **have no field** in which a privileged
 quantity could be stored:
 
-* `TelemetrySample` -- only the participant's own kinematics. No neighbour block.
-* `ControlSample` -- only its own actuator channels.
-* `RadarDetection` -- `depth`, `azimuth`, `altitude`, `velocity`. Nothing
-  identifies the reflecting object.
-* `RadarFrame` -- `sensor_id` is a *logical* name (`"front"`), documented as "not
-  a CARLA actor id".
-* `TrackSample` -- `track_id` is locally generated and documented as having "no
-  relation to any CARLA actor id". Its global-frame fields are *estimates*
-  obtained by composing the observer's own pose with its own measurement.
-* `LocalTriggerRecord` -- for a collision it holds `collision_detected` and
-  `impulse`. "The identity of the other party is deliberately absent."
-* `ParticipantEvidence` -- "deliberately has no field capable of holding another
-  actor's ground truth".
+* `TelemetrySample`: only the participant's own kinematics. No neighbour block. *
+`ControlSample`: only its own actuator channels. * `RadarDetection`: `depth`,
+`azimuth`, `altitude`, `velocity`. Nothing identifies the reflecting object. *
+`RadarFrame`: `sensor_id` is a *logical* name (`"front"`), documented as "not a
+CARLA actor id". * `TrackSample`: `track_id` is locally generated and documented
+as having "no relation to any CARLA actor id". Its global-frame fields are
+*estimates* obtained by composing the observer's own pose with its own
+measurement. * `LocalTriggerRecord`: for a collision it holds
+`collision_detected` and `impulse`. "The identity of the other party is
+deliberately absent." * `ParticipantEvidence`: "deliberately has no field capable
+of holding another actor's ground truth".
 
 The privileged counterpart is a *different* dataclass in a *different* package:
 `cdf.oracle.logger.OracleActorState` carries `actor_id`, `lane_id`, `road_id`,
@@ -173,15 +166,13 @@ path therefore fails loudly instead of leaking ground truth.
 
 ### 2.3 Node-level validation inside the local builders
 
-`cdf.local.event_graph.validated_local_nodes(events, participant_id)` -- shared by
-the event graph and the causal DAG so both refuse the same inputs -- raises when:
+`cdf.local.event_graph.validated_local_nodes(events, participant_id)`, shared by
+the event graph and the causal DAG so both refuse the same inputs, raises when:
 
-* an event's type is in `ORACLE_ONLY_EVENT_TYPES`
-  (`ORACLE_SIGNAL_VIOLATION`, `ORACLE_RIGHT_OF_WAY_CONFLICT`,
-  `ORACLE_SCRIPTED_INTERVENTION`);
-* an event carries `Provenance.ORACLE`;
-* an event's `participant_id` differs from the graph owner's -- "every vehicle
-  builds its graph from its own evidence only".
+* an event's type is in `ORACLE_ONLY_EVENT_TYPES` (`ORACLE_SIGNAL_VIOLATION`,
+`ORACLE_RIGHT_OF_WAY_CONFLICT`, `ORACLE_SCRIPTED_INTERVENTION`); * an event
+carries `Provenance.ORACLE`; * an event's `participant_id` differs from the
+graph owner's: "every vehicle builds its graph from its own evidence only".
 
 `cdf.fusion.event_alignment.align_event_records` performs the same oracle-type
 check at the fusion boundary.
@@ -199,16 +190,16 @@ through exactly two methods with **independent cursors**:
 
 | Method | Returns | Caller |
 |---|---|---|
-| `drain_local(min_impulse)` | `LocalTriggerRecord(t, frame, participant_id, kind=COLLISION, collision_detected=True, impulse, detail={"source": "onboard_collision_sensor"})` -- **`other_actor` stripped** | `ParticipantAgent._handle_triggers` |
+| `drain_local(min_impulse)` | `LocalTriggerRecord(t, frame, participant_id, kind=COLLISION, collision_detected=True, impulse, detail={"source": "onboard_collision_sensor"})`: **`other_actor` stripped** | `ParticipantAgent._handle_triggers` |
 | `drain_privileged()` | a dict **including** `other_actor_id` and `other_type_id` | `OracleLogger._drain_collisions` only |
 
 This is the single point at which the identity of a collision partner could enter
 the local layer, and it is where the identity is deleted. The consequence is
-visible in the committed example run: A's local `COLLISION` event names no
-partner, and fusion has to *infer* the counterpart from A's own resolved radar
-tracks -- `"counterpart B inferred from own track at 3.64m at t=6.550s"` -- while
-B's own `COLLISION` event stays unmerged with `counterpart_unknown`, because B (the
-lead vehicle) held no tracks at all.
+visible in the committed example run: A's local `COLLISION` event names no partner,
+and fusion has to *infer* the counterpart from A's own resolved radar tracks,
+`"counterpart B inferred from own track at 3.64m at t=6.550s"`, while B's own
+`COLLISION` event stays unmerged with `counterpart_unknown`, because B (the lead
+vehicle) held no tracks at all.
 
 ### 2.5 Privileged properties without a privileged import
 
@@ -295,11 +286,11 @@ the privileged layer itself, `evaluation/` is the scoring layer and is allowed t
 consult the oracle, and `viewer/` carries the badged oracle view for human
 inspection.
 
-The walk runs over a synthetic run built in-process **and** over every recorded
-run under `artifacts/` -- all 39 of the campaign plus their counterfactual
-replays and the separate independent-clock smoke recordings are included --
-marked `slow` because the recursive scan takes substantial time. Scanning one run proves the
-pipeline *can* produce clean artifacts; scanning the campaign proves it *did*.
+The walk runs over a synthetic run built in-process **and** over every recorded run under
+`artifacts/`, all 39 of the campaign plus their counterfactual replays and the separate
+independent-clock smoke recordings are included, marked `slow` because the recursive scan
+takes substantial time. Scanning one run proves the pipeline *can* produce clean artifacts;
+scanning the campaign proves it *did*.
 
 **C. Event-type checks.** No event in a `local` or `fused` artifact may have a
 type in `ORACLE_ONLY_EVENT_TYPES`; every event in `vehicle_<pid>/events.json`
@@ -314,7 +305,7 @@ be *rejected* when loaded with either other scope.
 **E. Schema checks.** The dataclass field sets of `TelemetrySample`,
 `ControlSample`, `RadarDetection`, `RadarFrame`, `TrackSample`,
 `LocalTriggerRecord`, `Evidence`, `Event`, `GraphEdge` and `GraphDocument` (via
-`schemas.field_names`) must contain no forbidden name or substring -- the
+`schemas.field_names`) must contain no forbidden name or substring: the
 structural guarantee of §2.1, asserted rather than assumed.
 
 **F. Collision-sensor split.** A `CollisionSensor` fed a synthetic event must
@@ -367,14 +358,14 @@ somewhere in the campaign was produced with knowledge of the answer.
 
 The boundary is not free, and the committed S01 run shows the bill:
 
-* B, the lead vehicle, holds **zero** radar tracks -- its forward radar sees empty
-  road. Its local causal DAG has 10 nodes and 6 edges against A's 20 and 22.
-* B's own `COLLISION` event cannot name A. Fusion records
-  `counterpart_unknown` for it rather than guessing.
-* `P1_brake_response` and `P2_no_throttle_while_closing` are **`UNKNOWN`** for B:
-  "no radar track and no CRITICAL_TTC event evidence", "no range-rate evidence".
+* B, the lead vehicle, holds **zero** radar tracks: its forward radar sees empty
+road. Its local causal DAG has 10 nodes and 6 edges against A's 20 and 22. * B's
+own `COLLISION` event cannot name A. Fusion records `counterpart_unknown` for it
+rather than guessing. * `P1_brake_response` and `P2_no_throttle_while_closing` are
+**`UNKNOWN`** for B: "no radar track and no CRITICAL_TTC event evidence", "no
+range-rate evidence".
 
 An omniscient recorder would have answered all three. Reporting *insufficient
-evidence* instead is the behaviour under test, not a defect -- and it is what
+evidence* instead is the behaviour under test, not a defect, and it is what
 makes the fusion benefit measured in S07 and the remaining epistemic limits
 meaningful rather than circular.

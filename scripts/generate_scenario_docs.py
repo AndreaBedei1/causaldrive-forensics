@@ -3,7 +3,7 @@
 
 The prose in that document is written by hand; the *numbers* are not. Scenario
 geometry is tuned empirically against the simulator, so any table typed by hand
-goes stale the moment an approach distance or a brake timing is retuned -- and a
+goes stale the moment an approach distance or a brake timing is retuned, and a
 stale parameter table in a forensics project is worse than no table.
 
 This script reads ``configs/scenarios/*.yaml`` and rewrites everything between
@@ -72,7 +72,7 @@ def _spawn_text(spawn: Dict[str, Any]) -> str:
 def _action_text(action: Dict[str, Any]) -> str:
     params = action.get("params", {}) or {}
     ptxt = ", ".join("{0} {1:g}".format(k, float(v)) for k, v in sorted(params.items()))
-    return "`{0}` -- {1} at t={2:g}s for {3:g}s{4}".format(
+    return "`{0}`: {1} at t={2:g}s for {3:g}s{4}".format(
         action["action_id"],
         action["kind"],
         float(action.get("t_start", 0.0)),
@@ -87,7 +87,7 @@ def render_scenario(path: Path) -> List[str]:
     out: List[str] = []
     sid = block.get("scenario_id", path.stem.upper())
     name = block.get("name", "")
-    out.append("### {0} -- {1}".format(sid, name.replace("_", " ")))
+    out.append("### {0}: {1}".format(sid, name.replace("_", " ")))
     out.append("")
     out.append(
         "*Map:* **{0}** &nbsp;&nbsp; *Config:* `configs/scenarios/{1}`".format(
@@ -175,7 +175,7 @@ def render_scenario(path: Path) -> List[str]:
             out.append(
                 "*Expected local UNKNOWNs:* "
                 + ", ".join("`{0}`".format(u) for u in unknowns)
-                + " -- the oracle may assert these; local and fused inference must not."
+                + ". The oracle may assert these; local and fused inference must not."
             )
             out.append("")
 

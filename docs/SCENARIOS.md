@@ -2,7 +2,7 @@
 
 Scenarios are pure data: `configs/scenarios/*.yaml`, turned into actors, routes
 and scripted controllers by `cdf.simulation.scenario_base`. Keeping them
-declarative buys three things the experiment protocol depends on --
+declarative buys three things the experiment protocol depends on:
 reproducibility (the whole spec is hashed into the run manifest), interventions
 (every behaviour is a named `ScriptedAction`, so a counterfactual is "the same
 spec with one action disabled, delayed or weakened") and validation (the spec
@@ -19,16 +19,15 @@ stable `Town03_Opt` variant with the same roundabout geometry.
 Two Town05 sites carry almost everything:
 
 * the **three-lane straight** around `y = -204` (recommended spawn point index
-  **265**), measured to offer ~160 m of junction-free travel -- used by S01, S02,
-  S06 and S07;
-* **junction 720** at `(101.6, 0.3)`, measured to expose four clean approaches
-  (maximum bearing error 0.7°) and carrying **no traffic light**, so signal state
-  cannot confound a crossing scenario -- used by S03, S04, S05 and S08;
+**265**), measured to offer ~160 m of junction-free travel, used by S01, S02, S06
+and S07; * **junction 720** at `(101.6, 0.3)`, measured to expose four clean
+approaches (maximum bearing error 0.7°) and carrying **no traffic light**, so
+signal state cannot confound a crossing scenario, used by S03, S04, S05 and S08;
 
-On Town03_Opt, the central roundabout around `(0.0, 0.0)` is used by S09:
-four clean approaches whose routes curve by roughly 90° through the circulating
-area. That curvature is the point -- constant-velocity path prediction is
-weakest exactly where heading changes fastest.
+On Town03_Opt, the central roundabout around `(0.0, 0.0)` is used by S09: four
+clean approaches whose routes curve by roughly 90° through the circulating
+area. That curvature is the point: constant-velocity path prediction is weakest
+exactly where heading changes fastest.
 
 Crossing scenarios name a junction centre and two compass bearings rather than a
 table of hand-measured spawn coordinates (`SpawnSpec.anchor: junction_approach` →
@@ -38,17 +37,59 @@ table of hand-measured spawn coordinates (`SpawnSpec.anchor: junction_approach` 
 
 ## Overview
 
-| Id | Name | Map | Vehicles | Variants (default **bold**) | Expected outcome | Max duration |
-|---|---|---|---|---|---|---|
-| S01 | `rear_end` | Town05 | 2 (A, B) | **`crash`**, `avoided` | collision / near miss | 26 s |
-| S02 | `cut_in` | Town05 | 2 (A, B) | **`crash`**, `avoided` | collision / near miss | 26 s |
-| S03 | `crossing` | Town05 | 2 (A, B) | **`crash`** | collision | 28 s |
-| S04 | `crossing_braking` | Town05 | 2 (A, B) | **`yield`** | **no event** | 28 s |
-| S05 | `simultaneous_crossing` | Town05 | 2 (A, B) | **`crash`** | collision | 28 s |
-| S06 | `chain_collision` | Town05 | 3 (A, B, C) | **`a_front_pushed`**, `b_rear_first` | collision (2 impacts, ordered) | 30 s |
-| S07 | `partial_view` | Town05 | 3 (A, B, C) | **`occluded`**, `full_view` | collision | 30 s |
-| S08 | `multidirection_crossing` | Town05 | 3 (A, B, C) | **`crash`** | collision | 30 s |
-| S09 | `roundabout` | **Town04** | 2 (A, B) | **`merge_conflict`** | collision | 30 s |
+Sixteen scenarios, 35 variants. **S01 to S09 are hash-frozen**: their
+configuration may not change, so a better metric on them has to come from the
+method. **S10 to S16 are the V2 additions**, and each isolates something the
+earlier nine could not ask.
+
+| Id | Name | Vehicles | Main question | Variants |
+|---|---|---|---|---|
+| S01 | `rear_end` | 2 | does a late reaction to the vehicle ahead braking get recovered? | `crash`, `avoided` |
+| S02 | `cut_in` | 2 | is a lateral move into the lane recovered as the thing that closed the gap? | `crash`, `avoided` |
+| S03 | `crossing` | 2 | who entered the junction without yielding? | `crash` |
+| S04 | `crossing_braking` | 2 | the same conflict without an outcome: does the system stay silent? | `yield` |
+| S05 | `simultaneous_crossing` | 2 | two vehicles, neither yielding, arriving together: is the contribution shared? | `crash` |
+| S06 | `chain_collision` | 3 | in a chain, which pair collided first? | `a_front_pushed`, `b_rear_first` |
+| S07 | `partial_view` | 3 | can a vehicle nobody could see be placed on the timeline at all? | `occluded`, `full_view` |
+| S08 | `multidirection_crossing` | 3 | can a cause that consists of *not* yielding be rooted? | `crash` |
+| S09 | `roundabout` | 2 | give-way on entry, where the geometry is curved | `merge_conflict` |
+| S10 | `single_stop_a` | 2 | A has the STOP sign: is the obligation read off A's own camera and held against A? | `rolls_through`, `stops_safely`, `stops_then_proceeds` |
+| S11 | `single_stop_b` | 2 | B has the STOP sign: the mirror of S10, so a bias towards one role would show | `rolls_through`, `stops_safely`, `stops_then_proceeds` |
+| S12 | `all_way_stop` | 2 | both have STOP signs: who had priority, and is ambiguity preserved when it cannot be told? | `a_arrives_first`, `b_arrives_first`, `near_simultaneous`, `b_fails_to_stop` |
+| S13 | `disputed_lane_change` | 2 | which vehicle closed the gap, when the deciding evidence is split between them? | `cut_in`, `accelerates_into_gap`, `safe_lane_change` |
+| S14 | `three_car_chain` | 3 | is the pushed vehicle spared, or blamed for striking the car it was shoved into? | `c_pushes_b`, `b_hits_a_first`, `independent_impacts` |
+| S15 | `intersection_pileup` | 3 | a deflection into a bystander: are the deflected car and the bystander left out of the account? | `deflected_into_c`, `single_impact`, `b_stops` |
+| S16 | `secondary_collision` | 3 | is the second impact a consequence of the first, or that vehicle's own doing? | `consequential`, `independent`, `avoided` |
+
+All sixteen run on Town05 except S09, which needs Town04's roundabout.
+
+### What the campaign found, including where it did not work
+
+Three of the new scenarios did not stage the encounter they were written to ask
+about, and the results pages say so rather than quietly dropping them.
+
+**S12 `near_simultaneous` never collided**, on any of its three seeds. Its
+closest approaches were 10.90 m, 8.39 m and 8.23 m against a 6 m requirement.
+The junction is the only one in Town05 that renders stop signs on more than one
+approach, and its geometry gives the two vehicles very different distances from
+their stop lines to the merge point. The priority-ambiguity question is
+therefore **not answered by this campaign**.
+
+**S14 `c_pushes_b` came out backwards.** The design names C, the striker. The
+analysis named A and B physically and supported B normatively, because B has a
+`CONTINUED_ACCELERATION_DURING_CONFLICT` before the first impact and C's own
+rule violation is stamped *after* the impact it caused. Both findings are
+defensible on the recorded evidence and neither is the answer the variant was
+written to test.
+
+**S15 `deflected_into_c` and both S16 impact variants land on the wrong pair**,
+on all three seeds each: the collision occurs between A and B rather than the
+pair the variant names.
+
+Scenario validation failed on 22 of 105 runs in total, all within S10 to S16.
+The full breakdown is in [RESULTS.md](RESULTS.md) §9, and
+[LIMITATIONS.md](LIMITATIONS.md) §23, §25 and §27 state what each failure does
+and does not invalidate.
 
 ---
 
@@ -58,7 +99,7 @@ table of hand-measured spawn coordinates (`SpawnSpec.anchor: junction_approach` 
 
 _Generated from `configs/scenarios/*.yaml` by `scripts/generate_scenario_docs.py`. Do not edit by hand._
 
-### S01 -- rear end
+### S01: rear end
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s01_rear_end.yaml`
 
@@ -73,8 +114,8 @@ B travels ahead of A in the same lane and brakes hard. A reacts late and strikes
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=5.6s for 6s (intensity 0.85)
-* **B** &mdash; `B_emergency_brake` -- brake at t=4s for 8s (intensity 1)
+* **A** &mdash; `A_late_brake`: brake at t=5.6s for 6s (intensity 0.85)
+* **B** &mdash; `B_emergency_brake`: brake at t=4s for 8s (intensity 1)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -100,8 +141,8 @@ Scripted actions (these are the intervention handles):
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=5.1s for 8s (intensity 1)
-* **B** &mdash; `B_emergency_brake` -- brake at t=4s for 8s (intensity 1)
+* **A** &mdash; `A_late_brake`: brake at t=5.1s for 8s (intensity 1)
+* **B** &mdash; `B_emergency_brake`: brake at t=4s for 8s (intensity 1)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 14 m.
 
@@ -121,7 +162,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S02 -- cut in
+### S02: cut in
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s02_cut_in.yaml`
 
@@ -136,9 +177,9 @@ B starts in the lane to A's left, slightly ahead, then moves laterally into A's 
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=3.9s for 6s (intensity 0.85)
-* **B** &mdash; `B_cut_in` -- lane_shift at t=1s for 2.2s (lateral_m 3.5)
-* **B** &mdash; `B_slow_after_cut_in` -- set_speed at t=3.2s for 12s (target_speed 6.5)
+* **A** &mdash; `A_late_brake`: brake at t=3.9s for 6s (intensity 0.85)
+* **B** &mdash; `B_cut_in`: lane_shift at t=1s for 2.2s (lateral_m 3.5)
+* **B** &mdash; `B_slow_after_cut_in`: set_speed at t=3.2s for 12s (target_speed 6.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -167,9 +208,9 @@ Scripted actions (these are the intervention handles):
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=2.9s for 9s (intensity 1)
-* **B** &mdash; `B_cut_in` -- lane_shift at t=1s for 2.2s (lateral_m 3.5)
-* **B** &mdash; `B_slow_after_cut_in` -- set_speed at t=3.2s for 12s (target_speed 6.5)
+* **A** &mdash; `A_late_brake`: brake at t=2.9s for 9s (intensity 1)
+* **B** &mdash; `B_cut_in`: lane_shift at t=1s for 2.2s (lateral_m 3.5)
+* **B** &mdash; `B_slow_after_cut_in`: set_speed at t=3.2s for 12s (target_speed 6.5)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
 
@@ -191,7 +232,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S03 -- crossing
+### S03: crossing
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s03_crossing.yaml`
 
@@ -206,7 +247,7 @@ A travels through the junction at constant speed. B approaches from a perpendicu
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_fail_to_yield` -- set_speed at t=1.2s for 14s (target_speed 12.5)
+* **B** &mdash; `B_fail_to_yield`: set_speed at t=1.2s for 14s (target_speed 12.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -223,7 +264,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S04 -- crossing braking
+### S04: crossing braking
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s04_crossing_braking.yaml`
 
@@ -238,8 +279,8 @@ Identical crossing geometry to S03, but B brakes and yields on the approach. The
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_yield_brake` -- brake at t=3.2s for 4s (intensity 0.9)
-* **B** &mdash; `B_resume` -- set_speed at t=8s for 14s (target_speed 7)
+* **B** &mdash; `B_yield_brake`: brake at t=3.2s for 4s (intensity 0.9)
+* **B** &mdash; `B_resume`: set_speed at t=8s for 14s (target_speed 7)
 
 *Validation:* expected outcome **no_event**; A-B must close to under 12 m.
 
@@ -255,7 +296,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S05 -- simultaneous crossing
+### S05: simultaneous crossing
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s05_simultaneous_crossing.yaml`
 
@@ -270,8 +311,8 @@ A and B approach the same unsignalised junction from perpendicular directions at
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_no_yield` -- set_speed at t=0.5s for 14s (target_speed 11.5)
-* **B** &mdash; `B_no_yield` -- set_speed at t=0.5s for 14s (target_speed 11.5)
+* **A** &mdash; `A_no_yield`: set_speed at t=0.5s for 14s (target_speed 11.5)
+* **B** &mdash; `B_no_yield`: set_speed at t=0.5s for 14s (target_speed 11.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -289,7 +330,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S06 -- chain collision
+### S06: chain collision
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s06_chain_collision.yaml`
 
@@ -305,9 +346,9 @@ Three vehicles in a single lane: C leads, B follows, A is last. C brakes hard. W
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_very_late_brake` -- brake at t=5.6s for 8s (intensity 0.5)
-* **B** &mdash; `B_reaction_brake` -- brake at t=3.75s for 2s (intensity 1)
-* **C** &mdash; `C_emergency_brake` -- brake at t=3s for 10s (intensity 1)
+* **A** &mdash; `A_very_late_brake`: brake at t=5.6s for 8s (intensity 0.5)
+* **B** &mdash; `B_reaction_brake`: brake at t=3.75s for 2s (intensity 1)
+* **C** &mdash; `C_emergency_brake`: brake at t=3s for 10s (intensity 1)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 6 m.
 
@@ -335,9 +376,9 @@ Scripted actions (these are the intervention handles):
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=6.2s for 8s (intensity 0.8)
-* **B** &mdash; `B_no_reaction` -- brake at t=5.6s for 8s (intensity 0.35)
-* **C** &mdash; `C_emergency_brake` -- brake at t=3s for 10s (intensity 1)
+* **A** &mdash; `A_late_brake`: brake at t=6.2s for 8s (intensity 0.8)
+* **B** &mdash; `B_no_reaction`: brake at t=5.6s for 8s (intensity 0.35)
+* **C** &mdash; `C_emergency_brake`: brake at t=3s for 10s (intensity 1)
 
 *Validation:* expected outcome **collision**; collision pairs (B-C), (A-B); in order (B-C) then (A-B); B-C must close to under 6 m.
 
@@ -357,7 +398,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S07 -- partial view
+### S07: partial view
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s07_partial_view.yaml`
 
@@ -373,9 +414,9 @@ C brakes hard, B responds, A closes on B and strikes it. A cannot observe C at a
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=6.2s for 8s (intensity 0.8)
-* **B** &mdash; `B_reaction_brake` -- brake at t=3.7s for 10s (intensity 1)
-* **C** &mdash; `C_emergency_brake` -- brake at t=3s for 10s (intensity 1)
+* **A** &mdash; `A_late_brake`: brake at t=6.2s for 8s (intensity 0.8)
+* **B** &mdash; `B_reaction_brake`: brake at t=3.7s for 10s (intensity 1)
+* **C** &mdash; `C_emergency_brake`: brake at t=3s for 10s (intensity 1)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -405,9 +446,9 @@ Scripted actions (these are the intervention handles):
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_late_brake` -- brake at t=6.2s for 8s (intensity 0.8)
-* **B** &mdash; `B_reaction_brake` -- brake at t=3.7s for 10s (intensity 1)
-* **C** &mdash; `C_emergency_brake` -- brake at t=3s for 10s (intensity 1)
+* **A** &mdash; `A_late_brake`: brake at t=6.2s for 8s (intensity 0.8)
+* **B** &mdash; `B_reaction_brake`: brake at t=3.7s for 10s (intensity 1)
+* **C** &mdash; `C_emergency_brake`: brake at t=3s for 10s (intensity 1)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -427,7 +468,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S08 -- multidirection crossing
+### S08: multidirection crossing
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s08_multidirection_crossing.yaml`
 
@@ -443,8 +484,8 @@ A crosses the junction from one direction while B enters from a perpendicular on
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_fail_to_yield` -- set_speed at t=1.2s for 14s (target_speed 12.5)
-* **C** &mdash; `C_defensive_stop` -- brake at t=2.4s for 12s (intensity 0.9)
+* **B** &mdash; `B_fail_to_yield`: set_speed at t=1.2s for 14s (target_speed 12.5)
+* **C** &mdash; `C_defensive_stop`: brake at t=2.4s for 12s (intensity 0.9)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -463,7 +504,7 @@ Scripted actions (these are the intervention handles):
 
 ---
 
-### S09 -- roundabout
+### S09: roundabout
 
 *Map:* **Town03_Opt** &nbsp;&nbsp; *Config:* `configs/scenarios/s09_roundabout.yaml`
 
@@ -478,7 +519,7 @@ A is already circulating inside the roundabout on the outer circulating lane. B 
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_fail_to_give_way` -- set_speed at t=1s for 14s (target_speed 9.5)
+* **B** &mdash; `B_fail_to_give_way`: set_speed at t=1s for 14s (target_speed 9.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -493,6 +534,625 @@ Scripted actions (these are the intervention handles):
 
 > both routes curve through the roundabout, so headings change throughout the encounter
 > tests map-free reconstruction where constant-velocity prediction is weakest
+
+---
+
+### S10: single stop a
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s10_single_stop_a.yaml`
+
+A faces a stop sign on its approach; B does not and has benchmark priority. The variants differ only in what A does about the sign: stop properly, roll through it, or stop and then pull out correctly.
+
+**Variant `rolls_through`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_roll_through`: set_speed at t=3s for 12s (target_speed 5.5)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `A_roll_through`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.no_stop` --CONTRIBUTES_TO--> `A.stop_line_crossed`  
+  _not stopping is what leaves A still moving at the line_
+* `A.stop_line_crossed` --CONTRIBUTES_TO--> `A.conflict_entry`
+* `A.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> A decelerates but never reaches rest, which is what makes this a rolling stop rather than a stop
+
+**Variant `stops_safely`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_full_stop`: brake at t=2.6s for 7s (intensity 0.9)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 18 m.
+
+*Counterfactual candidates:* `A_full_stop`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.stopped` --PREVENTS--> `no_collision(A-B)`  
+  _coming to rest before the line is what keeps A out of the conflict_
+
+> the negative control: identical geometry, and A discharges the obligation
+> B passes unobstructed, so the separation stays large
+
+**Variant `stops_then_proceeds`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_full_stop`: brake at t=2.6s for 4.2s (intensity 0.9)
+* **A** &mdash; `A_pull_away`: set_speed at t=7.4s for 10s (target_speed 9)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 14 m.
+
+*Counterfactual candidates:* `A_full_stop`, `A_pull_away`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> the case that distinguishes 'stopped' from 'stopped and then proceeded safely'
+> A pulls away after B has cleared the junction, so both the stop and the crossing appear in the log
+
+---
+
+### S11: single stop b
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s11_single_stop_b.yaml`
+
+B faces a stop sign on its approach; A does not and has benchmark priority. Structurally identical to S10 with the roles exchanged, which is what makes it a check on symmetry rather than an extra data point.
+
+**Variant `rolls_through`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 5.5)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `B_roll_through`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_stop` --CONTRIBUTES_TO--> `B.stop_line_crossed`
+* `B.stop_line_crossed` --CONTRIBUTES_TO--> `B.conflict_entry`
+* `B.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> exists to check that nothing in the method keys on participant identity
+> findings should mirror S10 exactly with A and B exchanged
+
+**Variant `stops_safely`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_full_stop`: brake at t=2.6s for 7s (intensity 0.9)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 18 m.
+
+*Counterfactual candidates:* `B_full_stop`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> exists to check that nothing in the method keys on participant identity
+> findings should mirror S10 exactly with A and B exchanged
+
+**Variant `stops_then_proceeds`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_full_stop`: brake at t=2.6s for 4.2s (intensity 0.9)
+* **B** &mdash; `B_pull_away`: set_speed at t=7.4s for 10s (target_speed 9)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 14 m.
+
+*Counterfactual candidates:* `B_full_stop`, `B_pull_away`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> exists to check that nothing in the method keys on participant identity
+> findings should mirror S10 exactly with A and B exchanged
+
+---
+
+### S12: all way stop
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s12_all_way_stop.yaml`
+
+Both A and B face stop signs. Variants differ in who stops first, whether the two arrivals are distinguishable at all, and whether one vehicle stops.
+
+**Variant `a_arrives_first`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_stop`: brake at t=2.4s for 3s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=6s for 12s (target_speed 8)
+* **B** &mdash; `B_stop`: brake at t=4s for 4.5s (intensity 0.9)
+* **B** &mdash; `B_proceed`: set_speed at t=10s for 12s (target_speed 8)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
+
+*Counterfactual candidates:* `A_stop`, `B_stop`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.stopped` --PREVENTS--> `no_collision(A-B)`
+* `B.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> A completes its stop about 1.6 s before B, which clears the margin
+> A then proceeds first, so both the stopping and the priority properties pass
+
+**Variant `b_arrives_first`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_stop`: brake at t=4s for 3.4s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=7.6s for 12s (target_speed 8)
+* **B** &mdash; `B_stop`: brake at t=2.4s for 3s (intensity 0.9)
+* **B** &mdash; `B_proceed`: set_speed at t=6s for 12s (target_speed 8)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
+
+*Counterfactual candidates:* `A_stop`, `B_stop`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.stopped` --PREVENTS--> `no_collision(A-B)`
+* `B.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> both approaches controlled, so the benchmark falls to arrival order
+> no tie-break is configured in any variant, so a close arrival stays ambiguous
+
+**Variant `near_simultaneous`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_stop`: brake at t=1.6s for 3.4s (intensity 0.95)
+* **A** &mdash; `A_proceed`: set_speed at t=5s for 12s (target_speed 9)
+* **B** &mdash; `B_stop`: brake at t=2.7s for 1.2s (intensity 0.95)
+* **B** &mdash; `B_proceed`: set_speed at t=3.9s for 12s (target_speed 9)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `A_stop`, `B_stop`, `A_proceed`, `B_proceed`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+* `B.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> both stopped correctly, 0.1 s apart, and both then pulled away together
+> the designed answer is AMBIGUOUS_PRIORITY: the stopping properties pass and priority cannot be decided
+> a method that always produces a priority verdict scores better here while being wrong
+
+**Variant `b_fails_to_stop`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_stop`: brake at t=2.4s for 4.2s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=6.6s for 12s (target_speed 8)
+* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 6)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `A_stop`, `B_roll_through`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_stop` --CONTRIBUTES_TO--> `B.stop_line_crossed`
+* `B.stop_line_crossed` --CONTRIBUTES_TO--> `B.conflict_entry`
+* `B.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+* `A.stopped` --PREVENTS--> `collision(A-B)`  
+  _A discharged its own obligation, which acts against the outcome without averting it_
+
+> A stops and has priority by arrival; B rolls through and strikes it
+> the asymmetry is in the normative layer, not in the physical one: both entered the junction
+
+---
+
+### S13: disputed lane change
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s13_disputed_lane_change.yaml`
+
+A travels in the right lane; B is alongside in the left. In the disputed variants the gap between them closes and they touch, and which behaviour closed it differs. The safe variant keeps the same manoeuvre with room.
+
+**Variant `cut_in`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_cut_in`: lane_shift at t=4s for 3s (lateral_offset 3.5)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `B_cut_in`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.solid_line_crossed` --CONTRIBUTES_TO--> `A.closing`  
+  _B moving laterally into A's lane is what collapses the gap_
+* `A.closing` --CONTRIBUTES_TO--> `A.critical_ttc`
+* `A.critical_ttc` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> B has room ahead but not beside: the lateral move is what creates the conflict
+> A holds a constant speed throughout, so nothing A did contributed
+
+**Variant `accelerates_into_gap`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_accelerate`: set_speed at t=3.4s for 10s (target_speed 17.5)
+* **B** &mdash; `B_cut_in`: lane_shift at t=4.6s for 4s (lateral_offset 3.5)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `B_cut_in`, `A_accelerate`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.closing` --CONTRIBUTES_TO--> `A.critical_ttc`
+* `A.critical_ttc` --CAUSES_OUTCOME--> `collision(A-B)`
+* `B.solid_line_crossed` --CONTRIBUTES_TO--> `A.closing`  
+  _both behaviours contribute here, which is what makes the case contested_
+
+> B performs the same lane change with more room; A accelerates into what is left
+> the designed answer has both as contributors, not one
+> a method that always names a single initiator will be wrong on this variant
+
+**Variant `safe_lane_change`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_cut_in`: lane_shift at t=6s for 5s (lateral_offset 3.5)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 12 m.
+
+*Counterfactual candidates:* `B_cut_in`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.solid_line_crossed` --CONTRIBUTES_TO--> `A.closing`
+* `A.closing` --PREVENTS--> `no_collision(A-B)`  
+  _the gap closes but never to contact, so the encounter is real and stays short of it_
+
+> the negative control: identical manoeuvre, begun later and taken slower
+> the line crossing still appears in B's log, so the normative layer sees the same evidence
+
+---
+
+### S14: three car chain
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s14_three_car_chain.yaml`
+
+A leads, B follows, C is last, all in one lane. A brakes. Which pair collides first, and which vehicle was merely in the way, depends on how B responds.
+
+**Variant `c_pushes_b`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_brake`: brake at t=4s for 8s (intensity 0.85)
+* **B** &mdash; `B_brake`: brake at t=4.9s for 1.6s (intensity 0.95)
+* **C** &mdash; `C_no_response`: set_speed at t=4s for 10s (target_speed 13)
+
+*Validation:* expected outcome **collision**; collision pairs (B-C), (A-B); in order (B-C) then (A-B); B-C must close to under 5 m.
+
+*Counterfactual candidates:* `A_brake`, `B_brake`, `C_no_response`.
+
+*Ground-truth causal template (oracle only):*
+
+* `C.no_braking` --CAUSES_OUTCOME--> `collision(B-C)`  
+  _C does not respond to the closing gap, which is what produces the first impact_
+* `collision(B-C)` --CONTRIBUTES_TO--> `collision(A-B)`  
+  _the shunt: the first impact is what puts B into A_
+
+> B brakes adequately and is struck from behind anyway
+> B strikes A, but nothing B did reaches that impact except through being hit
+
+**Variant `b_hits_a_first`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_brake`: brake at t=4s for 8s (intensity 0.85)
+* **B** &mdash; `B_late_brake`: brake at t=6.3s for 8s (intensity 1)
+* **C** &mdash; `C_late_brake`: brake at t=6.9s for 8s (intensity 1)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `A_brake`, `B_late_brake`, `C_late_brake`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
+* `C.no_braking` --CAUSES_OUTCOME--> `collision(B-C)`
+
+> almost the same end configuration as c_pushes_b, and the opposite causal structure
+> here B does contribute to the first impact, and C to the second only
+> the two variants together test whether the method reads the order or the layout
+
+**Variant `independent_impacts`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_brake`: brake at t=4s for 8s (intensity 0.85)
+* **B** &mdash; `B_late_brake`: brake at t=6.3s for 6s (intensity 1)
+* **C** &mdash; `C_much_later_brake`: brake at t=5s for 4s (intensity 0.7)
+* **C** &mdash; `C_creep_forward`: set_speed at t=13s for 8s (target_speed 4)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `A_brake`, `B_late_brake`, `C_much_later_brake`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
+* `C.unsafe_entry` --CAUSES_OUTCOME--> `collision(B-C)`
+
+> two impacts several seconds apart with no causal link between them
+> tests that the method does not chain impacts merely because they share a vehicle
+> the clock alignment still works: B feels both, so the transitive route is unchanged
+
+---
+
+### S15: intersection pileup
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s15_intersection_pileup.yaml`
+
+B fails to stop and strikes A in the junction. The impact deflects A into C, which is approaching the same junction from a third direction.
+
+**Variant `deflected_into_c`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
+| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 48 m | 6 / 6 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 7)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B), (A-C); in order (A-B) then (A-C); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `B_roll_through`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_stop` --CONTRIBUTES_TO--> `B.conflict_entry`
+* `B.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+* `collision(A-B)` --CONTRIBUTES_TO--> `collision(A-C)`  
+  _the first impact deflects A out of its path and into C_
+
+> designed answer: B contributes to both impacts, A to neither, C to neither
+> A was struck and then struck C, which is the pushed-vehicle shape across a junction
+
+**Variant `single_impact`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
+| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 70 m | 6 / 6 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 7)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); in order (A-B); A-B must close to under 6 m.
+
+*Counterfactual candidates:* `B_roll_through`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.no_stop` --CONTRIBUTES_TO--> `B.conflict_entry`
+* `B.conflict_entry` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> the control for deflected_into_c: one impact instead of two, same initiating behaviour
+> C is present and uninvolved, and here there is no impact to be wrongly attributed to it
+> also a partial-alignment case: C feels no contact, so C cannot be tied to the common timeline at all
+
+**Variant `b_stops`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
+| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 48 m | 6 / 6 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **B** &mdash; `B_full_stop`: brake at t=2.6s for 8s (intensity 0.9)
+
+*Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
+
+*Counterfactual candidates:* `B_full_stop`.
+
+*Ground-truth causal template (oracle only):*
+
+* `B.stopped` --PREVENTS--> `no_collision(A-B)`
+
+> the negative control, and also the no-collision timing case
+> with no contact anywhere, no recorder can be tied to another and the merged log says so
+
+---
+
+### S16: secondary collision
+
+*Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s16_secondary_collision.yaml`
+
+A brakes hard and B runs into it. What happens next to B -- deflected into C, driving on into C, or stopping clear -- is what the variants change.
+
+**Variant `consequential`** *(default)*
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265, fwd 34 m, lane -1 | 12 / 12 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
+* **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
+* **B** &mdash; `B_deflected`: lane_shift at t=7.4s for 2s (lateral_offset 3.2)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
+* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
+* `collision(A-B)` --CONTRIBUTES_TO--> `collision(B-C)`  
+  _the first impact is what puts B across into C_
+
+> designed answer: B contributes to the first impact and not to the second
+> B's displacement into C follows from being unable to stop after the impact
+> the two impacts are about 1.5 s apart, close enough that contact matching has real work to do
+
+**Variant `independent`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265, fwd 52 m, lane -1 | 12 / 12 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
+* **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
+* **B** &mdash; `B_resume`: set_speed at t=13s for 8s (target_speed 11)
+* **B** &mdash; `B_changes_lane`: lane_shift at t=17s for 3s (lateral_offset 3.2)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`, `B_changes_lane`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
+* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
+* `B.solid_line_crossed` --CAUSES_OUTCOME--> `collision(B-C)`  
+  _the second impact is B's own lane change, not a consequence of the first_
+
+> designed answer: B contributes to both impacts, for two unrelated reasons
+> the pair and the geometry of the second impact match the consequential variant
+> what differs is that a path from B's own behaviour reaches it without passing through the first impact
+
+**Variant `avoided`**
+
+| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
+|---|---|---|---|---|
+| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
+| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265, fwd 52 m, lane -1 | 12 / 12 m/s | baseline |
+
+Scripted actions (these are the intervention handles):
+
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
+* **B** &mdash; `B_late_brake`: brake at t=5.9s for 9s (intensity 1)
+
+*Validation:* expected outcome **collision**; collision pairs (A-B); in order (A-B); A-B must close to under 5 m.
+
+*Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`.
+
+*Ground-truth causal template (oracle only):*
+
+* `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
+* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
+
+> one impact only; B stops clear and C is untouched
+> C never feels a contact, so C stays off the common timeline and the merged log says so
 
 ---
 

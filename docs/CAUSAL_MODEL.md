@@ -9,7 +9,7 @@ separation is load-bearing.
 |---|---|---|
 | What an edge means | a relation readable straight off the evidence | a *hypothesis* about why something happened |
 | Edge types | `PRECEDES`, `OBSERVED_FROM`, `SAME_TRACK`, `INTERACTS_WITH` (plus `ALIGNS_WITH` / `ASSOCIATED_WITH`, fusion only) | `CONTRIBUTES_TO`, `TRIGGERS`, `INCREASES_RISK_OF`, `PREVENTS`, `CAUSES_OUTCOME` |
-| Needs a theory? | no | yes -- one named rule per edge |
+| Needs a theory? | no | yes: one named rule per edge |
 | Acyclic? | not required | **guaranteed** |
 | Artifact | `vehicle_<id>/event_graph.json` | `vehicle_<id>/causal_graph.json` |
 
@@ -34,7 +34,7 @@ the intervals padded by `event_graph.interacts_tolerance_s` (0.5 s), and the who
 document is capped at `event_graph.max_edges` (5000). When the cap bites, whole
 relation classes are given up in priority order (`PRECEDES` first, because it
 merely restates the timestamps) and, within a class, the *longest* temporal spans
-go first -- keeping the immediate-successor chain, which transitivity cannot
+go first: keeping the immediate-successor chain, which transitivity cannot
 recover. The limits actually used are recorded in the document's `meta`.
 
 > None of the five `event_graph.*` keys is present in `configs/default.yaml`; the
@@ -67,7 +67,7 @@ no track subject to match).
 
 ### 2.1 The table
 
-`prior` is the rule's strength before any evidence -- a **modelling assumption,
+`prior` is the rule's strength before any evidence: a **modelling assumption,
 not a measured probability**. `lag` is the longest accepted cause→effect delay.
 "same subj." means both events must concern the same local radar track; "self
 eff." means the effect must be an own-behaviour (subject-free) event.
@@ -77,13 +77,13 @@ eff." means the effect must be an own-behaviour (subject-free) event.
 | Rule | Cause → Effect | Edge | prior | lag | same subj. | Why this relation is physically plausible |
 |---|---|---|---|---|---|---|
 | `target_deceleration_closes_gap` | `TARGET_DECELERATION` → `RANGE_DECREASING`, `RAPID_CLOSING` | `TRIGGERS` | 0.80 | 2.5 s | yes | A tracked object slowing while we hold speed mechanically shortens the gap: observed range falls and range-rate turns strongly negative. |
-| `closing_range_increases_ttc_risk` | `RANGE_DECREASING` → `LOW_TTC` | `INCREASES_RISK_OF` | 0.50 | 4.0 s | yes | A shrinking range does not by itself imply an imminent impact -- the closure may be slow -- but it is the precondition under which a low TTC can arise. Risk-raising, not triggering. |
+| `closing_range_increases_ttc_risk` | `RANGE_DECREASING` → `LOW_TTC` | `INCREASES_RISK_OF` | 0.50 | 4.0 s | yes | A shrinking range does not by itself imply an imminent impact, the closure may be slow, but it is the precondition under which a low TTC can arise. Risk-raising, not triggering. |
 | `rapid_closing_shortens_ttc` | `RAPID_CLOSING` → `LOW_TTC` | `CONTRIBUTES_TO` | 0.75 | 3.0 s | yes | TTC is range divided by closing speed, so a high closing speed is a direct numerical contributor to that same track's TTC falling below the warning threshold. |
 | `ttc_escalates_to_critical` | `LOW_TTC`, `RAPID_CLOSING` → `CRITICAL_TTC` | `CONTRIBUTES_TO` | 0.80 | 3.0 s | yes | Without an intervening correction an already-low TTC keeps decreasing into the critical band; the earlier crossing is the same physical process one stage earlier. |
 | `cut_in_closes_gap` | `CUT_IN_LIKE_MOTION` → `RANGE_DECREASING`, `RAPID_CLOSING`, `LOW_TTC` | `TRIGGERS` | 0.75 | 2.5 s | yes | An object moving laterally into our path takes over the headway reserved for empty road, abruptly converting lateral separation into longitudinal closure. |
 | `lateral_crossing_predicts_conflict` | `LATERAL_CROSSING` → `PREDICTED_PATH_CONFLICT` | `CONTRIBUTES_TO` | 0.60 | 3.0 s | yes | Sustained lateral motion across our heading is what makes the constant-velocity extrapolation of the two paths intersect; the predicted conflict is that observation carried forward in time. |
 | `predicted_conflict_becomes_region_entry` | `PREDICTED_PATH_CONFLICT`, `LATERAL_CROSSING` → `CONFLICT_REGION_ENTRY` | `TRIGGERS` | 0.70 | 4.0 s | yes | A predicted crossing point that neither party alters is reached: entry into the inferred region is the prediction coming true. |
-| `conflict_region_entry_shortens_ttc` | `CONFLICT_REGION_ENTRY` → `LOW_TTC`, `CRITICAL_TTC` | `CONTRIBUTES_TO` | 0.70 | 3.0 s | yes | Once both parties occupy the same small region the remaining separation is metres rather than tens of metres -- exactly the condition under which TTC collapses. |
+| `conflict_region_entry_shortens_ttc` | `CONFLICT_REGION_ENTRY` → `LOW_TTC`, `CRITICAL_TTC` | `CONTRIBUTES_TO` | 0.70 | 3.0 s | yes | Once both parties occupy the same small region the remaining separation is metres rather than tens of metres: exactly the condition under which TTC collapses. |
 | `predicted_conflict_increases_ttc_risk` | `PREDICTED_PATH_CONFLICT` → `LOW_TTC` | `INCREASES_RISK_OF` | 0.55 | 4.0 s | yes | A predicted path conflict raises the probability of a low-TTC encounter, but either party can falsify the prediction, so the claim is risk-raising rather than deterministic. |
 
 #### How the ego vehicle reacts to what it perceives
@@ -114,29 +114,28 @@ eff." means the effect must be an own-behaviour (subject-free) event.
 | Rule | Cause → Effect | Edge | prior | lag | Why |
 |---|---|---|---|---|---|
 | `critical_ttc_causes_collision` | `CRITICAL_TTC` → `COLLISION` | `CAUSES_OUTCOME` | 0.90 | 3.0 s | A TTC inside the critical band followed by an impact is the strongest onboard explanation of that impact: the collision is the TTC running out. |
-| `unmitigated_conflict_causes_collision` | `RAPID_CLOSING`, `CONFLICT_REGION_ENTRY`, `CUT_IN_LIKE_MOTION` → `COLLISION` | `CAUSES_OUTCOME` | 0.50 | 4.0 s | Fallback for impacts the TTC estimator never flagged -- a short-range cut-in or an intersection conflict can collide before any TTC sample is confirmed. |
+| `unmitigated_conflict_causes_collision` | `RAPID_CLOSING`, `CONFLICT_REGION_ENTRY`, `CUT_IN_LIKE_MOTION` → `COLLISION` | `CAUSES_OUTCOME` | 0.50 | 4.0 s | Fallback for impacts the TTC estimator never flagged: a short-range cut-in or an intersection conflict can collide before any TTC sample is confirmed. |
 | `conflict_causes_near_miss` | `CRITICAL_TTC`, `LOW_TTC`, `CONFLICT_REGION_ENTRY` → `NEAR_MISS` | `CAUSES_OUTCOME` | 0.65 | 3.0 s | A near miss is a conflict that materialised without contact; the conflict indicators are what make the encounter a near miss rather than ordinary traffic. |
-| `braking_prevents_collision` | `HARD_BRAKE`, `HARD_DECELERATION`, `BRAKE_ONSET` → `NEAR_MISS` | `PREVENTS` | 0.70 | 3.0 s | A near miss is a collision that did not happen. When our own braking precedes it, the braking is the averting action -- hence `PREVENTS`: the edge claims the cause *removed a worse outcome*, not that it produced this one. |
+| `braking_prevents_collision` | `HARD_BRAKE`, `HARD_DECELERATION`, `BRAKE_ONSET` → `NEAR_MISS` | `PREVENTS` | 0.70 | 3.0 s | A near miss is a collision that did not happen. When our own braking precedes it, the braking is the averting action, hence `PREVENTS`: the edge claims the cause *removed a worse outcome*, not that it produced this one. |
 | `steering_prevents_collision` | `STEER_ONSET`, `SIGNIFICANT_HEADING_CHANGE`, `LANE_CHANGE_LIKE_MANEUVER` → `NEAR_MISS` | `PREVENTS` | 0.45 | 3.0 s | The evasive-steering counterpart; weaker because a steering input near an encounter is also consistent with ordinary path following. |
 | `collision_forces_stop` | `COLLISION` → `POST_IMPACT_STOP`, `HARD_DECELERATION` | `TRIGGERS` | 0.85 | 4.0 s | The impact, plus the post-impact braking it provokes, is what brings the vehicle to rest. `TRIGGERS` rather than `CAUSES_OUTCOME`, because the standstill is a consequence of the outcome, not the forensic outcome under investigation. |
 
-**23 rules in total** (9 conflict-development, 4 perception→reaction, 2
-actuation→motion, 2 own-behaviour-raises-risk, 6 outcome). The `PREVENTS` type is what lets the model say "this action
-acted *against* the outcome" -- essential for not mistaking a victim's late
-braking for a cause.
+**23 rules in total** (9 conflict-development, 4 perception→reaction, 2 actuation→motion, 2 own-behaviour-raises-risk,
+6 outcome). The `PREVENTS` type is what lets the model say "this action acted *against* the outcome": essential for
+not mistaking a victim's late braking for a cause.
 
 ### 2.2 Tuning without editing code
 
 `load_rules(cfg)` applies two configuration mechanisms:
 
 * `causal_rules.default_max_lag_s` (4.0 s) is a **global ceiling**: a rule whose
-  declared window is longer is clipped, so one value can tighten the whole table,
-  while rules with shorter, mechanically motivated windows keep them.
-* `causal_rules.overrides.<rule name>.<field>` adjusts one rule. Only
-  `OVERRIDABLE_FIELDS` may be set -- `enabled`, `prior`, `max_lag_s`, `edge_type`,
-  `require_same_subject`, `require_self_effect`; `enabled: false` removes the rule
-  entirely. An explicit `max_lag_s` override is honoured as given and *not*
-  clipped, otherwise asking for a longer window would silently do nothing.
+declared window is longer is clipped, so one value can tighten the whole table,
+while rules with shorter, mechanically motivated windows keep them. *
+`causal_rules.overrides.<rule name>.<field>` adjusts one rule. Only
+`OVERRIDABLE_FIELDS` may be set: `enabled`, `prior`, `max_lag_s`, `edge_type`,
+`require_same_subject`, `require_self_effect`; `enabled: false` removes the rule
+entirely. An explicit `max_lag_s` override is honoured as given and *not* clipped,
+otherwise asking for a longer window would silently do nothing.
 
 Cause/effect type lists are deliberately **not** overridable: changing which event
 types a rule relates changes the scientific claim and belongs in code review.
@@ -161,9 +160,9 @@ confidence      = clamp( r.prior * node_factor * temporal_factor , 0, 1 )
 with `w = causal_rules.confidence.node_weight` (0.6) and
 `tau = causal_rules.confidence.temporal_decay_s` (3.0 s).
 
-The three terms answer three different questions -- *how plausible is the rule at
+The three terms answer three different questions, *how plausible is the rule at
 all*, *how solid is the underlying detection*, *how tightly did the two events
-actually follow each other* -- and **each term is stored on the edge**
+actually follow each other*, and **each term is stored on the edge**
 (`detail["rule_prior"]`, `["node_factor"]`, `["temporal_factor"]`, `["lag_s"]`,
 `["max_lag_s"]`) so a surprising number can be traced to the term that produced
 it without recomputing anything. `w` interpolates between "trust the rule" and
@@ -175,8 +174,8 @@ literal `exp(-lag / tau)`, and it matters only inside the small negative band th
 `lag >= 0` the two formulas are identical. For a negative lag the literal formula
 would return a factor *greater than one* and inflate the edge above its rule
 prior; merely clamping the lag at zero fixes that but introduces a subtler error,
-because every time-reversed pair would then score a flat 1.0 -- strictly better
-than any correctly ordered pair, however tight. Two mirror-image rules
+because every time-reversed pair would then score a flat 1.0: strictly better than
+any correctly ordered pair, however tight. Two mirror-image rules
 (`own_lateral_manoeuvre_creates_conflict` and
 `lateral_threat_triggers_evasive_steering`) compete for exactly such pairs, and
 the observed ordering is the only evidence that can separate them.
@@ -329,8 +328,8 @@ noise; propagating a value through it would amount to inventing physics.
 ### 5.2 Interventions are realised physically
 
 In this project an intervention is a **re-execution**: the identical scenario is
-replayed in the simulator -- same map, same spawn state, same seed, same
-controller gains, same sensor configuration -- with one named scripted action
+replayed in the simulator, same map, same spawn state, same seed, same
+controller gains, same sensor configuration, with one named scripted action
 modified. The outcome is then *measured*, not inferred.
 
 `cdf.simulation.runner._apply_intervention` supports five operations on exactly
@@ -338,7 +337,7 @@ one `action_id` (`RUNNER_OPS` in `cdf.causal.interventions`):
 
 | op | Effect |
 |---|---|
-| `disable` | `action.enabled = False` -- the action never fires |
+| `disable` | `action.enabled = False`: the action never fires |
 | `delay` | `t_start += seconds` |
 | `advance` | `t_start = max(0, t_start - seconds)` |
 | `scale` | `params[param] *= factor` |
@@ -353,13 +352,13 @@ raise, listing the declared actions.
 
 `cdf.causal.interventions.enumerate_interventions` merges two independent sources:
 
-* **the scenario author** -- `intervention_candidates` in the YAML, always
-  enumerated even when the reconstruction never noticed them, otherwise a
-  reconstruction that missed a cause could quietly remove that cause from the
-  experiment;
-* **the reconstruction itself** -- `GraphAnalyzer.candidate_intervention_nodes()`
-  ranks nodes whose removal destroys causal explanations of the outcome; being
-  *events*, they are mapped back onto actions by participant and time proximity.
+* **the scenario author**, `intervention_candidates` in the YAML, always
+enumerated even when the reconstruction never noticed them, otherwise a
+reconstruction that missed a cause could quietly remove that cause from the
+experiment; * **the reconstruction itself**,
+`GraphAnalyzer.candidate_intervention_nodes()` ranks nodes whose removal destroys
+causal explanations of the outcome; being *events*, they are mapped back onto
+actions by participant and time proximity.
 
 An action that is both declared and graph-ranked outranks one that is only
 declared. The list is capped at `counterfactual.max_interventions` (8) and dropped
@@ -369,12 +368,11 @@ candidates are **logged, never silently discarded**.
 `remove_edge()` report `outcome_still_reachable`, `lost_paths`, `lost_ancestors`
 and `outcomes_disconnected`. Two conventions matter there:
 
-* *causal paths start at root causes* -- a path is a complete chain from an
-  in-degree-0 node down to the outcome, so path-cut rankings depend on structure
-  rather than on chain length;
-* *removal is measured against the **original** root set* -- after a deletion the
-  graph re-roots itself and the deleted node's children would look like fresh root
-  causes, hiding that an explanation was destroyed.
+* *causal paths start at root causes*, a path is a complete chain from an
+in-degree-0 node down to the outcome, so path-cut rankings depend on structure
+rather than on chain length; * *removal is measured against the **original** root
+set*, after a deletion the graph re-roots itself and the deleted node's children
+would look like fresh root causes, hiding that an explanation was destroyed.
 
 ### 5.4 The measured outcome of a replay
 
@@ -382,7 +380,7 @@ and `outcomes_disconnected`. Two conventions matter there:
 `collision`, `collision_pairs`, `t_collision`, `impact_speed`,
 `relative_impact_speed` (the delta-v proxy), `min_ttc`, `min_distance`,
 `near_miss`, `validation_passed`, `notes`. **`None` means undefined and is never
-turned into a zero** -- attribution has to be able to tell "no severity" from
+turned into a zero**: attribution has to be able to tell "no severity" from
 "severity unknown".
 
 Replays run into their own artifact directories (`replay_layout`), so the factual
@@ -426,7 +424,7 @@ with
 
 so `score ∈ [0, 1]` and prevention dominates: a replay that only made the impact
 softer still scores above one that changed nothing. Prevention implies the maximum
-severity term by definition -- there was no impact left to be severe -- while an
+severity term by definition, there was no impact left to be severe, while an
 *unmeasured* reduction contributes `0.0`, because an unmeasured reduction is not
 evidence of a reduction. `severity_reduction` returns `None` when either run has
 no measured value or when the factual severity is zero and the ratio would be
@@ -450,7 +448,7 @@ without passing the but-for test are listed separately as *contributing actions*
 > The score is a **monotone summary of two measurements from controlled replays,
 > on an arbitrary but fixed scale, and it is meaningless outside the intervention
 > set that produced it.** `but_for` is a causal contribution *under the stated
-> intervention semantics* -- "had this scripted action not been performed as it
+> intervention semantics*: "had this scripted action not been performed as it
 > was, no collision would have occurred in this replay". Duty of care, right of
 > way and foreseeability are outside this model and cannot be derived from
 > onboard evidence. The report carries the disclaimer *"Causal contribution under
@@ -461,7 +459,7 @@ without passing the but-for test are listed separately as *contributing actions*
 > **The raw counterfactual outcomes are kept.** `CausalContribution` stores the
 > full `CounterfactualOutcome` next to the score; `attribution_report` carries the
 > factual outcome, every replay's raw outcome, the verdict *and* the replays that
-> failed with their error messages -- so a reader can always ask "what actually
+> failed with their error messages, so a reader can always ask "what actually
 > happened in that replay?", and can tell a hypothesis that was tested and
 > rejected from one that was never tested at all. `intervention_results.csv`
 > carries the same raw columns (`collision`, `t_collision`, `impact_speed`,

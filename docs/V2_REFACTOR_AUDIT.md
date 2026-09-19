@@ -9,9 +9,9 @@ and what V2 does with it.
 
 ## What V2 changes, in one paragraph
 
-V1 answered one question -- *how much of the incident graph can distributed logs
-reconstruct?* -- and answered it well. V2 splits that into four questions that
-have to stay separate: what each vehicle observed, what happened globally, which
+V1 answered one question, *how much of the incident graph can distributed logs
+reconstruct?*, and answered it well. V2 splits that into four questions that have
+to stay separate: what each vehicle observed, what happened globally, which
 temporal properties were violated, and which behaviours contributed to
 responsibility. Three consequences drive every entry below. A **camera** and
 **traffic-control perception** are new inputs, so signs and road markings become
@@ -23,7 +23,7 @@ timestamps and cannot check a DAG.
 
 ## Classification
 
-### KEEP -- unchanged, still correct under V2
+### KEEP: unchanged, still correct under V2
 
 | Component | Why it stays |
 |---|---|
@@ -37,7 +37,7 @@ timestamps and cannot check a DAG.
 | `simulation/{carla_client,world,runner,controllers,vehicle_agent}.py` | Simulator lifecycle, including the fresh-engine verification. V2 adds sensors to it. |
 | `tests/test_no_privileged_leakage.py`, `tests/test_inference_is_blind.py` | Anti-leakage. §4 explicitly forbids removing these. |
 
-### REPLACE -- the concept survives, the implementation does not
+### REPLACE: the concept survives, the implementation does not
 
 | Component | Replaced by | Why |
 |---|---|---|
@@ -46,7 +46,7 @@ timestamps and cannot check a DAG.
 | Graph-first pipeline (local graph -> fused graph) | Log-first (`local_log.json` -> `global_log.json` -> graph) | §15. |
 | `evaluation/graph_metrics.py` as primary scoring | `evaluation/graph_comparison.py` | Already demoted at HEAD; V2 removes the template path from the primary result entirely. |
 
-### REMOVE -- obsolete under V2, archived under `legacy/`
+### REMOVE: obsolete under V2, archived under `legacy/`
 
 | Component | Why it goes |
 |---|---|
@@ -56,7 +56,7 @@ timestamps and cannot check a DAG.
 | `scratch/` | Untracked working files from the V1 campaign. |
 | Radar-primary alignment as the documented method | Moves to `legacy/`; §12 requires it out of the primary story. |
 
-### MIGRATE -- moves or is extended rather than rewritten
+### MIGRATE: moves or is extended rather than rewritten
 
 | Component | Change |
 |---|---|
@@ -66,11 +66,11 @@ timestamps and cannot check a DAG.
 | `viewer/` (2 993 lines) | Rewritten around four sections (§28). |
 | `evaluation/final_results.py` | Rewritten to lead with the per-scenario supervisor table (§42) rather than aggregate ablations. |
 
-### INVESTIGATE -- unresolved at audit time
+### INVESTIGATE: unresolved at audit time
 
 | Question | Where it lands |
 |---|---|
-| Does CARLA 0.9.15 place physical STOP/YIELD sign props at the junctions the scenarios use? | §25. If not, spawn sign props and define oracle control zones in scenario config -- but local inference must still detect them by camera. |
+| Does CARLA 0.9.15 place physical STOP/YIELD sign props at the junctions the scenarios use? | §25. If not, spawn sign props and define oracle control zones in scenario config, but local inference must still detect them by camera. |
 | Is `sensor.other.lane_invasion` reliable enough to be treated as an onboard ADAS signal? | §9. If it reports the crossed marking type, it is usable; if it only reports "a marking was crossed", `SOLID_LINE_CROSSED` has to come from perception or be documented as unavailable. |
 | Live MP4 encoding cost in synchronous mode | §6 allows buffering compressed frames and encoding after the run. Measured during Phase 3. |
 | Is a sign classifier trainable without labelled data? | §7 requires a reproducible image-based method and forbids privileged labels. Falls back to a documented geometric/colour detector with measured precision/recall rather than a fabricated one. |
@@ -107,8 +107,8 @@ with it.
 `fusion/fused_causal_graph.json`, with `physical_causal_graph` as an alias
 property pointing at it.
 
-Renaming it would touch 53 call sites across 18 files and -- the reason that
-decided it -- would stop the V1 campaign from being re-read, which is how the two
+Renaming it would touch 53 call sites across 18 files and, the reason that
+decided it, would stop the V1 campaign from being re-read, which is how the two
 generations are compared. The substantive requirement in §34 is "avoid multiple
 redundant graph files with overlapping meanings", and that is met either way:
 there is exactly one fused causal graph, plus the deliberately separate union
@@ -117,8 +117,8 @@ baseline. The alias makes the V2 vocabulary usable in new code.
 ### The legacy template scoring stays in `src/`, not `legacy/`
 
 §4 lists "old template-based graph scoring as the primary metric" among the
-things to remove or archive. It is no longer the primary metric -- the observable
-comparison is -- but the earlier brief required retaining it as
+things to remove or archive. It is no longer the primary metric, the observable
+comparison is, but the earlier brief required retaining it as
 `legacy_template_reference`, and the clock and method ablations still read it.
 
 Moving it under `legacy/` would mean either breaking those ablations or importing
@@ -141,17 +141,17 @@ had, all in contact alignment, and they are worth recording because they are the
 argument for validating against recordings rather than fixtures alone.
 
 1. **Resting contact is reported as impacts.** After a pile-up the collision
-   sensor fires roughly twice a second for the rest of the run at a hundredth of
-   the impact impulse -- 43 such reports beside one real impact of 11 569 N*s.
-2. **Averaging disagreeing pairings produces a number neither supports.** A true
-   impact implied +0.267 s, a spurious pairing -0.083 s, and the median +0.092.
-3. **Greedy matching cannot separate two similar impacts.** The impulses are
-   uninformative; only the joint consistency of the assignment decides.
-4. **The middle vehicle of a chain registers one impact, not two**, so one anchor
-   relates both neighbours and the second offset inherits an error the recordings
-   do not bound. The bound this audit originally reported was computed by
-   subtracting two timestamps from two different clocks; it read 13 ms where the
-   true error was 200 ms, and has been removed rather than corrected.
+sensor fires roughly twice a second for the rest of the run at a hundredth of the
+impact impulse: 43 such reports beside one real impact of 11 569 N*s. 2.
+**Averaging disagreeing pairings produces a number neither supports.** A true
+impact implied +0.267 s, a spurious pairing -0.083 s, and the median +0.092. 3.
+**Greedy matching cannot separate two similar impacts.** The impulses are
+uninformative; only the joint consistency of the assignment decides. 4. **The
+middle vehicle of a chain registers one impact, not two**, so one anchor relates
+both neighbours and the second offset inherits an error the recordings do not
+bound. The bound this audit originally reported was computed by subtracting two
+timestamps from two different clocks; it read 13 ms where the true error was 200
+ms, and has been removed rather than corrected.
 
 ## Test count
 

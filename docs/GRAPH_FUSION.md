@@ -90,8 +90,8 @@ physical path** and must coincide to within sensor and localisation error.
 
 ### 2.1 The cost function
 
-`score_candidate(observer_ev, track_id, other_ev, cfg)` first **rejects outright**
--- returning `None`, not a high cost -- when:
+`score_candidate(observer_ev, track_id, other_ev, cfg)` first **rejects
+outright**, returning `None`, not a high cost, when:
 
 * the track's span and the candidate's span overlap by less than
   `fusion.track_association.min_overlap_s` = **1.0 s**;
@@ -130,8 +130,8 @@ Both trajectories are resampled onto a common grid of
 *Normalisers.* `max_velocity_rmse_mps` (10.0) and `min_speed_for_heading_mps`
 (0.5) are code defaults **not present in `configs/default.yaml`**; they only
 normalise already-bounded quantities. Velocity that a recorder left identically
-zero is reconstructed by differentiating the resampled positions -- legitimate,
-being a function of the same local evidence -- and when velocity evidence is
+zero is reconstructed by differentiating the resampled positions, legitimate,
+being a function of the same local evidence, and when velocity evidence is
 missing entirely the channel takes the neutral 0.5 rather than rewarding or
 punishing the candidate. Samples where either object is essentially stationary
 carry no directional information and are skipped; when none qualifies, heading
@@ -144,8 +144,8 @@ distinct physical objects, so at most one of them can be any given participant.
 That is exactly a rectangular linear assignment problem, and it is solved
 **optimally** with `scipy.optimize.linear_sum_assignment` rather than greedily, so
 a locally attractive but globally wrong pairing cannot win. Pairs with no
-candidate are priced at `_INFEASIBLE_COST = 1e6` -- finite, so the solver stays
-feasible on rectangular problems -- and filtered out afterwards.
+candidate are priced at `_INFEASIBLE_COST = 1e6`, finite, so the solver stays
+feasible on rectangular problems, and filtered out afterwards.
 
 ### 2.3 RESOLVED / AMBIGUOUS / UNRESOLVED
 
@@ -178,7 +178,7 @@ with `floor = fusion.track_association.ambiguous_confidence_factor` (code defaul
 **The evidence-parity guard.** The cost measures only how *well* two trajectories
 agree, never over how much of the track's life they were compared. A decoy that
 shares the road with a track for one second and then disappears is scored on a
-second of perfect agreement -- cost 0, score 1.0 -- and would beat the true match
+second of perfect agreement, cost 0, score 1.0, and would beat the true match
 measured over the whole run with a metre of radar bias. `_evidence_parity`
 therefore compares `chosen.overlap_s / rival.overlap_s` against
 `fusion.track_association.min_evidence_parity` (code default **0.5**, the rival
@@ -188,8 +188,8 @@ winner that rests on too little evidence to `AMBIGUOUS`, with an explicit reason
 identity is reported as a best guess, not as established."
 
 Every verdict carries a human-checkable `reason`, and **every candidate of every
-track is written to `fusion/association_report.json`** -- not just the winner --
-so a third party can re-derive the verdict, see the margin and disagree with it.
+track is written to `fusion/association_report.json`**, not just the winner, so
+a third party can re-derive the verdict, see the margin and disagree with it.
 The report also embeds the full threshold block and the config hash.
 
 *Example, from the committed S01 run.* One track, `A::T001`, observed by A:
@@ -199,9 +199,9 @@ all, so it poses an empty assignment problem.
 
 ### 2.4 From assignments to a subject map
 
-`resolve_subjects(assignments)` yields `track_id → participant_id` for
-`RESOLVED` **and** `AMBIGUOUS` assignments -- an ambiguous assignment *does* name
-a participant, and its reduced confidence propagates into the fused node -- and
+`resolve_subjects(assignments)` yields `track_id → participant_id` for `RESOLVED`
+**and** `AMBIGUOUS` assignments, an ambiguous assignment *does* name a
+participant, and its reduced confidence propagates into the fused node, and
 excludes `UNRESOLVED` ones, which name nobody. The distinction is deliberately
 preserved rather than collapsed into a boolean.
 
@@ -272,7 +272,7 @@ be equal.
 ### 3.4 Naming the counterpart of an own-recorded relational event
 
 A `COLLISION` is relational, but an onboard collision sensor reports *that* an
-impact happened, never *with whom* -- that is the whole point of the data
+impact happened, never *with whom*: that is the whole point of the data
 boundary. `_infer_counterpart` recovers the other party legitimately: take the
 observer's own radar tracks that association already resolved to a participant,
 find the nearest at the moment of the event, and name it. Everything used is the
@@ -290,9 +290,9 @@ also lie within `counterpart_max_range_m` (8.0 m) at a sample within
 the same participant count as one hypothesis, not two.
 
 Verdicts: `inferred` / `ambiguous` / `unknown`, all three recorded. On the
-committed S01 run both branches are visible: A's collision gets
-`counterpart B inferred from own track at 3.64m at t=6.550s`, while B's collision
-gets `counterpart_unknown` -- B held no tracks, so it cannot name A.
+committed S01 run both branches are visible: A's collision gets `counterpart B
+inferred from own track at 3.64m at t=6.550s`, while B's collision gets
+`counterpart_unknown`, B held no tracks, so it cannot name A.
 
 ### 3.5 Grouping
 
@@ -301,12 +301,11 @@ within tolerance. Groups are built by **best-first (closest in time) single-link
 merging with a validity check on every union**: `_union_is_valid` requires *every*
 cross pair of the two groups to be compatible, so a group stays a genuine clique.
 Plain single linkage would chain events transitively across a span far wider than
-the tolerance and could put two events of one participant in one group -- and a
-group never contains two events from the same participant, because within one log
-a repeated detection is a separate event and collapsing them would rewrite that
-participant's own account. A rejected union is reported
-(`group_union_rejected`), never silently dropped. The result does not depend on
-input order.
+the tolerance and could put two events of one participant in one group, and a group
+never contains two events from the same participant, because within one log a
+repeated detection is a separate event and collapsing them would rewrite that
+participant's own account. A rejected union is reported (`group_union_rejected`),
+never silently dropped. The result does not depend on input order.
 
 ---
 
@@ -319,9 +318,9 @@ Each alignment group collapses into one fused `Event`:
 | `event_type`, `participant_id` | taken from the **representative** |
 | `t_peak` | confidence-weighted mean of the members' peaks (plain mean at zero total weight) |
 | `t_start` / `t_end` | minimum start / maximum end over the members |
-| `confidence` | `fuse_confidence(member confidences, cfg)` -- §5 |
+| `confidence` | `fuse_confidence(member confidences, cfg)`: §5 |
 | `values` | per-key **mean** across the members that reported that key; a key reported by only one participant is kept as that participant's value (dropping it would discard a measurement, imputing a zero would invent one) |
-| `subject` | a **participant id**, not a local track id -- §4.2 |
+| `subject` | a **participant id**, not a local track id: §4.2 |
 | `owners` | the union of the members' owners, sorted |
 | `merged_from` | the sorted member event ids |
 | `evidence` | every member's evidence, **plus** one back-pointer per member carrying its participant, type, confidence and original local subject |
@@ -335,7 +334,7 @@ then by event id, so the choice is deterministic.
 **4.2 The fused subject.** A local track id such as `"A::T007"` is meaningless
 outside A's log, so the fused node names the participant the association stage
 identified. When the group could not be keyed, the original local label is kept
-verbatim -- losing it would erase the only pointer back to the supporting
+verbatim: losing it would erase the only pointer back to the supporting
 evidence.
 
 **4.3 Ids.** `make_event_id("fused", owner, type, t_peak, subject|digest)` where
@@ -356,7 +355,7 @@ raises.
 | `max` | `max(v)` | keep the strongest single piece of evidence; refuse to let agreement between weak observations manufacture certainty |
 | `mean` | `mean(v)` | the contributions are measurements of one quantity, so a weak one *dilutes* a strong one |
 
-`noisy_or([0.5, 0.5]) == 0.75`. An unknown method **raises** -- silently falling
+`noisy_or([0.5, 0.5]) == 0.75`. An unknown method **raises**: silently falling
 back to a default would make the number in the artifact untraceable to the config
 hash stamped next to it. An empty sequence yields `0.0`: no evidence is not weak
 evidence.
@@ -367,15 +366,15 @@ reach 1.0: **certainty is not reachable by accumulating heuristics.**
 > ### Caveat: this is evidence accumulation, not calibrated probability
 >
 > A local event's confidence expresses how cleanly the underlying signal crossed
-> its threshold -- how many radar points supported the track, how far above the
+> its threshold: how many radar points supported the track, how far above the
 > hysteresis band a deceleration went. It is **not** the output of a fitted
 > probabilistic model and no frequency interpretation is claimed for it.
 > Consequently the fused value **must not be read as `P(event | evidence)`**. It
 > is a monotone, auditable summary answering one question: *did several
 > independent onboard recorders support the same claim, and how strongly?*
 > `noisy_or` is chosen as the default because independence is the interesting
-> property of this architecture -- the recorders share no sensor and no clock
-> discipline -- and it is also the most optimistic rule, which is why it is
+> property of this architecture: the recorders share no sensor and no clock
+> discipline, and it is also the most optimistic rule, which is why it is
 > capped.
 
 The same function fuses edge confidence over the contributing local edges.
@@ -405,13 +404,13 @@ detected *before* the surviving edges are built and recorded in
 
 | Kind | Meaning | Resolution |
 |---|---|---|
-| `edge_type_disagreement` | participants assert different relations between the same ordered pair of fused nodes (one says `PREVENTS` where another says `CONTRIBUTES_TO`) | `kept_both` -- **both edges survive**, and each carries `detail["contradiction"]` naming the competing types |
+| `edge_type_disagreement` | participants assert different relations between the same ordered pair of fused nodes (one says `PREVENTS` where another says `CONTRIBUTES_TO`) | `kept_both`: **both edges survive**, and each carries `detail["contradiction"]` naming the competing types |
 | `direction_disagreement` | one participant asserts `X → Y` while another asserts `Y → X` | `kept_both`; the cycle is resolved by the DAG stage, which records which edge lost |
 
 `fusion.conflict.keep_contradictions` = **true** is the default and the
 recommended setting. Setting it false asks fusion to *adjudicate* (keep the
-strongest edge type per pair) -- but even then the discarded claims are reported
-in `rejected_edges` with reason `contradiction_adjudicated`. The configuration can
+strongest edge type per pair), but even then the discarded claims are reported in
+`rejected_edges` with reason `contradiction_adjudicated`. The configuration can
 ask fusion to adjudicate, **never to forget**. An investigator must be able to see
 that the evidence conflicts; a single averaged edge would hide exactly the fact
 that matters most.
@@ -538,20 +537,18 @@ it is worth.
 Nothing in a fused artifact is anonymous about where it came from.
 
 * Every fused node and edge carries `provenance = FUSED` and an `owners` list
-  naming every contributing participant.
-* Every fused node carries `merged_from` (the contributing local event ids) and an
-  `Evidence` back-pointer per member with that member's participant, type,
-  confidence and original local subject.
-* Every fused edge carries `merged_from`, `detail["contributing_participants"]`
-  and `detail["source_edges"]` -- the full per-participant claim list including
-  each one's confidence, rule and temporal relation.
-* The document's `meta["fusion"]` records `n_merged_groups`, `n_contradictions`,
-  `n_rejected_edges`, the `confidence_method`, the `config_hash` and
-  `enforced_dag`.
-* `fusion_diagnostics.json` additionally carries the input node/edge counts per
-  participant, every merged group with its `t_peak_spread_s`, the contradiction
-  list, the rejected-edge list, the unresolved tracks with their reasons, the
-  alignment diagnostics, the clock alignment block and the subject map.
+naming every contributing participant. * Every fused node carries `merged_from`
+(the contributing local event ids) and an `Evidence` back-pointer per member with
+that member's participant, type, confidence and original local subject. * Every
+fused edge carries `merged_from`, `detail["contributing_participants"]` and
+`detail["source_edges"]`: the full per-participant claim list including each one's
+confidence, rule and temporal relation. * The document's `meta["fusion"]` records
+`n_merged_groups`, `n_contradictions`, `n_rejected_edges`, the
+`confidence_method`, the `config_hash` and `enforced_dag`. *
+`fusion_diagnostics.json` additionally carries the input node/edge counts per
+participant, every merged group with its `t_peak_spread_s`, the contradiction
+list, the rejected-edge list, the unresolved tracks with their reasons, the
+alignment diagnostics, the clock alignment block and the subject map.
 
 A fused claim can therefore always be traced back to the individual onboard
 recordings that support it.
@@ -562,18 +559,17 @@ recordings that support it.
 
 Two different questions, answered by two different mechanisms.
 
-### 8.1 `_fusion_added` -- structural, inside one run
+### 8.1 `_fusion_added`: structural, inside one run
 
 Written to `diagnostics["fusion_added"]`, with its criterion stated inline:
 
-* a **node** is *added* when its `owners` span more than one participant -- no
-  local graph contains it, because no participant saw both sides;
-* an **edge** is *added* when it touches such a node -- its endpoint does not
-  exist in any local graph, so neither can the edge;
-* a **bridged path** is a reachability pair `(u, v)` present in the fused graph and
-  in **no** participant's own remapped subgraph. This is the concrete payoff of
-  fusion: *a cause recorded by one vehicle now reaches an outcome recorded by
-  another*.
+* a **node** is *added* when its `owners` span more than one participant, no local
+graph contains it, because no participant saw both sides; * an **edge** is *added*
+when it touches such a node, its endpoint does not exist in any local graph, so
+neither can the edge; * a **bridged path** is a reachability pair `(u, v)` present
+in the fused graph and in **no** participant's own remapped subgraph. This is the
+concrete payoff of fusion: *a cause recorded by one vehicle now reaches an outcome
+recorded by another*.
 
 The bridged-path listing is capped at `fusion.diagnostics.max_bridged_paths` (code
 default 200) because the count grows quadratically, but the **count is always
@@ -581,11 +577,11 @@ reported in full** along with a `bridged_paths_truncated` flag.
 
 *From the committed S01 run:* 2 added nodes (both fused `DECELERATION` nodes, each
 merging A's `TARGET_DECELERATION` observation with B's own `DECELERATION` report),
-5 added edges, and **20 bridged paths** -- for example
-`fused:B:BRAKE_ONSET → fused:A:COLLISION`, a chain from B's brake command to A's
-impact that neither vehicle's own graph contains.
+5 added edges, and **20 bridged paths**, for example `fused:B:BRAKE_ONSET →
+fused:A:COLLISION`, a chain from B's brake command to A's impact that neither
+vehicle's own graph contains.
 
-### 8.2 `knowledge_gain` -- against a reference
+### 8.2 `knowledge_gain`: against a reference
 
 `GraphAnalyzer.knowledge_gain(baseline, reference, …)` answers the evaluation
 question: *what does this graph recover of the reference that the baseline
@@ -603,13 +599,13 @@ baseline does not. The result reports `nodes_gained`, `edges_gained`, their coun
 and four recalls (`baseline_node_recall`, `self_node_recall`,
 `baseline_edge_recall`, `self_edge_recall`) against the reference.
 
-**Claims this graph adds that the reference does not contain are *not* a gain** --
+**Claims this graph adds that the reference does not contain are *not* a gain**:
 they are false positives, and they are scored separately by
 `cdf.graph.metrics.graph_structure_metrics`. A "gain" metric that counted them
 would reward hallucination.
 
-Identity across graphs is `canonical_key` -- `(event_type, owner_participant,
-resolved_subject, time_bucket)` -- because event ids are never comparable across
+Identity across graphs is `canonical_key`, `(event_type, owner_participant,
+resolved_subject, time_bucket)`, because event ids are never comparable across
 independently produced graphs. The time bucket defaults to
 `DEFAULT_CANONICAL_TIME_BUCKET_S = 1.0 s`
 (`evaluation.event_match.canonical_time_bucket_s`, not present in

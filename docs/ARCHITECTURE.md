@@ -1,7 +1,87 @@
 # Architecture
 
-This document traces the complete pipeline, module by module, naming the actual
-functions that run. Every symbol below exists in the repository; paths are
+## The pipeline in ten stages
+
+```
+        ┌── Vehicle A ──┐
+        │   Vehicle B   │   1. local acquisition
+        └── Vehicle C ──┘      telemetry, controls, radar, camera, lane, contact
+                │
+                ▼              2. local event extraction
+        per-vehicle events        one log per vehicle, on its own clock
+                │
+                ▼              3. time synchronization
+          common timeline         contact, then radar, then unresolved
+                │
+                ▼              4. vehicle identity association
+        tracks become names       anonymous radar track to participant
+                │
+                ▼              5. global event log
+            one account           every vehicle's events on one axis
+                │
+                ▼              6. physical causal DAG
+           what led to what       hypotheses with evidence and confidence
+                │
+      ┌─────────┼─────────┐
+      ▼         ▼         ▼
+  7. temporal  8. respon-  9. counterfactual
+     properties   sibility     replay
+   PASS/FAIL/    violation   would it have
+    UNKNOWN      on a path    been avoided
+      └─────────┼─────────┘
+                ▼
+                              10. oracle and evaluation
+                                  scored against the privileged record
+```
+
+**1. Local acquisition.** Each vehicle records only what its own sensors give
+it: telemetry, controls, radar returns to anonymous tracks, forward camera, lane
+sensor, contact trigger, on its own clock. Nothing about another vehicle, and
+nothing about the map.
+
+**2. Local event extraction.** Those recordings become typed events. A brake
+onset from its own controls, a closing range from its own radar, a STOP sign
+from its own frames. Each vehicle also builds its own event graph and its own
+causal graph, from its own evidence alone.
+
+**3. Time synchronization.** The logs are on different clocks, so before they can
+be merged the offsets have to be estimated from evidence the vehicles recorded:
+a shared impact first, a radar trajectory fit second, unresolved last.
+[CLOCKS.md](CLOCKS.md).
+
+**4. Vehicle identity association.** One vehicle's radar track `B::T001` and the
+participant C are the same thing, and nothing in the recordings says so. The
+association is inferred from trajectory agreement on the common timeline, which
+is why it cannot run before stage 3.
+
+**5. Global event log.** A flat, timestamped, checkable table of everything every
+vehicle recorded, on one axis, before any graph is built. A reader can audit this;
+a DAG is harder to argue with.
+
+**6. Physical causal DAG.** What led to what, as hypotheses carrying evidence and
+confidence, with cycles rejected. Physical only: it says nothing about rules.
+[EVENTS.md](EVENTS.md) separates these relations from the event-graph ones.
+
+**7. Temporal properties.** Metric temporal logic over the merged trace, three
+valued. PASS, FAIL, or UNKNOWN where the recording does not settle it.
+[FORMAL_METHODS.md](FORMAL_METHODS.md).
+
+**8. Responsibility graph.** A second graph built from the first, asking whether
+a normative violation lies on a physical causal path. Kept separate so the
+physics can be accepted while the rule is disputed.
+[RESPONSIBILITY.md](RESPONSIBILITY.md).
+
+**9. Counterfactual replay.** The encounter is re-run with one action or
+non-action changed, to test whether the outcome depended on it.
+[COUNTERFACTUALS.md](COUNTERFACTUALS.md).
+
+**10. Oracle and evaluation.** Only now is the privileged record opened, to score
+what the previous nine stages produced. Nothing it contains reaches them.
+[DATA_BOUNDARY.md](DATA_BOUNDARY.md) states the boundary and the tests that
+enforce it.
+
+The rest of this document traces the same pipeline module by module, naming the
+actual functions that run. Every symbol below exists in the repository; paths are
 relative to the repository root.
 
 Terminology used throughout the docs: *causal contribution*, *causal initiator*,
@@ -10,7 +90,7 @@ Terminology used throughout the docs: *causal contribution*, *causal initiator*,
 
 ---
 
-## 1. The stage map
+## 1. The stage map, in detail
 
 ```mermaid
 flowchart TD
@@ -43,12 +123,12 @@ flowchart TD
     FA --> EV
     AR2 --> EV
 
-    classDef todo stroke-dasharray: 5 5;
-    class CF,EV todo;
 ```
 
-Dashed boxes are the two stages whose *driver* module does not exist yet; their
-building blocks do, and are named precisely in sections 7 and 8.
+Every stage in this map has a driver that runs. The counterfactual sweep is
+`cdf.causal.counterfactuals.run_counterfactual_suite`, driven by
+`scripts/run_counterfactuals.py`; evaluation is `cdf.evaluation.suite.evaluate_run`,
+driven by `scripts/evaluate.py`. Sections 7 and 8 name the building blocks.
 
 ---
 
@@ -57,15 +137,15 @@ building blocks do, and are named precisely in sections 7 and 8.
 `cdf.common.config.load_run_config(scenario_id, sensor_profile, overrides,
 config_root)` deep-merges, in order:
 
-1. `configs/default.yaml` -- the threshold registry;
-2. `configs/sensors/<profile>.yaml` -- the radar profile (`radar` block only);
+1. `configs/default.yaml`, the threshold registry;
+2. `configs/sensors/<profile>.yaml`, the radar profile (`radar` block only);
    the profile is the explicit argument, else the scenario's `sensors.profile`,
    else the default's, else `radar_baseline`;
-3. `configs/scenarios/<id>.yaml` -- located case-insensitively by
+3. `configs/scenarios/<id>.yaml`, located case-insensitively by
    `find_scenario_file()` from `"S01"`, `"s1"` or `"S01_rear_end"`;
 4. `dotted.key=value` overrides parsed by `parse_override()`.
 
-The merged mapping becomes a `Config`. `Config.hash` is `config_hash()` -- a
+The merged mapping becomes a `Config`. `Config.hash` is `config_hash()`, a
 16-hex prefix of the SHA-256 of the normalised (float-rounded, key-sorted) JSON.
 `Config.get("a.b.c", default)` is the only read path used in the pipeline;
 `Config.require()` raises for values with no sensible default.
@@ -73,26 +153,26 @@ The merged mapping becomes a `Config`. `Config.hash` is `config_hash()` -- a
 `ScenarioSpec.from_config(cfg, variant)` reads the `scenario` block, deep-merges
 the chosen variant over it, applies `participant_overrides` per participant id,
 builds `ParticipantSpec` / `SpawnSpec` / `RouteSpec` / `ScriptedAction` objects,
-and runs `ScenarioSpec.validate_static()` -- which enforces 2--3 participants,
+and runs `ScenarioSpec.validate_static()`, which enforces 2 or 3 participants,
 unique participant and action ids, known `expected_outcome`, and that every
 `intervention_candidates` entry names a declared action. Any problem raises.
 
 ---
 
-## 3. `run_scenario` -- one scenario execution
+## 3. `run_scenario`, one scenario execution
 
 `cdf.simulation.runner.run_scenario(client, cfg, spec, seed, artifacts_root,
 persist, intervention, layout) -> RunResult`
 
 **Setup**
 
-1. `import_carla()` -- lazy import with an actionable error.
+1. `import_carla()`, lazy import with an actionable error.
 2. `make_run_id(scenario_id, seed, variant, config_hash)` →
    `"S01-crash-seed000-0b81b521"`. With an `intervention` the spec is first
    rewritten by `_apply_intervention()` and `-cf-<intervention_id>` is appended.
 3. `RunLayout.create(artifacts_root, scenario_id, name, seed, variant)`.
 4. `environment_block()` (`cdf.common.io`) and an `OracleLogger`.
-5. `with ScenarioWorld(client, cfg, spec.map_name, seed=seed) as sworld:` --
+5. `with ScenarioWorld(client, cfg, spec.map_name, seed=seed) as sworld:`,
    `__enter__` calls `ensure_map()`, applies synchronous mode /
    `fixed_delta_seconds` / substepping, and seeds the Traffic Manager.
 6. `oracle.bind_map(sworld.map)`; `sworld.spawn_points()`.
@@ -115,11 +195,11 @@ persist, intervention, layout) -> RunResult`
 11. `ParticipantAgent(...)`; `agent.spawn()` attaches the radars
     (`radar_specs_from_config`) and the `CollisionSensor`.
 12. `oracle.register(pid, agent.vehicle, collision_sensor=..., controller=...)`
-    -- the privileged side of the collision sensor and the actor id.
+    (the privileged side of the collision sensor and the actor id).
 
 **Settling**
 
-13. `sworld.warmup()` -- `simulation.warmup_ticks` (20) discarded ticks.
+13. `sworld.warmup()`, `simulation.warmup_ticks` (20) discarded ticks.
 14. `agent.apply_initial_speed()` per participant, then four more ticks so the
     imparted velocity takes effect in the solver.
 15. `t0 = sworld.elapsed_seconds`; `oracle.time_offset = t0`;
@@ -148,7 +228,7 @@ near-miss trigger must not end the run before the collision it anticipated.
 16. `agent.finalize()` stops the sensors and returns the retained window.
 17. Outcome: `COLLISION` if `oracle.collision_pairs()` is non-empty, else
     `NEAR_MISS` if any recorder triggered, else `NO_EVENT`.
-18. `validate_run(spec, oracle, agents, cfg)` -- section 3.1.
+18. `validate_run(spec, oracle, agents, cfg)`, section 3.1.
 19. When persisting: `agent.persist(layout)` per participant,
     `oracle.persist(layout)`, `write_json(layout.manifest, manifest)`,
     `write_json(layout.scenario_validation, validation)`.
@@ -182,7 +262,7 @@ scenario cannot quietly poison downstream metrics.
 
 ---
 
-## 4. `ParticipantAgent.step` -- the onboard stack
+## 4. `ParticipantAgent.step`, the onboard stack
 
 `cdf.simulation.vehicle_agent.ParticipantAgent` is the narrow waist between the
 simulator and local inference: if a privileged quantity ever reached local
@@ -218,22 +298,22 @@ sequenceDiagram
 **`read_own_state`** touches `self.vehicle` only: transform, velocity,
 acceleration, angular velocity, control. It calls
 `cdf.local.own_state.make_telemetry()`, which fills `speed` via `ground_speed()`
-and `accel_long`/`accel_lat` via `body_frame_acceleration()` -- so every producer
+and `accel_long`/`accel_lat` via `body_frame_acceleration()`, so every producer
 of telemetry agrees on the definitions.
 
 **`RadarFrontEnd.process(frame, telemetry)`** (`cdf.local.radar`) refuses a frame
 or telemetry belonging to another participant, then:
 
-1. `apply_degradation(frame, cfg, rng)` -- the sensor-quality profile is applied
+1. `apply_degradation(frame, cfg, rng)`, the sensor-quality profile is applied
    *after* acquisition, from a seeded stream, so a degraded run is reproducible.
    One uniform and three Gaussian draws are consumed per detection whether or not
    it survives, so changing a noise sigma re-weights the outcome without
    reshuffling the stream.
-2. `filter_detections(detections, cfg)` -- the five `radar_processing.filter`
+2. `filter_detections(detections, cfg)`, the five `radar_processing.filter`
    gates (range band, `max_abs_velocity_mps`, altitude band, `max_abs_azimuth_rad`).
 3. `polar_to_body(...)` per surviving return, plus
    `stationarity_residual(velocity, azimuth + sensor_yaw, own_speed)`.
-4. `cluster_points(points, eps_m, min_points, velocity_weight)` -- a hand-written,
+4. `cluster_points(points, eps_m, min_points, velocity_weight)`, a hand-written,
    index-order-deterministic DBSCAN over `(rel_x, rel_y, range_rate)`.
 5. `_build_cluster(...)` per group: centroid, mean range rate, `body_to_global`,
    extent, `_quality(n_points, spread)`, and the **median** member stationarity
@@ -243,9 +323,9 @@ or telemetry belonging to another participant, then:
 **`RadarTracker.update(t, frame, clusters, telemetry)`** (`cdf.local.tracking`)
 refuses foreign clusters/telemetry and a backwards `t`, then:
 
-1. `_predict(t)` -- constant-velocity prediction of every track to `t`, each from
+1. `_predict(t)`, constant-velocity prediction of every track to `t`, each from
    its own `last_t`, so a coasting track is extrapolated over the whole gap.
-2. `_associate(predictions, clusters)` -- a gated **optimal** one-to-one
+2. `_associate(predictions, clusters)`, a gated **optimal** one-to-one
    assignment (`scipy.optimize.linear_sum_assignment`) on global-frame distance;
    pairs beyond `tracking.gate_m` are priced at `_GATE_REJECT_COST` before the
    solve and dropped after it.
@@ -253,7 +333,7 @@ refuses foreign clusters/telemetry and a backwards `t`, then:
    confidence `+ hit_gain`, latching confirmation at `min_hits_to_confirm` and
    `confidence.min_confirm`) or `_apply_miss` (coast, confidence `- miss_decay`).
 4. Tracks with `misses >= max_misses` are dropped.
-5. Unassociated clusters `_spawn` a new track -- **unless** the cluster is
+5. Unassociated clusters `_spawn` a new track, **unless** the cluster is
    world-fixed and `radar_processing.stationary.reject_new_tracks` is set. The
    test gates track *birth* only, so a tracked vehicle that brakes to a halt is
    never lost.
@@ -267,7 +347,7 @@ a `RingBuffer` with a hard `deque(maxlen=...)` capacity of
 `pre_event_s * sample_rate_hz * records_per_step` (the multiplicity is read from
 the same config keys the producers use, so a 16-track step still retains a full
 20 s of track history) plus a post-event list that *refuses* records past its
-capacity rather than evicting -- after an impact the earliest post-event records
+capacity rather than evicting, after an impact the earliest post-event records
 are the valuable ones. The first `trigger()` freezes the window to
 `[t_trigger - pre_event_s, t_trigger + post_event_s]`; later triggers are
 recorded but never re-arm the window.
@@ -276,7 +356,7 @@ recorded but never re-arm the window.
 
 | Trigger | Source | Config |
 |---|---|---|
-| `COLLISION` | `CollisionSensor.drain_local(min_impulse=…)` -- identity stripped | `recorder.triggers.collision.min_impulse` |
+| `COLLISION` | `CollisionSensor.drain_local(min_impulse=…)`, identity stripped | `recorder.triggers.collision.min_impulse` |
 | `NEAR_MISS` | own track TTC and range, armed once | `recorder.triggers.near_miss.ttc_s`, `.min_range_m` |
 | `EMERGENCY_BRAKE` | own brake command and own `accel_long`, armed once | `recorder.triggers.emergency_brake.brake_cmd`, `.decel_mps2` |
 
@@ -288,7 +368,7 @@ current target speed, overridden while a `brake` or `stop` action is active. Aft
 
 ---
 
-## 5. `analyse_run` -- local inference
+## 5. `analyse_run`, local inference
 
 `cdf.local.pipeline.analyse_run(run_dir, cfg, persist=True) -> Dict[str, LocalAnalysis]`
 
@@ -336,7 +416,7 @@ each with `confidence_terms()`, and makes the result acyclic with
 
 ---
 
-## 6. `fuse_run` -- post-event fusion
+## 6. `fuse_run`, post-event fusion
 
 `cdf.fusion.pipeline.fuse_run(run_dir, cfg, persist=True, fuse_event_graph=True)
 -> FusionResult`
@@ -398,9 +478,9 @@ diagnostics, `fused_events.json`, both fused graphs in JSON and GraphML,
 
 **Oracle.** `cdf.oracle.logger.OracleLogger` is the only module that reads global
 simulator state. Per tick, `capture()` records an `OracleActorState` per
-participant -- exact pose, velocity, acceleration, controls, plus the privileged
+participant, exact pose, velocity, acceleration, controls, plus the privileged
 map context (`lane_id`, `road_id`, `section_id`, `is_junction`, `junction_id`,
-`traffic_light_state`, `traffic_light_id`) -- and every traffic light in the
+`traffic_light_state`, `traffic_light_id`), and every traffic light in the
 world. `_drain_collisions()` pulls `CollisionSensor.drain_privileged()` and
 resolves `other_actor_id` to a participant through `participant_of_actor()`;
 `collision_pairs()` de-duplicates CARLA's twice-reported impacts into ordered
@@ -412,7 +492,7 @@ resolves `other_actor_id` to a participant through `participant_of_actor()`;
 * `.check_participant(ev)` runs every `LOCAL_PROPERTIES` entry on one
   participant's own evidence;
 * `.check_run(run)` aggregates that over the run into the on-disk shape of
-  `checking/model_check_results.json` -- and contains **no** oracle verdicts;
+  `checking/model_check_results.json`, and contains **no** oracle verdicts;
 * `.check_oracle(oracle_trace)` runs `ORACLE_PROPERTIES` on a plain trace mapping,
   returning a separate list that the caller must persist separately.
 
@@ -432,8 +512,8 @@ violating intervals, decimated deterministically to
 
 **Counterfactual replay** is an interventional re-execution, not a graph edit:
 `run_scenario(client, cfg, spec, seed, intervention={...})` rewrites exactly one
-`ScriptedAction` through `_apply_intervention()` --
-`op ∈ {disable, delay, advance, scale, set}` -- and holds the map, spawn state,
+`ScriptedAction` through `_apply_intervention()`,
+`op ∈ {disable, delay, advance, scale, set}`, and holds the map, spawn state,
 seed and every other controller parameter identical. Which events are worth
 replaying comes from the structural half, `cdf.graph.analysis.GraphAnalyzer`:
 `candidate_intervention_nodes()`, `remove_node()`, `remove_edge()`,
@@ -446,10 +526,10 @@ replaying comes from the structural half, `cdf.graph.analysis.GraphAnalyzer`:
 > (`counterfactual.*`) and both halves above exist. See `docs/CAUSAL_MODEL.md` §6.
 
 **Evaluation** compares the two sides. The metric implementations exist in
-`cdf.graph.metrics` -- `prf1`, `event_metrics`, `graph_structure_metrics`
+`cdf.graph.metrics`, `prf1`, `event_metrics`, `graph_structure_metrics`
 (node/edge precision, recall, F1 and structural Hamming distance),
 `compare_local_vs_fused` (per participant, the best single local reconstruction,
-the fused one, and the deltas) -- built on the tolerance-correct Hungarian matcher
+the fused one, and the deltas), built on the tolerance-correct Hungarian matcher
 in `cdf.graph.matching`.
 
 > **Status.** `cdf.evaluation` is an empty placeholder package: no module writes
@@ -485,7 +565,7 @@ into a campaign it does not belong to.
 | Module | Role |
 |---|---|
 | `schemas.py` | every persisted record type, the `EventType` taxonomy, `Provenance`, `CheckStatus`, `SCHEMA_VERSIONS`, the anti-leakage registries, `make_event_id` / `make_track_id` / `stable_digest` / `to_jsonable` |
-| `layout.py` | `RunLayout` -- **the** canonical artifact paths; nothing hard-codes one |
+| `layout.py` | `RunLayout`, **the** canonical artifact paths; nothing hard-codes one |
 | `config.py` | layered YAML merge, `Config`, `config_hash`, `load_run_config` |
 | `evidence.py` | `ParticipantEvidence` / `RunEvidence` and their loaders; the single place the artifact format is interpreted |
 | `geometry.py` | frame transforms (`polar_to_body`, `body_to_global`, `global_to_body`, `radar_detection_to_global`), `time_to_collision_1d`, `closest_approach`, `polyline_intersection`, `predict_constant_velocity`, `resample_trajectory`, `trajectory_rmse` |
@@ -506,7 +586,7 @@ matching), `metrics.py`, `analysis.py`.
   a simulator, and physically cannot hold a world handle.
 * **Local vs fusion.** Each vehicle reaches its reconstruction alone. Fusion may
   only rename co-observed events, accumulate confidence and *record* disagreement
-  -- never make a claim disappear.
+  Never make a claim disappear.
 * **Inference vs oracle.** Ground truth is quarantined under `oracle/`, carries
   `Provenance.ORACLE`, and is refused by `load_graph(expect_scope=…)` at every
   inference boundary.
