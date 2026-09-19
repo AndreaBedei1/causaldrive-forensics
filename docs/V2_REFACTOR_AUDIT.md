@@ -129,7 +129,7 @@ filename `legacy_template_edge_matches.csv`.
 ### The V1 docs are pointers, not deletions
 
 §43 says to delete stale duplicates. `EVENT_TAXONOMY.md`,
-`CLOCK_SYNCHRONIZATION.md` and `MODEL_CHECKING.md` are superseded by `EVENTS.md`,
+`CLOCK_SYNCHRONIZATION.md` and `MODEL_CHECKING.md` now live under `legacy/`, superseded by `EVENTS.md`,
 `CLOCKS.md` and `FORMAL_METHODS.md`, but they are referenced from dozens of code
 docstrings. Deleting them would leave those references dangling, which §4 forbids
 in the same breath ("no broken docs"). Each now opens by naming its successor.

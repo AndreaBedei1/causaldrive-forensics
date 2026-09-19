@@ -19,6 +19,12 @@ artifacts_v2/**
 # computed from, and untracked for the same reason as the roots above.
 artifacts_v2_validation/**
 !artifacts_v2_validation/.gitkeep
+# A recording copied out for a demo or a screenshot. Same reason as the roots
+# above: recordings are regenerated, not committed.
+demo_scenarios/
+
+# Working files: batch lists, logs, one-off probes.
+scratch/
 
 # Python
 __pycache__/

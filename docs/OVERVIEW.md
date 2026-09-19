@@ -114,11 +114,11 @@ into a culprit. Details in [COUNTERFACTUALS.md](COUNTERFACTUALS.md).
 | What can each layer legally read? | [DATA_BOUNDARY.md](DATA_BOUNDARY.md) |
 | How is the code organised? | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | What are the nine scenarios? | [SCENARIOS.md](SCENARIOS.md) |
-| How is the common timeline estimated? | [CLOCK_SYNCHRONIZATION.md](CLOCK_SYNCHRONIZATION.md) |
+| How is the common timeline estimated? | [CLOCKS.md](CLOCKS.md) |
 | How are the logs merged? | [GRAPH_FUSION.md](GRAPH_FUSION.md) |
 | What is a causal edge, and where does it come from? | [CAUSAL_MODEL.md](CAUSAL_MODEL.md) |
 | How is contribution established? | [COUNTERFACTUALS.md](COUNTERFACTUALS.md) |
-| What properties are checked on the traces? | [MODEL_CHECKING.md](MODEL_CHECKING.md) |
+| What properties are checked on the traces? | [FORMAL_METHODS.md](FORMAL_METHODS.md) |
 | How do I look at a run? | [VIEWER.md](VIEWER.md) |
 | How was the campaign run? | [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) |
 | What did it find? | [RESULTS.md](RESULTS.md) |

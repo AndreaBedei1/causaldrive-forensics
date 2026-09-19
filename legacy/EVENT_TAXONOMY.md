@@ -1,4 +1,4 @@
-> **Superseded by [EVENTS.md](EVENTS.md).**
+> **Superseded by [EVENTS.md](../docs/EVENTS.md).**
 >
 > This describes the V1 event vocabulary: own-behaviour, radar and outcome
 > events, before the road, traffic-control and non-action families were
@@ -7,7 +7,7 @@
 > 
 > It is kept because many code docstrings still point here. For what the
 > vocabulary is now, and why it is divided the way it is, read
-> [EVENTS.md](EVENTS.md).
+> [EVENTS.md](../docs/EVENTS.md).
 
 ---
 
@@ -124,7 +124,7 @@ lateral signal is zeroed wherever any of them fails:
 
 > `events.lane_change_like.max_net_heading_ratio` is **not** present in
 > `configs/default.yaml`; the code default `0.5` is in force. See
-> `docs/IMPLEMENTATION_CHECKLIST.md`.
+> `legacy/IMPLEMENTATION_CHECKLIST.md`.
 
 ---
 
@@ -204,7 +204,7 @@ the extractor treats them as such.
 | `POST_IMPACT_STOP` | the vehicle came to rest after its own impact | own `speed` after a `COLLISION` candidate | `events.outcome.post_impact_stop.speed_mps` = `0.6` m/s within `events.outcome.post_impact_stop.within_s` = `4.0` s |
 
 A local `COLLISION` event **cannot name the other party**: the onboard collision
-sensor's `drain_local()` strips it (see `docs/DATA_BOUNDARY.md` §2.4). Its
+sensor's `drain_local()` strips it (see `../docs/DATA_BOUNDARY.md` §2.4). Its
 `subject` is set only when the originating trigger carried a `track_id` -- which
 near-miss triggers do and collision triggers do not.
 
@@ -250,4 +250,4 @@ emitted only by the fusion layer.
 `RADAR_TRACK_APPEARED` and `RADAR_TRACK_LOST` are banned from *both* sides of
 every causal edge (enforced by `validate_rules()`): they are facts about the
 observer's sensing process, not about the world. Their place is the
-`OBSERVED_FROM` relation in the event graph. See `docs/CAUSAL_MODEL.md`.
+`OBSERVED_FROM` relation in the event graph. See `../docs/CAUSAL_MODEL.md`.

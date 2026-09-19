@@ -319,7 +319,7 @@ _to_event(...) per candidate               # make_event_id → stable ids
 ```
 
 Threshold crossings are Schmitt-triggered episodes (`_find_episodes`,
-`_release_threshold`), not instants. Full semantics: `docs/EVENT_TAXONOMY.md`.
+`_release_threshold`), not instants. Full semantics: [`docs/EVENTS.md`](EVENTS.md).
 
 **`build_event_graph`** (`cdf.local.event_graph`) emits `PRECEDES` (forward
 fan-out), `OBSERVED_FROM` (radar-derived event → its track's appearance),
@@ -424,7 +424,7 @@ that raises aborts loudly rather than degrading to `UNKNOWN`.
 extracts, for every `FAIL`, the padded trace window around the hull of its
 violating intervals, decimated deterministically to
 `checking.counterexample.max_samples`, with per-condition spans. Full semantics:
-`docs/MODEL_CHECKING.md`.
+[`docs/FORMAL_METHODS.md`](FORMAL_METHODS.md).
 
 ---
 

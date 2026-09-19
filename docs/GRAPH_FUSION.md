@@ -650,4 +650,4 @@ ambiguous_confidence_factor, min_evidence_parity}`,
 counterpart_max_time_gap_s, counterpart_max_range_m,
 counterpart_ambiguity_margin_m}`,
 `fusion.enforce_dag`, `fusion.diagnostics.max_bridged_paths`. See
-`docs/IMPLEMENTATION_CHECKLIST.md`.
+[`legacy/IMPLEMENTATION_CHECKLIST.md`](../legacy/IMPLEMENTATION_CHECKLIST.md).

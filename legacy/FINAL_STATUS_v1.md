@@ -4,9 +4,9 @@ What was built, what was executed, what was measured, and what did not work.
 No claim here is aspirational: every number is either printed by a command given
 below or read from a file under `artifacts/`.
 
-Read alongside [`docs/EXPERIMENTAL_FINDINGS.md`](docs/EXPERIMENTAL_FINDINGS.md)
-(results), [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) (what the results do not
-support) and [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) (simulator behaviour
+Read alongside [`EXPERIMENTAL_FINDINGS.md`](EXPERIMENTAL_FINDINGS.md)
+(results), [`../docs/LIMITATIONS.md`](../docs/LIMITATIONS.md) (what the results do not
+support) and [`../docs/ENVIRONMENT.md`](../docs/ENVIRONMENT.md) (simulator behaviour
 this code is shaped around).
 
 ---
@@ -119,14 +119,14 @@ than three participant vehicles; no pedestrians, bicycles or motorcycles; no
 camera anywhere.
 
 Town03 is not used by any scenario: every attempt to load it killed the server on
-this build, so S09 runs on Town04 (`docs/ENVIRONMENT.md`, finding 4).
+this build, so S09 runs on Town04 (`../docs/ENVIRONMENT.md`, finding 4).
 
 ---
 
 ## 5. Results
 
 All figures below are printed by `python scripts/extract_findings.py --section all`
-and read from `artifacts/`. `docs/EXPERIMENTAL_FINDINGS.md` gives the reasoning;
+and read from `artifacts/`. `EXPERIMENTAL_FINDINGS.md` gives the reasoning;
 this is the summary.
 
 **Artifacts produced.** 63 run directories (39 recorded runs, 20 counterfactual
@@ -218,7 +218,7 @@ signal claim.
 ## 6. What did not work
 
 Recorded because they cost real time and shape the code, not as excuses. The
-simulator findings are detailed in `docs/ENVIRONMENT.md`.
+simulator findings are detailed in `../docs/ENVIRONMENT.md`.
 
 ### Unresolved
 
@@ -232,7 +232,7 @@ established. The counterfactual campaign gets through it by structure, not
 repair: `counterfactual.resume` reuses replays already on disk and the driver
 retries, so successive attempts need fewer restarts. The five suites needed 4, 3,
 4, 4 and 4 attempts; the ablation needed 3. This is a workaround and is recorded
-as one in `docs/LIMITATIONS.md` §14.
+as one in `../docs/LIMITATIONS.md` §14.
 
 ### Resolved, but they invalidated work
 
@@ -301,7 +301,7 @@ yield, and the intervention API can weaken an action that exists but cannot
 remove an absence. Scripted controllers do not react, so removing an upstream
 cause does not propagate to a downstream response, which is why S06a and S07
 return `insufficient_evidence`. All three are properties of the scenario design,
-not of the replay machinery, and are stated in `docs/LIMITATIONS.md`.
+not of the replay machinery, and are stated in `../docs/LIMITATIONS.md`.
 
 ---
 

@@ -4,7 +4,7 @@
 > recorder read one shared simulator clock.** It is retained as a historical
 > baseline and is not the project's final result. The final campaign — every
 > recorder on its own clock, with the common timeline estimated from shared
-> observations alone — is in [RESULTS.md](RESULTS.md), and the two are
+> observations alone — is in [RESULTS.md](../docs/RESULTS.md), and the two are
 > deliberately never averaged together: `cdf.common.campaign` marks a run
 > recorded under a different clock protocol as foreign rather than folding it in.
 
@@ -12,7 +12,7 @@ Technical results only. This is not a paper and contains no related work. Every
 number below was read from a persisted artifact; `scripts/extract_findings.py`
 reproduces them from `artifacts/` without re-running anything.
 
-Read `docs/LIMITATIONS.md` first. In particular: everything here is a statement
+Read `../docs/LIMITATIONS.md` first. In particular: everything here is a statement
 about CARLA 0.9.15 on one machine, with a simulated radar and scripted vehicles.
 
 ---
@@ -95,7 +95,7 @@ process handle.
 native CARLA client aborts the whole interpreter -- `Fatal Python error:
 Aborted`, inside `world.apply_settings()` -- on the third simulator process of a
 suite. It is reproducible, produces no Python traceback and no Windows error
-report, and the cause is not established; `docs/ENVIRONMENT.md` finding 10
+report, and the cause is not established; `../docs/ENVIRONMENT.md` finding 10
 records what was tried and what it did not fix. The campaign gets through it by
 structure rather than repair: `counterfactual.resume` reuses the replays already
 on disk and `scripts/run_counterfactual_campaign.py` retries each suite, so
@@ -412,7 +412,7 @@ python scripts/extract_findings.py --section counterfactuals
 ```
 
 **How these were executed.** The counterfactual driver aborts the interpreter
-part-way through a suite on this build (§2 and `docs/ENVIRONMENT.md`, finding
+part-way through a suite on this build (§2 and `../docs/ENVIRONMENT.md`, finding
 10), so each suite was run repeatedly with `counterfactual.resume` reusing the
 replays already on disk. The five suites needed 4, 3, 4, 4 and 4 attempts
 respectively. Every replay still ran on its own freshly started engine -- the
@@ -647,7 +647,7 @@ campaign run exactly:
 | association trajectory RMSE | 1.3561327263302574 m | 1.3561327263302574 m |
 
 Identical to the last digit the artifacts record. This is the direct evidence
-behind the claim in `docs/EXPERIMENT_PROTOCOL.md` that the campaign is
+behind the claim in `../docs/EXPERIMENT_PROTOCOL.md` that the campaign is
 reproducible run-by-run from its recorded parameters, and that recording it
 across eleven commits did not perturb the recordings: the parameters that govern
 a recording did not change, and re-running one at HEAD proves it rather than

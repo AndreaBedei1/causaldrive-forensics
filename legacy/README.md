@@ -30,4 +30,4 @@ canonical-vocabulary machinery are all still under `src/`. They are no longer th
 primary path but they are still *run* -- the clock and method ablations compare
 against them -- so archiving them would mean either breaking those ablations or
 importing from `legacy/` in the active path. They are labelled where they live
-instead. See the deviations section of `docs/V2_REFACTOR_AUDIT.md`.
+instead. See the deviations section of `../docs/V2_REFACTOR_AUDIT.md`.

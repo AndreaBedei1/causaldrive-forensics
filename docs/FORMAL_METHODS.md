@@ -181,5 +181,5 @@ what was checked without having to read a result to infer it.
 | Running them, and vacuity | `src/cdf/formal/report.py` |
 | Tests | `tests/unit/test_formal_logic.py` |
 
-Historical note: `docs/MODEL_CHECKING.md` describes the V1 layer, whose properties
+Historical note: [`legacy/MODEL_CHECKING.md`](../legacy/MODEL_CHECKING.md) describes the V1 layer, whose properties
 were hand-written evaluators rather than executable formulae.

@@ -1,4 +1,4 @@
-> **Superseded by [FORMAL_METHODS.md](FORMAL_METHODS.md).**
+> **Superseded by [FORMAL_METHODS.md](../docs/FORMAL_METHODS.md).**
 >
 > This describes the V1 property layer, whose properties were hand-written
 > Python evaluators carrying an MTL-looking string beside them. Nothing
@@ -7,7 +7,7 @@
 > 
 > V2 replaces it with an AST that is evaluated directly, so the rendering and
 > the verdict are the same object. Read
-> [FORMAL_METHODS.md](FORMAL_METHODS.md).
+> [FORMAL_METHODS.md](../docs/FORMAL_METHODS.md).
 
 ---
 

@@ -265,6 +265,6 @@ An unaligned row renders as a dash, never as 0.00.
 | Per-recorder clock models | `src/cdf/common/clocks.py` |
 | Tests, including the four cases the brief names | `tests/unit/test_contact_alignment.py` |
 
-Historical note: `docs/CLOCK_SYNCHRONIZATION.md` describes the V1 radar-based
+Historical note: [`legacy/CLOCK_SYNCHRONIZATION.md`](../legacy/CLOCK_SYNCHRONIZATION.md) describes the V1 radar-based
 method, which is retained for the ablation. This document describes the method
 the V2 results are computed from.

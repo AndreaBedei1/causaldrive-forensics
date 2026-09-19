@@ -1,4 +1,4 @@
-> **Superseded by [CLOCKS.md](CLOCKS.md).**
+> **Superseded by [CLOCKS.md](../docs/CLOCKS.md).**
 >
 > This describes the V1 radar-based clock estimator, which fitted range and
 > range rate against another vehicle's recorded trajectory and read both an
@@ -9,7 +9,7 @@
 > are computed from: a drift rate fitted over a 25 s window from noisy radar
 > is a number with more decimal places than evidence behind it. The V2 method
 > anchors on shared physical contact -- one equation, one unknown, no fitting.
-> Read [CLOCKS.md](CLOCKS.md).
+> Read [CLOCKS.md](../docs/CLOCKS.md).
 
 ---
 
@@ -80,7 +80,7 @@ Collisions supply a sixth, much stronger constraint. Two vehicles that touch
 were in the same place at the same instant, and both recorded a local collision
 trigger. The trigger says *that* the vehicle was struck — the local sensor
 channel deliberately does not reveal *by whom*, which is a separate inference
-described in [GRAPH_FUSION.md](GRAPH_FUSION.md) — but the timestamps alone anchor
+described in [GRAPH_FUSION.md](../docs/GRAPH_FUSION.md) — but the timestamps alone anchor
 the two timelines tightly.
 
 ## Solving it as a graph
@@ -194,6 +194,6 @@ protocols:
 
 ## Related
 
-- [DATA_BOUNDARY.md](DATA_BOUNDARY.md) — why the simulator clock is privileged
-- [GRAPH_FUSION.md](GRAPH_FUSION.md) — what the common timeline is then used for
-- [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — how the ablation is run
+- [DATA_BOUNDARY.md](../docs/DATA_BOUNDARY.md) — why the simulator clock is privileged
+- [GRAPH_FUSION.md](../docs/GRAPH_FUSION.md) — what the common timeline is then used for
+- [EXPERIMENT_PROTOCOL.md](../docs/EXPERIMENT_PROTOCOL.md) — how the ablation is run

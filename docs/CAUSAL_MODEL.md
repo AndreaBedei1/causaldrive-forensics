@@ -38,7 +38,7 @@ go first -- keeping the immediate-successor chain, which transitivity cannot
 recover. The limits actually used are recorded in the document's `meta`.
 
 > None of the five `event_graph.*` keys is present in `configs/default.yaml`; the
-> code defaults quoted above are in force. See `docs/IMPLEMENTATION_CHECKLIST.md`.
+> code defaults quoted above are in force. See [`legacy/IMPLEMENTATION_CHECKLIST.md`](../legacy/IMPLEMENTATION_CHECKLIST.md).
 
 ---
 

@@ -10,7 +10,7 @@ carries it.
 - [x] local Git repository, branch `main`
 - [x] no GitHub remote, nothing pushed (`git remote -v` is empty)
 - [x] clean package structure under `src/cdf/`
-- [x] install instructions (`README.md`, `docs/ENVIRONMENT.md`)
+- [x] install instructions (`README.md`, `../docs/ENVIRONMENT.md`)
 - [x] dependency files tested: `pyproject.toml`, `requirements.txt`, `environment.yml`
 
 ## Data boundary
@@ -107,7 +107,7 @@ carries it.
 - [x] causal-contribution artifacts with the raw outcomes retained
 - [x] **executed against the live simulator** — 20 replays across five runs,
       each on a genuinely fresh simulator engine (see the launcher/engine finding
-      in `docs/ENVIRONMENT.md`); results in `docs/EXPERIMENTAL_FINDINGS.md` §9
+      in `../docs/ENVIRONMENT.md`); results in `legacy/EXPERIMENTAL_FINDINGS.md` §9
 
 ## Scenarios
 
@@ -140,7 +140,7 @@ carries it.
       encounter fixed while varying only the sensor profile. Its baseline
       profile doubles as a reproducibility control: re-recording the campaign's
       S01 run at a later commit reproduced it to the last recorded digit
-      (`docs/EXPERIMENTAL_FINDINGS.md` §10)
+      (`legacy/EXPERIMENTAL_FINDINGS.md` §10)
 
 ## Viewer
 
@@ -182,14 +182,14 @@ carries it.
       verdict distribution)
 - [x] scenario validation table — `artifacts/summary/scenario_validation.csv`;
       39 of 39 runs pass
-- [x] `docs/EXPERIMENTAL_FINDINGS.md` written from actual outputs only, with
+- [x] `legacy/EXPERIMENTAL_FINDINGS.md` written from actual outputs only, with
       `scripts/extract_findings.py` reproducing every number from the artifacts
-- [x] `docs/LIMITATIONS.md`
+- [x] `../docs/LIMITATIONS.md`
 
 ## Reproducibility
 
 - [x] exact commands in `README.md`
-- [x] environment versions recorded (`docs/ENVIRONMENT.md`, every manifest)
+- [x] environment versions recorded (`../docs/ENVIRONMENT.md`, every manifest)
 - [x] seeds recorded, with the per-seed perturbation recorded explicitly
 - [x] configuration and its hash recorded in every manifest
 - [x] one-command scenario run, suite run, evaluation and viewer

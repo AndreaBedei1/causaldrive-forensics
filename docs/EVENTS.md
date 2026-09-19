@@ -160,5 +160,5 @@ reference has the same relation between those two nodes.
 | Matching and scoring | `src/cdf/evaluation/graph_comparison.py` |
 | The privileged side | `src/cdf/oracle/observable.py` |
 
-Historical note: `docs/EVENT_TAXONOMY.md` described the V1 vocabulary, before the
+Historical note: [`legacy/EVENT_TAXONOMY.md`](../legacy/EVENT_TAXONOMY.md) described the V1 vocabulary, before the
 road, non-action and outcome-pair work. It is superseded by this document.
