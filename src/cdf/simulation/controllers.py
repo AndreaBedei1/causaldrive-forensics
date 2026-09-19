@@ -277,6 +277,7 @@ class ScriptedController:
         steer_gain: float = 0.9,
         steer_rate_limit: float = 0.14,
         post_impact_stop: bool = True,
+        post_impact_mode: str = "",
     ) -> None:
         self.participant_id = participant_id
         self.route = route
@@ -288,6 +289,20 @@ class ScriptedController:
         self.steer_gain = float(steer_gain)
         self.steer_rate_limit = float(steer_rate_limit)
         self.post_impact_stop = bool(post_impact_stop)
+        #: What this vehicle does once it has been hit.
+        #:
+        #: ``stop``   brake hard, the default and what ``post_impact_stop`` means.
+        #: ``coast``  release everything: no throttle, no brake, no steer, and
+        #:            let the physics carry the vehicle. This is what a vehicle
+        #:            that has just been shunted actually does, and without it
+        #:            the speed controller sees it below target and *accelerates*
+        #:            into the car in front, so a pushed vehicle looks as though
+        #:            it drove into the collision under its own power.
+        #: ``drive``  keep following the route, which ``post_impact_stop: false``
+        #:            used to mean on its own.
+        self.post_impact_mode = str(
+            post_impact_mode or ("stop" if post_impact_stop else "drive")
+        ).lower()
 
         self._pid = PIDLongitudinal()
         self._route_hint = 0
@@ -337,8 +352,11 @@ class ScriptedController:
 
     def step(self, state: VehicleState, dt: float) -> ControlCommand:
         """Compute the actuation command for this tick."""
-        if self._impacted and self.post_impact_stop:
-            return ControlCommand(throttle=0.0, brake=1.0, steer=0.0).clamped()
+        if self._impacted:
+            if self.post_impact_mode == "stop":
+                return ControlCommand(throttle=0.0, brake=1.0, steer=0.0).clamped()
+            if self.post_impact_mode == "coast":
+                return ControlCommand(throttle=0.0, brake=0.0, steer=0.0).clamped()
 
         target_speed = self._resolve_target_speed(state.t)
         lateral = self._resolve_lateral_offset(state.t)

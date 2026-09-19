@@ -76,6 +76,9 @@ scenario:
   validation:
     encounter_pair: ["B", "C"]
     min_separation_below_m: 5.0
+    max_accumulated_turn_deg: 60.0
+    min_straightness: 0.95
+    no_scenery_collision: true
 
   intervention_candidates:
     - "A_brake"
@@ -100,15 +103,44 @@ scenario:
   variants:
     # ---- C runs into B, B is pushed into A -------------------------------
     c_pushes_b:
+      # The whole claim of this variant is that B was pushed. If B had its foot
+      # down between the two impacts it was not pushed, it drove, and the
+      # scenario is not staging what it says it stages.
+      validation:
+        coasting_after_impact: ["B"]
+        coasting_window_s: 1.5
+        impact_interval_s: { min: 0.15, max: 2.5 }
       participant_overrides:
         B:
           # B must be free to roll when C strikes it, or the push this variant
           # exists to demonstrate cannot happen: holding the brakes through the
           # impact pins B in place and the second contact never occurs.
-          post_impact_stop: false
+          #
+          # But "free to roll" is not "keep driving", which is what
+          # post_impact_stop: false alone meant. The speed controller saw B
+          # below its target after the impact and opened the throttle, so the
+          # vehicle this variant is about being *pushed* into A was accelerating
+          # into A under its own power. Coasting is the actual physics of being
+          # shunted: no throttle, no brake, no steering, and whatever momentum
+          # C transferred.
+          post_impact_mode: "coast"
           actions:
             # B responds in time and would have stopped clear, so B's presence
             # in the second impact is entirely the consequence of being struck.
+            # NOT YET TUNED. B stops clear of A, which the variant requires,
+            # but 6.95 m clear, and the push from C does not close that. The
+            # scenario therefore produces one impact where it declares two, and
+            # its validation fails saying so.
+            #
+            # This is the honest consequence of removing the phantom throttle:
+            # B used to "reach" A by accelerating into it under its own power
+            # after being hit, which is the thing this variant exists to deny.
+            # Closing the gap has to come from the geometry instead. Moving B to
+            # 19 m made it roll into A unaided before C arrived, and 0.80 and
+            # 0.62 brake intensities did the same, so the window between
+            # "stops clear" and "does not need C at all" is narrow and needs
+            # B held at rest after braking rather than left to the speed
+            # controller, which resumes 13 m/s the moment the brake ends.
             - action_id: "B_brake"
               kind: "brake"
               t_start: 4.9

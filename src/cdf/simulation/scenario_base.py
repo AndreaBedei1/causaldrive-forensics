@@ -142,6 +142,9 @@ class ParticipantSpec:
     genuine partial observability through sensing rather than by deleting data."""
     actions: List[ScriptedAction] = field(default_factory=list)
     post_impact_stop: bool = True
+    post_impact_mode: str = ""
+    """``stop``, ``coast`` or ``drive``. Empty keeps whatever
+    ``post_impact_stop`` says, so no existing scenario changes behaviour."""
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ParticipantSpec":
@@ -167,6 +170,7 @@ class ParticipantSpec:
             sensor_profile=d.get("sensor_profile"),
             actions=actions,
             post_impact_stop=bool(d.get("post_impact_stop", True)),
+            post_impact_mode=str(d.get("post_impact_mode", "") or ""),
         )
 
 
@@ -600,4 +604,5 @@ def make_controller(spec: ParticipantSpec, route: RoutePlan) -> ScriptedControll
         target_speed=spec.target_speed,
         actions=list(spec.actions),
         post_impact_stop=spec.post_impact_stop,
+        post_impact_mode=spec.post_impact_mode,
     )
