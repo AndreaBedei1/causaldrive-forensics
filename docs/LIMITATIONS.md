@@ -408,3 +408,33 @@ on a real run -- which is why the stop property also accepts the lane sensor's
 record of crossing into the junction as its boundary (`docs/FORMAL_METHODS.md`).
 The stop-line detector still runs and still reports honestly; it simply has
 nothing to find at these junctions.
+
+## 25. The pushed-vehicle case does not come out the way it was designed
+
+`S14/c_pushes_b` puts C into B and B into A, and the question it exists to ask is
+whether the middle vehicle is spared: B is in the second impact only because it
+was struck, so it should not be named an initiating contributor. The campaign
+records the collision order correctly — (B,C) at 6.50 s then (A,B) at 7.70 s —
+and then names **B supported and C partial**, which is not the designed answer.
+
+Neither finding is arbitrary, and both are worth stating precisely.
+
+B is named because it has `CONTINUED_ACCELERATION_DURING_CONFLICT` at 5.76 s,
+*before* the first impact, together with an independent physical path. That is
+B's own behaviour and not a consequence of the push, so on the evidence recorded
+the finding is defensible — it is simply not the thing the variant was written to
+test, and a reader comparing it against the design would take it for the failure
+the design was guarding against.
+
+C is the striker and is reported with no physical path to the outcome. Its own
+rule violation is stamped at 6.66 s, *after* the impact at 6.50 s that it caused,
+so the physical requirement finds nothing of C's that independently reaches the
+collision. A violation recorded after the event it should explain cannot support
+a contribution, and the layer is right to refuse — but the result is that the
+vehicle which initiated the chain is the one the account does not name.
+
+What this bounds: the pushed-vehicle discrimination is not demonstrated by this
+campaign. The mechanism it depends on — a physical path that traverses an impact
+only where the vehicle's own behaviour independently reaches it — is implemented
+and unit-tested, and the recorded run does not exercise it as intended because
+the pre-impact evidence falls the wrong side of the two vehicles.
