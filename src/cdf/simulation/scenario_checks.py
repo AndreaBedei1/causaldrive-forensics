@@ -245,6 +245,52 @@ def run_physical_checks(
             .format(first["participant"], first["what"], first["t"])
         )
 
+    # -- the vehicle stopped where the sign told it to ----------------------
+    # "It stopped" is not the claim a stop-sign scenario makes. The claim is
+    # that it stopped *before the line*, and a vehicle that brakes to rest in
+    # the middle of the junction has satisfied the first and broken the second.
+    for pid, want in (validation.get("stop_point") or {}).items():
+        # A variant can switch one off by setting it null, which is how
+        # b_fails_to_stop says that B is not supposed to stop.
+        if not want:
+            continue
+        rows = times.get(pid) or []
+        if not rows:
+            problems.append("no states recorded for {0}".format(pid))
+            continue
+        moving = float(want.get("moving_above_ms", 0.5))
+        at_rest = next(
+            ((t, a) for t, a in rows
+             if a.speed < moving and t > float(want.get("after_s", 1.0))),
+            None,
+        )
+        if at_rest is None:
+            problems.append(
+                "{0} never came to rest: this variant requires it to stop at "
+                "its stop line".format(pid)
+            )
+            continue
+        t_stop, actor = at_rest
+        d = math.hypot(actor.x - float(want["x"]), actor.y - float(want["y"]))
+        checks.setdefault("stop_point", {})[pid] = {
+            "t": round(t_stop, 3), "x": round(actor.x, 2), "y": round(actor.y, 2),
+            "distance_m": round(d, 2), "in_junction": bool(actor.is_junction),
+        }
+        if d > float(want.get("max_distance_m", 8.0)):
+            problems.append(
+                "{0} came to rest {1:.1f} m from its stop line at ({2:.1f}, "
+                "{3:.1f}), limit {4:.1f} m: it stopped somewhere other than the "
+                "line, which for a stop-sign scenario is the whole question"
+                .format(pid, d, float(want["x"]), float(want["y"]),
+                        float(want.get("max_distance_m", 8.0)))
+            )
+        if want.get("must_be_outside_junction", True) and actor.is_junction:
+            problems.append(
+                "{0} came to rest inside the junction at ({1:.1f}, {2:.1f}): a "
+                "stop sign is obeyed before the junction, not in it"
+                .format(pid, actor.x, actor.y)
+            )
+
     # -- a pushed vehicle is not driving itself ------------------------------
     coasting = validation.get("coasting_after_impact") or []
     if coasting and impacts:

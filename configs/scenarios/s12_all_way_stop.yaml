@@ -29,7 +29,11 @@ scenario:
     two arrivals are distinguishable at all, and whether one vehicle stops.
   map: "Town05"
   default_variant: "a_arrives_first"
-  max_duration_s: 32.0
+  # The encounter is decided by about 13 s. Recording longer only lets the
+  # route follower run out of road: at 32 s both vehicles reached the end of a
+  # 110 m route and spiralled, which is what the accumulated-yaw check now
+  # refuses.
+  max_duration_s: 18.0
 
   participants:
     - id: "A"
@@ -39,13 +43,27 @@ scenario:
         junction_x: -283.42
         junction_y: 1.23
         bearing_deg: 180.0
-        back_m: 46.0
-      # Junction 1930 is a T: the east-west road ends here and its only exits
-      # turn. A therefore turns right onto the north-south road, which is the
-      # road B is travelling straight down -- so the two paths still conflict,
-      # and they conflict in the way the variants describe: whoever stopped
-      # first pulls out across the other.
-      route: { length_m: 110.0, step_m: 2.0, turns: ["right"] }
+        # 66 m back from the junction *centre*, and the centre is what back_m
+        # measures from. Junction 1930's bounding box is 51 m wide, so its
+        # eastern edge is 25 m from that centre and a 46 m spawn left A only
+        # 18 m of approach: at 9 m/s it reached the junction in two seconds,
+        # which is why it was still braking after it had entered. 66 m gives a
+        # 33 m run-up, so the stop is made on the approach where a person
+        # watching expects it.
+        back_m: 66.0
+        # The stem has a left-turn lane and a right-turn lane, and each is
+        # committed: neither offers a choice at the junction, so the lane is
+        # the turn. lane_offset -1 is the left-turn lane, and a left turn is
+        # what crosses B. On the right-turn lane A merged onto B's road
+        # travelling the same way and the two never conflicted at all.
+        lane_offset: -1
+      # turns is kept for readability; this junction never consults it, because
+      # the lane has already decided.
+      route:
+        length_m: 240.0
+        step_m: 2.0
+        turns: ["left"]
+        turn_lookahead: true
       initial_speed: 9.0
       target_speed: 9.0
       actions: []
@@ -57,8 +75,17 @@ scenario:
         junction_x: -283.42
         junction_y: 1.23
         bearing_deg: -90.0
-        back_m: 46.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        # 50, not 62: measured, not computed. This arm quantises hard, and
+        # 50 is what puts B at (-265.20, 47.78) on the lane it actually
+        # drives, 31 m from its line. At 62 it sat 10 m further back and
+        # its stop completed a second after A's, in a scenario about them
+        # completing together.
+        back_m: 50.0
+      route:
+        length_m: 240.0
+        step_m: 2.0
+        turns: ["straight"]
+        turn_lookahead: true
       initial_speed: 9.0
       target_speed: 9.0
       actions: []
@@ -73,7 +100,11 @@ scenario:
           junction_x: -283.42
           junction_y: 1.23
           bearing_deg: 180.0
-          back_m: 26.0
+          # 29 puts the line at (-254.35, -0.33), 3.5 m clear of the
+          # junction edge at x = -257.9. At 26 it sat 1.5 m clear, and a
+          # variant braking a fifth of a second later stopped inside the
+          # junction.
+          back_m: 29.0
         # The map renders a real stop sign on this approach, so none is
         # spawned. place_traffic_control verifies the mesh is there and
         # records physically_present from what it found, not from this
@@ -105,6 +136,20 @@ scenario:
 
   validation:
     encounter_pair: ["A", "B"]
+    # Both vehicles must come to rest at their own stop line and outside the
+    # junction. "It stopped" is not the claim an all-way stop makes; stopping
+    # before the line is.
+    stop_point:
+      A: { x: -254.35, y: -0.33, max_distance_m: 6.0 }
+      B: { x: -265.20, y: 16.50, max_distance_m: 6.0 }
+    collision_near:
+      x: -266.5
+      y: 4.0
+      max_distance_m: 10.0
+      require_in_junction: true
+    max_accumulated_turn_deg: 160.0
+    min_straightness: 0.55
+    no_scenery_collision: true
     min_separation_below_m: 16.0
 
   intervention_candidates:
@@ -131,25 +176,25 @@ scenario:
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 2.4
-              duration: 3.0
+              t_start: 2.7
+              duration: 3.8
               params: { intensity: 0.9 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 6.0
-              duration: 12.0
+              t_start: 6.5
+              duration: 8.0
               params: { target_speed: 8.0 }
         B:
           actions:
             - action_id: "B_stop"
               kind: "brake"
-              t_start: 4.0
-              duration: 4.5
+              t_start: 2.8
+              duration: 7.7
               params: { intensity: 0.9 }
             - action_id: "B_proceed"
               kind: "set_speed"
-              t_start: 10.0
-              duration: 12.0
+              t_start: 10.5
+              duration: 6.0
               params: { target_speed: 8.0 }
       notes:
         - "A completes its stop about 1.6 s before B, which clears the margin"
@@ -162,25 +207,25 @@ scenario:
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 4.0
-              duration: 3.4
+              t_start: 2.8
+              duration: 7.7
               params: { intensity: 0.9 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 7.6
-              duration: 12.0
+              t_start: 10.5
+              duration: 6.0
               params: { target_speed: 8.0 }
         B:
           actions:
             - action_id: "B_stop"
               kind: "brake"
-              t_start: 2.4
-              duration: 3.0
+              t_start: 2.7
+              duration: 3.8
               params: { intensity: 0.9 }
             - action_id: "B_proceed"
               kind: "set_speed"
-              t_start: 6.0
-              duration: 12.0
+              t_start: 6.5
+              duration: 8.0
               params: { target_speed: 8.0 }
 
     # ---- neither arrival is clearly first --------------------------------
@@ -200,26 +245,26 @@ scenario:
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 1.6
-              duration: 3.4
+              t_start: 2.7
+              duration: 4.3
               params: { intensity: 0.95 }
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 5.0
-              duration: 12.0
-              params: { target_speed: 9.0 }
+              t_start: 7.0
+              duration: 8.0
+              params: { target_speed: 8.0 }
         B:
           actions:
             - action_id: "B_stop"
               kind: "brake"
-              t_start: 2.7
-              duration: 1.2
+              t_start: 2.8
+              duration: 4.2
               params: { intensity: 0.95 }
             - action_id: "B_proceed"
               kind: "set_speed"
-              t_start: 3.9
-              duration: 12.0
-              params: { target_speed: 9.0 }
+              t_start: 7.0
+              duration: 8.0
+              params: { target_speed: 9.5 }
       causal_template:
         - cause: { kind: "state", participant: "A", name: "conflict_entry" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
@@ -239,6 +284,11 @@ scenario:
       validation:
         encounter_pair: ["A", "B"]
         min_separation_below_m: 6.0
+        # Only A stops here. Asking B for a stop would be asking the variant
+        # not to happen.
+        stop_point:
+          A: { x: -254.35, y: -0.33, max_distance_m: 6.0 }
+          B: null
       intervention_candidates:
         - "A_stop"
         - "B_roll_through"
@@ -247,21 +297,39 @@ scenario:
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 2.4
-              duration: 4.2
+              t_start: 2.7
+              duration: 5.1
               params: { intensity: 0.9 }
+            # A waits a moment longer at the line than in the other variants.
+            # At 7.0 it crossed B's lane a second before B got there and the
+            # two missed by 3.2 m; the point of this variant is that B does not
+            # stop, so A has to still be crossing when B arrives.
             - action_id: "A_proceed"
               kind: "set_speed"
-              t_start: 6.6
-              duration: 12.0
+              t_start: 7.8
+              duration: 8.0
               params: { target_speed: 8.0 }
         B:
+          # 80 m back rather than 62. B does not stop here, so at the shared
+          # spawn it would cross the junction at about 5 s and be gone long
+          # before A pulled out at 7 s. Starting further back makes it arrive
+          # while A is crossing, without pretending B approaches unusually
+          # slowly.
+          spawn:
+            anchor: "junction_approach"
+            junction_x: -283.42
+            junction_y: 1.23
+            bearing_deg: -90.0
+            back_m: 80.0
           actions:
+            # 5 m/s: slow enough that B is still crossing when A pulls out,
+            # and slow enough to read as a vehicle rolling a stop rather than
+            # one that simply never saw it.
             - action_id: "B_roll_through"
               kind: "set_speed"
-              t_start: 3.0
-              duration: 12.0
-              params: { target_speed: 6.0 }
+              t_start: 2.0
+              duration: 14.0
+              params: { target_speed: 5.0 }
       causal_template:
         - cause: { kind: "state", participant: "B", name: "no_stop" }
           effect: { kind: "state", participant: "B", name: "stop_line_crossed" }
