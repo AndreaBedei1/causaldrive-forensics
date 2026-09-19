@@ -160,6 +160,34 @@ def _separations(pairs: Sequence[Tuple[str, float]]) -> List[float]:
     ]
 
 
+def _caveats(alignment: Optional[Mapping[str, Any]]) -> List[Mapping[str, Any]]:
+    """The contact stage's shared-anchor caveats, wherever they ended up.
+
+    The hybrid aligner keeps the contact stage's findings whole but nests them
+    under ``contact_stage``, so a consumer reading the top level of a hybrid
+    result finds nothing and concludes there was no caveat. That is not a
+    different measurement, it is the same one read from the wrong level, and it
+    silently turned "this order was never established" into a confident verdict
+    on the recorded chains. One accessor, so the readers cannot drift apart
+    again.
+    """
+    alignment = alignment or {}
+    direct = alignment.get("shared_anchor_caveats")
+    if direct:
+        return list(direct)
+    nested = (alignment.get("contact_stage") or {}).get("shared_anchor_caveats")
+    return list(nested or [])
+
+
+def _suspect_offsets(alignment: Optional[Mapping[str, Any]]) -> List[str]:
+    """Recorders whose offset rests on an anchor doing double duty."""
+    return sorted({
+        str(p)
+        for caveat in _caveats(alignment)
+        for p in (caveat.get("participants_with_suspect_offset") or [])
+    })
+
+
 def _collision_order(
     global_log: Optional[Mapping[str, Any]],
     observable: Optional[Mapping[str, Any]],
@@ -210,10 +238,7 @@ def _collision_order(
     # interval between the two impacts and collapsed them onto one instant. The
     # column has to say so, or the reader takes an artefact of a shared anchor
     # for a finding.
-    suspect = sorted({
-        p for caveat in ((alignment or {}).get("shared_anchor_caveats") or [])
-        for p in (caveat.get("participants_with_suspect_offset") or [])
-    })
+    suspect = _suspect_offsets(alignment)
     truth_pairs = _pair_times(
         [e for e in (observable or {}).get("events", []) or []
          if e.get("event_type") == "COLLISION"],
@@ -346,8 +371,7 @@ def _clock(alignment: Optional[Mapping[str, Any]]) -> str:
     )
     if unresolved:
         text += "; {0} unresolved".format(", ".join(str(p) for p in unresolved))
-    caveats = stage.get("shared_anchor_caveats") or []
-    if caveats:
+    if _caveats(alignment):
         text += "; shared anchor"
     return text
 
@@ -484,7 +508,7 @@ def _limitation(
         "undecided_property": bool(
             ((formal or {}).get("summary") or {}).get("n_unknown")
         ),
-        "shared_anchor": bool((alignment or {}).get("shared_anchor_caveats")),
+        "shared_anchor": bool(_caveats(alignment)),
     }
     for key, text in _LIMITATIONS:
         if not flags.get(key):
@@ -500,11 +524,7 @@ def _limitation(
                 else "a recorder"
             )
         if "{suspect}" in text:
-            names = sorted({
-                p
-                for caveat in ((alignment or {}).get("shared_anchor_caveats") or [])
-                for p in (caveat.get("participants_with_suspect_offset") or [])
-            })
+            names = _suspect_offsets(alignment)
             return text.format(
                 suspect="{0}'s".format(", ".join(names)) if names else "one"
             )

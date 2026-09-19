@@ -224,18 +224,45 @@ def test_the_markdown_carries_both_mandated_tables() -> None:
 def test_the_tables_name_the_reference_they_are_scored_against() -> None:
     """A reader must never have to guess which reference a number used."""
     text = render_markdown(results_fixture())
+    assert "# Measured against the observable ground truth" in text
+    assert "# Measured against the scenario design" in text
     assert "## Attribution against the scenario design" in text
-    assert "(design reference)" in text
+    assert "legacy design-reference structural ablation" in text
     assert "design-template attribution P / R / F1" in text
     # And the two aggregations of the same clock error must be distinguishable.
     assert "scenario-aggregated clock offset MAE" in text
 
 
-def test_drift_is_reported_as_unmodelled_rather_than_as_an_estimation_error() -> None:
-    """Scale is pinned to 1 on purpose, so calling the residue an error lies."""
+def test_the_observable_ground_truth_comes_before_the_design_reference() -> None:
+    """Leading with the weaker reference is how a reader takes it for the result."""
     text = render_markdown(results_fixture())
-    assert "not estimated; scale pinned to 1" in text
+    assert (text.index("# Measured against the observable ground truth")
+            < text.index("# Measured against the scenario design"))
+
+
+def test_drift_is_never_presented_as_an_estimation_error() -> None:
+    """Scale is fixed to 1 on purpose, so calling the residue an error lies."""
+    text = render_markdown(results_fixture())
     assert "clock drift error" not in text
+    assert "| clock drift |" not in text
+
+
+def test_the_drift_control_says_it_was_not_estimated() -> None:
+    from cdf.evaluation.final_results import _drift_control
+
+    absent = _drift_control({"clock": {}})
+    assert "not estimated" in absent and "fixed to 1" in absent
+
+    present = _drift_control({"clock": {
+        "unmodelled_drift_ppm": 59.23, "unmodelled_drift_max_ppm": 180.6,
+        "n_drift_scored": 133, "unmodelled_drift_worst_s": 0.0054,
+        "longest_run_s": 30.0, "tick_s": 0.05,
+    }})
+    assert "not estimated" in present
+    assert "133 non-reference recorders" in present
+    assert "59.23 ppm" in present
+    # The size of the approximation, measured rather than asserted.
+    assert "0.0054 s" in present and "0.05 s" in present
 
 
 def test_the_ablated_arms_do_not_claim_a_causal_path_or_attribution_score() -> None:
@@ -418,3 +445,20 @@ def test_a_hard_case_is_stated_once_per_scenario_variant() -> None:
     assert out["n_runs"] == 4, "every run is still counted"
     variants = [(h["scenario"], h["variant"]) for h in out["hard_cases"]]
     assert variants == [("S14", "c_pushes_b"), ("S14", "independent_impacts")]
+
+
+def test_declining_to_order_two_impacts_is_not_scored_as_getting_it_wrong() -> None:
+    """A method that says nothing has not said something false."""
+    from cdf.evaluation.final_results import _v2_markdown
+
+    lines = []
+    _v2_markdown(lines, {"collision_order": {
+        "verdicts": {"correct": 11, "not_established": 3},
+        "n_multi_impact_runs": 14, "n_order_claimed": 11, "n_order_declined": 3,
+        "accuracy_where_claimed": 1.0, "correct_rate": 0.7857,
+        "multi_impact_runs": [],
+    }})
+    text = "\n".join(lines)
+    assert "claimed an order on 11" in text
+    assert "declined" in text
+    assert "78.6%" in text and "100.0%" in text

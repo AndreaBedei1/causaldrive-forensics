@@ -35,8 +35,13 @@ __all__ = ["v2_blocks", "clock_block", "perception_block", "collision_order_bloc
 
 PathLike = Union[str, Path]
 
-#: Clock sources, in the order the hierarchy prefers them.
-SOURCES: Tuple[str, ...] = ("REFERENCE", "CONTACT", "RADAR", "UNRESOLVED")
+#: Clock sources, in the order the hierarchy prefers them. ``ACQUISITION_START``
+#: is not part of the fusion hierarchy: it is the harness marker used on runs
+#: where nothing ever touched, and it is named separately so its recorders are
+#: never counted as though a physical contact had placed them.
+SOURCES: Tuple[str, ...] = (
+    "REFERENCE", "CONTACT", "RADAR", "ACQUISITION_START", "UNRESOLVED",
+)
 
 
 def _maybe(path: Path) -> Optional[Dict[str, Any]]:
@@ -119,6 +124,19 @@ def _true_offsets(layout: RunLayout) -> Dict[str, float]:
     return out
 
 
+def _true_scales(layout: RunLayout) -> Dict[str, float]:
+    """Each recorder's true rate, from the privileged record. Scoring only."""
+    truth = _maybe(layout.oracle_dir / "clock_ground_truth.json")
+    block = (truth or {}).get("participants") or {}
+    if not isinstance(block, Mapping):
+        return {}
+    out: Dict[str, float] = {}
+    for pid, value in block.items():
+        if isinstance(value, Mapping) and "true_scale" in value:
+            out[str(pid)] = float(value["true_scale"])
+    return out
+
+
 def clock_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
     """How every recorder was placed on common time, and how far out it was.
 
@@ -130,6 +148,12 @@ def clock_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
     statuses: Counter = Counter()
     errors: Dict[str, List[float]] = {s: [] for s in SOURCES}
     all_errors: List[float] = []
+    # What fixing the scale to 1 leaves unmodelled. Not an estimator error: the
+    # aligner never claims a rate, so this is the size of a deliberate
+    # approximation, measured after the fact.
+    drifts: List[float] = []
+    longest_run_s = 0.0
+    tick_s: Optional[float] = None
     unscored = 0
     n_participants = 0
 
@@ -145,9 +169,30 @@ def clock_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
         reference = alignment.get("reference")
         base = truth.get(str(reference)) if reference else None
 
+        scales = _true_scales(layout)
+        ref_scale = scales.get(str(reference)) if reference else None
+        manifest = _maybe(layout.manifest) or {}
+        longest_run_s = max(longest_run_s, float(manifest.get("duration_sim_s") or 0.0))
+        if tick_s is None and manifest.get("fixed_delta_seconds"):
+            tick_s = float(manifest["fixed_delta_seconds"])
+
+        # Runs aligned by the harness marker record no per-vehicle provenance.
+        # Defaulting them to CONTACT would credit a physical impact that never
+        # happened, and would fold each of their reference recorders, whose
+        # error is zero by definition, into the contact average.
+        marker = str(alignment.get("method", "")) == "acquisition_start_marker"
+        fallback = "ACQUISITION_START" if marker else "CONTACT"
+
         for pid in sorted(set(per_source) | set(offsets)):
             n_participants += 1
-            source = str(per_source.get(pid, "CONTACT" if pid in offsets else "UNRESOLVED"))
+            if pid in per_source:
+                source = str(per_source[pid])
+            elif pid == str(reference):
+                source = "REFERENCE"
+            elif pid in offsets:
+                source = fallback
+            else:
+                source = "UNRESOLVED"
             sources[source] += 1
             got = offsets.get(pid)
             if got is None or base is None or pid not in truth:
@@ -159,6 +204,10 @@ def clock_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
             error = float(got) - expected
             errors.setdefault(source, []).append(error)
             all_errors.append(error)
+            # The reference has no relative drift by definition; it is the
+            # gauge. Counting its zero would dilute the control.
+            if ref_scale and pid in scales and pid != str(reference):
+                drifts.append(abs(scales[pid] / ref_scale - 1.0) * 1e6)
 
     def stats(values: Sequence[float]) -> Dict[str, Any]:
         if not values:
@@ -180,6 +229,26 @@ def clock_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
         "n_unresolved": sources.get("UNRESOLVED", 0),
         "unresolved_rate": _rate(sources.get("UNRESOLVED", 0), n_participants),
         "offset_error": stats(all_errors),
+        # The drift control. Reported so the size of the fixed-scale
+        # approximation is on the record, never as an estimator score.
+        "drift_estimated": False,
+        "n_drift_scored": len(drifts),
+        "unmodelled_drift_ppm": (
+            round(sum(drifts) / len(drifts), 3) if drifts else None
+        ),
+        "unmodelled_drift_max_ppm": round(max(drifts), 3) if drifts else None,
+        "unmodelled_drift_worst_s": (
+            round(max(drifts) * 1e-6 * longest_run_s, 6)
+            if drifts and longest_run_s else None
+        ),
+        "longest_run_s": round(longest_run_s, 3) if longest_run_s else None,
+        "tick_s": tick_s,
+        "drift_note": (
+            "the aligner fits an offset and fixes scale to 1, so drift is not "
+            "estimated. This is the true relative drift that choice leaves "
+            "unmodelled, measured after the fact over the non-reference "
+            "recorders; a reference has no relative drift by definition"
+        ),
         "offset_error_by_source": {
             s: stats(errors.get(s, [])) for s in SOURCES
         },
@@ -321,9 +390,17 @@ def collision_order_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
             })
 
     multi = sum(verdicts[k] for k in ("correct", "wrong", "not_established"))
+    # Declining to order two impacts is not the same as ordering them wrongly,
+    # so the rate over claims is reported beside the rate over all multi-impact
+    # runs. One says how often the method is right when it speaks; the other
+    # says how often it speaks at all.
+    claimed = verdicts.get("correct", 0) + verdicts.get("wrong", 0)
     return {
         "verdicts": dict(sorted(verdicts.items())),
         "n_multi_impact_runs": multi,
+        "n_order_claimed": claimed,
+        "n_order_declined": verdicts.get("not_established", 0),
+        "accuracy_where_claimed": _rate(verdicts.get("correct", 0), claimed),
         "correct_rate": _rate(verdicts.get("correct", 0), multi),
         "multi_impact_runs": rows,
         "note": (

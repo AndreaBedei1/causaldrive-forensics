@@ -13350,7 +13350,11 @@
   ],
   "v2": {
     "clock": {
-      "n_aligned": 238,
+      "drift_estimated": false,
+      "drift_note": "the aligner fits an offset and fixes scale to 1, so drift is not estimated. This is the true relative drift that choice leaves unmodelled, measured after the fact over the non-reference recorders; a reference has no relative drift by definition",
+      "longest_run_s": 30.0,
+      "n_aligned": 208,
+      "n_drift_scored": 133,
       "n_participants": 252,
       "n_participants_without_a_reference_offset": 14,
       "n_runs": 105,
@@ -13362,10 +13366,15 @@
         "n": 238
       },
       "offset_error_by_source": {
+        "ACQUISITION_START": {
+          "mae_s": 3e-06,
+          "max_abs_s": 8e-06,
+          "n": 30
+        },
         "CONTACT": {
-          "mae_s": 0.00461,
+          "mae_s": 0.007717,
           "max_abs_s": 0.249677,
-          "n": 149
+          "n": 89
         },
         "RADAR": {
           "mae_s": 0.013007,
@@ -13375,7 +13384,7 @@
         "REFERENCE": {
           "mae_s": 0.0,
           "max_abs_s": 0.0,
-          "n": 75
+          "n": 105
         },
         "UNRESOLVED": {
           "mae_s": null,
@@ -13391,22 +13400,28 @@
         "PARTIALLY_ALIGNED": 14
       },
       "source_distribution": {
-        "CONTACT": 149,
+        "ACQUISITION_START": 30,
+        "CONTACT": 89,
         "RADAR": 14,
-        "REFERENCE": 75,
+        "REFERENCE": 105,
         "UNRESOLVED": 14
       },
+      "tick_s": 0.05,
+      "unmodelled_drift_max_ppm": 180.605,
+      "unmodelled_drift_ppm": 59.232,
+      "unmodelled_drift_worst_s": 0.005418,
       "unresolved_rate": 0.0556
     },
     "collision_order": {
-      "correct_rate": 0.9286,
+      "accuracy_where_claimed": 1.0,
+      "correct_rate": 0.7857,
       "multi_impact_runs": [
         {
-          "cell": "A-B then B-C (correct)",
+          "cell": "A-B, B-C: order not established (C offset rests on a shared anchor); truth A-B then B-C 0.200 s apart",
           "scenario": "S06",
           "seed": 0,
           "variant": "a_front_pushed",
-          "verdict": "correct"
+          "verdict": "not_established"
         },
         {
           "cell": "B-C then A-B (correct)",
@@ -13423,11 +13438,11 @@
           "verdict": "correct"
         },
         {
-          "cell": "B-C then A-B (WRONG, truth A-B then B-C)",
+          "cell": "B-C, A-B: order not established (C offset rests on a shared anchor); truth A-B then B-C 0.200 s apart",
           "scenario": "S06",
           "seed": 2,
           "variant": "a_front_pushed",
-          "verdict": "wrong"
+          "verdict": "not_established"
         },
         {
           "cell": "B-C then A-B (correct)",
@@ -13465,11 +13480,11 @@
           "verdict": "correct"
         },
         {
-          "cell": "A-B then B-C (correct)",
+          "cell": "A-B, B-C: order not established (A offset rests on a shared anchor); truth A-B then B-C 0.000 s apart",
           "scenario": "S14",
           "seed": 1,
           "variant": "c_pushes_b",
-          "verdict": "correct"
+          "verdict": "not_established"
         },
         {
           "cell": "A-B then B-C (correct)",
@@ -13501,12 +13516,14 @@
         }
       ],
       "n_multi_impact_runs": 14,
+      "n_order_claimed": 11,
+      "n_order_declined": 3,
       "note": "only runs with more than one impact can get an order wrong. 'not established' is its own verdict, not a failure: two impacts closer together than the recording can resolve, or an offset resting on a shared anchor, leave an order the method did not claim",
       "verdicts": {
-        "correct": 13,
+        "correct": 11,
         "not_applicable": 30,
-        "single_impact": 61,
-        "wrong": 1
+        "not_established": 3,
+        "single_impact": 61
       }
     },
     "counterfactual": {

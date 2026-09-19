@@ -656,6 +656,33 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         )
     )
     lines.append("")
+    lines.append(
+        "Two references appear on this page and they are never mixed. The "
+        "**observable ground truth** is what the simulator recorded as having "
+        "happened, and it is what the reconstruction is scored against. The "
+        "**scenario design** is the causal template the experiment was written "
+        "from, and it says what was intended. Each section names the one it "
+        "used."
+    )
+    lines.append("")
+    lines.append("# Measured against the observable ground truth")
+    lines.append("")
+
+    # The reconstruction, measured against what was observably there.
+    _v2_markdown(lines, results.get("v2") or {})
+
+    # Everything below is scored against the scenario design instead. It is a
+    # different question and it is kept in its own part of the page.
+    lines.append("# Measured against the scenario design")
+    lines.append("")
+    lines.append(
+        "A scenario's causal template says what the experiment intended to "
+        "stage. Scoring against it asks whether the account matches the "
+        "intention, which is not the same as asking whether it matches what "
+        "happened, and the two can disagree. Where both exist the sections "
+        "above are the V2 result."
+    )
+    lines.append("")
 
     # -- per scenario --------------------------------------------------
     lines.append("## Attribution against the scenario design")
@@ -701,7 +728,10 @@ def render_markdown(results: Mapping[str, Any]) -> str:
 
     # -- method ablation -----------------------------------------------
     ablation = results.get("method_ablation") or {}
-    lines.append("## What each layer of the method was worth (design reference)")
+    lines.append(
+        "## What each layer of the method was worth "
+        "(legacy design-reference structural ablation)"
+    )
     lines.append("")
     lines.append(
         "Structural figures here are scored against the scenario design "
@@ -800,18 +830,15 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         lines.append(clocks.get("note", "").capitalize() + ".")
     lines.append("")
 
-    # -- the V2 blocks ---------------------------------------------------
-    _v2_markdown(lines, results.get("v2") or {})
 
     # -- headline figures ----------------------------------------------
     lines.append("## Headline figures (design reference, scenario-aggregated)")
     lines.append("")
     lines.append(
-        "Aggregated per scenario variant and scored against the scenario design. "
-        "The participant-weighted clock figures, the perception counts and the "
-        "property verdicts are in their own sections above. The two clock "
-        "averages differ because they average different populations, not because "
-        "they disagree."
+        "One row per measure, averaged over scenario variants so that a "
+        "three-seed variant counts once. The reconstruction rows are scored "
+        "against the observable ground truth; the attribution rows against the "
+        "scenario design, as their labels say."
     )
     lines.append("")
     recon = headline["reconstruction"]
@@ -829,12 +856,8 @@ def render_markdown(results: Mapping[str, Any]) -> str:
         ("cross-view trajectory RMSE", _fmt(recon["cross_view_rmse_m"]) + " m"),
         ("scenario-aggregated clock offset MAE",
          _fmt(headline["clock"]["offset_mae_s"], 5) + " s"),
-        # Not an estimation error: the aligner pins scale to 1 on purpose, so
-        # this figure is the true relative drift that choice leaves unmodelled.
-        ("clock drift",
-         "not estimated; scale pinned to 1 "
-         "(unmodelled true drift {0} ppm)".format(
-             _fmt(headline["clock"]["drift_mae_ppm"], 2))),
+        # Drift is deliberately not estimated, so it is not an estimator score
+        # and does not belong here. It is reported as a control under Clocks.
         ("clock fit residual (self-reported)",
          _fmt(headline["clock"]["alignment_residual_s"], 4) + " s"),
         ("causal path P / R / F1", "{0} / {1} / {2}".format(
@@ -977,6 +1000,44 @@ def _secs(value):
     return "--" if value is None else "{0:.6f} s".format(value)
 
 
+def _drift_control(v2):
+    """Drift, reported as the control value it is.
+
+    The aligner fits an offset and fixes scale to 1. Drift is therefore not
+    estimated, and the figure below is not an estimator error: it is the true
+    relative drift between the recorders that this choice leaves unmodelled,
+    measured after the fact so the size of the approximation is on the record.
+    """
+    clock = (v2 or {}).get("clock") or {}
+    ppm = clock.get("unmodelled_drift_ppm")
+    if ppm is None:
+        return (
+            "**Drift is not estimated; scale is fixed to 1.** No drift control "
+            "was recorded for this campaign."
+        )
+    text = (
+        "**Drift is not estimated; scale is fixed to 1.** Over the {0} "
+        "non-reference recorders, the true relative drift this leaves "
+        "unmodelled averages {1:.2f} ppm and reaches {2:.2f} ppm at worst. A "
+        "reference recorder has no relative drift by definition and is not "
+        "counted."
+    ).format(clock.get("n_drift_scored", 0), ppm,
+             clock.get("unmodelled_drift_max_ppm") or ppm)
+    worst_s = clock.get("unmodelled_drift_worst_s")
+    longest = clock.get("longest_run_s")
+    tick = clock.get("tick_s")
+    if worst_s is not None and longest and tick:
+        text += (
+            " Over the longest run in the campaign, {0:.0f} s, that worst case "
+            "accumulates {1:.4f} s against a simulator tick of {2:.2f} s, which "
+            "is why fitting a rate was not worth the extra parameter."
+        ).format(longest, worst_s, tick)
+    return text + (
+        " It is a control value, not an estimator score, and it is kept out of "
+        "the headline table for that reason."
+    )
+
+
 def _sentence(text):
     """Capitalise a note written to be embedded, so it reads as a sentence."""
     text = (text or "").strip()
@@ -1024,12 +1085,14 @@ def _v2_markdown(lines, v2):
     )
     lines.append("")
     lines.append(
-        "Participant-weighted: every recorder counts once, so a three-vehicle run "
-        "contributes three rows and a two-vehicle run two. *Recorders* is how "
-        "many were placed by that source; *scored* is how many the error could be "
-        "measured on, since an unresolved recorder has no offset to score. The "
-        "headline table averages per scenario variant instead, which is why the "
-        "two figures differ."
+        "**Participant-weighted**: every recorder counts once, so a "
+        "three-vehicle run contributes three rows and a two-vehicle run two. "
+        "*Recorders* is how many were placed by that source; *scored* is how "
+        "many the error could be measured on, since an unresolved recorder has "
+        "no offset to score. The headline table reports a "
+        "**scenario-aggregated** figure instead, averaging per scenario variant "
+        "so that a three-seed variant counts once. The two numbers differ "
+        "because they average different populations, not because they disagree."
     )
     lines.append("")
     lines.append("| Source | Recorders | Scored | Offset MAE | Worst |")
@@ -1044,9 +1107,13 @@ def _v2_markdown(lines, v2):
         clock.get("n_participants", 0), overall.get("n", 0),
         _secs(overall.get("mae_s")), _secs(overall.get("max_abs_s"))))
     lines.append("")
+    lines.append("The **all** row is the participant-weighted clock offset MAE.")
+    lines.append("")
     lines.append("Run status: {0}. Unresolved recorders: {1} of {2}.".format(
         _tally(clock.get("run_status_distribution")),
         clock.get("n_unresolved", 0), clock.get("n_participants", 0)))
+    lines.append("")
+    lines.append(_drift_control(v2))
     lines.append("")
 
     perception = v2.get("perception") or {}
@@ -1159,8 +1226,21 @@ def _v2_markdown(lines, v2):
     lines.append("Verdicts: {0}.".format(_tally(order.get("verdicts"))))
     if order.get("n_multi_impact_runs"):
         lines.append("")
-        lines.append("Multi-impact runs: {0}, correct on {1}.".format(
-            order["n_multi_impact_runs"], _pct(order.get("correct_rate"))))
+        lines.append(
+            "Multi-impact runs: {0}. The method claimed an order on {1} of "
+            "them and was right on {2} of those ({3}); on {4} it declined, "
+            "because the impacts were closer together than the recording "
+            "resolves or the offset rested on a shared anchor. Over all {0} "
+            "runs that is {5}."
+            .format(
+                order["n_multi_impact_runs"],
+                order.get("n_order_claimed", 0),
+                (order.get("verdicts") or {}).get("correct", 0),
+                _pct(order.get("accuracy_where_claimed")),
+                order.get("n_order_declined", 0),
+                _pct(order.get("correct_rate")),
+            )
+        )
         lines.append("")
         lines.append("| Scenario | Variant | Seed | Verdict |")
         lines.append("|---|---|---|---|")

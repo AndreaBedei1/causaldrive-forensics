@@ -6,91 +6,30 @@ Campaign `artifacts_v2`, clock protocol `independent_local_clocks`.
 
 105 runs over 35 scenario/variant combinations (26 designed to collide, 9 negative controls).
 
-## Attribution against the scenario design
+Two references appear on this page and they are never mixed. The **observable ground truth** is what the simulator recorded as having happened, and it is what the reconstruction is scored against. The **scenario design** is the causal template the experiment was written from, and it says what was intended. Each section names the one it used.
 
-Scored against each scenario's declared causal template, which says what the experiment intended. That is a different question from the one the responsibility layer answers, and the two can disagree. On `S10/rolls_through` this table reads *incorrect* while the responsibility analysis reports A as supported, because a template names physical causes and the responsibility layer names normative contributors. The reconstruction itself is scored against the observable ground truth, in the sections below.
-
-| Scenario | Incident reconstructed | Design-template contributors | Inferred | Attribution class | P | R | F1 | Verdict |
-|---|---|---|---|---|---|---|---|---|
-| S01 / avoided | yes | none | none | -- | 1.000 | 1.000 | 1.000 | restrained |
-| S01 / crash | yes | B | B | single_initiator | 1.000 | 1.000 | 1.000 | correct |
-| S02 / avoided | no | none | none | -- | 1.000 | 1.000 | 1.000 | restrained |
-| S02 / crash | yes | B | B | mixed: shared_contribution, single_initiator | 1.000 | 1.000 | 1.000 | correct |
-| S03 / crash | yes | B | A, B | mixed: shared_contribution, single_initiator | 0.167 | 0.333 | 0.222 | partial |
-| S04 / yield | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S05 / crash | yes | A, B | B | mixed: shared_contribution, single_initiator | 1.000 | 0.500 | 0.667 | partial |
-| S06 / a_front_pushed | yes | C | B, C | mixed: joint_contribution, mixed | 0.667 | 1.000 | 0.778 | partial |
-| S06 / b_rear_first | yes | B, C | C | single_initiator | 1.000 | 0.500 | 0.667 | partial |
-| S07 / full_view | yes | B, C | B, C | mixed: shared_contribution, single_initiator | 1.000 | 0.833 | 0.889 | partial |
-| S07 / occluded | yes | B, C | B, C | shared_contribution | 1.000 | 1.000 | 1.000 | correct |
-| S08 / crash | yes | B | A | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S09 / merge_conflict | yes | B | B | mixed: insufficient_evidence, single_initiator | 0.333 | 0.333 | 0.333 | partial |
-| S10 / rolls_through | yes | none | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | incorrect |
-| S10 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S10 / stops_then_proceeds | yes | none | B | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | false attribution |
-| S11 / rolls_through | yes | none | B | mixed: shared_contribution, single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
-| S11 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S11 / stops_then_proceeds | yes | none | none | mixed: insufficient_evidence, single_initiator | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S12 / a_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S12 / b_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S12 / b_fails_to_stop | yes | none | none | mixed: insufficient_evidence, shared_contribution | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S12 / near_simultaneous | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
-| S13 / accelerates_into_gap | yes | none | A | mixed | 0.000 | 0.000 | 0.000 | incorrect |
-| S13 / cut_in | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S13 / safe_lane_change | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
-| S14 / b_hits_a_first | yes | none | A | single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
-| S14 / c_pushes_b | yes | none | A, B | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
-| S14 / independent_impacts | yes | none | A | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
-| S15 / b_stops | yes | none | C | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S15 / deflected_into_c | yes | none | B | single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S15 / single_impact | yes | none | A, B | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
-| S16 / avoided | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
-| S16 / consequential | yes | A | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | partial |
-| S16 / independent | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
-
-A negative control has no designed contributor. Its precision, recall and F1 are vacuously 1.0 and are excluded from the means below; what is measured for it is whether the system named anybody, reported as `restrained` or `false attribution`.
-
-## What each layer of the method was worth (design reference)
-
-Structural figures here are scored against the scenario design reference, not against the observable ground truth. They are kept because a three-arm comparison is only meaningful against one fixed reference, and they should be read as a comparison between arms rather than as the V2 reconstruction result.
-
-| Method | Node F1 | Edge F1 | Edge recall | Canonical edge recall | Causal Path F1 | Attribution F1 |
-|---|---|---|---|---|---|---|
-| Best Local | 0.201 | 0.096 | 0.300 | 0.412 | n/a | n/a |
-| Simple Fusion | 0.243 | 0.047 | 0.337 | 0.631 | n/a | n/a |
-| Fusion + Global Causal Reasoning | 0.243 | 0.038 | 0.355 | 0.733 | 0.342 | 0.560 |
-
-Averaged over 105 runs. Strict edge recall has a ceiling of **0.476** on this campaign: that fraction of the reference's edges leave a scripted-action node, which is a privileged event type no reconstruction can emit. 70 of 105 runs reach their own ceiling exactly.
-
-Causal-path F1 and attribution F1 describe the complete reconstruction and are not defined for the two ablated arms, which produce a graph but no chains or named contributors; they are marked `n/a` rather than filled with a number that would not mean the same thing.
-
-## What the clock alignment is worth
-
-| Clock protocol | Offset error [s] | Node F1 | Edge F1 | Edge recall | Association F1 |
-|---|---|---|---|---|---|
-| A - synchronized (control) | 0.00000 | 0.244 | 0.035 | 0.354 | 0.843 |
-| B - independent, uncorrected | 0.24846 | 0.244 | 0.037 | 0.361 | 0.787 |
-| C - independent, estimated alignment | 0.04983 | 0.244 | 0.034 | 0.347 | 0.842 |
-
-Averaged over 105 runs.
-
-One physical recording per run, scored three ways. a restamps the recorders onto the simulator clock using the true profiles and is a control, not a separate run; b takes each recorder's own timestamps at face value; c uses the alignment estimated from shared observations alone, which is the protocol the campaign reports.
+# Measured against the observable ground truth
 
 ## Clocks (participant-weighted)
 
 How each recorder reached common time. A vehicle placed by a fitted trajectory is not making the same claim as one tied in by a physical impact, so the source is reported per participant rather than averaged away. Error is relative to each run's reference recorder: a common timeline is only fixed up to a constant.
 
-Participant-weighted: every recorder counts once, so a three-vehicle run contributes three rows and a two-vehicle run two. *Recorders* is how many were placed by that source; *scored* is how many the error could be measured on, since an unresolved recorder has no offset to score. The headline table averages per scenario variant instead, which is why the two figures differ.
+**Participant-weighted**: every recorder counts once, so a three-vehicle run contributes three rows and a two-vehicle run two. *Recorders* is how many were placed by that source; *scored* is how many the error could be measured on, since an unresolved recorder has no offset to score. The headline table reports a **scenario-aggregated** figure instead, averaging per scenario variant so that a three-seed variant counts once. The two numbers differ because they average different populations, not because they disagree.
 
 | Source | Recorders | Scored | Offset MAE | Worst |
 |---|---|---|---|---|
-| `REFERENCE` | 75 | 75 | 0.000000 s | 0.000000 s |
-| `CONTACT` | 149 | 149 | 0.004610 s | 0.249677 s |
+| `REFERENCE` | 105 | 105 | 0.000000 s | 0.000000 s |
+| `CONTACT` | 89 | 89 | 0.007717 s | 0.249677 s |
 | `RADAR` | 14 | 14 | 0.013007 s | 0.046226 s |
+| `ACQUISITION_START` | 30 | 30 | 0.000003 s | 0.000008 s |
 | `UNRESOLVED` | 14 | 0 | -- | -- |
 | **all** | 252 | 238 | 0.003651 s | 0.249677 s |
 
+The **all** row is the participant-weighted clock offset MAE.
+
 Run status: ACQUISITION_START_ALIGNED x30, CONTACT_ALIGNED x33, HYBRID_ALIGNED x14, MULTI_CONTACT_ALIGNED x14, PARTIALLY_ALIGNED x14. Unresolved recorders: 14 of 252.
+
+**Drift is not estimated; scale is fixed to 1.** Over the 133 non-reference recorders, the true relative drift this leaves unmodelled averages 59.23 ppm and reaches 180.60 ppm at worst. A reference recorder has no relative drift by definition and is not counted. Over the longest run in the campaign, 30 s, that worst case accumulates 0.0054 s against a simulator tick of 0.05 s, which is why fitting a rate was not worth the extra parameter. It is a control value, not an estimator score, and it is kept out of the headline table for that reason.
 
 ## Perception, from real campaign frames
 
@@ -150,22 +89,22 @@ Evidence classes over all findings: insufficient x32, partial x140, supported x6
 
 ## Collision order
 
-Verdicts: correct x13, not_applicable x30, single_impact x61, wrong x1.
+Verdicts: correct x11, not_applicable x30, not_established x3, single_impact x61.
 
-Multi-impact runs: 14, correct on 92.9%.
+Multi-impact runs: 14. The method claimed an order on 11 of them and was right on 11 of those (100.0%); on 3 it declined, because the impacts were closer together than the recording resolves or the offset rested on a shared anchor. Over all 14 runs that is 78.6%.
 
 | Scenario | Variant | Seed | Verdict |
 |---|---|---|---|
-| S06 | a_front_pushed | 0 | correct |
+| S06 | a_front_pushed | 0 | not_established |
 | S06 | b_rear_first | 0 | correct |
 | S06 | b_rear_first | 1 | correct |
-| S06 | a_front_pushed | 2 | wrong |
+| S06 | a_front_pushed | 2 | not_established |
 | S06 | b_rear_first | 2 | correct |
 | S14 | b_hits_a_first | 0 | correct |
 | S14 | c_pushes_b | 0 | correct |
 | S14 | independent_impacts | 0 | correct |
 | S14 | b_hits_a_first | 1 | correct |
-| S14 | c_pushes_b | 1 | correct |
+| S14 | c_pushes_b | 1 | not_established |
 | S14 | independent_impacts | 1 | correct |
 | S14 | b_hits_a_first | 2 | correct |
 | S14 | c_pushes_b | 2 | correct |
@@ -179,9 +118,83 @@ But-for verdicts: not tested x199, yes x39.
 
 A prevention opportunity is not factual causation, and the role records which question each replay answered: removing what happened, supplying what did not, or improving what did.
 
+# Measured against the scenario design
+
+A scenario's causal template says what the experiment intended to stage. Scoring against it asks whether the account matches the intention, which is not the same as asking whether it matches what happened, and the two can disagree. Where both exist the sections above are the V2 result.
+
+## Attribution against the scenario design
+
+Scored against each scenario's declared causal template, which says what the experiment intended. That is a different question from the one the responsibility layer answers, and the two can disagree. On `S10/rolls_through` this table reads *incorrect* while the responsibility analysis reports A as supported, because a template names physical causes and the responsibility layer names normative contributors. The reconstruction itself is scored against the observable ground truth, in the sections below.
+
+| Scenario | Incident reconstructed | Design-template contributors | Inferred | Attribution class | P | R | F1 | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| S01 / avoided | yes | none | none | -- | 1.000 | 1.000 | 1.000 | restrained |
+| S01 / crash | yes | B | B | single_initiator | 1.000 | 1.000 | 1.000 | correct |
+| S02 / avoided | no | none | none | -- | 1.000 | 1.000 | 1.000 | restrained |
+| S02 / crash | yes | B | B | mixed: shared_contribution, single_initiator | 1.000 | 1.000 | 1.000 | correct |
+| S03 / crash | yes | B | A, B | mixed: shared_contribution, single_initiator | 0.167 | 0.333 | 0.222 | partial |
+| S04 / yield | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S05 / crash | yes | A, B | B | mixed: shared_contribution, single_initiator | 1.000 | 0.500 | 0.667 | partial |
+| S06 / a_front_pushed | yes | C | B, C | mixed: joint_contribution, mixed | 0.667 | 1.000 | 0.778 | partial |
+| S06 / b_rear_first | yes | B, C | C | single_initiator | 1.000 | 0.500 | 0.667 | partial |
+| S07 / full_view | yes | B, C | B, C | mixed: shared_contribution, single_initiator | 1.000 | 0.833 | 0.889 | partial |
+| S07 / occluded | yes | B, C | B, C | shared_contribution | 1.000 | 1.000 | 1.000 | correct |
+| S08 / crash | yes | B | A | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S09 / merge_conflict | yes | B | B | mixed: insufficient_evidence, single_initiator | 0.333 | 0.333 | 0.333 | partial |
+| S10 / rolls_through | yes | none | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | incorrect |
+| S10 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S10 / stops_then_proceeds | yes | none | B | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | false attribution |
+| S11 / rolls_through | yes | none | B | mixed: shared_contribution, single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
+| S11 / stops_safely | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S11 / stops_then_proceeds | yes | none | none | mixed: insufficient_evidence, single_initiator | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S12 / a_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S12 / b_arrives_first | no | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S12 / b_fails_to_stop | yes | none | none | mixed: insufficient_evidence, shared_contribution | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S12 / near_simultaneous | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
+| S13 / accelerates_into_gap | yes | none | A | mixed | 0.000 | 0.000 | 0.000 | incorrect |
+| S13 / cut_in | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S13 / safe_lane_change | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | insufficient evidence |
+| S14 / b_hits_a_first | yes | none | A | single_initiator | 0.333 | 0.333 | 0.333 | incorrect |
+| S14 / c_pushes_b | yes | none | A, B | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
+| S14 / independent_impacts | yes | none | A | mixed: joint_contribution, mixed | 0.333 | 0.333 | 0.333 | incorrect |
+| S15 / b_stops | yes | none | C | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S15 / deflected_into_c | yes | none | B | single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S15 / single_impact | yes | none | A, B | mixed: shared_contribution, single_initiator | 0.000 | 0.000 | 0.000 | incorrect |
+| S16 / avoided | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
+| S16 / consequential | yes | A | A | mixed: insufficient_evidence, single_initiator | 0.667 | 0.667 | 0.667 | partial |
+| S16 / independent | yes | A | A | mixed: insufficient_evidence, mixed, single_initiator | 0.667 | 0.667 | 0.667 | partial |
+
+A negative control has no designed contributor. Its precision, recall and F1 are vacuously 1.0 and are excluded from the means below; what is measured for it is whether the system named anybody, reported as `restrained` or `false attribution`.
+
+## What each layer of the method was worth (legacy design-reference structural ablation)
+
+Structural figures here are scored against the scenario design reference, not against the observable ground truth. They are kept because a three-arm comparison is only meaningful against one fixed reference, and they should be read as a comparison between arms rather than as the V2 reconstruction result.
+
+| Method | Node F1 | Edge F1 | Edge recall | Canonical edge recall | Causal Path F1 | Attribution F1 |
+|---|---|---|---|---|---|---|
+| Best Local | 0.201 | 0.096 | 0.300 | 0.412 | n/a | n/a |
+| Simple Fusion | 0.243 | 0.047 | 0.337 | 0.631 | n/a | n/a |
+| Fusion + Global Causal Reasoning | 0.243 | 0.038 | 0.355 | 0.733 | 0.342 | 0.560 |
+
+Averaged over 105 runs. Strict edge recall has a ceiling of **0.476** on this campaign: that fraction of the reference's edges leave a scripted-action node, which is a privileged event type no reconstruction can emit. 70 of 105 runs reach their own ceiling exactly.
+
+Causal-path F1 and attribution F1 describe the complete reconstruction and are not defined for the two ablated arms, which produce a graph but no chains or named contributors; they are marked `n/a` rather than filled with a number that would not mean the same thing.
+
+## What the clock alignment is worth
+
+| Clock protocol | Offset error [s] | Node F1 | Edge F1 | Edge recall | Association F1 |
+|---|---|---|---|---|---|
+| A - synchronized (control) | 0.00000 | 0.244 | 0.035 | 0.354 | 0.843 |
+| B - independent, uncorrected | 0.24846 | 0.244 | 0.037 | 0.361 | 0.787 |
+| C - independent, estimated alignment | 0.04983 | 0.244 | 0.034 | 0.347 | 0.842 |
+
+Averaged over 105 runs.
+
+One physical recording per run, scored three ways. a restamps the recorders onto the simulator clock using the true profiles and is a control, not a separate run; b takes each recorder's own timestamps at face value; c uses the alignment estimated from shared observations alone, which is the protocol the campaign reports.
+
 ## Headline figures (design reference, scenario-aggregated)
 
-Aggregated per scenario variant and scored against the scenario design. The participant-weighted clock figures, the perception counts and the property verdicts are in their own sections above. The two clock averages differ because they average different populations, not because they disagree.
+One row per measure, averaged over scenario variants so that a three-seed variant counts once. The reconstruction rows are scored against the observable ground truth; the attribution rows against the scenario design, as their labels say.
 
 | Measure | Value |
 |---|---|
@@ -192,7 +205,6 @@ Aggregated per scenario variant and scored against the scenario design. The part
 | spurious collisions | 42 |
 | cross-view trajectory RMSE | 1.503 m |
 | scenario-aggregated clock offset MAE | 0.00519 s |
-| clock drift | not estimated; scale pinned to 1 (unmodelled true drift 58.52 ppm) |
 | clock fit residual (self-reported) | -- s |
 | causal path P / R / F1 | 0.339 / 0.351 / 0.342 |
 | causal ancestry recall | 0.669 |
