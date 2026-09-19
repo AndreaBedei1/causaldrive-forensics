@@ -1,4 +1,5 @@
-> **These are V1 results.**
+> **These are V1 results. The current ones are in
+> [`results/`](../results/README.md).**
 >
 > Recorded from `artifacts_independent_clocks/` and, for the structural
 > figures, scored against the scenario template rather than against a

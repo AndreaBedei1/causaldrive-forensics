@@ -110,14 +110,36 @@ python -m cdf.cli env          # verifies the simulator connection and version
 ### 2. Record the campaign
 
 ```bash
-python scripts/run_campaign.py --artifacts artifacts_independent_clocks \
-                               --seeds 0 1 2 --attempts 3
+python scripts/run_campaign.py --artifacts artifacts_v2 \
+                               --seeds 0 1 2 --attempts 3 --logs artifacts_v2/logs
 ```
 
-Thirteen scenario/variant combinations × three seeds = 39 runs. One subprocess
-per run with a fresh simulator connection, because a long-lived engine
-accumulates state that silently changes later runs. Completed runs are skipped
-on a re-invocation, so an interrupted campaign resumes.
+Thirty-five scenario/variant combinations x three seeds = **105 runs**. One
+subprocess per run with a fresh simulator connection, because a long-lived engine
+accumulates state that silently changes later runs. Completed runs are skipped on
+a re-invocation, so an interrupted campaign resumes.
+
+### The simulator process, and one deviation
+
+The default protocol restarts the engine for each run. On the machine the V2
+campaign was recorded on, that was losing the engine part way through a scenario:
+the client then spun on a refused streaming port, the campaign retried the same
+run three times, and the whole campaign stalled with 15 of 105 recorded.
+
+So the V2 campaign was driven by a supervisor that keeps **one** served engine
+alive, passes `--keep-stray-engines` so the campaign does not kill it, and
+restarts the engine only when it actually dies, relaunching the campaign from
+whatever is already on disk. The deviation is recorded here rather than left
+implicit. It changes only how the simulator process is kept alive around the
+experiment: each run still records its own configuration, its own seed and its
+own fate, so the campaign remains one experiment.
+
+Two things made the default protocol fragile and are fixed rather than worked
+around. `connect_with_retry` probed `get_server_version`, which answers while the
+engine is still bringing a map up, so the caller's first `get_map` blocked for
+sixty seconds and raised; it now asks for the world as well. And running a second
+engine alongside the campaign's own -- easy to do by accident -- leaves two
+processes contending for port 2000 and neither can serve.
 
 The tree is stamped `campaign.json` with `clock_protocol:
 independent_local_clocks`. A run recorded under a different protocol is reported
