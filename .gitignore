@@ -19,6 +19,12 @@ artifacts_v2/**
 # computed from, and untracked for the same reason as the roots above.
 artifacts_v2_validation/**
 !artifacts_v2_validation/.gitkeep
+# Scenario development and tuning runs, on seed 99. Kept apart from every
+# campaign root so a scenario being fixed can never reach a recorded result,
+# and untracked for the same reason as the roots above: these are recordings.
+artifacts_scenario_validation/**
+!artifacts_scenario_validation/.gitkeep
+
 # A recording copied out for a demo or a screenshot. Same reason as the roots
 # above: recordings are regenerated, not committed.
 demo_scenarios/

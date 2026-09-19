@@ -130,7 +130,7 @@ scenario:
               kind: "lane_shift"
               t_start: 7.4
               duration: 2.0
-              params: { lateral_offset: 3.2 }
+              params: { lateral_m: 3.2 }
       notes:
         - "designed answer: B contributes to the first impact and not to the second"
         - "B's displacement into C follows from being unable to stop after the impact"
@@ -162,7 +162,7 @@ scenario:
               kind: "lane_shift"
               t_start: 17.0
               duration: 3.0
-              params: { lateral_offset: 3.2 }
+              params: { lateral_m: 3.2 }
         C:
           # C is further ahead so it is still there when B catches up.
           spawn: { anchor: "spawn_index", index: 265, forward_m: 52.0, lane_offset: -1 }

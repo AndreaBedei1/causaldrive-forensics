@@ -40,6 +40,7 @@ from .traffic_control import (
     place_traffic_control, stop_lines_truth, traffic_control_truth,
 )
 from .carla_client import import_carla
+from .scenario_checks import run_physical_checks
 from .live_view import LiveScenarioView, LiveViewOptions
 from .scenario_base import (
     ParticipantSpec,
@@ -838,6 +839,14 @@ def validate_run(
         checks.setdefault("max_speed", {})[pid] = round(top, 3)
         if top < 0.5:
             problems.append("participant {0} never moved (max speed {1:.2f} m/s)".format(pid, top))
+
+    # --- what a person watching would have objected to ---
+    # Declared collisions are not enough: a run where both vehicles circled and
+    # hit a fence satisfied every check above, because somewhere in all of that
+    # the declared pair had touched.
+    physical_problems, physical_checks = run_physical_checks(spec, oracle, spec.validation)
+    problems.extend(physical_problems)
+    checks["physical"] = physical_checks
 
     return {
         "schema_version": SCHEMA_VERSIONS["manifest"],

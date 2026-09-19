@@ -33,9 +33,17 @@ scenario:
         anchor: "junction_approach"
         junction_x: 152.54
         junction_y: -0.23
-        bearing_deg: -90.0
-        back_m: 44.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        # The near lane of the through road, the one B's left turn crosses.
+        bearing_deg: 90.0
+        back_m: 60.0
+      # Long enough that A never reaches the end of it: a route that runs out
+      # under a moving vehicle leaves the pursuit controller chasing its last
+      # point and the vehicle turns back on itself.
+      route:
+        length_m: 240.0
+        step_m: 2.0
+        turns: ["straight"]
+        turn_lookahead: true
       initial_speed: 10.0
       target_speed: 10.0
       actions: []
@@ -47,8 +55,16 @@ scenario:
         junction_x: 152.54
         junction_y: -0.23
         bearing_deg: 0.0
-        back_m: 30.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        back_m: 45.0
+      # Left across the through road, which is the movement that has to give
+      # way. turn_lookahead is required: at this junction both connecting lanes
+      # leave the entry within a degree of the approach heading, so a decision
+      # scored on those headings picks whichever the map lists first.
+      route:
+        length_m: 110.0
+        step_m: 2.0
+        turns: ["left"]
+        turn_lookahead: true
       initial_speed: 9.0
       target_speed: 9.0
       actions: []
@@ -78,6 +94,16 @@ scenario:
   validation:
     encounter_pair: ["A", "B"]
     min_separation_below_m: 6.0
+    # The conflict is inside the junction, exactly as in S10. If this scenario
+    # stops mirroring S10 the mirror is the thing it was testing.
+    collision_near:
+      x: 152.54
+      y: -0.23
+      max_distance_m: 12.0
+      require_in_junction: true
+    max_accumulated_turn_deg: 150.0
+    min_straightness: 0.60
+    no_scenery_collision: true
 
   intervention_candidates:
     - "B_roll_through"
@@ -104,8 +130,8 @@ scenario:
           actions:
             - action_id: "B_roll_through"
               kind: "set_speed"
-              t_start: 3.0
-              duration: 12.0
+              t_start: 2.0
+              duration: 14.0
               params: { target_speed: 5.5 }
 
     stops_safely:
@@ -132,6 +158,10 @@ scenario:
     stops_then_proceeds:
       expected_outcome: "near_miss"
       expected_collision_pairs: []
+      # The encounter is decided once B has stopped, A has passed and B has
+      # completed its turn. Recording past that point only gives the route
+      # follower time to invent something.
+      max_duration_s: 16.0
       validation:
         encounter_pair: ["A", "B"]
         min_separation_below_m: 14.0
@@ -149,7 +179,7 @@ scenario:
             - action_id: "B_pull_away"
               kind: "set_speed"
               t_start: 7.4
-              duration: 10.0
+              duration: 6.0
               params: { target_speed: 9.0 }
       causal_template:
         - cause: { kind: "state", participant: "B", name: "stopped" }

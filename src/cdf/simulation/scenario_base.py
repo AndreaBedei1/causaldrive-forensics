@@ -101,12 +101,27 @@ class RouteSpec:
     ``"straight"``, ``"left"`` or ``"right"``. Exhausted decisions default to
     ``"straight"``."""
 
+    turn_lookahead: bool = False
+    """Resolve a turn by where each candidate *leads* rather than by its own
+    heading at the junction entry.
+
+    Off by default, and deliberately so. At a junction entry every connecting
+    lane still runs along the approach, so the candidates' own headings can sit
+    within a degree of each other while leading to different roads; the decision
+    is then settled by which lane CARLA lists first, and ``left``, ``right`` and
+    ``straight`` all select the same one. Looking downstream fixes that, but it
+    also changes which exit a roundabout takes, and S09 is frozen on the original
+    choice. So the scenarios that need a turn they can rely on ask for this, and
+    the ones recorded before it keep exactly the routes they were recorded with.
+    """
+
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "RouteSpec":
         return RouteSpec(
             length_m=float(d.get("length_m", 200.0)),
             step_m=float(d.get("step_m", 2.0)),
             turns=[str(t) for t in d.get("turns", [])],
+            turn_lookahead=bool(d.get("turn_lookahead", False)),
         )
 
 
@@ -501,7 +516,9 @@ def build_route(carla_map: Any, start_wp: Any, spec: RouteSpec) -> RoutePlan:
             wp = candidates[0]
         else:
             decision = turns.pop(0) if turns else "straight"
-            wp = _choose_successor(wp, candidates, decision)
+            wp = _choose_successor(
+                wp, candidates, decision, lookahead=spec.turn_lookahead
+            )
         travelled += step
 
     if len(points) < 2:
@@ -509,13 +526,54 @@ def build_route(carla_map: Any, start_wp: Any, spec: RouteSpec) -> RoutePlan:
     return RoutePlan(points=points, headings=headings)
 
 
-def _choose_successor(current: Any, candidates: Sequence[Any], decision: str) -> Any:
+def _eventual_heading(candidate: Any, probe_m: float = 14.0) -> float:
+    """Where this candidate is actually pointing once it has committed.
+
+    At a junction entry every connecting lane still runs along the approach, so
+    the candidates' own headings can differ by a degree or two while leading to
+    completely different roads. Scoring on those headings makes the turn decision
+    a coin toss: at Town05's junction 359 all three of ``left``, ``right`` and
+    ``straight`` selected the same lane and every vehicle turned the same way,
+    whatever its scenario asked for.
+
+    Following each candidate a short way forward and reading the heading there is
+    what separates them. The probe stops at the first fork, because past a fork
+    the answer would depend on a decision that has not been made yet.
+    """
+    wp = candidate
+    travelled = 0.0
+    step = 2.0
+    while travelled < probe_m:
+        nxt = wp.next(step)
+        if not nxt or len(nxt) > 1:
+            break
+        wp = nxt[0]
+        travelled += step
+    return float(wp.transform.rotation.yaw)
+
+
+def _choose_successor(
+    current: Any,
+    candidates: Sequence[Any],
+    decision: str,
+    lookahead: bool = False,
+) -> Any:
     """Pick the successor matching a turn decision, by relative heading."""
     base = current.transform.rotation.yaw
     scored: List[Tuple[float, Any]] = []
     for c in candidates:
         delta = angle_diff_deg(c.transform.rotation.yaw, base)
         scored.append((delta, c))
+
+    # Where the immediate headings cannot tell the candidates apart, the choice
+    # above is decided by which lane CARLA happens to list first. Look downstream
+    # instead, for the scenarios that asked for it. Only this case is re-scored,
+    # so a junction whose candidates already diverge keeps the selection it
+    # always made even with the lookahead on.
+    if lookahead and len(scored) > 1 and max(abs(d) for d, _ in scored) < 10.0:
+        scored = [
+            (angle_diff_deg(_eventual_heading(c), base), c) for _, c in scored
+        ]
 
     decision = (decision or "straight").lower()
     if decision == "straight":

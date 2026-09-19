@@ -89,7 +89,7 @@ scenario:
               kind: "lane_shift"
               t_start: 4.0
               duration: 3.0
-              params: { lateral_offset: 3.5 }
+              params: { lateral_m: 3.5 }
       notes:
         - "B has room ahead but not beside: the lateral move is what creates the conflict"
         - "A holds a constant speed throughout, so nothing A did contributed"
@@ -116,7 +116,7 @@ scenario:
               kind: "lane_shift"
               t_start: 4.6
               duration: 4.0
-              params: { lateral_offset: 3.5 }
+              params: { lateral_m: 3.5 }
       causal_template:
         - cause: { kind: "state", participant: "A", name: "closing" }
           effect: { kind: "state", participant: "A", name: "critical_ttc" }
@@ -147,7 +147,7 @@ scenario:
               kind: "lane_shift"
               t_start: 6.0
               duration: 5.0
-              params: { lateral_offset: 3.5 }
+              params: { lateral_m: 3.5 }
       causal_template:
         - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
           effect: { kind: "state", participant: "A", name: "closing" }

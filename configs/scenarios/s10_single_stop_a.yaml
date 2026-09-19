@@ -13,9 +13,23 @@
 # that only had the second could not tell a stop sign run beside an unrelated
 # collision from one that produced it.
 #
-# Geometry: junction 359 of Town05 at (152.54, -0.23), on the eastbound
-# approach carrying BP_Stop4_7_SM_1 at (142.2, 6.0) -- 11.9 m back from the
-# junction, and one of only five stop signs Town05 actually renders. The map
+# Geometry: junction 359 of Town05 at (152.54, -0.23). It is a **T**, not a
+# crossroads, and that is the whole shape of this scenario. The eastbound arm A
+# approaches on simply ends there: the junction offers it a left turn and a right
+# turn and no way straight on. The through road runs north to south in two lanes,
+# x = 151.5 carrying traffic one way and x = 155.0 the other.
+#
+# A terminating arm is exactly the kind of approach that carries a stop sign, and
+# this one does: BP_Stop4_7_SM_1 at (142.2, 6.0), 11.9 m back from the junction,
+# one of only five stop signs Town05 actually renders.
+#
+# So the conflict is the one a T produces. A has to pull out across the through
+# road to reach the far lane, and B has priority on the near lane A must cross.
+# A that rolls through the sign crosses in front of B and is struck side-on,
+# inside the junction. An earlier version of this file asked both vehicles to
+# drive "straight" across, which no lane here does: A was silently turned by the
+# map onto B's lane and the two met 17 m beyond the junction, travelling the same
+# way. What looked like a crossing collision was a merge. The map
 # holds 33 traffic.stop trigger actors and 5 sign meshes, and a trigger volume is
 # not something a camera can read; the junction this scenario used before had
 # seven triggers and no mesh at all, so there was nothing on A's approach to
@@ -46,8 +60,17 @@ scenario:
         junction_x: 152.54
         junction_y: -0.23
         bearing_deg: 0.0
-        back_m: 30.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        back_m: 45.0
+      # Left across the through road, which is the movement that has to give
+      # way. turn_lookahead is required here: at this junction both connecting
+      # lanes leave the entry within a degree of the approach heading, so a
+      # decision scored on those headings picks whichever lane the map lists
+      # first and "left" means nothing.
+      route:
+        length_m: 110.0
+        step_m: 2.0
+        turns: ["left"]
+        turn_lookahead: true
       initial_speed: 9.0
       target_speed: 9.0
       actions: []
@@ -58,9 +81,18 @@ scenario:
         anchor: "junction_approach"
         junction_x: 152.54
         junction_y: -0.23
-        bearing_deg: -90.0
-        back_m: 44.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        # The near lane of the through road, the one A's left turn crosses.
+        bearing_deg: 90.0
+        back_m: 60.0
+      # Long enough that B never reaches the end of it. A route that runs out
+      # under a moving vehicle leaves the pure-pursuit controller chasing its
+      # last point, and the vehicle turns back on itself: that is what the
+      # circling in these scenarios was.
+      route:
+        length_m: 240.0
+        step_m: 2.0
+        turns: ["straight"]
+        turn_lookahead: true
       initial_speed: 10.0
       target_speed: 10.0
       actions: []
@@ -96,6 +128,20 @@ scenario:
   validation:
     encounter_pair: ["A", "B"]
     min_separation_below_m: 6.0
+    # The conflict is inside the junction. An impact out on the exit road is a
+    # merge that happened after the encounter, which is what this scenario
+    # produced before the geometry was corrected, and it must fail rather than
+    # pass quietly.
+    collision_near:
+      x: 152.54
+      y: -0.23
+      max_distance_m: 12.0
+      require_in_junction: true
+    # One left turn is about 90 degrees. Anything approaching twice that is a
+    # vehicle going round again.
+    max_accumulated_turn_deg: 150.0
+    min_straightness: 0.60
+    no_scenery_collision: true
 
   intervention_candidates:
     - "A_roll_through"
@@ -132,8 +178,8 @@ scenario:
             # signature NO_STOP_AFTER_STOP_SIGN has to catch.
             - action_id: "A_roll_through"
               kind: "set_speed"
-              t_start: 3.0
-              duration: 12.0
+              t_start: 2.0
+              duration: 14.0
               params: { target_speed: 5.5 }
       notes:
         - "A decelerates but never reaches rest, which is what makes this a rolling stop rather than a stop"
@@ -168,6 +214,13 @@ scenario:
     stops_then_proceeds:
       expected_outcome: "near_miss"
       expected_collision_pairs: []
+      # The story is over once A has stopped, B has passed and A has completed
+      # its turn. Left running, the 110 m routes carry both vehicles into
+      # further junctions where the route follower takes whatever successor it
+      # is offered: on the development seed they circled through 211 and 328
+      # degrees and B destroyed a piece of vegetation, none of which is the
+      # scenario. The recording stops when the encounter is decided.
+      max_duration_s: 16.0
       validation:
         encounter_pair: ["A", "B"]
         min_separation_below_m: 14.0
@@ -185,7 +238,7 @@ scenario:
             - action_id: "A_pull_away"
               kind: "set_speed"
               t_start: 7.4
-              duration: 10.0
+              duration: 6.0
               params: { target_speed: 9.0 }
       causal_template:
         - cause: { kind: "state", participant: "A", name: "stopped" }
