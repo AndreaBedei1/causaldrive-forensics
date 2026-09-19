@@ -439,12 +439,12 @@ def test_a_hard_case_is_stated_once_per_scenario_variant() -> None:
     from cdf.evaluation.responsibility_metrics import aggregate_responsibility
 
     runs = [_scored_run("S14", "c_pushes_b", seed, "the pushed vehicle") for seed in (0, 1, 2)]
-    runs.append(_scored_run("S14", "independent_impacts", 0, "two impacts, one vehicle"))
+    runs.append(_scored_run("S14", "b_hits_a_first", 0, "which pair went first"))
     out = aggregate_responsibility(runs)
 
     assert out["n_runs"] == 4, "every run is still counted"
     variants = [(h["scenario"], h["variant"]) for h in out["hard_cases"]]
-    assert variants == [("S14", "c_pushes_b"), ("S14", "independent_impacts")]
+    assert variants == [("S14", "c_pushes_b"), ("S14", "b_hits_a_first")]
 
 
 def test_declining_to_order_two_impacts_is_not_scored_as_getting_it_wrong() -> None:

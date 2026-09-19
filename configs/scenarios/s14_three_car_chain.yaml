@@ -32,6 +32,13 @@ scenario:
   description: >
     A leads, B follows, C is last, all in one lane. A brakes. Which pair collides
     first, and which vehicle was merely in the way, depends on how B responds.
+    A third variant, independent_impacts, was retired: it produced its second
+    impact by having C come to a complete stop and then deliberately creep into
+    the stationary pile seven seconds later, which is not a road situation. The
+    distinction it was testing, that two impacts sharing a vehicle must not be
+    chained merely for sharing it, is what S16 tests between its consequential
+    and independent variants, and S16 does it without asking a driver to drive
+    into a wreck.
   map: "Town05"
   default_variant: "c_pushes_b"
   max_duration_s: 30.0
@@ -63,7 +70,10 @@ scenario:
 
     - id: "C"
       blueprint: "vehicle.nissan.patrol"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
+      # 8 m closer to B than before. C has to arrive while B is still moving,
+      # and at the old 15 m gap it got there a quarter of a second after B had
+      # come to rest.
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 8.0, lane_offset: 0 }
       route: { length_m: 140.0, step_m: 2.0 }
       initial_speed: 13.0
       target_speed: 13.0
@@ -127,25 +137,22 @@ scenario:
           actions:
             # B responds in time and would have stopped clear, so B's presence
             # in the second impact is entirely the consequence of being struck.
-            # NOT YET TUNED. B stops clear of A, which the variant requires,
-            # but 6.95 m clear, and the push from C does not close that. The
-            # scenario therefore produces one impact where it declares two, and
-            # its validation fails saying so.
+            # B has to be still rolling when C reaches it. Struck while
+            # stationary it barely moved: the trace shows C losing 10.6 m/s in
+            # a quarter of a second while B gained 0.50 m/s and travelled 2 cm,
+            # because CARLA puts most of a rear-end into the ground when the
+            # struck car is at rest on its wheels. Struck while still coasting
+            # forward, B keeps its own momentum and takes C's on top of it.
             #
-            # This is the honest consequence of removing the phantom throttle:
-            # B used to "reach" A by accelerating into it under its own power
-            # after being hit, which is the thing this variant exists to deny.
-            # Closing the gap has to come from the geometry instead. Moving B to
-            # 19 m made it roll into A unaided before C arrived, and 0.80 and
-            # 0.62 brake intensities did the same, so the window between
-            # "stops clear" and "does not need C at all" is narrow and needs
-            # B held at rest after braking rather than left to the speed
-            # controller, which resumes 13 m/s the moment the brake ends.
+            # 0.64 over 2.5 s from 13 m/s is about 6.5 m/s2, which brings B to
+            # rest roughly 2.5 m short of A: enough that B does not reach A on
+            # its own, which is what the variant claims, and little enough that
+            # the push closes it.
             - action_id: "B_brake"
               kind: "brake"
               t_start: 4.9
-              duration: 1.6
-              params: { intensity: 0.95 }
+              duration: 2.5
+              params: { intensity: 0.75 }
         C:
           actions:
             # C holds speed. Modelled as an explicit action so the
@@ -200,47 +207,3 @@ scenario:
         - "the two variants together test whether the method reads the order or the layout"
 
     # ---- two impacts that have nothing to do with each other -------------
-    independent_impacts:
-      expected_collision_pairs: [["A", "B"], ["B", "C"]]
-      expected_collision_order: [["A", "B"], ["B", "C"]]
-      max_duration_s: 34.0
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 5.0
-      intervention_candidates:
-        - "A_brake"
-        - "B_late_brake"
-        - "C_much_later_brake"
-      participant_overrides:
-        B:
-          actions:
-            - action_id: "B_late_brake"
-              kind: "brake"
-              t_start: 6.3
-              duration: 6.0
-              params: { intensity: 1.0 }
-        C:
-          actions:
-            # C is far enough back to stop, then rolls into the stationary pile
-            # several seconds later -- a separate event, not a chain reaction.
-            - action_id: "C_much_later_brake"
-              kind: "brake"
-              t_start: 5.0
-              duration: 4.0
-              params: { intensity: 0.7 }
-            - action_id: "C_creep_forward"
-              kind: "set_speed"
-              t_start: 13.0
-              duration: 8.0
-              params: { target_speed: 4.0 }
-      causal_template:
-        - cause: { kind: "state", participant: "B", name: "no_braking" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-        - cause: { kind: "state", participant: "C", name: "unsafe_entry" }
-          effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-          edge: "CAUSES_OUTCOME"
-      notes:
-        - "two impacts several seconds apart with no causal link between them"
-        - "tests that the method does not chain impacts merely because they share a vehicle"
-        - "the clock alignment still works: B feels both, so the transitive route is unchanged"

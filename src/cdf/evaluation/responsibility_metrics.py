@@ -57,6 +57,9 @@ HARD_CASES: Dict[Tuple[str, str], str] = {
         "the pushed vehicle must not be an initiating contributor merely "
         "because it physically struck the vehicle ahead"
     ),
+    # Retired variant. The entry stays because results/ still reports the
+    # campaign that included it, and a recorded finding needs its
+    # explanation to remain resolvable.
     ("S14", "independent_impacts"): (
         "two impacts sharing a vehicle but nothing else must not be chained"
     ),

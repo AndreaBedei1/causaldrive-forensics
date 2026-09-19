@@ -57,7 +57,7 @@ earlier nine could not ask.
 | S11 | `single_stop_b` | 2 | B has the STOP sign: the mirror of S10, so a bias towards one role would show | `rolls_through`, `stops_safely`, `stops_then_proceeds` |
 | S12 | `all_way_stop` | 2 | both have STOP signs: who had priority, and is ambiguity preserved when it cannot be told? | `a_arrives_first`, `b_arrives_first`, `near_simultaneous`, `b_fails_to_stop` |
 | S13 | `disputed_lane_change` | 2 | which vehicle closed the gap, when the deciding evidence is split between them? | `cut_in`, `accelerates_into_gap`, `safe_lane_change` |
-| S14 | `three_car_chain` | 3 | is the pushed vehicle spared, or blamed for striking the car it was shoved into? | `c_pushes_b`, `b_hits_a_first`, `independent_impacts` |
+| S14 | `three_car_chain` | 3 | is the pushed vehicle spared, or blamed for striking the car it was shoved into? | `c_pushes_b`, `b_hits_a_first` |
 | S15 | `intersection_pileup` | 3 | a deflection into a bystander: are the deflected car and the bystander left out of the account? | `deflected_into_c`, `single_impact`, `b_stops` |
 | S16 | `secondary_collision` | 3 | is the second impact a consequence of the first, or that vehicle's own doing? | `consequential`, `independent`, `avoided` |
 
@@ -547,12 +547,12 @@ A faces a stop sign on its approach; B does not and has benchmark priority. The 
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_roll_through`: set_speed at t=3s for 12s (target_speed 5.5)
+* **A** &mdash; `A_roll_through`: set_speed at t=2s for 14s (target_speed 5.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -571,8 +571,8 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -594,13 +594,13 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
 * **A** &mdash; `A_full_stop`: brake at t=2.6s for 4.2s (intensity 0.9)
-* **A** &mdash; `A_pull_away`: set_speed at t=7.4s for 10s (target_speed 9)
+* **A** &mdash; `A_pull_away`: set_speed at t=7.4s for 6s (target_speed 9)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 14 m.
 
@@ -625,12 +625,12 @@ B faces a stop sign on its approach; A does not and has benchmark priority. Stru
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 5.5)
+* **B** &mdash; `B_roll_through`: set_speed at t=2s for 14s (target_speed 5.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -649,8 +649,8 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -671,13 +671,13 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 10 / 10 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 30 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 60 m | 10 / 10 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
 * **B** &mdash; `B_full_stop`: brake at t=2.6s for 4.2s (intensity 0.9)
-* **B** &mdash; `B_pull_away`: set_speed at t=7.4s for 10s (target_speed 9)
+* **B** &mdash; `B_pull_away`: set_speed at t=7.4s for 6s (target_speed 9)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 14 m.
 
@@ -702,15 +702,15 @@ Both A and B face stop signs. Variants differ in who stops first, whether the tw
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 66 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 50 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_stop`: brake at t=2.4s for 3s (intensity 0.9)
-* **A** &mdash; `A_proceed`: set_speed at t=6s for 12s (target_speed 8)
-* **B** &mdash; `B_stop`: brake at t=4s for 4.5s (intensity 0.9)
-* **B** &mdash; `B_proceed`: set_speed at t=10s for 12s (target_speed 8)
+* **A** &mdash; `A_stop`: brake at t=2.7s for 3.8s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=6.5s for 8s (target_speed 8)
+* **B** &mdash; `B_stop`: brake at t=2.8s for 7.7s (intensity 0.9)
+* **B** &mdash; `B_proceed`: set_speed at t=10.5s for 6s (target_speed 8)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
 
@@ -728,15 +728,15 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 66 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 50 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_stop`: brake at t=4s for 3.4s (intensity 0.9)
-* **A** &mdash; `A_proceed`: set_speed at t=7.6s for 12s (target_speed 8)
-* **B** &mdash; `B_stop`: brake at t=2.4s for 3s (intensity 0.9)
-* **B** &mdash; `B_proceed`: set_speed at t=6s for 12s (target_speed 8)
+* **A** &mdash; `A_stop`: brake at t=2.8s for 7.7s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=10.5s for 6s (target_speed 8)
+* **B** &mdash; `B_stop`: brake at t=2.7s for 3.8s (intensity 0.9)
+* **B** &mdash; `B_proceed`: set_speed at t=6.5s for 8s (target_speed 8)
 
 *Validation:* expected outcome **near_miss**; A-B must close to under 16 m.
 
@@ -754,15 +754,15 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 66 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 50 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_stop`: brake at t=1.6s for 3.4s (intensity 0.95)
-* **A** &mdash; `A_proceed`: set_speed at t=5s for 12s (target_speed 9)
-* **B** &mdash; `B_stop`: brake at t=2.7s for 1.2s (intensity 0.95)
-* **B** &mdash; `B_proceed`: set_speed at t=3.9s for 12s (target_speed 9)
+* **A** &mdash; `A_stop`: brake at t=2.7s for 4.3s (intensity 0.95)
+* **A** &mdash; `A_proceed`: set_speed at t=7s for 8s (target_speed 8)
+* **B** &mdash; `B_stop`: brake at t=2.8s for 4.2s (intensity 0.95)
+* **B** &mdash; `B_proceed`: set_speed at t=7s for 8s (target_speed 9.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -781,14 +781,14 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 46 m | 9 / 9 m/s | baseline |
-| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 46 m | 9 / 9 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (-283.42, 1.23), bearing 180deg, back 66 m | 9 / 9 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (-283.42, 1.23), bearing -90deg, back 80 m | 9 / 9 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_stop`: brake at t=2.4s for 4.2s (intensity 0.9)
-* **A** &mdash; `A_proceed`: set_speed at t=6.6s for 12s (target_speed 8)
-* **B** &mdash; `B_roll_through`: set_speed at t=3s for 12s (target_speed 6)
+* **A** &mdash; `A_stop`: brake at t=2.7s for 5.1s (intensity 0.9)
+* **A** &mdash; `A_proceed`: set_speed at t=7.8s for 8s (target_speed 8)
+* **B** &mdash; `B_roll_through`: set_speed at t=2s for 14s (target_speed 5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 6 m.
 
@@ -817,12 +817,12 @@ A travels in the right lane; B is alongside in the left. In the disputed variant
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+| A | `vehicle.tesla.model3` | location (-112.9, -190.1) | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | location (-87.9, -193.6) | 7 / 7 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_cut_in`: lane_shift at t=4s for 3s (lateral_offset 3.5)
+* **B** &mdash; `B_cut_in`: lane_shift at t=2.5s for 2.5s (lateral_m 3.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 5 m.
 
@@ -842,13 +842,13 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+| A | `vehicle.tesla.model3` | location (-112.9, -190.1) | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | location (-87.9, -193.6) | 7 / 7 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_accelerate`: set_speed at t=3.4s for 10s (target_speed 17.5)
-* **B** &mdash; `B_cut_in`: lane_shift at t=4.6s for 4s (lateral_offset 3.5)
+* **A** &mdash; `A_accelerate`: set_speed at t=2s for 8s (target_speed 15)
+* **B** &mdash; `B_cut_in`: lane_shift at t=2.2s for 3.8s (lateral_m 3.5)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); A-B must close to under 5 m.
 
@@ -869,14 +869,15 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265 | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265, fwd 11 m, lane -1 | 13 / 13 m/s | baseline |
+| A | `vehicle.tesla.model3` | location (-112.9, -190.1) | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | location (-87.9, -193.6) | 7 / 7 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **B** &mdash; `B_cut_in`: lane_shift at t=6s for 5s (lateral_offset 3.5)
+* **B** &mdash; `B_cut_in`: lane_shift at t=2.5s for 3.5s (lateral_m 3.5)
+* **B** &mdash; `B_keeps_pace`: set_speed at t=0s for 10s (target_speed 10)
 
-*Validation:* expected outcome **near_miss**; A-B must close to under 12 m.
+*Validation:* expected outcome **no_event**; A-B must close to under 30 m.
 
 *Counterfactual candidates:* `B_cut_in`.
 
@@ -895,7 +896,7 @@ Scripted actions (these are the intervention handles):
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s14_three_car_chain.yaml`
 
-A leads, B follows, C is last, all in one lane. A brakes. Which pair collides first, and which vehicle was merely in the way, depends on how B responds.
+A leads, B follows, C is last, all in one lane. A brakes. Which pair collides first, and which vehicle was merely in the way, depends on how B responds. A third variant, independent_impacts, was retired: it produced its second impact by having C come to a complete stop and then deliberately creep into the stationary pile seven seconds later, which is not a road situation. The distinction it was testing, that two impacts sharing a vehicle must not be chained merely for sharing it, is what S16 tests between its consequential and independent variants, and S16 does it without asking a driver to drive into a wreck.
 
 **Variant `c_pushes_b`** *(default)*
 
@@ -903,12 +904,12 @@ A leads, B follows, C is last, all in one lane. A brakes. Which pair collides fi
 |---|---|---|---|---|
 | A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
 | B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265, fwd 8 m | 13 / 13 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
 * **A** &mdash; `A_brake`: brake at t=4s for 8s (intensity 0.85)
-* **B** &mdash; `B_brake`: brake at t=4.9s for 1.6s (intensity 0.95)
+* **B** &mdash; `B_brake`: brake at t=4.9s for 2.5s (intensity 0.75)
 * **C** &mdash; `C_no_response`: set_speed at t=4s for 10s (target_speed 13)
 
 *Validation:* expected outcome **collision**; collision pairs (B-C), (A-B); in order (B-C) then (A-B); B-C must close to under 5 m.
@@ -931,7 +932,7 @@ Scripted actions (these are the intervention handles):
 |---|---|---|---|---|
 | A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
 | B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.nissan.patrol` | spawn 265, fwd 8 m | 13 / 13 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -951,34 +952,6 @@ Scripted actions (these are the intervention handles):
 > almost the same end configuration as c_pushes_b, and the opposite causal structure
 > here B does contribute to the first impact, and C to the second only
 > the two variants together test whether the method reads the order or the layout
-
-**Variant `independent_impacts`**
-
-| Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
-|---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265, fwd 30 m | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265, fwd 15 m | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
-
-Scripted actions (these are the intervention handles):
-
-* **A** &mdash; `A_brake`: brake at t=4s for 8s (intensity 0.85)
-* **B** &mdash; `B_late_brake`: brake at t=6.3s for 6s (intensity 1)
-* **C** &mdash; `C_much_later_brake`: brake at t=5s for 4s (intensity 0.7)
-* **C** &mdash; `C_creep_forward`: set_speed at t=13s for 8s (target_speed 4)
-
-*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
-
-*Counterfactual candidates:* `A_brake`, `B_late_brake`, `C_much_later_brake`.
-
-*Ground-truth causal template (oracle only):*
-
-* `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
-* `C.unsafe_entry` --CAUSES_OUTCOME--> `collision(B-C)`
-
-> two impacts several seconds apart with no causal link between them
-> tests that the method does not chain impacts merely because they share a vehicle
-> the clock alignment still works: B feels both, so the transitive route is unchanged
 
 ---
 
@@ -1082,7 +1055,7 @@ Scripted actions (these are the intervention handles):
 
 * **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
 * **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
-* **B** &mdash; `B_deflected`: lane_shift at t=7.4s for 2s (lateral_offset 3.2)
+* **B** &mdash; `B_deflected`: lane_shift at t=7.4s for 2s (lateral_m 3.2)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
 
@@ -1112,7 +1085,7 @@ Scripted actions (these are the intervention handles):
 * **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
 * **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
 * **B** &mdash; `B_resume`: set_speed at t=13s for 8s (target_speed 11)
-* **B** &mdash; `B_changes_lane`: lane_shift at t=17s for 3s (lateral_offset 3.2)
+* **B** &mdash; `B_changes_lane`: lane_shift at t=17s for 3s (lateral_m 3.2)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
 
