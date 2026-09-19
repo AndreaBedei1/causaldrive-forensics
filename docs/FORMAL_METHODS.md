@@ -1,9 +1,56 @@
 # Formal methods
 
-Metric temporal logic over a finite, partially observed trace, evaluated with
-three-valued semantics.
+## Three verdicts, not two
 
-## The formula is the thing that runs
+Every property returns one of three answers, and the third is the one that makes
+the other two mean anything.
+
+| Verdict | What it says |
+|---|---|
+| **PASS** | the obligation was met, and the evidence covers the window in which it had to be met |
+| **FAIL** | the obligation was not met, and the evidence is good enough to say so |
+| **UNKNOWN** | the recording does not settle it: the window runs past the end of the log, or across a sensor dropout, or the two vehicles involved were never placed on one clock |
+
+A fourth outcome is reported separately and is not a verdict at all. A property
+whose trigger never fired is **vacuous**: there was no obligation, so there was
+nothing to pass. Vacuous instances are excluded from the checked count, because
+folding them into PASS would make the pass rate a measure of how few obligations
+a scenario contained, and the negative controls would score best of all.
+
+**Missing evidence never becomes PASS, and never becomes FAIL.** Both would be
+assertions about time nobody watched.
+
+## What it looks like in practice
+
+Three of the eight properties, in words before symbols.
+
+**A vehicle that saw a stop sign must come to a full stop before it crosses into
+the junction.** The obligation opens when the camera reports
+`STOP_SIGN_DETECTED` and closes when the vehicle crosses the line. PASS needs a
+`FULL_STOP` inside that stretch. FAIL means the vehicle crossed without one.
+UNKNOWN means the camera or the lane sensor dropped samples across the stretch,
+so whether it stopped was not recorded.
+
+**A vehicle facing a critical time-to-collision must respond.** The obligation
+opens at `CRITICAL_TTC` and a response, braking or swerving, must follow within
+the configured window. This is the property that most often FAILs, and honestly
+so: these are crash scenarios, and a vehicle that entered a conflict without
+reacting really did fail to respond.
+
+**A vehicle that has been in a collision must come to rest afterwards.** The
+obligation opens at `COLLISION`. It is most often UNKNOWN, and that is the right
+answer: the recording usually ends before the vehicle has finished stopping, so
+the window runs off the end of the trace.
+
+What the eight properties found across the campaign, and where they disagreed
+with the privileged record, is in [RESULTS.md](RESULTS.md) §5.
+
+## How a property is written
+
+Metric temporal logic over a finite, partially observed trace, evaluated with
+three-valued semantics. The rest of this page is the detail.
+
+### The formula is the thing that runs
 
 The previous layer carried a `formal` field beside each property: an MTL-looking
 string, written by hand, sitting next to separate Python that computed the
@@ -15,7 +62,7 @@ rendering in a report and the object that produced the verdict are the same
 thing, so they cannot drift apart. A test asserts that every property's published
 formula is `render(prop.formula)`.
 
-## The fragment
+### The fragment
 
 Occurrence atoms, the Boolean connectives, and five metric operators:
 
@@ -33,7 +80,7 @@ Atoms bind to participants through three placeholders. A property fires at a
 trigger event, and that event supplies `SELF` — the vehicle the obligation falls
 on — and `SUBJECT`, the vehicle it is about. `ANY` matches whatever is there.
 
-### Why `Since` had to exist
+#### Why `Since` had to exist
 
 "A full stop between seeing the sign and crossing the line" is not expressible
 with `Once`. `O[0,12] FULL_STOP` asks whether a stop happened in the last twelve
@@ -46,7 +93,7 @@ sign and now, and that stretch has a length the formula cannot know in advance.
 to be. It is the only operator whose window is set by an event rather than by a
 constant, and both the stop and yield properties need it.
 
-## Three-valued, and why
+### Three-valued, and why
 
 **Missing evidence never becomes PASS, and never becomes FAIL either.** Both
 would be assertions about time nobody watched.
@@ -69,7 +116,7 @@ Connectives are Kleene's: `FAIL & UNKNOWN` is `FAIL`, because one false conjunct
 is enough whatever the other turns out to be, and symmetrically `PASS | UNKNOWN`
 is `PASS`.
 
-## Aggregating over instances
+### Aggregating over instances
 
 A property fires once per trigger, and the rule for combining is asymmetric on
 purpose. One instance failing means the property failed however many others
@@ -84,7 +131,7 @@ negative-control runs — where almost nothing triggers — would score best of 
 `n_vacuous` is excluded from `n_checked`, and the unknown rate is over checked
 properties only.
 
-## Two vehicles need one clock
+### Two vehicles need one clock
 
 A property relating one vehicle's braking to another's conflict entry is
 meaningless unless the two recorders share an axis. The trace carries which clock
@@ -93,7 +140,7 @@ it is on and which participants are aligned, and a property declared
 stated reason — rather than quietly comparing timestamps from two different
 clocks.
 
-## The properties
+### The properties
 
 | | Title | Trigger | Notes |
 |---|---|---|---|
@@ -106,12 +153,12 @@ clocks.
 | P7 | one impact per pair on the merged timeline | `COLLISION` | two vehicles |
 | P8 | a claimed missing braking response really had none | `NO_BRAKING_RESPONSE` | anchors at `t_start` |
 
-### Why P1 has two triggers
+#### Why P1 has two triggers
 
 The stop obligation's natural boundary is the painted stop line, and Town05
 paints no stop bar at any junction where it renders a stop sign
 (`docs/LIMITATIONS.md` §24). `STOP_LINE_CROSSED` therefore never fires on a real
-run, and the property was permanently vacuous -- not passing, not failing, simply
+run, and the property was permanently vacuous: not passing, not failing, simply
 never asked. The stop-line detector was behaving correctly throughout: it tracked
 a bright band, saw it leave the frame upward rather than pass beneath the
 vehicle, and refused to claim a crossing. Missing a crossing costs recall;
@@ -122,8 +169,8 @@ vehicle's own lane sensor records it. So P1 accepts either.
 
 This does not weaken the property. Its formula is an implication whose antecedent
 is *a stop sign was seen in the last twelve seconds*, so a trigger firing where
-no sign was seen -- an ordinary lane change -- is vacuously satisfied rather than
-violated. The checker also deduplicates triggers landing on the same instant for
+no sign was seen, an ordinary lane change for instance, is vacuously satisfied
+rather than violated. The checker also deduplicates triggers landing on the same instant for
 the same vehicle, because a lane sensor reports the marking and the solid line
 together and one violation must not be counted twice.
 

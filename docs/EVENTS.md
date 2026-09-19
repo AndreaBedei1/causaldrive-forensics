@@ -30,35 +30,46 @@ simulator trace and an onboard reconstruction may assert them; they reach them b
 different routes, which is what makes the comparison a measurement rather than a
 tautology.
 
-### Own motion — 11 types
+### Own vehicle — 11 types
 
 `VEHICLE_STARTED` `ACCELERATION` `DECELERATION` `HARD_DECELERATION`
 `BRAKE_ONSET` `HARD_BRAKE` `THROTTLE_ONSET` `STEER_ONSET`
 `SIGNIFICANT_HEADING_CHANGE` `LANE_CHANGE_LIKE_MANEUVER` `FULL_STOP`
 
-One vehicle, no subject. The reference reads them from exact controls and exact
-velocity; a vehicle reads them from its own controls and its own accelerometer.
-Same fact, different instrument.
+**Produced by** a vehicle's own controls and its own accelerometer, needing
+nothing outside itself. **Why it matters:** these are what a vehicle did, and
+every causal chain in the project has one of them somewhere near its root. One
+vehicle, no subject. The reference reads the same facts from exact controls and
+exact velocity, so the comparison is between two instruments, not two
+vocabularies.
 
-### Pairwise — 8 types
+### Interaction — 8 types
 
 `RANGE_DECREASING` `RAPID_CLOSING` `LOW_TTC` `CRITICAL_TTC` `LATERAL_CROSSING`
 `CUT_IN_LIKE_MOTION` `PREDICTED_PATH_CONFLICT` `CONFLICT_REGION_ENTRY`
 
-`participant_id` observes, `subject` is observed. The reference computes these
-from exact relative geometry; a vehicle computes them from radar returns it has
-resolved into a track.
+**Produced by** radar returns a vehicle has resolved into a track, and the
+geometry it computes from them. **Why it matters:** this is where one vehicle's
+account first mentions another, and it is what turns a set of separate logs into
+an encounter. `participant_id` observes, `subject` is observed. The reference
+computes the same relations from exact relative geometry.
 
-### Road and traffic control — 7 types
+### Road and camera — 7 types
 
 `STOP_SIGN_DETECTED` `YIELD_SIGN_DETECTED` `STOP_LINE_DETECTED`
 `STOP_LINE_CROSSED` `LANE_MARKING_CROSSED` `SOLID_LINE_CROSSED`
 `ROAD_BOUNDARY_CROSSED`
 
-The other party is the road, so there is no subject. The routes differ most
-sharply here: a vehicle reads a sign off its camera and a marking crossing off
-its lane sensor, while the reference reads both off the exact map. That gap *is*
-the perception measurement — see `docs/DATA_BOUNDARY.md`.
+**Produced by** the forward camera, for the signs and the stop line, and by the
+onboard lane sensor, for the crossings. **Why it matters:** an obligation has to
+come from somewhere, and this is the only family that supplies one. No sign, no
+stop rule to violate. The other party is the road, so there is no subject.
+
+The routes differ most sharply here: a vehicle reads a sign off its own frames
+while the reference reads it off the exact map, and that gap **is** the
+perception measurement. See [DATA_BOUNDARY.md](DATA_BOUNDARY.md) for what the
+vehicle may not consult, and [RESULTS.md](RESULTS.md) §4 for what the detector
+was worth.
 
 ### Non-actions — 6 types
 
@@ -66,15 +77,21 @@ the perception measurement — see `docs/DATA_BOUNDARY.md`.
 `NO_EVASIVE_RESPONSE` `CONFLICT_ENTRY_WITHOUT_DECELERATION`
 `CONTINUED_ACCELERATION_DURING_CONFLICT`
 
-The only types whose claim is the *absence* of a signal, which makes them the
-only ones that can be asserted without evidence. They are covered in their own
-section below.
+**Produced by** a rule that watches an interval opened by an observed obligation
+and finds no qualifying response in it. **Why it matters:** most of what a
+responsibility analysis wants to say is about something that did not happen, and
+without these there is no node for a causal chain to start at. They are also the
+only types whose claim is the *absence* of a signal, which makes them the only
+ones assertable without evidence, so they need four conditions rather than one.
+Their own section is below.
 
-### Outcome — 3 types
+### Outcomes — 3 types
 
 `NEAR_MISS` `COLLISION` `POST_IMPACT_STOP`
 
-What the encounter came to. A collision and a near miss are facts about a *pair*,
+**Produced by** the onboard contact trigger, for a collision, and by the
+closest-approach geometry for a near miss. **Why it matters:** this is the thing
+to be explained, and every causal chain terminates in one. A collision and a near miss are facts about a *pair*,
 and which vehicle a graph files the event under is an artifact of who recorded it
 first — so the matcher normalises the pair and treats `COLLISION(A,B)` and
 `COLLISION(B,A)` as the same event. `POST_IMPACT_STOP` is deliberately left
@@ -140,6 +157,39 @@ junction without having slowed is a claim about the approach.
 The privileged reference runs these same rules over its own events. If it used a
 laxer definition the comparison would stop measuring whether the vehicle noticed
 and start measuring whose rule was looser.
+
+## Two graphs, two vocabularies of relation
+
+The project builds two graphs per vehicle and keeps their edge types strictly
+apart, because they make different kinds of claim.
+
+**Event-graph relations** are structural and assert nothing causal:
+
+| Relation | What it says |
+|---|---|
+| `PRECEDES` | this event happened before that one |
+| `OBSERVED_FROM` | this event was derived from that observation |
+| `SAME_TRACK` | these observations are of one radar track |
+| `INTERACTS_WITH` | these two events involve the same pair of vehicles |
+| `ALIGNS_WITH` | these two events, from different recorders, are the same event |
+| `ASSOCIATED_WITH` | this track was resolved to that participant |
+
+**Causal-DAG relations** are hypotheses, and every instance carries evidence and
+a confidence:
+
+| Relation | What it says |
+|---|---|
+| `CONTRIBUTES_TO` | this made that more likely or more severe |
+| `TRIGGERS` | this is what set that off |
+| `INCREASES_RISK_OF` | this raised the risk of that without determining it |
+| `PREVENTS` | this acted against that outcome |
+| `CAUSES_OUTCOME` | this reaches the outcome being explained |
+
+The separation is the point. `PRECEDES` is cheap and nearly always true;
+`CONTRIBUTES_TO` has to be argued for. Collapsing the two would let temporal
+order masquerade as causation, which is the specific mistake this project exists
+to avoid. The two graphs are written to separate artifacts, scored separately,
+and a relation from one is never read as a relation from the other.
 
 ## Matching
 

@@ -1,10 +1,64 @@
 # Responsibility
 
-Nothing in this layer is a finding of legal fault. What it produces is a
-normative violation against a stated benchmark rule, plus evidence of causal
-relevance, reported as **supported**, **partial** or **insufficient**. What a
-court would make of any of it is a question this project cannot answer and does
-not.
+## Four questions, kept apart
+
+The project answers four different questions about a collision, in order, and
+never merges them.
+
+| | Question |
+|---|---|
+| **Physical causality** | What physically contributed to the collision? |
+| **Normative** | What obligation was violated? |
+| **Responsibility evidence** | Does a normative violation lie on a physical causal path? |
+| **Counterfactual** | Would changing the relevant action or non-action have prevented the outcome? |
+
+Each can be answered without the others, and each can come out differently. A
+vehicle that brakes lawfully and is rear-ended answers yes to the first and no to
+the second. A vehicle that ran a stop sign a hundred metres from an unrelated
+collision answers yes to the second and no to the first. Only when the first two
+meet does the third have anything to report, and the fourth is a separate test
+that a replay has to earn.
+
+**This is not legal liability.** What the layer produces is a normative violation
+against a stated benchmark rule, plus evidence of causal relevance, reported as
+**supported**, **partial** or **insufficient**. The vocabulary is causal
+initiator, causal contributor, shared causal contribution, causal chain and
+insufficient evidence. No number here is a share of fault, and what a court would
+make of any of it is a question this project cannot answer and does not.
+
+## One example, end to end
+
+`S10/rolls_through`, seed 0. A approaches a junction with a STOP sign on its
+approach, does not stop, and collides with B. What the run's own
+`responsibility_report.json` records:
+
+**Physical causality.** A's physical path to the impact is three nodes long:
+A's heading change, B's predicted path conflict, then the collision. A is
+recorded `physical_causal_contributor: yes`. B is recorded `no`: B braked, and
+nothing B did reaches the impact as a cause of it. That chain is physical only.
+It says what led to what and nothing about rules.
+
+**Normative.** The sign A's own camera read creates the obligation, and property
+P1, *a stop sign seen means a full stop before the line*, fails for A at 5.235 s
+with one failing instance. Its benchmark rule is quoted in the artifact beside
+the verdict. P6, *a solid line is not crossed*, fails at the same instant. B has
+no property failure: B saw no sign and broke nothing.
+
+**Responsibility evidence.** A's violation and A's physical path meet, so A is
+reported **supported**. B is reported **insufficient**, which is the right
+verdict rather than an absence of one: B was in the collision and there is
+nothing to hold against B.
+
+**Counterfactual.** A's but-for verdict comes back **yes**. B's comes back
+**not tested**, with the reason stated in the artifact: no intervention in the
+replay set targeted that vehicle. Not tested is not the same as no, and the
+report never lets one be read as the other.
+
+One thing worth noticing: the attribution table scored against the scenario
+design template reads *incorrect* on this same run, because that template
+declares no action-caused contributor for S10 and so anything named scores zero.
+Two references, two answers, and the one with something to say here is this one.
+See [RESULTS.md](RESULTS.md) §6.
 
 ## Why it is a separate graph
 
