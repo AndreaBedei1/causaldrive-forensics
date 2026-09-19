@@ -278,6 +278,8 @@ class ScriptedController:
         steer_rate_limit: float = 0.14,
         post_impact_stop: bool = True,
         post_impact_mode: str = "",
+        post_impact_lateral_m: float = 0.0,
+        post_impact_deflect_s: float = 1.5,
     ) -> None:
         self.participant_id = participant_id
         self.route = route
@@ -298,11 +300,27 @@ class ScriptedController:
         #:            the speed controller sees it below target and *accelerates*
         #:            into the car in front, so a pushed vehicle looks as though
         #:            it drove into the collision under its own power.
+        #: ``deflect`` coast, and at the same time be carried off line by
+        #:            ``post_impact_lateral_m`` over ``post_impact_deflect_s``.
+        #:            This is a scenario-generation response to contact, not a
+        #:            timed manoeuvre: it has no schedule of its own and cannot
+        #:            begin until this vehicle has actually been hit, so a run
+        #:            in which the first collision does not happen produces no
+        #:            deflection and no second collision either.
+        #:
+        #:            It exists because CARLA will not reliably carry a struck
+        #:            car sideways. Whether the struck vehicle is displaced or
+        #:            simply stops depends on which of the two reached the
+        #:            crossing first, to within a fifth of a second, and a
+        #:            scenario whose story turns on that is not an experiment.
         #: ``drive``  keep following the route, which ``post_impact_stop: false``
         #:            used to mean on its own.
         self.post_impact_mode = str(
             post_impact_mode or ("stop" if post_impact_stop else "drive")
         ).lower()
+        self.post_impact_lateral_m = float(post_impact_lateral_m)
+        self.post_impact_deflect_s = max(1e-3, float(post_impact_deflect_s))
+        self._impact_t: Optional[float] = None
 
         self._pid = PIDLongitudinal()
         self._route_hint = 0
@@ -330,6 +348,11 @@ class ScriptedController:
         """
         self._impacted = True
 
+    def note_impact_time(self, t: float) -> None:
+        """Record when contact happened, for a deflection that follows from it."""
+        if self._impact_t is None:
+            self._impact_t = float(t)
+
     def action(self, action_id: str) -> Optional[ScriptedAction]:
         for a in self.actions:
             if a.action_id == action_id:
@@ -353,10 +376,25 @@ class ScriptedController:
     def step(self, state: VehicleState, dt: float) -> ControlCommand:
         """Compute the actuation command for this tick."""
         if self._impacted:
+            if self._impact_t is None:
+                self._impact_t = float(state.t)
             if self.post_impact_mode == "stop":
                 return ControlCommand(throttle=0.0, brake=1.0, steer=0.0).clamped()
             if self.post_impact_mode == "coast":
                 return ControlCommand(throttle=0.0, brake=0.0, steer=0.0).clamped()
+            if self.post_impact_mode == "deflect":
+                # Coasting, and steered off line by however far the scenario
+                # says the impact carried it. The offset ramps in with the same
+                # raised cosine a lane shift uses, so the path is a push rather
+                # than a swerve.
+                frac = min(1.0, (float(state.t) - self._impact_t)
+                           / self.post_impact_deflect_s)
+                smooth = 0.5 * (1.0 - math.cos(math.pi * frac))
+                offset = self.post_impact_lateral_m * smooth
+                self._lateral_offset = offset
+                return ControlCommand(
+                    throttle=0.0, brake=0.0, steer=self._steer(state, offset)
+                ).clamped()
 
         target_speed = self._resolve_target_speed(state.t)
         lateral = self._resolve_lateral_offset(state.t)

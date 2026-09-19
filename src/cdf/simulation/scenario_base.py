@@ -143,8 +143,13 @@ class ParticipantSpec:
     actions: List[ScriptedAction] = field(default_factory=list)
     post_impact_stop: bool = True
     post_impact_mode: str = ""
-    """``stop``, ``coast`` or ``drive``. Empty keeps whatever
+    """``stop``, ``coast``, ``deflect`` or ``drive``. Empty keeps whatever
     ``post_impact_stop`` says, so no existing scenario changes behaviour."""
+    post_impact_lateral_m: float = 0.0
+    """How far ``deflect`` carries this vehicle off its line, signed, positive
+    to the right of travel. Ignored in every other mode."""
+    post_impact_deflect_s: float = 1.5
+    """How long that displacement takes to come in."""
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ParticipantSpec":
@@ -171,6 +176,8 @@ class ParticipantSpec:
             actions=actions,
             post_impact_stop=bool(d.get("post_impact_stop", True)),
             post_impact_mode=str(d.get("post_impact_mode", "") or ""),
+            post_impact_lateral_m=float(d.get("post_impact_lateral_m", 0.0)),
+            post_impact_deflect_s=float(d.get("post_impact_deflect_s", 1.5)),
         )
 
 
@@ -605,4 +612,6 @@ def make_controller(spec: ParticipantSpec, route: RoutePlan) -> ScriptedControll
         actions=list(spec.actions),
         post_impact_stop=spec.post_impact_stop,
         post_impact_mode=spec.post_impact_mode,
+        post_impact_lateral_m=spec.post_impact_lateral_m,
+        post_impact_deflect_s=spec.post_impact_deflect_s,
     )

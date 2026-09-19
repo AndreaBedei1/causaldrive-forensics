@@ -29,7 +29,9 @@ scenario:
     which is approaching the same junction from a third direction.
   map: "Town05"
   default_variant: "deflected_into_c"
-  max_duration_s: 32.0
+  # The pile-up is over inside nine seconds. Left running, C reached the end of
+  # its route and circled through 335 degrees.
+  max_duration_s: 14.0
 
   participants:
     - id: "A"
@@ -38,22 +40,65 @@ scenario:
         anchor: "junction_approach"
         junction_x: 152.54
         junction_y: -0.23
-        bearing_deg: -90.0
-        back_m: 44.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        bearing_deg: 90.0
+        # 52, not 55. At 55 A arrived a quarter of a second late and drove into
+        # B's flank instead, which stops A dead rather than carrying it: a car
+        # that T-bones a heavier one loses its own speed and goes nowhere. Three
+        # metres closer and it is A's flank that B strikes, which is the impact
+        # this scenario is about.
+        back_m: 48.0
+      route:
+        length_m: 240.0
+        step_m: 2.0
+        turns: ["straight"]
+        turn_lookahead: true
       initial_speed: 11.0
       target_speed: 11.0
+      # A is struck and then carried. Braking itself to a stop the moment it is
+      # hit is what stopped the deflection this scenario is named for from
+      # happening at all: A came to rest inside the junction and C drove past
+      # it.
+      #
+      # Coasting alone was not enough either. Whether CARLA carries a struck car
+      # sideways or simply stops it turns on which vehicle reached the crossing
+      # first, to within about a fifth of a second: shifting A three metres was
+      # the difference between B striking A's flank and A driving into B's nose
+      # and stopping dead. A scenario whose story depends on that is not
+      # reproducible.
+      #
+      # So the displacement is declared. deflect coasts and is carried 3.6 m to
+      # the right over 1.4 s, which is the width of one lane, and it begins at
+      # the moment of contact and only then. It has no schedule: remove the
+      # first collision and there is no deflection and no second collision, which
+      # is the dependency the variant exists to demonstrate.
+      post_impact_mode: "deflect"
+      # Negative is to the left of travel, which for a vehicle heading north up
+      # the near lane is east, which is where the far lane and C are. Positive
+      # carried A the other way, into the kerb it had just left.
+      post_impact_lateral_m: -5.2
+      post_impact_deflect_s: 0.7
       actions: []
 
     - id: "B"
-      blueprint: "vehicle.nissan.patrol"
+      # Not the Nissan Patrol it used to be. A 2.7 t SUV struck broadside by a
+      # 1.8 t saloon stops the saloon dead: A ended the run at rest 45 m from
+      # its spawn with 0.59 m of lateral displacement, which is no deflection at
+      # all. Against a light car A keeps enough of its speed to be carried.
+      blueprint: "vehicle.audi.tt"
       spawn:
         anchor: "junction_approach"
         junction_x: 152.54
         junction_y: -0.23
         bearing_deg: 0.0
-        back_m: 30.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
+        back_m: 45.0
+      # Left across the through road. Junction 359 is a T and its eastbound arm
+      # has no way straight on, so "straight" silently became a turn; the
+      # lookahead is what makes the declared turn the one that happens.
+      route:
+        length_m: 110.0
+        step_m: 2.0
+        turns: ["left"]
+        turn_lookahead: true
       initial_speed: 10.0
       target_speed: 10.0
       actions: []
@@ -68,9 +113,13 @@ scenario:
         anchor: "junction_approach"
         junction_x: 152.54
         junction_y: -0.23
-        bearing_deg: 90.0
-        back_m: 48.0
-      route: { length_m: 80.0, step_m: 2.0, turns: ["straight"] }
+        bearing_deg: -90.0
+        back_m: 30.0
+      route:
+        length_m: 160.0
+        step_m: 2.0
+        turns: ["straight"]
+        turn_lookahead: true
       initial_speed: 6.0
       target_speed: 6.0
       actions: []
@@ -100,6 +149,16 @@ scenario:
 
   validation:
     encounter_pair: ["A", "B"]
+    # Both impacts inside the junction, and the second close behind the first:
+    # a second collision a long way after the first is not a consequence of it.
+    collision_near:
+      x: 152.54
+      y: -0.23
+      max_distance_m: 12.0
+      require_in_junction: true
+    max_accumulated_turn_deg: 140.0
+    min_straightness: 0.60
+    no_scenery_collision: true
     min_separation_below_m: 6.0
 
   intervention_candidates:
@@ -156,12 +215,25 @@ scenario:
           # C is far enough back that the deflection misses it. Everything else
           # is identical, so the difference in the account is attributable to
           # the second impact alone.
+          #
+          # C sits out of the deflection path here, which is the whole
+          # difference from deflected_into_c. On bearing 90 it shared the
+          # lane A now uses and drove into the stationary wreck 5.65 s
+          # after the first impact: a second collision, and one with
+          # nothing to do with any deflection.
           spawn:
             anchor: "junction_approach"
             junction_x: 152.54
             junction_y: -0.23
-            bearing_deg: 90.0
-            back_m: 70.0
+            bearing_deg: -90.0
+            back_m: 95.0
+          # A is deflected in this variant too, because the deflection follows
+          # from the impact and the impact is the same one. What differs is
+          # that there is nothing where A is carried to: at 6 m/s C was still
+          # on the far lane and A was pushed into it. At 2 m/s C is 30 m short
+          # of the junction when the recording ends.
+          initial_speed: 2.0
+          target_speed: 2.0
       causal_template:
         - cause: { kind: "state", participant: "B", name: "no_stop" }
           effect: { kind: "state", participant: "B", name: "conflict_entry" }
