@@ -13,4 +13,4 @@ python -c "import sys; sys.path.insert(0,'src'); \
            write_final_results('artifacts_v2')"
 ```
 
-Campaign: `?`, clock protocol `?`, 105 runs over 35 scenario/variant combinations.
+Campaign: `artifacts_v2`, clock protocol `independent_local_clocks`, 105 runs over 35 scenario/variant combinations.

@@ -525,8 +525,37 @@ def _consensus_scalar(values: Sequence[Optional[str]]) -> Optional[str]:
 
 
 def _campaign_identity(root: Path) -> Dict[str, Any]:
+    """What campaign these artifacts are, and under which clock protocol.
+
+    ``campaign.json`` is written by the V1 driver. A V2 root may not have one,
+    and the identity is then read from the runs themselves -- which is the more
+    reliable source anyway, since it is what each recording actually stamped.
+    A root holding more than one protocol reports them all rather than picking
+    one, because that is a root whose averages mean nothing.
+    """
     path = root / "campaign.json"
-    return read_json(path) if path.exists() else {}
+    if path.exists():
+        return read_json(path)
+    protocols, ids = set(), set()
+    for manifest in sorted(root.glob("*/*/manifest.json")):
+        try:
+            record = read_json(manifest)
+        except Exception:  # pragma: no cover - a corrupt manifest is not identity
+            continue
+        protocols.add(str(record.get("clock_protocol") or "unrecorded"))
+        if record.get("config_hash"):
+            ids.add(str(record["config_hash"]))
+    if not protocols:
+        return {}
+    return {
+        "campaign": root.name,
+        "clock_protocol": (
+            sorted(protocols)[0] if len(protocols) == 1
+            else "MIXED: " + ", ".join(sorted(protocols))
+        ),
+        "n_distinct_config_hashes": len(ids),
+        "source": "read from the runs; this root carries no campaign.json",
+    }
 
 
 def _ablation_summary(runs: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
@@ -885,7 +914,10 @@ def write_final_results(
             "Campaign: `{1}`, clock protocol `{2}`, {3} runs over {4} "
             "scenario/variant combinations.\n".format(
                 results["artifacts_root"],
-                (results.get("campaign") or {}).get("campaign_id", "?"),
+                (results.get("campaign") or {}).get(
+                    "campaign_id",
+                    (results.get("campaign") or {}).get("campaign", "?"),
+                ),
                 (results.get("campaign") or {}).get("clock_protocol", "?"),
                 results["headline"]["n_runs"],
                 results["headline"]["n_scenario_variants"],

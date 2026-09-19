@@ -1,6 +1,11 @@
 {
   "artifacts_root": "artifacts_v2",
-  "campaign": {},
+  "campaign": {
+    "campaign": "artifacts_v2",
+    "clock_protocol": "independent_local_clocks",
+    "n_distinct_config_hashes": 16,
+    "source": "read from the runs; this root carries no campaign.json"
+  },
   "clock_ablation": {
     "A_synchronized": {
       "association_f1": 0.8425,
