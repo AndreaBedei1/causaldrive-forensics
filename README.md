@@ -1,188 +1,148 @@
 # CausalDrive Forensics
 
-Reconstructing a road incident from what the vehicles involved recorded, and
-nothing else.
+Distributed reconstruction and causal analysis of road incidents from
+independent vehicle logs in CARLA.
 
-## 1. The problem
+![Three vehicles record the same chain collision on three unsynchronised clocks, shown at one instant on the estimated common timeline](docs/assets/causaldrive_hero.png)
+
+## What is it?
 
 After a collision there is no single record of what happened. There are several
-vehicles, each with a short buffer of its own sensor data, each on its own clock,
-none of which observed the others directly. The question is how much of the
-incident can be recovered from those separate accounts — and, just as importantly,
-what cannot be.
+vehicles, each holding a short buffer of its own sensor data: telemetry,
+controls, radar returns to anonymous tracks, a front camera, a lane sensor and a
+contact trigger. No vehicle sees another vehicle's data, and each runs on its own
+clock, offset from the others by a fraction of a second it does not know.
 
-This is a simulation study. CARLA provides the incidents and the exact state that
-grades the answers; the exact state is never available to the reconstruction.
+Afterwards those logs are brought together. The system estimates the offsets
+between the clocks from evidence the vehicles themselves recorded, matches each
+anonymous radar track to the participant it really was, and merges everything
+into one timeline. From that timeline it reconstructs the incident, builds a
+physical causal graph of what led to what, checks temporal properties over the
+trace, and runs a separate responsibility layer that asks which obligations were
+violated and whether a violation lies on a physical causal path. Counterfactual
+replays then test whether changing an action would have prevented the outcome.
 
-## 2. Inputs
+CARLA's privileged state, the true positions, the true clocks, the map and the
+actor identities, is used only afterwards, to grade the answers. It is never
+available to the reconstruction. The output is a causal account, not a finding of
+legal fault, and no number here is a share of one.
 
-Each vehicle keeps, for a short rolling window:
+## How it works
+
+```
+Vehicle A log ─┐
+Vehicle B log ─┼→  time alignment  →  identity association  →  global log
+Vehicle C log ─┘                                                    │
+                                                                    ▼
+                                                       physical causal DAG
+                                                                    │
+                                                                    ▼
+                                                     temporal properties
+                                                                    │
+                                                                    ▼
+                                                         responsibility
+                                                                    │
+                                                                    ▼
+                                                   counterfactual replay
+```
+
+Details in [Architecture](docs/ARCHITECTURE.md).
+
+## What each vehicle records
 
 | Input | What it gives |
 |---|---|
 | telemetry | its own position, velocity, acceleration, yaw and yaw rate |
 | controls | its own throttle, brake, steer, handbrake, gear |
 | radar | range, bearing and range rate to anonymous local tracks |
-| front camera | 20 s before the event and 5 s after, for signs and road markings |
+| RGB camera | video around the event, for signs and road markings |
 | lane sensor | that a road marking was crossed, and what sort |
-| contact trigger | that an impact happened, when, and how hard — never who with |
-| its own clock | offset and jitter of its own, shared with nobody |
+| contact trigger | that an impact happened, when, and how hard, never who with |
+| local clock | its own offset and jitter, shared with nobody |
 
-What a vehicle may **not** see: any other vehicle's telemetry, the map, lane or
-road ids, waypoints, traffic-light state, CARLA actor identities, the scenario
-definition, or the simulator clock. `docs/DATA_BOUNDARY.md` states the boundary
-and the tests that enforce it.
+What a vehicle may not see is stated and enforced in
+[Data boundary](docs/DATA_BOUNDARY.md).
 
-## 3. Pipeline
+## Benchmark
 
-```
-each vehicle          local events  →  local_log.json  →  physical graph
-                                            ↓
-fusion                hybrid clock alignment: contact, then radar
-                      anonymous track → participant identity
-                                            ↓
-                                      global_log.json
-                                            ↓
-                                physical causal DAG
-                                            ↓
-formal methods        temporal properties: PASS / FAIL / UNKNOWN
-                                            ↓
-responsibility        obligations, violations, contribution
-                                            ↓
-counterfactual        replay, to test but-for causation
-                                            ↓
-evaluation            against privileged ground truth
-```
+**16 scenarios, 35 variants, 105 final CARLA runs, 3 seeds.**
 
-Five things about this are deliberate and are what the design turns on:
+| Scenarios | What they cover |
+|---|---|
+| S01 to S09 | the original reconstruction benchmark: rear-end, cut-in, crossing, chain collision, partial view, roundabout. Hash-frozen, so a better metric must come from the method |
+| S10 to S12 | STOP signs and priority: one approach controlled, the mirror case, and an all-way stop |
+| S13 | disputed lane change, where the deciding evidence is split across two vehicles |
+| S14 to S16 | multi-impact and secondary collisions: the pushed vehicle, the pile-up with a bystander, and the second impact that may be a consequence or its own doing |
 
-- **the log comes before the graph.** A DAG is what the project is for; a table of
-  timestamped facts is what a reader can check;
-- **clocks are anchored on shared contact first**, and on an offset-only radar
-  fit only where contact cannot reach. One impact fixes
-  one offset and says nothing about drift (`docs/CLOCKS.md`);
-- **the physical graph and the responsibility graph are separate**, so the physics
-  can be accepted and the norm disputed (`docs/RESPONSIBILITY.md`);
-- **properties are three-valued.** Time nobody watched is UNKNOWN, never PASS
-  (`docs/FORMAL_METHODS.md`);
-- **the ground truth speaks the reconstruction's vocabulary**, or the comparison
-  measures the vocabulary gap instead of the method (`docs/EVENTS.md`).
+Full descriptions in [Scenarios](docs/SCENARIOS.md).
 
-## 4. Scenarios
+## Main results
 
-Sixteen scenarios, 35 variants. S01–S09 are the original set and are hash-frozen:
-improving a metric must be a change to the method, never to the scenario.
-S10–S16 are new, and each isolates something the earlier nine could not
-(`docs/SCENARIOS.md`).
+All figures are from the final V2 campaign and are regenerated from the
+artifacts, never transcribed by hand.
+
+| Result | Measured | Read it with |
+|---|---|---|
+| Campaign completed | 105 of 105 runs recorded and evaluated, 0 exceptions | scenario validation passed on 83 of 105; the 22 failures are all in the new S10 to S16 set and are listed, not hidden |
+| Collision pairs | recall 0.994 | 42 spurious collisions across the campaign, so precision is the weak side |
+| Collision timing | 0.0043 s mean error, 0.0211 m mean location error | on the estimated common clock, not on simulator time |
+| Clock offset | 0.0037 s mean absolute error over 238 scored recorders | worst single recorder 0.2497 s; 14 of 252 stayed unresolved and are reported as such |
+| Radar fallback, S07 | all 6 runs aligned; the vehicle that never collides is placed by radar to 0.0021 s mean, 0.0032 s worst | contact is used first; radar only reaches vehicles contact cannot |
+| STOP sign detection | recall 90.2 percent | precision 55.4 percent, so the detector reports more signs than are there |
+| Multi-impact ordering | 13 of 14 multi-impact runs ordered correctly | the one failure is S06 seed 2, reported individually |
+| Responsibility | physical contributor F1 0.657 | normative contributor F1 0.487, recall 0.396: naming who violated an obligation is much harder than naming who was involved |
+
+Drift is deliberately not estimated; scale is fixed to 1. There is no verified
+stop-line ground truth in Town05, so stop-line detections are reported and not
+scored.
+
+Full tables, case studies and negative results in [Results](docs/RESULTS.md).
+
+## Explore
 
 | | |
 |---|---|
-| S01–S09 | rear-end, cut-in, crossing, chain collision, partial view, roundabout |
-| S10, S11 | single stop sign, with either approach controlled — mirrors of each other |
-| S12 | all-way stop, including an arrival too close to call |
-| S13 | disputed lane change, where the deciding evidence is split across vehicles |
-| S14 | three-car rear-end chain, with the pushed vehicle |
-| S15 | intersection pile-up, with a bystander that acts in no variant |
-| S16 | secondary collision: initiating versus consequential |
+| [Architecture](docs/ARCHITECTURE.md) | how the pieces fit together |
+| [Events](docs/EVENTS.md) | the event vocabulary, and what may be compared |
+| [Time synchronization](docs/CLOCKS.md) | contact first, radar second, unresolved last |
+| [Scenarios](docs/SCENARIOS.md) | what each scenario is for |
+| [Formal methods](docs/FORMAL_METHODS.md) | temporal properties, and why UNKNOWN is a verdict |
+| [Responsibility](docs/RESPONSIBILITY.md) | obligations, violations, contribution |
+| [Counterfactuals](docs/COUNTERFACTUALS.md) | replay, but-for causation, prevention |
+| [Results](docs/RESULTS.md) | the final V2 campaign in full |
+| [Limitations](docs/LIMITATIONS.md) | what this does not establish |
+| [Viewer](docs/VIEWER.md) | the four sections: reconstruction, graph, responsibility, video |
+| [Reproducibility](docs/REPRODUCIBILITY.md) | running it again and getting the same answer |
+| [Data boundary](docs/DATA_BOUNDARY.md) | what inference may not see, and how that is enforced |
 
-## 5. Run one scenario
+Earlier V1 material is kept under [`legacy/`](legacy/README.md). V1 and V2
+recordings are never mixed: V2 changed the sensors and the timing semantics, so a
+figure averaged over both would describe neither.
 
-CARLA must already be running. Start it yourself — the campaign does not launch
-it:
+## Quick start
 
-```bash
-python scripts/run_scenario.py --scenario S10 --variant rolls_through --seed 0 --artifacts artifacts_v2
-```
-
-That records the run and then analyses, fuses, checks and builds the viewer
-bundle. To redo any of those stages later without a simulator:
-
-```bash
-python scripts/reprocess_runs.py --artifacts artifacts_v2 --scenarios S10 --refactor
-```
-
-A three-car scenario is the same command with a different id:
-
-```bash
-python scripts/run_scenario.py --scenario S14 --variant c_pushes_b --seed 0 --artifacts artifacts_v2
-```
-
-Before the first run, check that the simulator is reachable and the versions
-match:
+Start CARLA yourself. The project connects to a running simulator and does not
+launch one:
 
 ```bash
 python -m cdf.cli env
 ```
 
-The full campaign — every scenario, every variant, every seed, one fresh
-simulator process per run:
+Run one scenario end to end, recording and then analysing it:
 
 ```bash
-python scripts/run_campaign.py --artifacts artifacts_v2 --seeds 0 1 2 --attempts 3
+python scripts/run_scenario.py --scenario S10 --variant rolls_through --seed 0 --artifacts artifacts_v2
 ```
 
-## 6. Open the viewer
+Open the viewer on that run:
 
 ```bash
 python scripts/serve_viewer.py --run artifacts_v2/S10_single_stop_a/seed_000_rolls_through
 ```
 
-Four sections — Reconstruction, Graph, Responsibility, Video — and nothing else.
-Each renders what the artifacts say; where something is absent it says so rather
-than showing an empty panel (`docs/VIEWER.md`).
-
-## 7. Results
-
-Committed under `results/`, regenerated from artifacts. Nothing there is
-hand-transcribed.
-
-V1 and V2 recordings are never mixed: V2 changed the sensors and the timing
-semantics, so a figure averaged over both would describe neither. The campaign
-refuses an artifacts root holding runs of both generations.
-
-## 8. Limitations
-
-The ones that most constrain how the results should be read
-(`docs/LIMITATIONS.md` has the rest):
-
-- **a vehicle that neither collides nor presents usable radar geometry stays
-  unresolved.** Contact places it where there is an impact and an offset-only
-  radar fit places it where there is not; where neither works the recorder keeps
-  its own clock and says so, rather than being placed on a guess. The negative
-  controls fall back on an explicit marker from the experiment harness, which is
-  declared, labelled and reported apart. It is never simulator time;
-- **the sign detector is classical colour-and-shape**, deterministic and with no
-  training data. It will miss signs at distance and in shadow. Its precision and
-  recall are measured and reported rather than assumed;
-- **a stop-line crossing is inferred from the marking leaving the frame**, so the
-  detector is deliberately conservative: it misses crossings rather than
-  inventing them;
-- **in a chain the middle vehicle often registers one impact, not two**, so one
-  anchor relates both neighbours. The alignment names the recorder whose offset
-  rests on that anchor and states that no error bound is determinable: a recorder
-  that never registered the second impact has no measurement of when it happened.
-  On the recorded chain this cost 200 ms on one offset and the order of two
-  impacts, which is reported rather than absorbed;
-- **nothing here is a finding of legal fault**, and no number is produced that
-  could be read as a share of one.
-
-## Documentation
-
-| | |
-|---|---|
-| `docs/ARCHITECTURE.md` | how the pieces fit together |
-| `docs/EVENTS.md` | the event vocabulary, and what may be compared |
-| `docs/CLOCKS.md` | hybrid alignment: contact, then radar, then unresolved |
-| `docs/FORMAL_METHODS.md` | the temporal logic |
-| `docs/RESPONSIBILITY.md` | obligations, violations, the priority benchmark |
-| `docs/SCENARIOS.md` | what each scenario is for |
-| `docs/VIEWER.md` | the four sections |
-| `docs/REPRODUCIBILITY.md` | running it again and getting the same answer |
-| `docs/DATA_BOUNDARY.md` | what inference may not see, and how that is enforced |
-| `docs/COUNTERFACTUALS.md` | replay, but-for causation, prevention |
-| `docs/LIMITATIONS.md` | what this does not establish |
-| `docs/V2_REFACTOR_AUDIT.md` | what changed from V1, and what was deliberately not changed |
+The full campaign and every other command are in
+[Reproducibility](docs/REPRODUCIBILITY.md).
 
 ## Licence
 
-See `LICENSE`.
+See [LICENSE](LICENSE).
