@@ -115,16 +115,24 @@ motorcycles. Multi-agent effects that only appear with denser traffic are out of
 scope, and nothing here addresses the perception problems specific to vulnerable
 road users.
 
-## 7. No camera, no local semantic map
+## 7. A camera and a lane sensor, but still no map
 
-By design, local inference sees only telemetry, controls and radar. It therefore
-cannot observe traffic-light state, lane markings, signage, road geometry or
-right-of-way rules. Those privileged facts remain outside the local and fused
-evidence boundary; the oracle and model-checking layers retain explicit support
-for them.
+V2 added a forward RGB camera and a lane-crossing sensor to every vehicle, so
+local inference is no longer blind to the road. It reads STOP and give-way signs
+from its own frames, records lane and solid-line crossings from its own sensor,
+and produces `STOP_SIGN_DETECTED`, `STOP_LINE_CROSSED` and
+`LANE_MARKING_CROSSED` events without privileged data. What that perception is
+worth is measured rather than assumed: see sections 24 and 26.
 
-That is an honest epistemic result, not a capability. A production forensic
-system would fuse camera and map data and would not face this particular limit.
+What is still absent is a **semantic map**. Local inference cannot read lane or
+road ids, waypoints, junction topology, right-of-way rules or traffic-light
+state. A sign is something a vehicle saw; the rule it implies is inferred from
+the sign, not looked up. Those privileged facts stay outside the evidence
+boundary, and the oracle and model-checking layers keep explicit support for
+them so that scoring can use what inference may not.
+
+That remains an epistemic result rather than a capability. A production forensic
+system would fuse map data and would not face this particular limit.
 
 ## 8. Causal assumptions
 
@@ -200,8 +208,8 @@ another build may differ, and the map-handling code may be unnecessary there.
 ## 14. The counterfactual campaign runs behind a workaround
 
 A counterfactual suite restarts the simulator before every replay, and on this
-build the native CARLA client aborts the whole interpreter -- `Fatal Python
-error: Aborted`, inside `world.apply_settings()` -- on the third simulator
+build the native CARLA client aborts the whole interpreter (`Fatal Python
+error: Aborted`, inside `world.apply_settings()`) on the third simulator
 process of a run. It is reproducible, it produces no Python traceback and no
 Windows error report, and the cause is not established (finding 10 in
 `docs/ENVIRONMENT.md` records what was tried and what it did not fix).
@@ -213,7 +221,7 @@ S01 suite needed four attempts for four replays.
 
 Two consequences for reading §9 of the findings. The replays in one suite were
 recorded across several processes and, for the retried ones, across several
-attempts -- each still on its own freshly started engine, which is the property
+attempts, each still on its own freshly started engine, which is the property
 the comparison actually depends on, but not in one uninterrupted session. And a
 suite that exhausts its retries would leave a partial contribution report; the
 driver reports such a run as `INCOMPLETE` rather than scoring it, and no
@@ -304,6 +312,20 @@ The campaign names exactly the designed contributors on a small number of the
 scenario variants designed to collide. On most it names a subset or a superset,
 and on one it names the wrong vehicle entirely.
 
+Read that table's reference before its verdicts. It scores against each
+scenario's causal template, and a template names contributors only through
+edges whose cause is a *scripted action*. S10 to S15 express their design in
+states instead, so of the 26 variants designed to collide, 13 declare a
+contributor there and 13 do not. Nine of the ten `incorrect` verdicts sit on a
+row with no reference, where naming anybody scores zero by construction; the
+tenth is `S08/crash`, discussed in section 20. The generated report marks those
+rows, and the honest reading of that column is how far this reference reaches,
+not how often the method was wrong.
+
+How well contributors were actually named is in the responsibility figures,
+which have a reference on 42 of the 105 runs: physical contributor F1 0.657,
+normative contributor F1 0.487 with recall 0.396.
+
 Restraint on the negative controls is complete — nobody is ever named where
 nobody contributed — and ancestry recall is near-total, meaning the behaviours
 the template blames are almost always somewhere in the reconstructed ancestry of
@@ -360,7 +382,7 @@ radar fallback exists for, and because the contact-only ablation still shows it.
 V1 aligned the clocks by fitting radar tracks, so it could place a vehicle that
 never touched anything. Contact-only V2 could not. In the partial-view scene A
 strikes B and C only brakes, so C has no anchor: the alignment reports
-`PARTIALLY_ALIGNED`, names C unaligned, and two things follow -- C appears nowhere
+`PARTIALLY_ALIGNED`, names C unaligned, and two things follow. C appears nowhere
 in the fused graph, and B's radar track of C is never resolved to C, because
 association needs both ends on one clock.
 
@@ -379,15 +401,16 @@ timeline and reporting them identically would be worse than an honest gap.
 
 ## 23. One all-way-stop variant does not produce its designed encounter
 
-`S12/near_simultaneous` declares a collision and does not achieve one. Its
-closest approach is 11.08 m against the 6 m the variant requires.
+`S12/near_simultaneous` declares a collision and does not achieve one. Across
+the three campaign seeds its closest approaches are 10.90 m, 8.39 m and 8.23 m
+against the 6 m the variant requires, and no collision occurs in any of them.
 
 The cause is geometry, not timing luck. The junction is the only one in Town05
 that renders stop signs on more than one approach, and it is a large T: the
 vehicle turning in has a merge point about 8 m beyond its stop line while the
 vehicle going straight has about 23 m. Six timing attempts on the development
 seed did not bring the two together, and the ones that came closest did so by
-making the two arrivals *not* near-simultaneous -- which is the one thing the
+making the two arrivals *not* near-simultaneous, which is the one thing the
 variant is for.
 
 It is left as declared and recorded by the campaign as a scenario validation
@@ -404,7 +427,7 @@ build also ships no stop-sign prop at all, so a scenario cannot place one.
 Both facts bound what the traffic-control scenarios can be. They must sit at one
 of five junctions, only one of which renders signs on more than one approach.
 And none of those junctions paints a stop bar, so `STOP_LINE_CROSSED` never fires
-on a real run -- which is why the stop property also accepts the lane sensor's
+on a real run. That is why the stop property also accepts the lane sensor's
 record of crossing into the junction as its boundary (`docs/FORMAL_METHODS.md`).
 The stop-line detector still runs and still reports honestly; it simply has
 nothing to find at these junctions.
@@ -438,3 +461,83 @@ campaign. The mechanism it depends on — a physical path that traverses an impa
 only where the vehicle's own behaviour independently reaches it — is implemented
 and unit-tested, and the recorded run does not exercise it as intended because
 the pre-impact evidence falls the wrong side of the two vehicles.
+
+## 26. The STOP detector finds most signs and reports more than are there
+
+Measured over real campaign frames: 46 true positives, 37 false positives, 5
+false negatives. Recall 90.2 percent, precision 55.4 percent.
+
+The detector is classical colour and shape, deterministic, with no training data
+and no learned prior. It was calibrated once on a development seed and then
+frozen, and both halves of that trade are visible in the numbers.
+
+Recall is the half that matters more here. A missed sign removes the obligation
+from the analysis entirely, and nothing downstream can recover it. A spurious
+sign is visible in the artifact, is contradicted by the other vehicle's view when
+there is one, and produces a violation a reader can argue with. Neither is good,
+but they fail differently, and a precision figure of 55.4 percent should not be
+read as the analysis being wrong on 45 percent of the signs it reasons about.
+
+What this bounds: any statement about traffic-control compliance in this campaign
+rests on a detector that is right about five times in nine when it speaks. The
+stop-sign scenarios are demonstrations that the pipeline carries sign evidence
+end to end, not evidence that the perception is production grade.
+
+## 27. Twenty-two of the 105 runs did not stage their designed encounter
+
+Scenario validation passed on 83 of 105 runs. The 22 failures are all in the new
+S10 to S16 set, listed variant by variant in
+[RESULTS.md](RESULTS.md).
+
+Three kinds of failure occur: a variant that declares a collision and produces a
+near miss, a variant that declares a near miss and produces a collision, and a
+variant that produces a collision between the wrong pair. `S15/deflected_into_c`,
+`S16/consequential` and `S16/independent` fail on all three seeds because the
+impact lands on A and B rather than on the pair the variant names.
+
+Those runs are still recorded, still evaluated and still counted. Dropping them
+would be choosing the sample after seeing it. What they mean is narrower: a run
+that did not stage its encounter cannot answer the question that encounter was
+written to ask, so the *scenario-level* conclusions for those variants are not
+supported even though the *run-level* measurements are sound.
+
+## 28. Two references exist, and only one of them is the reconstruction's
+
+The reconstruction is scored against the **observable ground truth**: what the
+simulator recorded as having happened, expressed in the vocabulary the
+reconstruction itself speaks. That is the primary reference, and the collision,
+timing, clock and perception figures all rest on it.
+
+The **scenario design template** is a second, weaker reference. It says what the
+experiment intended to stage, which is a different question, and the two can
+disagree without either being broken. The structural ablation and the
+design-template attribution table use it, and they are labelled as doing so.
+
+The hazard is reading a number scored against one as though it were scored
+against the other. V1 did exactly that and it is why the V2 refactor happened:
+the same recordings gave edge F1 0.065 for best-local and 0.051 for fusion
+against the template, making fusion look harmful, and 0.153 and 0.358 against a
+reference that speaks the reconstruction's vocabulary. The method did not change
+between those figures. Only what it was compared against did.
+
+## 29. Responsibility is a separate layer, and a replay can answer three questions
+
+Physical causality and responsibility are not the same claim and are never
+merged. A vehicle that brakes hard is a physical cause of the crash behind it and
+has broken no rule; a vehicle that ran a stop sign a kilometre earlier broke a
+rule that reaches nothing. The responsibility layer asks whether a **normative
+violation lies on a physical causal path**, and reports the two components
+separately so the physics can be accepted while the norm is disputed.
+
+The counterfactual layer carries the same distinction in its
+`counterfactual_role`. A replay can remove something that happened
+(`factual_removal`), supply something that did not (`prevention_opportunity`), or
+improve something that did (`omission_repair`). Only the first is factual
+causation. A prevention opportunity says the outcome was avoidable, not that the
+action caused it, and folding the three together would let "could have stopped
+it" be read as "did it".
+
+What this bounds: the evidence classes are the finding, not a score. Across the
+campaign they are 66 supported, 140 partial and 32 insufficient, and
+`insufficient evidence` is a verdict the layer is expected to return rather than
+a failure to reach one.
