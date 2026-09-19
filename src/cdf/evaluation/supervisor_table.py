@@ -180,12 +180,27 @@ def _caveats(alignment: Optional[Mapping[str, Any]]) -> List[Mapping[str, Any]]:
 
 
 def _suspect_offsets(alignment: Optional[Mapping[str, Any]]) -> List[str]:
-    """Recorders whose offset rests on an anchor doing double duty."""
-    return sorted({
+    """Recorders whose *final* offset rests on an anchor doing double duty.
+
+    The caveat is raised by the contact stage, and being named in it is exactly
+    what makes the hybrid stage try radar for that participant. So a recorder the
+    caveat names but radar went on to place is no longer resting on the impeached
+    anchor, and carrying the caveat forward would suppress an order the method
+    did establish. Only a participant still on its contact offset is suspect.
+    """
+    named = {
         str(p)
         for caveat in _caveats(alignment)
         for p in (caveat.get("participants_with_suspect_offset") or [])
-    })
+    }
+    if not named:
+        return []
+    sources = (alignment or {}).get("clock_sources") or {}
+    if not sources:
+        return sorted(named)
+    return sorted(
+        p for p in named if str(sources.get(p, "CONTACT")).upper() == "CONTACT"
+    )
 
 
 def _collision_order(

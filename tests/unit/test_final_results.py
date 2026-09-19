@@ -462,3 +462,58 @@ def test_declining_to_order_two_impacts_is_not_scored_as_getting_it_wrong() -> N
     assert "claimed an order on 11" in text
     assert "declined" in text
     assert "78.6%" in text and "100.0%" in text
+
+
+# --- the shared-anchor caveat, read from where the hybrid aligner puts it ---
+
+
+def _hybrid(sources, caveat_for):
+    """A hybrid alignment artifact: the contact stage kept whole underneath."""
+    return {
+        "status": "HYBRID_ALIGNED",
+        "reference": "B",
+        "clock_sources": dict(sources),
+        "contact_stage": {
+            "shared_anchor_caveats": [
+                {"anchor": "B#0", "participant": "B",
+                 "participants_with_suspect_offset": list(caveat_for)}
+            ],
+        },
+    }
+
+
+def test_the_caveat_is_found_under_the_contact_stage() -> None:
+    """The hybrid aligner nests it; reading the top level alone finds nothing."""
+    from cdf.evaluation.supervisor_table import _caveats
+
+    alignment = _hybrid({"A": "CONTACT", "B": "REFERENCE", "C": "CONTACT"}, ["C"])
+    assert alignment.get("shared_anchor_caveats") is None
+    assert len(_caveats(alignment)) == 1
+
+
+def test_a_recorder_radar_replaced_is_no_longer_resting_on_that_anchor() -> None:
+    """Being named in the caveat is what sends a participant to radar.
+
+    Carrying the caveat forward after radar placed it would suppress an order the
+    method did establish, on a run where the chain was recovered correctly.
+    """
+    from cdf.evaluation.supervisor_table import _suspect_offsets
+
+    still_contact = _hybrid({"A": "CONTACT", "B": "REFERENCE", "C": "CONTACT"}, ["C"])
+    assert _suspect_offsets(still_contact) == ["C"]
+
+    radar_placed = _hybrid({"A": "CONTACT", "B": "REFERENCE", "C": "RADAR"}, ["C"])
+    assert _suspect_offsets(radar_placed) == []
+
+
+def test_without_per_vehicle_provenance_the_caveat_still_stands() -> None:
+    """A contact-only artifact records no sources; it must not be read as clean."""
+    from cdf.evaluation.supervisor_table import _suspect_offsets
+
+    contact_only = {
+        "status": "MULTI_CONTACT_ALIGNED", "reference": "B",
+        "shared_anchor_caveats": [
+            {"participants_with_suspect_offset": ["C"]}
+        ],
+    }
+    assert _suspect_offsets(contact_only) == ["C"]

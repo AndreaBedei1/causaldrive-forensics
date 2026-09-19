@@ -89,7 +89,7 @@ artifacts, never transcribed by hand.
 | Clock offset | 0.0037 s mean absolute error over 238 scored recorders | worst single recorder 0.2497 s; 14 of 252 stayed unresolved and are reported as such |
 | Radar fallback, S07 | all 6 runs aligned; the vehicle that never collides is placed by radar to 0.0021 s mean, 0.0032 s worst | contact is used first; radar only reaches vehicles contact cannot |
 | STOP sign detection | recall 90.2 percent | precision 55.4 percent, so the detector reports more signs than are there |
-| Multi-impact ordering | 13 of 14 multi-impact runs ordered correctly | the one failure is S06 seed 2, reported individually |
+| Multi-impact ordering | an order was claimed on 12 of 14 multi-impact runs and was right on all 12 | on the other 2 the method declined, because the offset rested on an anchor doing double duty; declining is its own verdict, not a wrong answer |
 | Responsibility | physical contributor F1 0.657 | normative contributor F1 0.487, recall 0.396: naming who violated an obligation is much harder than naming who was involved |
 
 Drift is deliberately not estimated; scale is fixed to 1. There is no verified

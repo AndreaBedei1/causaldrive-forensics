@@ -89,13 +89,13 @@ Evidence classes over all findings: insufficient x32, partial x140, supported x6
 
 ## Collision order
 
-Verdicts: correct x11, not_applicable x30, not_established x3, single_impact x61.
+Verdicts: correct x12, not_applicable x30, not_established x2, single_impact x61.
 
-Multi-impact runs: 14. The method claimed an order on 11 of them and was right on 11 of those (100.0%); on 3 it declined, because the impacts were closer together than the recording resolves or the offset rested on a shared anchor. Over all 14 runs that is 78.6%.
+Multi-impact runs: 14. The method claimed an order on 12 of them and was right on 12 of those (100.0%); on 2 it declined, because the impacts were closer together than the recording resolves or the offset rested on a shared anchor. Over all 14 runs that is 85.7%.
 
 | Scenario | Variant | Seed | Verdict |
 |---|---|---|---|
-| S06 | a_front_pushed | 0 | not_established |
+| S06 | a_front_pushed | 0 | correct |
 | S06 | b_rear_first | 0 | correct |
 | S06 | b_rear_first | 1 | correct |
 | S06 | a_front_pushed | 2 | not_established |

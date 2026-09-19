@@ -13414,14 +13414,14 @@
     },
     "collision_order": {
       "accuracy_where_claimed": 1.0,
-      "correct_rate": 0.7857,
+      "correct_rate": 0.8571,
       "multi_impact_runs": [
         {
-          "cell": "A-B, B-C: order not established (C offset rests on a shared anchor); truth A-B then B-C 0.200 s apart",
+          "cell": "A-B then B-C (correct)",
           "scenario": "S06",
           "seed": 0,
           "variant": "a_front_pushed",
-          "verdict": "not_established"
+          "verdict": "correct"
         },
         {
           "cell": "B-C then A-B (correct)",
@@ -13516,13 +13516,13 @@
         }
       ],
       "n_multi_impact_runs": 14,
-      "n_order_claimed": 11,
-      "n_order_declined": 3,
+      "n_order_claimed": 12,
+      "n_order_declined": 2,
       "note": "only runs with more than one impact can get an order wrong. 'not established' is its own verdict, not a failure: two impacts closer together than the recording can resolve, or an offset resting on a shared anchor, leave an order the method did not claim",
       "verdicts": {
-        "correct": 11,
+        "correct": 12,
         "not_applicable": 30,
-        "not_established": 3,
+        "not_established": 2,
         "single_impact": 61
       }
     },

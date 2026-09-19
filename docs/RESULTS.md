@@ -246,11 +246,16 @@ registered its second impact, nothing in the recordings bounds how far the
 derived offset is out. On seed 2 the offset was out by 0.200 s, exactly the
 interval between the impacts.
 
+The fallback fixes this chain on one seed of three. On seed 0 radar replaced C's
+impeached offset, the two impacts came apart, and the order was recovered
+correctly. On seeds 1 and 2 radar did not engage, and C kept a contact offset out
+by 0.250 s and 0.200 s.
+
 The consequence is reported, not absorbed. Across the campaign the method claimed
-an impact order on 11 of the 14 multi-impact runs and was right on all 11. On the
-other 3 it declined, because the offset rested on a shared anchor. Declining is
-its own verdict and is not scored as a wrong answer, and equally is not scored as
-a right one.
+an impact order on 12 of the 14 multi-impact runs and was right on all 12. On the
+other 2 it declined, because the offset rested on an anchor doing double duty.
+Declining is its own verdict: it is not scored as a wrong answer, and equally not
+as a right one.
 
 ### S10/rolls_through: two references, two answers
 
