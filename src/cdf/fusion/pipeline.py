@@ -297,6 +297,19 @@ def fuse_run(
         fused_causal, cfg, run.participant_ids, alignment, episodes
     )
     attribution = build_attribution_hypothesis(reconstruction, fused_causal, cfg)
+    # Where replays exist, they outrank the graph-only hypothesis: the
+    # counterfactual campaign actually re-ran the encounter under a controlled
+    # modification, and that is what a but-for claim needs. Without this the
+    # replays were recorded and their verdicts never reached the responsibility
+    # report, which went on saying "not tested" for every vehicle in a run that
+    # had been replayed a dozen times.
+    replayed = layout.causal_contribution
+    if replayed.exists():
+        from ..common.io import read_json as _read_json
+
+        contribution = _read_json(replayed)
+        if contribution.get("contributions"):
+            attribution = contribution
 
     # Normative reasoning, in its own graph. Built from the physical graph and the
     # observed events, so a reader can accept the physics and dispute the norm.

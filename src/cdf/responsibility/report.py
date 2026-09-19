@@ -58,6 +58,24 @@ def _type_of(event: Event) -> str:
     )
 
 
+def _entry_is_about(entry: Mapping[str, Any], participant: str) -> bool:
+    """Whether a replay contribution concerns this vehicle.
+
+    The graph-only hypothesis names a participant. A replay-backed contribution
+    names the *action* it intervened on, because that is what an intervention
+    targets, and every scenario names its actions `<participant>_<what>` --
+    A_roll_through, B_brake. Matching on that prefix is what connects the two.
+    Without it the replays were recorded and every vehicle in a run that had been
+    replayed a dozen times still reported "not tested".
+    """
+    named = entry.get("participant_id")
+    if named is not None:
+        return str(named) == str(participant)
+    action = str(entry.get("action_id") or "")
+    return action.startswith("{0}_".format(participant))
+
+
+
 def _but_for(
     attribution: Optional[Mapping[str, Any]], participant: str
 ) -> Dict[str, Any]:
@@ -77,7 +95,7 @@ def _but_for(
             ),
         }
     for entry in attribution.get("contributions", []) or []:
-        if str(entry.get("participant_id")) != str(participant):
+        if not _entry_is_about(entry, participant):
             continue
         established = entry.get("establishes_causation")
         if established is None:
