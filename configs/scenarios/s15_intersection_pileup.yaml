@@ -184,6 +184,15 @@ scenario:
   variants:
     # ---- B runs the stop, strikes A, A is deflected into C ---------------
     deflected_into_c:
+      validation:
+        # What makes the second impact a consequence rather than a coincidence:
+        # it follows the first closely, and A has no throttle in between. The
+        # deflection itself cannot start before contact -- it is triggered by
+        # it -- but that is a property of the code, and this is the property
+        # measured in the recording.
+        impact_interval_s: { min: 0.2, max: 3.0 }
+        coasting_after_impact: ["A"]
+        coasting_window_s: 3.0
       participant_overrides:
         B:
           actions:
@@ -203,6 +212,9 @@ scenario:
       validation:
         encounter_pair: ["A", "B"]
         min_separation_below_m: 6.0
+        # The control has to state its absence: naming the pair that must
+        # collide says nothing about the pair that must not.
+        forbidden_collision_pairs: [["A", "C"]]
       participant_overrides:
         B:
           actions:

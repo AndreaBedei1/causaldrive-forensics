@@ -70,20 +70,50 @@ def _path(states: Sequence[Any]) -> Dict[str, Any]:
     }
 
 
+#: Below this impulse a participant-pair contact is two cars leaning on each
+#: other, not a collision. The chain merge below collapses a contact that is
+#: continuously reported, but two vehicles that have come to rest touching also
+#: stop and restart reporting minutes into a run, and each restart would read as
+#: a fresh impact. Both guards are needed. The real impacts in this benchmark
+#: are upwards of 1600 N.s and mostly upwards of 4000; settling measures in the
+#: low hundreds.
+RESTING_CONTACT_IMPULSE = 500.0
+
+#: Contacts arriving closer together than this are the same impact still
+#: being reported. CARLA re-reports a standing contact at exactly 0.5 s
+#: intervals, so the window has to be wider than that to catch them.
+CONTACT_CHAIN_WINDOW_S = 0.75
+
+
 def _pair_impacts(collisions: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Distinct participant-to-participant impacts, in time order."""
     rows = []
     for c in collisions:
         if not c.get("is_participant_pair"):
             continue
-        pair = tuple(sorted([str(c["participant_id"]), str(c["other_participant_id"])]))
-        rows.append({"t": float(c["t"]), "pair": pair,
-                     "impulse": float(c.get("impulse") or 0.0)})
-    merged: List[Dict[str, Any]] = []
-    for row in sorted(rows, key=lambda r: (r["t"], r["pair"])):
-        if merged and merged[-1]["pair"] == row["pair"] and row["t"] - merged[-1]["t"] < 0.5:
-            merged[-1]["impulse"] = max(merged[-1]["impulse"], row["impulse"])
+        impulse = float(c.get("impulse") or 0.0)
+        if impulse < RESTING_CONTACT_IMPULSE:
             continue
+        pair = tuple(sorted([str(c["participant_id"]), str(c["other_participant_id"])]))
+        rows.append({"t": float(c["t"]), "pair": pair, "impulse": impulse})
+    # Vehicles that stay in contact are reported again every half second for as
+    # long as it lasts. That is one impact, however long it lasts, so the merge
+    # follows the chain: each further contact is absorbed if it arrives within
+    # the window of the *previous* one, not of the first. Comparing against the
+    # first is what let an indefinite run of contacts reappear as a second
+    # impact a few seconds later, which is then whatever an interval check is
+    # reading. A genuine second collision between the same pair, after they had
+    # come apart, still registers: it is more than a window away from the last
+    # contact of the first one.
+    merged: List[Dict[str, Any]] = []
+    last_seen: Dict[Tuple[str, str], Tuple[int, float]] = {}
+    for row in sorted(rows, key=lambda r: (r["t"], r["pair"])):
+        prev = last_seen.get(row["pair"])
+        if prev is not None and row["t"] - prev[1] < CONTACT_CHAIN_WINDOW_S:
+            merged[prev[0]]["impulse"] = max(merged[prev[0]]["impulse"], row["impulse"])
+            last_seen[row["pair"]] = (prev[0], row["t"])
+            continue
+        last_seen[row["pair"]] = (len(merged), row["t"])
         merged.append(row)
     return merged
 
@@ -298,7 +328,11 @@ def run_physical_checks(
         window = float(validation.get("coasting_window_s", 1.5))
         limit = float(validation.get("coasting_throttle_max", 0.05))
         for pid in coasting:
-            rows = [a for t, a in (times.get(pid) or []) if t0 <= t <= t0 + window]
+            # Strictly after: the frame the impact is stamped on still carries
+            # the control the vehicle was applying when it was hit, which in a
+            # scenario where the struck vehicle was cruising is a throttle
+            # reading that says nothing about what it did afterwards.
+            rows = [a for t, a in (times.get(pid) or []) if t0 < t <= t0 + window]
             if not rows:
                 problems.append("no states recorded for {0} after the first impact".format(pid))
                 continue
@@ -310,5 +344,88 @@ def run_physical_checks(
                     "being struck; a pushed vehicle must coast, not accelerate "
                     "under its own power".format(pid, peak, window)
                 )
+
+    # -- a displacement that the impact, and nothing else, produced ---------
+    # A floor on total sideways movement says a vehicle left its lane. It does
+    # not say why, and in a scenario whose whole claim is "because it was hit"
+    # that is the part worth checking. So the displacement is measured on both
+    # sides of the first impact: near zero before it, and real after it. A
+    # scripted lane change at a fixed time would fail this whichever side of
+    # the impact the clock happened to put it on.
+    begins = validation.get("lateral_begins_at_impact") or {}
+    if begins:
+        if not impacts:
+            problems.append("an impact-triggered displacement was declared but none occurred")
+        else:
+            t0 = impacts[0]["t"]
+            for pid, want in sorted(begins.items()):
+                rows = times.get(pid) or []
+                if len(rows) < 2:
+                    problems.append("no trajectory recorded for {0}".format(pid))
+                    continue
+                x0, y0 = rows[0][1].x, rows[0][1].y
+                heading = math.radians(rows[0][1].yaw)
+                nx, ny = -math.sin(heading), math.cos(heading)
+                before = [abs((a.x - x0) * nx + (a.y - y0) * ny) for t, a in rows if t < t0]
+                after = [abs((a.x - x0) * nx + (a.y - y0) * ny) for t, a in rows if t >= t0]
+                pre = max(before) if before else 0.0
+                post = max(after) if after else 0.0
+                checks.setdefault("lateral_at_impact", {})[pid] = {
+                    "before_m": round(pre, 2), "after_m": round(post, 2)}
+                cap = float(want.get("before_max_m", 0.3))
+                floor = float(want.get("after_min_m", 1.0))
+                if pre > cap:
+                    problems.append(
+                        "{0} had already moved {1:.2f} m sideways before the first "
+                        "impact, more than the {2:.2f} m this variant allows: the "
+                        "displacement is not the impact's doing"
+                        .format(pid, pre, cap))
+                if post < floor:
+                    problems.append(
+                        "{0} moved {1:.2f} m sideways after the first impact; this "
+                        "variant needs at least {2:.2f} m, so the vehicle was not "
+                        "visibly carried anywhere".format(pid, post, floor))
+
+    # -- a vehicle that reached the second impact under its own power -------
+    # The mirror of the check above, and the one that separates a consequence
+    # from a coincidence. In a variant whose story is "the driver did this
+    # later, of its own accord", the throttle between the two impacts is the
+    # evidence: if it is zero the second impact was still the first one paying
+    # out, whatever the interval says.
+    driven = validation.get("self_driven_between_impacts") or {}
+    if driven:
+        if len(impacts) < 2:
+            problems.append(
+                "a self-driven second impact was declared but {0} occurred"
+                .format(len(impacts))
+            )
+        else:
+            t0, t1 = impacts[0]["t"], impacts[1]["t"]
+            for pid, floor in sorted(driven.items()):
+                rows = [a for t, a in (times.get(pid) or []) if t0 < t < t1]
+                if not rows:
+                    problems.append(
+                        "no states recorded for {0} between the two impacts".format(pid)
+                    )
+                    continue
+                peak = max(a.throttle for a in rows)
+                checks.setdefault("self_driven", {})[pid] = round(peak, 3)
+                if peak < float(floor):
+                    problems.append(
+                        "{0} never applied more than {1:.2f} throttle between the "
+                        "two impacts; this variant claims the second one was {0}'s "
+                        "own doing, and a coasting vehicle has not done anything"
+                        .format(pid, peak)
+                    )
+
+    # -- a pair the variant says must stay apart ----------------------------
+    for pair in validation.get("forbidden_collision_pairs") or []:
+        key = tuple(sorted(str(p) for p in pair))
+        hit = [i for i in impacts if i["pair"] == key]
+        if hit:
+            problems.append(
+                "{0} and {1} collided at t={2:.2f}s; this variant is the one "
+                "where that does not happen".format(key[0], key[1], hit[0]["t"])
+            )
 
     return problems, checks
