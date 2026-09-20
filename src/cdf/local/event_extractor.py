@@ -356,6 +356,58 @@ class EventExtractor:
                 )
             )
 
+        # --- FULL_STOP: coming to rest, and staying there long enough to mean
+        #     it. The mirror of VEHICLE_STARTED above, and bound by the same
+        #     rule about what a rolling buffer may claim: an episode already
+        #     open on the first sample is evidence that the recording started,
+        #     not that the vehicle stopped.
+        #
+        #     This is the event the priority benchmark reads to decide which
+        #     vehicle completed its stop first, the one the obligation a stop
+        #     sign opens is discharged by, and the one three temporal
+        #     properties are written over. Until it was emitted, all of them
+        #     read an absence: no two-sign junction could ever be resolved by
+        #     arrival, whatever the vehicles actually did, and the resulting
+        #     AMBIGUOUS_PRIORITY looked like caution rather than a missing
+        #     detector.
+        stop_eps = _find_episodes(
+            times,
+            speed,
+            float(cfg.get("events.full_stop.speed_mps", 0.5)),
+            "below",
+            self._ratio,
+            float(cfg.get("events.full_stop.min_duration_s", 0.30)),
+        )
+        for episode in [e for e in stop_eps if e.i_start > 0]:
+            out.append(
+                _Candidate(
+                    event_type=EventType.FULL_STOP,
+                    subject=None,
+                    t_start=episode.t_start,
+                    t_peak=episode.t_start,
+                    t_end=episode.t_end,
+                    peak_value=episode.peak_value,
+                    extreme_is_max=False,
+                    values={
+                        "speed_mps": float(episode.peak_value),
+                        "duration_s": float(episode.t_end - episode.t_start),
+                        "threshold_mps": float(
+                            cfg.get("events.full_stop.speed_mps", 0.5)
+                        ),
+                    },
+                    confidence=1.0,
+                    evidence=[
+                        Evidence(
+                            kind="telemetry",
+                            ref=pid,
+                            t_start=episode.t_start,
+                            t_end=episode.t_end,
+                        )
+                    ],
+                    source_sensors=["telemetry"],
+                )
+            )
+
         # --- longitudinal dynamics (own telemetry).
         out.extend(
             self._threshold_candidates(

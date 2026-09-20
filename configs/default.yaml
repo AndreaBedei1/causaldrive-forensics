@@ -141,6 +141,13 @@ events:
 
   vehicle_started:
     speed_mps: 0.8
+  # Coming to rest, which is a different claim from decelerating and the one
+  # the stop-sign scenarios turn on. The speed sits just under the 0.6 m/s the
+  # post-impact stop uses, and the duration is what stops a momentary dip at
+  # the bottom of a hard brake from being reported as a stop.
+  full_stop:
+    speed_mps: 0.5
+    min_duration_s: 0.30
   acceleration:
     enter_mps2: 1.5
   deceleration:

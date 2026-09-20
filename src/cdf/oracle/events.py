@@ -880,6 +880,48 @@ def _deceleration_events(trace: Dict[str, Any], participants: Sequence[str], cfg
     return out
 
 
+def _full_stop_events(
+    trace: Dict[str, Any], participants: Sequence[str], cfg: Config
+) -> List[Event]:
+    """``stopped`` for each participant, from its exact speed.
+
+    The privileged counterpart of the local detector, on the same thresholds, so
+    that a stop the reconstruction reports and a stop that happened are the same
+    kind of claim and can be matched. Without it the reference asserted no stops
+    at all, and every scenario template naming ``stopped`` had that edge dropped
+    as unrealised -- including the two all-way-stop variants whose designed
+    answer is which vehicle stopped first.
+
+    A standstill already in progress on the first sample is not reported, which
+    is the same rule the local detector follows and is here for the same reason:
+    coming to rest is a transition, and a transition that was not witnessed
+    cannot be claimed. Keeping the two rules identical also keeps the reference
+    and the reconstruction scoring the same set of events rather than differing
+    by one at the start of every trace.
+    """
+    enter = float(cfg.get("events.full_stop.speed_mps", 0.5))
+    min_duration_s = float(cfg.get("events.full_stop.min_duration_s", 0.30))
+    confidence = _confidence(cfg, "state", 0.9)
+
+    out: List[Event] = []
+    for pid in sorted(str(p) for p in participants):
+        rows = participant_series(trace, pid)
+        if len(rows) < 2:
+            continue
+        times = [float(r["t"]) for r in rows]
+        speeds = [float(r["speed"]) for r in rows]
+        for episode in _find_episodes(times, speeds, enter, "below", min_duration_s):
+            if abs(episode.t_start - times[0]) < 1e-9:
+                continue
+            values = {
+                "speed_mps": float(episode.peak_value),
+                "duration_s": float(episode.t_end - episode.t_start),
+                "threshold_mps": enter,
+            }
+            out.append(_state_event("stopped", pid, None, episode, values, confidence))
+    return out
+
+
 def _signal_violation_events(
     trace: Dict[str, Any], participants: Sequence[str], cfg: Config
 ) -> List[Event]:
@@ -1329,6 +1371,7 @@ def build_oracle_events(trace: Dict[str, Any], spec: Any, cfg: Config) -> List[E
         events.extend(_closing_and_ttc_events(pair_kinematics(trace, a, b), cfg))
         events.extend(_conflict_entry_events(trace, a, b, cfg))
     events.extend(_deceleration_events(trace, participants, cfg))
+    events.extend(_full_stop_events(trace, participants, cfg))
     events.extend(_signal_violation_events(trace, participants, cfg))
     events.extend(_right_of_way_events(trace, participants, cfg))
     events.extend(_outcome_events(trace, participants, cfg))
