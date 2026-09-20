@@ -37,7 +37,7 @@ table of hand-measured spawn coordinates (`SpawnSpec.anchor: junction_approach` 
 
 ## Overview
 
-Sixteen scenarios, 35 variants. **S01 to S09 are hash-frozen**: their
+Sixteen scenarios, 34 variants. **S01 to S09 are hash-frozen**: their
 configuration may not change, so a better metric on them has to come from the
 method. **S10 to S16 are the V2 additions**, and each isolates something the
 earlier nine could not ask.
@@ -965,9 +965,9 @@ B fails to stop and strikes A in the junction. The impact deflects A into C, whi
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
-| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
-| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 48 m | 6 / 6 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 48 m | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 30 m | 6 / 6 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -991,9 +991,9 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
-| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
-| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 70 m | 6 / 6 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 48 m | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 95 m | 2 / 2 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -1016,9 +1016,9 @@ Scripted actions (these are the intervention handles):
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing -90deg, back 44 m | 11 / 11 m/s | baseline |
-| B | `vehicle.nissan.patrol` | junction (152.54, -0.23), bearing 0deg, back 30 m | 10 / 10 m/s | baseline |
-| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 90deg, back 48 m | 6 / 6 m/s | baseline |
+| A | `vehicle.tesla.model3` | junction (152.54, -0.23), bearing 90deg, back 48 m | 11 / 11 m/s | baseline |
+| B | `vehicle.audi.tt` | junction (152.54, -0.23), bearing 0deg, back 45 m | 10 / 10 m/s | baseline |
+| C | `vehicle.audi.tt` | junction (152.54, -0.23), bearing -90deg, back 30 m | 6 / 6 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
@@ -1041,23 +1041,22 @@ Scripted actions (these are the intervention handles):
 
 *Map:* **Town05** &nbsp;&nbsp; *Config:* `configs/scenarios/s16_secondary_collision.yaml`
 
-A brakes hard and B runs into it. What happens next to B -- deflected into C, driving on into C, or stopping clear -- is what the variants change.
+A brakes and B runs into the back of it. What becomes of A -- knocked into the next lane and into C, driving into C later of its own accord, or stopping clear -- is what the variants change.
 
 **Variant `consequential`** *(default)*
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265, fwd 34 m, lane -1 | 12 / 12 m/s | baseline |
+| A | `vehicle.audi.tt` | spawn 265, fwd 7 m | 13 / 13 m/s | baseline |
+| B | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.mercedes.sprinter` | spawn 265, fwd 73.5 m, lane -1 | 1 / 1 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
-* **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
-* **B** &mdash; `B_deflected`: lane_shift at t=7.4s for 2s (lateral_m 3.2)
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 7s (intensity 0.45)
+* **B** &mdash; `B_late_brake`: brake at t=4.8s for 1.5s (intensity 0.4)
 
-*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+*Validation:* expected outcome **collision**; collision pairs (A-B), (A-C); in order (A-B) then (A-C); A-B must close to under 5 m.
 
 *Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`.
 
@@ -1065,55 +1064,55 @@ Scripted actions (these are the intervention handles):
 
 * `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
 * `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
-* `collision(A-B)` --CONTRIBUTES_TO--> `collision(B-C)`  
-  _the first impact is what puts B across into C_
+* `collision(A-B)` --CONTRIBUTES_TO--> `collision(A-C)`  
+  _the first impact is what puts A across into C_
 
-> designed answer: B contributes to the first impact and not to the second
-> B's displacement into C follows from being unable to stop after the impact
-> the two impacts are about 1.5 s apart, close enough that contact matching has real work to do
+> designed answer: B is the sole contributor, to both impacts
+> A is a party to two collisions and the cause of neither
+> the two impacts are under a second apart, close enough that contact matching has real work to do
 
 **Variant `independent`**
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265, fwd 52 m, lane -1 | 12 / 12 m/s | baseline |
+| A | `vehicle.audi.tt` | spawn 265, fwd 7 m | 13 / 13 m/s | baseline |
+| B | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.mercedes.sprinter` | spawn 265, fwd 73.5 m, lane -1 | 1 / 1 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
-* **B** &mdash; `B_late_brake`: brake at t=5.9s for 5s (intensity 0.9)
-* **B** &mdash; `B_resume`: set_speed at t=13s for 8s (target_speed 11)
-* **B** &mdash; `B_changes_lane`: lane_shift at t=17s for 3s (lateral_m 3.2)
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 7s (intensity 0.45)
+* **A** &mdash; `A_pulls_away`: set_speed at t=10.5s for 12s (target_speed 12)
+* **A** &mdash; `A_changes_lane`: lane_shift at t=11s for 2.5s (lateral_m -4.2)
+* **B** &mdash; `B_late_brake`: brake at t=4.8s for 1.5s (intensity 0.4)
 
-*Validation:* expected outcome **collision**; collision pairs (A-B), (B-C); in order (A-B) then (B-C); A-B must close to under 5 m.
+*Validation:* expected outcome **collision**; collision pairs (A-B), (A-C); in order (A-B) then (A-C); A-B must close to under 5 m.
 
-*Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`, `B_changes_lane`.
+*Counterfactual candidates:* `A_emergency_brake`, `B_late_brake`, `A_changes_lane`.
 
 *Ground-truth causal template (oracle only):*
 
 * `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
 * `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
-* `B.solid_line_crossed` --CAUSES_OUTCOME--> `collision(B-C)`  
-  _the second impact is B's own lane change, not a consequence of the first_
+* `A.A_changes_lane` --CAUSES_OUTCOME--> `collision(A-C)`  
+  _the second impact is A's own lane change, not a consequence of the first_
 
-> designed answer: B contributes to both impacts, for two unrelated reasons
+> designed answer: B contributes to the first impact and A to the second
 > the pair and the geometry of the second impact match the consequential variant
-> what differs is that a path from B's own behaviour reaches it without passing through the first impact
+> what differs is that a path from A's own behaviour reaches it without passing through the first impact
 
 **Variant `avoided`**
 
 | Participant | Blueprint | Spawn | Initial / target speed | Radar profile |
 |---|---|---|---|---|
-| A | `vehicle.tesla.model3` | spawn 265, fwd 26 m | 13 / 13 m/s | baseline |
-| B | `vehicle.audi.tt` | spawn 265 | 13 / 13 m/s | baseline |
-| C | `vehicle.nissan.patrol` | spawn 265, fwd 52 m, lane -1 | 12 / 12 m/s | baseline |
+| A | `vehicle.audi.tt` | spawn 265, fwd 7 m | 13 / 13 m/s | baseline |
+| B | `vehicle.nissan.patrol` | spawn 265 | 13 / 13 m/s | baseline |
+| C | `vehicle.mercedes.sprinter` | spawn 265, fwd 73.5 m, lane -1 | 1 / 1 m/s | baseline |
 
 Scripted actions (these are the intervention handles):
 
-* **A** &mdash; `A_emergency_brake`: brake at t=4s for 8s (intensity 1)
-* **B** &mdash; `B_late_brake`: brake at t=5.9s for 9s (intensity 1)
+* **A** &mdash; `A_emergency_brake`: brake at t=4s for 7s (intensity 0.45)
+* **B** &mdash; `B_late_brake`: brake at t=4.8s for 1.5s (intensity 0.4)
 
 *Validation:* expected outcome **collision**; collision pairs (A-B); in order (A-B); A-B must close to under 5 m.
 
@@ -1124,7 +1123,7 @@ Scripted actions (these are the intervention handles):
 * `A.A_emergency_brake` --CONTRIBUTES_TO--> `B.closing`
 * `B.no_braking` --CAUSES_OUTCOME--> `collision(A-B)`
 
-> one impact only; B stops clear and C is untouched
+> one impact only; A stops clear and C is untouched
 > C never feels a contact, so C stays off the common timeline and the merged log says so
 
 ---

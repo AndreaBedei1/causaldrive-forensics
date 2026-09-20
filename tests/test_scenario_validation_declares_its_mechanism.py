@@ -109,6 +109,39 @@ def test_every_v2_variant_forbids_driving_into_the_scenery(name):
         assert validation.get("no_scenery_collision") is True, (name, variant)
 
 
+#: Scenarios whose encounter is a junction conflict. "They collided" is not the
+#: claim; "they collided *in the junction*" is, and an impact on the approach
+#: means one of them never got there.
+JUNCTION_SCENARIOS = ("s10_single_stop_a.yaml", "s11_single_stop_b.yaml",
+                      "s12_all_way_stop.yaml", "s15_intersection_pileup.yaml")
+
+
+@pytest.mark.parametrize("name", JUNCTION_SCENARIOS)
+def test_a_junction_scenario_requires_the_impact_inside_the_junction(name):
+    for variant in _variants(name):
+        near = _spec(name, variant).validation.get("collision_near") or {}
+        if not near:
+            continue
+        assert near.get("require_in_junction") is True, (name, variant)
+
+
+def test_s12_requires_both_vehicles_to_stop_outside_the_junction():
+    """The scenario is about stopping *before* the line, not about stopping.
+
+    A vehicle that brakes to rest inside the junction has obeyed nothing, and
+    an earlier version of S12 did exactly that on every variant while passing
+    a check that only asked whether it had stopped.
+    """
+    name = "s12_all_way_stop.yaml"
+    for variant in _variants(name):
+        stops = _spec(name, variant).validation.get("stop_point") or {}
+        named = {pid: want for pid, want in stops.items() if want}
+        assert named, (name, variant, "no stop point is checked at all")
+        for pid, want in named.items():
+            assert want.get("must_be_outside_junction", True) is True, (
+                name, variant, pid)
+
+
 @pytest.mark.parametrize("name", V2_FILES)
 def test_every_v2_variant_bounds_how_far_a_vehicle_may_turn(name):
     """The number that catches circling, which no collision check would."""

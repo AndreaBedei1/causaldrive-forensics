@@ -57,3 +57,9 @@ Thumbs.db
 # CARLA / local scratch
 *.log
 scratch/
+
+# Recordings displaced by a scenario correction. Kept for comparison, outside
+# every campaign root so evaluation cannot pick them up, and untracked for the
+# same reason as the roots themselves: they are recordings.
+artifacts_superseded/**
+!artifacts_superseded/README.md

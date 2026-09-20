@@ -178,12 +178,12 @@ def test_the_chain_of_two_impacts_is_recovered_without_naming_a_scenario(cfg) ->
 def test_two_impacts_far_apart_in_time_are_not_chained(cfg) -> None:
     """Sharing a vehicle is not enough; a chain reaction is also prompt.
 
-    S14's independent_impacts variant is built on this: B rear-ends A, and eight
-    seconds later C rolls into the stationary pile. The same three vehicles and
-    the same pair structure as the chain variant, and no causal link between the
-    two impacts. A rule that chained them on shared membership alone would give
-    the same answer to both variants, which is exactly what that pair of
-    scenarios exists to detect.
+    S16's independent variant is built on this: B rear-ends A, and seven seconds
+    later A pulls out of the lane under its own power and drives into C. The
+    same three vehicles and the same pair structure as the consequential
+    variant, and no causal link between the two impacts. A rule that chained
+    them on shared membership alone would give the same answer to both
+    variants, which is exactly what that pair of variants exists to detect.
     """
     doc = graph([
         node("ab", EventType.COLLISION, "A", 7.4, subject="B", owners=["A", "B"]),
@@ -195,7 +195,7 @@ def test_two_impacts_far_apart_in_time_are_not_chained(cfg) -> None:
     ]
 
 
-def test_the_chain_window_is_what_separates_the_two_s14_variants(cfg) -> None:
+def test_the_chain_window_is_what_separates_the_two_s16_variants(cfg) -> None:
     """Directly at the boundary, so a widened lag cannot pass unnoticed.
 
     Half a second apart chains; eight seconds apart does not. Whoever changes
