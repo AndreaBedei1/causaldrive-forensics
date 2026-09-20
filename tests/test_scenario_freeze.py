@@ -151,6 +151,42 @@ def test_no_v2_causal_template_references_an_uncomparable_state() -> None:
                     assert is_comparable(STATE_EVENT_TYPES[state]), (name, state)
 
 
+#: The final benchmark, counted from the configuration rather than asserted.
+#: Written down here so that gaining or losing a variant is a deliberate act
+#: with a reason, the same way changing a frozen scenario is: every published
+#: figure is an average over exactly this set, and a set that drifts silently
+#: makes two documents that quote different campaigns look like one.
+FINAL_SCENARIOS = 16
+FINAL_VARIANTS = 34
+FINAL_SEEDS = 3
+
+
+def test_the_benchmark_is_the_size_the_documentation_says_it_is() -> None:
+    from cdf.cli import suite_combinations
+    from cdf.common.config import available_scenarios
+
+    combinations = suite_combinations(available_scenarios())
+    scenarios = {scenario for scenario, _variant in combinations}
+
+    assert len(scenarios) == FINAL_SCENARIOS, sorted(scenarios)
+    assert len(combinations) == FINAL_VARIANTS, sorted(combinations)
+    assert len(combinations) * FINAL_SEEDS == 102
+
+
+def test_s14_has_not_regained_the_variant_that_faked_its_second_impact() -> None:
+    """It produced that impact by having a stopped car creep into a wreck.
+
+    The distinction it was testing -- that two impacts sharing a vehicle must
+    not be chained merely for sharing it -- is what S16 tests between its
+    consequential and independent variants, on a road situation rather than on
+    a driver deliberately driving into stationary wreckage.
+    """
+    from cdf.cli import suite_combinations
+
+    variants = {v for s, v in suite_combinations(["S14"])}
+    assert variants == {"c_pushes_b", "b_hits_a_first"}, sorted(variants)
+
+
 def test_no_v2_scenario_declares_an_unimplemented_sign_kind() -> None:
     """Only stop and give-way are detected, so only those may be placed."""
     from cdf.common.config import Config, deep_merge, load_yaml
