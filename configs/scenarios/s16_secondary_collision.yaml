@@ -16,11 +16,18 @@
 #                   its own power and drives into C
 #   avoided         A stops in its own lane and stays there; C is untouched
 #
-# In all three the *same pair* collides second, at much the same place, and A is
-# party to both impacts. The only thing that separates them is the causal
-# relationship between the two impacts, so a method that reads the layout rather
-# than the structure will give the same answer to all three -- which is exactly
-# what this scenario is for.
+# In all three the *same pair* collides second, in much the same place, and A is
+# party to both impacts. What separates them is the causal relationship between
+# the two, and the evidence for it is A's own throttle rather than anything in
+# the layout: a method that reads where the vehicles ended up will give the same
+# answer to all three, which is exactly what this scenario is for.
+#
+# The two second impacts are not identical, and the scenario does not claim they
+# are. A carried vehicle arrives slewed and slowing, and a driven one arrives
+# square and accelerating, so the independent variant lands the harder blow. A
+# method could in principle separate them on severity alone; it would be reading
+# a proxy, and it would have learned nothing about which impact followed from
+# the first.
 #
 # The normative reading differs sharply even so. In the consequential variant A
 # is a party to two impacts and a contributor to neither; in the independent one
@@ -149,9 +156,18 @@ scenario:
     - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
       effect: { kind: "state", participant: "B", name: "closing" }
       edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "B", name: "no_braking" }
+    # B's own action, not a non-action state. "B did not brake" is not what
+    # happens here: B brakes 0.35 s before it arrives, far too late to matter,
+    # and the non-action detector discharges its obligation on any deceleration
+    # within 1.5 s of the critical time-to-collision -- including the one the
+    # impact itself produces. So `no_braking` is not realisable in a rear-end of
+    # this shape, and an earlier version of this template declared it anyway and
+    # had the edge dropped from every run as unrealised. S01, the frozen
+    # rear-end, names the follower's late brake for the same reason.
+    - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
       effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
       edge: "CAUSES_OUTCOME"
+      rationale: "B braked, and braked far too late to stop in the distance it had left"
     - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
       effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
       edge: "CONTRIBUTES_TO"
@@ -161,7 +177,8 @@ scenario:
     - "the initiating impact is identical in all three variants; only its sequel changes"
     - "the second impact involves the same pair in all variants, so the layout cannot distinguish them"
     - "A is party to both impacts, which is what the contact-matching ambiguity check has to handle"
-    - "C has no actions and the same spawn in every variant, so nothing about C separates them"
+    - "C has no actions, the same blueprint and the same speed in every variant"
+    - "C sits further ahead in the independent variant, because a vehicle doing its own manoeuvre needs room a carried one does not"
 
   variants:
     # ---- the second impact is a consequence of the first -----------------
@@ -216,7 +233,7 @@ scenario:
 
     # ---- the second impact is A's own doing, later -----------------------
     independent:
-      max_duration_s: 16.0
+      max_duration_s: 18.0
       intervention_candidates:
         - "A_emergency_brake"
         - "B_late_brake"
@@ -241,7 +258,7 @@ scenario:
               kind: "set_speed"
               t_start: 10.5
               duration: 12.0
-              params: { target_speed: 12.0 }
+              params: { target_speed: 9.0 }
             # Half a second after A sets off, not at the same instant: the
             # straight bit is what lets A be doing something by the time it
             # reaches the next lane. Turning out of a standstill produced a
@@ -251,6 +268,14 @@ scenario:
               t_start: 11.0
               duration: 2.5
               params: { lateral_m: -4.2 }
+        C:
+          # Further ahead than in the other two variants, and this is the one
+          # thing about C that is not identical across them. A needs room here:
+          # it has to finish a lane change and be travelling before it reaches
+          # C, and from the shared position it was still crabbing across the
+          # line when it arrived. What came of that was a 296 N.s clip on one
+          # seed, after which A simply carried on past at 12.6 m/s.
+          spawn: { anchor: "spawn_index", index: 265, forward_m: 84.0, lane_offset: -1 }
       validation:
         encounter_pair: ["A", "B"]
         min_separation_below_m: 5.0
@@ -271,9 +296,10 @@ scenario:
         - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "CONTRIBUTES_TO"
-        - cause: { kind: "state", participant: "B", name: "no_braking" }
+        - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
           edge: "CAUSES_OUTCOME"
+          rationale: "B braked, and braked far too late to stop in the distance it had left"
         - cause: { kind: "action", participant: "A", action_id: "A_changes_lane" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
           edge: "CAUSES_OUTCOME"
@@ -306,9 +332,10 @@ scenario:
         - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "CONTRIBUTES_TO"
-        - cause: { kind: "state", participant: "B", name: "no_braking" }
+        - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
           edge: "CAUSES_OUTCOME"
+          rationale: "B braked, and braked far too late to stop in the distance it had left"
       notes:
         - "one impact only; A stops clear and C is untouched"
         - "C never feels a contact, so C stays off the common timeline and the merged log says so"

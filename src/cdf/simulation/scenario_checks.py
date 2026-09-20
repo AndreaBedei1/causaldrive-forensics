@@ -70,13 +70,18 @@ def _path(states: Sequence[Any]) -> Dict[str, Any]:
     }
 
 
-#: Below this impulse a participant-pair contact is two cars leaning on each
-#: other, not a collision. The chain merge below collapses a contact that is
-#: continuously reported, but two vehicles that have come to rest touching also
-#: stop and restart reporting minutes into a run, and each restart would read as
-#: a fresh impact. Both guards are needed. The real impacts in this benchmark
-#: are upwards of 1600 N.s and mostly upwards of 4000; settling measures in the
-#: low hundreds.
+#: Below this, a *repeat* contact between a pair that has already touched is two
+#: cars leaning on each other rather than a second collision. The chain merge
+#: below collapses a contact that is continuously reported, but two vehicles at
+#: rest against each other also stop and restart reporting seconds later, and
+#: each restart would otherwise read as a fresh impact.
+#:
+#: It is deliberately not applied to a pair's first contact. A pair that has
+#: never touched and now touches has collided, however lightly, and hiding that
+#: from the physical checks while ``collision_pairs`` still reported it left one
+#: validation file contradicting itself. Whether a light contact is the
+#: collision a variant *declared* is a different question, asked of the whole
+#: campaign in tests/integration/test_final_campaign_physics.py.
 RESTING_CONTACT_IMPULSE = 500.0
 
 #: Contacts arriving closer together than this are the same impact still
@@ -91,11 +96,9 @@ def _pair_impacts(collisions: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     for c in collisions:
         if not c.get("is_participant_pair"):
             continue
-        impulse = float(c.get("impulse") or 0.0)
-        if impulse < RESTING_CONTACT_IMPULSE:
-            continue
         pair = tuple(sorted([str(c["participant_id"]), str(c["other_participant_id"])]))
-        rows.append({"t": float(c["t"]), "pair": pair, "impulse": impulse})
+        rows.append({"t": float(c["t"]), "pair": pair,
+                     "impulse": float(c.get("impulse") or 0.0)})
     # Vehicles that stay in contact are reported again every half second for as
     # long as it lasts. That is one impact, however long it lasts, so the merge
     # follows the chain: each further contact is absorbed if it arrives within
@@ -111,6 +114,11 @@ def _pair_impacts(collisions: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
         prev = last_seen.get(row["pair"])
         if prev is not None and row["t"] - prev[1] < CONTACT_CHAIN_WINDOW_S:
             merged[prev[0]]["impulse"] = max(merged[prev[0]]["impulse"], row["impulse"])
+            last_seen[row["pair"]] = (prev[0], row["t"])
+            continue
+        if prev is not None and row["impulse"] < RESTING_CONTACT_IMPULSE:
+            # This pair has touched before and is touching again, gently: they
+            # are resting against each other, not colliding a second time.
             last_seen[row["pair"]] = (prev[0], row["t"])
             continue
         last_seen[row["pair"]] = (len(merged), row["t"])

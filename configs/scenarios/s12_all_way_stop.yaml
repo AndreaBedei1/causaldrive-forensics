@@ -185,11 +185,19 @@ scenario:
               duration: 8.0
               params: { target_speed: 8.0 }
         B:
+          # The later arrival, and the reason the variant has a name. At the
+          # shared 9 m/s both vehicles reached their lines within a tenth of a
+          # second of each other and the benchmark rule -- priority to whoever
+          # completed its stop first, by a clear margin -- had nothing to
+          # separate. Approaching at 6 m/s and braking later puts this one about
+          # 1.7 s behind, which clears the 0.5 s margin with room to spare.
+          initial_speed: 6.0
+          target_speed: 6.0
           actions:
             - action_id: "B_stop"
               kind: "brake"
-              t_start: 2.8
-              duration: 7.7
+              t_start: 4.4
+              duration: 6.1
               params: { intensity: 0.9 }
             - action_id: "B_proceed"
               kind: "set_speed"
@@ -197,18 +205,26 @@ scenario:
               duration: 6.0
               params: { target_speed: 8.0 }
       notes:
-        - "A completes its stop about 1.6 s before B, which clears the margin"
+        - "A completes its stop about 1.7 s before B, which clears the margin"
         - "A then proceeds first, so both the stopping and the priority properties pass"
 
     # ---- B stops clearly first, and goes first: correct, mirrored --------
     b_arrives_first:
       participant_overrides:
         A:
+          # The later arrival, and the reason the variant has a name. At the
+          # shared 9 m/s both vehicles reached their lines within a tenth of a
+          # second of each other and the benchmark rule -- priority to whoever
+          # completed its stop first, by a clear margin -- had nothing to
+          # separate. Approaching at 6 m/s and braking later puts this one about
+          # 1.7 s behind, which clears the 0.5 s margin with room to spare.
+          initial_speed: 6.0
+          target_speed: 6.0
           actions:
             - action_id: "A_stop"
               kind: "brake"
-              t_start: 2.8
-              duration: 7.7
+              t_start: 4.4
+              duration: 6.1
               params: { intensity: 0.9 }
             - action_id: "A_proceed"
               kind: "set_speed"

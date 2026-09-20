@@ -57,12 +57,6 @@ HARD_CASES: Dict[Tuple[str, str], str] = {
         "the pushed vehicle must not be an initiating contributor merely "
         "because it physically struck the vehicle ahead"
     ),
-    # Retired variant. The entry stays because results/ still reports the
-    # campaign that included it, and a recorded finding needs its
-    # explanation to remain resolvable.
-    ("S14", "independent_impacts"): (
-        "two impacts sharing a vehicle but nothing else must not be chained"
-    ),
     ("S15", "deflected_into_c"): (
         "the deflected vehicle and the bystander are both uninvolved in the "
         "normative account"
@@ -73,7 +67,9 @@ HARD_CASES: Dict[Tuple[str, str], str] = {
     ),
     ("S16", "independent"): (
         "the same pair, the same geometry, and the second impact is that "
-        "vehicle's own doing"
+        "vehicle's own doing. This is the case S14's retired "
+        "independent_impacts variant was written for, on a road situation "
+        "rather than on a stopped car creeping into a wreck"
     ),
 }
 

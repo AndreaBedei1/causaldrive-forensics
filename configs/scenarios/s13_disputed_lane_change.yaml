@@ -131,11 +131,27 @@ scenario:
       validation:
         min_lateral_displacement_m:
           B: 1.5
+        # 90 deg, not the 60 the other two variants use. B is struck square in
+        # the flank while it is still crabbing across the lane, and a car hit
+        # like that is spun: B ends up about 68 deg off its original heading.
+        # The cap is here to catch a vehicle circling because it outran its
+        # route, which runs to hundreds of degrees, not to catch one that was
+        # turned by the collision the variant is about. The 60 was set when
+        # this variant produced a 17.7 N.s tap that disturbed nobody.
+        max_accumulated_turn_deg: 90.0
       intervention_candidates:
         - "B_cut_in"
         - "A_accelerate"
       participant_overrides:
         A:
+          # 12 m further back than in the other two variants. A accelerates
+          # here, and from the shared 25 m it arrived while B was still half a
+          # lane out and went straight past: what touched was B's front corner
+          # against A's rear, at 17.7 N.s on one seed, 98.0 on another and not
+          # at all on the third. Starting further back is what lets A close the
+          # gap from behind, which is the thing the variant is named for, rather
+          # than overtake before the gap exists.
+          spawn: { anchor: "location", x: -124.9, y: -190.1 }
           actions:
             # A speeds up as the gap opens, closing it again from behind.
             - action_id: "A_accelerate"

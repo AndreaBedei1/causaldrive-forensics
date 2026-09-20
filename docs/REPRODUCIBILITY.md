@@ -114,7 +114,7 @@ python scripts/run_campaign.py --artifacts artifacts_v2 \
                                --seeds 0 1 2 --attempts 3 --logs artifacts_v2/logs
 ```
 
-Thirty-five scenario/variant combinations x three seeds = **105 runs**. One
+Thirty-four scenario/variant combinations x three seeds = **102 runs**. One
 subprocess per run with a fresh simulator connection, because a long-lived engine
 accumulates state that silently changes later runs. Completed runs are skipped on
 a re-invocation, so an interrupted campaign resumes.

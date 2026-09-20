@@ -46,7 +46,11 @@ scenario:
   participants:
     - id: "A"
       blueprint: "vehicle.tesla.model3"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 30.0, lane_offset: 0 }
+      # 33, not 30. The claim this variant makes is that B would have stopped
+      # short of A unaided, so the distance B has to stop in is the claim. At a
+      # 15 m gap B arrived with 0.6 m to spare on two campaign seeds and touched
+      # A before C reached it on the third, which is the story backwards.
+      spawn: { anchor: "spawn_index", index: 265, forward_m: 33.0, lane_offset: 0 }
       route: { length_m: 120.0, step_m: 2.0 }
       initial_speed: 13.0
       target_speed: 13.0
@@ -119,7 +123,11 @@ scenario:
       validation:
         coasting_after_impact: ["B"]
         coasting_window_s: 1.5
-        impact_interval_s: { min: 0.15, max: 2.5 }
+        # One tick, not three. A floor here only has to make the two impacts
+        # separable in time at all; a *shorter* gap is more consistent with C
+        # pushing B into A, not less, and 0.15 s rejected the very thing the
+        # variant is about.
+        impact_interval_s: { min: 0.05, max: 2.5 }
       participant_overrides:
         B:
           # B must be free to roll when C strikes it, or the push this variant
