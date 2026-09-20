@@ -384,3 +384,25 @@ def test_nothing_placed_by_either_source_is_unresolved(monkeypatch):
     assert out["status"] == "UNRESOLVED_TIME_ALIGNMENT"
     assert out["offsets_s"] == {}
     assert sorted(out["unaligned_participants"]) == ["A", "B"]
+
+
+def test_a_radar_fit_on_the_search_bound_is_declined() -> None:
+    """An offset at the edge of the window is a failure to find one.
+
+    The optimiser is bounded, so when no offset fits it returns the bound and
+    reports it with the same confidence as a real answer. In the campaign that
+    found this, a vehicle that could not be placed at all came back placed a
+    full second out with confidence 0.94. Every offset this estimator resolves
+    legitimately lands well inside the window -- the largest measured across
+    the campaign is 0.57 s against a 1.0 s limit -- so the bound is never a
+    right answer, and saying nothing is better than saying that.
+    """
+    import inspect
+
+    from cdf.fusion import clock_alignment
+
+    source = inspect.getsource(clock_alignment)
+    assert "if abs(b) >= limit - step:" in source, (
+        "the bound-hit guard has gone; a radar fit that ran out of search "
+        "window will be reported as a confident offset again"
+    )

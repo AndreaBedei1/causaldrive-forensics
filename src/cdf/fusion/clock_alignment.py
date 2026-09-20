@@ -320,6 +320,23 @@ def estimate_track_clock(
             b, ppm = map(float, affine.x)
             fit = affine
             drift_status = "AFFINE_DRIFT_ESTIMATED"
+    # A solution sitting on the edge of the search window is not an estimate of
+    # the offset; it is the optimiser having run out of room to look. Nothing
+    # else here notices: the fit reports a bound-hit with the same confidence as
+    # any other answer, which is how a vehicle that could not be placed at all
+    # came back placed a full second out with confidence 0.96.
+    #
+    # The check is here rather than beside the first solve because there are
+    # three of them -- the radar-only fit, the re-solve once collision anchors
+    # join the objective, and the joint offset-and-surface-bias refinement --
+    # and each can land on the bound after the previous one did not. Every
+    # offset this estimator resolves legitimately lands well inside the window:
+    # the largest across the campaign is 0.57 s against a 1.0 s limit.
+    #
+    # Declining is a verdict the rest of the pipeline already carries: the
+    # recorder is reported UNRESOLVED rather than placed on a guess.
+    if abs(b) >= limit - step:
+        return None
     valid, pos, rng, rate, vel, heading = channels(b, ppm, surface)
     n = int(np.count_nonzero(valid))
     if n < min_n or np.mean(valid) < float(get("min_overlap_fraction", 0.6)):
