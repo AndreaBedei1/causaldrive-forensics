@@ -2,7 +2,7 @@
 # Override the interpreter if you are not using the documented conda env:
 #   make test PYTHON=/path/to/python
 PYTHON ?= python
-ARTIFACTS ?= artifacts
+ARTIFACTS ?= artifacts_v2
 SEEDS ?= 0 1 2
 
 .PHONY: help install env-check test test-fast test-carla lint leakage verify \
@@ -46,7 +46,7 @@ leakage:
 	$(PYTHON) -m pytest -q tests/test_no_privileged_leakage.py
 
 verify:
-	$(PYTHON) scripts/verify_evidence.py --artifacts artifacts
+	$(PYTHON) scripts/verify_evidence.py --artifacts $(ARTIFACTS)
 
 s1:
 	$(PYTHON) scripts/run_scenario.py --scenario S01 --seed 0
