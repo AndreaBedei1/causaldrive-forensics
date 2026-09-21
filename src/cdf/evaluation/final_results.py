@@ -1302,10 +1302,21 @@ def _v2_markdown(lines, v2):
     counterfactual = v2.get("counterfactual") or {}
     lines.append("## Counterfactuals")
     lines.append("")
-    lines.append("But-for verdicts: {0}.".format(
-        _tally(counterfactual.get("but_for_verdicts"))))
+    if counterfactual.get("campaign_wide_aggregate_claimed"):
+        lines.append("But-for verdicts: {0}.".format(
+            _tally(counterfactual.get("but_for_verdicts"))))
+    else:
+        lines.append(
+            "No campaign-wide fresh counterfactual aggregate is claimed. "
+            "Replay coverage is {0} of {1} findings; status: `{2}`."
+            .format(
+                counterfactual.get("n_tested_findings", 0),
+                counterfactual.get("n_findings", 0),
+                counterfactual.get("status", "not_evaluated"),
+            )
+        )
     roles = counterfactual.get("counterfactual_roles") or {}
-    if roles:
+    if roles and counterfactual.get("campaign_wide_aggregate_claimed"):
         lines.append("")
         lines.append("Roles: {0}.".format(_tally(roles)))
     lines.append("")

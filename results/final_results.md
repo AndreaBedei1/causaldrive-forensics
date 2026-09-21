@@ -19,17 +19,17 @@ How each recorder reached common time. A vehicle placed by a fitted trajectory i
 | Source | Recorders | Scored | Offset MAE | Worst |
 |---|---|---|---|---|
 | `REFERENCE` | 102 | 102 | 0.000000 s | 0.000000 s |
-| `CONTACT` | 85 | 85 | 0.005604 s | 0.249677 s |
-| `RADAR` | 14 | 14 | 0.201849 s | 1.275730 s |
+| `CONTACT` | 84 | 84 | 0.002698 s | 0.199960 s |
+| `RADAR` | 14 | 14 | 0.086944 s | 0.293477 s |
 | `ACQUISITION_START` | 36 | 36 | 0.000003 s | 0.000008 s |
-| `UNRESOLVED` | 6 | 0 | -- | -- |
-| **all** | 243 | 237 | 0.013934 s | 1.275730 s |
+| `UNRESOLVED` | 7 | 0 | -- | -- |
+| **all** | 243 | 236 | 0.006119 s | 0.293477 s |
 
 The **all** row is the participant-weighted clock offset MAE.
 
-Run status: ACQUISITION_START_ALIGNED x33, CONTACT_ALIGNED x33, HYBRID_ALIGNED x14, MULTI_CONTACT_ALIGNED x16, PARTIALLY_ALIGNED x6. Unresolved recorders: 6 of 243.
+Run status: ACQUISITION_START_ALIGNED x33, CONTACT_ALIGNED x33, HYBRID_ALIGNED x14, MULTI_CONTACT_ALIGNED x15, PARTIALLY_ALIGNED x7. Unresolved recorders: 7 of 243.
 
-**Drift is not estimated; scale is fixed to 1.** Over the 135 non-reference recorders, the true relative drift this leaves unmodelled averages 59.70 ppm and reaches 180.60 ppm at worst. A reference recorder has no relative drift by definition and is not counted. Over the longest run in the campaign, 30 s, that worst case accumulates 0.0054 s against a simulator tick of 0.05 s, which is why fitting a rate was not worth the extra parameter. It is a control value, not an estimator score, and it is kept out of the headline table for that reason.
+**Drift is not estimated; scale is fixed to 1.** Over the 134 non-reference recorders, the true relative drift this leaves unmodelled averages 58.95 ppm and reaches 180.60 ppm at worst. A reference recorder has no relative drift by definition and is not counted. Over the longest run in the campaign, 30 s, that worst case accumulates 0.0054 s against a simulator tick of 0.05 s, which is why fitting a rate was not worth the extra parameter. It is a control value, not an estimator score, and it is kept out of the headline table for that reason.
 
 ## Perception, from real campaign frames
 
@@ -54,13 +54,13 @@ The same formulae run over the merged reconstruction and over the observable gro
 
 | Comparable | Agree | Agreement | False violations | Missed violations |
 |---|---|---|---|---|
-| 157 | 114 | 72.6% | 10 (6.4%) | 33 (21.0%) |
+| 158 | 115 | 72.8% | 10 (6.3%) | 33 (20.9%) |
 
 False violations by property: P3 x5, P4 x5.
 
 Missed violations by property: P3 x21, P4 x12.
 
-Undecided by property: P4 x7, P5 x9, P7 x12.
+Undecided by property: P4 x7, P5 x9, P7 x11.
 
 ## Contribution: physical and normative
 
@@ -68,7 +68,7 @@ Two different claims, scored apart. A vehicle that brakes hard is a physical cau
 
 | Comparison | Runs | Precision | Recall | F1 | Exact set match |
 |---|---|---|---|---|---|
-| Physical | 102 | 68.9% | 70.8% | 69.9% | 37.2% |
+| Physical | 102 | 69.4% | 70.8% | 70.1% | 38.2% |
 | Normative | 30 | 60.6% | 60.6% | 60.6% | -- |
 
 Runs carrying a normative reference: 30 of 102.
@@ -81,20 +81,21 @@ Runs carrying a normative reference: 30 of 102.
 
 - **S16/consequential**: the second impact is a consequence, so its participant contributes to the first and not to the second
 
-- **S16/independent**: the same pair, the same geometry, and the second impact is that vehicle's own doing. This is the case S14's retired independent_impacts variant was written for, on a road situation rather than on a stopped car creeping into a wreck
+- **S16/independent**: the same pair and geometry recur, but the second impact is that vehicle's own doing rather than a consequence of the first
 
-Evidence classes over all findings: insufficient x67, partial x98, supported x72.
+Evidence classes over all findings: insufficient x67, partial x97, supported x72.
 
 ## Collision order
 
-Verdicts: correct x17, not_applicable x33, not_established x1, single_impact x49, wrong x2.
+Verdicts: correct x18, not_applicable x33, not_established x1, single_impact x48, wrong x2.
 
-Multi-impact runs: 20. The method claimed an order on 19 of them and was right on 17 of those (89.5%); on 1 it declined, because the impacts were closer together than the recording resolves or the offset rested on a shared anchor. Over all 20 runs that is 85.0%.
+Multi-impact runs: 21. The method claimed an order on 20 of them and was right on 18 of those (90.0%); on 1 it declined, because the impacts were closer together than the recording resolves or the offset rested on a shared anchor. Over all 21 runs that is 85.7%.
 
 | Scenario | Variant | Seed | Verdict |
 |---|---|---|---|
 | S06 | a_front_pushed | 0 | correct |
 | S06 | b_rear_first | 0 | correct |
+| S06 | a_front_pushed | 1 | correct |
 | S06 | b_rear_first | 1 | correct |
 | S06 | a_front_pushed | 2 | not_established |
 | S06 | b_rear_first | 2 | correct |
@@ -118,7 +119,7 @@ Multi-impact runs: 20. The method claimed an order on 19 of them and was right o
 
 ## Counterfactuals
 
-But-for verdicts: not tested x231, yes x6.
+No campaign-wide fresh counterfactual aggregate is claimed. Replay coverage is 0 of 236 findings; status: `not_evaluated`.
 
 A prevention opportunity is not factual causation, and the role records which question each replay answered: removing what happened, supplying what did not, or improving what did.
 
@@ -141,7 +142,7 @@ A row whose reference is empty cannot be a measurement of the method. Anything t
 | S03 / crash | yes | B | A, B | mixed: shared_contribution, single_initiator | 0.167 | 0.333 | 0.222 | partial |
 | S04 / yield | yes | none | none | insufficient_evidence | 1.000 | 1.000 | 1.000 | restrained |
 | S05 / crash | yes | A, B | B | mixed: shared_contribution, single_initiator | 1.000 | 0.500 | 0.667 | partial |
-| S06 / a_front_pushed | yes | C | B, C | mixed: joint_contribution, mixed | 0.667 | 1.000 | 0.778 | partial |
+| S06 / a_front_pushed | yes | C | B, C | mixed: mixed, shared_contribution | 0.500 | 1.000 | 0.667 | partial |
 | S06 / b_rear_first | yes | B, C | C | single_initiator | 1.000 | 0.500 | 0.667 | partial |
 | S07 / full_view | yes | B, C | B, C | mixed: shared_contribution, single_initiator | 1.000 | 0.833 | 0.889 | partial |
 | S07 / occluded | yes | B, C | B, C | shared_contribution | 1.000 | 1.000 | 1.000 | correct |
@@ -180,8 +181,8 @@ Structural figures here are scored against the scenario design reference, not ag
 | Method | Node F1 | Edge F1 | Edge recall | Canonical edge recall | Causal Path F1 | Attribution F1 |
 |---|---|---|---|---|---|---|
 | Best Local | 0.237 | 0.071 | 0.252 | 0.363 | n/a | n/a |
-| Simple Fusion | 0.284 | 0.045 | 0.316 | 0.480 | n/a | n/a |
-| Fusion + Global Causal Reasoning | 0.284 | 0.040 | 0.360 | 0.590 | 0.345 | 0.464 |
+| Simple Fusion | 0.284 | 0.044 | 0.315 | 0.480 | n/a | n/a |
+| Fusion + Global Causal Reasoning | 0.284 | 0.039 | 0.359 | 0.591 | 0.345 | 0.459 |
 
 Averaged over 102 runs. Strict edge recall has a ceiling of **0.576** on this campaign: that fraction of the reference's edges leave a scripted-action node, which is a privileged event type no reconstruction can emit. 48 of 102 runs reach their own ceiling exactly.
 
@@ -193,7 +194,7 @@ Causal-path F1 and attribution F1 describe the complete reconstruction and are n
 |---|---|---|---|---|---|
 | A - synchronized (control) | 0.00000 | 0.284 | 0.039 | 0.361 | 0.803 |
 | B - independent, uncorrected | 0.24965 | 0.284 | 0.040 | 0.363 | 0.781 |
-| C - independent, estimated alignment | 0.07207 | 0.281 | 0.036 | 0.333 | 0.801 |
+| C - independent, estimated alignment | 0.05115 | 0.280 | 0.036 | 0.336 | 0.792 |
 
 Averaged over 102 runs.
 
@@ -206,16 +207,16 @@ One row per measure, averaged over scenario variants so that a three-seed varian
 | Measure | Value |
 |---|---|
 | incidents reconstructed | 27 of 34 scenario variants |
-| collision time error | 0.0116 s |
-| collision location error | 0.0474 m |
-| collision pair recall | 0.993 |
-| spurious collisions | 13 |
-| cross-view trajectory RMSE | 1.315 m |
-| scenario-aggregated clock offset MAE | 0.01624 s |
+| collision time error | 0.0101 s |
+| collision location error | 0.0343 m |
+| collision pair recall | 1.000 |
+| spurious collisions | 11 |
+| cross-view trajectory RMSE | 1.318 m |
+| scenario-aggregated clock offset MAE | 0.00714 s |
 | clock fit residual (self-reported) | -- s |
 | causal path P / R / F1 | 0.337 / 0.420 / 0.345 |
-| causal ancestry recall | 0.841 |
-| design-template attribution P / R / F1 | 0.500 / 0.457 / 0.464 |
+| causal ancestry recall | 0.844 |
+| design-template attribution P / R / F1 | 0.493 / 0.457 / 0.459 |
 | exact contributor-set accuracy | 0.217 |
 | scenarios correct / partial / incorrect / insufficient | 3 / 7 / 9 / 4 |
 | false attributions on negative controls | 0 of 11 |

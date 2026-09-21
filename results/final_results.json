@@ -24,12 +24,12 @@
       "offset_error_s": 0.249646
     },
     "C_independent_aligned": {
-      "association_f1": 0.8015,
-      "drift_error_ppm": 56.8376,
-      "edge_f1": 0.0359,
-      "edge_recall": 0.3327,
-      "node_f1": 0.2806,
-      "offset_error_s": 0.072068
+      "association_f1": 0.7923,
+      "drift_error_ppm": 56.2035,
+      "edge_f1": 0.0363,
+      "edge_recall": 0.336,
+      "node_f1": 0.2797,
+      "offset_error_s": 0.051152
     },
     "n_runs": 102,
     "note": "one physical recording per run, scored three ways. A restamps the recorders onto the simulator clock using the true profiles and is a control, not a separate run; B takes each recorder's own timestamps at face value; C uses the alignment estimated from shared observations alone, which is the protocol the campaign reports"
@@ -37,39 +37,39 @@
   "headline": {
     "attribution": {
       "exact_set_accuracy": 0.2174,
-      "f1": 0.4638,
+      "f1": 0.4589,
       "n_correct": 3,
       "n_incorrect": 9,
       "n_insufficient_evidence": 4,
       "n_partial": 7,
-      "n_scenarios_with_seed_disagreement": 10,
+      "n_scenarios_with_seed_disagreement": 9,
       "note": "means are over the scenario variants designed to collide; a negative control has nothing to attribute and its vacuous 1.0 would flatter the mean",
-      "precision": 0.5,
+      "precision": 0.4928,
       "recall": 0.4565
     },
     "causal_paths": {
-      "ancestry_recall": 0.8409,
+      "ancestry_recall": 0.8441,
       "f1": 0.3455,
       "precision": 0.3366,
       "recall": 0.4199
     },
     "clock": {
       "alignment_residual_s": null,
-      "drift_mae_ppm": 59.129,
+      "drift_mae_ppm": 58.82,
       "note": "error of the estimated transform against the recorder's true clock profile; the residual is what the fit itself reported, without reference to the truth",
-      "offset_mae_s": 0.016244
+      "offset_mae_s": 0.007141
     },
     "n_collision_variants": 23,
     "n_negative_controls": 11,
     "n_runs": 102,
     "n_scenario_variants": 34,
     "reconstruction": {
-      "collision_location_error_m": 0.0474,
-      "collision_pair_recall": 0.9928,
-      "collision_time_error_s": 0.0116,
-      "cross_view_rmse_m": 1.3148,
+      "collision_location_error_m": 0.0343,
+      "collision_pair_recall": 1.0,
+      "collision_time_error_s": 0.0101,
+      "cross_view_rmse_m": 1.3176,
       "n_incidents_reconstructed": 27,
-      "n_spurious_collisions": 13
+      "n_spurious_collisions": 11
     },
     "restraint": {
       "n_controls": 11,
@@ -94,18 +94,18 @@
       "strict_nodes_recall": 0.2926
     },
     "fusion_global_reasoning": {
-      "canonical_edges_f1": 0.0768,
-      "canonical_edges_precision": 0.0418,
-      "canonical_edges_recall": 0.5902,
-      "canonical_nodes_f1": 0.4138,
+      "canonical_edges_f1": 0.077,
+      "canonical_edges_precision": 0.0419,
+      "canonical_edges_recall": 0.5912,
+      "canonical_nodes_f1": 0.4137,
       "canonical_nodes_precision": 0.3008,
-      "canonical_nodes_recall": 0.7328,
-      "strict_edges_f1": 0.0395,
-      "strict_edges_precision": 0.0213,
-      "strict_edges_recall": 0.3597,
-      "strict_nodes_f1": 0.2837,
-      "strict_nodes_precision": 0.2053,
-      "strict_nodes_recall": 0.5084
+      "canonical_nodes_recall": 0.733,
+      "strict_edges_f1": 0.0393,
+      "strict_edges_precision": 0.0212,
+      "strict_edges_recall": 0.3587,
+      "strict_nodes_f1": 0.2838,
+      "strict_nodes_precision": 0.2054,
+      "strict_nodes_recall": 0.5091
     },
     "n_runs": 102,
     "n_runs_at_ceiling": 48,
@@ -114,15 +114,15 @@
       "canonical_edges_f1": 0.0797,
       "canonical_edges_precision": 0.0444,
       "canonical_edges_recall": 0.4796,
-      "canonical_nodes_f1": 0.4138,
+      "canonical_nodes_f1": 0.4137,
       "canonical_nodes_precision": 0.3008,
-      "canonical_nodes_recall": 0.7328,
-      "strict_edges_f1": 0.0447,
-      "strict_edges_precision": 0.0247,
-      "strict_edges_recall": 0.3163,
-      "strict_nodes_f1": 0.2837,
-      "strict_nodes_precision": 0.2053,
-      "strict_nodes_recall": 0.5084
+      "canonical_nodes_recall": 0.733,
+      "strict_edges_f1": 0.0445,
+      "strict_edges_precision": 0.0246,
+      "strict_edges_recall": 0.3153,
+      "strict_nodes_f1": 0.2838,
+      "strict_nodes_precision": 0.2054,
+      "strict_nodes_recall": 0.5091
     },
     "strict_edge_recall_ceiling": 0.5756
   },
@@ -406,22 +406,22 @@
       "verdict": "partial"
     },
     {
-      "ancestry_recall": 0.8889,
-      "attribution_class": "mixed: joint_contribution, mixed",
-      "attribution_f1": 0.7778,
-      "attribution_precision": 0.6667,
+      "ancestry_recall": 1.0,
+      "attribution_class": "mixed: mixed, shared_contribution",
+      "attribution_f1": 0.6667,
+      "attribution_precision": 0.5,
       "attribution_recall": 1.0,
-      "attribution_source": "counterfactual_replay",
+      "attribution_source": "fused_graph_only",
       "causal_path_f1": 0.0,
       "causal_path_precision": 0.0,
       "causal_path_recall": 0.0,
       "clock_alignment_residual_s": null,
       "clock_drift_mae_ppm": 40.5214,
-      "clock_offset_mae_s": 0.0754,
-      "collision_location_error_m": 0.379,
-      "collision_pair_recall": 0.8333,
-      "collision_time_error_s": 0.117,
-      "contributors_disagree_across_seeds": true,
+      "clock_offset_mae_s": 0.0827,
+      "collision_location_error_m": 0.104,
+      "collision_pair_recall": 1.0,
+      "collision_time_error_s": 0.0825,
+      "contributors_disagree_across_seeds": false,
       "contributors_ground_truth": [
         "C"
       ],
@@ -431,7 +431,7 @@
       ],
       "cross_view_rmse_m": 2.0439,
       "edge_f1_best_local": 0.1143,
-      "edge_f1_fused": 0.0284,
+      "edge_f1_fused": 0.028,
       "edge_recall_ceiling": 0.4444,
       "edge_recall_fused": 0.1852,
       "exact_set_match": false,
@@ -439,9 +439,9 @@
       "false_attribution": false,
       "incident_reconstructed": true,
       "n_runs": 3,
-      "n_spurious_collisions": 3,
+      "n_spurious_collisions": 1,
       "node_f1_best_local": 0.2368,
-      "node_f1_fused": 0.3991,
+      "node_f1_fused": 0.4005,
       "scenario_id": "S06",
       "variant": "a_front_pushed",
       "verdict": "partial"
@@ -452,7 +452,7 @@
       "attribution_f1": 0.6667,
       "attribution_precision": 1.0,
       "attribution_recall": 0.5,
-      "attribution_source": "counterfactual_replay",
+      "attribution_source": "fused_graph_only",
       "causal_path_f1": 0.0,
       "causal_path_precision": 0.0,
       "causal_path_recall": 0.0,
@@ -1292,8 +1292,8 @@
       "causal_path_precision": 0.0199,
       "causal_path_recall": 0.6667,
       "clock_alignment_residual_s": null,
-      "clock_drift_mae_ppm": 62.8675,
-      "clock_offset_mae_s": 0.0002,
+      "clock_drift_mae_ppm": 60.8016,
+      "clock_offset_mae_s": 0.0006,
       "collision_location_error_m": 0.0,
       "collision_pair_recall": 1.0,
       "collision_time_error_s": 0.0,
@@ -1302,9 +1302,9 @@
       "contributors_inferred": [
         "B"
       ],
-      "cross_view_rmse_m": 1.0839,
+      "cross_view_rmse_m": 1.1368,
       "edge_f1_best_local": 0.039,
-      "edge_f1_fused": 0.0146,
+      "edge_f1_fused": 0.0142,
       "edge_recall_ceiling": 1.0,
       "edge_recall_fused": 0.6667,
       "exact_set_match": false,
@@ -1314,7 +1314,7 @@
       "n_runs": 3,
       "n_spurious_collisions": 0,
       "node_f1_best_local": 0.2182,
-      "node_f1_fused": 0.2394,
+      "node_f1_fused": 0.2396,
       "scenario_id": "S15",
       "variant": "single_impact",
       "verdict": "incorrect"
@@ -1330,8 +1330,8 @@
       "causal_path_precision": 0.0,
       "causal_path_recall": 0.0,
       "clock_alignment_residual_s": null,
-      "clock_drift_mae_ppm": 74.8453,
-      "clock_offset_mae_s": 0.3176,
+      "clock_drift_mae_ppm": 66.4031,
+      "clock_offset_mae_s": 0.0004,
       "collision_location_error_m": 0.0,
       "collision_pair_recall": 1.0,
       "collision_time_error_s": 0.0,
@@ -1341,9 +1341,9 @@
         "B"
       ],
       "contributors_inferred": [],
-      "cross_view_rmse_m": 1.392,
+      "cross_view_rmse_m": 1.4324,
       "edge_f1_best_local": 0.146,
-      "edge_f1_fused": 0.0511,
+      "edge_f1_fused": 0.0525,
       "edge_recall_ceiling": 0.3333,
       "edge_recall_fused": 0.3333,
       "exact_set_match": false,
@@ -1353,7 +1353,7 @@
       "n_runs": 3,
       "n_spurious_collisions": 0,
       "node_f1_best_local": 0.2352,
-      "node_f1_fused": 0.3526,
+      "node_f1_fused": 0.3545,
       "scenario_id": "S16",
       "variant": "avoided",
       "verdict": "insufficient evidence"
@@ -1626,7 +1626,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 2,
           "node_f1": 0.358974358974359,
-          "offset_error_s": 0.08530286096557577
+          "offset_error_s": 0.08530286125704581
         }
       },
       "clock_alignment_residual_s": null,
@@ -1737,7 +1737,7 @@
           "edge_recall": 0.25,
           "n_merged_groups": 2,
           "node_f1": 0.41025641025641024,
-          "offset_error_s": 0.08539293475857399
+          "offset_error_s": 0.08539293479061325
         }
       },
       "clock_alignment_residual_s": null,
@@ -2078,7 +2078,7 @@
           "edge_recall": 0.42857142857142855,
           "n_merged_groups": 3,
           "node_f1": 0.43478260869565216,
-          "offset_error_s": 0.004708514660233254
+          "offset_error_s": 0.004708514843090039
         }
       },
       "clock_alignment_residual_s": null,
@@ -2871,7 +2871,7 @@
           "edge_recall": 0.4,
           "n_merged_groups": 9,
           "node_f1": 0.3013698630136986,
-          "offset_error_s": 0.06535835643603566
+          "offset_error_s": 0.06535835645361093
         }
       },
       "clock_alignment_residual_s": null,
@@ -3217,7 +3217,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 0,
           "node_f1": 0.13186813186813187,
-          "offset_error_s": 0.052252125709021595
+          "offset_error_s": 0.052252125708914084
         }
       },
       "clock_alignment_residual_s": null,
@@ -3550,7 +3550,7 @@
           "edge_recall": 0.5,
           "n_merged_groups": 9,
           "node_f1": 0.3076923076923077,
-          "offset_error_s": 0.059292225704127385
+          "offset_error_s": 0.05929222570412739
         }
       },
       "clock_alignment_residual_s": null,
@@ -3864,11 +3864,11 @@
         "simple_fusion.strict.nodes.recall": 0.5
       },
       "ancestry_recall": 1.0,
-      "attribution_class": "joint_contribution",
-      "attribution_f1": 1.0,
-      "attribution_precision": 1.0,
+      "attribution_class": "shared_contribution",
+      "attribution_f1": 0.666667,
+      "attribution_precision": 0.5,
       "attribution_recall": 1.0,
-      "attribution_source": "counterfactual_replay",
+      "attribution_source": "fused_graph_only",
       "causal_path_f1": 0.0,
       "causal_path_precision": 0.0,
       "causal_path_recall": 0.0,
@@ -3912,6 +3912,7 @@
         "C"
       ],
       "contributors_inferred": [
+        "B",
         "C"
       ],
       "cross_view_rmse_m": 1.774476,
@@ -3919,7 +3920,7 @@
       "edge_f1_fused": 0.03389830508474577,
       "edge_recall_ceiling": 0.444444,
       "edge_recall_fused": 0.2222222222222222,
-      "exact_set_match": true,
+      "exact_set_match": false,
       "expect_collision": true,
       "false_attribution": null,
       "incident_reconstructed": true,
@@ -3953,32 +3954,32 @@
         "best_local.strict.nodes.f1": 0.25,
         "best_local.strict.nodes.precision": 0.3333333333333333,
         "best_local.strict.nodes.recall": 0.2,
-        "fusion_global_reasoning.canonical.edges.f1": 0.10344827586206896,
-        "fusion_global_reasoning.canonical.edges.precision": 0.056074766355140186,
-        "fusion_global_reasoning.canonical.edges.recall": 0.6666666666666666,
-        "fusion_global_reasoning.canonical.nodes.f1": 0.5858585858585859,
-        "fusion_global_reasoning.canonical.nodes.precision": 0.4915254237288136,
+        "fusion_global_reasoning.canonical.edges.f1": 0.11570247933884298,
+        "fusion_global_reasoning.canonical.edges.precision": 0.0625,
+        "fusion_global_reasoning.canonical.edges.recall": 0.7777777777777778,
+        "fusion_global_reasoning.canonical.nodes.f1": 0.5918367346938775,
+        "fusion_global_reasoning.canonical.nodes.precision": 0.5,
         "fusion_global_reasoning.canonical.nodes.recall": 0.725,
-        "fusion_global_reasoning.strict.edges.f1": 0.017241379310344827,
-        "fusion_global_reasoning.strict.edges.precision": 0.009345794392523364,
-        "fusion_global_reasoning.strict.edges.recall": 0.1111111111111111,
-        "fusion_global_reasoning.strict.nodes.f1": 0.4242424242424242,
-        "fusion_global_reasoning.strict.nodes.precision": 0.3559322033898305,
+        "fusion_global_reasoning.strict.edges.f1": 0.0,
+        "fusion_global_reasoning.strict.edges.precision": 0.0,
+        "fusion_global_reasoning.strict.edges.recall": 0.0,
+        "fusion_global_reasoning.strict.nodes.f1": 0.42857142857142855,
+        "fusion_global_reasoning.strict.nodes.precision": 0.3620689655172414,
         "fusion_global_reasoning.strict.nodes.recall": 0.525,
         "simple_fusion.canonical.edges.f1": 0.12658227848101264,
         "simple_fusion.canonical.edges.precision": 0.07142857142857142,
         "simple_fusion.canonical.edges.recall": 0.5555555555555556,
-        "simple_fusion.canonical.nodes.f1": 0.5858585858585859,
-        "simple_fusion.canonical.nodes.precision": 0.4915254237288136,
+        "simple_fusion.canonical.nodes.f1": 0.5918367346938775,
+        "simple_fusion.canonical.nodes.precision": 0.5,
         "simple_fusion.canonical.nodes.recall": 0.725,
-        "simple_fusion.strict.edges.f1": 0.025316455696202528,
-        "simple_fusion.strict.edges.precision": 0.014285714285714285,
-        "simple_fusion.strict.edges.recall": 0.1111111111111111,
-        "simple_fusion.strict.nodes.f1": 0.4242424242424242,
-        "simple_fusion.strict.nodes.precision": 0.3559322033898305,
+        "simple_fusion.strict.edges.f1": 0.0,
+        "simple_fusion.strict.edges.precision": 0.0,
+        "simple_fusion.strict.edges.recall": 0.0,
+        "simple_fusion.strict.nodes.f1": 0.42857142857142855,
+        "simple_fusion.strict.nodes.precision": 0.3620689655172414,
         "simple_fusion.strict.nodes.recall": 0.525
       },
-      "ancestry_recall": 0.666667,
+      "ancestry_recall": 1.0,
       "attribution_class": "mixed",
       "attribution_f1": 0.666667,
       "attribution_precision": 0.5,
@@ -4018,11 +4019,11 @@
       },
       "clock_alignment_residual_s": null,
       "clock_drift_mae_ppm": 41.60255270790891,
-      "clock_offset_mae_s": 0.12493326338504936,
-      "collision_location_error_m": 0.83605,
-      "collision_order_correct": false,
-      "collision_pair_recall": 0.5,
-      "collision_time_error_s": 0.25,
+      "clock_offset_mae_s": 0.1468252715062303,
+      "collision_location_error_m": 0.011316,
+      "collision_order_correct": true,
+      "collision_pair_recall": 1.0,
+      "collision_time_error_s": 0.146577,
       "contributors_ground_truth": [
         "C"
       ],
@@ -4032,7 +4033,7 @@
       ],
       "cross_view_rmse_m": 2.582213,
       "edge_f1_best_local": 0.1142857142857143,
-      "edge_f1_fused": 0.034482758620689655,
+      "edge_f1_fused": 0.03305785123966942,
       "edge_recall_ceiling": 0.444444,
       "edge_recall_fused": 0.2222222222222222,
       "exact_set_match": false,
@@ -4045,10 +4046,10 @@
         "n_properties": 12,
         "n_unknown": 4
       },
-      "n_reconstructed_collisions": 3,
-      "n_spurious_collisions": 2,
+      "n_reconstructed_collisions": 2,
+      "n_spurious_collisions": 0,
       "node_f1_best_local": 0.25,
-      "node_f1_fused": 0.4242424242424242,
+      "node_f1_fused": 0.42857142857142855,
       "run_path": "artifacts_v2/S06_chain_collision/seed_001_a_front_pushed",
       "scenario_id": "S06",
       "seed": 1,
@@ -4215,7 +4216,7 @@
       "attribution_f1": 0.666667,
       "attribution_precision": 1.0,
       "attribution_recall": 0.5,
-      "attribution_source": "counterfactual_replay",
+      "attribution_source": "fused_graph_only",
       "causal_path_f1": 0.0,
       "causal_path_precision": 0.0,
       "causal_path_recall": 0.0,
@@ -4710,7 +4711,7 @@
           "edge_recall": 0.2222222222222222,
           "n_merged_groups": 5,
           "node_f1": 0.35443037974683544,
-          "offset_error_s": 0.05241461991908111
+          "offset_error_s": 0.0524146199299768
         }
       },
       "clock_alignment_residual_s": null,
@@ -4943,7 +4944,7 @@
           "edge_recall": 0.2222222222222222,
           "n_merged_groups": 4,
           "node_f1": 0.33333333333333337,
-          "offset_error_s": 0.05230454289905803
+          "offset_error_s": 0.052304542896401615
         }
       },
       "clock_alignment_residual_s": null,
@@ -5177,7 +5178,7 @@
           "edge_recall": 0.2222222222222222,
           "n_merged_groups": 5,
           "node_f1": 0.3157894736842105,
-          "offset_error_s": 0.052999088825193184
+          "offset_error_s": 0.05299908885656493
         }
       },
       "clock_alignment_residual_s": null,
@@ -5294,7 +5295,7 @@
           "edge_recall": 0.42857142857142855,
           "n_merged_groups": 7,
           "node_f1": 0.2903225806451613,
-          "offset_error_s": 0.01258452953131238
+          "offset_error_s": 0.012584529593858904
         }
       },
       "clock_alignment_residual_s": null,
@@ -5409,7 +5410,7 @@
           "edge_recall": 0.42857142857142855,
           "n_merged_groups": 9,
           "node_f1": 0.36363636363636365,
-          "offset_error_s": 0.004850270941632581
+          "offset_error_s": 0.004850270778652781
         }
       },
       "clock_alignment_residual_s": null,
@@ -5524,7 +5525,7 @@
           "edge_recall": 0.5,
           "n_merged_groups": 8,
           "node_f1": 0.3050847457627119,
-          "offset_error_s": 0.004025436327775703
+          "offset_error_s": 0.004025435825741747
         }
       },
       "clock_alignment_residual_s": null,
@@ -5639,7 +5640,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 1,
           "node_f1": 0.41666666666666663,
-          "offset_error_s": 0.08627423991342362
+          "offset_error_s": 0.08627423978674462
         }
       },
       "clock_alignment_residual_s": null,
@@ -5865,7 +5866,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 2,
           "node_f1": 0.40816326530612246,
-          "offset_error_s": 0.002222118038752788
+          "offset_error_s": 0.0022221180393244555
         }
       },
       "clock_alignment_residual_s": null,
@@ -5980,7 +5981,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 9,
           "node_f1": 0.25,
-          "offset_error_s": 0.00012591363141004064
+          "offset_error_s": 0.0001259136314098186
         }
       },
       "clock_alignment_residual_s": null,
@@ -6315,7 +6316,7 @@
           "edge_recall": 0.5,
           "n_merged_groups": 1,
           "node_f1": 0.20512820512820512,
-          "offset_error_s": 0.019818330032673304
+          "offset_error_s": 0.01981833003047921
         }
       },
       "clock_alignment_residual_s": null,
@@ -6426,7 +6427,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 1,
           "node_f1": 0.125,
-          "offset_error_s": 0.006245644091303803
+          "offset_error_s": 0.006245644091281314
         }
       },
       "clock_alignment_residual_s": null,
@@ -6759,7 +6760,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 1,
           "node_f1": 0.14634146341463414,
-          "offset_error_s": 0.00801914944589495
+          "offset_error_s": 0.008019149446070434
         }
       },
       "clock_alignment_residual_s": null,
@@ -6870,7 +6871,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 1,
           "node_f1": 0.14634146341463414,
-          "offset_error_s": 0.007075034124597979
+          "offset_error_s": 0.007075034124598034
         }
       },
       "clock_alignment_residual_s": null,
@@ -6981,7 +6982,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 10,
           "node_f1": 0.4067796610169492,
-          "offset_error_s": 0.002020872405821633
+          "offset_error_s": 0.0020208724058479177
         }
       },
       "clock_alignment_residual_s": null,
@@ -7207,7 +7208,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 10,
           "node_f1": 0.26666666666666666,
-          "offset_error_s": 0.003259232402193668
+          "offset_error_s": 0.003259232402227197
         }
       },
       "clock_alignment_residual_s": null,
@@ -7431,7 +7432,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 2,
           "node_f1": 0.17647058823529413,
-          "offset_error_s": 0.0007522213672926104
+          "offset_error_s": 0.0007522213672926069
         }
       },
       "clock_alignment_residual_s": null,
@@ -7542,7 +7543,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 1,
           "node_f1": 0.19354838709677416,
-          "offset_error_s": 0.0036235781480071644
+          "offset_error_s": 0.0036235781472799527
         }
       },
       "clock_alignment_residual_s": null,
@@ -7653,7 +7654,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 1,
           "node_f1": 0.14634146341463414,
-          "offset_error_s": 0.005399693992352114
+          "offset_error_s": 0.005399693992326177
         }
       },
       "clock_alignment_residual_s": null,
@@ -8430,7 +8431,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 4,
           "node_f1": 0.28571428571428575,
-          "offset_error_s": 0.010064419895559843
+          "offset_error_s": 0.01006441989555985
         }
       },
       "clock_alignment_residual_s": null,
@@ -8541,7 +8542,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 2,
           "node_f1": 0.2448979591836735,
-          "offset_error_s": 0.06016239741087892
+          "offset_error_s": 0.06016239741087889
         }
       },
       "clock_alignment_residual_s": null,
@@ -9657,7 +9658,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 2,
           "node_f1": 0.3333333333333333,
-          "offset_error_s": 0.02182859417215964
+          "offset_error_s": 0.021828594172159654
         }
       },
       "clock_alignment_residual_s": null,
@@ -10439,7 +10440,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 2,
           "node_f1": 0.3414634146341463,
-          "offset_error_s": 0.12334641183197455
+          "offset_error_s": 0.12334641183197452
         }
       },
       "clock_alignment_residual_s": null,
@@ -10782,7 +10783,7 @@
           "edge_recall": 0.5,
           "n_merged_groups": 5,
           "node_f1": 0.3090909090909091,
-          "offset_error_s": 0.08986684931973091
+          "offset_error_s": 0.08986684931973092
         }
       },
       "clock_alignment_residual_s": null,
@@ -10889,13 +10890,13 @@
           "offset_error_s": 0.20794161441860745
         },
         "C_independent_aligned": {
-          "association_f1": 0.8,
+          "association_f1": 0.6666666666666666,
           "drift_error_ppm": 95.72893424969476,
-          "edge_f1": 0.05555555555555555,
-          "edge_recall": 0.3333333333333333,
-          "n_merged_groups": 2,
-          "node_f1": 0.4,
-          "offset_error_s": 0.39270003583740903
+          "edge_f1": 0.08421052631578947,
+          "edge_recall": 0.6666666666666666,
+          "n_merged_groups": 3,
+          "node_f1": 0.4044943820224719,
+          "offset_error_s": 0.005435199921060424
         }
       },
       "clock_alignment_residual_s": null,
@@ -11009,7 +11010,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 16,
           "node_f1": 0.1904761904761905,
-          "offset_error_s": 0.04094875282777786
+          "offset_error_s": 0.040948752818954236
         }
       },
       "clock_alignment_residual_s": null,
@@ -11120,7 +11121,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 18,
           "node_f1": 0.2448979591836735,
-          "offset_error_s": 0.04776105853752703
+          "offset_error_s": 0.04776105853851487
         }
       },
       "clock_alignment_residual_s": null,
@@ -11231,7 +11232,7 @@
           "edge_recall": 0.0,
           "n_merged_groups": 17,
           "node_f1": 0.22222222222222224,
-          "offset_error_s": 0.04601609500781173
+          "offset_error_s": 0.04601609511402717
         }
       },
       "clock_alignment_residual_s": null,
@@ -11342,7 +11343,7 @@
           "edge_recall": 0.75,
           "n_merged_groups": 27,
           "node_f1": 0.23668639053254434,
-          "offset_error_s": 0.006117420530576373
+          "offset_error_s": 0.006117420529350409
         }
       },
       "clock_alignment_residual_s": null,
@@ -11453,7 +11454,7 @@
           "edge_recall": 0.75,
           "n_merged_groups": 25,
           "node_f1": 0.2894736842105263,
-          "offset_error_s": 0.008436713067222587
+          "offset_error_s": 0.008436713076687447
         }
       },
       "clock_alignment_residual_s": null,
@@ -11566,7 +11567,7 @@
           "edge_recall": 1.0,
           "n_merged_groups": 21,
           "node_f1": 0.32812499999999994,
-          "offset_error_s": 0.01612149432987864
+          "offset_error_s": 0.016121494267448428
         }
       },
       "clock_alignment_residual_s": null,
@@ -11619,30 +11620,30 @@
         "best_local.strict.nodes.f1": 0.19607843137254902,
         "best_local.strict.nodes.precision": 0.16666666666666666,
         "best_local.strict.nodes.recall": 0.23809523809523808,
-        "fusion_global_reasoning.canonical.edges.f1": 0.025641025641025647,
-        "fusion_global_reasoning.canonical.edges.precision": 0.012987012987012988,
+        "fusion_global_reasoning.canonical.edges.f1": 0.024096385542168676,
+        "fusion_global_reasoning.canonical.edges.precision": 0.012195121951219513,
         "fusion_global_reasoning.canonical.edges.recall": 1.0,
-        "fusion_global_reasoning.canonical.nodes.f1": 0.3943661971830986,
-        "fusion_global_reasoning.canonical.nodes.precision": 0.28,
-        "fusion_global_reasoning.canonical.nodes.recall": 0.6666666666666666,
-        "fusion_global_reasoning.strict.edges.f1": 0.02469135802469136,
-        "fusion_global_reasoning.strict.edges.precision": 0.0125,
+        "fusion_global_reasoning.canonical.nodes.f1": 0.35294117647058826,
+        "fusion_global_reasoning.canonical.nodes.precision": 0.234375,
+        "fusion_global_reasoning.canonical.nodes.recall": 0.7142857142857143,
+        "fusion_global_reasoning.strict.edges.f1": 0.023255813953488372,
+        "fusion_global_reasoning.strict.edges.precision": 0.011764705882352941,
         "fusion_global_reasoning.strict.edges.recall": 1.0,
-        "fusion_global_reasoning.strict.nodes.f1": 0.2816901408450704,
-        "fusion_global_reasoning.strict.nodes.precision": 0.2,
-        "fusion_global_reasoning.strict.nodes.recall": 0.47619047619047616,
-        "simple_fusion.canonical.edges.f1": 0.02985074626865672,
-        "simple_fusion.canonical.edges.precision": 0.015151515151515152,
+        "fusion_global_reasoning.strict.nodes.f1": 0.2823529411764706,
+        "fusion_global_reasoning.strict.nodes.precision": 0.1875,
+        "fusion_global_reasoning.strict.nodes.recall": 0.5714285714285714,
+        "simple_fusion.canonical.edges.f1": 0.029411764705882353,
+        "simple_fusion.canonical.edges.precision": 0.014925373134328358,
         "simple_fusion.canonical.edges.recall": 1.0,
-        "simple_fusion.canonical.nodes.f1": 0.3943661971830986,
-        "simple_fusion.canonical.nodes.precision": 0.28,
-        "simple_fusion.canonical.nodes.recall": 0.6666666666666666,
-        "simple_fusion.strict.edges.f1": 0.02857142857142857,
-        "simple_fusion.strict.edges.precision": 0.014492753623188406,
+        "simple_fusion.canonical.nodes.f1": 0.35294117647058826,
+        "simple_fusion.canonical.nodes.precision": 0.234375,
+        "simple_fusion.canonical.nodes.recall": 0.7142857142857143,
+        "simple_fusion.strict.edges.f1": 0.028169014084507043,
+        "simple_fusion.strict.edges.precision": 0.014285714285714285,
         "simple_fusion.strict.edges.recall": 1.0,
-        "simple_fusion.strict.nodes.f1": 0.2816901408450704,
-        "simple_fusion.strict.nodes.precision": 0.2,
-        "simple_fusion.strict.nodes.recall": 0.47619047619047616
+        "simple_fusion.strict.nodes.f1": 0.2823529411764706,
+        "simple_fusion.strict.nodes.precision": 0.1875,
+        "simple_fusion.strict.nodes.recall": 0.5714285714285714
       },
       "ancestry_recall": 1.0,
       "attribution_class": "single_initiator",
@@ -11679,12 +11680,12 @@
           "edge_recall": 1.0,
           "n_merged_groups": 18,
           "node_f1": 0.2823529411764706,
-          "offset_error_s": 0.006633672550305647
+          "offset_error_s": 0.006633672550305661
         }
       },
       "clock_alignment_residual_s": null,
-      "clock_drift_mae_ppm": 94.93600694598925,
-      "clock_offset_mae_s": 0.00036496525197143555,
+      "clock_drift_mae_ppm": 88.7385094658355,
+      "clock_offset_mae_s": 0.0014222834956114912,
       "collision_location_error_m": 0.0,
       "collision_order_correct": null,
       "collision_pair_recall": 1.0,
@@ -11693,9 +11694,9 @@
       "contributors_inferred": [
         "B"
       ],
-      "cross_view_rmse_m": 1.104125,
+      "cross_view_rmse_m": 1.262917,
       "edge_f1_best_local": 0.07142857142857142,
-      "edge_f1_fused": 0.02469135802469136,
+      "edge_f1_fused": 0.023255813953488372,
       "edge_recall_ceiling": 1.0,
       "edge_recall_fused": 1.0,
       "exact_set_match": false,
@@ -11711,7 +11712,7 @@
       "n_reconstructed_collisions": 1,
       "n_spurious_collisions": 0,
       "node_f1_best_local": 0.19607843137254902,
-      "node_f1_fused": 0.2816901408450704,
+      "node_f1_fused": 0.2823529411764706,
       "run_path": "artifacts_v2/S15_intersection_pileup/seed_000_single_impact",
       "scenario_id": "S15",
       "seed": 0,
@@ -11787,12 +11788,12 @@
         },
         "C_independent_aligned": {
           "association_f1": 0.6153846153846153,
-          "drift_error_ppm": 12.691737140635428,
+          "drift_error_ppm": 12.691737140579917,
           "edge_f1": 0.0,
           "edge_recall": 0.0,
           "n_merged_groups": 11,
           "node_f1": 0.18181818181818182,
-          "offset_error_s": 0.4010742232476735
+          "offset_error_s": 0.40107422324764963
         }
       },
       "clock_alignment_residual_s": null,
@@ -11900,12 +11901,12 @@
         },
         "C_independent_aligned": {
           "association_f1": 0.6666666666666666,
-          "drift_error_ppm": 87.53318261328636,
-          "edge_f1": 0.020408163265306124,
+          "drift_error_ppm": 47.49239699902707,
+          "edge_f1": 0.017543859649122806,
           "edge_recall": 1.0,
-          "n_merged_groups": 14,
-          "node_f1": 0.2184873949579832,
-          "offset_error_s": 0.22595568375487515
+          "n_merged_groups": 17,
+          "node_f1": 0.2222222222222222,
+          "offset_error_s": 0.005890039276404503
         }
       },
       "clock_alignment_residual_s": null,
@@ -11958,30 +11959,30 @@
         "best_local.strict.nodes.f1": 0.23333333333333334,
         "best_local.strict.nodes.precision": 0.2692307692307692,
         "best_local.strict.nodes.recall": 0.20588235294117646,
-        "fusion_global_reasoning.canonical.edges.f1": 0.022727272727272724,
-        "fusion_global_reasoning.canonical.edges.precision": 0.012195121951219513,
+        "fusion_global_reasoning.canonical.edges.f1": 0.023809523809523808,
+        "fusion_global_reasoning.canonical.edges.precision": 0.01282051282051282,
         "fusion_global_reasoning.canonical.edges.recall": 0.16666666666666666,
-        "fusion_global_reasoning.canonical.nodes.f1": 0.5434782608695653,
-        "fusion_global_reasoning.canonical.nodes.precision": 0.43103448275862066,
-        "fusion_global_reasoning.canonical.nodes.recall": 0.7352941176470589,
-        "fusion_global_reasoning.strict.edges.f1": 0.04545454545454545,
-        "fusion_global_reasoning.strict.edges.precision": 0.024390243902439025,
+        "fusion_global_reasoning.canonical.nodes.f1": 0.5454545454545455,
+        "fusion_global_reasoning.canonical.nodes.precision": 0.4444444444444444,
+        "fusion_global_reasoning.canonical.nodes.recall": 0.7058823529411765,
+        "fusion_global_reasoning.strict.edges.f1": 0.047619047619047616,
+        "fusion_global_reasoning.strict.edges.precision": 0.02564102564102564,
         "fusion_global_reasoning.strict.edges.recall": 0.3333333333333333,
-        "fusion_global_reasoning.strict.nodes.f1": 0.34782608695652173,
-        "fusion_global_reasoning.strict.nodes.precision": 0.27586206896551724,
-        "fusion_global_reasoning.strict.nodes.recall": 0.47058823529411764,
-        "simple_fusion.canonical.edges.f1": 0.027777777777777776,
-        "simple_fusion.canonical.edges.precision": 0.015151515151515152,
+        "fusion_global_reasoning.strict.nodes.f1": 0.34090909090909094,
+        "fusion_global_reasoning.strict.nodes.precision": 0.2777777777777778,
+        "fusion_global_reasoning.strict.nodes.recall": 0.4411764705882353,
+        "simple_fusion.canonical.edges.f1": 0.028169014084507043,
+        "simple_fusion.canonical.edges.precision": 0.015384615384615385,
         "simple_fusion.canonical.edges.recall": 0.16666666666666666,
-        "simple_fusion.canonical.nodes.f1": 0.5434782608695653,
-        "simple_fusion.canonical.nodes.precision": 0.43103448275862066,
-        "simple_fusion.canonical.nodes.recall": 0.7352941176470589,
-        "simple_fusion.strict.edges.f1": 0.05555555555555555,
-        "simple_fusion.strict.edges.precision": 0.030303030303030304,
+        "simple_fusion.canonical.nodes.f1": 0.5454545454545455,
+        "simple_fusion.canonical.nodes.precision": 0.4444444444444444,
+        "simple_fusion.canonical.nodes.recall": 0.7058823529411765,
+        "simple_fusion.strict.edges.f1": 0.056338028169014086,
+        "simple_fusion.strict.edges.precision": 0.03076923076923077,
         "simple_fusion.strict.edges.recall": 0.3333333333333333,
-        "simple_fusion.strict.nodes.f1": 0.34782608695652173,
-        "simple_fusion.strict.nodes.precision": 0.27586206896551724,
-        "simple_fusion.strict.nodes.recall": 0.47058823529411764
+        "simple_fusion.strict.nodes.f1": 0.34090909090909094,
+        "simple_fusion.strict.nodes.precision": 0.2777777777777778,
+        "simple_fusion.strict.nodes.recall": 0.4411764705882353
       },
       "ancestry_recall": 0.0,
       "attribution_class": "insufficient_evidence",
@@ -12012,18 +12013,18 @@
           "offset_error_s": 0.2701288807662925
         },
         "C_independent_aligned": {
-          "association_f1": 0.6666666666666666,
-          "drift_error_ppm": 36.21736637426931,
-          "edge_f1": 0.044444444444444446,
+          "association_f1": 0.4,
+          "drift_error_ppm": 10.76814201983467,
+          "edge_f1": 0.046511627906976744,
           "edge_recall": 0.3333333333333333,
           "n_merged_groups": 2,
-          "node_f1": 0.34782608695652173,
-          "offset_error_s": 0.3174134211062869
+          "node_f1": 0.34090909090909094,
+          "offset_error_s": 0.005904626679854474
         }
       },
       "clock_alignment_residual_s": null,
-      "clock_drift_mae_ppm": 36.21736637426931,
-      "clock_offset_mae_s": 0.3144890964311302,
+      "clock_drift_mae_ppm": 10.76814201983467,
+      "clock_offset_mae_s": 5.597719742270191e-05,
       "collision_location_error_m": 0.0,
       "collision_order_correct": null,
       "collision_pair_recall": 1.0,
@@ -12033,9 +12034,9 @@
         "B"
       ],
       "contributors_inferred": [],
-      "cross_view_rmse_m": 1.381938,
+      "cross_view_rmse_m": 1.435097,
       "edge_f1_best_local": 0.10256410256410256,
-      "edge_f1_fused": 0.04545454545454545,
+      "edge_f1_fused": 0.047619047619047616,
       "edge_recall_ceiling": 0.333333,
       "edge_recall_fused": 0.3333333333333333,
       "exact_set_match": false,
@@ -12051,7 +12052,7 @@
       "n_reconstructed_collisions": 1,
       "n_spurious_collisions": 0,
       "node_f1_best_local": 0.23333333333333334,
-      "node_f1_fused": 0.34782608695652173,
+      "node_f1_fused": 0.34090909090909094,
       "run_path": "artifacts_v2/S16_secondary_collision/seed_000_avoided",
       "scenario_id": "S16",
       "seed": 0,
@@ -12132,7 +12133,7 @@
           "edge_recall": 0.3333333333333333,
           "n_merged_groups": 2,
           "node_f1": 0.3611111111111111,
-          "offset_error_s": 0.10000536599115989
+          "offset_error_s": 0.10000536599115994
         }
       },
       "clock_alignment_residual_s": null,
@@ -12186,29 +12187,29 @@
         "best_local.strict.nodes.f1": 0.2950819672131148,
         "best_local.strict.nodes.precision": 0.3103448275862069,
         "best_local.strict.nodes.recall": 0.28125,
-        "fusion_global_reasoning.canonical.edges.f1": 0.06521739130434782,
-        "fusion_global_reasoning.canonical.edges.precision": 0.03488372093023256,
+        "fusion_global_reasoning.canonical.edges.f1": 0.06818181818181818,
+        "fusion_global_reasoning.canonical.edges.precision": 0.036585365853658534,
         "fusion_global_reasoning.canonical.edges.recall": 0.5,
-        "fusion_global_reasoning.canonical.nodes.f1": 0.5581395348837209,
-        "fusion_global_reasoning.canonical.nodes.precision": 0.4444444444444444,
+        "fusion_global_reasoning.canonical.nodes.f1": 0.5783132530120481,
+        "fusion_global_reasoning.canonical.nodes.precision": 0.47058823529411764,
         "fusion_global_reasoning.canonical.nodes.recall": 0.75,
-        "fusion_global_reasoning.strict.edges.f1": 0.04347826086956522,
-        "fusion_global_reasoning.strict.edges.precision": 0.023255813953488372,
+        "fusion_global_reasoning.strict.edges.f1": 0.04545454545454545,
+        "fusion_global_reasoning.strict.edges.precision": 0.024390243902439025,
         "fusion_global_reasoning.strict.edges.recall": 0.3333333333333333,
-        "fusion_global_reasoning.strict.nodes.f1": 0.3488372093023256,
-        "fusion_global_reasoning.strict.nodes.precision": 0.2777777777777778,
+        "fusion_global_reasoning.strict.nodes.f1": 0.3614457831325301,
+        "fusion_global_reasoning.strict.nodes.precision": 0.29411764705882354,
         "fusion_global_reasoning.strict.nodes.recall": 0.46875,
         "simple_fusion.canonical.edges.f1": 0.08333333333333334,
         "simple_fusion.canonical.edges.precision": 0.045454545454545456,
         "simple_fusion.canonical.edges.recall": 0.5,
-        "simple_fusion.canonical.nodes.f1": 0.5581395348837209,
-        "simple_fusion.canonical.nodes.precision": 0.4444444444444444,
+        "simple_fusion.canonical.nodes.f1": 0.5783132530120481,
+        "simple_fusion.canonical.nodes.precision": 0.47058823529411764,
         "simple_fusion.canonical.nodes.recall": 0.75,
         "simple_fusion.strict.edges.f1": 0.05555555555555555,
         "simple_fusion.strict.edges.precision": 0.030303030303030304,
         "simple_fusion.strict.edges.recall": 0.3333333333333333,
-        "simple_fusion.strict.nodes.f1": 0.3488372093023256,
-        "simple_fusion.strict.nodes.precision": 0.2777777777777778,
+        "simple_fusion.strict.nodes.f1": 0.3614457831325301,
+        "simple_fusion.strict.nodes.precision": 0.29411764705882354,
         "simple_fusion.strict.nodes.recall": 0.46875
       },
       "ancestry_recall": 0.0,
@@ -12250,8 +12251,8 @@
         }
       },
       "clock_alignment_residual_s": null,
-      "clock_drift_mae_ppm": 180.44948771528402,
-      "clock_offset_mae_s": 0.6383419144252204,
+      "clock_drift_mae_ppm": 180.57201841614744,
+      "clock_offset_mae_s": 0.0009815951458908845,
       "collision_location_error_m": 2e-06,
       "collision_order_correct": null,
       "collision_pair_recall": 1.0,
@@ -12261,9 +12262,9 @@
         "B"
       ],
       "contributors_inferred": [],
-      "cross_view_rmse_m": 1.361735,
+      "cross_view_rmse_m": 1.429643,
       "edge_f1_best_local": 0.1,
-      "edge_f1_fused": 0.04347826086956522,
+      "edge_f1_fused": 0.04545454545454545,
       "edge_recall_ceiling": 0.333333,
       "edge_recall_fused": 0.3333333333333333,
       "exact_set_match": false,
@@ -12279,7 +12280,7 @@
       "n_reconstructed_collisions": 1,
       "n_spurious_collisions": 0,
       "node_f1_best_local": 0.25,
-      "node_f1_fused": 0.3488372093023256,
+      "node_f1_fused": 0.3614457831325301,
       "run_path": "artifacts_v2/S16_secondary_collision/seed_002_avoided",
       "scenario_id": "S16",
       "seed": 2,
@@ -12360,7 +12361,7 @@
           "edge_recall": 0.2857142857142857,
           "n_merged_groups": 1,
           "node_f1": 0.30303030303030304,
-          "offset_error_s": 0.00578728326477447
+          "offset_error_s": 0.0002213806215366626
         }
       },
       "clock_alignment_residual_s": null,
@@ -12696,13 +12697,13 @@
           "offset_error_s": 0.2078905963520086
         },
         "C_independent_aligned": {
-          "association_f1": 0.5714285714285715,
-          "drift_error_ppm": 25.66997685699013,
-          "edge_f1": 0.04938271604938271,
+          "association_f1": 0.33333333333333337,
+          "drift_error_ppm": 8.732422754120783,
+          "edge_f1": 0.05633802816901408,
           "edge_recall": 0.25,
           "n_merged_groups": 2,
-          "node_f1": 0.3177570093457944,
-          "offset_error_s": 0.6100538714398855
+          "node_f1": 0.26804123711340205,
+          "offset_error_s": 0.10000959873883497
         }
       },
       "clock_alignment_residual_s": null,
@@ -12928,13 +12929,13 @@
           "offset_error_s": 0.2017712190692474
         },
         "C_independent_aligned": {
-          "association_f1": 0.8,
-          "drift_error_ppm": 36.49865682908704,
-          "edge_f1": 0.051948051948051945,
+          "association_f1": 0.5,
+          "drift_error_ppm": 56.78980444812076,
+          "edge_f1": 0.05970149253731343,
           "edge_recall": 0.25,
           "n_merged_groups": 2,
-          "node_f1": 0.3366336633663366,
-          "offset_error_s": 0.6207486312431514
+          "node_f1": 0.2921348314606742,
+          "offset_error_s": 0.00549105550233539
         }
       },
       "clock_alignment_residual_s": null,
@@ -12980,17 +12981,17 @@
       "drift_estimated": false,
       "drift_note": "the aligner fits an offset and fixes scale to 1, so drift is not estimated. This is the true relative drift that choice leaves unmodelled, measured after the fact over the non-reference recorders; a reference has no relative drift by definition",
       "longest_run_s": 30.0,
-      "n_aligned": 201,
-      "n_drift_scored": 135,
+      "n_aligned": 200,
+      "n_drift_scored": 134,
       "n_participants": 243,
-      "n_participants_without_a_reference_offset": 6,
+      "n_participants_without_a_reference_offset": 7,
       "n_runs": 102,
-      "n_unresolved": 6,
+      "n_unresolved": 7,
       "note": "error is relative to the run's reference recorder, because a common timeline is only fixed up to a constant. The source says how each recorder was placed: a physical contact, a fitted radar trajectory, or not at all",
       "offset_error": {
-        "mae_s": 0.013934,
-        "max_abs_s": 1.27573,
-        "n": 237
+        "mae_s": 0.006119,
+        "max_abs_s": 0.293477,
+        "n": 236
       },
       "offset_error_by_source": {
         "ACQUISITION_START": {
@@ -12999,13 +13000,13 @@
           "n": 36
         },
         "CONTACT": {
-          "mae_s": 0.005604,
-          "max_abs_s": 0.249677,
-          "n": 85
+          "mae_s": 0.002698,
+          "max_abs_s": 0.19996,
+          "n": 84
         },
         "RADAR": {
-          "mae_s": 0.201849,
-          "max_abs_s": 1.27573,
+          "mae_s": 0.086944,
+          "max_abs_s": 0.293477,
           "n": 14
         },
         "REFERENCE": {
@@ -13023,25 +13024,25 @@
         "ACQUISITION_START_ALIGNED": 33,
         "CONTACT_ALIGNED": 33,
         "HYBRID_ALIGNED": 14,
-        "MULTI_CONTACT_ALIGNED": 16,
-        "PARTIALLY_ALIGNED": 6
+        "MULTI_CONTACT_ALIGNED": 15,
+        "PARTIALLY_ALIGNED": 7
       },
       "source_distribution": {
         "ACQUISITION_START": 36,
-        "CONTACT": 85,
+        "CONTACT": 84,
         "RADAR": 14,
         "REFERENCE": 102,
-        "UNRESOLVED": 6
+        "UNRESOLVED": 7
       },
       "tick_s": 0.05,
       "unmodelled_drift_max_ppm": 180.605,
-      "unmodelled_drift_ppm": 59.698,
+      "unmodelled_drift_ppm": 58.953,
       "unmodelled_drift_worst_s": 0.005418,
-      "unresolved_rate": 0.0247
+      "unresolved_rate": 0.0288
     },
     "collision_order": {
-      "accuracy_where_claimed": 0.8947,
-      "correct_rate": 0.85,
+      "accuracy_where_claimed": 0.9,
+      "correct_rate": 0.8571,
       "multi_impact_runs": [
         {
           "cell": "A-B then B-C (correct)",
@@ -13055,6 +13056,13 @@
           "scenario": "S06",
           "seed": 0,
           "variant": "b_rear_first",
+          "verdict": "correct"
+        },
+        {
+          "cell": "A-B then B-C (correct)",
+          "scenario": "S06",
+          "seed": 1,
+          "variant": "a_front_pushed",
           "verdict": "correct"
         },
         {
@@ -13184,41 +13192,44 @@
           "verdict": "correct"
         }
       ],
-      "n_multi_impact_runs": 20,
-      "n_order_claimed": 19,
+      "n_multi_impact_runs": 21,
+      "n_order_claimed": 20,
       "n_order_declined": 1,
       "note": "only runs with more than one impact can get an order wrong. 'not established' is its own verdict, not a failure: two impacts closer together than the recording can resolve, or an offset resting on a shared anchor, leave an order the method did not claim",
       "verdicts": {
-        "correct": 17,
+        "correct": 18,
         "not_applicable": 33,
         "not_established": 1,
-        "single_impact": 49,
+        "single_impact": 48,
         "wrong": 2
       }
     },
     "counterfactual": {
       "but_for_verdicts": {
-        "not tested": 231,
-        "yes": 6
+        "not tested": 236
       },
+      "campaign_wide_aggregate_claimed": false,
       "counterfactual_roles": {},
+      "n_findings": 236,
       "n_reports": 102,
-      "note": "a prevention opportunity is not factual causation. The role says which question a replay answered: removing what happened, supplying what did not, or improving what did"
+      "n_tested_findings": 0,
+      "note": "a campaign-wide aggregate is reported only when every finding was tested. A prevention opportunity is not factual causation. The role says which question a replay answered: removing what happened, supplying what did not, or improving what did",
+      "status": "not_evaluated"
     },
     "formal": {
-      "agreement": 0.7261,
-      "false_violation_rate": 0.0637,
+      "agreement": 0.7278,
+      "false_violation_rate": 0.0633,
       "false_violations_by_property": {
         "P3": 5,
         "P4": 5
       },
-      "missed_violation_rate": 0.2102,
+      "missed_violation_rate": 0.2089,
       "missed_violations_by_property": {
         "P3": 21,
         "P4": 12
       },
-      "n_agree": 114,
-      "n_comparable": 157,
+      "n_agree": 115,
+      "n_comparable": 158,
       "n_false_violations": 10,
       "n_missed_violations": 33,
       "n_runs": 102,
@@ -13227,7 +13238,7 @@
       "undecided_by_property": {
         "P4": 7,
         "P5": 9,
-        "P7": 12
+        "P7": 11
       }
     },
     "perception": {
@@ -13287,11 +13298,11 @@
     "responsibility": {
       "evidence_classes": {
         "insufficient": 67,
-        "partial": 98,
+        "partial": 97,
         "supported": 72
       },
       "sets": {
-        "exact_physical_match_rate": 0.3725,
+        "exact_physical_match_rate": 0.3824,
         "hard_cases": [
           {
             "designed_normative": [],
@@ -13377,10 +13388,10 @@
               "B"
             ],
             "variant": "independent",
-            "why_it_is_hard": "the same pair, the same geometry, and the second impact is that vehicle's own doing. This is the case S14's retired independent_impacts variant was written for, on a road situation rather than on a stopped car creeping into a wreck"
+            "why_it_is_hard": "the same pair and geometry recur, but the second impact is that vehicle's own doing rather than a consequence of the first"
           }
         ],
-        "n_exact_physical_match": 38,
+        "n_exact_physical_match": 39,
         "n_runs": 102,
         "n_runs_with_a_normative_reference": 30,
         "normative_contributor_sets": {
@@ -13393,11 +13404,11 @@
         },
         "note": "counts are summed across runs and divided once, so every participant weighs the same. The hard cases are listed individually because an aggregate can hide getting one backwards",
         "physical_contributor_sets": {
-          "f1": 0.6986,
+          "f1": 0.701,
           "n_expected": 144,
-          "n_found": 148,
+          "n_found": 147,
           "n_matched": 102,
-          "precision": 0.6892,
+          "precision": 0.6939,
           "recall": 0.7083
         },
         "scored": true

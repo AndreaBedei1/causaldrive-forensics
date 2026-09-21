@@ -18,10 +18,9 @@ tick and monotonic-safe. `clocks.independent: false` reproduces synchronized
 recorder timestamping. Neither choice changes scenario action times or physics.
 
 Old campaign artifacts without a `clock_protocol` marker are the
-`synchronized_clock_baseline`; retain them unchanged. New manifests explicitly
-declare `independent_local_clocks`. Do not combine the campaigns as if their
-inference protocol were identical. Final paper results need a new independent
-clock campaign after the smoke tests; this change does not regenerate it.
+`synchronized_clock_baseline`; retain them unchanged. Final V2 manifests
+explicitly declare `independent_local_clocks`. Do not combine the campaigns as
+if their inference protocol were identical.
 
 Use a separate artifacts root for smoke runs:
 
@@ -706,18 +705,11 @@ produced a run and what evaluated it is visible rather than silent.
 
 ### What the recorded campaign actually is
 
-**The V2 campaign is a single-commit campaign.** All 105 runs under
-`artifacts_v2/` were recorded at commit `a76be77a`, between 2026-09-18T23:49 and
-2026-09-19T01:03. Every run's `manifest.json` records that commit, and there are
-16 distinct configuration hashes across the campaign, exactly one per scenario,
-so no scenario was recorded under two different configurations.
-
-That property is what makes the campaign comparable run to run without further
-argument. It is also not free: it was reached by re-recording. When the audit of
-scenario validity found that S11 and S15 declared a stop sign on an approach
-where Town05 renders no mesh, the affected seeds were re-recorded rather than
-patched in the evaluation, and the whole campaign was re-recorded afterwards so
-that it remained one experiment rather than two stitched together.
+The final V2 factual campaign contains 102 runs: 34 scenario/variant
+combinations at three seeds. Restaged scenarios were re-recorded rather than
+patched in evaluation. Every run stores the commit, seed, fully merged
+configuration and configuration hash that produced its evidence, so provenance
+is checked from the artifacts rather than inferred from directory names.
 
 Every run still stores its own fully merged configuration rather than a
 reference to one, so the claim above is checkable from the artifacts and not
@@ -727,8 +719,8 @@ counterfactual manifest as well as the run manifest, so a mismatch between what
 produced a run and what evaluated it is visible rather than silent.
 
 Evaluation is re-derived offline over every run in one pass
-(`python scripts/reprocess_runs.py --artifacts artifacts_v2 --stages evaluate
-figures viewer`), so all 105 runs are scored by one build of the metrics code
+(`python scripts/reprocess_runs.py --artifacts artifacts_v2 --stages fuse check
+evaluate ablate clocks figures viewer manifest`), so all 102 runs are scored by one build of the metrics code
 rather than by whatever was current when each was recorded.
 
 #### Historical: the V1 campaign was not

@@ -10,9 +10,8 @@ scenario definitions. Historical V1 material remains under
 The numerical snapshot below is read from the committed
 [`results/final_results.json`](../results/final_results.json). One caveat is
 important: commit `2b6df8a6` fixed a radar clock fit that could return the
-search boundary as a high-confidence estimate. The final clock aggregate has
-not yet been propagated through every offline artifact, so the pre-fix clock
-MAE in the generated result file is not repeated here.
+search boundary as a high-confidence estimate. The complete 102-run offline
+dependency chain and these generated results now include that fix.
 
 ## Reconstruction
 
@@ -23,16 +22,16 @@ MAE in the generated result file is not repeated here.
 | Collision variants | 23 |
 | Negative controls | 11 |
 | Incidents reconstructed | 27 / 34 variants |
-| Collision-pair recall | **0.9928** |
-| Mean collision-time error | **0.0116 s** |
-| Mean collision-location error | **0.0474 m** |
-| Spurious collisions | **13** |
-| Cross-view trajectory RMSE | **1.3148 m** |
+| Collision-pair recall | **1.0000** |
+| Mean collision-time error | **0.0101 s** |
+| Mean collision-location error | **0.0343 m** |
+| Spurious collisions | **11** |
+| Cross-view trajectory RMSE | **1.3176 m** |
 
-For multi-impact incidents there are 20 applicable runs. The system claims an
-order on 19 of them: **17 are correct, 2 wrong**, and 1 further run is reported
+For multi-impact incidents there are 21 applicable runs. The system claims an
+order on 20 of them: **18 are correct, 2 wrong**, and 1 further run is reported
 as `not_established`. Accuracy where an order is claimed is therefore
-**89.5%**.
+**90.0%**.
 
 ## S16: secondary collision
 
@@ -54,10 +53,10 @@ contributor in `consequential`.
 
 | Comparison | Precision | Recall | F1 |
 |---|---:|---:|---:|
-| Physical contributors | 0.689 | 0.708 | **0.699** |
+| Physical contributors | 0.694 | 0.708 | **0.701** |
 | Normative contributors | 0.606 | 0.606 | **0.606** |
 
-The exact physical contributor set is recovered on 38 of 102 runs (37.3%).
+The exact physical contributor set is recovered on 39 of 102 runs (38.2%).
 These figures describe causal/normative contribution, not legal fault.
 
 ## Formal/model checking
@@ -69,7 +68,7 @@ Across 102 runs and 972 property evaluations:
 - **466 UNKNOWN**
 
 On the comparable reconstruction-vs-observable-ground-truth subset, agreement
-is **72.6%** (114/157), with 10 false violations and 33 missed violations.
+is **72.8%** (115/158), with 10 false violations and 33 missed violations.
 `UNKNOWN` is kept as a first-class outcome rather than folded into PASS.
 
 ## Perception
@@ -91,7 +90,7 @@ reconstruction, formal checking and responsibility results above.
 
 The final clock code rejects fits pinned to the configured search boundary and
 returns `UNRESOLVED` instead. This specifically fixed affected S16/avoided
-recorders. Because the complete 102-run offline reprocessing after that patch
-has not yet been committed, this page deliberately does not quote a final
-post-fix aggregate clock MAE.
+recorders. After complete 102-run offline reprocessing, the scenario-aggregated
+offset MAE is **0.007141 s**. Participant-weighted MAE is **0.006119 s** over
+236 resolved recorders; 7 of 243 recorders remain explicitly unresolved.
 

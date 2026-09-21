@@ -431,14 +431,27 @@ def _counterfactual_block(run_dirs: Sequence[Path]) -> Dict[str, Any]:
             role = block.get("counterfactual_role")
             if role:
                 roles[str(role)] += 1
+    n_findings = sum(verdicts.values())
+    n_not_tested = int(verdicts.get("not tested", 0))
+    n_tested = n_findings - n_not_tested
+    complete = n_findings > 0 and n_tested == n_findings
     return {
         "n_reports": n_reports,
+        "n_findings": n_findings,
+        "n_tested_findings": n_tested,
+        "status": (
+            "complete" if complete else
+            "not_evaluated" if n_tested == 0 else
+            "incomplete"
+        ),
+        "campaign_wide_aggregate_claimed": complete,
         "but_for_verdicts": dict(sorted(verdicts.items())),
         "counterfactual_roles": dict(sorted(roles.items())),
         "note": (
-            "a prevention opportunity is not factual causation. The role says "
-            "which question a replay answered: removing what happened, "
-            "supplying what did not, or improving what did"
+            "a campaign-wide aggregate is reported only when every finding was "
+            "tested. A prevention opportunity is not factual causation. The "
+            "role says which question a replay answered: removing what "
+            "happened, supplying what did not, or improving what did"
         ),
     }
 

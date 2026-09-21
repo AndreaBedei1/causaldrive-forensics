@@ -124,7 +124,7 @@ a re-invocation, so an interrupted campaign resumes.
 The default protocol restarts the engine for each run. On the machine the V2
 campaign was recorded on, that was losing the engine part way through a scenario:
 the client then spun on a refused streaming port, the campaign retried the same
-run three times, and the whole campaign stalled with 15 of 105 recorded.
+run three times, and the campaign stalled after 15 recordings.
 
 So the V2 campaign was driven by a supervisor that keeps **one** served engine
 alive, passes `--keep-stray-engines` so the campaign does not kill it, and

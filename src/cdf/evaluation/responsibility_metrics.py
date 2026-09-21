@@ -66,10 +66,8 @@ HARD_CASES: Dict[Tuple[str, str], str] = {
         "the first and not to the second"
     ),
     ("S16", "independent"): (
-        "the same pair, the same geometry, and the second impact is that "
-        "vehicle's own doing. This is the case S14's retired "
-        "independent_impacts variant was written for, on a road situation "
-        "rather than on a stopped car creeping into a wreck"
+        "the same pair and geometry recur, but the second impact is that "
+        "vehicle's own doing rather than a consequence of the first"
     ),
 }
 

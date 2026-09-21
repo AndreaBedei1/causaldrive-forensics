@@ -464,6 +464,23 @@ def test_declining_to_order_two_impacts_is_not_scored_as_getting_it_wrong() -> N
     assert "78.6%" in text and "100.0%" in text
 
 
+def test_incomplete_counterfactuals_are_not_presented_as_an_aggregate() -> None:
+    from cdf.evaluation.final_results import _v2_markdown
+
+    lines = []
+    _v2_markdown(lines, {"counterfactual": {
+        "status": "not_evaluated",
+        "campaign_wide_aggregate_claimed": False,
+        "n_findings": 236,
+        "n_tested_findings": 0,
+        "but_for_verdicts": {"not tested": 236},
+    }})
+    text = "\n".join(lines)
+    assert "No campaign-wide fresh counterfactual aggregate is claimed" in text
+    assert "0 of 236" in text
+    assert "But-for verdicts" not in text
+
+
 # --- the shared-anchor caveat, read from where the hybrid aligner puts it ---
 
 

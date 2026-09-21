@@ -81,16 +81,17 @@ Full descriptions in [Scenarios](docs/SCENARIOS.md).
 The current factual campaign contains **102 runs over 34 scenario/variant
 combinations**. The figures below are read from the committed final campaign
 artifacts. The clock aligner has since been patched to reject radar fits pinned
-to its search bound; the clock aggregate is therefore intentionally not quoted
-here until that offline reprocessing is propagated to every run.
+to its search bound, and the full 102-run offline dependency chain has been
+regenerated with that fix.
 
 | Result | Measured |
 |---|---|
-| Collision pairs | recall **0.993** |
-| Collision timing | **0.0116 s** mean error; **0.0474 m** mean location error |
-| Spurious collisions | **13** across 102 runs |
-| Multi-impact ordering | **17/19** claimed orders correct (**89.5%**); 1 declined, 2 wrong |
-| Physical contributors | precision 0.689, recall 0.708, **F1 0.699** |
+| Collision pairs | recall **1.000** |
+| Collision timing | **0.0101 s** mean error; **0.0343 m** mean location error |
+| Spurious collisions | **11** across 102 runs |
+| Multi-impact ordering | **18/20** claimed orders correct (**90.0%**); 1 declined, 2 wrong |
+| Clock alignment | scenario-aggregated offset MAE **0.007141 s**; 7 of 243 recorders unresolved |
+| Physical contributors | precision 0.694, recall 0.708, **F1 0.701** |
 | Normative contributors | precision/recall/**F1 0.606** on runs with a normative reference |
 | Model checking | **190 PASS / 316 FAIL / 466 UNKNOWN** |
 | Negative controls | **0 false attributions in 11 controls** |

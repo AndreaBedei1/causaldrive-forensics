@@ -347,16 +347,16 @@ and on one it names the wrong vehicle entirely.
 Read that table's reference before its verdicts. It scores against each
 scenario's causal template, and a template names contributors only through
 edges whose cause is a *scripted action*. S10 to S15 express their design in
-states instead, so of the 26 variants designed to collide, 13 declare a
-contributor there and 13 do not. Nine of the ten `incorrect` verdicts sit on a
+states instead, so of the 23 variants designed to collide, 13 declare a
+contributor there and 10 do not. Eight of the nine `incorrect` verdicts sit on a
 row with no reference, where naming anybody scores zero by construction; the
-tenth is `S08/crash`, discussed in section 20. The generated report marks those
+ninth is `S08/crash`, discussed in section 20. The generated report marks those
 rows, and the honest reading of that column is how far this reference reaches,
 not how often the method was wrong.
 
 How well contributors were actually named is in the responsibility figures,
-which have a reference on 42 of the 105 runs: physical contributor F1 0.657,
-normative contributor F1 0.487 with recall 0.396.
+which score all 102 physical references and 30 applicable normative references:
+physical contributor F1 0.701 and normative contributor F1 0.606.
 
 Restraint on the negative controls is complete — nobody is ever named where
 nobody contributed — and ancestry recall is near-total, meaning the behaviours
@@ -383,11 +383,11 @@ one that created it. It is exactly wrong, and it is wrong for a structural
 reason rather than a tuning one: you cannot put a non-event at the root of a
 chain of events.
 
-The counterfactual replay gets it right, because removing `B_fail_to_yield` is
-something the simulator can do even though the local recorders could not observe
-it, and the collision then does not happen. This is the clearest case in the
-campaign for why the replay-backed verdict and the graph-only hypothesis are
-both reported: on S08 they disagree, and the replay is the one to believe.
+The counterfactual implementation can test this by removing
+`B_fail_to_yield`, even though the local recorders could not observe the
+absence. The fresh replay sweep after final restaging was interrupted, however,
+so the delivery makes no final replay-backed claim for S08 and does not carry
+forward the old-geometry result.
 
 Fixing this properly would need the taxonomy to carry *expected-but-absent*
 behaviour — "approached a conflict at constant speed where a response was due" —
@@ -431,24 +431,14 @@ and a whole account is still lost. The harness marker is **not** used to patch
 one participant of an otherwise physically aligned run: mixing provenances on one
 timeline and reporting them identically would be worse than an honest gap.
 
-## 23. One all-way-stop variant does not produce its designed encounter
+## 23. Near-simultaneous priority must remain undecided
 
-`S12/near_simultaneous` declares a collision and does not achieve one. Across
-the three campaign seeds its closest approaches are 10.90 m, 8.39 m and 8.23 m
-against the 6 m the variant requires, and no collision occurs in any of them.
-
-The cause is geometry, not timing luck. The junction is the only one in Town05
-that renders stop signs on more than one approach, and it is a large T: the
-vehicle turning in has a merge point about 8 m beyond its stop line while the
-vehicle going straight has about 23 m. Six timing attempts on the development
-seed did not bring the two together, and the ones that came closest did so by
-making the two arrivals *not* near-simultaneous, which is the one thing the
-variant is for.
-
-It is left as declared and recorded by the campaign as a scenario validation
-failure. The priority-ambiguity question it was written to ask is therefore not
-answered by this campaign. The other three S12 variants do run, and the
-clear-priority cases are covered by them.
+The final `S12/near_simultaneous` recordings pass scenario validation on all
+three seeds. Their reconstructed stop-completion gaps remain below the declared
+0.5 s clear-arrival margin, so the responsibility layer reports
+`AMBIGUOUS_PRIORITY`. The clear-arrival variants report
+`PRIORITY_BY_ARRIVAL`. This is deliberate restraint: always naming a winner
+would score well on easier cases and be wrong here.
 
 ## 24. Town05 renders five stop signs, and none of them has a painted stop line
 
@@ -466,38 +456,17 @@ nothing to find at these junctions.
 
 ## 25. The pushed-vehicle case does not come out the way it was designed
 
-`S14/c_pushes_b` puts C into B and B into A, and the question it exists to ask is
-whether the middle vehicle is spared: B is in the second impact only because it
-was struck, so it should not be named an initiating contributor. The campaign
-records the collision order correctly — (B,C) at 6.50 s then (A,B) at 7.70 s —
-and then names **B supported and C partial**, which is not the designed answer.
-
-Neither finding is arbitrary, and both are worth stating precisely.
-
-B is named because it has `CONTINUED_ACCELERATION_DURING_CONFLICT` at 5.76 s,
-*before* the first impact, together with an independent physical path. That is
-B's own behaviour and not a consequence of the push, so on the evidence recorded
-the finding is defensible — it is simply not the thing the variant was written to
-test, and a reader comparing it against the design would take it for the failure
-the design was guarding against.
-
-C is the striker and is reported with no physical path to the outcome. Its own
-rule violation is stamped at 6.66 s, *after* the impact at 6.50 s that it caused,
-so the physical requirement finds nothing of C's that independently reaches the
-collision. A violation recorded after the event it should explain cannot support
-a contribution, and the layer is right to refuse — but the result is that the
-vehicle which initiated the chain is the one the account does not name.
-
-What this bounds: the pushed-vehicle discrimination is not demonstrated by this
-campaign. The mechanism it depends on — a physical path that traverses an impact
-only where the vehicle's own behaviour independently reaches it — is implemented
-and unit-tested, and the recorded run does not exercise it as intended because
-the pre-impact evidence falls the wrong side of the two vehicles.
+`S14/c_pushes_b` puts C into B and B into A, and asks whether the middle vehicle
+is spared from being named as an initiating contributor merely because it was
+pushed. The final aggregate does not recover the designed physical set: it names
+A, B and C, although C is the supported normative contributor. The impact order
+is reconstructed, but the responsibility discrimination the variant was written
+to test is therefore not demonstrated by this campaign.
 
 ## 26. The STOP detector finds most signs and reports more than are there
 
-Measured over real campaign frames: 46 true positives, 37 false positives, 5
-false negatives. Recall 90.2 percent, precision 55.4 percent.
+Measured over real campaign frames: 51 true positives, 66 false positives and 0
+false negatives. Recall is 100 percent and precision is 43.6 percent.
 
 The detector is classical colour and shape, deterministic, with no training data
 and no learned prior. It was calibrated once on a development seed and then
@@ -507,31 +476,21 @@ Recall is the half that matters more here. A missed sign removes the obligation
 from the analysis entirely, and nothing downstream can recover it. A spurious
 sign is visible in the artifact, is contradicted by the other vehicle's view when
 there is one, and produces a violation a reader can argue with. Neither is good,
-but they fail differently, and a precision figure of 55.4 percent should not be
-read as the analysis being wrong on 45 percent of the signs it reasons about.
+but they fail differently, and a precision figure of 43.6 percent should not be
+read as the analysis being wrong on 56.4 percent of the signs it reasons about.
 
 What this bounds: any statement about traffic-control compliance in this campaign
-rests on a detector that is right about five times in nine when it speaks. The
+rests on a detector that is right fewer than half the time when it speaks. The
 stop-sign scenarios are demonstrations that the pipeline carries sign evidence
 end to end, not evidence that the perception is production grade.
 
-## 27. Twenty-two of the 105 runs did not stage their designed encounter
+## 27. Scenario validation is a gate, not an evaluation score
 
-Scenario validation passed on 83 of 105 runs. The 22 failures are all in the new
-S10 to S16 set, listed variant by variant in
-[RESULTS.md](RESULTS.md).
-
-Three kinds of failure occur: a variant that declares a collision and produces a
-near miss, a variant that declares a near miss and produces a collision, and a
-variant that produces a collision between the wrong pair. `S15/deflected_into_c`,
-`S16/consequential` and `S16/independent` fail on all three seeds because the
-impact lands on A and B rather than on the pair the variant names.
-
-Those runs are still recorded, still evaluated and still counted. Dropping them
-would be choosing the sample after seeing it. What they mean is narrower: a run
-that did not stage its encounter cannot answer the question that encounter was
-written to ask, so the *scenario-level* conclusions for those variants are not
-supported even though the *run-level* measurements are sound.
+All 102 final factual runs pass their declared scenario-validation checks. This
+does not make the reconstruction correct; it establishes only that the designed
+encounter occurred, so the reconstruction and responsibility measurements have
+the event they were intended to evaluate. Failed development recordings and the
+obsolete pre-restaging narrative are not mixed into the final campaign.
 
 ## 28. Two references exist, and only one of them is the reconstruction's
 
