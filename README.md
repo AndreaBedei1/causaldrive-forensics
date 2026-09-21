@@ -65,7 +65,7 @@ What a vehicle may not see is stated and enforced in
 
 ## Benchmark
 
-**16 scenarios, 35 variants, 105 final CARLA runs, 3 seeds.**
+**16 scenarios, 34 variants, 102 final CARLA runs, 3 seeds.**
 
 | Scenarios | What they cover |
 |---|---|
@@ -78,25 +78,36 @@ Full descriptions in [Scenarios](docs/SCENARIOS.md).
 
 ## Main results
 
-All figures are from the final V2 campaign and are regenerated from the
-artifacts, never transcribed by hand.
+The current factual campaign contains **102 runs over 34 scenario/variant
+combinations**. The figures below are read from the committed final campaign
+artifacts. The clock aligner has since been patched to reject radar fits pinned
+to its search bound; the clock aggregate is therefore intentionally not quoted
+here until that offline reprocessing is propagated to every run.
 
-| Result | Measured | Read it with |
-|---|---|---|
-| Campaign completed | 105 of 105 runs recorded and evaluated, 0 exceptions | scenario validation passed on 83 of 105; the 22 failures are all in the new S10 to S16 set and are listed, not hidden |
-| Collision pairs | recall 0.994 | 42 spurious collisions across the campaign, so precision is the weak side |
-| Collision timing | 0.0043 s mean error, 0.0211 m mean location error | on the estimated common clock, not on simulator time |
-| Clock offset | 0.0037 s mean absolute error over 238 scored recorders | worst single recorder 0.2497 s; 14 of 252 stayed unresolved and are reported as such |
-| Radar fallback, S07 | all 6 runs aligned; the vehicle that never collides is placed by radar to 0.0021 s mean, 0.0032 s worst | contact is used first; radar only reaches vehicles contact cannot |
-| STOP sign detection | recall 90.2 percent | precision 55.4 percent, so the detector reports more signs than are there |
-| Multi-impact ordering | an order was claimed on 12 of 14 multi-impact runs and was right on all 12 | on the other 2 the method declined, because the offset rested on an anchor doing double duty; declining is its own verdict, not a wrong answer |
-| Responsibility | physical contributor F1 0.657 | normative contributor F1 0.487, recall 0.396: naming who violated an obligation is much harder than naming who was involved |
+| Result | Measured |
+|---|---|
+| Collision pairs | recall **0.993** |
+| Collision timing | **0.0116 s** mean error; **0.0474 m** mean location error |
+| Spurious collisions | **13** across 102 runs |
+| Multi-impact ordering | **17/19** claimed orders correct (**89.5%**); 1 declined, 2 wrong |
+| Physical contributors | precision 0.689, recall 0.708, **F1 0.699** |
+| Normative contributors | precision/recall/**F1 0.606** on runs with a normative reference |
+| Model checking | **190 PASS / 316 FAIL / 466 UNKNOWN** |
+| Negative controls | **0 false attributions in 11 controls** |
 
-Drift is deliberately not estimated; scale is fixed to 1. There is no verified
-stop-line ground truth in Town05, so stop-line detections are reported and not
-scored.
+### S16: secondary collision
 
-Full tables, case studies and negative results in [Results](docs/RESULTS.md).
+S16 is retained in the final benchmark. Across its three seeds per variant,
+collision-pair recall is **1.00** with **0 spurious collisions**. For the two
+multi-impact variants, the reconstructed impact order is correct on **all 6/6
+runs**: 3/3 for `consequential` and 3/3 for `independent`. Attribution is
+harder: `independent` is partial (F1 0.444 in the current aggregate), while
+`consequential` remains insufficient-evidence at the responsibility layer.
+
+The fresh counterfactual sweep after the final scenario restaging was not
+completed, so no campaign-wide fresh counterfactual aggregate is claimed here.
+
+Full tables in [Results](docs/RESULTS.md).
 
 ## Explore
 
