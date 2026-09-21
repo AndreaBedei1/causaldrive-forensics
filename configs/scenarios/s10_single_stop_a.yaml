@@ -1,7 +1,7 @@
 # =============================================================================
 # S10 -- SINGLE STOP, A CONTROLLED  (2 vehicles)
 # =============================================================================
-# The first scenario in which traffic control is part of the causal account, and
+# The first scenario in which traffic control is part of the scenario account, and
 # the simplest case of the supervisor's right-of-way benchmark: one approach has
 # a stop sign and the other does not.
 #
@@ -150,7 +150,7 @@ scenario:
   # each designed edge has a counterpart a reconstruction could in principle
   # recover. A template edge nothing could match would measure the vocabulary
   # rather than the method.
-  causal_template:
+  design_template:
     - cause: { kind: "state", participant: "A", name: "no_stop" }
       effect: { kind: "state", participant: "A", name: "stop_line_crossed" }
       edge: "CONTRIBUTES_TO"
@@ -201,7 +201,7 @@ scenario:
               t_start: 2.6
               duration: 7.0
               params: { intensity: 0.9 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "A", name: "stopped" }
           effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
           edge: "PREVENTS"
@@ -240,7 +240,7 @@ scenario:
               t_start: 7.4
               duration: 6.0
               params: { target_speed: 9.0 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "A", name: "stopped" }
           effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
           edge: "PREVENTS"

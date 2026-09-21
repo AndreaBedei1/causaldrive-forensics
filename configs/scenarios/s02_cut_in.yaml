@@ -65,7 +65,7 @@ scenario:
     - "B_slow_after_cut_in"
     - "A_late_brake"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_cut_in" }
       effect: { kind: "state", participant: "A", name: "closing" }
       edge: "TRIGGERS"

@@ -1,11 +1,11 @@
 # =============================================================================
 # S06 -- CHAIN COLLISION  (3 vehicles)
 # =============================================================================
-# The first genuine multi-agent causal chain. The two variants share an almost
+# The first genuine multi-agent scenario chain. The two variants share an almost
 # identical spatial layout and produce a similar final configuration, but the
-# causal structure differs: the collisions happen in the opposite order and have
+# scenario structure differs: the collisions happen in the opposite order and have
 # different initiators. This is the direct test of hypothesis H4 -- that
-# counterfactual interventions recover different causal structures for S06a and
+# replay interventions recover different scenario structures for S06a and
 # S06b rather than being fooled by the similar end state.
 # =============================================================================
 
@@ -92,7 +92,7 @@ scenario:
               t_start: 5.6
               duration: 8.0
               params: { intensity: 0.5 }
-      causal_template:
+      design_template:
         - cause: { kind: "action", participant: "C", action_id: "C_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "TRIGGERS"
@@ -110,14 +110,14 @@ scenario:
 
     # ---------------------------------------------------------------------
     # S06b: B fails to respond and strikes C first; A then strikes B.
-    #       Order: (B,C) then (A,B). Same layout, reversed causal order.
+    #       Order: (B,C) then (A,B). Same layout, reversed scenario order.
     # ---------------------------------------------------------------------
     b_rear_first:
       expected_collision_pairs: [["B", "C"], ["A", "B"]]
       expected_collision_order: [["B", "C"], ["A", "B"]]
       notes:
         - "S06b: B strikes C first, then A strikes B"
-        - "same spatial layout as S06a, opposite causal order"
+        - "same spatial layout as S06a, opposite scenario order"
       intervention_candidates:
         - "C_emergency_brake"
         - "B_no_reaction"
@@ -140,7 +140,7 @@ scenario:
       validation:
         encounter_pair: ["B", "C"]
         min_separation_below_m: 6.0
-      causal_template:
+      design_template:
         - cause: { kind: "action", participant: "C", action_id: "C_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "TRIGGERS"

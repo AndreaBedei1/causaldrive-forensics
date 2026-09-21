@@ -65,7 +65,7 @@ scenario:
   intervention_candidates:
     - "B_fail_to_yield"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_fail_to_yield" }
       effect: { kind: "state", participant: "B", name: "conflict_entry" }
       edge: "TRIGGERS"

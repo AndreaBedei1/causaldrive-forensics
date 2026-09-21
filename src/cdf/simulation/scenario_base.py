@@ -1,20 +1,4 @@
-"""Declarative scenario specification and construction.
-
-A scenario is described entirely by data (``configs/scenarios/*.yaml``) and turned
-into CARLA actors, routes and scripted controllers by the helpers here. Keeping
-scenarios declarative buys three things the experiment protocol depends on:
-
-* **Reproducibility** -- the whole specification is hashed into the run manifest.
-* **Interventions** -- every behaviour is a named :class:`ScriptedAction`, so a
-  counterfactual replay is "the same spec with one action disabled, delayed or
-  weakened", not a separate hand-written variant.
-* **Validation** -- the spec states what is supposed to happen (the expected
-  outcome, the expected collision pair, minimum separation), so a scenario that
-  silently stops producing its intended encounter fails loudly.
-
-Spawn and route construction use the CARLA map API. That is legitimate: this is
-test-generation code. The forensic pipeline observes only the resulting motion.
-"""
+"""Fixed scenario specifications and CARLA route construction."""
 
 from __future__ import annotations
 
@@ -183,7 +167,7 @@ class ParticipantSpec:
 
 @dataclass
 class ScenarioSpec:
-    """A complete, validated scenario definition."""
+    """A scenario definition loaded from the fixed YAML files."""
 
     scenario_id: str
     name: str
@@ -192,60 +176,9 @@ class ScenarioSpec:
     variant: str = "default"
     participants: List[ParticipantSpec] = field(default_factory=list)
 
-    expected_outcome: str = "collision"
-    """``"collision"``, ``"near_miss"`` or ``"no_event"``."""
-    expected_collision_pairs: List[List[str]] = field(default_factory=list)
-    expected_collision_order: List[List[str]] = field(default_factory=list)
-    """For chain collisions: the pairs in the order they must occur."""
-
     max_duration_s: float = 30.0
-    validation: Dict[str, Any] = field(default_factory=dict)
-    causal_template: List[Dict[str, Any]] = field(default_factory=list)
-    """Designed ground-truth causal structure, consumed by the oracle graph
-    builder. Never visible to local or fused inference."""
-    intervention_candidates: List[str] = field(default_factory=list)
-    """Action ids the counterfactual layer is allowed to intervene on."""
     traffic_control: Dict[str, Any] = field(default_factory=dict)
-    """Stop and give-way signs, and where their stop lines are.
-
-    Two jobs, and keeping them apart matters. At construction time it says what
-    to place, because CARLA does not put a physical stop sign at every junction a
-    scenario might want and an approach with no sign on it cannot be perceived.
-    At evaluation time it is the privileged traffic-control ground truth: the true
-    class of each sign, its position, its stop line, and which approach it
-    governs.
-
-    It is never read by local inference, which sees signs only through the
-    camera. That is the whole point of having a camera: the gap between what the
-    sign is and what the vehicle made of it is the perception result.
-
-    Shape::
-
-        traffic_control:
-          signs:
-            - sign_id: "stop_A"
-              kind: "stop"              # stop | yield
-              governs: "A"              # the approach it faces
-              anchor: {...}             # same form as a participant spawn
-              spawn_prop: true          # place a prop if the map has none
-              stop_line_forward_m: 3.0  # line position relative to the sign
-          tie_break: null               # participant id, or null: see below
-
-    ``tie_break`` exists so that a near-simultaneous arrival at an all-way stop
-    can be resolved *only* where the scenario says how. Left null -- the default
-    -- the priority benchmark reports AMBIGUOUS_PRIORITY rather than applying a
-    convention the experiment has not declared.
-    """
     traffic_lights: Dict[str, Any] = field(default_factory=dict)
-    """Optional signal configuration, e.g. freezing one approach on red.
-
-    Scenario construction may set traffic-light state; the resulting states are
-    recorded by the oracle only. Local inference has no way to observe them,
-    which is exactly why those facts remain outside local and fused inference."""
-    expected_local_unknowns: List[str] = field(default_factory=list)
-    """Facts the local and fused layers are expected to be UNABLE to establish.
-    The evaluation asserts they are absent locally and present in the oracle."""
-    notes: List[str] = field(default_factory=list)
 
     def participant(self, participant_id: str) -> ParticipantSpec:
         for p in self.participants:
@@ -256,63 +189,6 @@ class ScenarioSpec:
     @property
     def participant_ids(self) -> List[str]:
         return [p.participant_id for p in self.participants]
-
-    def validate_static(self) -> List[str]:
-        """Structural checks that need no simulator. Returns a list of problems."""
-        problems: List[str] = []
-        ids = self.participant_ids
-        if not 2 <= len(ids) <= 3:
-            problems.append(
-                "scenario must have 2 or 3 participants, found {0}".format(len(ids))
-            )
-        if len(set(ids)) != len(ids):
-            problems.append("duplicate participant ids: {0}".format(ids))
-        for pair in self.expected_collision_pairs:
-            for pid in pair:
-                if pid not in ids:
-                    problems.append(
-                        "expected_collision_pairs references unknown participant {0!r}".format(pid)
-                    )
-        action_ids: List[str] = []
-        for p in self.participants:
-            for a in p.actions:
-                action_ids.append(a.action_id)
-        if len(set(action_ids)) != len(action_ids):
-            problems.append("duplicate scripted action ids: {0}".format(action_ids))
-        signs = (self.traffic_control or {}).get("signs", []) or []
-        sign_ids = [str(sign.get("sign_id", "")) for sign in signs]
-        if len(set(sign_ids)) != len(sign_ids):
-            problems.append("duplicate traffic-control sign ids: {0}".format(sign_ids))
-        for sign in signs:
-            kind = str(sign.get("kind", "")).lower()
-            if kind not in ("stop", "yield"):
-                problems.append(
-                    "sign {0!r} has kind {1!r}; only 'stop' and 'yield' are "
-                    "implemented, and a sign the detector cannot classify is "
-                    "worse than one the scenario does not place".format(
-                        sign.get("sign_id"), sign.get("kind"))
-                )
-            governs = str(sign.get("governs", ""))
-            if governs and governs not in ids:
-                problems.append(
-                    "sign {0!r} governs unknown participant {1!r}".format(
-                        sign.get("sign_id"), governs)
-                )
-        tie_break = (self.traffic_control or {}).get("tie_break")
-        if tie_break is not None and str(tie_break) not in ids:
-            problems.append(
-                "traffic_control.tie_break names unknown participant "
-                "{0!r}".format(tie_break)
-            )
-
-        for cand in self.intervention_candidates:
-            if cand not in action_ids:
-                problems.append(
-                    "intervention candidate {0!r} is not a declared action".format(cand)
-                )
-        if self.expected_outcome not in ("collision", "near_miss", "no_event"):
-            problems.append("unknown expected_outcome {0!r}".format(self.expected_outcome))
-        return problems
 
     @staticmethod
     def from_config(cfg: Config, variant: Optional[str] = None) -> "ScenarioSpec":
@@ -356,27 +232,10 @@ class ScenarioSpec:
             map_name=str(merged.get("map", "Town05")),
             variant=chosen,
             participants=participants,
-            expected_outcome=str(merged.get("expected_outcome", "collision")),
-            expected_collision_pairs=[list(p) for p in merged.get("expected_collision_pairs", [])],
-            expected_collision_order=[list(p) for p in merged.get("expected_collision_order", [])],
             max_duration_s=float(merged.get("max_duration_s", 30.0)),
-            validation=merged.get("validation", {}) or {},
-            causal_template=merged.get("causal_template", []) or [],
-            intervention_candidates=[str(c) for c in merged.get("intervention_candidates", [])],
             traffic_control=merged.get("traffic_control", {}) or {},
             traffic_lights=merged.get("traffic_lights", {}) or {},
-            expected_local_unknowns=[
-                str(u) for u in merged.get("expected_local_unknowns", []) or []
-            ],
-            notes=[str(n) for n in merged.get("notes", [])],
         )
-        problems = spec.validate_static()
-        if problems:
-            raise ValueError(
-                "scenario {0} variant {1!r} is invalid:\n  - {2}".format(
-                    spec.scenario_id, chosen, "\n  - ".join(problems)
-                )
-            )
         return spec
 
 

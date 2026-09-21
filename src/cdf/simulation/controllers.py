@@ -15,7 +15,7 @@ A participant's behaviour is fully described by
 * an ordered list of :class:`ScriptedAction` items, each with an explicit
   ``action_id``, start time and duration.
 
-That last piece is what makes the counterfactual layer possible: an intervention
+That last piece is what makes the replay layer possible: an intervention
 is simply "remove, delay, or weaken the action with this id", replayed from the
 same seed and spawn state. There is no hidden behaviour to intervene on.
 
@@ -170,9 +170,9 @@ class RoutePlan:
 class ScriptedAction:
     """One named, timed behaviour modification.
 
-    ``action_id`` is the handle the counterfactual layer intervenes on. Keep ids
+    ``action_id`` is the handle the replay layer intervenes on. Keep ids
     stable and descriptive (``"B_emergency_brake"``, ``"B_cut_in"``), because they
-    appear in counterfactual manifests and in the causal-contribution report.
+    appear in replay manifests and in the scenario-contribution report.
 
     Supported kinds
     ---------------

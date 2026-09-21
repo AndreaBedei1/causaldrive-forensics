@@ -16,13 +16,13 @@ pipeline: every threshold lives in one of these files.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Union
 
 import yaml
 
-from .schemas import stable_digest
 
 __all__ = [
     "Config",
@@ -83,9 +83,8 @@ def deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> Dict[str
 
 def config_hash(config: Mapping[str, Any]) -> str:
     """Deterministic 16-hex-character digest of a resolved configuration."""
-    return stable_digest(
-        json.dumps(_normalise(config), sort_keys=True, separators=(",", ":"))
-    )[:16]
+    payload = json.dumps(_normalise(config), sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()[:16]
 
 
 def _normalise(obj: Any) -> Any:

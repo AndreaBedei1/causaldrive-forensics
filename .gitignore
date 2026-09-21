@@ -1,65 +1,9 @@
-# Generated experiment artifacts (regenerate with scripts/run_campaign.py).
-# Two campaigns are kept side by side: artifacts/ is the historical
-# synchronized-clock baseline, artifacts_independent_clocks/ is the final
-# campaign in which every recorder keeps its own clock. Neither is committed --
-# they are hundreds of megabytes of recordings -- but the summary tables derived
-# from them are, under docs/ and results/.
-artifacts/**
-!artifacts/.gitkeep
-!artifacts/example/**
-artifacts_independent_clocks/**
-!artifacts_independent_clocks/.gitkeep
-# The V2 campaign. Kept apart from the V1 roots above on purpose: V2 changed the
-# sensors and the timing semantics, so a result averaged over both describes
-# neither. scripts/run_campaign.py refuses a root holding both.
-artifacts_v2/**
-!artifacts_v2/.gitkeep
-# Development and calibration runs, on seed 99. Kept out of artifacts_v2/ so that
-# a threshold tuned here can never be tuned on a seed the final metrics are
-# computed from, and untracked for the same reason as the roots above.
-artifacts_v2_validation/**
-!artifacts_v2_validation/.gitkeep
-# Scenario development and tuning runs, on seed 99. Kept apart from every
-# campaign root so a scenario being fixed can never reach a recorded result,
-# and untracked for the same reason as the roots above: these are recordings.
-artifacts_scenario_validation/**
-!artifacts_scenario_validation/.gitkeep
-
-# A recording copied out for a demo or a screenshot. Same reason as the roots
-# above: recordings are regenerated, not committed.
-demo_scenarios/
-
-# Working files: batch lists, logs, one-off probes.
-scratch/
-
-# Python
+# Raw recordings are generated locally and are not source files.
+traces/
 __pycache__/
 *.py[cod]
 *.egg-info/
-.eggs/
-build/
-dist/
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Environments
 .venv/
 venv/
-env/
-
-# Editors / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-
-# CARLA / local scratch
+.pytest_cache/
 *.log
-scratch/
-
-# Recordings displaced by a scenario correction. Kept for comparison, outside
-# every campaign root so evaluation cannot pick them up, and untracked for the
-# same reason as the roots themselves: they are recordings.
-artifacts_superseded/**
-!artifacts_superseded/README.md

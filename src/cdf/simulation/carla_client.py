@@ -143,7 +143,7 @@ def connect_with_retry(
 
     The handshake alone is not readiness. ``get_server_version`` answers while
     the engine is still bringing a map up, and the caller's first ``get_map``
-    then blocks for the full sixty seconds and raises -- which on the campaign
+    then blocks for the full sixty seconds and raises -- which on the collection
     looked like a scenario that hung, retried three times and stalled the whole
     run. So the probe asks for the world as well, and a server that cannot yet
     produce one is treated as still booting rather than as connected.
@@ -345,7 +345,7 @@ class CarlaServer:
         Killing the launcher is not enough. ``CarlaUE4.exe`` spawns
         ``CarlaUE4-Win64-Shipping.exe`` and exits, so terminating the ``Popen``
         handle leaves a ~2.5 GB engine process alive and still holding the RPC
-        port. A campaign that restarts the simulator between runs then leaks one
+        port. A collection that restarts the simulator between runs then leaks one
         engine per restart -- and, far worse, every later "fresh" server fails to
         bind the port and the client silently reconnects to the FIRST one, so the
         runs meant to be independent all share accumulated state.
@@ -416,7 +416,7 @@ class CarlaServer:
         every log line says the restart succeeded.
 
         So the restart is verified rather than assumed. A genuinely fresh engine
-        has been ticking for seconds; one that has served a campaign has not.
+        has been ticking for seconds; one that has served a collection has not.
         """
         self.stop()
         time.sleep(3.0)
@@ -568,7 +568,7 @@ class SimulatorSession:
         is not harmless: with the clients of several dead servers alive in one
         process, an exception escaping one of those threads takes the whole
         interpreter down with ``Fatal Python error: Aborted`` inside an
-        unrelated call. A counterfactual campaign died this way three replays
+        unrelated call. A replay collection died this way three replays
         in, in ``world.apply_settings()`` on a freshly started server.
 
         Dropping the last reference and forcing a collection is what actually
@@ -586,7 +586,7 @@ class SimulatorSession:
         A run is only reproducible on a freshly booted server: repeated runs in
         one server session drift, by enough to change an outcome class (see
         ``docs/ENVIRONMENT.md``). Any comparison between runs -- and a
-        counterfactual replay is exactly that -- must therefore start each run
+        replay replay is exactly that -- must therefore start each run
         from a fresh process, or the difference being measured is confounded with
         accumulated simulator state.
         """

@@ -7,7 +7,7 @@
 #   * the constant-velocity path prediction underlying conflict inference is
 #     least accurate exactly where the heading is changing fastest,
 #   * radar bearings sweep quickly, so track continuity is harder to maintain,
-#   * fusion must associate tracks whose global-frame estimates come from
+#   * merge must associate tracks whose global-frame estimates come from
 #     observers that are themselves rotating.
 #
 # Local inference still gets no map topology: that a roundabout exists at all
@@ -74,7 +74,7 @@ scenario:
   intervention_candidates:
     - "B_fail_to_give_way"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_fail_to_give_way" }
       effect: { kind: "state", participant: "B", name: "conflict_entry" }
       edge: "TRIGGERS"

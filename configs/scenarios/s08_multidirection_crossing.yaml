@@ -7,7 +7,7 @@
 #
 # This is the richest test of track association: each participant sees the other
 # two as anonymous radar tracks from a completely different viewpoint, and the
-# fusion layer must resolve identity from trajectory evidence alone.
+# merge layer must resolve identity from trajectory evidence alone.
 # =============================================================================
 
 scenario:
@@ -84,7 +84,7 @@ scenario:
     - "B_fail_to_yield"
     - "C_defensive_stop"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_fail_to_yield" }
       effect: { kind: "state", participant: "B", name: "conflict_entry" }
       edge: "TRIGGERS"
@@ -103,4 +103,4 @@ scenario:
     crash:
       notes:
         - "three viewpoints on one conflict region; C is an uninvolved observer"
-        - "C's evidence should let fusion recover parts of the interaction A and B each miss"
+        - "C's evidence should let merge recover parts of the interaction A and B each miss"

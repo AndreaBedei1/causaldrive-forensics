@@ -382,19 +382,19 @@ class ScenarioWorld:
     def delta_seconds(self) -> float:
         return float(self.cfg.get("simulation.fixed_delta_seconds", 0.05))
 
-    # -- privileged accessors (ORACLE USE ONLY) ---------------------------
+    # -- privileged accessors (ground-truth USE ONLY) ---------------------------
 
     def all_vehicles(self) -> List[Any]:
         """Every vehicle actor in the world.
 
-        PRIVILEGED. Only scenario construction and the oracle logger may call
-        this. The local and fusion layers must never see its output -- that is
+        PRIVILEGED. Only scenario construction and the ground-truth logger may call
+        this. The local and merge layers must never see its output -- that is
         exactly the boundary the anti-leakage tests enforce.
         """
         return list(self.world.get_actors().filter("vehicle.*"))
 
     def traffic_lights(self) -> List[Any]:
-        """Every traffic light actor. PRIVILEGED -- oracle use only."""
+        """Every traffic light actor. PRIVILEGED -- ground-truth use only."""
         return list(self.world.get_actors().filter("traffic.traffic_light"))
 
     def spawn_points(self) -> List[Any]:

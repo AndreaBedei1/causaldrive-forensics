@@ -2,9 +2,9 @@
 # S05 -- SIMULTANEOUS CROSSING
 # =============================================================================
 # Both vehicles enter the inferred conflict region with insufficient yielding.
-# Neither action alone is "the" cause: the counterfactual layer should find that
+# Neither action alone is "the" cause: the replay layer should find that
 # intervening on EITHER participant prevents the collision, which is the
-# definition of shared causal contribution used in docs/CAUSAL_MODEL.md.
+# definition of shared scenario contribution used in docs/scenario_MODEL.md.
 # =============================================================================
 
 scenario:
@@ -66,7 +66,7 @@ scenario:
     - "A_no_yield"
     - "B_no_yield"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "A", action_id: "A_no_yield" }
       effect: { kind: "state", participant: "A", name: "conflict_entry" }
       edge: "CONTRIBUTES_TO"
@@ -84,4 +84,4 @@ scenario:
     crash:
       notes:
         - "symmetric: both participants contribute, neither is the sole initiator"
-        - "expected counterfactual result: intervening on either one prevents the collision"
+        - "expected replay result: intervening on either one prevents the collision"

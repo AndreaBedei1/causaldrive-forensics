@@ -2,7 +2,7 @@
 # S04 -- CROSSING + BRAKING  (NEGATIVE CONTROL)
 # =============================================================================
 # Deliberately the same geometry family as S03, with one vehicle yielding. The
-# point is to test that the system does NOT infer collision causality from path
+# point is to test that the system does NOT infer collision scenarioity from path
 # geometry alone: the predicted paths still intersect, but the outcome differs
 # because the actions differ.
 # =============================================================================
@@ -64,7 +64,7 @@ scenario:
   intervention_candidates:
     - "B_yield_brake"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_yield_brake" }
       effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
       edge: "PREVENTS"
@@ -74,4 +74,4 @@ scenario:
     yield:
       notes:
         - "negative control: same crossing geometry as S03, but B yields"
-        - "a system that infers causality from geometry alone would wrongly flag a conflict outcome here"
+        - "a system that infers scenarioity from geometry alone would wrongly flag a conflict outcome here"

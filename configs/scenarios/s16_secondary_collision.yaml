@@ -17,7 +17,7 @@
 #   avoided         A stops in its own lane and stays there; C is untouched
 #
 # In all three the *same pair* collides second, in much the same place, and A is
-# party to both impacts. What separates them is the causal relationship between
+# party to both impacts. What separates them is the scenario relationship between
 # the two, and the evidence for it is A's own throttle rather than anything in
 # the layout: a method that reads where the vehicles ended up will give the same
 # answer to all three, which is exactly what this scenario is for.
@@ -89,7 +89,7 @@ scenario:
     - id: "A"
       blueprint: "vehicle.audi.tt"
       spawn: { anchor: "spawn_index", index: 265, forward_m: 7.0, lane_offset: 0 }
-      # 200 m, not the 65 m this run uses: a counterfactual in which A never
+      # 200 m, not the 65 m this run uses: a replay in which A never
       # brakes travels the whole length at 13 m/s, and a vehicle that outruns
       # its route starts chasing a point behind itself and wanders off the road.
       route: { length_m: 200.0, step_m: 2.0 }
@@ -152,7 +152,7 @@ scenario:
     - "A_emergency_brake"
     - "B_late_brake"
 
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
       effect: { kind: "state", participant: "B", name: "closing" }
       edge: "CONTRIBUTES_TO"
@@ -292,7 +292,7 @@ scenario:
         max_accumulated_turn_deg: 70.0
         min_straightness: 0.95
         no_scenery_collision: true
-      causal_template:
+      design_template:
         - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "CONTRIBUTES_TO"
@@ -328,7 +328,7 @@ scenario:
         max_accumulated_turn_deg: 70.0
         min_straightness: 0.95
         no_scenery_collision: true
-      causal_template:
+      design_template:
         - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
           effect: { kind: "state", participant: "B", name: "closing" }
           edge: "CONTRIBUTES_TO"

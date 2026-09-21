@@ -164,7 +164,7 @@ scenario:
   intervention_candidates:
     - "B_roll_through"
 
-  causal_template:
+  design_template:
     - cause: { kind: "state", participant: "B", name: "no_stop" }
       effect: { kind: "state", participant: "B", name: "conflict_entry" }
       edge: "CONTRIBUTES_TO"
@@ -246,7 +246,7 @@ scenario:
           # of the junction when the recording ends.
           initial_speed: 2.0
           target_speed: 2.0
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "B", name: "no_stop" }
           effect: { kind: "state", participant: "B", name: "conflict_entry" }
           edge: "CONTRIBUTES_TO"
@@ -276,7 +276,7 @@ scenario:
               t_start: 2.6
               duration: 8.0
               params: { intensity: 0.9 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "B", name: "stopped" }
           effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
           edge: "PREVENTS"

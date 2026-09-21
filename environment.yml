@@ -1,22 +1,6 @@
-# Conda environment matching the tested configuration (see docs/ENVIRONMENT.md).
-# CARLA 0.9.15 ships cp37/cp38 wheels only, so Python 3.8 is used.
-name: cdf
+name: carla-raw-acquisition
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
-  # 1.24.3 is what this environment actually imports; see docs/ENVIRONMENT.md
-  # for the pip-metadata discrepancy. Any 1.2x release should work.
-  - numpy>=1.23,<2.0
-  - scipy=1.10.*
-  - networkx=3.1
-  - pandas=2.0.*
-  - pyyaml=6.0.*
-  - matplotlib=3.7.*
-  - pytest
-  - pip
-  - pip:
-      # Install the CARLA API from the simulator distribution, e.g.:
-      #   pip install <CARLA>/PythonAPI/carla/dist/carla-0.9.15-cp38-cp38-win_amd64.whl
-      # or the .egg shipped with your build.
-      - -e .
+  - python>=3.8
+  - pyyaml>=5.4

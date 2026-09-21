@@ -9,7 +9,7 @@
 # The near_simultaneous variant exists specifically to be undecidable. Two
 # vehicles that completed their stops a tenth of a second apart did not arrive in
 # a clear order, and no amount of reconstruction quality changes that; the
-# benchmark returns AMBIGUOUS_PRIORITY and the responsibility layer records it.
+# benchmark returns AMBIGUOUS_PRIORITY and the obligations layer records it.
 # A method tuned to always produce a verdict would score *better* on a naive
 # metric here while being wrong, which is why the variant is in the set.
 #
@@ -156,7 +156,7 @@ scenario:
     - "A_stop"
     - "B_stop"
 
-  causal_template:
+  design_template:
     - cause: { kind: "state", participant: "A", name: "stopped" }
       effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
       edge: "PREVENTS"
@@ -281,7 +281,7 @@ scenario:
               t_start: 7.0
               duration: 8.0
               params: { target_speed: 9.5 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "A", name: "conflict_entry" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
           edge: "CAUSES_OUTCOME"
@@ -346,7 +346,7 @@ scenario:
               t_start: 2.0
               duration: 14.0
               params: { target_speed: 5.0 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "B", name: "no_stop" }
           effect: { kind: "state", participant: "B", name: "stop_line_crossed" }
           edge: "CONTRIBUTES_TO"

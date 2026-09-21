@@ -1,7 +1,7 @@
 # =============================================================================
 # S13 -- DISPUTED LANE CHANGE  (2 vehicles)
 # =============================================================================
-# The case the accident-attribution literature treats as genuinely contested: two
+# The case the accident-assignment literature treats as genuinely contested: two
 # vehicles converge on the same piece of road and each account is consistent with
 # the damage. B says A accelerated into a gap B was already entering; A says B cut
 # across with no room. Both are describing the same closing gap from opposite ends.
@@ -10,7 +10,7 @@
 # variants are physically distinguishable and the distinguishing evidence is
 # distributed. B's lane change is visible in B's own steering and in B's lane
 # sensor; A's acceleration is visible in A's own controls. Neither vehicle can see
-# both. So this is the scenario where fusion has to earn its place -- a single log
+# both. So this is the scenario where merge has to earn its place -- a single log
 # supports one story and the merged log supports one account of the pair.
 #
 # The line-crossing evidence matters here specifically. In the cut_in variant B
@@ -91,7 +91,7 @@ scenario:
   intervention_candidates:
     - "B_cut_in"
 
-  causal_template:
+  design_template:
     - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
       effect: { kind: "state", participant: "A", name: "closing" }
       edge: "CONTRIBUTES_TO"
@@ -171,7 +171,7 @@ scenario:
               t_start: 2.2
               duration: 3.8
               params: { lateral_m: 3.5 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "A", name: "closing" }
           effect: { kind: "state", participant: "A", name: "critical_ttc" }
           edge: "CONTRIBUTES_TO"
@@ -217,7 +217,7 @@ scenario:
               t_start: 0.0
               duration: 10.0
               params: { target_speed: 10.0 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "B", name: "solid_line_crossed" }
           effect: { kind: "state", participant: "A", name: "closing" }
           edge: "CONTRIBUTES_TO"

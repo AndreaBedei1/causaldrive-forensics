@@ -1,7 +1,7 @@
 # =============================================================================
 # S01 -- REAR-END
 # =============================================================================
-# The simplest longitudinal causal chain, used as the baseline validation of the
+# The simplest longitudinal scenario chain, used as the baseline validation of the
 # whole pipeline: lead behaviour -> range decrease -> TTC decrease -> follower
 # response -> outcome.
 #
@@ -59,9 +59,9 @@ scenario:
     - "B_emergency_brake"
     - "A_late_brake"
 
-  # Designed ground-truth causal structure. ORACLE ONLY -- never visible to the
+  # Designed ground-truth scenario structure. ORACLE ONLY -- never visible to the
   # local or fused inference layers.
-  causal_template:
+  design_template:
     - cause: { kind: "action", participant: "B", action_id: "B_emergency_brake" }
       effect: { kind: "state", participant: "A", name: "closing" }
       edge: "CONTRIBUTES_TO"

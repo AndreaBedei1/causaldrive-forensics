@@ -1,21 +1,21 @@
 # =============================================================================
 # S14 -- THREE-CAR REAR-END CHAIN  (3 vehicles)
 # =============================================================================
-# The pushed-vehicle case, which is the one the responsibility layer was built
+# The pushed-vehicle case, which is the one the obligations layer was built
 # for. Three vehicles in one lane: A leads, B follows, C is last. There are two
 # impacts, and which vehicle is a contributor to which of them is the whole
 # question.
 #
 # In c_pushes_b, C runs into B and B is shunted into A. B's collision sensor
 # fires with B's mass behind it, and B genuinely strikes A -- so a method that
-# reads causal ancestry naively makes B a contributor to an impact B could not
+# reads scenario ancestry naively makes B a contributor to an impact B could not
 # have avoided. The designed answer is that C contributes to both impacts and B
 # to neither.
 #
 # In b_hits_a_first the order is reversed: B rear-ends A under its own braking
 # failure, and C then runs into the stationary pile. Now B does contribute to the
 # first impact. The two variants have almost the same final configuration -- three
-# cars nose to tail -- and opposite causal structures, which is what makes them a
+# cars nose to tail -- and opposite scenario structures, which is what makes them a
 # real test rather than two recordings of the same thing.
 #
 # The clock story matters here too. B feels both impacts, so B is the recorder
@@ -32,7 +32,7 @@ scenario:
   description: >
     A leads, B follows, C is last, all in one lane. A brakes. Which pair collides
     first, and which vehicle was merely in the way, depends on how B responds.
-    A third variant, independent_impacts, was retired: it produced its second
+    A third variant, independent_runs, was retired: it produced its second
     impact by having C come to a complete stop and then deliberately creep into
     the stationary pile seven seconds later, which is not a road situation. The
     distinction it was testing, that two impacts sharing a vehicle must not be
@@ -48,7 +48,7 @@ scenario:
       blueprint: "vehicle.tesla.model3"
       # 33, not 30. The claim this variant makes is that B would have stopped
       # short of A unaided, so the distance B has to stop in is the claim. At a
-      # 15 m gap B arrived with 0.6 m to spare on two campaign seeds and touched
+      # 15 m gap B arrived with 0.6 m to spare on two collection seeds and touched
       # A before C reached it on the third, which is the story backwards.
       spawn: { anchor: "spawn_index", index: 265, forward_m: 33.0, lane_offset: 0 }
       route: { length_m: 120.0, step_m: 2.0 }
@@ -57,7 +57,7 @@ scenario:
       actions:
         # A brakes for something ahead. This is the lawful behaviour that starts
         # the chain and contributes to nothing normatively -- the case the
-        # responsibility layer has to get right in the other direction.
+        # obligations layer has to get right in the other direction.
         - action_id: "A_brake"
           kind: "brake"
           t_start: 4.0
@@ -99,7 +99,7 @@ scenario:
     - "B_brake"
     - "C_no_response"
 
-  causal_template:
+  design_template:
     - cause: { kind: "state", participant: "C", name: "no_braking" }
       effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
       edge: "CAUSES_OUTCOME"
@@ -164,7 +164,7 @@ scenario:
         C:
           actions:
             # C holds speed. Modelled as an explicit action so the
-            # counterfactual layer has something to intervene on: "if C had
+            # replay layer has something to intervene on: "if C had
             # braked" is the question the scenario is for.
             - action_id: "C_no_response"
               kind: "set_speed"
@@ -202,7 +202,7 @@ scenario:
               t_start: 6.9
               duration: 8.0
               params: { intensity: 1.0 }
-      causal_template:
+      design_template:
         - cause: { kind: "state", participant: "B", name: "no_braking" }
           effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
           edge: "CAUSES_OUTCOME"
@@ -210,7 +210,7 @@ scenario:
           effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
           edge: "CAUSES_OUTCOME"
       notes:
-        - "almost the same end configuration as c_pushes_b, and the opposite causal structure"
+        - "almost the same end configuration as c_pushes_b, and the opposite scenario structure"
         - "here B does contribute to the first impact, and C to the second only"
         - "the two variants together test whether the method reads the order or the layout"
 
