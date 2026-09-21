@@ -22,7 +22,8 @@ then cleans up its CARLA actors.
 
 ## Sensors and files
 
-Each run is written below `traces/<scenario>/run_<seed>/<variant>/`:
+For example, the default S01 run is written below
+`traces/S01/run_0_crash/`:
 
 ```text
 metadata.json

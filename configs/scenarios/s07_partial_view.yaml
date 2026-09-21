@@ -2,8 +2,8 @@ scenario:
   scenario_id: S07
   name: partial_view
   description: 'C brakes hard, B responds, A closes on B and strikes it. A cannot
-    observe C at all (occluded by B and restricted by a narrow-FOV radar), so A''s
-    local reconstruction should be missing the initiating cause that B observed.
+    observe C at all because B occludes it and A uses a narrow-FOV radar. The
+    participants retain their configured sensor profiles.
 
     '
   map: Town05

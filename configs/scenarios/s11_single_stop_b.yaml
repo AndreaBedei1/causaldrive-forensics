@@ -1,9 +1,9 @@
 scenario:
   scenario_id: S11
   name: single_stop_b
-  description: 'B faces a stop sign on its approach; A does not and has benchmark
-    priority. Structurally identical to S10 with the roles exchanged, which is what
-    makes it a check on symmetry rather than an extra data point.
+  description: 'B faces a stop sign on its approach; A does not. The scenario
+    exchanges the controlled approach and keeps the same physical stop-sign
+    behaviour as S10.
 
     '
   map: Town05
