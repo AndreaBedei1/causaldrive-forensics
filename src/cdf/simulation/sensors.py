@@ -77,9 +77,12 @@ class RadarSensor:
 @dataclass
 class CameraSpec:
     sensor_id: str = "front"; blueprint: str = "sensor.camera.rgb"; width: int = 800; height: int = 600; fov_deg: float = 90.0
-    mount_x: float = 1.4; mount_y: float = 0.0; mount_z: float = 1.4; mount_pitch_deg: float = 0.0
+    sensor_tick_s: float = 0.0; mount_x: float = 1.4; mount_y: float = 0.0; mount_z: float = 1.4; mount_pitch_deg: float = 0.0; mount_yaw_deg: float = 0.0; mount_roll_deg: float = 0.0
     def attributes(self) -> Dict[str, Any]:
-        return {"image_size_x": str(self.width), "image_size_y": str(self.height), "fov": str(self.fov_deg)}
+        attrs = {"image_size_x": str(self.width), "image_size_y": str(self.height), "fov": str(self.fov_deg)}
+        if self.sensor_tick_s > 0.0:
+            attrs["sensor_tick"] = str(self.sensor_tick_s)
+        return attrs
 
 
 def camera_spec_from_config(cfg: Config) -> Optional[CameraSpec]:
@@ -87,13 +90,26 @@ def camera_spec_from_config(cfg: Config) -> Optional[CameraSpec]:
     if b is None or not bool(b.get("enabled", True)): return None
     return CameraSpec(sensor_id=str(b.get("sensor_id", "front")), blueprint=str(b.get("blueprint", "sensor.camera.rgb")),
         width=int(b.get("width", 800)), height=int(b.get("height", 600)), fov_deg=float(b.get("fov_deg", 90)),
-        mount_x=float(b.get("mount_x", 1.4)), mount_y=float(b.get("mount_y", 0)), mount_z=float(b.get("mount_z", 1.4)), mount_pitch_deg=float(b.get("mount_pitch_deg", 0)))
+        sensor_tick_s=float(b.get("sensor_tick_s", 0.0)),
+        mount_x=float(b.get("mount_x", 1.4)), mount_y=float(b.get("mount_y", 0)), mount_z=float(b.get("mount_z", 1.4)), mount_pitch_deg=float(b.get("mount_pitch_deg", 0)),
+        mount_yaw_deg=float(b.get("mount_yaw_deg", 0)), mount_roll_deg=float(b.get("mount_roll_deg", 0)))
+
+
+def depth_camera_spec_from_config(cfg: Config) -> Optional[CameraSpec]:
+    """Load the raw depth-camera installation, if enabled."""
+    b = cfg.get("sensors.depth_camera", None)
+    if b is None or not bool(b.get("enabled", True)): return None
+    return CameraSpec(sensor_id=str(b.get("sensor_id", "front_depth")), blueprint=str(b.get("blueprint", "sensor.camera.depth")),
+        width=int(b.get("width", 800)), height=int(b.get("height", 600)), fov_deg=float(b.get("fov_deg", 90)),
+        sensor_tick_s=float(b.get("sensor_tick_s", 0.0)),
+        mount_x=float(b.get("mount_x", 1.4)), mount_y=float(b.get("mount_y", 0)), mount_z=float(b.get("mount_z", 1.4)), mount_pitch_deg=float(b.get("mount_pitch_deg", 0)),
+        mount_yaw_deg=float(b.get("mount_yaw_deg", 0)), mount_roll_deg=float(b.get("mount_roll_deg", 0)))
 
 
 class CameraSensor:
     def __init__(self, scenario_world: Any, vehicle: Any, spec: CameraSpec, max_queue: int = 8) -> None:
         carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0
-        transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=spec.mount_z), carla.Rotation(pitch=spec.mount_pitch_deg, yaw=0, roll=0))
+        transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=spec.mount_z), carla.Rotation(pitch=spec.mount_pitch_deg, yaw=spec.mount_yaw_deg, roll=spec.mount_roll_deg))
         self.sensor = scenario_world.spawn_sensor(spec.blueprint, transform, attach_to=vehicle, attributes=spec.attributes()); self.sensor.listen(self._on_image)
     def _on_image(self, image: Any) -> None:
         try: self._queue.put_nowait(image)
@@ -106,7 +122,9 @@ class CameraSensor:
             except queue.Empty: return None
             if int(image.frame) < int(frame): continue
             return {"frame": int(image.frame), "timestamp": float(image.timestamp), "width": int(image.width), "height": int(image.height), "data": bytes(image.raw_data),
-                    "sensor_id": self.spec.sensor_id, "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": self.spec.mount_z, "pitch_deg": self.spec.mount_pitch_deg}}
+                    "sensor_id": self.spec.sensor_id, "sensor_blueprint": self.spec.blueprint, "fov_deg": self.spec.fov_deg, "sensor_tick_s": self.spec.sensor_tick_s,
+                    "file_format": "raw_bgra8", "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": self.spec.mount_z,
+                    "pitch_deg": self.spec.mount_pitch_deg, "yaw_deg": self.spec.mount_yaw_deg, "roll_deg": self.spec.mount_roll_deg}}
         return None
     def stop(self) -> None:
         try:

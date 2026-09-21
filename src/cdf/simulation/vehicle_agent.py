@@ -7,7 +7,7 @@ from typing import Any
 from ..common.config import Config, configs_dir, load_yaml
 from ..recording.vehicle_logger import VehicleLogger
 from .controllers import ScriptedController, VehicleState
-from .sensors import CameraSensor, CollisionSensor, RadarSensor, camera_spec_from_config, radar_specs_from_config
+from .sensors import CameraSensor, CollisionSensor, RadarSensor, camera_spec_from_config, depth_camera_spec_from_config, radar_specs_from_config
 
 
 class RawVehicleAgent:
@@ -22,13 +22,16 @@ class RawVehicleAgent:
             sensor_cfg = cfg.with_overrides({"radar": profile.get("radar", {}), "sensors": {"profile": str(spec.sensor_profile)}})
         self.radar = [RadarSensor(scenario_world, self.vehicle, rs) for rs in radar_specs_from_config(sensor_cfg)]
         camera_spec = camera_spec_from_config(cfg)
+        depth_camera_spec = depth_camera_spec_from_config(cfg)
         self.camera = CameraSensor(scenario_world, self.vehicle, camera_spec) if camera_spec else None
+        self.depth_camera = CameraSensor(scenario_world, self.vehicle, depth_camera_spec) if depth_camera_spec else None
         self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,
             "sensor_profile": str(spec.sensor_profile or cfg.get("sensors.profile", "")),
             "radar": [r.spec.__dict__ for r in self.radar],
             "camera": camera_spec.__dict__ if camera_spec else None,
+            "depth_camera": depth_camera_spec.__dict__ if depth_camera_spec else None,
             "vehicle_transform": {"x": spawn_transform.location.x, "y": spawn_transform.location.y, "z": spawn_transform.location.z, "yaw_deg": spawn_transform.rotation.yaw},
         })
 
@@ -56,6 +59,10 @@ class RawVehicleAgent:
             item = self.camera.poll(frame)
             if item is not None:
                 data = item.pop("data"); self.logger.log_camera(item, data)
+        if self.depth_camera is not None:
+            item = self.depth_camera.poll(frame)
+            if item is not None:
+                data = item.pop("data"); self.logger.log_depth(item, data)
         for collision in self.collision_sensor.drain_vehicle(): self.logger.log_collision(collision)
         return {"frame": int(frame), "timestamp": float(t), "throttle": command.throttle, "brake": command.brake,
                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}

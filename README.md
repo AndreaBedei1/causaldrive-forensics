@@ -37,12 +37,22 @@ vehicles/A/collisions.jsonl
 vehicles/A/radar.jsonl
 vehicles/A/camera/metadata.jsonl
 vehicles/A/camera/frames/
+vehicles/A/depth/metadata.jsonl
+vehicles/A/depth/frames/
 ```
 
 Vehicle files contain only that vehicle's pose, orientation, velocity,
 acceleration, angular velocity, controls, collision impulse, radar detections
-(frame, timestamp, depth, azimuth, altitude, radial velocity), and raw camera
-frames with sensor metadata. Vehicle files never contain simulator actor IDs.
+(frame, timestamp, depth, azimuth, altitude, radial velocity), raw RGB frames,
+and raw depth-camera frames with sensor metadata. RGB, depth, and radar are
+recorded independently; no sensor selection or combination is performed.
+Vehicle files never contain simulator actor IDs.
+
+Depth frames are lossless original CARLA BGRA bytes (`raw_bgra8`), not a
+visualization. For a pixel stored as BGRA bytes, metric depth can later be
+decoded as `1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres. Per-frame
+metadata includes the frame, timestamp, sensor transform, width, height, FOV,
+blueprint, file format, and filename.
 
 The separate ground-truth trace is privileged simulator state: it contains
 participant actor IDs, full vehicle state, controls as recorded by the runner,
