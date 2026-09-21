@@ -1,127 +1,78 @@
-# =============================================================================
-# S07 -- OCCLUDED / PARTIAL VIEW  (3 vehicles)   *** KEY SCENARIO ***
-# =============================================================================
-# This scenario exists to answer the central question: does distributed merge
-# add knowledge that no single ego view can obtain?
-#
-# Occlusion mechanism (documented, not manufactured)
-# --------------------------------------------------
-# Three vehicles travel in one lane: C leads, B follows, A is last. The event
-# that initiates everything is C's hard braking.
-#
-#   * B has a clear line of sight to C and observes it directly.
-#   * A's radar returns from C are physically blocked by B, which sits directly
-#     between them. A is additionally fitted with the narrow-FOV radar profile
-#     (30 deg instead of 120 deg), so it cannot acquire C around B's sides
-#     either.
-#
-# The missing information therefore comes from SENSING -- real occlusion plus a
-# real sensor limitation -- and never from deleting graph elements after
-# inference. Whether merge recovers C's contribution is measured, not assumed:
-# see the knowledge_gain metric in docs/GRAPH_merge.md.
-# =============================================================================
-
 scenario:
-  scenario_id: "S07"
-  name: "partial_view"
-  description: >
-    C brakes hard, B responds, A closes on B and strikes it. A cannot observe C
-    at all (occluded by B and restricted by a narrow-FOV radar), so A's local
-    reconstruction should be missing the initiating cause that B observed.
-  map: "Town05"
-  default_variant: "occluded"
+  scenario_id: S07
+  name: partial_view
+  description: 'C brakes hard, B responds, A closes on B and strikes it. A cannot
+    observe C at all (occluded by B and restricted by a narrow-FOV radar), so A''s
+    local reconstruction should be missing the initiating cause that B observed.
+
+    '
+  map: Town05
+  default_variant: occluded
   max_duration_s: 30.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
-      route: { length_m: 150.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      # The partial view is created here: a narrow-FOV radar, combined with B
-      # physically occluding C.
-      sensor_profile: "radar_narrow_fov"
-      actions:
-        - action_id: "A_late_brake"
-          kind: "brake"
-          t_start: 6.2
-          duration: 8.0
-          params: { intensity: 0.8 }
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 24.0, lane_offset: 0 }
-      route: { length_m: 130.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      sensor_profile: "radar_baseline"
-      actions:
-        - action_id: "B_reaction_brake"
-          kind: "brake"
-          t_start: 3.7
-          duration: 10.0
-          params: { intensity: 1.0 }
-
-    - id: "C"
-      blueprint: "vehicle.nissan.patrol"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 50.0, lane_offset: 0 }
-      route: { length_m: 110.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      sensor_profile: "radar_baseline"
-      actions:
-        - action_id: "C_emergency_brake"
-          kind: "brake"
-          t_start: 3.0
-          duration: 10.0
-          params: { intensity: 1.0 }
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "C_emergency_brake"
-    - "B_reaction_brake"
-    - "A_late_brake"
-
-  design_template:
-    - cause: { kind: "action", participant: "C", action_id: "C_emergency_brake" }
-      effect: { kind: "state", participant: "B", name: "closing" }
-      edge: "TRIGGERS"
-      rationale: "the initiating event, observable by B but not by A"
-    - cause: { kind: "state", participant: "B", name: "closing" }
-      effect: { kind: "action", participant: "B", action_id: "B_reaction_brake" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "action", participant: "B", action_id: "B_reaction_brake" }
-      effect: { kind: "state", participant: "A", name: "closing" }
-      edge: "TRIGGERS"
-    - cause: { kind: "state", participant: "A", name: "closing" }
-      effect: { kind: "state", participant: "A", name: "critical_ttc" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-    - cause: { kind: "action", participant: "A", action_id: "A_late_brake" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "PREVENTS"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 0.0
+      lane_offset: 0
+    route:
+      length_m: 150.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    sensor_profile: radar_narrow_fov
+    actions:
+    - action_id: A_late_brake
+      kind: brake
+      t_start: 6.2
+      duration: 8.0
+      params:
+        intensity: 0.8
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 24.0
+      lane_offset: 0
+    route:
+      length_m: 130.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    sensor_profile: radar_baseline
+    actions:
+    - action_id: B_reaction_brake
+      kind: brake
+      t_start: 3.7
+      duration: 10.0
+      params:
+        intensity: 1.0
+  - id: C
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 50.0
+      lane_offset: 0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    sensor_profile: radar_baseline
+    actions:
+    - action_id: C_emergency_brake
+      kind: brake
+      t_start: 3.0
+      duration: 10.0
+      params:
+        intensity: 1.0
   variants:
-    occluded:
-      notes:
-        - "A: narrow-FOV radar and physically occluded from C by B"
-        - "B: baseline radar with a clear view of C"
-        - "the merge benefit measured here must come from sensing, not from post-hoc edge deletion"
-
-    # Control condition: identical dynamics, but A gets the baseline radar. If
-    # the merge benefit measured in the occluded variant is real, it should
-    # shrink here -- A can now see more of the interaction on its own.
+    occluded: {}
     full_view:
-      notes: ["control: same dynamics with A on the baseline radar profile"]
       participant_overrides:
         A:
-          sensor_profile: "radar_baseline"
+          sensor_profile: radar_baseline

@@ -1,8 +1,7 @@
 """Connection and process management for the CARLA simulator.
 
-This module exists because a bare ``carla.Client`` is not robust enough to drive
-a long experiment suite unattended. Three failure modes were observed on the
-reference machine and are handled here explicitly:
+This module exists because a bare ``carla.Client`` is not robust enough for
+repeatable scenario acquisition. Three failure modes are handled explicitly:
 
 1. ``client.load_world(X)`` while the server is **already running map X** crashes
    the server. :func:`ensure_map` therefore switches maps only when the requested
@@ -228,7 +227,7 @@ def ensure_map(client: Any, target_map: str, settle_timeout_s: float = 60.0) -> 
 class CarlaServer:
     """Optional supervisor for a locally installed CARLA simulator process.
 
-    The experiment runner can use this to bring a server up when none is
+    The scenario runner can use this to bring a server up when none is
     running, and to restart one that died mid-suite. It never touches a server it
     did not start unless :meth:`kill_existing` is called explicitly.
     """
@@ -561,19 +560,8 @@ class SimulatorSession:
     def release_client(self) -> None:
         """Drop the client bound to the current server and collect it.
 
-        Every ``carla.Client`` owns a background streaming client that keeps
-        trying to reconnect to the sensor port on its own. When the server it
-        was talking to is killed, that thread does not stop -- it is the source
-        of the repeated ``streaming client: connection failed`` lines -- and it
-        is not harmless: with the clients of several dead servers alive in one
-        process, an exception escaping one of those threads takes the whole
-        interpreter down with ``Fatal Python error: Aborted`` inside an
-        unrelated call. A replay collection died this way three replays
-        in, in ``world.apply_settings()`` on a freshly started server.
-
-        Dropping the last reference and forcing a collection is what actually
-        runs the C++ destructor, so this is called before every restart rather
-        than left to the garbage collector's own schedule.
+        Dropping the last reference and forcing a collection lets the CARLA
+        client release its background streaming resources before a restart.
         """
         if self._client is None:
             return
@@ -582,13 +570,6 @@ class SimulatorSession:
 
     def fresh_world_for_map(self, map_name: str) -> Any:
         """Restart the simulator, then return a world running ``map_name``.
-
-        A run is only reproducible on a freshly booted server: repeated runs in
-        one server session drift, by enough to change an outcome class (see
-        ``docs/ENVIRONMENT.md``). Any comparison between runs -- and a
-        replay replay is exactly that -- must therefore start each run
-        from a fresh process, or the difference being measured is confounded with
-        accumulated simulator state.
         """
         if not self.server.available:
             LOGGER.warning(

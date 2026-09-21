@@ -1,285 +1,105 @@
-# =============================================================================
-# S15 -- INTERSECTION PILE-UP  (3 vehicles)
-# =============================================================================
-# The pushed-vehicle case again, but across a junction instead of along a lane,
-# and with traffic control in play. A and B collide in the intersection; the
-# impact deflects one of them into C, which was waiting or passing.
-#
-# Two things make this different from S14 rather than a restatement of it.
-#
-# The second impact is lateral, not longitudinal. In a rear-end chain the shunt
-# is along the direction both vehicles were already travelling, and a method
-# could plausibly get the right answer by following momentum in one dimension.
-# Here the deflection changes direction, so the physical graph has to connect an
-# impact to a subsequent one whose geometry does not resemble it.
-#
-# And C is a bystander. In S14 every vehicle was part of the traffic stream that
-# produced the incident. Here C did nothing at all -- so if C appears as a
-# contributor, something is treating presence as participation.
-#
-# Junction 720 of Town05 at (101.6, 0.3), with a stop sign on B's approach so the
-# initiating impact has a normative account and not only a physical one.
-# =============================================================================
-
 scenario:
-  scenario_id: "S15"
-  name: "intersection_pileup"
-  description: >
-    B fails to stop and strikes A in the junction. The impact deflects A into C,
-    which is approaching the same junction from a third direction.
-  map: "Town05"
-  default_variant: "deflected_into_c"
-  # The pile-up is over inside nine seconds. Left running, C reached the end of
-  # its route and circled through 335 degrees.
+  scenario_id: S15
+  name: intersection_pileup
+  description: 'B fails to stop and strikes A in the junction. The impact deflects
+    A into C, which is approaching the same junction from a third direction.
+
+    '
+  map: Town05
+  default_variant: deflected_into_c
   max_duration_s: 14.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 152.54
-        junction_y: -0.23
-        bearing_deg: 90.0
-        # 52, not 55. At 55 A arrived a quarter of a second late and drove into
-        # B's flank instead, which stops A dead rather than carrying it: a car
-        # that T-bones a heavier one loses its own speed and goes nowhere. Three
-        # metres closer and it is A's flank that B strikes, which is the impact
-        # this scenario is about.
-        back_m: 48.0
-      route:
-        length_m: 240.0
-        step_m: 2.0
-        turns: ["straight"]
-        turn_lookahead: true
-      initial_speed: 11.0
-      target_speed: 11.0
-      # A is struck and then carried. Braking itself to a stop the moment it is
-      # hit is what stopped the deflection this scenario is named for from
-      # happening at all: A came to rest inside the junction and C drove past
-      # it.
-      #
-      # Coasting alone was not enough either. Whether CARLA carries a struck car
-      # sideways or simply stops it turns on which vehicle reached the crossing
-      # first, to within about a fifth of a second: shifting A three metres was
-      # the difference between B striking A's flank and A driving into B's nose
-      # and stopping dead. A scenario whose story depends on that is not
-      # reproducible.
-      #
-      # So the displacement is declared. deflect coasts and is carried 3.6 m to
-      # the right over 1.4 s, which is the width of one lane, and it begins at
-      # the moment of contact and only then. It has no schedule: remove the
-      # first collision and there is no deflection and no second collision, which
-      # is the dependency the variant exists to demonstrate.
-      post_impact_mode: "deflect"
-      # Negative is to the left of travel, which for a vehicle heading north up
-      # the near lane is east, which is where the far lane and C are. Positive
-      # carried A the other way, into the kerb it had just left.
-      post_impact_lateral_m: -5.2
-      post_impact_deflect_s: 0.7
-      actions: []
-
-    - id: "B"
-      # Not the Nissan Patrol it used to be. A 2.7 t SUV struck broadside by a
-      # 1.8 t saloon stops the saloon dead: A ended the run at rest 45 m from
-      # its spawn with 0.59 m of lateral displacement, which is no deflection at
-      # all. Against a light car A keeps enough of its speed to be carried.
-      blueprint: "vehicle.audi.tt"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 152.54
-        junction_y: -0.23
-        bearing_deg: 0.0
-        back_m: 45.0
-      # Left across the through road. Junction 359 is a T and its eastbound arm
-      # has no way straight on, so "straight" silently became a turn; the
-      # lookahead is what makes the declared turn the one that happens.
-      route:
-        length_m: 110.0
-        step_m: 2.0
-        turns: ["left"]
-        turn_lookahead: true
-      initial_speed: 10.0
-      target_speed: 10.0
-      actions: []
-
-    # C approaches from the third arm, slowly, and is struck by whatever comes
-    # out of the junction. It takes no action in any variant.
-    - id: "C"
-      # Junction 359 is a T with approaches on bearings 0, 90 and -90;
-      # there is no 180 lane for C to come down.
-      blueprint: "vehicle.audi.tt"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 152.54
-        junction_y: -0.23
-        bearing_deg: -90.0
-        back_m: 30.0
-      route:
-        length_m: 160.0
-        step_m: 2.0
-        turns: ["straight"]
-        turn_lookahead: true
-      initial_speed: 6.0
-      target_speed: 6.0
-      actions: []
-
-  traffic_control:
-    signs:
-      - sign_id: "stop_B"
-        kind: "stop"
-        governs: "B"
-        anchor:
-          anchor: "junction_approach"
-          junction_x: 152.54
-          junction_y: -0.23
-          bearing_deg: 0.0
-          back_m: 12.0
-        # The map renders a real stop sign on this approach, so none is
-        # spawned. place_traffic_control verifies the mesh is there and
-        # records physically_present from what it found, not from this
-        # declaration.
-        spawn_prop: false
-        stop_line_forward_m: 4.0
-    tie_break: null
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"], ["A", "C"]]
-  expected_collision_order: [["A", "B"], ["A", "C"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    # Both impacts inside the junction, and the second close behind the first:
-    # a second collision a long way after the first is not a consequence of it.
-    collision_near:
-      x: 152.54
-      y: -0.23
-      max_distance_m: 12.0
-      require_in_junction: true
-    max_accumulated_turn_deg: 140.0
-    min_straightness: 0.60
-    no_scenery_collision: true
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "B_roll_through"
-
-  design_template:
-    - cause: { kind: "state", participant: "B", name: "no_stop" }
-      effect: { kind: "state", participant: "B", name: "conflict_entry" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-    - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
-      edge: "CONTRIBUTES_TO"
-      rationale: "the first impact deflects A out of its path and into C"
-
-  notes:
-    - "C takes no action in any variant: if C appears as a contributor, presence is being read as participation"
-    - "the second impact is lateral, so the physical graph has to link impacts whose geometry differs"
-    - "A is the recorder that feels both impacts, so A ties B and C onto one timeline"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: junction_approach
+      junction_x: 152.54
+      junction_y: -0.23
+      bearing_deg: 90.0
+      back_m: 48.0
+    route:
+      length_m: 240.0
+      step_m: 2.0
+      turns:
+      - straight
+      turn_lookahead: true
+    initial_speed: 11.0
+    target_speed: 11.0
+    post_impact_mode: deflect
+    post_impact_lateral_m: -5.2
+    post_impact_deflect_s: 0.7
+    actions: []
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: junction_approach
+      junction_x: 152.54
+      junction_y: -0.23
+      bearing_deg: 0.0
+      back_m: 45.0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+      turns:
+      - left
+      turn_lookahead: true
+    initial_speed: 10.0
+    target_speed: 10.0
+    actions: []
+  - id: C
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: junction_approach
+      junction_x: 152.54
+      junction_y: -0.23
+      bearing_deg: -90.0
+      back_m: 30.0
+    route:
+      length_m: 160.0
+      step_m: 2.0
+      turns:
+      - straight
+      turn_lookahead: true
+    initial_speed: 6.0
+    target_speed: 6.0
+    actions: []
   variants:
-    # ---- B runs the stop, strikes A, A is deflected into C ---------------
     deflected_into_c:
-      validation:
-        # What makes the second impact a consequence rather than a coincidence:
-        # it follows the first closely, and A has no throttle in between. The
-        # deflection itself cannot start before contact -- it is triggered by
-        # it -- but that is a property of the code, and this is the property
-        # measured in the recording.
-        impact_interval_s: { min: 0.2, max: 3.0 }
-        coasting_after_impact: ["A"]
-        coasting_window_s: 3.0
       participant_overrides:
         B:
           actions:
-            - action_id: "B_roll_through"
-              kind: "set_speed"
-              t_start: 3.0
-              duration: 12.0
-              params: { target_speed: 7.0 }
-      notes:
-        - "designed answer: B contributes to both impacts, A to neither, C to neither"
-        - "A was struck and then struck C, which is the pushed-vehicle shape across a junction"
-
-    # ---- the same impact, and A is not deflected into anyone -------------
+          - action_id: B_roll_through
+            kind: set_speed
+            t_start: 3.0
+            duration: 12.0
+            params:
+              target_speed: 7.0
     single_impact:
-      expected_collision_pairs: [["A", "B"]]
-      expected_collision_order: [["A", "B"]]
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 6.0
-        # The control has to state its absence: naming the pair that must
-        # collide says nothing about the pair that must not.
-        forbidden_collision_pairs: [["A", "C"]]
       participant_overrides:
         B:
           actions:
-            - action_id: "B_roll_through"
-              kind: "set_speed"
-              t_start: 3.0
-              duration: 12.0
-              params: { target_speed: 7.0 }
+          - action_id: B_roll_through
+            kind: set_speed
+            t_start: 3.0
+            duration: 12.0
+            params:
+              target_speed: 7.0
         C:
-          # C is far enough back that the deflection misses it. Everything else
-          # is identical, so the difference in the account is attributable to
-          # the second impact alone.
-          #
-          # C sits out of the deflection path here, which is the whole
-          # difference from deflected_into_c. On bearing 90 it shared the
-          # lane A now uses and drove into the stationary wreck 5.65 s
-          # after the first impact: a second collision, and one with
-          # nothing to do with any deflection.
           spawn:
-            anchor: "junction_approach"
+            anchor: junction_approach
             junction_x: 152.54
             junction_y: -0.23
             bearing_deg: -90.0
             back_m: 95.0
-          # A is deflected in this variant too, because the deflection follows
-          # from the impact and the impact is the same one. What differs is
-          # that there is nothing where A is carried to: at 6 m/s C was still
-          # on the far lane and A was pushed into it. At 2 m/s C is 30 m short
-          # of the junction when the recording ends.
           initial_speed: 2.0
           target_speed: 2.0
-      design_template:
-        - cause: { kind: "state", participant: "B", name: "no_stop" }
-          effect: { kind: "state", participant: "B", name: "conflict_entry" }
-          edge: "CONTRIBUTES_TO"
-        - cause: { kind: "state", participant: "B", name: "conflict_entry" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-      notes:
-        - "the control for deflected_into_c: one impact instead of two, same initiating behaviour"
-        - "C is present and uninvolved, and here there is no impact to be wrongly attributed to it"
-        - "also a partial-alignment case: C feels no contact, so C cannot be tied to the common timeline at all"
-
-    # ---- B stops; no impact at all --------------------------------------
     b_stops:
-      expected_outcome: "near_miss"
-      expected_collision_pairs: []
-      expected_collision_order: []
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 16.0
-      intervention_candidates:
-        - "B_full_stop"
       participant_overrides:
         B:
           actions:
-            - action_id: "B_full_stop"
-              kind: "brake"
-              t_start: 2.6
-              duration: 8.0
-              params: { intensity: 0.9 }
-      design_template:
-        - cause: { kind: "state", participant: "B", name: "stopped" }
-          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
-          edge: "PREVENTS"
-      notes:
-        - "the negative control, and also the no-collision timing case"
-        - "with no contact anywhere, no recorder can be tied to another and the merged log says so"
+          - action_id: B_full_stop
+            kind: brake
+            t_start: 2.6
+            duration: 8.0
+            params:
+              intensity: 0.9

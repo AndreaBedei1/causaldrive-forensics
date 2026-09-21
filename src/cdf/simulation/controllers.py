@@ -1,10 +1,7 @@
-"""Deterministic scripted controllers used to *generate* scenarios.
+"""Deterministic scripted controllers used to generate scenarios.
 
-These controllers are test-generation code. They legitimately know the scripted
-world -- the route, the timing, the intended manoeuvre -- because they create it.
-The forensic algorithm never sees any of this: it only observes the resulting
-motion through onboard sensors. Keeping generation and inference in separate
-modules is what makes that separation checkable rather than merely claimed.
+The controller follows the configured route and timed actions with deterministic
+lateral and longitudinal control.
 
 Design
 ------
@@ -14,10 +11,6 @@ A participant's behaviour is fully described by
 * a base target speed, and
 * an ordered list of :class:`ScriptedAction` items, each with an explicit
   ``action_id``, start time and duration.
-
-That last piece is what makes the replay layer possible: an intervention
-is simply "remove, delay, or weaken the action with this id", replayed from the
-same seed and spawn state. There is no hidden behaviour to intervene on.
 
 Control is deliberately simple and deterministic: pure-pursuit lateral steering
 plus a PI longitudinal controller. No randomness, no wall-clock, no Traffic
@@ -162,7 +155,7 @@ class RoutePlan:
 
 
 # ---------------------------------------------------------------------------
-# Scripted actions (the intervention handles)
+# Scripted actions
 # ---------------------------------------------------------------------------
 
 
@@ -170,9 +163,7 @@ class RoutePlan:
 class ScriptedAction:
     """One named, timed behaviour modification.
 
-    ``action_id`` is the handle the replay layer intervenes on. Keep ids
-    stable and descriptive (``"B_emergency_brake"``, ``"B_cut_in"``), because they
-    appear in replay manifests and in the scenario-contribution report.
+    ``action_id`` is a stable name for the configured action.
 
     Supported kinds
     ---------------
@@ -312,7 +303,7 @@ class ScriptedController:
         #:            car sideways. Whether the struck vehicle is displaced or
         #:            simply stops depends on which of the two reached the
         #:            crossing first, to within a fifth of a second, and a
-        #:            scenario whose story turns on that is not an experiment.
+        #:            scenario whose story turns on that is not a fixed run.
         #: ``drive``  keep following the route, which ``post_impact_stop: false``
         #:            used to mean on its own.
         self.post_impact_mode = str(
@@ -332,7 +323,7 @@ class ScriptedController:
     # -- state ------------------------------------------------------------
 
     def reset(self) -> None:
-        """Return the controller to its initial state (for a clean replay)."""
+        """Return the controller to its initial state."""
         self._pid.reset()
         self._route_hint = 0
         self._last_steer = 0.0
@@ -485,7 +476,7 @@ class ScriptedController:
             j += 1
         return j - index
 
-    # -- introspection used by scenario validation ------------------------
+    # -- controller state used by the runner ------------------------------
 
     @property
     def lateral_offset(self) -> float:

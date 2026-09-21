@@ -1,249 +1,84 @@
-# =============================================================================
-# S10 -- SINGLE STOP, A CONTROLLED  (2 vehicles)
-# =============================================================================
-# The first scenario in which traffic control is part of the scenario account, and
-# the simplest case of the supervisor's right-of-way benchmark: one approach has
-# a stop sign and the other does not.
-#
-# What makes it worth running is that two questions come apart here which the
-# earlier scenarios could not separate. "Did A cause the collision?" is physical
-# and answered from the trajectories. "Should A have stopped?" is normative and
-# answered from what A's camera saw and what A then did. A method that only had
-# the first would call the crash-variant outcome a symmetric conflict; a method
-# that only had the second could not tell a stop sign run beside an unrelated
-# collision from one that produced it.
-#
-# Geometry: junction 359 of Town05 at (152.54, -0.23). It is a **T**, not a
-# crossroads, and that is the whole shape of this scenario. The eastbound arm A
-# approaches on simply ends there: the junction offers it a left turn and a right
-# turn and no way straight on. The through road runs north to south in two lanes,
-# x = 151.5 carrying traffic one way and x = 155.0 the other.
-#
-# A terminating arm is exactly the kind of approach that carries a stop sign, and
-# this one does: BP_Stop4_7_SM_1 at (142.2, 6.0), 11.9 m back from the junction,
-# one of only five stop signs Town05 actually renders.
-#
-# So the conflict is the one a T produces. A has to pull out across the through
-# road to reach the far lane, and B has priority on the near lane A must cross.
-# A that rolls through the sign crosses in front of B and is struck side-on,
-# inside the junction. An earlier version of this file asked both vehicles to
-# drive "straight" across, which no lane here does: A was silently turned by the
-# map onto B's lane and the two met 17 m beyond the junction, travelling the same
-# way. What looked like a crossing collision was a merge. The map
-# holds 33 traffic.stop trigger actors and 5 sign meshes, and a trigger volume is
-# not something a camera can read; the junction this scenario used before had
-# seven triggers and no mesh at all, so there was nothing on A's approach to
-# detect. No traffic light lies within 35 m, so signal state cannot confound the
-# result -- which matters because signal state is privileged and a vehicle could
-# not observe it.
-# =============================================================================
-
 scenario:
-  scenario_id: "S10"
-  name: "single_stop_a"
-  description: >
-    A faces a stop sign on its approach; B does not and has benchmark priority.
-    The variants differ only in what A does about the sign: stop properly, roll
-    through it, or stop and then pull out correctly.
-  map: "Town05"
-  default_variant: "rolls_through"
+  scenario_id: S10
+  name: single_stop_a
+  description: 'A faces a stop sign on its approach; B does not and has benchmark
+    priority. The variants differ only in what A does about the sign: stop properly,
+    roll through it, or stop and then pull out correctly.
+
+    '
+  map: Town05
+  default_variant: rolls_through
   max_duration_s: 28.0
-
   participants:
-    # A is the controlled approach. It arrives at a speed from which stopping is
-    # possible, so that failing to stop is a choice rather than a physical
-    # impossibility -- otherwise the normative finding would be unfair.
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 152.54
-        junction_y: -0.23
-        bearing_deg: 0.0
-        back_m: 45.0
-      # Left across the through road, which is the movement that has to give
-      # way. turn_lookahead is required here: at this junction both connecting
-      # lanes leave the entry within a degree of the approach heading, so a
-      # decision scored on those headings picks whichever lane the map lists
-      # first and "left" means nothing.
-      route:
-        length_m: 110.0
-        step_m: 2.0
-        turns: ["left"]
-        turn_lookahead: true
-      initial_speed: 9.0
-      target_speed: 9.0
-      actions: []
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 152.54
-        junction_y: -0.23
-        # The near lane of the through road, the one A's left turn crosses.
-        bearing_deg: 90.0
-        back_m: 60.0
-      # Long enough that B never reaches the end of it. A route that runs out
-      # under a moving vehicle leaves the pure-pursuit controller chasing its
-      # last point, and the vehicle turns back on itself: that is what the
-      # circling in these scenarios was.
-      route:
-        length_m: 240.0
-        step_m: 2.0
-        turns: ["straight"]
-        turn_lookahead: true
-      initial_speed: 10.0
-      target_speed: 10.0
-      actions: []
-
-  # Privileged. Scenario construction uses it to place what the map may not
-  # provide; evaluation uses it as the traffic-control ground truth. Local
-  # inference sees signs only through the camera, which is the entire point of
-  # the camera: the gap between the two is the perception measurement.
-  traffic_control:
-    signs:
-      - sign_id: "stop_A"
-        kind: "stop"
-        governs: "A"
-        anchor:
-          anchor: "junction_approach"
-          junction_x: 152.54
-          junction_y: -0.23
-          bearing_deg: 0.0
-          back_m: 12.0
-        # The map renders a real stop sign on this approach, so none is
-        # spawned. place_traffic_control verifies the mesh is there and
-        # records physically_present from what it found, not from this
-        # declaration.
-        spawn_prop: false
-        stop_line_forward_m: 4.0
-    # Only one approach is controlled, so arrival order never has to break a
-    # tie and no tie-break convention is declared.
-    tie_break: null
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-    # The conflict is inside the junction. An impact out on the exit road is a
-    # merge that happened after the encounter, which is what this scenario
-    # produced before the geometry was corrected, and it must fail rather than
-    # pass quietly.
-    collision_near:
-      x: 152.54
-      y: -0.23
-      max_distance_m: 12.0
-      require_in_junction: true
-    # One left turn is about 90 degrees. Anything approaching twice that is a
-    # vehicle going round again.
-    max_accumulated_turn_deg: 150.0
-    min_straightness: 0.60
-    no_scenery_collision: true
-
-  intervention_candidates:
-    - "A_roll_through"
-
-  # Designed structure. Every state here maps onto a comparable event type, so
-  # each designed edge has a counterpart a reconstruction could in principle
-  # recover. A template edge nothing could match would measure the vocabulary
-  # rather than the method.
-  design_template:
-    - cause: { kind: "state", participant: "A", name: "no_stop" }
-      effect: { kind: "state", participant: "A", name: "stop_line_crossed" }
-      edge: "CONTRIBUTES_TO"
-      rationale: "not stopping is what leaves A still moving at the line"
-    - cause: { kind: "state", participant: "A", name: "stop_line_crossed" }
-      effect: { kind: "state", participant: "A", name: "conflict_entry" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "A", name: "conflict_entry" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-
-  notes:
-    - "the benchmark right-of-way rule for this case is that the uncontrolled approach has priority"
-    - "A arrives at 9 m/s, from which a stop is comfortably achievable"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: junction_approach
+      junction_x: 152.54
+      junction_y: -0.23
+      bearing_deg: 0.0
+      back_m: 45.0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+      turns:
+      - left
+      turn_lookahead: true
+    initial_speed: 9.0
+    target_speed: 9.0
+    actions: []
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: junction_approach
+      junction_x: 152.54
+      junction_y: -0.23
+      bearing_deg: 90.0
+      back_m: 60.0
+    route:
+      length_m: 240.0
+      step_m: 2.0
+      turns:
+      - straight
+      turn_lookahead: true
+    initial_speed: 10.0
+    target_speed: 10.0
+    actions: []
   variants:
-    # ---- A rolls through the sign and is struck ---------------------------
     rolls_through:
       participant_overrides:
         A:
           actions:
-            # A slows a little, as a rolling stop does, and continues. Modelled
-            # as a speed change rather than a brake so that the trace shows
-            # deceleration without ever reaching rest -- which is exactly the
-            # signature NO_STOP_AFTER_STOP_SIGN has to catch.
-            - action_id: "A_roll_through"
-              kind: "set_speed"
-              t_start: 2.0
-              duration: 14.0
-              params: { target_speed: 5.5 }
-      notes:
-        - "A decelerates but never reaches rest, which is what makes this a rolling stop rather than a stop"
-
-    # ---- A stops properly; no conflict ------------------------------------
+          - action_id: A_roll_through
+            kind: set_speed
+            t_start: 2.0
+            duration: 14.0
+            params:
+              target_speed: 5.5
     stops_safely:
-      expected_outcome: "near_miss"
-      expected_collision_pairs: []
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 18.0
-      intervention_candidates:
-        - "A_full_stop"
       participant_overrides:
         A:
           actions:
-            - action_id: "A_full_stop"
-              kind: "brake"
-              t_start: 2.6
-              duration: 7.0
-              params: { intensity: 0.9 }
-      design_template:
-        - cause: { kind: "state", participant: "A", name: "stopped" }
-          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
-          edge: "PREVENTS"
-          rationale: "coming to rest before the line is what keeps A out of the conflict"
-      notes:
-        - "the negative control: identical geometry, and A discharges the obligation"
-        - "B passes unobstructed, so the separation stays large"
-
-    # ---- A stops, then enters after B has cleared -------------------------
+          - action_id: A_full_stop
+            kind: brake
+            t_start: 2.6
+            duration: 7.0
+            params:
+              intensity: 0.9
     stops_then_proceeds:
-      expected_outcome: "near_miss"
-      expected_collision_pairs: []
-      # The story is over once A has stopped, B has passed and A has completed
-      # its turn. Left running, the 110 m routes carry both vehicles into
-      # further junctions where the route follower takes whatever successor it
-      # is offered: on the development seed they circled through 211 and 328
-      # degrees and B destroyed a piece of vegetation, none of which is the
-      # scenario. The recording stops when the encounter is decided.
       max_duration_s: 16.0
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 14.0
-      intervention_candidates:
-        - "A_full_stop"
-        - "A_pull_away"
       participant_overrides:
         A:
           actions:
-            - action_id: "A_full_stop"
-              kind: "brake"
-              t_start: 2.6
-              duration: 4.2
-              params: { intensity: 0.9 }
-            - action_id: "A_pull_away"
-              kind: "set_speed"
-              t_start: 7.4
-              duration: 6.0
-              params: { target_speed: 9.0 }
-      design_template:
-        - cause: { kind: "state", participant: "A", name: "stopped" }
-          effect: { kind: "outcome", name: "no_collision", participants: ["A", "B"] }
-          edge: "PREVENTS"
-      notes:
-        - "the case that distinguishes 'stopped' from 'stopped and then proceeded safely'"
-        - "A pulls away after B has cleared the junction, so both the stop and the crossing appear in the log"
+          - action_id: A_full_stop
+            kind: brake
+            t_start: 2.6
+            duration: 4.2
+            params:
+              intensity: 0.9
+          - action_id: A_pull_away
+            kind: set_speed
+            t_start: 7.4
+            duration: 6.0
+            params:
+              target_speed: 9.0

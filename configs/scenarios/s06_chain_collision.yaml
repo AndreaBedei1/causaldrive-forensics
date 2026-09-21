@@ -1,157 +1,94 @@
-# =============================================================================
-# S06 -- CHAIN COLLISION  (3 vehicles)
-# =============================================================================
-# The first genuine multi-agent scenario chain. The two variants share an almost
-# identical spatial layout and produce a similar final configuration, but the
-# scenario structure differs: the collisions happen in the opposite order and have
-# different initiators. This is the direct test of hypothesis H4 -- that
-# replay interventions recover different scenario structures for S06a and
-# S06b rather than being fooled by the similar end state.
-# =============================================================================
-
 scenario:
-  scenario_id: "S06"
-  name: "chain_collision"
-  description: >
-    Three vehicles in a single lane: C leads, B follows, A is last. C brakes
-    hard. Which pair collides first depends on how B responds.
-  map: "Town05"
-  default_variant: "a_front_pushed"
+  scenario_id: S06
+  name: chain_collision
+  description: 'Three vehicles in a single lane: C leads, B follows, A is last. C
+    brakes hard. Which pair collides first depends on how B responds.
+
+    '
+  map: Town05
+  default_variant: a_front_pushed
   max_duration_s: 30.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
-      route: { length_m: 150.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      actions: []
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 26.0, lane_offset: 0 }
-      route: { length_m: 130.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      actions: []
-
-    - id: "C"
-      blueprint: "vehicle.nissan.patrol"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 44.0, lane_offset: 0 }
-      route: { length_m: 110.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      actions:
-        - action_id: "C_emergency_brake"
-          kind: "brake"
-          t_start: 3.0
-          duration: 10.0
-          params: { intensity: 1.0 }
-
-  expected_outcome: "collision"
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "C_emergency_brake"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 0.0
+      lane_offset: 0
+    route:
+      length_m: 150.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    actions: []
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 26.0
+      lane_offset: 0
+    route:
+      length_m: 130.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    actions: []
+  - id: C
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 44.0
+      lane_offset: 0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    actions:
+    - action_id: C_emergency_brake
+      kind: brake
+      t_start: 3.0
+      duration: 10.0
+      params:
+        intensity: 1.0
   variants:
-    # ---------------------------------------------------------------------
-    # S06a: B responds in time and stops behind C; A does not, hits B, and the
-    #       impact pushes B into C. Order: (A,B) then (B,C).
-    # ---------------------------------------------------------------------
     a_front_pushed:
-      expected_collision_pairs: [["A", "B"], ["B", "C"]]
-      expected_collision_order: [["A", "B"], ["B", "C"]]
-      notes:
-        - "S06a: A strikes B, and the impact pushes B into C"
-        - "B brakes in time; A brakes far too late"
-      intervention_candidates:
-        - "C_emergency_brake"
-        - "B_reaction_brake"
-        - "A_very_late_brake"
       participant_overrides:
         B:
-          # B stops safely behind C, then releases the brakes. It must be free to
-          # roll when A arrives, otherwise the "pushed into C" mechanism cannot
-          # happen at all and the variant silently degenerates into S06b's layout.
           post_impact_stop: false
           actions:
-            - action_id: "B_reaction_brake"
-              kind: "brake"
-              t_start: 3.75
-              duration: 2.0
-              params: { intensity: 1.0 }
+          - action_id: B_reaction_brake
+            kind: brake
+            t_start: 3.75
+            duration: 2.0
+            params:
+              intensity: 1.0
         A:
           actions:
-            - action_id: "A_very_late_brake"
-              kind: "brake"
-              t_start: 5.6
-              duration: 8.0
-              params: { intensity: 0.5 }
-      design_template:
-        - cause: { kind: "action", participant: "C", action_id: "C_emergency_brake" }
-          effect: { kind: "state", participant: "B", name: "closing" }
-          edge: "TRIGGERS"
-        - cause: { kind: "action", participant: "A", action_id: "A_very_late_brake" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "PREVENTS"
-          rationale: "A's braking is far too late to avert the first impact"
-        - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-        - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-          edge: "CAUSES_OUTCOME"
-          rationale: "the second impact is a mechanical consequence of the first"
-
-    # ---------------------------------------------------------------------
-    # S06b: B fails to respond and strikes C first; A then strikes B.
-    #       Order: (B,C) then (A,B). Same layout, reversed scenario order.
-    # ---------------------------------------------------------------------
+          - action_id: A_very_late_brake
+            kind: brake
+            t_start: 5.6
+            duration: 8.0
+            params:
+              intensity: 0.5
     b_rear_first:
-      expected_collision_pairs: [["B", "C"], ["A", "B"]]
-      expected_collision_order: [["B", "C"], ["A", "B"]]
-      notes:
-        - "S06b: B strikes C first, then A strikes B"
-        - "same spatial layout as S06a, opposite scenario order"
-      intervention_candidates:
-        - "C_emergency_brake"
-        - "B_no_reaction"
-        - "A_late_brake"
       participant_overrides:
         B:
           actions:
-            - action_id: "B_no_reaction"
-              kind: "brake"
-              t_start: 5.6
-              duration: 8.0
-              params: { intensity: 0.35 }
+          - action_id: B_no_reaction
+            kind: brake
+            t_start: 5.6
+            duration: 8.0
+            params:
+              intensity: 0.35
         A:
           actions:
-            - action_id: "A_late_brake"
-              kind: "brake"
-              t_start: 6.2
-              duration: 8.0
-              params: { intensity: 0.8 }
-      validation:
-        encounter_pair: ["B", "C"]
-        min_separation_below_m: 6.0
-      design_template:
-        - cause: { kind: "action", participant: "C", action_id: "C_emergency_brake" }
-          effect: { kind: "state", participant: "B", name: "closing" }
-          edge: "TRIGGERS"
-        - cause: { kind: "action", participant: "B", action_id: "B_no_reaction" }
-          effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-          edge: "CONTRIBUTES_TO"
-          rationale: "B's inadequate braking is what makes the first impact happen"
-        - cause: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-          effect: { kind: "state", participant: "A", name: "critical_ttc" }
-          edge: "CONTRIBUTES_TO"
-          rationale: "B stopping abruptly on impact collapses A's remaining gap"
-        - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
+          - action_id: A_late_brake
+            kind: brake
+            t_start: 6.2
+            duration: 8.0
+            params:
+              intensity: 0.8

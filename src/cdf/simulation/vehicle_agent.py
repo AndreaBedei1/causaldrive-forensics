@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..common.config import Config
+from ..common.config import Config, configs_dir, load_yaml
 from ..recording.vehicle_logger import VehicleLogger
 from .controllers import ScriptedController, VehicleState
 from .sensors import CameraSensor, CollisionSensor, RadarSensor, camera_spec_from_config, radar_specs_from_config
@@ -15,12 +15,18 @@ class RawVehicleAgent:
                  spawn_transform: Any, output_root: Any) -> None:
         self.world = scenario_world; self.cfg = cfg; self.spec = spec; self.controller = controller
         self.vehicle = scenario_world.spawn_vehicle(spec.blueprint, spawn_transform)
-        self.radar = [RadarSensor(scenario_world, self.vehicle, rs) for rs in radar_specs_from_config(cfg)]
+        sensor_cfg = cfg
+        if spec.sensor_profile:
+            profile_path = configs_dir() / "sensors" / (str(spec.sensor_profile) + ".yaml")
+            profile = load_yaml(profile_path)
+            sensor_cfg = cfg.with_overrides({"radar": profile.get("radar", {}), "sensors": {"profile": str(spec.sensor_profile)}})
+        self.radar = [RadarSensor(scenario_world, self.vehicle, rs) for rs in radar_specs_from_config(sensor_cfg)]
         camera_spec = camera_spec_from_config(cfg)
         self.camera = CameraSensor(scenario_world, self.vehicle, camera_spec) if camera_spec else None
         self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,
+            "sensor_profile": str(spec.sensor_profile or cfg.get("sensors.profile", "")),
             "radar": [r.spec.__dict__ for r in self.radar],
             "camera": camera_spec.__dict__ if camera_spec else None,
             "vehicle_transform": {"x": spawn_transform.location.x, "y": spawn_transform.location.y, "z": spawn_transform.location.z, "yaw_deg": spawn_transform.rotation.yaw},

@@ -1,6 +1,6 @@
 """Deterministic synchronous world control with guaranteed actor cleanup.
 
-Two properties matter for reproducible experiments and are enforced here.
+Two properties matter for repeatable acquisition and are enforced here.
 
 **Determinism.** The world runs in synchronous mode at a fixed time step with
 substepping enabled, and the Traffic Manager (used only for background behaviour,
@@ -66,7 +66,7 @@ def resolve_spawn(
     staying on drivable lanes with the same travel direction.
 
     Using the map here is legitimate: this is *scenario construction*, which is
-    test-generation code. No local inference module may do the same.
+    scenario-construction code.
     """
     carla = import_carla()
 
@@ -387,9 +387,7 @@ class ScenarioWorld:
     def all_vehicles(self) -> List[Any]:
         """Every vehicle actor in the world.
 
-        PRIVILEGED. Only scenario construction and the ground-truth logger may call
-        this. The local and merge layers must never see its output -- that is
-        exactly the boundary the anti-leakage tests enforce.
+        Used by ground-truth recording when a complete simulator view is needed.
         """
         return list(self.world.get_actors().filter("vehicle.*"))
 

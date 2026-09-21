@@ -177,8 +177,6 @@ class ScenarioSpec:
     participants: List[ParticipantSpec] = field(default_factory=list)
 
     max_duration_s: float = 30.0
-    traffic_control: Dict[str, Any] = field(default_factory=dict)
-    traffic_lights: Dict[str, Any] = field(default_factory=dict)
 
     def participant(self, participant_id: str) -> ParticipantSpec:
         for p in self.participants:
@@ -233,8 +231,6 @@ class ScenarioSpec:
             variant=chosen,
             participants=participants,
             max_duration_s=float(merged.get("max_duration_s", 30.0)),
-            traffic_control=merged.get("traffic_control", {}) or {},
-            traffic_lights=merged.get("traffic_lights", {}) or {},
         )
         return spec
 

@@ -1,217 +1,100 @@
-# =============================================================================
-# S14 -- THREE-CAR REAR-END CHAIN  (3 vehicles)
-# =============================================================================
-# The pushed-vehicle case, which is the one the obligations layer was built
-# for. Three vehicles in one lane: A leads, B follows, C is last. There are two
-# impacts, and which vehicle is a contributor to which of them is the whole
-# question.
-#
-# In c_pushes_b, C runs into B and B is shunted into A. B's collision sensor
-# fires with B's mass behind it, and B genuinely strikes A -- so a method that
-# reads scenario ancestry naively makes B a contributor to an impact B could not
-# have avoided. The designed answer is that C contributes to both impacts and B
-# to neither.
-#
-# In b_hits_a_first the order is reversed: B rear-ends A under its own braking
-# failure, and C then runs into the stationary pile. Now B does contribute to the
-# first impact. The two variants have almost the same final configuration -- three
-# cars nose to tail -- and opposite scenario structures, which is what makes them a
-# real test rather than two recordings of the same thing.
-#
-# The clock story matters here too. B feels both impacts, so B is the recorder
-# that ties A and C together; A and C never touch. If the transitive alignment is
-# wrong, the two impacts appear in the wrong order and the whole account inverts.
-#
-# Geometry: the three-lane straight on Town05 around y = -204 (spawn point 265),
-# the same stretch S06 uses for its chain.
-# =============================================================================
-
 scenario:
-  scenario_id: "S14"
-  name: "three_car_chain"
-  description: >
-    A leads, B follows, C is last, all in one lane. A brakes. Which pair collides
-    first, and which vehicle was merely in the way, depends on how B responds.
-    A third variant, independent_runs, was retired: it produced its second
-    impact by having C come to a complete stop and then deliberately creep into
-    the stationary pile seven seconds later, which is not a road situation. The
-    distinction it was testing, that two impacts sharing a vehicle must not be
-    chained merely for sharing it, is what S16 tests between its consequential
-    and independent variants, and S16 does it without asking a driver to drive
-    into a wreck.
-  map: "Town05"
-  default_variant: "c_pushes_b"
+  scenario_id: S14
+  name: three_car_chain
+  description: 'A leads, B follows, C is last, all in one lane. A brakes. Which pair
+    collides first, and which vehicle was merely in the way, depends on how B responds.
+    A third variant, independent_runs, was retired: it produced its second impact
+    by having C come to a complete stop and then deliberately creep into the stationary
+    pile seven seconds later, which is not a road situation. The distinction it was
+    testing, that two impacts sharing a vehicle must not be chained merely for sharing
+    it, is what S16 tests between its consequential and independent variants, and
+    S16 does it without asking a driver to drive into a wreck.
+
+    '
+  map: Town05
+  default_variant: c_pushes_b
   max_duration_s: 30.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      # 33, not 30. The claim this variant makes is that B would have stopped
-      # short of A unaided, so the distance B has to stop in is the claim. At a
-      # 15 m gap B arrived with 0.6 m to spare on two collection seeds and touched
-      # A before C reached it on the third, which is the story backwards.
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 33.0, lane_offset: 0 }
-      route: { length_m: 120.0, step_m: 2.0 }
-      initial_speed: 13.0
-      target_speed: 13.0
-      actions:
-        # A brakes for something ahead. This is the lawful behaviour that starts
-        # the chain and contributes to nothing normatively -- the case the
-        # obligations layer has to get right in the other direction.
-        - action_id: "A_brake"
-          kind: "brake"
-          t_start: 4.0
-          duration: 8.0
-          params: { intensity: 0.85 }
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 15.0, lane_offset: 0 }
-      route: { length_m: 130.0, step_m: 2.0 }
-      initial_speed: 13.0
-      target_speed: 13.0
-      actions: []
-
-    - id: "C"
-      blueprint: "vehicle.nissan.patrol"
-      # 8 m closer to B than before. C has to arrive while B is still moving,
-      # and at the old 15 m gap it got there a quarter of a second after B had
-      # come to rest.
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 8.0, lane_offset: 0 }
-      route: { length_m: 140.0, step_m: 2.0 }
-      initial_speed: 13.0
-      target_speed: 13.0
-      actions: []
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["B", "C"], ["A", "B"]]
-  expected_collision_order: [["B", "C"], ["A", "B"]]
-
-  validation:
-    encounter_pair: ["B", "C"]
-    min_separation_below_m: 5.0
-    max_accumulated_turn_deg: 60.0
-    min_straightness: 0.95
-    no_scenery_collision: true
-
-  intervention_candidates:
-    - "A_brake"
-    - "B_brake"
-    - "C_no_response"
-
-  design_template:
-    - cause: { kind: "state", participant: "C", name: "no_braking" }
-      effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-      edge: "CAUSES_OUTCOME"
-      rationale: "C does not respond to the closing gap, which is what produces the first impact"
-    - cause: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CONTRIBUTES_TO"
-      rationale: "the shunt: the first impact is what puts B into A"
-
-  notes:
-    - "B is the only recorder that feels both impacts, so B is what ties A and C onto one timeline"
-    - "A and C never touch, so their alignment is transitive through B"
-    - "the designed answer has C contributing to both impacts and B to neither"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 33.0
+      lane_offset: 0
+    route:
+      length_m: 120.0
+      step_m: 2.0
+    initial_speed: 13.0
+    target_speed: 13.0
+    actions:
+    - action_id: A_brake
+      kind: brake
+      t_start: 4.0
+      duration: 8.0
+      params:
+        intensity: 0.85
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 15.0
+      lane_offset: 0
+    route:
+      length_m: 130.0
+      step_m: 2.0
+    initial_speed: 13.0
+    target_speed: 13.0
+    actions: []
+  - id: C
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 8.0
+      lane_offset: 0
+    route:
+      length_m: 140.0
+      step_m: 2.0
+    initial_speed: 13.0
+    target_speed: 13.0
+    actions: []
   variants:
-    # ---- C runs into B, B is pushed into A -------------------------------
     c_pushes_b:
-      # The whole claim of this variant is that B was pushed. If B had its foot
-      # down between the two impacts it was not pushed, it drove, and the
-      # scenario is not staging what it says it stages.
-      validation:
-        coasting_after_impact: ["B"]
-        coasting_window_s: 1.5
-        # One tick, not three. A floor here only has to make the two impacts
-        # separable in time at all; a *shorter* gap is more consistent with C
-        # pushing B into A, not less, and 0.15 s rejected the very thing the
-        # variant is about.
-        impact_interval_s: { min: 0.05, max: 2.5 }
       participant_overrides:
         B:
-          # B must be free to roll when C strikes it, or the push this variant
-          # exists to demonstrate cannot happen: holding the brakes through the
-          # impact pins B in place and the second contact never occurs.
-          #
-          # But "free to roll" is not "keep driving", which is what
-          # post_impact_stop: false alone meant. The speed controller saw B
-          # below its target after the impact and opened the throttle, so the
-          # vehicle this variant is about being *pushed* into A was accelerating
-          # into A under its own power. Coasting is the actual physics of being
-          # shunted: no throttle, no brake, no steering, and whatever momentum
-          # C transferred.
-          post_impact_mode: "coast"
+          post_impact_mode: coast
           actions:
-            # B responds in time and would have stopped clear, so B's presence
-            # in the second impact is entirely the consequence of being struck.
-            # B has to be still rolling when C reaches it. Struck while
-            # stationary it barely moved: the trace shows C losing 10.6 m/s in
-            # a quarter of a second while B gained 0.50 m/s and travelled 2 cm,
-            # because CARLA puts most of a rear-end into the ground when the
-            # struck car is at rest on its wheels. Struck while still coasting
-            # forward, B keeps its own momentum and takes C's on top of it.
-            #
-            # 0.64 over 2.5 s from 13 m/s is about 6.5 m/s2, which brings B to
-            # rest roughly 2.5 m short of A: enough that B does not reach A on
-            # its own, which is what the variant claims, and little enough that
-            # the push closes it.
-            - action_id: "B_brake"
-              kind: "brake"
-              t_start: 4.9
-              duration: 2.5
-              params: { intensity: 0.75 }
+          - action_id: B_brake
+            kind: brake
+            t_start: 4.9
+            duration: 2.5
+            params:
+              intensity: 0.75
         C:
           actions:
-            # C holds speed. Modelled as an explicit action so the
-            # replay layer has something to intervene on: "if C had
-            # braked" is the question the scenario is for.
-            - action_id: "C_no_response"
-              kind: "set_speed"
-              t_start: 4.0
-              duration: 10.0
-              params: { target_speed: 13.0 }
-      notes:
-        - "B brakes adequately and is struck from behind anyway"
-        - "B strikes A, but nothing B did reaches that impact except through being hit"
-
-    # ---- B rear-ends A, then C runs into B -------------------------------
+          - action_id: C_no_response
+            kind: set_speed
+            t_start: 4.0
+            duration: 10.0
+            params:
+              target_speed: 13.0
     b_hits_a_first:
-      expected_collision_pairs: [["A", "B"], ["B", "C"]]
-      expected_collision_order: [["A", "B"], ["B", "C"]]
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 5.0
-      intervention_candidates:
-        - "A_brake"
-        - "B_late_brake"
-        - "C_late_brake"
       participant_overrides:
         B:
           actions:
-            # B reacts far too late, so B causes the first impact itself.
-            - action_id: "B_late_brake"
-              kind: "brake"
-              t_start: 6.3
-              duration: 8.0
-              params: { intensity: 1.0 }
+          - action_id: B_late_brake
+            kind: brake
+            t_start: 6.3
+            duration: 8.0
+            params:
+              intensity: 1.0
         C:
           actions:
-            - action_id: "C_late_brake"
-              kind: "brake"
-              t_start: 6.9
-              duration: 8.0
-              params: { intensity: 1.0 }
-      design_template:
-        - cause: { kind: "state", participant: "B", name: "no_braking" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-        - cause: { kind: "state", participant: "C", name: "no_braking" }
-          effect: { kind: "outcome", name: "collision", participants: ["B", "C"] }
-          edge: "CAUSES_OUTCOME"
-      notes:
-        - "almost the same end configuration as c_pushes_b, and the opposite scenario structure"
-        - "here B does contribute to the first impact, and C to the second only"
-        - "the two variants together test whether the method reads the order or the layout"
-
-    # ---- two impacts that have nothing to do with each other -------------
+          - action_id: C_late_brake
+            kind: brake
+            t_start: 6.9
+            duration: 8.0
+            params:
+              intensity: 1.0

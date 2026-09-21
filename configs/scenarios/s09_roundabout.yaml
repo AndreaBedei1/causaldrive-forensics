@@ -1,93 +1,54 @@
-# =============================================================================
-# S09 -- ROUNDABOUT MERGE / CONFLICT
-# =============================================================================
-# Curved trajectories and a merge interaction, which stress parts of the local
-# pipeline that the straight-road and right-angle-crossing scenarios do not:
-#
-#   * the constant-velocity path prediction underlying conflict inference is
-#     least accurate exactly where the heading is changing fastest,
-#   * radar bearings sweep quickly, so track continuity is harder to maintain,
-#   * merge must associate tracks whose global-frame estimates come from
-#     observers that are themselves rotating.
-#
-# Local inference still gets no map topology: that a roundabout exists at all
-# has to be inferred, if at all, from the observed motion.
-#
-# Map: Town03_Opt, central roundabout around (0.0, 0.0), measured from the
-# Town03/Town03_Opt OpenDRIVE map. The two approaches below resolve to real
-# curved lanes.
-# =============================================================================
-
 simulation:
-  # This CARLA build crashes when a TrafficManager client is created on
-  # Town03_Opt, and S09 has no background traffic that needs one.
   traffic_manager_enabled: false
-
 scenario:
-  scenario_id: "S09"
-  name: "roundabout"
-  description: >
-    A is already circulating inside the roundabout on the outer circulating
-    lane. B approaches from the south entry, fails to give way, and collides
-    with A while entering the circulating area.
-  map: "Town03_Opt"
-  default_variant: "merge_conflict"
+  scenario_id: S09
+  name: roundabout
+  description: 'A is already circulating inside the roundabout on the outer circulating
+    lane. B approaches from the south entry, fails to give way, and collides with
+    A while entering the circulating area.
+
+    '
+  map: Town03_Opt
+  default_variant: merge_conflict
   max_duration_s: 30.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn:
-        anchor: "location"
-        x: 3.0
-        y: -23.0
-      route: { length_m: 120.0, step_m: 2.0, turns: ["straight", "straight"] }
-      initial_speed: 8.0
-      target_speed: 8.0
-      actions: []
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 0.0
-        junction_y: 0.0
-        bearing_deg: 90.0
-        back_m: 35.0
-      route: { length_m: 120.0, step_m: 2.0, turns: ["straight", "straight"] }
-      initial_speed: 8.0
-      target_speed: 8.0
-      actions:
-        - action_id: "B_fail_to_give_way"
-          kind: "set_speed"
-          t_start: 1.0
-          duration: 14.0
-          params: { target_speed: 9.5 }
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "B_fail_to_give_way"
-
-  design_template:
-    - cause: { kind: "action", participant: "B", action_id: "B_fail_to_give_way" }
-      effect: { kind: "state", participant: "B", name: "conflict_entry" }
-      edge: "TRIGGERS"
-      rationale: "entering the circulating area without giving way creates the conflict"
-    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
-      effect: { kind: "state", participant: "A", name: "critical_ttc" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: location
+      x: 3.0
+      y: -23.0
+    route:
+      length_m: 120.0
+      step_m: 2.0
+      turns:
+      - straight
+      - straight
+    initial_speed: 8.0
+    target_speed: 8.0
+    actions: []
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: junction_approach
+      junction_x: 0.0
+      junction_y: 0.0
+      bearing_deg: 90.0
+      back_m: 35.0
+    route:
+      length_m: 120.0
+      step_m: 2.0
+      turns:
+      - straight
+      - straight
+    initial_speed: 8.0
+    target_speed: 8.0
+    actions:
+    - action_id: B_fail_to_give_way
+      kind: set_speed
+      t_start: 1.0
+      duration: 14.0
+      params:
+        target_speed: 9.5
   variants:
-    merge_conflict:
-      notes:
-        - "both routes curve through the roundabout, so headings change throughout the encounter"
-        - "tests map-free reconstruction where constant-velocity prediction is weakest"
+    merge_conflict: {}

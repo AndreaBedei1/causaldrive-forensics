@@ -1,1 +1,1 @@
-"""Concrete scenario implementations S01-S09."""
+"""Scenario package for the fixed S01-S16 configuration set."""

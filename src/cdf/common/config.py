@@ -7,10 +7,8 @@ Configuration is resolved by deep-merging, in order:
 3. ``configs/scenarios/<id>.yaml``    -- the scenario definition
 4. explicit overrides passed on the command line
 
-The fully merged mapping is hashed (:func:`config_hash`) and the hash is stamped
-into every run manifest, so a result can always be traced back to the exact
-parameter set that produced it. There are no magic numbers scattered through the
-pipeline: every threshold lives in one of these files.
+The fully merged mapping is hashed (:func:`config_hash`) so each run can be
+tied back to the exact parameter set that produced it.
 """
 
 from __future__ import annotations
@@ -130,8 +128,8 @@ class Config:
 
     Supports dotted lookups with defaults, which keeps call sites readable::
 
-        cfg.get("events.ttc.critical_s", 1.5)
-        cfg.require("recorder.pre_event_s")
+        cfg.get("simulation.fixed_delta_seconds", 0.05)
+        cfg.require("sensors.profile")
     """
 
     __slots__ = ("_data", "_hash", "_sources")

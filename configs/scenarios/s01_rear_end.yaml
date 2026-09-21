@@ -1,102 +1,62 @@
-# =============================================================================
-# S01 -- REAR-END
-# =============================================================================
-# The simplest longitudinal scenario chain, used as the baseline validation of the
-# whole pipeline: lead behaviour -> range decrease -> TTC decrease -> follower
-# response -> outcome.
-#
-# Geometry: the three-lane straight on Town05 around y = -204 (spawn point 265),
-# which was measured to offer ~160 m of junction-free travel.
-# =============================================================================
-
 scenario:
-  scenario_id: "S01"
-  name: "rear_end"
-  description: >
-    B travels ahead of A in the same lane and brakes hard. A reacts late and
-    strikes B. The avoided variant keeps the geometry but gives A a timely
-    response, which turns the outcome into a near miss.
-  map: "Town05"
-  default_variant: "crash"
+  scenario_id: S01
+  name: rear_end
+  description: 'B travels ahead of A in the same lane and brakes hard. A reacts late
+    and strikes B. The avoided variant keeps the geometry but gives A a timely response,
+    which turns the outcome into a near miss.
+
+    '
+  map: Town05
+  default_variant: crash
   max_duration_s: 26.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
-      route: { length_m: 150.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      actions:
-        # A reacts, but only after the gap has already collapsed.
-        - action_id: "A_late_brake"
-          kind: "brake"
-          t_start: 5.6
-          duration: 6.0
-          params: { intensity: 0.85 }
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 28.0, lane_offset: 0 }
-      route: { length_m: 120.0, step_m: 2.0 }
-      initial_speed: 14.0
-      target_speed: 14.0
-      actions:
-        - action_id: "B_emergency_brake"
-          kind: "brake"
-          t_start: 4.0
-          duration: 8.0
-          params: { intensity: 1.0 }
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "B_emergency_brake"
-    - "A_late_brake"
-
-  # Designed ground-truth scenario structure. ORACLE ONLY -- never visible to the
-  # local or fused inference layers.
-  design_template:
-    - cause: { kind: "action", participant: "B", action_id: "B_emergency_brake" }
-      effect: { kind: "state", participant: "A", name: "closing" }
-      edge: "CONTRIBUTES_TO"
-      rationale: "the lead vehicle's deceleration is what collapses the gap"
-    - cause: { kind: "state", participant: "A", name: "closing" }
-      effect: { kind: "state", participant: "A", name: "critical_ttc" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-    - cause: { kind: "action", participant: "A", action_id: "A_late_brake" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "PREVENTS"
-      rationale: "A's braking acts against the outcome but begins too late to avert it"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 0.0
+      lane_offset: 0
+    route:
+      length_m: 150.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    actions:
+    - action_id: A_late_brake
+      kind: brake
+      t_start: 5.6
+      duration: 6.0
+      params:
+        intensity: 0.85
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 28.0
+      lane_offset: 0
+    route:
+      length_m: 120.0
+      step_m: 2.0
+    initial_speed: 14.0
+    target_speed: 14.0
+    actions:
+    - action_id: B_emergency_brake
+      kind: brake
+      t_start: 4.0
+      duration: 8.0
+      params:
+        intensity: 1.0
   variants:
-    crash:
-      notes: ["A reacts 1.6 s after B begins braking, which is too late"]
-
+    crash: {}
     avoided:
-      # Same geometry and same lead behaviour; only A's response timing and the
-      # initial gap change. This is the negative control for S01.
-      expected_outcome: "near_miss"
-      expected_collision_pairs: []
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 14.0
-      notes:
-        - "identical geometry and identical lead behaviour to the crash variant"
-        - "only A's reaction time changes, so the difference in outcome is attributable to that alone"
       participant_overrides:
         A:
           actions:
-            - action_id: "A_late_brake"
-              kind: "brake"
-              t_start: 5.1
-              duration: 8.0
-              params: { intensity: 1.0 }
+          - action_id: A_late_brake
+            kind: brake
+            t_start: 5.1
+            duration: 8.0
+            params:
+              intensity: 1.0

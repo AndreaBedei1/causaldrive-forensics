@@ -1,106 +1,75 @@
-# =============================================================================
-# S08 -- MULTI-DIRECTION CROSSING  (3 vehicles)
-# =============================================================================
-# Three vehicles converge on one conflict region from three different bearings.
-# A and B collide; C approaches from a third direction, brakes, and therefore
-# survives as an independent observer of the whole interaction.
-#
-# This is the richest test of track association: each participant sees the other
-# two as anonymous radar tracks from a completely different viewpoint, and the
-# merge layer must resolve identity from trajectory evidence alone.
-# =============================================================================
-
 scenario:
-  scenario_id: "S08"
-  name: "multidirection_crossing"
-  description: >
-    A crosses the junction from one direction while B enters from a
-    perpendicular one without yielding, striking A. C approaches from the
-    opposite direction to A, brakes short of the conflict region, and observes
-    the collision from a third viewpoint.
-  map: "Town05"
-  default_variant: "crash"
+  scenario_id: S08
+  name: multidirection_crossing
+  description: 'A crosses the junction from one direction while B enters from a perpendicular
+    one without yielding, striking A. C approaches from the opposite direction to
+    A, brakes short of the conflict region, and observes the collision from a third
+    viewpoint.
+
+    '
+  map: Town05
+  default_variant: crash
   max_duration_s: 30.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.tesla.model3"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
-        bearing_deg: 0.0
-        back_m: 42.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
-      initial_speed: 10.0
-      target_speed: 10.0
-      actions: []
-
-    - id: "B"
-      blueprint: "vehicle.audi.tt"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
-        bearing_deg: -90.0
-        back_m: 50.0
-      route: { length_m: 110.0, step_m: 2.0, turns: ["straight"] }
-      initial_speed: 9.0
-      target_speed: 9.0
-      actions:
-        - action_id: "B_fail_to_yield"
-          kind: "set_speed"
-          t_start: 1.2
-          duration: 14.0
-          params: { target_speed: 12.5 }
-
-    - id: "C"
-      blueprint: "vehicle.nissan.patrol"
-      spawn:
-        anchor: "junction_approach"
-        junction_x: 101.6
-        junction_y: 0.3
-        bearing_deg: 180.0
-        back_m: 46.0
-      route: { length_m: 100.0, step_m: 2.0, turns: ["straight"] }
-      initial_speed: 9.0
-      target_speed: 9.0
-      actions:
-        # C stops short of the conflict region and watches.
-        - action_id: "C_defensive_stop"
-          kind: "brake"
-          t_start: 2.4
-          duration: 12.0
-          params: { intensity: 0.9 }
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 6.0
-
-  intervention_candidates:
-    - "B_fail_to_yield"
-    - "C_defensive_stop"
-
-  design_template:
-    - cause: { kind: "action", participant: "B", action_id: "B_fail_to_yield" }
-      effect: { kind: "state", participant: "B", name: "conflict_entry" }
-      edge: "TRIGGERS"
-    - cause: { kind: "state", participant: "B", name: "conflict_entry" }
-      effect: { kind: "state", participant: "A", name: "critical_ttc" }
-      edge: "CONTRIBUTES_TO"
-    - cause: { kind: "state", participant: "A", name: "critical_ttc" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-    - cause: { kind: "action", participant: "C", action_id: "C_defensive_stop" }
-      effect: { kind: "outcome", name: "no_collision", participants: ["A", "C"] }
-      edge: "PREVENTS"
-      rationale: "C's stop keeps it out of the conflict region entirely"
-
+  - id: A
+    blueprint: vehicle.tesla.model3
+    spawn:
+      anchor: junction_approach
+      junction_x: 101.6
+      junction_y: 0.3
+      bearing_deg: 0.0
+      back_m: 42.0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+      turns:
+      - straight
+    initial_speed: 10.0
+    target_speed: 10.0
+    actions: []
+  - id: B
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: junction_approach
+      junction_x: 101.6
+      junction_y: 0.3
+      bearing_deg: -90.0
+      back_m: 50.0
+    route:
+      length_m: 110.0
+      step_m: 2.0
+      turns:
+      - straight
+    initial_speed: 9.0
+    target_speed: 9.0
+    actions:
+    - action_id: B_fail_to_yield
+      kind: set_speed
+      t_start: 1.2
+      duration: 14.0
+      params:
+        target_speed: 12.5
+  - id: C
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: junction_approach
+      junction_x: 101.6
+      junction_y: 0.3
+      bearing_deg: 180.0
+      back_m: 46.0
+    route:
+      length_m: 100.0
+      step_m: 2.0
+      turns:
+      - straight
+    initial_speed: 9.0
+    target_speed: 9.0
+    actions:
+    - action_id: C_defensive_stop
+      kind: brake
+      t_start: 2.4
+      duration: 12.0
+      params:
+        intensity: 0.9
   variants:
-    crash:
-      notes:
-        - "three viewpoints on one conflict region; C is an uninvolved observer"
-        - "C's evidence should let merge recover parts of the interaction A and B each miss"
+    crash: {}

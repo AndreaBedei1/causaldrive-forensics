@@ -1,341 +1,104 @@
-# =============================================================================
-# S16 -- SECONDARY COLLISION AFTER INITIAL IMPACT  (3 vehicles)
-# =============================================================================
-# The distinction this whole set of scenarios has been working towards: telling an
-# initiating collision from a consequence of one. S14 and S15 both contain that
-# shape, but in each it is bundled with something else -- a chain in one lane, a
-# junction and a stop sign in the other. Here it is isolated and the variants
-# differ in nothing but whether the second impact is a consequence.
-#
-# Three vehicles, one impact that starts things and a second that follows. B runs
-# into the back of A; what becomes of A is what the variants change:
-#
-#   consequential   the impact knocks A into the next lane and into C, with no
-#                   throttle from A in between
-#   independent     A stops, and seconds later pulls out of the live lane under
-#                   its own power and drives into C
-#   avoided         A stops in its own lane and stays there; C is untouched
-#
-# In all three the *same pair* collides second, in much the same place, and A is
-# party to both impacts. What separates them is the scenario relationship between
-# the two, and the evidence for it is A's own throttle rather than anything in
-# the layout: a method that reads where the vehicles ended up will give the same
-# answer to all three, which is exactly what this scenario is for.
-#
-# The two second impacts are not identical, and the scenario does not claim they
-# are. A carried vehicle arrives slewed and slowing, and a driven one arrives
-# square and accelerating, so the independent variant lands the harder blow. A
-# method could in principle separate them on severity alone; it would be reading
-# a proxy, and it would have learned nothing about which impact followed from
-# the first.
-#
-# The normative reading differs sharply even so. In the consequential variant A
-# is a party to two impacts and a contributor to neither; in the independent one
-# it is a victim in the first and a contributor in the second. Any method that
-# assigns contribution by counting involvement will get one of them wrong.
-#
-# The clock story is also at its hardest here. In the consequential variant the
-# two impacts are close together in time and A is party to both, so the contact
-# matching has to tell A's two impacts apart on impulse and position. That is the
-# case the alignment's ambiguity check exists for, and if the evidence does not
-# separate them the honest answer is AMBIGUOUS_CONTACT_MATCH rather than a guess.
-#
-# -- geometry ----------------------------------------------------------------
-# The three-lane straight on Town05 from spawn point 265, heading west. Lane -2
-# carries A and B at y = -204.0; lane -1 alongside carries C at y = -200.5, one
-# lane width (3.5 m) to their left. The straight runs 158 m before it begins to
-# curve at x = -150, so every route here ends well inside it and nothing is left
-# chasing a route point behind itself at the end of a run.
-#
-# -- why it is A that gets carried, and not B --------------------------------
-# Because that is the way the momentum goes, and an earlier version of this
-# scenario spent a long time proving it. That version had B, the striker,
-# deflected into the next lane. B cannot go anywhere: A is four metres in front
-# of it and braking, so B is stopped again within a second of the first impact
-# having moved 0.3 m sideways, and the only ways to free it are to make A coast
-# away from a crash it was braking for, or to script a second displacement for A
-# as well. A, on the other hand, is struck from behind: it gains speed -- 6.1 m/s
-# to 10.7 in the impact -- and has open road in front of it. One displacement, no
-# traffic in the way, and the vehicle that moves is the one the collision
-# actually pushed.
-#
-# B is the Patrol and A the TT for the same reason: the heavier striker is what
-# makes the speed A picks up worth having.
-#
-# -- why A is still rolling when B arrives -----------------------------------
-# A brakes at 0.45 from 7 m ahead. That is close, deliberately: brake input is
-# nothing like linear in this simulator, and 0.45 already stops the TT in 1.7 s,
-# so a larger gap simply means A is stationary before B gets there. A stationary
-# struck car takes the whole impact into the ground -- S14 measured a struck
-# vehicle gaining 0.50 m/s while the striker lost 10.6, and the first attempt at
-# this scenario had B bouncing backwards off a car that had been at rest for half
-# a second. Contact has to happen inside A's braking, while A is still rolling at
-# about 6 m/s, and at 13 m/s that means B is about 0.7 s behind. Which is also
-# what the scenario says about B.
-# =============================================================================
-
 scenario:
-  scenario_id: "S16"
-  name: "secondary_collision"
-  description: >
-    A brakes and B runs into the back of it. What becomes of A -- knocked into the
-    next lane and into C, driving into C later of its own accord, or stopping
+  scenario_id: S16
+  name: secondary_collision
+  description: 'A brakes and B runs into the back of it. What becomes of A -- knocked
+    into the next lane and into C, driving into C later of its own accord, or stopping
     clear -- is what the variants change.
-  map: "Town05"
-  default_variant: "consequential"
+
+    '
+  map: Town05
+  default_variant: consequential
   max_duration_s: 10.0
-
   participants:
-    - id: "A"
-      blueprint: "vehicle.audi.tt"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 7.0, lane_offset: 0 }
-      # 200 m, not the 65 m this run uses: a replay in which A never
-      # brakes travels the whole length at 13 m/s, and a vehicle that outruns
-      # its route starts chasing a point behind itself and wanders off the road.
-      route: { length_m: 200.0, step_m: 2.0 }
-      initial_speed: 13.0
-      target_speed: 13.0
-      actions:
-        - action_id: "A_emergency_brake"
-          kind: "brake"
-          t_start: 4.0
-          # Long enough to run up to the moment the independent variant has A
-          # pull away, so that no variant has a second of unbraked idling in
-          # which A quietly sets off again on its own.
-          duration: 7.0
-          params: { intensity: 0.45 }
-
-    - id: "B"
-      blueprint: "vehicle.nissan.patrol"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 0.0, lane_offset: 0 }
-      route: { length_m: 200.0, step_m: 2.0 }
-      initial_speed: 13.0
-      target_speed: 13.0
-      actions:
-        # Far too late, and the same in every variant: the initiating event is
-        # held constant and only its sequel changes.
-        - action_id: "B_late_brake"
-          kind: "brake"
-          t_start: 4.8
-          duration: 1.5
-          params: { intensity: 0.40 }
-
-    # A van crawling in the next lane, which is what A was braking for. It is a
-    # bystander in the strict sense: no actions at all, and the same blueprint,
-    # spawn and speed in every variant, so nothing about C separates them.
-    #
-    # A van rather than a car because the target has to be forgiving. Where A
-    # ends up depends on where it was hit, and where it was hit moves by a
-    # metre or so from seed to seed -- action timings are jittered per seed, by
-    # design. A 5.9 m vehicle absorbs that; a 4.8 m one did not, and the
-    # variant missed C entirely on two seeds out of three.
-    - id: "C"
-      blueprint: "vehicle.mercedes.sprinter"
-      spawn: { anchor: "spawn_index", index: 265, forward_m: 73.5, lane_offset: -1 }
-      route: { length_m: 70.0, step_m: 2.0 }
-      initial_speed: 1.0
-      target_speed: 1.0
-      actions: []
-
-  expected_outcome: "collision"
-  expected_collision_pairs: [["A", "B"], ["A", "C"]]
-  expected_collision_order: [["A", "B"], ["A", "C"]]
-
-  validation:
-    encounter_pair: ["A", "B"]
-    min_separation_below_m: 5.0
-    max_accumulated_turn_deg: 70.0
-    min_straightness: 0.95
-    no_scenery_collision: true
-
-  intervention_candidates:
-    - "A_emergency_brake"
-    - "B_late_brake"
-
-  design_template:
-    - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
-      effect: { kind: "state", participant: "B", name: "closing" }
-      edge: "CONTRIBUTES_TO"
-    # B's own action, not a non-action state. "B did not brake" is not what
-    # happens here: B brakes 0.35 s before it arrives, far too late to matter,
-    # and the non-action detector discharges its obligation on any deceleration
-    # within 1.5 s of the critical time-to-collision -- including the one the
-    # impact itself produces. So `no_braking` is not realisable in a rear-end of
-    # this shape, and an earlier version of this template declared it anyway and
-    # had the edge dropped from every run as unrealised. S01, the frozen
-    # rear-end, names the follower's late brake for the same reason.
-    - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      edge: "CAUSES_OUTCOME"
-      rationale: "B braked, and braked far too late to stop in the distance it had left"
-    - cause: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-      effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
-      edge: "CONTRIBUTES_TO"
-      rationale: "the first impact is what puts A across into C"
-
-  notes:
-    - "the initiating impact is identical in all three variants; only its sequel changes"
-    - "the second impact involves the same pair in all variants, so the layout cannot distinguish them"
-    - "A is party to both impacts, which is what the contact-matching ambiguity check has to handle"
-    - "C has no actions, the same blueprint and the same speed in every variant"
-    - "C sits further ahead in the independent variant, because a vehicle doing its own manoeuvre needs room a carried one does not"
-
+  - id: A
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 7.0
+      lane_offset: 0
+    route:
+      length_m: 200.0
+      step_m: 2.0
+    initial_speed: 13.0
+    target_speed: 13.0
+    actions:
+    - action_id: A_emergency_brake
+      kind: brake
+      t_start: 4.0
+      duration: 7.0
+      params:
+        intensity: 0.45
+  - id: B
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 0.0
+      lane_offset: 0
+    route:
+      length_m: 200.0
+      step_m: 2.0
+    initial_speed: 13.0
+    target_speed: 13.0
+    actions:
+    - action_id: B_late_brake
+      kind: brake
+      t_start: 4.8
+      duration: 1.5
+      params:
+        intensity: 0.4
+  - id: C
+    blueprint: vehicle.mercedes.sprinter
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 73.5
+      lane_offset: -1
+    route:
+      length_m: 70.0
+      step_m: 2.0
+    initial_speed: 1.0
+    target_speed: 1.0
+    actions: []
   variants:
-    # ---- the second impact is a consequence of the first -----------------
     consequential:
       participant_overrides:
         A:
-          # Carried, not steered. post_impact_mode "deflect" has no schedule of
-          # its own: it starts at contact and only at contact, so a run in which
-          # the first impact does not happen produces no displacement and no
-          # second impact either. The dependence is a property of the mechanism
-          # rather than of the timing, which is the whole claim of the variant.
-          #
-          # The displacement is negative because positive is to the right of
-          # travel and C is to the left: heading west, +lateral is -y, and C
-          # sits at y = -200.5 against A's -204.0.
-          #
-          # 9 m is where the impact points A, not how far it gets. A is
-          # coasting, and coasting in this simulator means engine braking: A
-          # leaves the impact at 10.7 m/s and has spent it inside eight metres.
-          # It crosses about a metre and a half of that lane before it reaches
-          # C, slewed some thirty degrees, which is what a car that has been
-          # hit from behind does -- it is knocked askew rather than steered
-          # across. Aiming at the lane centre instead produced a polite,
-          # convergent lane change that ran out of speed short of anything.
-          post_impact_mode: "deflect"
+          post_impact_mode: deflect
           post_impact_lateral_m: -9.0
           post_impact_deflect_s: 0.3
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 5.0
-        # The two impacts close together and A under no power in between.
-        # Together these say "carried": the interval alone would not.
-        impact_interval_s: { min: 0.3, max: 3.5 }
-        coasting_after_impact: ["A"]
-        coasting_window_s: 3.5
-        # Not a bare floor on total sideways movement: A never completes a
-        # lane change, because it runs into C before it can. What is checked
-        # instead is that the movement starts at the impact -- A is straight in
-        # its lane up to that instant and out of it afterwards, having been
-        # given no steering of its own at any point in any variant. C is in a
-        # different lane from A, so an A-C contact is itself evidence that
-        # something moved A sideways; this says when.
-        lateral_begins_at_impact:
-          A: { before_max_m: 0.6, after_min_m: 0.4 }
-        max_accumulated_turn_deg: 70.0
-        min_straightness: 0.95
-        no_scenery_collision: true
-      notes:
-        - "designed answer: B is the sole contributor, to both impacts"
-        - "A is a party to two collisions and the cause of neither"
-        - "the two impacts are under a second apart, close enough that contact matching has real work to do"
-
-    # ---- the second impact is A's own doing, later -----------------------
     independent:
       max_duration_s: 18.0
-      intervention_candidates:
-        - "A_emergency_brake"
-        - "B_late_brake"
-        - "A_changes_lane"
       participant_overrides:
         A:
-          # A keeps driving to its own script after the impact instead of being
-          # frozen by it, which is what lets the variant give it a second and
-          # separate piece of behaviour several seconds later.
-          post_impact_mode: "drive"
+          post_impact_mode: drive
           actions:
-            - action_id: "A_emergency_brake"
-              kind: "brake"
-              t_start: 4.0
-              duration: 7.0
-              params: { intensity: 0.45 }
-            # Seconds after the shunt, A pulls out of the live lane without
-            # looking and drives into the traffic alongside. Same pair, same
-            # place, and nothing about it follows from the first collision
-            # except that A happened to be standing there.
-            - action_id: "A_pulls_away"
-              kind: "set_speed"
-              t_start: 10.5
-              duration: 12.0
-              params: { target_speed: 9.0 }
-            # Half a second after A sets off, not at the same instant: the
-            # straight bit is what lets A be doing something by the time it
-            # reaches the next lane. Turning out of a standstill produced a
-            # 372 N.s brush, which is a contact but not a collision.
-            - action_id: "A_changes_lane"
-              kind: "lane_shift"
-              t_start: 11.0
-              duration: 2.5
-              params: { lateral_m: -4.2 }
+          - action_id: A_emergency_brake
+            kind: brake
+            t_start: 4.0
+            duration: 7.0
+            params:
+              intensity: 0.45
+          - action_id: A_pulls_away
+            kind: set_speed
+            t_start: 10.5
+            duration: 12.0
+            params:
+              target_speed: 9.0
+          - action_id: A_changes_lane
+            kind: lane_shift
+            t_start: 11.0
+            duration: 2.5
+            params:
+              lateral_m: -4.2
         C:
-          # Further ahead than in the other two variants, and this is the one
-          # thing about C that is not identical across them. A needs room here:
-          # it has to finish a lane change and be travelling before it reaches
-          # C, and from the shared position it was still crabbing across the
-          # line when it arrived. What came of that was a 296 N.s clip on one
-          # seed, after which A simply carried on past at 12.6 m/s.
-          spawn: { anchor: "spawn_index", index: 265, forward_m: 84.0, lane_offset: -1 }
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 5.0
-        # The mirror of the consequential checks. A long gap on its own would
-        # not settle it -- a slow consequence is still a consequence -- so what
-        # is actually checked is that A was under power in between.
-        impact_interval_s: { min: 5.0, max: 16.0 }
-        self_driven_between_impacts: { A: 0.20 }
-        # A's lane change is arrested by C in the same way the deflection is in
-        # the consequential variant, so the two variants show much the same
-        # sideways movement. That is the point: what separates them is the
-        # throttle, not the geometry.
-        min_lateral_displacement_m: { A: 0.5 }
-        max_accumulated_turn_deg: 70.0
-        min_straightness: 0.95
-        no_scenery_collision: true
-      design_template:
-        - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
-          effect: { kind: "state", participant: "B", name: "closing" }
-          edge: "CONTRIBUTES_TO"
-        - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-          rationale: "B braked, and braked far too late to stop in the distance it had left"
-        - cause: { kind: "action", participant: "A", action_id: "A_changes_lane" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "C"] }
-          edge: "CAUSES_OUTCOME"
-          rationale: "the second impact is A's own lane change, not a consequence of the first"
-      notes:
-        - "designed answer: B contributes to the first impact and A to the second"
-        - "the pair and the geometry of the second impact match the consequential variant"
-        - "what differs is that a path from A's own behaviour reaches it without passing through the first impact"
-
-    # ---- no second impact -----------------------------------------------
+          spawn:
+            anchor: spawn_index
+            index: 265
+            forward_m: 84.0
+            lane_offset: -1
     avoided:
-      expected_collision_pairs: [["A", "B"]]
-      expected_collision_order: [["A", "B"]]
       participant_overrides:
         A:
-          # The default: struck, and brakes to a halt. A ends up stopped in its
-          # own lane and never reaches the next one.
-          post_impact_mode: "stop"
-      validation:
-        encounter_pair: ["A", "B"]
-        min_separation_below_m: 5.0
-        # Saying which pair must collide does not say that no other pair may,
-        # so the variant whose whole content is an absence has to state the
-        # absence itself.
-        forbidden_collision_pairs: [["A", "C"]]
-        max_accumulated_turn_deg: 70.0
-        min_straightness: 0.95
-        no_scenery_collision: true
-      design_template:
-        - cause: { kind: "action", participant: "A", action_id: "A_emergency_brake" }
-          effect: { kind: "state", participant: "B", name: "closing" }
-          edge: "CONTRIBUTES_TO"
-        - cause: { kind: "action", participant: "B", action_id: "B_late_brake" }
-          effect: { kind: "outcome", name: "collision", participants: ["A", "B"] }
-          edge: "CAUSES_OUTCOME"
-          rationale: "B braked, and braked far too late to stop in the distance it had left"
-      notes:
-        - "one impact only; A stops clear and C is untouched"
-        - "C never feels a contact, so C stays off the common timeline and the merged log says so"
+          post_impact_mode: stop
