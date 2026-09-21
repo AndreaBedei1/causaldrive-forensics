@@ -63,33 +63,18 @@ earlier nine could not ask.
 
 All sixteen run on Town05 except S09, which needs Town04's roundabout.
 
-### What the campaign found, including where it did not work
+### Current final-campaign status
 
-Three of the new scenarios did not stage the encounter they were written to ask
-about, and the results pages say so rather than quietly dropping them.
+The corrected V2 benchmark contains **34 variants and 102 factual runs**. The
+old pre-rebuild S10-S16 recordings are not part of the active campaign.
 
-**S12 `near_simultaneous` never collided**, on any of its three seeds. Its
-closest approaches were 10.90 m, 8.39 m and 8.23 m against a 6 m requirement.
-The junction is the only one in Town05 that renders stop signs on more than one
-approach, and its geometry gives the two vehicles very different distances from
-their stop lines to the merge point. The priority-ambiguity question is
-therefore **not answered by this campaign**.
+S16 is retained. Its `consequential` and `independent` variants each
+produce the intended two-impact sequence on all three final seeds, and the
+reconstruction gets the impact order correct on **6/6** S16 multi-impact runs.
+The `avoided` variant provides the single-impact control. See
+[RESULTS.md](RESULTS.md) for the measured reconstruction and attribution
+figures.
 
-**S14 `c_pushes_b` came out backwards.** The design names C, the striker. The
-analysis named A and B physically and supported B normatively, because B has a
-`CONTINUED_ACCELERATION_DURING_CONFLICT` before the first impact and C's own
-rule violation is stamped *after* the impact it caused. Both findings are
-defensible on the recorded evidence and neither is the answer the variant was
-written to test.
-
-**S15 `deflected_into_c` and both S16 impact variants land on the wrong pair**,
-on all three seeds each: the collision occurs between A and B rather than the
-pair the variant names.
-
-Scenario validation failed on 22 of 105 runs in total, all within S10 to S16.
-The full breakdown is in [RESULTS.md](RESULTS.md) §9, and
-[LIMITATIONS.md](LIMITATIONS.md) §23, §25 and §27 state what each failure does
-and does not invalidate.
 
 ---
 
