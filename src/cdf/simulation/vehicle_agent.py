@@ -71,7 +71,9 @@ class RawVehicleAgent:
             item = self.depth_camera.poll(frame)
             if item is not None:
                 data = item.pop("data"); self.logger.log_depth(item, data)
-        for collision in self.collision_sensor.drain_vehicle(): self.logger.log_collision(collision)
+        for collision in self.collision_sensor.drain_vehicle():
+            self.logger.log_collision(collision)
+            self.controller.notify_impact()
         return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
 
