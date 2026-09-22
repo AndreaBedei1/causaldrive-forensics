@@ -45,6 +45,12 @@ scenario:
             duration: 2.5
             params:
               lateral_m: 3.5
+          - action_id: B_continue_after_cut_in
+            kind: hold
+            t_start: 5.0
+            duration: 5.0
+            params:
+              target_speed: 7.0
     accelerates_into_gap:
       participant_overrides:
         A:
