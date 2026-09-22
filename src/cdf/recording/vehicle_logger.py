@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Mapping
 
 from PIL import Image
+
+from .compact_observations import CompactObservationWriter
 
 
 def _json(value: Any) -> str:
@@ -45,11 +47,77 @@ class VehicleLogger:
         self.state = _Jsonl(self.root / "ego.jsonl")
         self.controls = _Jsonl(self.root / "controls.jsonl")
         self.collisions = _Jsonl(self.root / "collisions.jsonl")
-        self.radar = _Jsonl(self.root / "radar.jsonl")
         self.camera_metadata = _Jsonl(self.root / "camera" / "metadata.jsonl")
-        self.depth_observations = _Jsonl(self.root / "depth_observations.jsonl")
         (self.root / "camera" / "frames").mkdir(parents=True, exist_ok=True)
         (self.root / "metadata.json").write_text(_json(_without_privileged_ids(metadata)), encoding="utf-8")
+        self._radar_writers: Dict[str, CompactObservationWriter] = {}
+        radar_entries = list(metadata.get("radar", []) or [])
+        radar_root = self.root / "radar"
+        for radar in radar_entries:
+            sensor_id = str(radar.get("sensor_id", "front"))
+            if sensor_id in self._radar_writers:
+                raise ValueError("radar sensor IDs must be unique: {0}".format(sensor_id))
+            location = radar_root if len(radar_entries) == 1 else radar_root / sensor_id
+            self._radar_writers[sensor_id] = CompactObservationWriter(
+                location / "observations.npz",
+                {
+                    "source": "radar",
+                    "sensor_id": sensor_id,
+                    "schema_version": 1,
+                    "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
+                    "sensor_transform": {
+                        "x": float(radar.get("mount_x", 2.2)),
+                        "y": float(radar.get("mount_y", 0.0)),
+                        "z": float(radar.get("mount_z", 1.0)),
+                        "yaw_deg": float(radar.get("mount_yaw_deg", 0.0)),
+                        "pitch_deg": float(radar.get("mount_pitch_deg", 0.0)),
+                    },
+                    "sensor_tick_s": float(radar.get("sensor_tick_s", 0.05)),
+                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 120.0)),
+                    "vertical_fov_deg": float(radar.get("vertical_fov_deg", 10.0)),
+                    "range_m": float(radar.get("range_m", 90.0)),
+                    "radial_velocity_status": "measured",
+                },
+            )
+        self._camera_metadata = {
+            "source": "rgb",
+            "sensor_id": (metadata.get("camera") or {}).get("sensor_id"),
+            "schema_version": 1,
+            "width": (metadata.get("camera") or {}).get("width"),
+            "height": (metadata.get("camera") or {}).get("height"),
+            "fov_deg": (metadata.get("camera") or {}).get("fov_deg"),
+            "sensor_tick_s": (metadata.get("camera") or {}).get("sensor_tick_s"),
+            "file_format": "jpeg",
+            "jpeg_quality": 90,
+        }
+        (self.root / "camera" / "metadata.json").write_text(_json(self._camera_metadata), encoding="utf-8")
+        depth = metadata.get("depth_camera") or {}
+        depth_spec = metadata.get("depth_observations") or {}
+        self._depth_writer = CompactObservationWriter(
+            self.root / "depth" / "observations.npz",
+            {
+                "source": "depth",
+                "sensor_id": depth.get("sensor_id"),
+                "schema_version": 1,
+                "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
+                "sensor_transform": {
+                    "x": depth.get("mount_x"), "y": depth.get("mount_y"), "z": depth.get("mount_z"),
+                    "yaw_deg": depth.get("mount_yaw_deg"), "pitch_deg": depth.get("mount_pitch_deg"),
+                    "roll_deg": depth.get("mount_roll_deg"),
+                },
+                "sensor_tick_s": depth.get("sensor_tick_s"),
+                "horizontal_fov_deg": depth.get("fov_deg"),
+                "vertical_observation_fov_deg": depth_spec.get("vertical_fov_deg"),
+                "observation_horizontal_fov_deg": depth_spec.get("horizontal_fov_deg"),
+                "max_range_m": depth_spec.get("max_range_m"),
+                "azimuth_bin_deg": depth_spec.get("azimuth_bin_deg"),
+                "altitude_bin_deg": depth_spec.get("altitude_bin_deg"),
+                "radial_velocity_status": "not_estimated",
+            },
+        )
+        self._camera_stats: Dict[str, Any] = {}
+        self._depth_stats: Dict[str, Any] = {}
+        self._radar_stats: Dict[str, Mapping[str, Any]] = {}
         self._closed = False
 
     def log_state(self, record: Dict[str, Any]) -> None: self.state.write(_without_privileged_ids(record))
@@ -57,25 +125,44 @@ class VehicleLogger:
     def log_collision(self, record: Dict[str, Any]) -> None:
         # Never accept simulator actor identity in a vehicle-local file.
         self.collisions.write(_without_privileged_ids(record))
-    def log_radar(self, record: Dict[str, Any]) -> None: self.radar.write(_without_privileged_ids(record))
+    def log_radar(self, record: Dict[str, Any]) -> None:
+        sensor_id = str(record.get("sensor_id", "front"))
+        writer = self._radar_writers.get(sensor_id)
+        if writer is None:
+            raise KeyError("unknown radar sensor ID: {0}".format(sensor_id))
+        writer.append(record["frame"], record["timestamp"], record.get("detections", []))
     def log_camera(self, record: Dict[str, Any], data: bytes) -> None:
         frame = int(record["frame"])
-        filename = f"{frame:08d}.png"
+        filename = f"{frame:08d}.jpg"
         image = Image.frombytes("RGBA", (int(record["width"]), int(record["height"])), data, "raw", "BGRA")
-        image.convert("RGB").save(self.root / "camera" / "frames" / filename, format="PNG", compress_level=1)
+        image.convert("RGB").save(self.root / "camera" / "frames" / filename, format="JPEG", quality=90, optimize=True)
         metadata = _without_privileged_ids(record)
         metadata.pop("data", None)
         metadata["image_filename"] = filename
-        metadata["file_format"] = "png"
-        metadata["encoding"] = "RGB PNG converted losslessly from CARLA BGRA"
+        metadata["file_format"] = "jpeg"
+        metadata["jpeg_quality"] = 90
         self.camera_metadata.write(metadata)
 
     def log_depth_observations(self, record: Dict[str, Any]) -> None:
-        self.depth_observations.write(_without_privileged_ids(record))
+        self._depth_writer.append(record["frame"], record["timestamp"], record.get("detections", []))
+
+    def set_camera_stats(self, stats: Mapping[str, Any]) -> None:
+        self._camera_stats = dict(stats)
+
+    def set_depth_stats(self, stats: Mapping[str, Any]) -> None:
+        self._depth_stats = dict(stats)
+
+    def set_radar_stats(self, sensor_id: str, stats: Mapping[str, Any]) -> None:
+        self._radar_stats[str(sensor_id)] = dict(stats)
 
     def close(self) -> None:
         if self._closed:
             return
-        for stream in (self.state, self.controls, self.collisions, self.radar, self.camera_metadata, self.depth_observations):
+        for stream in (self.state, self.controls, self.collisions, self.camera_metadata):
             stream.close()
+        self._depth_writer.close(self._depth_stats)
+        for sensor_id, writer in self._radar_writers.items():
+            writer.close(self._radar_stats.get(sensor_id, {}))
+        self._camera_metadata.update(self._camera_stats)
+        (self.root / "camera" / "metadata.json").write_text(_json(self._camera_metadata), encoding="utf-8")
         self._closed = True

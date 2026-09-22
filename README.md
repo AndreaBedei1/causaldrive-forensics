@@ -34,34 +34,41 @@ ground_truth/collisions.jsonl
 vehicles/A/ego.jsonl
 vehicles/A/controls.jsonl
 vehicles/A/collisions.jsonl
-vehicles/A/radar.jsonl
+vehicles/A/radar/observations.npz
+vehicles/A/radar/metadata.json
 vehicles/A/camera/metadata.jsonl
+vehicles/A/camera/metadata.json
 vehicles/A/camera/frames/
-vehicles/A/depth_observations.jsonl
+vehicles/A/depth/observations.npz
+vehicles/A/depth/metadata.json
 ```
 
 Vehicle files contain only that vehicle's pose, orientation, velocity,
-acceleration, angular velocity, controls, collision impulse, radar detections
-(frame, timestamp, depth, azimuth, altitude, radial velocity), RGB PNG frames,
-and compact geometric depth observations. Ego, controls, ground truth, and
-radar run at 20 Hz; RGB is intentionally sampled at 4 Hz, while depth is
-requested at 20 Hz and records the callbacks delivered by CARLA.
-RGB, depth, and radar are recorded independently; no sensor selection or
-combination is performed. Vehicle files never contain simulator actor IDs.
+acceleration, angular velocity, controls, collision impulse, RGB JPEG frames,
+and independent compact radar/depth observation streams. Ego, controls,
+ground truth, and radar run at 20 Hz; RGB is sampled at 4 Hz, while depth is
+requested at 20 Hz and records the callbacks delivered by CARLA. Vehicle files
+never contain simulator actor IDs.
 
 Depth observations are produced in memory from the configured 20 Hz CARLA
-depth stream;
-full depth images are not persisted. Radar and depth detections share the same
-fields (`depth`, `azimuth`, `altitude`, `radial_velocity`). Depth radial velocity
-is currently `null` and is reserved for a later temporal implementation. The
-common comparison region is ±45° horizontal, ±5° vertical, and 0–90 m;
-observations are sparsified into 2° azimuth × 2° altitude bins (at most 225
-detections per frame). RGB remains the full 90° visual image.
+depth stream; full depth images are not persisted. Radar and depth are stored
+as compressed NumPy NPZ streams with the same four float32 detection columns:
+`depth_m`, `azimuth_rad`, `altitude_rad`, and `radial_velocity_mps`. Depth
+`radial_velocity_mps` is `NaN` (`radial_velocity_status: not_estimated`) and
+is reserved for temporal estimation in a later stage. Radar velocity remains
+the measured CARLA value. The common comparison region is ±45° horizontal,
+±5° vertical, and 0–90 m; depth observations are sparsified into 2° azimuth ×
+2° altitude bins (at most 225 detections per frame). RGB remains the full 90°
+visual image and is stored as visually high-quality lossy JPEG at quality 90.
 
-For a depth pixel stored as BGRA bytes, metric depth is decoded as
-`1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres. Depth metadata retains
-the original CARLA frame and timestamp, sensor transform, and compact
-detections; no full depth image is written.
+Each NPZ stores `frames` (int64), `timestamps` (float64), `offsets` (int64),
+and `detections` (float32 `[N,4]`). The detections for frame `i` are
+`detections[offsets[i]:offsets[i+1]]`; variable frame sizes are not padded.
+Sensor metadata stores the schema, units, transform, FOV, rate, and callback
+statistics once. For a depth pixel stored as BGRA bytes, metric depth is
+decoded in memory as `1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres.
+When a sensor profile defines multiple radars, each sensor is written under
+`vehicles/A/radar/<sensor_id>/` with the same NPZ schema.
 
 The separate ground-truth trace is privileged simulator state: it contains
 participant actor IDs, full vehicle state, controls as recorded by the runner,

@@ -52,11 +52,12 @@ def radar_specs_from_config(cfg: Config) -> List[RadarSpec]:
 
 class RadarSensor:
     def __init__(self, scenario_world: Any, vehicle: Any, spec: RadarSpec, max_queue: int = 64) -> None:
-        carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0
+        carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0; self._received = 0; self._delivered = 0
         transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=spec.mount_z), carla.Rotation(pitch=spec.mount_pitch_deg, yaw=spec.mount_yaw_deg, roll=0))
         self.sensor = scenario_world.spawn_sensor(spec.blueprint, transform, attach_to=vehicle, attributes=spec.attributes())
         self.sensor.listen(self._on_measurement)
     def _on_measurement(self, measurement: Any) -> None:
+        self._received += 1
         try: self._queue.put_nowait(measurement)
         except queue.Full: self._dropped += 1
     @property
@@ -66,12 +67,16 @@ class RadarSensor:
             try: m = self._queue.get(timeout=timeout_s)
             except queue.Empty: return None
             if int(m.frame) < int(frame): continue
+            self._delivered += 1
             return {"frame": int(m.frame), "timestamp": float(m.timestamp), "sensor_id": self.spec.sensor_id,
                     "source": "radar",
                     "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": self.spec.mount_z,
                                           "yaw_deg": self.spec.mount_yaw_deg, "pitch_deg": self.spec.mount_pitch_deg},
                     "detections": [{"depth": float(d.depth), "azimuth": float(d.azimuth), "altitude": float(d.altitude), "radial_velocity": float(d.velocity)} for d in m]}
         return None
+    @property
+    def stats(self) -> Dict[str, Any]:
+        return {"callbacks_received": self._received, "queue_drops": self._dropped, "frames_delivered": self._delivered}
     def stop(self) -> None:
         try:
             if self.sensor.is_listening: self.sensor.stop()
@@ -253,13 +258,16 @@ def depth_observations_from_bgra(raw_data: bytes, width: int, height: int,
 
 
 class CameraSensor:
-    def __init__(self, scenario_world: Any, vehicle: Any, spec: CameraSpec, max_queue: int = 64) -> None:
-        carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0
+    def __init__(self, scenario_world: Any, vehicle: Any, spec: CameraSpec, max_queue: int = 64,
+                 report_frame_gaps: bool = False) -> None:
+        carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0; self._received = 0; self._duplicates = 0; self._pre_timeline = 0
         self._minimum_frame: Optional[int] = None
+        self._report_frame_gaps = bool(report_frame_gaps)
         self._seen_frames = set()
         transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=spec.mount_z), carla.Rotation(pitch=spec.mount_pitch_deg, yaw=spec.mount_yaw_deg, roll=spec.mount_roll_deg))
         self.sensor = scenario_world.spawn_sensor(spec.blueprint, transform, attach_to=vehicle, attributes=spec.attributes()); self.sensor.listen(self._on_image)
     def _on_image(self, image: Any) -> None:
+        self._received += 1
         try: self._queue.put_nowait(image)
         except queue.Full: self._dropped += 1
     @property
@@ -281,13 +289,31 @@ class CameraSensor:
             try:
                 image = self._queue.get_nowait()
                 if self._minimum_frame is not None and int(image.frame) < self._minimum_frame:
+                    self._pre_timeline += 1
                     continue
                 if int(image.frame) in self._seen_frames:
+                    self._duplicates += 1
                     continue
                 self._seen_frames.add(int(image.frame))
                 out.append(self._record(image))
             except queue.Empty:
                 return out
+    @property
+    def stats(self) -> Dict[str, Any]:
+        frames = sorted(self._seen_frames)
+        gaps = sum(max(0, later - earlier - 1) for earlier, later in zip(frames, frames[1:]))
+        stats = {
+            "callbacks_received": self._received,
+            "queue_drops": self._dropped,
+            "duplicate_callbacks": self._duplicates,
+            "pre_timeline_callbacks": self._pre_timeline,
+            "frames_written": len(frames),
+            "first_frame": frames[0] if frames else None,
+            "last_frame": frames[-1] if frames else None,
+        }
+        if self._report_frame_gaps:
+            stats["missing_frame_count"] = int(gaps)
+        return stats
     def stop(self) -> None:
         try:
             if self.sensor.is_listening: self.sensor.stop()

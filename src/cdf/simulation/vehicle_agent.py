@@ -35,7 +35,9 @@ class RawVehicleAgent:
         self._depth_executor = ThreadPoolExecutor(max_workers=1) if depth_camera_spec else None
         self._depth_futures = deque()
         self.camera = CameraSensor(scenario_world, self.vehicle, camera_spec) if camera_spec else None
-        self.depth_camera = CameraSensor(scenario_world, self.vehicle, depth_camera_spec, max_queue=512) if depth_camera_spec else None
+        self.depth_camera = (CameraSensor(scenario_world, self.vehicle, depth_camera_spec,
+                                          max_queue=512, report_frame_gaps=True)
+                             if depth_camera_spec else None)
         self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,
@@ -142,4 +144,10 @@ class RawVehicleAgent:
     def close(self) -> None:
         if self._depth_executor is not None:
             self._depth_executor.shutdown(wait=True)
+        if self.camera is not None:
+            self.logger.set_camera_stats(self.camera.stats)
+        if self.depth_camera is not None:
+            self.logger.set_depth_stats(self.depth_camera.stats)
+        for radar in self.radar:
+            self.logger.set_radar_stats(radar.spec.sensor_id, radar.stats)
         self.logger.close()
