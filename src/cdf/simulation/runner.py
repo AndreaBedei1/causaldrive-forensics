@@ -111,6 +111,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             simulation_start_timestamp = float(simulation_start)
             fixed_delta_seconds = float(dt)
             _position_spectator(sworld.world, [agent.vehicle for agent in agents], carla)
+            for agent in agents:
+                agent.set_sensor_start_frame(sworld.frame + 1)
             limit = min(float(spec.max_duration_s), float(cfg.get("simulation.max_duration_s", spec.max_duration_s)))
             scheduled_end = max(
                 [float(action.t_start) + float(action.duration)
@@ -152,6 +154,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                 remaining_wall_time = wall_clock_start + scenario_timestamp - time.monotonic()
                 if remaining_wall_time > 0.0:
                     time.sleep(remaining_wall_time)
+            for agent in agents:
+                agent.flush_sensor_queues()
     finally:
         for agent in agents: agent.close()
         gt.close()

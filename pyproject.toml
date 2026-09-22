@@ -9,7 +9,7 @@ description = "Raw CARLA scenario acquisition with separate vehicle and simulato
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
-dependencies = ["PyYAML>=5.4"]
+dependencies = ["PyYAML>=5.4", "numpy>=1.23", "Pillow>=9.0"]
 
 [project.optional-dependencies]
 sim = ["carla==0.9.15"]

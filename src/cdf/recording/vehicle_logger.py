@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 
+from PIL import Image
+
 
 def _json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
@@ -45,9 +47,8 @@ class VehicleLogger:
         self.collisions = _Jsonl(self.root / "collisions.jsonl")
         self.radar = _Jsonl(self.root / "radar.jsonl")
         self.camera_metadata = _Jsonl(self.root / "camera" / "metadata.jsonl")
-        self.depth_metadata = _Jsonl(self.root / "depth" / "metadata.jsonl")
+        self.depth_observations = _Jsonl(self.root / "depth_observations.jsonl")
         (self.root / "camera" / "frames").mkdir(parents=True, exist_ok=True)
-        (self.root / "depth" / "frames").mkdir(parents=True, exist_ok=True)
         (self.root / "metadata.json").write_text(_json(_without_privileged_ids(metadata)), encoding="utf-8")
         self._closed = False
 
@@ -57,26 +58,24 @@ class VehicleLogger:
         # Never accept simulator actor identity in a vehicle-local file.
         self.collisions.write(_without_privileged_ids(record))
     def log_radar(self, record: Dict[str, Any]) -> None: self.radar.write(_without_privileged_ids(record))
-    def log_camera(self, record: Dict[str, Any], data: bytes, extension: str = "bgra") -> None:
+    def log_camera(self, record: Dict[str, Any], data: bytes) -> None:
         frame = int(record["frame"])
-        filename = f"{frame:08d}.{extension}"
-        (self.root / "camera" / "frames" / filename).write_bytes(data)
+        filename = f"{frame:08d}.png"
+        image = Image.frombytes("RGBA", (int(record["width"]), int(record["height"])), data, "raw", "BGRA")
+        image.convert("RGB").save(self.root / "camera" / "frames" / filename, format="PNG", compress_level=1)
         metadata = _without_privileged_ids(record)
+        metadata.pop("data", None)
         metadata["image_filename"] = filename
+        metadata["file_format"] = "png"
+        metadata["encoding"] = "RGB PNG converted losslessly from CARLA BGRA"
         self.camera_metadata.write(metadata)
 
-    def log_depth(self, record: Dict[str, Any], data: bytes, extension: str = "bgra") -> None:
-        frame = int(record["frame"])
-        filename = f"{frame:08d}.{extension}"
-        (self.root / "depth" / "frames" / filename).write_bytes(data)
-        metadata = _without_privileged_ids(record)
-        metadata["image_filename"] = filename
-        metadata["encoding"] = "CARLA depth: BGRA bytes encode normalized 24-bit depth; meters = 1000 * (R + 256*G + 65536*B) / (256**3 - 1)."
-        self.depth_metadata.write(metadata)
+    def log_depth_observations(self, record: Dict[str, Any]) -> None:
+        self.depth_observations.write(_without_privileged_ids(record))
 
     def close(self) -> None:
         if self._closed:
             return
-        for stream in (self.state, self.controls, self.collisions, self.radar, self.camera_metadata, self.depth_metadata):
+        for stream in (self.state, self.controls, self.collisions, self.radar, self.camera_metadata, self.depth_observations):
             stream.close()
         self._closed = True
