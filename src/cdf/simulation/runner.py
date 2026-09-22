@@ -39,6 +39,9 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     run_root.mkdir(parents=True, exist_ok=True)
     gt = GroundTruthLogger(run_root, {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "map": spec.map_name})
     agents: List[RawVehicleAgent] = []
+    simulation_start_timestamp = None
+    simulation_end_timestamp = None
+    fixed_delta_seconds = None
     try:
         with ScenarioWorld(client, cfg, spec.map_name, seed=seed) as sworld:
             placements = []
@@ -67,6 +70,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             # exactly as the scenario definitions expect.
             simulation_start = sworld.elapsed_seconds
             dt = sworld.delta_seconds
+            simulation_start_timestamp = float(simulation_start)
+            fixed_delta_seconds = float(dt)
             limit = min(float(spec.max_duration_s), float(cfg.get("simulation.max_duration_s", spec.max_duration_s)))
             scheduled_end = max(
                 [float(action.t_start) + float(action.duration)
@@ -76,6 +81,7 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             last_collision_t = None
             while sworld.elapsed_seconds - simulation_start <= limit + 1e-9:
                 snapshot = sworld.tick(); frame = int(snapshot.frame); timestamp = float(snapshot.timestamp.elapsed_seconds)
+                simulation_end_timestamp = timestamp
                 scenario_timestamp = timestamp - simulation_start
                 controls = {
                     agent.spec.participant_id: agent.step(
@@ -106,5 +112,12 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
         for agent in agents: agent.close()
         gt.close()
     metadata = {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "participants": [p.participant_id for p in spec.participants], "python": sys.version, "platform": platform.platform(), "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    if simulation_start_timestamp is not None:
+        metadata["simulation_start_timestamp"] = simulation_start_timestamp
+    if fixed_delta_seconds is not None:
+        metadata["fixed_delta_seconds"] = fixed_delta_seconds
+    if simulation_end_timestamp is not None and simulation_start_timestamp is not None:
+        metadata["simulation_end_timestamp"] = simulation_end_timestamp
+        metadata["recorded_duration_s"] = simulation_end_timestamp - simulation_start_timestamp
     (run_root / "metadata.json").write_text(json.dumps(metadata, indent=2, sort_keys=True), encoding="utf-8")
     return run_root
