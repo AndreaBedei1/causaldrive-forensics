@@ -31,6 +31,44 @@ def _state(actor: Any, frame: int, timestamp: float) -> dict:
             "angular_velocity": {"x": float(w.x), "y": float(w.y), "z": float(w.z)}}
 
 
+def _position_spectator(world: Any, vehicles: List[Any], carla: Any) -> None:
+    """Keep CARLA's spectator on a read-only overhead view of the run."""
+    if not vehicles:
+        return
+    transforms = [vehicle.get_transform() for vehicle in vehicles]
+    locations = [transform.location for transform in transforms]
+    center_x = sum(float(location.x) for location in locations) / len(locations)
+    center_y = sum(float(location.y) for location in locations) / len(locations)
+    center_z = sum(float(location.z) for location in locations) / len(locations)
+    span = max(
+        max(float(location.x) for location in locations) - min(float(location.x) for location in locations),
+        max(float(location.y) for location in locations) - min(float(location.y) for location in locations),
+        1.0,
+    )
+    offset = min(12.0, max(6.0, span * 0.2))
+    altitude = max(35.0, min(45.0, 35.0 + span * 0.15))
+    camera_location = carla.Location(
+        x=center_x + offset,
+        y=center_y - offset,
+        z=center_z + altitude,
+    )
+    look_x = center_x - float(camera_location.x)
+    look_y = center_y - float(camera_location.y)
+    look_z = center_z - float(camera_location.z)
+    horizontal = math.hypot(look_x, look_y)
+    spectator = world.get_spectator()
+    spectator.set_transform(
+        carla.Transform(
+            camera_location,
+            carla.Rotation(
+                pitch=math.degrees(math.atan2(look_z, horizontal)),
+                yaw=math.degrees(math.atan2(look_y, look_x)),
+                roll=0.0,
+            ),
+        )
+    )
+
+
 def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output_root: str = "traces") -> Path:
     """Run one scenario variant and return its trace directory."""
     carla = import_carla()
@@ -72,6 +110,7 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             dt = sworld.delta_seconds
             simulation_start_timestamp = float(simulation_start)
             fixed_delta_seconds = float(dt)
+            _position_spectator(sworld.world, [agent.vehicle for agent in agents], carla)
             limit = min(float(spec.max_duration_s), float(cfg.get("simulation.max_duration_s", spec.max_duration_s)))
             scheduled_end = max(
                 [float(action.t_start) + float(action.duration)
@@ -79,10 +118,12 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                 default=0.0,
             )
             last_collision_t = None
+            wall_clock_start = time.monotonic()
             while sworld.elapsed_seconds - simulation_start <= limit + 1e-9:
                 snapshot = sworld.tick(); frame = int(snapshot.frame); timestamp = float(snapshot.timestamp.elapsed_seconds)
                 simulation_end_timestamp = timestamp
                 scenario_timestamp = timestamp - simulation_start
+                _position_spectator(sworld.world, [agent.vehicle for agent in agents], carla)
                 controls = {
                     agent.spec.participant_id: agent.step(
                         scenario_timestamp, frame, dt, recorded_timestamp=timestamp
@@ -108,6 +149,9 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                             and scenario_timestamp >= scheduled_end
                             and scenario_timestamp >= last_collision_t + POST_IMPACT_RECORDING_S):
                         break
+                remaining_wall_time = wall_clock_start + scenario_timestamp - time.monotonic()
+                if remaining_wall_time > 0.0:
+                    time.sleep(remaining_wall_time)
     finally:
         for agent in agents: agent.close()
         gt.close()
