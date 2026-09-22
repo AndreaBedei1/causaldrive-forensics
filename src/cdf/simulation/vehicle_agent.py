@@ -6,6 +6,7 @@ from typing import Any
 
 from ..common.config import Config, configs_dir, load_yaml
 from ..recording.vehicle_logger import VehicleLogger
+from .carla_client import import_carla
 from .controllers import ScriptedController, VehicleState
 from .sensors import CameraSensor, CollisionSensor, RadarSensor, camera_spec_from_config, depth_camera_spec_from_config, radar_specs_from_config
 
@@ -42,15 +43,22 @@ class RawVehicleAgent:
                 "velocity": {"x": float(v.x), "y": float(v.y), "z": float(v.z)}, "acceleration": {"x": float(a.x), "y": float(a.y), "z": float(a.z)},
                 "angular_velocity": {"x": float(ang.x), "y": float(ang.y), "z": float(ang.z)}}
 
-    def step(self, t: float, frame: int, dt: float) -> dict:
-        record = self.state_record(t, frame)
+    def step(self, t: float, frame: int, dt: float, recorded_timestamp: float = None) -> dict:
+        """Advance the scripted controller using ``t`` and log CARLA's raw time."""
+        timestamp = float(t) if recorded_timestamp is None else float(recorded_timestamp)
+        record = self.state_record(timestamp, frame)
         speed = (record["velocity"]["x"] ** 2 + record["velocity"]["y"] ** 2 + record["velocity"]["z"] ** 2) ** 0.5
         state = VehicleState(t=t, x=record["x"], y=record["y"], yaw=record["yaw_deg"], speed=speed,
                              vx=record["velocity"]["x"], vy=record["velocity"]["y"])
         command = self.controller.step(state, dt)
-        self.vehicle.apply_control(command.clamped())
+        clamped = command.clamped()
+        carla = import_carla()
+        self.vehicle.apply_control(carla.VehicleControl(
+            throttle=clamped.throttle, brake=clamped.brake, steer=clamped.steer,
+            hand_brake=clamped.hand_brake, reverse=clamped.reverse,
+        ))
         self.logger.log_state(record)
-        self.logger.log_control({"frame": int(frame), "timestamp": float(t), "throttle": command.throttle, "brake": command.brake,
+        self.logger.log_control({"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                                  "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse})
         for radar in self.radar:
             item = radar.poll(frame)
@@ -64,7 +72,7 @@ class RawVehicleAgent:
             if item is not None:
                 data = item.pop("data"); self.logger.log_depth(item, data)
         for collision in self.collision_sensor.drain_vehicle(): self.logger.log_collision(collision)
-        return {"frame": int(frame), "timestamp": float(t), "throttle": command.throttle, "brake": command.brake,
+        return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
 
     def ground_truth_collisions(self):

@@ -24,6 +24,13 @@ def _spectator_argument(value: str) -> str:
     raise argparse.ArgumentTypeError("spectator must be 'overhead' or 'follow:<participant>'")
 
 
+def _nonnegative_seconds(value: str) -> float:
+    seconds = float(value)
+    if seconds < 0.0:
+        raise argparse.ArgumentTypeError("hold-after must be non-negative")
+    return seconds
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Acquire raw CARLA data for one scenario")
     parser.add_argument("--scenario", required=True, help="scenario id, for example S01")
@@ -36,13 +43,16 @@ def main() -> int:
     parser.add_argument("--realtime", action="store_true", help="pace simulation ticks at the configured fixed time step")
     parser.add_argument("--spectator", type=_spectator_argument, default=None,
                         help="non-recording CARLA spectator view: overhead or follow:<participant>")
+    parser.add_argument("--hold-after", type=_nonnegative_seconds, default=0.0,
+                        help="keep the final CARLA scene visible for this many seconds before cleanup")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     cfg = load_run_config(args.scenario, sensor_profile=args.sensor_profile, overrides=args.override)
     spec = ScenarioSpec.from_config(cfg, variant=args.variant)
     client = client_from_config(cfg, autostart=not args.no_autostart)
     path = run_scenario(client, cfg, spec, args.seed, output_root=args.output,
-                        realtime=args.realtime, spectator=args.spectator)
+                        realtime=args.realtime, spectator=args.spectator,
+                        hold_after_s=args.hold_after)
     print(path)
     return 0
 

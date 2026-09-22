@@ -83,7 +83,8 @@ def _pace_realtime(enabled: bool, wall_start: float, simulation_start: float,
 
 
 def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output_root: str = "traces",
-                 realtime: bool = False, spectator: Optional[str] = None) -> Path:
+                 realtime: bool = False, spectator: Optional[str] = None,
+                 hold_after_s: float = 0.0) -> Path:
     """Run one scenario variant and return its trace directory."""
     carla = import_carla()
     run_name = f"run_{int(seed)}" if spec.variant == "default" else f"run_{int(seed)}_{spec.variant}"
@@ -91,6 +92,9 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     run_root.mkdir(parents=True, exist_ok=True)
     gt = GroundTruthLogger(run_root, {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "map": spec.map_name})
     agents: List[RawVehicleAgent] = []
+    hold_after_s = float(hold_after_s)
+    if hold_after_s < 0.0:
+        raise ValueError("hold_after_s must be non-negative")
     spectator_mode, spectator_participant = _spectator_mode(
         spectator, [participant.participant_id for participant in spec.participants]
     )
@@ -109,8 +113,12 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                 transform = carla.Transform(carla.Location(x=tf.location.x, y=tf.location.y, z=tf.location.z + float(cfg.get("simulation.spawn_z_offset", 0.3))), carla.Rotation(pitch=0, yaw=tf.rotation.yaw, roll=0))
                 agent = RawVehicleAgent(sworld, cfg, pspec, make_controller(pspec, route), transform, run_root)
                 agents.append(agent)
+            # CARLA's elapsed clock is not reset when the requested map is
+            # already loaded. Scenario limits and scripted action times are
+            # defined relative to this run, whereas the recorded timestamps
+            # remain CARLA's unmodified clock values.
+            simulation_start = sworld.elapsed_seconds
             wall_start = time.monotonic() if realtime else 0.0
-            simulation_start = sworld.elapsed_seconds if realtime else 0.0
             if spectator_mode is None and not realtime:
                 sworld.warmup()
             else:
@@ -134,9 +142,15 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                     _pace_realtime(realtime, wall_start, simulation_start, float(snapshot.timestamp.elapsed_seconds))
             dt = sworld.delta_seconds
             limit = min(float(spec.max_duration_s), float(cfg.get("simulation.max_duration_s", spec.max_duration_s)))
-            while sworld.elapsed_seconds <= limit + 1e-9:
+            while sworld.elapsed_seconds - simulation_start <= limit + 1e-9:
                 snapshot = sworld.tick(); frame = int(snapshot.frame); timestamp = float(snapshot.timestamp.elapsed_seconds)
-                controls = {agent.spec.participant_id: agent.step(timestamp, frame, dt) for agent in agents}
+                scenario_timestamp = timestamp - simulation_start
+                controls = {
+                    agent.spec.participant_id: agent.step(
+                        scenario_timestamp, frame, dt, recorded_timestamp=timestamp
+                    )
+                    for agent in agents
+                }
                 for agent in agents:
                     gt.state({"participant_id": agent.spec.participant_id, **_state(agent.vehicle, frame, timestamp)})
                     gt.control({"participant_id": agent.spec.participant_id, **controls[agent.spec.participant_id]})
@@ -146,6 +160,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                     _update_spectator(sworld, agents, spectator_mode, spectator_participant)
                 if realtime:
                     _pace_realtime(True, wall_start, simulation_start, timestamp)
+            if hold_after_s > 0.0:
+                time.sleep(hold_after_s)
     finally:
         for agent in agents: agent.close()
         gt.close()
