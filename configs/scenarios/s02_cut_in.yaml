@@ -59,9 +59,9 @@ scenario:
       participant_overrides:
         A:
           actions:
-          - action_id: A_late_brake
-            kind: brake
+          - action_id: A_slow_after_cut_in
+            kind: set_speed
             t_start: 2.9
             duration: 9.0
             params:
-              intensity: 1.0
+              target_speed: 6.0
