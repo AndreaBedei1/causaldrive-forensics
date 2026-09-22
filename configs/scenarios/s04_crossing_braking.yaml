@@ -54,4 +54,5 @@ scenario:
       params:
         target_speed: 7.0
   variants:
-    yield: {}
+    yield:
+      max_duration_s: 10.0
