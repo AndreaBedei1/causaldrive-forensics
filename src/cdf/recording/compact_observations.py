@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping, Optional
+from typing import Any, Dict, Iterable, Iterator, Mapping, Optional
 
 import numpy as np
 
@@ -48,9 +48,19 @@ class CompactObservations:
     timestamps: np.ndarray
     offsets: np.ndarray
     detections: np.ndarray
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def frame_detections(self, index: int) -> np.ndarray:
         return self.detections[self.offsets[index]:self.offsets[index + 1]]
+
+    def __iter__(self) -> Iterator[Dict[str, Any]]:
+        """Iterate frames through the same logical radar/depth interface."""
+        for index, (frame, timestamp) in enumerate(zip(self.frames, self.timestamps)):
+            yield {
+                "frame": int(frame),
+                "timestamp": float(timestamp),
+                "detections": self.frame_detections(index),
+            }
 
 
 def load_observations(path: Path) -> CompactObservations:
@@ -65,7 +75,20 @@ def load_observations(path: Path) -> CompactObservations:
             timestamps=np.asarray(data["timestamps"], dtype=np.float64).copy(),
             offsets=np.asarray(data["offsets"], dtype=np.int64).copy(),
             detections=np.asarray(data["detections"], dtype=np.float32).copy(),
+            metadata={},
         )
+    metadata_path = Path(path).with_name("metadata.json")
+    metadata: Dict[str, Any] = {}
+    if metadata_path.exists():
+        try:
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise ValueError("invalid observation metadata JSON") from exc
+    observations = CompactObservations(
+        frames=observations.frames, timestamps=observations.timestamps,
+        offsets=observations.offsets, detections=observations.detections,
+        metadata=metadata,
+    )
     if observations.detections.ndim != 2 or observations.detections.shape[1] != 4:
         raise ValueError("detections must have shape [N, 4]")
     if len(observations.offsets) != len(observations.frames) + 1:
@@ -79,6 +102,69 @@ def load_observations(path: Path) -> CompactObservations:
     ):
         raise ValueError("invalid observation offsets")
     return observations
+
+
+COMMON_REGION = {
+    "azimuth_min_deg": -45.0,
+    "azimuth_max_deg": 45.0,
+    "altitude_min_deg": -5.0,
+    "altitude_max_deg": 5.0,
+    "range_min_m": 0.0,
+    "range_max_m": 90.0,
+}
+
+
+def _filter_common_region(observations: CompactObservations) -> CompactObservations:
+    """Return a view with the radar/depth overlap while preserving all frames."""
+    az_limit = np.deg2rad(45.0)
+    al_limit = np.deg2rad(5.0)
+    rows = []
+    offsets = [0]
+    for index in range(len(observations.frames)):
+        detections = observations.frame_detections(index)
+        if len(detections):
+            # Preserve NaN velocity rows: only geometry defines the region.
+            valid = (
+                np.isfinite(detections[:, 0])
+                & (detections[:, 0] >= 0.0) & (detections[:, 0] <= 90.0)
+                & np.isfinite(detections[:, 1]) & (np.abs(detections[:, 1]) <= az_limit)
+                & np.isfinite(detections[:, 2]) & (np.abs(detections[:, 2]) <= al_limit)
+            )
+            rows.extend(detections[valid])
+        offsets.append(len(rows))
+    filtered = np.asarray(rows, dtype=np.float32).reshape((-1, 4)) if rows else np.empty((0, 4), dtype=np.float32)
+    metadata = dict(observations.metadata)
+    metadata["common_region"] = dict(COMMON_REGION)
+    return CompactObservations(
+        frames=observations.frames.copy(), timestamps=observations.timestamps.copy(),
+        offsets=np.asarray(offsets, dtype=np.int64), detections=filtered, metadata=metadata,
+    )
+
+
+def load_observation_stream(vehicle_dir: Path, source: str = "radar", common_region: bool = False) -> CompactObservations:
+    """Load either native radar or depth through one source-agnostic API.
+
+    ``common_region=True`` filters only the returned view; native NPZ files are
+    never modified, so radar observations outside the overlap remain available.
+    """
+    root = Path(vehicle_dir)
+    source_name = str(source).lower()
+    if source_name == "depth":
+        path = root / "depth" / "observations.npz"
+    elif source_name == "radar":
+        path = root / "radar" / "observations.npz"
+        if not path.exists():
+            candidates = sorted((root / "radar").glob("*/observations.npz"))
+            if len(candidates) == 1:
+                path = candidates[0]
+            elif not candidates:
+                raise FileNotFoundError("no radar observations found under " + str(root))
+            else:
+                raise ValueError("multiple radar sensors require an explicit sensor path")
+    else:
+        raise ValueError("source must be 'radar' or 'depth'")
+    observations = load_observations(path)
+    return _filter_common_region(observations) if common_region else observations
 
 
 class CompactObservationWriter:
@@ -143,4 +229,3 @@ class CompactObservationWriter:
             self._metadata.update(dict(metadata_updates))
         self.metadata_path.write_text(_json(self._metadata), encoding="utf-8")
         self._closed = True
-

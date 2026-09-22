@@ -13,8 +13,10 @@ from .carla_client import import_carla
 from .controllers import ScriptedController, VehicleState
 from .sensors import (CameraSensor, CollisionSensor, RadarSensor,
                       camera_spec_from_config, depth_camera_spec_from_config,
+                      depth_radial_velocity_config_from_config,
                       depth_observation_spec_from_config,
                       depth_observations_from_bgra, radar_specs_from_config)
+from ..recording.depth_velocity import DepthRadialVelocityEstimator
 
 
 
@@ -38,6 +40,8 @@ class RawVehicleAgent:
         self.depth_camera = (CameraSensor(scenario_world, self.vehicle, depth_camera_spec,
                                           max_queue=512, report_frame_gaps=True)
                              if depth_camera_spec else None)
+        self.depth_velocity_config = depth_radial_velocity_config_from_config(cfg)
+        self._depth_estimator = DepthRadialVelocityEstimator(self.depth_velocity_config)
         self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,
@@ -46,6 +50,7 @@ class RawVehicleAgent:
             "camera": camera_spec.__dict__ if camera_spec else None,
             "depth_camera": depth_camera_spec.__dict__ if depth_camera_spec else None,
             "depth_observations": self.depth_observation_spec.__dict__,
+            "depth_radial_velocity": self.depth_velocity_config.as_metadata(),
             "vehicle_transform": {"x": spawn_transform.location.x, "y": spawn_transform.location.y, "z": spawn_transform.location.z, "yaw_deg": spawn_transform.rotation.yaw},
         })
 
@@ -74,13 +79,22 @@ class RawVehicleAgent:
         self._depth_futures.append((item, future))
 
     def _drain_depth_futures(self, wait: bool = False) -> None:
+        ready = []
         while self._depth_futures:
             item, future = self._depth_futures[0]
             if not wait and not future.done():
-                return
+                break
             item["detections"] = future.result()
-            self.logger.log_depth_observations(item)
             self._depth_futures.popleft()
+            ready.append(item)
+        # Callbacks can arrive out of order; temporal state is updated only in
+        # increasing CARLA timestamp order (frame is a deterministic tie-breaker).
+        ready.sort(key=lambda record: (float(record["timestamp"]), int(record["frame"])))
+        for item in ready:
+            item["detections"] = self._depth_estimator.process(
+                int(item["frame"]), float(item["timestamp"]), item["detections"]
+            )
+            self.logger.log_depth_observations(item)
 
     def step(self, t: float, frame: int, dt: float, recorded_timestamp: float = None) -> dict:
         """Advance the scripted controller using ``t`` and log CARLA's raw time."""
@@ -147,7 +161,9 @@ class RawVehicleAgent:
         if self.camera is not None:
             self.logger.set_camera_stats(self.camera.stats)
         if self.depth_camera is not None:
-            self.logger.set_depth_stats(self.depth_camera.stats)
+            depth_stats = dict(self.depth_camera.stats)
+            depth_stats["radial_velocity"] = self._depth_estimator.stats.as_dict()
+            self.logger.set_depth_stats(depth_stats)
         for radar in self.radar:
             self.logger.set_radar_stats(radar.spec.sensor_id, radar.stats)
         self.logger.close()

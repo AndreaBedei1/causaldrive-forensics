@@ -13,6 +13,7 @@ from cdf.simulation.sensors import (  # noqa: E402
     depth_observations_from_depth,
     unproject_pixel,
 )
+from cdf.recording.depth_velocity import DepthRadialVelocityEstimator  # noqa: E402
 
 
 class DepthObservationTests(unittest.TestCase):
@@ -53,6 +54,54 @@ class DepthObservationTests(unittest.TestCase):
         for record in (radar_record, depth_record):
             for detection in record["detections"]:
                 _ = (detection["depth"], detection["azimuth"], detection["altitude"], detection["radial_velocity"])
+
+    @staticmethod
+    def _one(depth, azimuth=0.0, altitude=0.0):
+        return [{"depth": depth, "azimuth": math.radians(azimuth), "altitude": math.radians(altitude), "radial_velocity": None}]
+
+    def test_temporal_velocity_sign_and_real_dt(self):
+        cases = ((10.0, 9.5, 5.0), (10.0, 10.5, -5.0), (10.0, 10.0, 0.0))
+        for previous, current, expected in cases:
+            estimator = DepthRadialVelocityEstimator()
+            self.assertIsNone(estimator.process(1, 0.0, self._one(previous))[0]["radial_velocity"])
+            result = estimator.process(2, 0.1, self._one(current))[0]["radial_velocity"]
+            self.assertAlmostEqual(result, expected, places=6)
+
+    def test_missing_callback_uses_timestamp_delta(self):
+        estimator = DepthRadialVelocityEstimator()
+        estimator.process(1, 0.0, self._one(10.0))
+        result = estimator.process(3, 0.2, self._one(9.0))[0]["radial_velocity"]
+        self.assertAlmostEqual(result, 5.0, places=6)
+
+    def test_first_frame_and_angular_drift(self):
+        estimator = DepthRadialVelocityEstimator()
+        first = estimator.process(1, 0.0, self._one(10.0, 0.0))[0]
+        self.assertIsNone(first["radial_velocity"])
+        current = estimator.process(2, 0.1, self._one(9.5, 2.0))[0]
+        self.assertAlmostEqual(current["radial_velocity"], 5.0, places=6)
+
+    def test_angular_mismatch_and_impossible_jump_are_nan(self):
+        estimator = DepthRadialVelocityEstimator()
+        estimator.process(1, 0.0, self._one(10.0, 0.0))
+        mismatch = estimator.process(2, 0.1, self._one(9.5, 8.0))[0]
+        self.assertIsNone(mismatch["radial_velocity"])
+        estimator = DepthRadialVelocityEstimator()
+        estimator.process(1, 0.0, self._one(10.0))
+        impossible = estimator.process(2, 0.1, self._one(0.0))[0]
+        self.assertIsNone(impossible["radial_velocity"])
+
+    def test_ambiguous_match_is_rejected(self):
+        estimator = DepthRadialVelocityEstimator()
+        estimator.process(1, 0.0, self._one(10.0, -1.0) + self._one(10.0, 1.0))
+        current = estimator.process(2, 0.1, self._one(9.5, 0.0))[0]
+        self.assertIsNone(current["radial_velocity"])
+
+    def test_out_of_order_timestamp_does_not_rewind_state(self):
+        estimator = DepthRadialVelocityEstimator()
+        estimator.process(1, 1.0, self._one(10.0))
+        self.assertIsNone(estimator.process(0, 0.9, self._one(9.5))[0]["radial_velocity"])
+        result = estimator.process(2, 1.1, self._one(9.5))[0]["radial_velocity"]
+        self.assertAlmostEqual(result, 5.0, places=6)
 
 
 if __name__ == "__main__":

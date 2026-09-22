@@ -6,6 +6,7 @@ import numpy as np
 
 from src.cdf.recording.compact_observations import (
     CompactObservationWriter,
+    load_observation_stream,
     load_observations,
 )
 
@@ -48,6 +49,24 @@ class CompactObservationTests(unittest.TestCase):
             loaded = load_observations(path)
             self.assertEqual(loaded.detections.shape, (0, 4))
             np.testing.assert_array_equal(loaded.offsets, [0, 0])
+
+    def test_source_agnostic_loader_and_common_region(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vehicle = Path(tmp)
+            metadata = {"schema_version": 1, "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"]}
+            for source in ("radar", "depth"):
+                writer = CompactObservationWriter(vehicle / source / "observations.npz", dict(metadata, source=source))
+                writer.append(1, 0.0, [
+                    {"depth": 10.0, "azimuth": 0.0, "altitude": 0.0, "radial_velocity": None},
+                    {"depth": 100.0, "azimuth": 0.0, "altitude": 0.0, "radial_velocity": 1.0},
+                    {"depth": 10.0, "azimuth": np.deg2rad(50.0), "altitude": 0.0, "radial_velocity": 1.0},
+                ])
+                writer.close()
+            for source in ("radar", "depth"):
+                stream = load_observation_stream(vehicle, source=source, common_region=True)
+                self.assertEqual(stream.frames.tolist(), [1])
+                self.assertEqual(stream.detections.shape, (1, 4))
+                self.assertEqual(stream.metadata["source"], source)
 
 
 if __name__ == "__main__":

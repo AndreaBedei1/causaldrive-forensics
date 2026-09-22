@@ -77,6 +77,7 @@ class VehicleLogger:
                     "vertical_fov_deg": float(radar.get("vertical_fov_deg", 10.0)),
                     "range_m": float(radar.get("range_m", 90.0)),
                     "radial_velocity_status": "measured",
+                    "radial_velocity_sign": "positive_towards_sensor",
                 },
             )
         self._camera_metadata = {
@@ -93,6 +94,7 @@ class VehicleLogger:
         (self.root / "camera" / "metadata.json").write_text(_json(self._camera_metadata), encoding="utf-8")
         depth = metadata.get("depth_camera") or {}
         depth_spec = metadata.get("depth_observations") or {}
+        depth_velocity = metadata.get("depth_radial_velocity") or {}
         self._depth_writer = CompactObservationWriter(
             self.root / "depth" / "observations.npz",
             {
@@ -112,7 +114,12 @@ class VehicleLogger:
                 "max_range_m": depth_spec.get("max_range_m"),
                 "azimuth_bin_deg": depth_spec.get("azimuth_bin_deg"),
                 "altitude_bin_deg": depth_spec.get("altitude_bin_deg"),
-                "radial_velocity_status": "not_estimated",
+                "radial_velocity_status": "temporally_estimated" if depth_velocity.get("enabled", True) else "disabled",
+                "radial_velocity_method": "temporal_geometric_association_v1",
+                "radial_velocity_sign": "positive_towards_sensor",
+                "uses_ground_truth": False,
+                "uses_radar_for_estimation": False,
+                "association": depth_velocity,
             },
         )
         self._camera_stats: Dict[str, Any] = {}

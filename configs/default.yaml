@@ -50,3 +50,12 @@ depth_observations:
   vertical_fov_deg: 10.0
   azimuth_bin_deg: 2.0
   altitude_bin_deg: 2.0
+depth_radial_velocity:
+  enabled: true
+  max_dt_s: 0.20
+  max_azimuth_difference_deg: 6.0
+  max_altitude_difference_deg: 4.0
+  max_abs_radial_velocity_mps: 60.0
+  range_gate_margin_m: 0.50
+  require_mutual_match: true
+  max_velocity_jump_mps: 20.0

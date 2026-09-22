@@ -11,6 +11,10 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 from ..common.config import Config
+from ..recording.depth_velocity import (
+    DepthRadialVelocityConfig,
+    depth_radial_velocity_config_from_mapping,
+)
 from .carla_client import import_carla
 
 
@@ -139,6 +143,11 @@ def depth_observation_spec_from_config(cfg: Config) -> DepthObservationSpec:
         azimuth_bin_deg=float(d.get("azimuth_bin_deg", 2.0)),
         altitude_bin_deg=float(d.get("altitude_bin_deg", 2.0)),
     )
+
+
+def depth_radial_velocity_config_from_config(cfg: Config) -> DepthRadialVelocityConfig:
+    """Load the optional temporal depth velocity estimator configuration."""
+    return depth_radial_velocity_config_from_mapping(cfg.get("depth_radial_velocity", {}) or {})
 
 
 def decode_carla_depth(raw_data: bytes, width: int, height: int) -> np.ndarray:
