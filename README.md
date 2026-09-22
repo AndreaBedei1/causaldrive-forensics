@@ -17,8 +17,12 @@ python scripts/run_scenario.py --scenario S01
 ```
 
 Useful options are `--variant`, `--seed`, `--output`, `--sensor-profile`, and
-`--override key=value`. The runner executes one configured scenario variant and
-then cleans up its CARLA actors.
+`--override key=value`. For optional visual inspection, `--realtime` paces the
+already-configured synchronous ticks and `--spectator overhead` follows the
+active vehicles from above; `--spectator follow:A` follows participant A. These
+options only move CARLA's spectator and do not alter scenario settings or
+recorded files. The runner executes one configured scenario variant and then
+cleans up its CARLA actors.
 
 ## Sensors and files
 
