@@ -1,0 +1,35 @@
+{
+  "altitude_bin_deg": 2.0,
+  "azimuth_bin_deg": 2.0,
+  "callbacks_received": 303,
+  "columns": [
+    "depth_m",
+    "azimuth_rad",
+    "altitude_rad",
+    "radial_velocity_mps"
+  ],
+  "duplicate_callbacks": 60,
+  "first_frame": 2570959,
+  "frames_written": 221,
+  "horizontal_fov_deg": 90.0,
+  "last_frame": 2571238,
+  "max_range_m": 90.0,
+  "missing_frame_count": 59,
+  "observation_horizontal_fov_deg": 90.0,
+  "pre_timeline_callbacks": 22,
+  "queue_drops": 0,
+  "radial_velocity_status": "not_estimated",
+  "schema_version": 1,
+  "sensor_id": "front_depth",
+  "sensor_tick_s": 0.05,
+  "sensor_transform": {
+    "pitch_deg": 0.0,
+    "roll_deg": 0.0,
+    "x": 1.4,
+    "y": 0.0,
+    "yaw_deg": 0.0,
+    "z": 1.4
+  },
+  "source": "depth",
+  "vertical_observation_fov_deg": 10.0
+}

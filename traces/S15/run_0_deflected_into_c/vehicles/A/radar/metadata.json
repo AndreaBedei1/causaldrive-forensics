@@ -1,0 +1,30 @@
+{
+  "callbacks_received": 303,
+  "columns": [
+    "depth_m",
+    "azimuth_rad",
+    "altitude_rad",
+    "radial_velocity_mps"
+  ],
+  "first_frame": 2570959,
+  "frames_delivered": 280,
+  "frames_written": 280,
+  "horizontal_fov_deg": 120.0,
+  "last_frame": 2571238,
+  "missing_frame_count": 0,
+  "queue_drops": 0,
+  "radial_velocity_status": "measured",
+  "range_m": 90.0,
+  "schema_version": 1,
+  "sensor_id": "front",
+  "sensor_tick_s": 0.05,
+  "sensor_transform": {
+    "pitch_deg": 0.0,
+    "x": 2.2,
+    "y": 0.0,
+    "yaw_deg": 0.0,
+    "z": 1.0
+  },
+  "source": "radar",
+  "vertical_fov_deg": 10.0
+}
