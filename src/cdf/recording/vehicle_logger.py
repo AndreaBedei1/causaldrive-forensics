@@ -6,9 +6,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
-from PIL import Image
+import numpy as np
 
 from .compact_observations import CompactObservationWriter
+from ..perception.traffic_signs import SignDetector, SignTracker
 
 
 def _json(value: Any) -> str:
@@ -47,8 +48,8 @@ class VehicleLogger:
         self.state = _Jsonl(self.root / "ego.jsonl")
         self.controls = _Jsonl(self.root / "controls.jsonl")
         self.collisions = _Jsonl(self.root / "collisions.jsonl")
-        self.camera_metadata = _Jsonl(self.root / "camera" / "metadata.jsonl")
-        (self.root / "camera" / "frames").mkdir(parents=True, exist_ok=True)
+        self.traffic_signs = _Jsonl(self.root / "traffic_signs.jsonl")
+        (self.root / "camera").mkdir(parents=True, exist_ok=True)
         (self.root / "metadata.json").write_text(_json(_without_privileged_ids(metadata)), encoding="utf-8")
         self._radar_writers: Dict[str, CompactObservationWriter] = {}
         radar_entries = list(metadata.get("radar", []) or [])
@@ -88,10 +89,14 @@ class VehicleLogger:
             "height": (metadata.get("camera") or {}).get("height"),
             "fov_deg": (metadata.get("camera") or {}).get("fov_deg"),
             "sensor_tick_s": (metadata.get("camera") or {}).get("sensor_tick_s"),
-            "file_format": "jpeg",
-            "jpeg_quality": 90,
+            "processing": "transient_bgra_to_rgb",
+            "images_persisted": False,
         }
         (self.root / "camera" / "metadata.json").write_text(_json(self._camera_metadata), encoding="utf-8")
+        sign_cfg = metadata.get("traffic_signs") or {}
+        self._sign_detector = SignDetector(sign_cfg)
+        self._sign_tracker = SignTracker(sign_cfg)
+        self._camera_width = int((metadata.get("camera") or {}).get("width") or 0)
         depth = metadata.get("depth_camera") or {}
         depth_spec = metadata.get("depth_observations") or {}
         depth_velocity = metadata.get("depth_radial_velocity") or {}
@@ -139,16 +144,15 @@ class VehicleLogger:
             raise KeyError("unknown radar sensor ID: {0}".format(sensor_id))
         writer.append(record["frame"], record["timestamp"], record.get("detections", []))
     def log_camera(self, record: Dict[str, Any], data: bytes) -> None:
-        frame = int(record["frame"])
-        filename = f"{frame:08d}.jpg"
-        image = Image.frombytes("RGBA", (int(record["width"]), int(record["height"])), data, "raw", "BGRA")
-        image.convert("RGB").save(self.root / "camera" / "frames" / filename, format="JPEG", quality=90, optimize=True)
-        metadata = _without_privileged_ids(record)
-        metadata.pop("data", None)
-        metadata["image_filename"] = filename
-        metadata["file_format"] = "jpeg"
-        metadata["jpeg_quality"] = 90
-        self.camera_metadata.write(metadata)
+        # CARLA supplies BGRA.  Convert only in memory; no image writer is used.
+        width, height = int(record["width"]), int(record["height"])
+        bgra = np.frombuffer(data, dtype=np.uint8).reshape((height, width, 4))
+        rgb = bgra[..., [2, 1, 0]]
+        frame = int(record["frame"]); timestamp = float(record["timestamp"])
+        found = self._sign_detector.detect(rgb, frame=frame, t=timestamp)
+        self._sign_tracker.update(found)
+        self._camera_width = width
+        del rgb, bgra
 
     def log_depth_observations(self, record: Dict[str, Any]) -> None:
         self._depth_writer.append(record["frame"], record["timestamp"], record.get("detections", []))
@@ -165,7 +169,31 @@ class VehicleLogger:
     def close(self) -> None:
         if self._closed:
             return
-        for stream in (self.state, self.controls, self.collisions, self.camera_metadata):
+        for track in self._sign_tracker.tracks(confirmed_only=True):
+            relevance = track.relevance(self._camera_width)
+            self.traffic_signs.write({
+                "sign_track_id": track.track_id,
+                "sensor_id": self._camera_metadata.get("sensor_id"),
+                "class": track.sign_class,
+                "timestamp_first": round(track.t_first, 4),
+                "timestamp_confirmed": round(track.detections[self._sign_tracker.min_detections - 1].t, 4),
+                "timestamp_last": round(track.t_last, 4),
+                "n_detections": len(track.detections),
+                "best_confidence": round(track.best.confidence, 4),
+                "best_bbox": list(track.best.bbox),
+                "relevant_to_ego_path": relevance["relevant_to_ego_path"],
+                "centredness": relevance["centredness"],
+                "growing": relevance["growing"],
+            })
+        self._camera_stats.update({
+            "candidate_sign_detections": self._sign_tracker.n_detections,
+            "confirmed_sign_tracks": len(self._sign_tracker.tracks(True)),
+            "rejected_short_tracks": self._sign_tracker.rejected_short_tracks,
+            "confirmed_stop_tracks": sum(t.sign_class == "STOP" for t in self._sign_tracker.tracks(True)),
+            "confirmed_yield_tracks": sum(t.sign_class == "YIELD" for t in self._sign_tracker.tracks(True)),
+            "rgb_images_persisted": False,
+        })
+        for stream in (self.state, self.controls, self.collisions, self.traffic_signs):
             stream.close()
         self._depth_writer.close(self._depth_stats)
         for sensor_id, writer in self._radar_writers.items():

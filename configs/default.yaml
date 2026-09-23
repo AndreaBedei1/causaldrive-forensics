@@ -14,6 +14,7 @@ simulation:
   warmup_ticks: 20
   min_spawn_gap_m: 5.0
   max_duration_s: 45.0
+  gpu: auto
 sensors:
   profile: "radar_baseline"
   camera:
@@ -50,6 +51,21 @@ depth_observations:
   vertical_fov_deg: 10.0
   azimuth_bin_deg: 2.0
   altitude_bin_deg: 2.0
+  suppress_ground: true
+  min_relative_height_m: -0.9
+traffic_signs:
+  min_area_px: 240
+  min_fill_ratio: 0.80
+  min_redness: 0.28
+  min_confidence: 0.45
+  approx_epsilon: 0.025
+  min_saturation: 90
+  min_value: 50
+  close_kernel_px: 9
+  max_centre_row_fraction: 0.62
+  max_centre_gap_px: 60.0
+  max_time_gap_s: 0.6
+  min_detections_per_track: 3
 depth_radial_velocity:
   enabled: true
   max_dt_s: 0.20

@@ -27,7 +27,7 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from ..common.config import Config
 
@@ -43,11 +43,53 @@ __all__ = [
     "find_carla_root",
     "map_basename",
     "import_carla",
+    "query_nvidia_gpus",
+    "select_gpu",
 ]
 
 
 class CarlaUnavailable(RuntimeError):
     """Raised when no usable CARLA server or Python API can be reached."""
+
+
+def query_nvidia_gpus() -> List[Dict[str, Any]]:
+    """Return free memory/utilisation for NVIDIA adapters, if nvidia-smi exists."""
+    command = ["nvidia-smi", "--query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu",
+               "--format=csv,noheader,nounits"]
+    try:
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
+    except (OSError, subprocess.CalledProcessError):
+        LOGGER.warning("nvidia-smi unavailable; CARLA GPU selection will use its default adapter")
+        return []
+    result: List[Dict[str, Any]] = []
+    for line in output.splitlines():
+        fields = [part.strip() for part in line.split(",")]
+        if len(fields) != 6:
+            continue
+        try:
+            result.append({"index": int(fields[0]), "name": fields[1],
+                           "memory_total_mib": int(float(fields[2])), "memory_used_mib": int(float(fields[3])),
+                           "memory_free_mib": int(float(fields[4])), "utilization_pct": float(fields[5])})
+        except ValueError:
+            LOGGER.warning("could not parse nvidia-smi row: %s", line)
+    return result
+
+
+def select_gpu(config: Union[str, int, None] = "auto", gpus: Optional[List[Dict[str, Any]]] = None) -> Optional[int]:
+    """Resolve ``auto`` to the most free, least utilised adapter."""
+    if config is None or str(config).strip().lower() in {"", "none", "null", "off"}:
+        return None
+    if isinstance(config, int) or str(config).strip().lstrip("-").isdigit():
+        return int(config)
+    if str(config).strip().lower() != "auto":
+        raise ValueError("simulation.gpu must be auto, an integer adapter index, or null")
+    candidates = query_nvidia_gpus() if gpus is None else list(gpus)
+    if not candidates:
+        return None
+    chosen = max(candidates, key=lambda gpu: (gpu.get("memory_free_mib", -1),
+                                               -gpu.get("utilization_pct", 100000),
+                                               -gpu.get("index", 0)))
+    return int(chosen["index"])
 
 
 def import_carla() -> Any:
@@ -239,12 +281,17 @@ class CarlaServer:
         quality: str = "Low",
         offscreen: bool = True,
         extra_args: Optional[Sequence[str]] = None,
+        gpu: Union[str, int, None] = "auto",
     ) -> None:
         self.root = find_carla_root(root)
         self.port = int(port)
         self.quality = quality
         self.offscreen = bool(offscreen)
         self.extra_args = list(extra_args or [])
+        self.gpu = gpu
+        self.selected_gpu_index: Optional[int] = None
+        self.selected_gpu: Optional[Dict[str, Any]] = None
+        self._gpu_resolved = False
         self._process: Optional[subprocess.Popen] = None
         self._pre_existing_pids: set = set()
         self._owned_pids: set = set()
@@ -278,6 +325,17 @@ class CarlaServer:
         ]
         if self.offscreen:
             args.append("-RenderOffScreen")
+        if not self._gpu_resolved:
+            self.selected_gpu_index = select_gpu(self.gpu)
+            if self.selected_gpu_index is not None:
+                self.selected_gpu = next((g for g in query_nvidia_gpus() if g["index"] == self.selected_gpu_index), None)
+                LOGGER.info("CARLA GPU adapter %s selected (%s)", self.selected_gpu_index,
+                            self.selected_gpu or "explicit adapter request")
+            elif str(self.gpu).lower() == "auto":
+                LOGGER.warning("no NVIDIA adapter selected for CARLA; using Unreal default")
+            self._gpu_resolved = True
+        if self.selected_gpu_index is not None:
+            args.append("-ini:[/Script/Engine.RendererSettings]:r.GraphicsAdapter={0}".format(self.selected_gpu_index))
         args.extend(self.extra_args)
         return args
 
@@ -471,13 +529,14 @@ class SimulatorSession:
         carla_root: Optional[str] = None,
         autostart: bool = True,
         settle_timeout_s: float = 90.0,
+        gpu: Union[str, int, None] = "auto",
     ) -> None:
         self.host = host
         self.port = int(port)
         self.timeout_s = float(timeout_s)
         self.autostart = bool(autostart)
         self.settle_timeout_s = float(settle_timeout_s)
-        self.server = CarlaServer(root=carla_root, port=self.port)
+        self.server = CarlaServer(root=carla_root, port=self.port, gpu=gpu)
         self._client: Optional[Any] = None
         self._switched = False
         self.restarts = 0
@@ -606,6 +665,7 @@ def session_from_config(cfg: Config, autostart: bool = True) -> SimulatorSession
         carla_root=cfg.get("simulation.carla_root"),
         autostart=autostart,
         settle_timeout_s=float(cfg.get("simulation.map_switch_settle_s", 90.0)),
+        gpu=cfg.get("simulation.gpu", "auto"),
     )
 
 
@@ -619,5 +679,6 @@ def client_from_config(cfg: Config, autostart: bool = False) -> Any:
     except CarlaUnavailable:
         if not autostart:
             raise
-        server = CarlaServer(root=cfg.get("simulation.carla_root"), port=port)
+        server = CarlaServer(root=cfg.get("simulation.carla_root"), port=port,
+                             gpu=cfg.get("simulation.gpu", "auto"))
         return server.start()

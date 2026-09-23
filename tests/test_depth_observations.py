@@ -38,7 +38,7 @@ class DepthObservationTests(unittest.TestCase):
         spec = DepthObservationSpec()
         depth = np.full((600, 800), 10.0, dtype=np.float32)
         observations = depth_observations_from_depth(depth, spec, 90.0)
-        self.assertLessEqual(len(observations), spec.max_bins)
+        self.assertLessEqual(len(observations), 45)
         self.assertTrue(observations)
         for detection in observations:
             self.assertLessEqual(detection["depth"], 90.0)
@@ -54,6 +54,20 @@ class DepthObservationTests(unittest.TestCase):
         for record in (radar_record, depth_record):
             for detection in record["detections"]:
                 _ = (detection["depth"], detection["azimuth"], detection["altitude"], detection["radial_velocity"])
+
+    def test_nearest_non_ground_per_azimuth(self):
+        from cdf.simulation.sensors import sparsify_depth_observations
+        spec = DepthObservationSpec()
+        detections = [
+            {"depth": 4.0, "azimuth": 0.0, "altitude": math.radians(-4), "radial_velocity": None},
+            {"depth": 8.0, "azimuth": 0.0, "altitude": math.radians(1), "radial_velocity": None},
+            {"depth": 20.0, "azimuth": 0.0, "altitude": math.radians(-5), "radial_velocity": None},
+            {"depth": 7.0, "azimuth": math.radians(10), "altitude": 0.0, "radial_velocity": None},
+        ]
+        out = sparsify_depth_observations(detections, spec)
+        self.assertEqual(len(out), 2)
+        self.assertAlmostEqual(out[0]["depth"], 4.0)
+        self.assertAlmostEqual(out[1]["depth"], 7.0)
 
     @staticmethod
     def _one(depth, azimuth=0.0, altitude=0.0):

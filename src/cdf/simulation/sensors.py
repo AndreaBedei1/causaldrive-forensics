@@ -126,12 +126,13 @@ class DepthObservationSpec:
     vertical_fov_deg: float = 10.0
     azimuth_bin_deg: float = 2.0
     altitude_bin_deg: float = 2.0
+    suppress_ground: bool = True
+    min_relative_height_m: float = -0.9
 
     @property
     def max_bins(self) -> int:
-        horizontal = int(math.ceil(self.horizontal_fov_deg / self.azimuth_bin_deg))
-        vertical = int(math.ceil(self.vertical_fov_deg / self.altitude_bin_deg))
-        return horizontal * vertical
+        # After sparsification there is at most one return per azimuth bin.
+        return int(math.ceil(self.horizontal_fov_deg / self.azimuth_bin_deg))
 
 
 def depth_observation_spec_from_config(cfg: Config) -> DepthObservationSpec:
@@ -142,6 +143,8 @@ def depth_observation_spec_from_config(cfg: Config) -> DepthObservationSpec:
         vertical_fov_deg=float(d.get("vertical_fov_deg", 10.0)),
         azimuth_bin_deg=float(d.get("azimuth_bin_deg", 2.0)),
         altitude_bin_deg=float(d.get("altitude_bin_deg", 2.0)),
+        suppress_ground=bool(d.get("suppress_ground", True)),
+        min_relative_height_m=float(d.get("min_relative_height_m", -0.9)),
     )
 
 
@@ -216,9 +219,49 @@ def _camera_geometry(width: int, height: int, horizontal_fov_deg: float,
     return azimuth.ravel(), altitude.ravel(), groups
 
 
+def sparsify_depth_observations(detections: List[Dict[str, Any]],
+                                spec: DepthObservationSpec) -> List[Dict[str, Any]]:
+    """Keep one nearest non-ground return per horizontal azimuth bin.
+
+    The input is deliberately the existing 2-degree-by-2-degree extraction;
+    this second stage removes vertical duplicates without introducing semantic
+    object assumptions.  Ground rejection uses only camera-local geometry.
+    """
+    n_az = int(math.ceil(spec.horizontal_fov_deg / spec.azimuth_bin_deg))
+    half_h = math.radians(spec.horizontal_fov_deg / 2.0)
+    selected: Dict[int, Dict[str, Any]] = {}
+    for detection in detections:
+        depth = float(detection.get("depth", float("nan")))
+        azimuth = float(detection.get("azimuth", float("nan")))
+        altitude = float(detection.get("altitude", float("nan")))
+        if not (math.isfinite(depth) and math.isfinite(azimuth) and math.isfinite(altitude)):
+            continue
+        if depth <= 0.0 or depth > spec.max_range_m:
+            continue
+        z_relative = depth * math.sin(altitude)
+        if spec.suppress_ground and z_relative < spec.min_relative_height_m:
+            continue
+        bin_index = int(math.floor((azimuth + half_h) / math.radians(spec.azimuth_bin_deg)))
+        bin_index = max(0, min(n_az - 1, bin_index))
+        previous = selected.get(bin_index)
+        # Stable tie-breaks make the output reproducible for equal surfaces.
+        key = (depth, abs(altitude), altitude)
+        if previous is None or key < previous["_selection_key"]:
+            kept = dict(detection)
+            kept.pop("_selection_key", None)
+            kept["_selection_key"] = key
+            selected[bin_index] = kept
+    out = []
+    for index in sorted(selected):
+        item = dict(selected[index])
+        item.pop("_selection_key", None)
+        out.append(item)
+    return out
+
+
 def depth_observations_from_depth(depth_m: np.ndarray, spec: DepthObservationSpec,
                                   horizontal_fov_deg: float) -> List[Dict[str, Any]]:
-    """Create one nearest-surface detection per deterministic angular bin."""
+    """Create sparse nearest-surface detections from the existing 2-D extraction."""
     if depth_m.ndim != 2:
         raise ValueError("depth array must be two-dimensional")
     height, width = depth_m.shape
@@ -256,7 +299,7 @@ def depth_observations_from_depth(depth_m: np.ndarray, spec: DepthObservationSpe
             # It is deliberately not computed in this acquisition step.
             "radial_velocity": None,
         })
-    return detections
+    return sparsify_depth_observations(detections, spec)
 
 
 def depth_observations_from_bgra(raw_data: bytes, width: int, height: int,

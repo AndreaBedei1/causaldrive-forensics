@@ -50,6 +50,7 @@ class RawVehicleAgent:
             "camera": camera_spec.__dict__ if camera_spec else None,
             "depth_camera": depth_camera_spec.__dict__ if depth_camera_spec else None,
             "depth_observations": self.depth_observation_spec.__dict__,
+            "traffic_signs": cfg.get("traffic_signs", {}) or {},
             "depth_radial_velocity": self.depth_velocity_config.as_metadata(),
             "vehicle_transform": {"x": spawn_transform.location.x, "y": spawn_transform.location.y, "z": spawn_transform.location.z, "yaw_deg": spawn_transform.rotation.yaw},
         })

@@ -5,7 +5,7 @@ and records raw CARLA observations. It does not alter scenario physics.
 
 ## Install and run
 
-Install Python 3.8+, NumPy, Pillow, and PyYAML, plus the CARLA 0.9.15 Python
+Install Python 3.8+, NumPy, Pillow, OpenCV, and PyYAML, plus the CARLA 0.9.15 Python
 API matching the server. Start CARLA on port 2000 (or configure the host and
 port in `configs/default.yaml`).
 
@@ -75,10 +75,20 @@ no automatic fallback and no radar/depth fusion in this task. Radar and depth
 keep their own `sensor_transform` metadata; comparable semantics do not imply
 co-located sensors.
 
-Depth images are processed in memory and not persisted. Observations are one
-nearest-surface detection per approximately 2° x 2° angular bin (up to 225 per
-frame). RGB remains 800x600 at 4 Hz, JPEG quality 90. Metric depth decoding is
+Depth images are processed in memory and not persisted. Observations first use
+the existing 2° x 2° geometry, then retain one nearest non-ground return per
+2° azimuth direction (at most about 45 detections per frame). RGB remains
+800x600 at 4 Hz and is converted BGRA-to-RGB transiently; no RGB frame files
+are written. The STOP/YIELD colour-and-shape detector tracks detections across
+frames and writes one compact `traffic_signs.jsonl` record per confirmed track.
+Metric depth decoding is
 `1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres for CARLA BGRA bytes.
+
+When the runner starts CARLA itself, `simulation.gpu: auto` queries
+`nvidia-smi` and selects the adapter with the most free VRAM (then lowest
+utilisation). Use `simulation.gpu: <index>` to request an adapter explicitly,
+or `null` to leave Unreal's default. `scripts/start_carla.py` uses the same
+selection path for manual starts.
 
 ## Validation
 
