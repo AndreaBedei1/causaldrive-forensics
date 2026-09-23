@@ -14,7 +14,7 @@ class RGBJpegTests(unittest.TestCase):
                 "participant_id": "A",
                 "camera": {
                     "sensor_id": "front_rgb", "width": 800, "height": 600,
-                    "fov_deg": 90.0, "sensor_tick_s": 0.25,
+                    "fov_deg": 90.0, "sensor_tick_s": 0.10,
                 },
                 "depth_camera": {"sensor_id": "front_depth", "sensor_tick_s": 0.05, "fov_deg": 90.0},
                 "depth_observations": {},

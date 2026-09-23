@@ -45,14 +45,21 @@ def _nearest_timestamp(stream: CompactObservations, timestamp: float, tolerance_
     return index if abs(float(stream.timestamps[index]) - timestamp) <= tolerance_s else None
 
 
-def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.051,
-                        angular_tolerance_deg: float = 2.0,
-                        range_tolerance_m: float = 2.0) -> Dict[str, float]:
+def _deadband_sign(values: np.ndarray, deadband_mps: float) -> np.ndarray:
+    return np.where(values > deadband_mps, 1, np.where(values < -deadband_mps, -1, 0))
+
+
+def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.03,
+                        azimuth_tolerance_deg: float = 4.0,
+                        altitude_tolerance_deg: float = 4.0,
+                        range_tolerance_m: float = 3.0,
+                        sign_deadband_mps: float = 0.5) -> Dict[str, float]:
     """Compare compatible post-acquisition returns in the common FOV."""
     radar = load_observation_stream(vehicle_dir, source="radar", common_region=True)
     depth = load_observation_stream(vehicle_dir, source="depth", common_region=True)
     pairs: List[Tuple[float, float]] = []
-    angular_tolerance = math.radians(angular_tolerance_deg)
+    azimuth_tolerance = math.radians(azimuth_tolerance_deg)
+    altitude_tolerance = math.radians(altitude_tolerance_deg)
     for depth_index, timestamp in enumerate(depth.timestamps):
         radar_index = _nearest_timestamp(radar, float(timestamp), timestamp_tolerance_s)
         if radar_index is None:
@@ -64,8 +71,8 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.051,
             if not math.isfinite(float(depth_detection[3])):
                 continue
             compatible = radar_detections[
-                (np.abs(radar_detections[:, 1] - depth_detection[1]) <= angular_tolerance)
-                & (np.abs(radar_detections[:, 2] - depth_detection[2]) <= angular_tolerance)
+                (np.abs(radar_detections[:, 1] - depth_detection[1]) <= azimuth_tolerance)
+                & (np.abs(radar_detections[:, 2] - depth_detection[2]) <= altitude_tolerance)
                 & (np.abs(radar_detections[:, 0] - depth_detection[0]) <= range_tolerance_m)
                 & np.isfinite(radar_detections[:, 3])
             ]
@@ -79,10 +86,12 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.051,
     return {
         "matched_pairs": float(len(values)),
         "depth_finite_coverage_percentage": _coverage(depth),
-        "sign_agreement_percentage": float(100.0 * np.mean(np.sign(values[:, 0]) == np.sign(values[:, 1]))),
+        "sign_agreement_percentage": float(100.0 * np.mean(_deadband_sign(values[:, 0], sign_deadband_mps) == _deadband_sign(values[:, 1], sign_deadband_mps))),
+        "pearson_correlation": float(np.corrcoef(values[:, 0], values[:, 1])[0, 1]) if len(values) > 1 else 0.0,
         "mae_mps": float(np.mean(np.abs(error))),
         "median_absolute_error_mps": float(np.median(np.abs(error))),
         "rmse_mps": float(np.sqrt(np.mean(error * error))),
+        "bias_mps": float(np.mean(error)),
         "median_radar_velocity_mps": float(np.median(values[:, 0])),
         "median_depth_velocity_mps": float(np.median(values[:, 1])),
     }
@@ -98,13 +107,23 @@ def main() -> int:
     parser.add_argument("vehicle_dir", type=Path)
     parser.add_argument("--source", choices=("radar", "depth"), default="depth")
     parser.add_argument("--metrics", action="store_true", help="also compute post-acquisition radar/depth metrics")
+    parser.add_argument("--timestamp-tolerance-s", type=float, default=0.03)
+    parser.add_argument("--azimuth-tolerance-deg", type=float, default=4.0)
+    parser.add_argument("--altitude-tolerance-deg", type=float, default=4.0)
+    parser.add_argument("--range-tolerance-m", type=float, default=3.0)
+    parser.add_argument("--sign-deadband-mps", type=float, default=0.5)
     args = parser.parse_args()
     print({"source": args.source, **source_switch_demo(args.vehicle_dir, args.source)})
     if args.metrics:
-        print(radar_depth_metrics(args.vehicle_dir))
+        parameters = {"timestamp_tolerance_s": args.timestamp_tolerance_s,
+                      "azimuth_tolerance_deg": args.azimuth_tolerance_deg,
+                      "altitude_tolerance_deg": args.altitude_tolerance_deg,
+                      "range_tolerance_m": args.range_tolerance_m,
+                      "sign_deadband_mps": args.sign_deadband_mps}
+        print({"parameters": parameters,
+               "metrics": radar_depth_metrics(args.vehicle_dir, **parameters)})
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

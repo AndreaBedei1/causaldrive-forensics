@@ -175,8 +175,11 @@ class VehicleLogger:
                 "sign_track_id": track.track_id,
                 "sensor_id": self._camera_metadata.get("sensor_id"),
                 "class": track.sign_class,
+                "frame_first": track.detections[0].frame,
                 "timestamp_first": round(track.t_first, 4),
+                "frame_confirmed": track.detections[self._sign_tracker.min_detections - 1].frame,
                 "timestamp_confirmed": round(track.detections[self._sign_tracker.min_detections - 1].t, 4),
+                "frame_last": track.detections[-1].frame,
                 "timestamp_last": round(track.t_last, 4),
                 "n_detections": len(track.detections),
                 "best_confidence": round(track.best.confidence, 4),
@@ -187,6 +190,8 @@ class VehicleLogger:
             })
         self._camera_stats.update({
             "candidate_sign_detections": self._sign_tracker.n_detections,
+            "candidate_stop_detections": sum(len(t.detections) for t in self._sign_tracker.tracks(False) if t.sign_class == "STOP"),
+            "candidate_yield_detections": sum(len(t.detections) for t in self._sign_tracker.tracks(False) if t.sign_class == "YIELD"),
             "confirmed_sign_tracks": len(self._sign_tracker.tracks(True)),
             "rejected_short_tracks": self._sign_tracker.rejected_short_tracks,
             "confirmed_stop_tracks": sum(t.sign_class == "STOP" for t in self._sign_tracker.tracks(True)),

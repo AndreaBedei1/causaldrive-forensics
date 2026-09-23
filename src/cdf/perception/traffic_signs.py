@@ -79,6 +79,13 @@ class SignTrack:
     @property
     def t_first(self) -> float: return self.detections[0].t
     @property
+    def frame_first(self) -> int: return self.detections[0].frame
+    @property
+    def frame_confirmed(self) -> int:
+        # The tracker writes this value at serialization time; callers that do
+        # not know the configured threshold use the historical default of 3.
+        return self.detections[min(2, len(self.detections) - 1)].frame
+    @property
     def t_last(self) -> float: return self.detections[-1].t
     @property
     def best(self) -> SignDetection: return max(self.detections, key=lambda d: d.confidence)
@@ -105,7 +112,10 @@ class SignTrack:
 
     def as_dict(self, image_width: int = 0) -> Dict[str, Any]:
         return {"sign_track_id": self.track_id, "class": self.sign_class,
+                "frame_first": self.frame_first, "frame_confirmed": self.frame_confirmed,
+                "frame_last": self.detections[-1].frame,
                 "n_detections": len(self.detections), "t_first": round(self.t_first, 4),
+                "t_confirmed": round(self.detections[min(2, len(self.detections) - 1)].t, 4),
                 "t_last": round(self.t_last, 4), "best_confidence": round(self.best.confidence, 4),
                 "best_bbox": list(self.best.bbox), "relevance": self.relevance(image_width),
                 "detections": [d.as_dict() for d in self.detections]}

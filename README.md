@@ -78,9 +78,15 @@ co-located sensors.
 Depth images are processed in memory and not persisted. Observations first use
 the existing 2° x 2° geometry, then retain one nearest non-ground return per
 2° azimuth direction (at most about 45 detections per frame). RGB remains
-800x600 at 4 Hz and is converted BGRA-to-RGB transiently; no RGB frame files
+800x600 at 10 Hz and is converted BGRA-to-RGB transiently; no RGB frame files
 are written. The STOP/YIELD colour-and-shape detector tracks detections across
 frames and writes one compact `traffic_signs.jsonl` record per confirmed track.
+The versioned `scripts/validate_observations.py` exposes timestamp, angular,
+range, and sign-deadband tolerances and reports them with every metric.
+`scripts/evaluate_radial_oracle.py` is a separate privileged evaluation tool:
+it uses ground-truth vehicle poses only offline to compare radar and depth
+target-level velocities with a target-centre range-rate oracle. It is never
+imported by acquisition or the online depth estimator.
 Metric depth decoding is
 `1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres for CARLA BGRA bytes.
 

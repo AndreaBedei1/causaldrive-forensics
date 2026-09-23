@@ -25,8 +25,11 @@ POST_IMPACT_RECORDING_S = 5.0
 
 def _state(actor: Any, frame: int, timestamp: float) -> dict:
     tf = actor.get_transform(); v = actor.get_velocity(); a = actor.get_acceleration(); w = actor.get_angular_velocity()
+    bbox = getattr(actor, "bounding_box", None)
+    extent = getattr(bbox, "extent", None)
     return {"frame": int(frame), "timestamp": float(timestamp), "actor_id": int(actor.id), "type_id": str(actor.type_id),
             "transform": {"x": float(tf.location.x), "y": float(tf.location.y), "z": float(tf.location.z), "roll_deg": float(tf.rotation.roll), "pitch_deg": float(tf.rotation.pitch), "yaw_deg": float(tf.rotation.yaw)},
+            "bbox_extent": {"x": float(extent.x), "y": float(extent.y), "z": float(extent.z)} if extent is not None else None,
             "velocity": {"x": float(v.x), "y": float(v.y), "z": float(v.z)}, "acceleration": {"x": float(a.x), "y": float(a.y), "z": float(a.z)},
             "angular_velocity": {"x": float(w.x), "y": float(w.y), "z": float(w.z)}}
 
