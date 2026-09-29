@@ -58,6 +58,16 @@ class RadarTransitionTests(unittest.TestCase):
         self.assertIn(("CLOSING_END", 3.5), events)
         self.assertIn(("CLOSING_START", 1.0), events)
 
+    def test_critical_ttc_never_outlasts_closing(self):
+        # Closing slows to 0.3 m/s at 0.5 m: TTC stays below 2 s, but closing has ended.
+        def profile(t):
+            if t < 3.0:
+                return 10.0 - 4.0 * (t - 1.0), 0.0, 4.0
+            return 0.5, 0.0, 0.3
+        events = _events(_track(profile))
+        self.assertIn(("CLOSING_END", 3.0), events)
+        self.assertIn(("CRITICAL_TTC_END", 3.0), events)
+
     def test_ego_path_entry_and_exit(self):
         def profile(t):  # moves across the corridor from left to right
             return 15.0, -3.5 + 2.0 * (t - 1.0), 0.0

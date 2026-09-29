@@ -212,7 +212,7 @@ state transitions without telemetry:
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
 | TRACK_APPEARED / TRACK_LOST | lifetime of an anonymous radar track |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
-| CRITICAL_TTC_START / _END | range / closing speed at most 2 s while closing |
+| CRITICAL_TTC_START / _END | range / closing speed at most 2 s while closing; ends at the latest with CLOSING |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
 | COLLISION | one per contact (callbacks within 0.5 s); keeps its peak impulse for alignment |

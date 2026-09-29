@@ -273,10 +273,12 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
                            times, _lasting(spans, times))
 
+    # A critical TTC needs closing: it ends at the latest with CLOSING (at very
+    # short range a slow residual closing speed would otherwise keep TTC low).
     critical = cfg.critical_ttc_s
     spans = active_intervals(times, samples,
                              lambda s: s.ttc_s is not None and s.ttc_s <= critical and s.closing_speed_mps >= closing,
-                             lambda s: s.ttc_s is None or s.ttc_s > critical)
+                             lambda s: s.ttc_s is None or s.ttc_s > critical or s.closing_speed_mps < closing / 2.0)
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, _lasting(spans, times))
 
