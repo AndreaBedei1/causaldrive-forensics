@@ -15,6 +15,16 @@ simulation:
   min_spawn_gap_m: 5.0
   max_duration_s: 45.0
   gpu: auto
+  # Rendering quality of the CARLA server.  Not Low: CARLA 0.9.15 in Low mode
+  # crashes deterministically in some scenarios (S05, S08, S13) while a camera
+  # renders a vehicle mesh (EXCEPTION_ACCESS_VIOLATION in
+  # FSkeletalMeshSceneProxy).  Vehicle physics is identical in both modes;
+  # radar returns and camera images are not (Low removes foliage and changes
+  # materials, lights and post-processing).
+  quality_level: Epic
+  # -unattended: a crashed engine exits instead of opening a blocking
+  # "Fatal error" dialog.
+  unattended: true
 sensors:
   profile: "radar_baseline"
   camera:

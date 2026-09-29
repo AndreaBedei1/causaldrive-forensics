@@ -274,19 +274,31 @@ class CarlaServer:
     did not start unless :meth:`kill_existing` is called explicitly.
     """
 
+    #: ``Low`` is not the default: in CARLA 0.9.15 on this setup it makes the
+    #: engine crash deterministically in some scenarios (a camera scene capture
+    #: renders a vehicle skeletal mesh whose mesh object was already freed:
+    #: EXCEPTION_ACCESS_VIOLATION in FSkeletalMeshSceneProxy::
+    #: GetMeshElementsConditionallySelectable).  The same runs complete under
+    #: ``Epic``, with bit-identical vehicle physics.
+    DEFAULT_QUALITY = "Epic"
+
     def __init__(
         self,
         root: Optional[str] = None,
         port: int = 2000,
-        quality: str = "Low",
+        quality: str = DEFAULT_QUALITY,
         offscreen: bool = True,
         extra_args: Optional[Sequence[str]] = None,
         gpu: Union[str, int, None] = "auto",
+        unattended: bool = True,
     ) -> None:
         self.root = find_carla_root(root)
         self.port = int(port)
         self.quality = quality
         self.offscreen = bool(offscreen)
+        # -unattended: an engine crash exits instead of waiting behind a modal
+        # "Fatal error" dialog, so a supervisor can restart it.
+        self.unattended = bool(unattended)
         self.extra_args = list(extra_args or [])
         self.gpu = gpu
         self.selected_gpu_index: Optional[int] = None
@@ -325,6 +337,8 @@ class CarlaServer:
         ]
         if self.offscreen:
             args.append("-RenderOffScreen")
+        if self.unattended:
+            args.append("-unattended")
         if not self._gpu_resolved:
             self.selected_gpu_index = select_gpu(self.gpu)
             if self.selected_gpu_index is not None:
@@ -530,13 +544,15 @@ class SimulatorSession:
         autostart: bool = True,
         settle_timeout_s: float = 90.0,
         gpu: Union[str, int, None] = "auto",
+        quality: str = CarlaServer.DEFAULT_QUALITY,
+        unattended: bool = True,
     ) -> None:
         self.host = host
         self.port = int(port)
         self.timeout_s = float(timeout_s)
         self.autostart = bool(autostart)
         self.settle_timeout_s = float(settle_timeout_s)
-        self.server = CarlaServer(root=carla_root, port=self.port, gpu=gpu)
+        self.server = CarlaServer(root=carla_root, port=self.port, gpu=gpu, quality=quality, unattended=unattended)
         self._client: Optional[Any] = None
         self._switched = False
         self.restarts = 0
@@ -666,6 +682,8 @@ def session_from_config(cfg: Config, autostart: bool = True) -> SimulatorSession
         autostart=autostart,
         settle_timeout_s=float(cfg.get("simulation.map_switch_settle_s", 90.0)),
         gpu=cfg.get("simulation.gpu", "auto"),
+        quality=str(cfg.get("simulation.quality_level", CarlaServer.DEFAULT_QUALITY)),
+        unattended=bool(cfg.get("simulation.unattended", True)),
     )
 
 
@@ -680,5 +698,7 @@ def client_from_config(cfg: Config, autostart: bool = False) -> Any:
         if not autostart:
             raise
         server = CarlaServer(root=cfg.get("simulation.carla_root"), port=port,
-                             gpu=cfg.get("simulation.gpu", "auto"))
+                             gpu=cfg.get("simulation.gpu", "auto"),
+                             quality=str(cfg.get("simulation.quality_level", CarlaServer.DEFAULT_QUALITY)),
+                             unattended=bool(cfg.get("simulation.unattended", True)))
         return server.start()

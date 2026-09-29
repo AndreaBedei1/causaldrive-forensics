@@ -112,6 +112,18 @@ utilisation). Use `simulation.gpu: <index>` to request an adapter explicitly,
 or `null` to leave Unreal's default. `scripts/start_carla.py` uses the same
 selection path for manual starts.
 
+CARLA runs with `-quality-level=Epic -unattended` (`simulation.quality_level`,
+`simulation.unattended`). Low quality is avoided: in CARLA 0.9.15 it crashes
+the engine deterministically in some scenarios (S05, S08 and S13 at fixed
+ticks), because a camera scene capture renders a vehicle's skeletal mesh after
+its mesh object was freed (`EXCEPTION_ACCESS_VIOLATION` in
+`FSkeletalMeshSceneProxy::GetMeshElementsConditionallySelectable`, resolved
+with the PDB shipped with CARLA). Vehicle physics (ego, controls, collisions)
+is bit-identical in both modes. Radar returns and camera images are not:
+Low mode removes foliage and changes materials, lights and post-processing, so
+Low and Epic recordings must not be mixed in one campaign. `-unattended` makes
+a crashed engine exit instead of waiting behind a "Fatal error" dialog.
+
 ## Validation
 
 Synthetic estimator tests are in `tests/test_depth_observations.py`. After
