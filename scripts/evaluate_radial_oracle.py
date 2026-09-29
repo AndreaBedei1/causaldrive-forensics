@@ -26,8 +26,15 @@ from cdf.recording.compact_observations import closing_speed, load_observation_s
 
 
 def _rotation(roll: float, pitch: float, yaw: float) -> np.ndarray:
-    cr, sr = math.cos(roll), math.sin(roll)
-    cp, sp = math.cos(pitch), math.sin(pitch)
+    """Vehicle-to-world rotation for CARLA angles in radians.
+
+    CARLA/Unreal is left-handed: positive pitch lifts the nose and positive
+    roll lowers the right side, so both enter the right-handed elementary
+    rotations below with a minus sign (the result equals Unreal's
+    FRotationMatrix).  Without it, a 7 degree climb looked 14 degrees off.
+    """
+    cr, sr = math.cos(-roll), math.sin(-roll)
+    cp, sp = math.cos(-pitch), math.sin(-pitch)
     cy, sy = math.cos(yaw), math.sin(yaw)
     rx = np.array([[1, 0, 0], [0, cr, -sr], [0, sr, cr]])
     ry = np.array([[cp, 0, sp], [0, 1, 0], [-sp, 0, cp]])
