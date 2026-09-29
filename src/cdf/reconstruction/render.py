@@ -1,0 +1,399 @@
+"""Human-readable output: JSON, JSONL, Markdown and DOT (SVG only if Graphviz exists).
+
+Rendering never changes a graph; it only describes it.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Sequence
+
+from .fusion import ASSOCIATED, short_label
+from .models import Alignment, Association, GlobalGraph, GlobalNode, LocalGraph
+
+KIND_COLOURS = {"ACTION": "#fde68a", "PERCEPTION": "#bfdbfe", "FACT": "#e5e7eb", "OUTCOME": "#fca5a5"}
+
+# The few attributes shown in the "Details" column of the node tables.
+DETAIL_KEYS = {
+    "BRAKE_ONSET": ["brake", "speed_mps"],
+    "THROTTLE_ONSET": ["throttle", "speed_mps"],
+    "FULL_STOP": ["stopped_for_s", "stopped_until_recording_end"],
+    "STOP_SIGN_DETECTED": ["n_detections", "relevant_to_ego_path"],
+    "YIELD_SIGN_DETECTED": ["n_detections", "relevant_to_ego_path"],
+    "TRACK_APPEARED": ["range_m", "bearing_deg", "speed_mps", "in_ego_path"],
+    "ENTERED_EGO_PATH": ["from_side", "longitudinal_m", "lateral_speed_mps"],
+    "CLOSING": ["range_m", "closing_speed_mps", "peak_closing_speed_mps", "duration_s"],
+    "CRITICAL_TTC": ["ttc_s", "range_m", "min_ttc_s"],
+    "TRACK_LOST": ["range_m", "bearing_deg", "tracked_for_s"],
+    "COLLISION": ["peak_impulse", "n_callbacks", "duration_s"],
+}
+
+
+# --------------------------------------------------------------------------
+# Files
+# --------------------------------------------------------------------------
+
+def _plain(value: Any) -> Any:
+    """Strict JSON: numpy scalars become Python numbers, NaN/inf become null."""
+    if isinstance(value, dict):
+        return {str(key): _plain(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain(item) for item in value]
+    if hasattr(value, "item") and not isinstance(value, (str, bytes)):
+        value = value.item()
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    return value
+
+
+def write_json(path: Path, data: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(_plain(data), indent=2, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def write_jsonl(path: Path, rows: Iterable[Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(_plain(row), allow_nan=False) + "\n")
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def render_svg(dot_path: Path) -> Optional[Path]:
+    """Render DOT to SVG when the ``dot`` executable is installed; else do nothing."""
+    executable = shutil.which("dot")
+    if executable is None:
+        return None
+    svg_path = dot_path.with_suffix(".svg")
+    subprocess.run([executable, "-Tsvg", str(dot_path), "-o", str(svg_path)], check=True)
+    return svg_path
+
+
+# --------------------------------------------------------------------------
+# Plain language
+# --------------------------------------------------------------------------
+
+def _side(bearing_deg: float) -> str:
+    if abs(bearing_deg) < 5.0:
+        return "ahead"
+    return "{0:.0f} deg to the {1}".format(abs(bearing_deg), "right" if bearing_deg > 0 else "left")
+
+
+def _object(subject: Optional[str]) -> str:
+    if subject is None:
+        return "an unknown object"
+    if ":" in subject:  # anonymous global entity such as A:track_001
+        return "unidentified object " + subject
+    return subject
+
+
+def sentence(event_type: str, actor: Optional[str], subject: Optional[str],
+             attributes: Dict[str, Any], participants: Sequence[str] = ()) -> str:
+    """One plain sentence per event; says only what the event's own evidence supports."""
+    a = attributes
+    who = _object(subject)
+    if event_type == "BRAKE_ONSET":
+        return "{0} started braking (brake {1:.2f} at {2:.1f} m/s)".format(actor, a["brake"], a["speed_mps"])
+    if event_type == "THROTTLE_ONSET":
+        return "{0} applied strong throttle ({1:.2f} at {2:.1f} m/s)".format(actor, a["throttle"], a["speed_mps"])
+    if event_type == "FULL_STOP":
+        if a.get("stopped_until_recording_end"):
+            return "{0} came to a full stop and stayed stopped until its recording ended".format(actor)
+        return "{0} came to a full stop for {1:.1f} s".format(actor, a["stopped_for_s"])
+    if event_type in ("STOP_SIGN_DETECTED", "YIELD_SIGN_DETECTED"):
+        return "{0}'s camera confirmed a {1} sign ({2})".format(actor, event_type.split("_")[0], subject)
+    if event_type == "TRACK_APPEARED":
+        return "{0}'s radar started tracking {1} at {2:.1f} m, {3}, moving at {4:.1f} m/s{5}".format(
+            actor, who, a["range_m"], _side(a["bearing_deg"]), a["speed_mps"],
+            ", inside its path" if a.get("in_ego_path") else "")
+    if event_type == "ENTERED_EGO_PATH":
+        return "{0} observed {1} move into its path from the {2} ({3:.1f} m ahead, lateral speed {4:.1f} m/s)".format(
+            actor, who, a["from_side"], a["longitudinal_m"], abs(a["lateral_speed_mps"]))
+    if event_type == "CLOSING":
+        return "{0} observed {1} closing at {2:.1f} m/s from {3:.1f} m (peak {4:.1f} m/s, down to {5:.1f} m)".format(
+            actor, who, a["closing_speed_mps"], a["range_m"], a["peak_closing_speed_mps"], a["min_range_m"])
+    if event_type == "CRITICAL_TTC":
+        return "{0}'s time-to-contact with {1} fell to {2:.1f} s at {3:.1f} m (minimum {4:.1f} s)".format(
+            actor, who, a["ttc_s"], a["range_m"], a["min_ttc_s"])
+    if event_type == "TRACK_LOST":
+        return "{0} lost {1} at {2:.1f} m, {3}, after tracking it for {4:.1f} s".format(
+            actor, who, a["range_m"], _side(a["bearing_deg"]), a["tracked_for_s"])
+    if event_type == "COLLISION":
+        if actor is None:  # merged global collision
+            peaks = ", ".join("{0}: {1:.0f}".format(name, value) for name, value in sorted(a["peak_impulse"].items()))
+            return "{0} both recorded this same collision (peak impulses {1} N*s)".format(
+                " and ".join(participants), peaks)
+        return "{0}'s collision sensor recorded a contact (peak impulse {1:.0f} N*s, {2} callback(s) over {3:.2f} s)".format(
+            actor, a["peak_impulse"], a["n_callbacks"], a["duration_s"])
+    return "{0}: {1}{2}".format(actor, event_type, " " + who if subject else "")
+
+
+def _when(t_global: float) -> str:
+    if abs(t_global) < 0.005:
+        return "At the matched collision"
+    if t_global < 0:
+        return "{0:.2f} s before the matched collision".format(-t_global)
+    return "{0:.2f} s after the matched collision".format(t_global)
+
+
+def global_sentence(node: GlobalNode) -> str:
+    text = sentence(node.event_type, node.actor_id, node.subject_id, node.attributes, node.participants)
+    if node.t_global is None:
+        return "(unaligned, {0} local time {1:.2f} s) {2}.".format(
+            node.observations[0].graph, node.observations[0].t_local, text)
+    return "{0}, {1}.".format(_when(node.t_global), text)
+
+
+# --------------------------------------------------------------------------
+# Markdown tables
+# --------------------------------------------------------------------------
+
+def _cell(value: Any) -> str:
+    if value is None:
+        return "-"
+    if isinstance(value, float):
+        return "{0:.2f}".format(value)
+    return str(value).replace("|", "/")
+
+
+def _details(event_type: str, attributes: Dict[str, Any]) -> str:
+    parts = []
+    for key in DETAIL_KEYS.get(event_type, []):
+        if key not in attributes:
+            continue
+        value = attributes[key]
+        if isinstance(value, dict):
+            value = ", ".join("{0} {1}".format(name, _cell(item)) for name, item in sorted(value.items()))
+        parts.append("{0}={1}".format(key, _cell(value)))
+    return "; ".join(parts)
+
+
+def _edge_lines(edges: Iterable[Any]) -> List[str]:
+    return ["    {0} --{1}--> {2}".format(edge.from_node, edge.relation, edge.to_node) for edge in edges]
+
+
+def local_graph_markdown(graph: LocalGraph) -> str:
+    owner = graph.owner
+    clock = graph.recorder.get("clock", {})
+    relations: Dict[str, int] = {}
+    for edge in graph.edges:
+        relations[edge.relation] = relations.get(edge.relation, 0) + 1
+    lines = [
+        "# Local graph - vehicle {0}".format(owner), "",
+        "All times are {0}'s own local clock: `t_local` = seconds since {0}'s first ego sample "
+        "(raw clock reading {1} at `t_local` = 0). Only files under `vehicles/{0}/` were read; "
+        "external objects are anonymous radar tracks.".format(owner, clock.get("origin_source_timestamp")), "",
+        "- Local frame: " + graph.recorder.get("frame", {}).get("definition", "-"),
+        "- Trace: {0} frames at {1:g} Hz in `local_trace.jsonl`".format(
+            graph.recorder.get("trace_frames"), graph.recorder.get("trace_hz", 10)),
+        "- Anonymous radar tracks: {0} (10 Hz samples in `local_tracks.jsonl`)".format(len(graph.tracks)),
+        "- Nodes: {0}; edges: {1} ({2})".format(len(graph.nodes), len(graph.edges), ", ".join(
+            "{0} {1}".format(name, count) for name, count in sorted(relations.items())) or "none"),
+        "", "## Nodes", "",
+        "| Id | Local time | Type | Actor | Subject | Source | Details |",
+        "|----|-----------:|------|-------|---------|--------|---------|",
+    ]
+    for node in graph.nodes:
+        lines.append("| {0} | {1:.2f} | {2} | {3} | {4} | {5} | {6} |".format(
+            node.node_id, node.t_local, node.event_type, node.actor_id, _cell(node.subject_id),
+            node.source, _details(node.event_type, node.attributes)))
+    lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```", ""]
+    lines += ["## Anonymous radar tracks", ""]
+    if graph.tracks:
+        lines += ["| Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |",
+                  "|-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|"]
+        for track in graph.tracks:
+            lines.append("| {0} | {1:.2f} | {2:.2f} | {3} | {4:.1f} m / {5:+.0f} deg | {6:.2f} m ({7:.2f}) | {8:.1f} m / {9:+.0f} deg | {10:.1f} m/s |".format(
+                track["track_id"], track["first_seen_t_local"], track["last_seen_t_local"],
+                track["measured_sweeps"], track["first_range_m"], track["first_bearing_deg"],
+                track["min_range_m"], track["min_range_t_local"], track["last_range_m"],
+                track["last_bearing_deg"], track["max_speed_mps"]))
+        lines.append("")
+        lines.append("Bearing: positive = to {0}'s right. Ranges are measured from the radar "
+                     "to the visible surface of the object.".format(owner))
+    else:
+        lines.append("No radar track: nothing moving stayed in {0}'s forward radar view long enough.".format(owner))
+    lines += ["", "## Plain-language reading", ""]
+    for node in graph.nodes:
+        lines.append("- t = {0:.2f} s: {1}.".format(
+            node.t_local, sentence(node.event_type, node.actor_id, node.subject_id, node.attributes)))
+    if not graph.nodes:
+        lines.append("- Nothing noteworthy was recorded.")
+    return "\n".join(lines) + "\n"
+
+
+def _alignment_lines(alignment: Alignment) -> List[str]:
+    lines = ["Reference event: `{0}`; `t_global = t_local + offset_to_global`.".format(alignment.reference_event), "",
+             "| Graph | Status | Anchor node | Anchor local time | Offset to global | Note |",
+             "|-------|--------|-------------|------------------:|-----------------:|------|"]
+    for name in sorted(alignment.graphs):
+        clock = alignment.graphs[name]
+        lines.append("| {0} | {1} | {2} | {3} | {4} | {5} |".format(
+            name, clock.status, _cell(clock.anchor_node), _cell(clock.anchor_t_local),
+            _cell(clock.offset_to_global), clock.reason))
+    offsets = alignment.to_dict()["relative_clock_offsets_s"]
+    if offsets:
+        lines += ["", "Estimated relative clock offsets: " + ", ".join(
+            "{0} = {1:+.3f} s".format(name, value) for name, value in offsets.items())]
+    for event in alignment.matched_events:
+        lines += ["", "Matched `{0}`: {1}".format(event["event_id"], "; ".join(event["evidence"]))]
+    return lines
+
+
+def _association_lines(associations: Sequence[Association]) -> List[str]:
+    if not associations:
+        return ["No anonymous track to associate."]
+    lines = ["| Local track | Global entity | Status | Confidence | Evidence |",
+             "|-------------|---------------|--------|-----------:|----------|"]
+    for item in associations:
+        lines.append("| {0}:{1} | {2} | {3} | {4} | {5} |".format(
+            item.local_graph, item.local_track, item.global_entity, item.status,
+            _cell(item.confidence), "<br>".join(item.evidence)))
+    return lines
+
+
+def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
+                          associations: Sequence[Association], trace: Sequence[Dict[str, Any]]) -> str:
+    lines = ["# Global graph - " + title, "",
+             "Global time `t_global` is 0 at the matched reference collision. The local graphs were "
+             "not modified: every node lists the local node(s) and local time(s) it comes from.", "",
+             "## Entities", "", "| Entity | Kind | Details |", "|--------|------|---------|"]
+    for entity in graph.entities:
+        if entity["kind"] == "recorder":
+            detail = "clock {0}; observed by others as: {1}".format(
+                entity["clock"], ", ".join(entity["observed_as"]) or "-")
+        else:
+            detail = "seen only by {0}; candidate: {1}".format(entity["observed_by"], _cell(entity["candidate"]))
+        lines.append("| {0} | {1} | {2} |".format(entity["entity_id"], entity["kind"], detail))
+    lines += ["", "## Graph alignment", ""] + _alignment_lines(alignment)
+    lines += ["", "## Identity associations", ""] + _association_lines(associations)
+    lines += ["", "## Nodes", "",
+              "| Id | Global time | Type | Actor | Subject / participants | Observed by (local node @ local time) | Details |",
+              "|----|------------:|------|-------|------------------------|----------------------------------------|---------|"]
+    for node in graph.nodes:
+        subject = ", ".join(node.participants) if node.actor_id is None else _cell(node.subject_id)
+        provenance = ", ".join("{0} @ {1:.2f}".format(obs.local_node, obs.t_local) for obs in node.observations)
+        lines.append("| {0} | {1} | {2} | {3} | {4} | {5} | {6} |".format(
+            node.node_id, _cell(node.t_global), node.event_type, _cell(node.actor_id), subject,
+            provenance, _details(node.event_type, node.attributes)))
+    lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```"]
+    lines += ["", "## Global trace", "", "| t_global | Events |", "|---------:|--------|"]
+    for row in trace:
+        lines.append("| {0:+.2f} | {1} |".format(row["t_global"], row["text"]))
+    lines += ["", "## Plain-language reading", ""]
+    lines += ["- " + global_sentence(node) for node in graph.nodes] or ["- Nothing to report."]
+    return "\n".join(lines) + "\n"
+
+
+# --------------------------------------------------------------------------
+# DOT
+# --------------------------------------------------------------------------
+
+def _quote(text: str) -> str:
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def _dot(name: str, title: str, nodes: Sequence[Dict[str, Any]], edges: Iterable[Any]) -> str:
+    lines = ["digraph {0} {{".format(_quote(name)),
+             "  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label={0}];".format(_quote(title)),
+             "  node [shape=box, style=\"rounded,filled\", fontname=Helvetica, fontsize=10];",
+             "  edge [fontname=Helvetica, fontsize=8];"]
+    for node in nodes:
+        extra = ", peripheries=2" if node.get("merged") else ""
+        lines.append("  {0} [label={1}, fillcolor={2}{3}];".format(
+            _quote(node["id"]), _quote("\n".join(node["label"])).replace("\n", "\\n"),
+            _quote(KIND_COLOURS.get(node["kind"], "#ffffff")), extra))
+    for edge in edges:
+        style = "" if edge.relation == "PRECEDES" else ", style=dashed, color=\"#2563eb\", constraint=false"
+        lines.append("  {0} -> {1} [label={2}{3}];".format(
+            _quote(edge.from_node), _quote(edge.to_node), _quote(edge.relation), style))
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def local_graph_dot(graph: LocalGraph) -> str:
+    nodes = [{"id": node.node_id, "kind": node.kind,
+              "label": [node.event_type, node.actor_id + (" -> " + node.subject_id if node.subject_id else ""),
+                        "t={0:.2f}".format(node.t_local)]} for node in graph.nodes]
+    return _dot("local_" + graph.owner, "Local graph - vehicle {0} (local time)".format(graph.owner),
+                nodes, graph.edges)
+
+
+def global_graph_dot(title: str, graph: GlobalGraph) -> str:
+    nodes = []
+    for node in graph.nodes:
+        who = " + ".join(node.participants) if node.actor_id is None else (
+            node.actor_id + (" -> " + node.subject_id if node.subject_id else ""))
+        when = "unaligned" if node.t_global is None else "t={0:+.2f}".format(node.t_global)
+        nodes.append({"id": node.node_id, "kind": node.kind, "label": [node.event_type, who, when],
+                      "merged": len(node.observations) > 1})
+    return _dot("global", "Global graph - {0} (t=0 at the matched collision)".format(title), nodes, graph.edges)
+
+
+# --------------------------------------------------------------------------
+# Run report
+# --------------------------------------------------------------------------
+
+def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
+                    associations: Sequence[Association], graph: GlobalGraph,
+                    trace: Sequence[Dict[str, Any]], config: Dict[str, Any]) -> str:
+    lines = ["# Reconstruction report - " + title, "",
+             "Inputs: `vehicles/{0}/` only (vehicle-local files). `ground_truth/` was not read; the "
+             "privileged comparison, if run, is in `evaluation/`.".format("/`, `vehicles/".join(
+                 local.owner for local in locals_)), "",
+             "Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) "
+             "-> graph-level alignment -> identity association -> global graph.", "",
+             "## Local reconstructions", "",
+             "| Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |",
+             "|----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|"]
+    for local in locals_:
+        collisions = ["{0} @ {1:.2f} s".format(node.node_id, node.t_local)
+                      for node in local.graph.nodes if node.event_type == "COLLISION"]
+        lines.append("| {0} | {1:.2f} s | {2} | {3} | {4} | {5} | {6} |".format(
+            local.owner, local.ego.end - local.ego.start, len(local.trace), len(local.graph.nodes), len(local.graph.edges),
+            len(local.tracks), ", ".join(collisions) or "none"))
+    lines += ["", "## Graph alignment", ""] + _alignment_lines(alignment)
+    lines += ["", "## Identity associations", ""] + _association_lines(associations)
+    merged = [node for node in graph.nodes if len(node.observations) > 1]
+    lines += ["", "## Global graph", "",
+              "{0} nodes, {1} edges; {2} merged node(s): {3}.".format(
+                  len(graph.nodes), len(graph.edges), len(merged),
+                  ", ".join("{0} {1} from {2}".format(node.node_id, short_label(node), " + ".join(
+                      obs.local_node for obs in node.observations)) for node in merged) or "none"),
+              "", "### Event sequence (global time)", ""]
+    lines += ["- `{0:+.2f}` {1}".format(row["t_global"], row["text"]) for row in trace] or ["- (none)"]
+    lines += ["", "### What happened, in plain language", ""]
+    lines += ["- " + global_sentence(node) for node in graph.nodes] or ["- Nothing to report."]
+
+    notes = []
+    for local in locals_:
+        if not local.tracks:
+            notes.append("{0} built no radar track: nothing moving stayed in its forward radar view "
+                         "long enough, so {0} has no perception of the others.".format(local.owner))
+    for item in associations:
+        if item.status != ASSOCIATED:
+            notes.append("{0}:{1} stays anonymous: {2}.".format(
+                item.local_graph, item.local_track, "; ".join(item.blocking) or "insufficient evidence"))
+    for name in sorted(alignment.graphs):
+        if alignment.graphs[name].status != "ALIGNED":
+            notes.append("{0} is UNALIGNED: {1}.".format(name, alignment.graphs[name].reason))
+    notes.append("Global time rests on one collision anchor and a constant offset per recorder; clock "
+                 "drift is not modelled, so timing uncertainty grows away from t_global = 0.")
+    notes.append("Radar tracks follow the visible surface of an object, not its centre, and a "
+                 "straight-ahead corridor is used for 'in path'.")
+    lines += ["", "## Uncertainty and limitations", ""] + ["- " + note for note in notes]
+
+    lines += ["", "## Files", "",
+              "- Local: `<recorder>/local_trace.jsonl`, `local_tracks.jsonl`, `local_graph.json|md|dot`",
+              "- Global: `global/alignment.json`, `associations.json`, `global_trace.jsonl`, "
+              "`global_graph.json|md|dot`", "",
+              "## Parameters", "", "```", json.dumps(config, indent=2), "```"]
+    return "\n".join(lines) + "\n"

@@ -1,0 +1,35 @@
+# Local-graph -> global-graph reconstruction (src/cdf/reconstruction).
+# Defaults were checked on S01-S03 crash runs; see src/cdf/reconstruction/config.py.
+reconstruction:
+  trace_hz: 10                        # readable local trace rate (local clock)
+
+  collision:
+    merge_gap_s: 0.5                  # callbacks closer than this = one contact episode
+
+  tracking:
+    min_height_m: 0.3                 # returns below: road surface
+    max_height_m: 2.5                 # returns above: signs, bridges, trees
+    moving_speed_mps: 1.0             # own line-of-sight speed that makes a return "moving"
+    cluster_distance_m: 2.0           # moving returns closer than this = one candidate object
+    max_association_distance_m: 2.5   # gate around a track's predicted position
+    max_velocity_mismatch_mps: 4.0    # Doppler gate around the track's predicted radial speed
+    max_track_gap_s: 0.5              # a silent track is ended after this
+    min_track_frames: 5               # radar sweeps with moving returns before a track is reported
+    measurement_std_m: 0.5            # Kalman: median-return position noise
+    radial_speed_std_mps: 0.3         # Kalman: median Doppler speed noise
+    acceleration_std_mps2: 6.0        # Kalman: unmodelled acceleration (emergency braking)
+
+  semantics:
+    brake_onset_threshold: 0.1        # brake pedal level of a BRAKE_ONSET
+    throttle_onset_threshold: 0.8     # only strong throttle is an event
+    full_stop_speed_mps: 0.3
+    closing_speed_threshold_mps: 1.0
+    critical_ttc_s: 2.0
+    path_half_width_m: 1.5            # straight-ahead corridor for ENTERED_EGO_PATH
+
+  fusion:
+    impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %
+    contact_window_s: 0.5             # a track must be seen this close to the collision...
+    contact_range_m: 3.5              # ...at this range or less, to be the collision partner
+    min_track_persistence_s: 1.0      # and tracked at least this long before it
+    speed_consistency_mps: 1.5        # track speed vs partner's own speed (RMSE)

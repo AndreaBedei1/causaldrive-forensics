@@ -115,3 +115,63 @@ association differences rather than hidden with ground truth.
 The separate `ground_truth/` trace contains privileged simulator state and is
 never part of the vehicle-local estimator input. No generated scenario traces
 should be committed.
+
+## Reconstruction: local graphs -> global graph
+
+`src/cdf/reconstruction/` turns the per-vehicle recordings of one run into
+local event graphs and then into one global graph:
+
+```text
+vehicles/X/*  -> local trace (10 Hz, X's own clock)  -> local graph of X
+                 anonymous radar tracks (track_001, ...; Kalman + RTS)
+all local graphs -> graph-level alignment (matched COLLISION nodes)
+                 -> identity association (track -> recorder, or stays anonymous)
+                 -> global graph + global trace
+```
+
+```text
+python scripts/reconstruct_run.py traces/S01/run_0_crash traces/S02/run_0_crash traces/S03/run_0_crash --evaluate
+```
+
+Output goes to `<run>/reconstruction/`: per recorder `local_trace.jsonl`,
+`local_tracks.jsonl`, `local_graph.json|md|dot`; under `global/`
+`alignment.json`, `associations.json`, `global_trace.jsonl`,
+`global_graph.json|md|dot`; a plain-language `report.md`. SVG files are written
+only when Graphviz `dot` is installed. `--evaluate` runs afterwards and writes
+`reconstruction/evaluation/`.
+
+Rules the code follows:
+
+- A recorder's local reconstruction reads only `vehicles/<X>/` (ego, controls,
+  collisions, traffic signs, radar). It never reads `ground_truth/`, other
+  vehicles' files, actor IDs or the CARLA `frame` counter (shared by all
+  recorders). External objects are anonymous radar tracks.
+- Local time: `t_local = source timestamp - origin`, the origin being the
+  recorder's own first ego sample; each event keeps its raw `t_source`. Local
+  frame: origin and x axis at the recorder's first pose, y to its right.
+- No log is synchronised. Two COLLISION nodes of different graphs are the same
+  contact when their peak impulses agree (equal and opposite impulses);
+  `alignment.json` stores `t_global = t_local + offset_to_global` with
+  `t_global = 0` at that contact. Local graphs are never modified. Recorders
+  without a matched collision stay `UNALIGNED` (no multi-hop alignment yet).
+- A local track is named after another recorder only at fusion, and only when
+  it was persistent, at contact range at the matched collision, the only such
+  track, and its speed matches that recorder's own speed. Otherwise it stays
+  anonymous (`A:track_001`) with the blocking reason in `associations.json`.
+- Radar detection velocity is used as the range rate (negative while the range
+  shrinks). This was verified on the recordings: static scenery ahead returns
+  about `-v*cos(azimuth)`, although the radar metadata labels it
+  `positive_towards_sensor`.
+
+The event vocabulary is small: BRAKE_ONSET, THROTTLE_ONSET (strong throttle),
+FULL_STOP, STOP/YIELD_SIGN_DETECTED, TRACK_APPEARED, ENTERED_EGO_PATH, CLOSING,
+CRITICAL_TTC (range-based), TRACK_LOST and COLLISION (callbacks within 0.5 s
+form one contact). Adding a type means adding one extractor in `local.py`.
+Graph edges are PRECEDES (time order) and SAME_TRACK. Parameters are in
+`configs/reconstruction.yaml`.
+
+`src/cdf/evaluation/reconstruction.py` is the only code that reads
+`ground_truth/`; it compares the written files with the simulator state
+(collision participants, clock anchors, identity decisions, track accuracy)
+and reruns alignment with one recorder's clock shifted by 0.73 s to check that
+the global graph does not change. Tests: `python -m pytest tests`.
