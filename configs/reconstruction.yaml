@@ -20,7 +20,7 @@ reconstruction:
     acceleration_std_mps2: 6.0        # Kalman: unmodelled acceleration (emergency braking)
 
   semantics:
-    brake_onset_threshold: 0.1        # brake pedal level of a BRAKE_ONSET
+    brake_onset_threshold: 0.1        # brake level that starts / (below) ends a BRAKE_EPISODE
     throttle_onset_threshold: 0.8     # only strong throttle is an event
     full_stop_speed_mps: 0.3
     closing_speed_threshold_mps: 1.0

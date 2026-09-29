@@ -29,8 +29,10 @@ from .models import (ACTION, FACT, OUTCOME, PERCEPTION, PRECEDES, SAME_TRACK,
 from .tracking import (EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
 
-# A pedal must have been below its threshold this long before a new onset counts.
-PEDAL_REARM_S = 0.5
+# The throttle must have been below its threshold this long before a new onset counts.
+THROTTLE_REARM_S = 0.5
+# A brake release shorter than this is a noisy dip, not the end of a braking episode.
+BRAKE_RELEASE_DEBOUNCE_S = 0.2
 # After a full stop the recorder must exceed this speed before another stop counts.
 STOP_REARM_SPEED_MPS = 1.0
 # Track episodes (closing, critical TTC) shorter than this are flicker, unless
@@ -55,22 +57,82 @@ def _local_time(record: Mapping[str, Any], clock_origin: float, key: str = "time
 # Event extractors: each returns a list of SemanticEvent in local time
 # --------------------------------------------------------------------------
 
-def pedal_onsets(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
-                 ego: EgoTrajectory, pedal: str, threshold: float, event_type: str) -> List[SemanticEvent]:
-    """First sample at or above ``threshold`` after the pedal stayed below it for PEDAL_REARM_S."""
+def brake_episodes(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
+                   ego: EgoTrajectory, cfg: SemanticsConfig) -> List[SemanticEvent]:
+    """One BRAKE_EPISODE per continuous braking action, from press to release.
+
+    An episode starts at the first sample at or above ``brake_onset_threshold``
+    and ends at the first sample below it, unless the brake comes back within
+    BRAKE_RELEASE_DEBOUNCE_S (a short dip does not split one action).  An
+    episode still active when the recording ends is ``released = False`` and
+    ends at the last control sample.
+    """
+    times = [_local_time(record, clock_origin) for record in controls]
+    brakes = [float(record["brake"]) for record in controls]
+    spans = []  # (index of the first braking sample, index of the release sample or None)
+    start: Optional[int] = None
+    release: Optional[int] = None
+    for index, brake in enumerate(brakes):
+        if brake >= cfg.brake_onset_threshold:
+            if start is None:
+                start = index
+            release = None  # braking again: the dip was shorter than the debounce
+        elif start is not None:
+            if release is None:
+                release = index
+            if times[index] - times[release] >= BRAKE_RELEASE_DEBOUNCE_S - 1e-6:
+                spans.append((start, release))
+                start = release = None
+    if start is not None:
+        spans.append((start, release))
+    return [_brake_episode(owner, controls, times, brakes, ego, first, release) for first, release in spans]
+
+
+def _brake_episode(owner: str, controls: Sequence[Mapping[str, Any]], times: List[float],
+                   brakes: List[float], ego: EgoTrajectory, first: int, release: Optional[int]) -> SemanticEvent:
+    """Summarise one braking interval; the samples themselves stay in the trace."""
+    released = release is not None
+    last = release - 1 if released else len(brakes) - 1  # last braking sample of the episode
+    start_t = times[first]
+    end_t = times[release] if released else times[-1]
+    pressed = brakes[first:last + 1]
+    speed_start = ego.at(start_t).speed
+    speed_end = ego.at(end_t).speed
+    speeds = [speed_start, speed_end] + [state.speed for state in ego.states
+                                         if start_t <= state.t_local <= end_t]
+    return SemanticEvent(
+        type="BRAKE_EPISODE", kind=ACTION, actor_id=owner, t_local=start_t,
+        attributes={"start_t_local": start_t, "end_t_local": end_t,
+                    "duration_s": round(end_t - start_t, 3),
+                    "peak_brake": round(max(pressed), 3),
+                    "mean_brake": round(sum(pressed) / len(pressed), 3),
+                    "speed_start_mps": round(speed_start, 2), "speed_end_mps": round(speed_end, 2),
+                    "min_speed_mps": round(min(speeds), 2),
+                    "delta_speed_mps": round(speed_end - speed_start, 2),
+                    "released": released,
+                    "began_before_recording": first == 0,
+                    "n_samples": len(pressed),
+                    "t_source": float(controls[first]["timestamp"])},
+        source="controls")
+
+
+def throttle_onsets(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
+                    ego: EgoTrajectory, cfg: SemanticsConfig) -> List[SemanticEvent]:
+    """Strong throttle: first sample at or above ``throttle_onset_threshold``
+    after the throttle stayed below it for THROTTLE_REARM_S."""
     events = []
     below_since: Optional[float] = None
     for record in controls:
         t_local = _local_time(record, clock_origin)
-        value = float(record[pedal])
-        if value < threshold:
+        value = float(record["throttle"])
+        if value < cfg.throttle_onset_threshold:
             if below_since is None:
                 below_since = t_local
             continue
-        if below_since is not None and t_local - below_since >= PEDAL_REARM_S:
+        if below_since is not None and t_local - below_since >= THROTTLE_REARM_S:
             events.append(SemanticEvent(
-                type=event_type, kind=ACTION, actor_id=owner, t_local=t_local,
-                attributes={pedal: round(value, 3), "speed_mps": round(ego.at(t_local).speed, 2),
+                type="THROTTLE_ONSET", kind=ACTION, actor_id=owner, t_local=t_local,
+                attributes={"throttle": round(value, 3), "speed_mps": round(ego.at(t_local).speed, 2),
                             "t_source": float(record["timestamp"])},
                 source="controls"))
         below_since = None
@@ -363,10 +425,8 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig,
 
     semantics = cfg.semantics
     events: List[SemanticEvent] = []
-    events += pedal_onsets(owner, controls, clock_origin, ego, "brake",
-                           semantics.brake_onset_threshold, "BRAKE_ONSET")
-    events += pedal_onsets(owner, controls, clock_origin, ego, "throttle",
-                           semantics.throttle_onset_threshold, "THROTTLE_ONSET")
+    events += brake_episodes(owner, controls, clock_origin, ego, semantics)
+    events += throttle_onsets(owner, controls, clock_origin, ego, semantics)
     events += full_stops(owner, ego, semantics)
     events += collision_episodes(owner, collisions, clock_origin, cfg.collision)
     events += sign_detections(owner, signs, clock_origin)

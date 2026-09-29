@@ -28,7 +28,7 @@ SAME_TRACK = "SAME_TRACK"
 # about it, and a collision before its aftermath.  Unknown types come last.
 SAME_TIME_ORDER = ("TRACK_APPEARED", "ENTERED_EGO_PATH", "CLOSING", "CRITICAL_TTC",
                    "STOP_SIGN_DETECTED", "YIELD_SIGN_DETECTED", "THROTTLE_ONSET",
-                   "BRAKE_ONSET", "COLLISION", "FULL_STOP", "TRACK_LOST")
+                   "BRAKE_EPISODE", "COLLISION", "FULL_STOP", "TRACK_LOST")
 
 
 def same_time_rank(event_type: str) -> int:

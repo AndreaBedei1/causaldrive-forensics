@@ -46,6 +46,7 @@ class TrackingConfig:
 
 @dataclass
 class SemanticsConfig:
+    # Brake level that starts a BRAKE_EPISODE; falling below it ends one.
     brake_onset_threshold: float = 0.1
     # Throttle onsets are only reported for strong demand (e.g. hard acceleration).
     throttle_onset_threshold: float = 0.8

@@ -228,7 +228,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
 
 
 def short_label(node: GlobalNode) -> str:
-    """COLLISION(A,B), BRAKE_ONSET(B), CLOSING(A,B), TRACK_APPEARED(A,A:track_002)."""
+    """COLLISION(A,B), BRAKE_EPISODE(B), CLOSING(A,B), TRACK_APPEARED(A,A:track_002)."""
     if node.actor_id is None:
         return "{0}({1})".format(node.event_type, ",".join(node.participants))
     names = [node.actor_id] + ([node.subject_id] if node.subject_id else [])
