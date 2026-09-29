@@ -1,0 +1,27 @@
+digraph "global" {
+  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Global graph - S01/run_0_crash (t=0 at the matched collision)"];
+  node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
+  edge [fontname=Helvetica, fontsize=8];
+  "g01" [label="TRACK_APPEARED\nA -> B\nt=-6.50", fillcolor="#bfdbfe"];
+  "g02" [label="CLOSING\nA -> B\nt=-6.05", fillcolor="#bfdbfe"];
+  "g03" [label="THROTTLE_ONSET\nA\nt=-5.35", fillcolor="#fde68a"];
+  "g04" [label="BRAKE_EPISODE\nB\nstart=-2.55\nduration=8.00s\npeak=1.00", fillcolor="#fde68a"];
+  "g05" [label="CLOSING\nA -> B\nt=-2.25", fillcolor="#bfdbfe"];
+  "g06" [label="CRITICAL_TTC\nA -> B\nt=-1.50", fillcolor="#bfdbfe"];
+  "g07" [label="FULL_STOP\nB\nt=-1.35", fillcolor="#e5e7eb"];
+  "g08" [label="BRAKE_EPISODE\nA\nstart=-0.95\nduration=6.40s\npeak=1.00", fillcolor="#fde68a"];
+  "g09" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
+  "g10" [label="FULL_STOP\nA\nt=+0.05", fillcolor="#e5e7eb"];
+  "g01" -> "g02" [label="PRECEDES"];
+  "g02" -> "g03" [label="PRECEDES"];
+  "g03" -> "g04" [label="PRECEDES"];
+  "g04" -> "g05" [label="PRECEDES"];
+  "g05" -> "g06" [label="PRECEDES"];
+  "g06" -> "g07" [label="PRECEDES"];
+  "g07" -> "g08" [label="PRECEDES"];
+  "g08" -> "g09" [label="PRECEDES"];
+  "g09" -> "g10" [label="PRECEDES"];
+  "g01" -> "g02" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g05" -> "g06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+}

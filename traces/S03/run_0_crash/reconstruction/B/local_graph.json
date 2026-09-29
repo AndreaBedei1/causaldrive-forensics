@@ -1,0 +1,269 @@
+{
+  "graph_id": "B",
+  "owner": "B",
+  "recorder": {
+    "owner": "B",
+    "clock": {
+      "origin_source_timestamp": 49.807998076081276,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 15.15,
+    "trace_hz": 10.0,
+    "trace_frames": 152,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "B:e01",
+      "event_type": "THROTTLE_ONSET",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 1.15,
+      "attributes": {
+        "throttle": 1.0,
+        "speed_mps": 7.39,
+        "t_source": 50.95799809321761
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e02",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 2.15,
+      "attributes": {
+        "range_m": 32.71,
+        "bearing_deg": -37.8,
+        "lateral_m": -20.05,
+        "closing_speed_mps": 14.23,
+        "speed_mps": 8.19,
+        "in_ego_path": false,
+        "t_source": 51.957998
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e03",
+      "event_type": "CLOSING",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 2.15,
+      "attributes": {
+        "range_m": 32.71,
+        "bearing_deg": -37.8,
+        "lateral_m": -20.05,
+        "closing_speed_mps": 14.23,
+        "peak_closing_speed_mps": 15.64,
+        "min_range_m": 0.93,
+        "end_t_local": 4.25,
+        "duration_s": 2.1,
+        "t_source": 51.957998
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e04",
+      "event_type": "CRITICAL_TTC",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 2.35,
+      "attributes": {
+        "range_m": 29.82,
+        "bearing_deg": -38.2,
+        "lateral_m": -18.44,
+        "closing_speed_mps": 14.92,
+        "ttc_s": 1.998,
+        "min_ttc_s": 0.106,
+        "end_t_local": 4.25,
+        "t_source": 52.157998
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e05",
+      "event_type": "ENTERED_EGO_PATH",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 4.1,
+      "attributes": {
+        "range_m": 2.91,
+        "bearing_deg": -29.6,
+        "lateral_m": -1.44,
+        "closing_speed_mps": 14.75,
+        "from_side": "left",
+        "longitudinal_m": 2.53,
+        "lateral_speed_mps": 10.7,
+        "t_source": 53.907998
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e06",
+      "event_type": "THROTTLE_ONSET",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.25,
+      "attributes": {
+        "throttle": 1.0,
+        "speed_mps": 5.15,
+        "t_source": 54.05799813941121
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e07",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.25,
+      "attributes": {
+        "peak_impulse": 12077.22,
+        "total_impulse": 12077.22,
+        "duration_s": 0.0,
+        "n_callbacks": 1,
+        "t_source": 54.05799813941121
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0
+    },
+    {
+      "node_id": "B:e08",
+      "event_type": "BRAKE_EPISODE",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.3,
+      "attributes": {
+        "start_t_local": 4.3,
+        "end_t_local": 15.15,
+        "duration_s": 10.85,
+        "peak_brake": 1.0,
+        "mean_brake": 1.0,
+        "speed_start_mps": 4.36,
+        "speed_end_mps": 0.0,
+        "min_speed_mps": 0.0,
+        "delta_speed_mps": -4.36,
+        "released": false,
+        "began_before_recording": false,
+        "n_samples": 218,
+        "t_source": 54.10799814015627
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e09",
+      "event_type": "FULL_STOP",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.55,
+      "attributes": {
+        "speed_mps": 0.253,
+        "stopped_for_s": 10.6,
+        "stopped_until_recording_end": true,
+        "t_source": 54.357998
+      },
+      "source": "ego",
+      "confidence": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "B:e01",
+      "to": "B:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e03",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e04",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e08",
+      "to": "B:e09",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e03",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e04",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e05",
+      "relation": "SAME_TRACK"
+    }
+  ],
+  "tracks": [
+    {
+      "track_id": "track_001",
+      "first_seen_t_local": 2.15,
+      "last_seen_t_local": 15.15,
+      "duration_s": 13.0,
+      "measured_sweeps": 260,
+      "radar_returns": 3085,
+      "min_range_m": 0.87,
+      "min_range_t_local": 4.3,
+      "max_speed_mps": 11.0,
+      "first_range_m": 32.71,
+      "first_bearing_deg": -37.8,
+      "last_range_m": 2.9,
+      "last_bearing_deg": 48.4
+    }
+  ]
+}

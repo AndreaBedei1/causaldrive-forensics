@@ -1,0 +1,25 @@
+digraph "local_B" {
+  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Local graph - vehicle B (local time)"];
+  node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
+  edge [fontname=Helvetica, fontsize=8];
+  "B:e01" [label="THROTTLE_ONSET\nB\nt=1.15", fillcolor="#fde68a"];
+  "B:e02" [label="TRACK_APPEARED\nB -> track_001\nt=2.15", fillcolor="#bfdbfe"];
+  "B:e03" [label="CLOSING\nB -> track_001\nt=2.15", fillcolor="#bfdbfe"];
+  "B:e04" [label="CRITICAL_TTC\nB -> track_001\nt=2.35", fillcolor="#bfdbfe"];
+  "B:e05" [label="ENTERED_EGO_PATH\nB -> track_001\nt=4.10", fillcolor="#bfdbfe"];
+  "B:e06" [label="THROTTLE_ONSET\nB\nt=4.25", fillcolor="#fde68a"];
+  "B:e07" [label="COLLISION\nB\nt=4.25", fillcolor="#fca5a5"];
+  "B:e08" [label="BRAKE_EPISODE\nB\nstart=4.30\nduration=10.85s\npeak=1.00", fillcolor="#fde68a"];
+  "B:e09" [label="FULL_STOP\nB\nt=4.55", fillcolor="#e5e7eb"];
+  "B:e01" -> "B:e02" [label="PRECEDES"];
+  "B:e02" -> "B:e03" [label="PRECEDES"];
+  "B:e03" -> "B:e04" [label="PRECEDES"];
+  "B:e04" -> "B:e05" [label="PRECEDES"];
+  "B:e05" -> "B:e06" [label="PRECEDES"];
+  "B:e06" -> "B:e07" [label="PRECEDES"];
+  "B:e07" -> "B:e08" [label="PRECEDES"];
+  "B:e08" -> "B:e09" [label="PRECEDES"];
+  "B:e02" -> "B:e03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e03" -> "B:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e04" -> "B:e05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+}

@@ -1,0 +1,21 @@
+digraph "local_A" {
+  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Local graph - vehicle A (local time)"];
+  node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
+  edge [fontname=Helvetica, fontsize=8];
+  "A:e01" [label="TRACK_APPEARED\nA -> track_001\nt=2.05", fillcolor="#bfdbfe"];
+  "A:e02" [label="CLOSING\nA -> track_001\nt=2.05", fillcolor="#bfdbfe"];
+  "A:e03" [label="CRITICAL_TTC\nA -> track_001\nt=2.35", fillcolor="#bfdbfe"];
+  "A:e04" [label="TRACK_LOST\nA -> track_001\nt=3.35", fillcolor="#bfdbfe"];
+  "A:e05" [label="COLLISION\nA\nt=4.25", fillcolor="#fca5a5"];
+  "A:e06" [label="BRAKE_EPISODE\nA\nstart=4.30\nduration=10.85s\npeak=1.00", fillcolor="#fde68a"];
+  "A:e07" [label="FULL_STOP\nA\nt=4.90", fillcolor="#e5e7eb"];
+  "A:e01" -> "A:e02" [label="PRECEDES"];
+  "A:e02" -> "A:e03" [label="PRECEDES"];
+  "A:e03" -> "A:e04" [label="PRECEDES"];
+  "A:e04" -> "A:e05" [label="PRECEDES"];
+  "A:e05" -> "A:e06" [label="PRECEDES"];
+  "A:e06" -> "A:e07" [label="PRECEDES"];
+  "A:e01" -> "A:e02" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e03" -> "A:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+}

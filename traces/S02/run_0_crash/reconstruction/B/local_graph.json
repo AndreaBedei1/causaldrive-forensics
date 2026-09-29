@@ -1,0 +1,128 @@
+{
+  "graph_id": "B",
+  "owner": "B",
+  "recorder": {
+    "owner": "B",
+    "clock": {
+      "origin_source_timestamp": 32.949120827019215,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 15.15,
+    "trace_hz": 10.0,
+    "trace_frames": 152,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "B:e01",
+      "event_type": "BRAKE_EPISODE",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 3.15,
+      "attributes": {
+        "start_t_local": 3.15,
+        "end_t_local": 3.6,
+        "duration_s": 0.45,
+        "peak_brake": 0.731,
+        "mean_brake": 0.481,
+        "speed_start_mps": 8.71,
+        "speed_end_mps": 6.56,
+        "min_speed_mps": 6.56,
+        "delta_speed_mps": -2.15,
+        "released": true,
+        "began_before_recording": false,
+        "n_samples": 9,
+        "t_source": 36.09912087395787
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e02",
+      "event_type": "BRAKE_EPISODE",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.25,
+      "attributes": {
+        "start_t_local": 4.25,
+        "end_t_local": 15.15,
+        "duration_s": 10.9,
+        "peak_brake": 1.0,
+        "mean_brake": 1.0,
+        "speed_start_mps": 9.59,
+        "speed_end_mps": 0.0,
+        "min_speed_mps": 0.0,
+        "delta_speed_mps": -9.59,
+        "released": false,
+        "began_before_recording": false,
+        "n_samples": 219,
+        "t_source": 37.19912089034915
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e03",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.25,
+      "attributes": {
+        "peak_impulse": 5953.86,
+        "total_impulse": 5953.86,
+        "duration_s": 0.0,
+        "n_callbacks": 1,
+        "t_source": 37.19912089034915
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0
+    },
+    {
+      "node_id": "B:e04",
+      "event_type": "FULL_STOP",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.0,
+      "attributes": {
+        "speed_mps": 0.002,
+        "stopped_for_s": 10.15,
+        "stopped_until_recording_end": true,
+        "t_source": 37.949121
+      },
+      "source": "ego",
+      "confidence": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "B:e01",
+      "to": "B:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e03",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e04",
+      "relation": "PRECEDES"
+    }
+  ],
+  "tracks": []
+}

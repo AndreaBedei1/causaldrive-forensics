@@ -1,0 +1,98 @@
+{
+  "graph_id": "B",
+  "owner": "B",
+  "recorder": {
+    "owner": "B",
+    "clock": {
+      "origin_source_timestamp": 19.181726828217506,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 11.95,
+    "trace_hz": 10.0,
+    "trace_frames": 120,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "B:e01",
+      "event_type": "BRAKE_EPISODE",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 3.95,
+      "attributes": {
+        "start_t_local": 3.95,
+        "end_t_local": 11.95,
+        "duration_s": 8.0,
+        "peak_brake": 1.0,
+        "mean_brake": 1.0,
+        "speed_start_mps": 13.78,
+        "speed_end_mps": 0.0,
+        "min_speed_mps": 0.0,
+        "delta_speed_mps": -13.78,
+        "released": false,
+        "began_before_recording": false,
+        "n_samples": 161,
+        "t_source": 23.131726887077093
+      },
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e02",
+      "event_type": "FULL_STOP",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.15,
+      "attributes": {
+        "speed_mps": 0.006,
+        "stopped_for_s": 6.8,
+        "stopped_until_recording_end": true,
+        "t_source": 24.331727
+      },
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e03",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 6.5,
+      "attributes": {
+        "peak_impulse": 17663.06,
+        "total_impulse": 17663.06,
+        "duration_s": 0.0,
+        "n_callbacks": 1,
+        "t_source": 25.681726925075054
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0
+    }
+  ],
+  "edges": [
+    {
+      "from": "B:e01",
+      "to": "B:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e03",
+      "relation": "PRECEDES"
+    }
+  ],
+  "tracks": []
+}
