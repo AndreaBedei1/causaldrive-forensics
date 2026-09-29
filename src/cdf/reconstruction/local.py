@@ -18,6 +18,7 @@ To add a state: compute its ``active_intervals`` and pass them to
 
 from __future__ import annotations
 
+import bisect
 import json
 import math
 from dataclasses import dataclass
@@ -338,21 +339,26 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
                 clock_origin: float, trace_hz: float) -> List[TraceFrame]:
     """Sample what the recorder knows every 1/trace_hz seconds of its own clock.
 
-    Each discrete event keeps its exact ``t_local`` and is listed once, in the
-    first frame at or after it: frame t holds the events of (t - step, t].
+    When the recording ends between two grid instants, one last frame is added
+    at the recording end, so no fact is extrapolated and no event is listed
+    before it happens.  Each discrete event keeps its exact ``t_local`` and is
+    listed once, in the first frame at or after it: frame t holds the events of
+    (previous frame, t].
     """
     step = 1.0 / trace_hz
     first = int(math.ceil(ego.start / step - 1e-6))
     last = int(math.floor(ego.end / step + 1e-6))
+    times = [round(index * step, 4) for index in range(first, last + 1)]
+    if ego.end - times[-1] > 1e-6:
+        times.append(round(ego.end, 4))
     by_frame: Dict[int, List[SemanticEvent]] = {}
     for event in events:
-        index = min(max(int(math.ceil(event.t_local / step - 1e-6)), first), last)
+        index = min(bisect.bisect_left(times, event.t_local - 1e-6), len(times) - 1)
         by_frame.setdefault(index, []).append(event)
     control_times = [_local_time(record, clock_origin) for record in controls]
     frames = []
     cursor = -1
-    for index in range(first, last + 1):
-        t_local = round(index * step, 4)
+    for index, t_local in enumerate(times):
         facts = [ego_motion_fact(owner, ego, t_local)]
         while cursor + 1 < len(controls) and control_times[cursor + 1] <= t_local + 1e-6:
             cursor += 1

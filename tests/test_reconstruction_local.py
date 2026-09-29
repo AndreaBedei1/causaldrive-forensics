@@ -7,8 +7,9 @@ import unittest
 from pathlib import Path
 
 from src.cdf.reconstruction.config import CollisionConfig, ReconstructionConfig
-from src.cdf.reconstruction.local import collision_events, reconstruct_vehicle
+from src.cdf.reconstruction.local import build_trace, collision_events, reconstruct_vehicle
 from src.cdf.reconstruction.models import GraphEdge, GraphNode, LocalGraph, SemanticEvent
+from src.cdf.reconstruction.tracking import EgoState, EgoTrajectory
 
 from synthetic_run import CONTACT_T, make_run
 
@@ -55,11 +56,29 @@ class LocalClockTests(unittest.TestCase):
         self.assertAlmostEqual(a.clock_origin + a_collision.t_local, 100.0 + CONTACT_T, places=4)
         self.assertAlmostEqual(b.clock_origin + b_collision.t_local, 250.0 + CONTACT_T, places=4)
         self.assertEqual(a.graph.recorder["clock"]["origin_source_timestamp"], 100.0)
-        # Trace frames are on each recorder's own 10 Hz grid; events keep exact times.
-        for frame in a.trace:
+        # Trace frames are on each recorder's own 10 Hz grid (the last one may sit at
+        # the recording end); events keep exact times.
+        for frame in a.trace[:-1]:
             self.assertAlmostEqual(frame.t_local * 10, round(frame.t_local * 10), places=6)
+        for frame in a.trace:
             for event in frame.events:
                 self.assertTrue(frame.t_local - 0.1 < event.t_local <= frame.t_local + 1e-9)
+
+    def test_a_recording_ending_between_grid_instants_gets_a_final_frame(self):
+        def trace(end):
+            ego = EgoTrajectory([EgoState(t_local=0.05 * k, x=0.0, y=0.0, heading=0.0, vx=5.0, vy=0.0)
+                                 for k in range(int(round(end / 0.05)) + 1)])
+            events = [SemanticEvent(type=name, kind="ACTION", actor_id="A", t_local=t, event_id="A:e%02d" % k)
+                      for k, (name, t) in enumerate([("BRAKE_START", 0.0), ("BRAKE_END", 0.95),
+                                                     ("STRONG_THROTTLE_START", end)], 1)]
+            return build_trace("A", ego, [], [], events, clock_origin=0.0, trace_hz=10.0)
+
+        frames = trace(1.05)
+        self.assertEqual([frame.t_local for frame in frames][-3:], [0.9, 1.0, 1.05])
+        self.assertEqual({frame.t_local: [e.type for e in frame.events] for frame in frames if frame.events},
+                         {0.0: ["BRAKE_START"], 1.0: ["BRAKE_END"], 1.05: ["STRONG_THROTTLE_START"]})
+        self.assertEqual(frames[-1].facts[0].attributes["speed_mps"], 5.0)
+        self.assertEqual([frame.t_local for frame in trace(1.0)][-2:], [0.9, 1.0])  # on the grid: no extra frame
 
     def test_a_local_graph_does_not_depend_on_another_recorder(self):
         with tempfile.TemporaryDirectory() as tmp:

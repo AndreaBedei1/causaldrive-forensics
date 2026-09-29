@@ -166,6 +166,13 @@ def _edge_lines(edges: Iterable[Any]) -> List[str]:
     return ["    {0} --{1}--> {2}".format(edge.from_node, edge.relation, edge.to_node) for edge in edges]
 
 
+def _final_frame_note(recorder: Dict[str, Any]) -> str:
+    end, hz = recorder.get("end_t_local"), recorder.get("trace_hz", 10)
+    if end is None or abs(end * hz - round(end * hz)) < 1e-3:
+        return ""
+    return ", the last one at the recording end ({0:.2f} s)".format(end)
+
+
 def _context_line(context: Optional[Mapping[str, Any]]) -> str:
     limit = (context or {}).get("speed_limit_kmh")
     if limit is None:
@@ -207,8 +214,8 @@ def local_graph_markdown(graph: LocalGraph) -> str:
         "(raw clock reading {1} at `t_local` = 0). Only files under `vehicles/{0}/` were read; "
         "external objects are anonymous radar tracks.".format(owner, clock.get("origin_source_timestamp")), "",
         "- Local frame: " + graph.recorder.get("frame", {}).get("definition", "-"),
-        "- Trace: {0} frames at {1:g} Hz in `local_trace.jsonl`".format(
-            graph.recorder.get("trace_frames"), graph.recorder.get("trace_hz", 10)),
+        "- Trace: {0} frames at {1:g} Hz in `local_trace.jsonl`{2}".format(
+            graph.recorder.get("trace_frames"), graph.recorder.get("trace_hz", 10), _final_frame_note(graph.recorder)),
         "- Anonymous radar tracks: {0} (10 Hz samples in `local_tracks.jsonl`)".format(len(graph.tracks)),
         "- " + _context_line(graph.recorder.get("incident_context")),
         "- Nodes: {0}; edges: {1} ({2})".format(len(graph.nodes), len(graph.edges), ", ".join(
