@@ -27,7 +27,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 from ..recording.compact_observations import load_observation_stream
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
-                     LocalGraph, SemanticEvent, TraceFrame, precedes_edges, same_time_rank)
+                     LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
 from .tracking import (EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
 
@@ -228,7 +228,7 @@ def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: fl
         name = SIGN_STATES.get(str(record.get("class", "")).upper())
         if name is None:
             continue
-        subject = "sign_" + str(record["sign_track_id"])
+        subject = str(record["sign_track_id"])  # the camera tracker's own id, e.g. sign-0
         confidence = round(float(record.get("best_confidence", 0.0)), 3)
         events.append(SemanticEvent(
             type=name + "_START", kind=PERCEPTION, actor_id=owner, subject_id=subject,
@@ -287,8 +287,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
 
 def number_events(owner: str, events: List[SemanticEvent]) -> List[SemanticEvent]:
     """Sort by local time (stable display order at equal times) and give graph ids."""
-    ordered = sorted(events, key=lambda event: (event.t_local, same_time_rank(event.type),
-                                                 event.type, event.subject_id or ""))
+    ordered = display_order(events, lambda event: event.t_local, lambda event: event.type,
+                            lambda event: event.actor_id, lambda event: event.subject_id)
     for index, event in enumerate(ordered, 1):
         event.event_id = "{0}:e{1:02d}".format(owner, index)
     return ordered

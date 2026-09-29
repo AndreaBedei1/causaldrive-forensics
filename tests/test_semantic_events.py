@@ -9,7 +9,7 @@ from src.cdf.reconstruction.checks import open_states, sign_windows
 from src.cdf.reconstruction.config import ReconstructionConfig, SemanticsConfig
 from src.cdf.reconstruction.local import (build_local_graph, control_events, motion_events,
                                           number_events, sign_events)
-from src.cdf.reconstruction.models import SemanticEvent, TraceFrame
+from src.cdf.reconstruction.models import SemanticEvent, TraceFrame, display_order
 from src.cdf.reconstruction.pipeline import reconstruct_run
 from src.cdf.reconstruction.tracking import EgoState, EgoTrajectory
 
@@ -154,14 +154,14 @@ class SpeedLimitTests(unittest.TestCase):
 class SignTests(unittest.TestCase):
     @staticmethod
     def _sign(sign_class, confirmed, last, relevant=True):
-        return {"sign_track_id": 3, "class": sign_class, "timestamp_first": ORIGIN + confirmed - 0.2,
+        return {"sign_track_id": "sign-3", "class": sign_class, "timestamp_first": ORIGIN + confirmed - 0.2,
                 "timestamp_confirmed": ORIGIN + confirmed, "timestamp_last": ORIGIN + last,
                 "best_confidence": 0.8, "relevant_to_ego_path": relevant}
 
     def test_confirmed_stop_sign_gives_a_detection_window(self):
         events = sign_events("A", [self._sign("STOP", 2.0, 5.0)], ORIGIN, recording_end=12.0, track_gap_s=0.6)
         self.assertEqual([(e.type, e.t_local, e.subject_id) for e in events],
-                         [("STOP_SIGN_DETECTED_START", 2.0, "sign_3"), ("STOP_SIGN_DETECTED_END", 5.0, "sign_3")])
+                         [("STOP_SIGN_DETECTED_START", 2.0, "sign-3"), ("STOP_SIGN_DETECTED_END", 5.0, "sign-3")])
         self.assertEqual(events[0].attributes, {"relevant_to_ego_path": True})
         self.assertEqual(events[1].attributes, {})
 
@@ -169,16 +169,30 @@ class SignTests(unittest.TestCase):
         events = sign_events("A", [self._sign("YIELD", 2.0, 11.8)], ORIGIN, recording_end=12.0, track_gap_s=0.6)
         self.assertEqual([e.type for e in events], ["YIELD_SIGN_DETECTED_START"])
 
+    def test_sign_confirmed_at_its_last_detection_gives_a_zero_length_window(self):
+        # Confirmed and last seen in the same frame: START and END share one timestamp.
+        events = sign_events("A", [self._sign("STOP", 3.15, 3.15)], ORIGIN, recording_end=12.0, track_gap_s=0.6)
+        graph = _graph(events + [_event("MOVING_START", 0.0), _event("TRACK_APPEARED", 3.15, "track_001")])
+        types = [node.event_type for node in graph.nodes if node.subject_id == "sign-3"]
+        self.assertEqual(types, ["STOP_SIGN_DETECTED_START", "STOP_SIGN_DETECTED_END"])
+        self.assertEqual([item["state"] for item in open_states(graph)], ["MOVING"])
+        window = sign_windows(graph)[0]
+        self.assertEqual((window["start_t_local"], window["end_t_local"]), (3.15, 3.15))
+        self.assertEqual(window["stop_starts_inside"], [])
+        start, end = (node.node_id for node in graph.nodes if node.subject_id == "sign-3")
+        precedes = {(edge.from_node, edge.to_node) for edge in graph.edges if edge.relation == "PRECEDES"}
+        self.assertNotIn((start, end), precedes)  # same timestamp: simultaneous, not ordered
+
     def test_stop_inside_the_window_is_detectable(self):
-        graph = _graph([_event("STOP_SIGN_DETECTED_START", 2.0, "sign_3", relevant_to_ego_path=True),
-                        _event("STOP_START", 4.0), _event("STOP_SIGN_DETECTED_END", 5.0, "sign_3")])
+        graph = _graph([_event("STOP_SIGN_DETECTED_START", 2.0, "sign-3", relevant_to_ego_path=True),
+                        _event("STOP_START", 4.0), _event("STOP_SIGN_DETECTED_END", 5.0, "sign-3")])
         window = sign_windows(graph)[0]
         self.assertEqual((window["start_t_local"], window["end_t_local"]), (2.0, 5.0))
         self.assertEqual(len(window["stop_starts_inside"]), 1)
 
     def test_missing_stop_inside_the_window_is_detectable(self):
-        graph = _graph([_event("STOP_SIGN_DETECTED_START", 2.0, "sign_3"),
-                        _event("STOP_SIGN_DETECTED_END", 5.0, "sign_3"), _event("STOP_START", 6.0)])
+        graph = _graph([_event("STOP_SIGN_DETECTED_START", 2.0, "sign-3"),
+                        _event("STOP_SIGN_DETECTED_END", 5.0, "sign-3"), _event("STOP_START", 6.0)])
         window = sign_windows(graph)[0]
         self.assertEqual(window["stop_starts_inside"], [])
         self.assertFalse(window["already_stopped_at_start"])
@@ -189,6 +203,17 @@ class GraphTests(unittest.TestCase):
         graph = _graph([_event("BRAKE_START", 1.0), _event("HARD_BRAKE_START", 1.0), _event("COLLISION", 2.0)])
         pairs = {(edge.from_node, edge.to_node) for edge in graph.edges if edge.relation == "PRECEDES"}
         self.assertEqual(pairs, {("A:e01", "A:e03"), ("A:e02", "A:e03")})
+
+    def test_display_order_keeps_a_zero_length_state_start_before_its_end(self):
+        # Ends normally precede starts at one timestamp; an END of a state that
+        # starts at that very timestamp (same actor and subject) must follow it.
+        items = [("CLOSING_END", 2.0, "track_001"), ("CLOSING_START", 2.0, "track_001"),
+                 ("CLOSING_END", 2.0, "track_002"), ("COLLISION", 2.0, None), ("BRAKE_START", 1.0, None)]
+        ordered = display_order(items, lambda item: item[1], lambda item: item[0],
+                                lambda item: "A", lambda item: item[2])
+        self.assertEqual(ordered, [("BRAKE_START", 1.0, None), ("COLLISION", 2.0, None),
+                                   ("CLOSING_END", 2.0, "track_002"), ("CLOSING_START", 2.0, "track_001"),
+                                   ("CLOSING_END", 2.0, "track_001")])
 
     def test_same_track_links_the_track_appearance_to_its_events(self):
         graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),

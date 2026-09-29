@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 ACTION = "ACTION"
 FACT = "FACT"
@@ -38,7 +38,8 @@ SAME_TRACK = "SAME_TRACK"
 # Display and serialisation order of events that share a timestamp.  It only
 # makes files stable and readable (a collision first, then state ends from the
 # innermost state outwards, then state starts from the outermost inwards); it
-# never creates a PRECEDES edge.  Unknown types come last.
+# never creates a PRECEDES edge.  Unknown types come last.  ``display_order``
+# applies it, keeping a zero-length state's START before its own END.
 SAME_TIME_ORDER = (
     "COLLISION",
     "CRITICAL_TTC_END", "CLOSING_END", "EGO_PATH_EXIT", "TRACK_LOST",
@@ -56,6 +57,40 @@ def same_time_rank(event_type: str) -> int:
     if event_type in SAME_TIME_ORDER:
         return SAME_TIME_ORDER.index(event_type)
     return len(SAME_TIME_ORDER)
+
+
+# Transition pairs that are not named NAME_START / NAME_END.
+TRANSITION_PAIRS = {"EGO_PATH_ENTRY": ("EGO_PATH", True), "EGO_PATH_EXIT": ("EGO_PATH", False)}
+
+
+def transition_of(event_type: str) -> Optional[Tuple[str, bool]]:
+    """(state name, True for a start / False for an end), or None for instantaneous events."""
+    if event_type in TRANSITION_PAIRS:
+        return TRANSITION_PAIRS[event_type]
+    if event_type.endswith("_START"):
+        return event_type[:-len("_START")], True
+    if event_type.endswith("_END"):
+        return event_type[:-len("_END")], False
+    return None
+
+
+def display_order(items: Sequence[Any], time_of: Callable[[Any], float], type_of: Callable[[Any], str],
+                  actor_of: Callable[[Any], Optional[str]], subject_of: Callable[[Any], Optional[str]]) -> List[Any]:
+    """Sort by time, then SAME_TIME_ORDER.  A state that starts and ends at the
+    same time (e.g. a sign seen for a single confirmation) keeps START before END."""
+    def state_key(item: Any) -> Tuple[Any, ...]:
+        return (transition_of(type_of(item))[0], actor_of(item), subject_of(item), round(time_of(item), 6))
+
+    starting_now = {state_key(item) for item in items
+                    if transition_of(type_of(item)) is not None and transition_of(type_of(item))[1]}
+
+    def key(item: Any) -> Tuple[Any, ...]:
+        transition = transition_of(type_of(item))
+        ends_own_start = transition is not None and not transition[1] and state_key(item) in starting_now
+        return (round(time_of(item), 6), ends_own_start, same_time_rank(type_of(item)), type_of(item),
+                actor_of(item) or "", subject_of(item) or "")
+
+    return sorted(items, key=key)
 
 
 def precedes_edges(ordered: Sequence[Any], time_of: Callable[[Any], float],

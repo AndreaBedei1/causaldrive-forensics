@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from .config import FusionConfig
 from .local import LocalReconstruction
 from .models import (OUTCOME, SAME_TRACK, Alignment, Association, GlobalGraph, GlobalNode,
-                     GraphClock, GraphEdge, Observation, precedes_edges, same_time_rank)
+                     GraphClock, GraphEdge, Observation, display_order, precedes_edges)
 from .tracking import LocalTrack
 
 ASSOCIATED = "ASSOCIATED"
@@ -196,9 +196,9 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             source="collision_sensor", confidence=event["confidence"],
             observations=[Observation(graph, event["nodes"][graph], event["t_local"][graph]) for graph in graphs]))
 
-    aligned = sorted((node for node in drafts if node.t_global is not None),
-                     key=lambda node: (node.t_global, same_time_rank(node.event_type), node.event_type,
-                                       node.actor_id or "", node.subject_id or ""))
+    aligned = display_order([node for node in drafts if node.t_global is not None],
+                            lambda node: node.t_global, lambda node: node.event_type,
+                            lambda node: node.actor_id, lambda node: node.subject_id)
     unaligned = sorted((node for node in drafts if node.t_global is None),
                        key=lambda node: (node.observations[0].graph, node.observations[0].t_local))
     nodes = aligned + unaligned

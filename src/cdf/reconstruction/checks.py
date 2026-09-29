@@ -10,28 +10,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from .models import GraphNode, LocalGraph
-
-# Transition pairs that are not named NAME_START / NAME_END.
-TRANSITION_PAIRS = {"EGO_PATH_ENTRY": ("EGO_PATH", True), "EGO_PATH_EXIT": ("EGO_PATH", False)}
-
-
-def _transition(event_type: str) -> Optional[Tuple[str, bool]]:
-    """(state name, True for a start / False for an end), or None for instantaneous events."""
-    if event_type in TRANSITION_PAIRS:
-        return TRANSITION_PAIRS[event_type]
-    if event_type.endswith("_START"):
-        return event_type[:-len("_START")], True
-    if event_type.endswith("_END"):
-        return event_type[:-len("_END")], False
-    return None
+from .models import GraphNode, LocalGraph, transition_of
 
 
 def open_states(graph: LocalGraph) -> List[Dict[str, Any]]:
     """States that started and never ended: still active when observation ended."""
     active: Dict[Tuple[str, Optional[str]], GraphNode] = {}
     for node in graph.nodes:
-        transition = _transition(node.event_type)
+        transition = transition_of(node.event_type)
         if transition is None:
             continue
         name, starts = transition
