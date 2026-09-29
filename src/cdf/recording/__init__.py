@@ -1,7 +1,11 @@
-"""Raw acquisition writers."""
+"""Raw acquisition storage and the source-agnostic observation loader.
 
-from .vehicle_logger import VehicleLogger
-from .ground_truth_logger import GroundTruthLogger
+The loggers are imported from their own modules (``vehicle_logger`` and
+``ground_truth_logger``) rather than from here, so that loading observations
+never imports the ground-truth logger: the reconstruction reads observations
+and must stay independent of privileged simulator state.
+"""
+
 from .compact_observations import (
     CompactObservationWriter,
     CompactObservations,
@@ -16,8 +20,7 @@ from .depth_velocity import (
 )
 
 __all__ = [
-    "VehicleLogger", "GroundTruthLogger", "CompactObservationWriter",
-    "CompactObservations", "load_observations", "load_observation_stream",
-    "ALGORITHM_VERSION", "DepthAssociationStats", "DepthRadialVelocityConfig",
-    "DepthRadialVelocityEstimator",
+    "CompactObservationWriter", "CompactObservations", "load_observations",
+    "load_observation_stream", "ALGORITHM_VERSION", "DepthAssociationStats",
+    "DepthRadialVelocityConfig", "DepthRadialVelocityEstimator",
 ]
