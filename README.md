@@ -160,12 +160,20 @@ only when Graphviz `dot` is installed. `--evaluate` runs afterwards and writes
 Rules the code follows:
 
 - A recorder's local reconstruction reads only `vehicles/<X>/` (ego, controls,
-  collisions, traffic signs, radar). It never reads `ground_truth/`, other
-  vehicles' files, actor IDs or the CARLA `frame` counter (shared by all
-  recorders). External objects are anonymous radar tracks.
+  collisions, traffic signs, radar) and the run's supplied
+  `incident_context.json`. It never reads `ground_truth/`, the run's
+  `metadata.json` (scenario design), other vehicles' files, actor IDs or the
+  CARLA `frame` counter (shared by all recorders). External objects are
+  anonymous radar tracks.
+- The speed limit is supplied incident context, known a priori from the
+  incident location: a scenario declares `context: {speed_limit_kmh: N}`, the
+  runner copies it to `incident_context.json`, and the reconstruction uses it.
+  It is neither perceived nor ground truth and is never inferred from the
+  CARLA map. Without it no SPEED_LIMIT_EXCEEDED event can be derived.
 - Local time: `t_local = source timestamp - origin`, the origin being the
-  recorder's own first ego sample; each event keeps its raw `t_source`. Local
-  frame: origin and x axis at the recorder's first pose, y to its right.
+  recorder's own first ego sample (stored in `local_graph.json`, so the raw
+  reading is `origin + t_local`). Local frame: origin and x axis at the
+  recorder's first pose, y to its right.
 - No log is synchronised. Two COLLISION nodes of different graphs are the same
   contact when their peak impulses agree (equal and opposite impulses);
   `alignment.json` stores `t_global = t_local + offset_to_global` with
@@ -178,17 +186,39 @@ Rules the code follows:
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
 
-The event vocabulary is small: BRAKE_EPISODE, THROTTLE_ONSET (strong throttle),
-FULL_STOP, STOP/YIELD_SIGN_DETECTED, TRACK_APPEARED, ENTERED_EGO_PATH, CLOSING,
-CRITICAL_TTC (range-based), TRACK_LOST and COLLISION (callbacks within 0.5 s
-form one contact). A BRAKE_EPISODE is one node per continuous braking action:
-it is stamped at its start and records start, end, duration, peak and mean
-brake, speed at start/end, minimum speed and whether the brake was released
-before the recording ended; a release shorter than 0.2 s does not split it.
-The individual brake values stay in the trace's EGO_CONTROL facts. Adding a
-type means adding one extractor in `local.py`.
-Graph edges are PRECEDES (time order) and SAME_TRACK. Parameters are in
-`configs/reconstruction.yaml`.
+Three levels are kept apart. Raw and track data feed the 10 Hz FACTS of
+`local_trace.jsonl` (EGO_MOTION, EGO_CONTROL, TRACK_STATE: speeds, pedals,
+ranges, TTC, uncertainty). The graph holds only semantic EVENTS, which are
+state transitions without telemetry:
+
+| Events | Meaning |
+|--------|---------|
+| BRAKE_START / BRAKE_END | brake at or above 0.1; releases shorter than 0.2 s do not split it |
+| HARD_BRAKE_START / _END | brake at or above 0.9 (nested inside BRAKE) |
+| STRONG_THROTTLE_START / _END | throttle at or above 0.8 |
+| MOVING_START / _END, STOP_START / _END | stop below 0.3 m/s, moving again above 1 m/s |
+| SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
+| TRACK_APPEARED / TRACK_LOST | lifetime of an anonymous radar track |
+| CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
+| CRITICAL_TTC_START / _END | range / closing speed at most 2 s while closing |
+| EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
+| STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
+| COLLISION | one per contact (callbacks within 0.5 s); keeps its peak impulse for alignment |
+
+A START at the first observation (recording start, or a track's first sample)
+carries `active_at_first_observation`; an EGO_PATH_ENTRY that was never seen is
+not invented; a state still active when observation ends has no END. A sign
+END means this recorder stopped detecting the sign, not that its obligation
+ended; `checks.sign_windows` lists the STOP_START events inside each window.
+LANE_DEPARTURE_START/_END and LEFT/RIGHT_TURN_SIGNAL_START/_END are reserved
+names: the recordings contain no lane or indicator evidence, so nothing emits
+them.
+
+Graph edges are PRECEDES, which links an event to every event at the next
+later time (events with equal times are simultaneous, their order unresolved),
+and SAME_TRACK, which links a track's TRACK_APPEARED to its later events.
+Adding a state means computing its active intervals in `local.py`.
+Parameters are in `configs/reconstruction.yaml`.
 
 `src/cdf/evaluation/reconstruction.py` is the only code that reads
 `ground_truth/`; it compares the written files with the simulator state

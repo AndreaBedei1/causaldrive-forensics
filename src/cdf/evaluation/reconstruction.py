@@ -181,8 +181,9 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     # 1. Collisions.
     collision_rows = []
     for contact in contacts:
-        match = next((node for node in collision_nodes
-                      if sorted(node["participants"]) == contact["participants"]), None)
+        # A contact with a static or unrecorded object has one report: a single-recorder node.
+        expected = [contact["participants"][0]] if "static/unrecorded" in contact["participants"] else contact["participants"]
+        match = next((node for node in collision_nodes if sorted(node["participants"]) == expected), None)
         timing = None
         if match is not None:
             timing = max(abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in match["observations"])
@@ -282,10 +283,16 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         config = config_from_mapping(graph.get("reconstruction_config"))
         robustness = _clock_shift_check(run_dir, graph, alignment, config)
 
-    reconstructed = all(row["participants_correct"] for row in collision_rows if "static/unrecorded" not in row["participants"])
+    between = [row for row in collision_rows if "static/unrecorded" not in row["participants"]]
+    merged = [node for node in collision_nodes if node["actor_id"] is None]
+    if between:
+        collision_text = "yes" if all(row["participants_correct"] for row in between) else "NO"
+    else:
+        collision_text = "no vehicle-vehicle collision in ground truth" + (
+            "" if not merged else ", but {0} merged collision node(s) reconstructed".format(len(merged)))
     decided = [row for row in track_rows if row["status"] == "ASSOCIATED"]
     headline = "collision reconstructed: {0}; associations correct: {1}/{2}; anonymous: {3}; max |t_global error| {4} s".format(
-        "yes" if reconstructed and collision_rows else "NO",
+        collision_text,
         sum(row["verdict"] == "correct" for row in decided), len(decided),
         sum(row["status"] != "ASSOCIATED" for row in track_rows),
         None if not time_errors else round(max(abs(e) for e in time_errors), 4))

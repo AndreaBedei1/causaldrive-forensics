@@ -10,8 +10,9 @@ import math
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
+from .checks import open_states, sign_windows
 from .fusion import ASSOCIATED, short_label
 from .models import Alignment, Association, GlobalGraph, GlobalNode, LocalGraph
 
@@ -165,6 +166,35 @@ def _edge_lines(edges: Iterable[Any]) -> List[str]:
     return ["    {0} --{1}--> {2}".format(edge.from_node, edge.relation, edge.to_node) for edge in edges]
 
 
+def _context_line(context: Optional[Mapping[str, Any]]) -> str:
+    limit = (context or {}).get("speed_limit_kmh")
+    if limit is None:
+        return "No speed limit was supplied as incident context, so SPEED_LIMIT_EXCEEDED cannot be derived."
+    return ("Speed limit {0:g} km/h, supplied as incident context: known a priori, "
+            "not perceived and not ground truth.".format(limit))
+
+
+def _open_state_lines(graph: LocalGraph) -> List[str]:
+    lines = ["- {0}{1}, since {2} (t = {3:.2f} s)".format(
+        item["state"], " of " + item["subject"] if item["subject"] else "", item["since_node"],
+        item["since_t_local"]) for item in open_states(graph)]
+    return lines or ["- none"]
+
+
+def _sign_window_lines(graph: LocalGraph) -> List[str]:
+    lines = []
+    for sign in ("STOP_SIGN_DETECTED", "YIELD_SIGN_DETECTED"):
+        for window in sign_windows(graph, sign):
+            end = ("the end of the recording (still in view)" if window["end_t_local"] is None
+                   else "{0:.2f} s".format(window["end_t_local"]))
+            lines.append("- {0} sign {1}: detected {2:.2f} s -> {3}; relevant to the path: {4}; "
+                         "STOP_START inside: {5}{6}".format(
+                             sign.split("_")[0], window["sign"], window["start_t_local"], end,
+                             window["relevant_to_ego_path"], ", ".join(window["stop_starts_inside"]) or "none",
+                             "; already stopped when the window opened" if window["already_stopped_at_start"] else ""))
+    return lines or ["- none"]
+
+
 def local_graph_markdown(graph: LocalGraph) -> str:
     owner = graph.owner
     clock = graph.recorder.get("clock", {})
@@ -180,6 +210,7 @@ def local_graph_markdown(graph: LocalGraph) -> str:
         "- Trace: {0} frames at {1:g} Hz in `local_trace.jsonl`".format(
             graph.recorder.get("trace_frames"), graph.recorder.get("trace_hz", 10)),
         "- Anonymous radar tracks: {0} (10 Hz samples in `local_tracks.jsonl`)".format(len(graph.tracks)),
+        "- " + _context_line(graph.recorder.get("incident_context")),
         "- Nodes: {0}; edges: {1} ({2})".format(len(graph.nodes), len(graph.edges), ", ".join(
             "{0} {1}".format(name, count) for name, count in sorted(relations.items())) or "none"),
         "", "## Nodes", "",
@@ -190,7 +221,13 @@ def local_graph_markdown(graph: LocalGraph) -> str:
         lines.append("| {0} | {1:.2f} | {2} | {3} | {4} | {5} | {6} |".format(
             node.node_id, node.t_local, node.event_type, node.actor_id, _cell(node.subject_id),
             node.source, _details(node.event_type, node.attributes)))
+    lines += ["", "Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) "
+              "are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the "
+              "recorder's resolution: PRECEDES links only different times."]
     lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```", ""]
+    lines += ["## States still active when observation ended", ""] + _open_state_lines(graph)
+    lines += ["", "## Sign detection windows", ""] + _sign_window_lines(graph)
+    lines += ["", "An END means this recorder stopped detecting the sign, not that its obligation ended.", ""]
     lines += ["## Anonymous radar tracks", ""]
     if graph.tracks:
         lines += ["| Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |",
@@ -216,7 +253,12 @@ def local_graph_markdown(graph: LocalGraph) -> str:
 
 
 def _alignment_lines(alignment: Alignment) -> List[str]:
-    lines = ["Reference event: `{0}`; `t_global = t_local + offset_to_global`.".format(alignment.reference_event), "",
+    if alignment.reference_event is None:
+        head = ("No collision was matched across recorders, so no local graph could be aligned; every "
+                "event keeps only its local time (radar-only alignment is not implemented).")
+    else:
+        head = "Reference event: `{0}`; `t_global = t_local + offset_to_global`.".format(alignment.reference_event)
+    lines = [head, "",
              "| Graph | Status | Anchor node | Anchor local time | Offset to global | Note |",
              "|-------|--------|-------------|------------------:|-----------------:|------|"]
     for name in sorted(alignment.graphs):
@@ -246,10 +288,12 @@ def _association_lines(associations: Sequence[Association]) -> List[str]:
 
 
 def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
-                          associations: Sequence[Association], trace: Sequence[Dict[str, Any]]) -> str:
+                          associations: Sequence[Association], trace: Sequence[Dict[str, Any]],
+                          context: Optional[Mapping[str, Any]] = None) -> str:
     lines = ["# Global graph - " + title, "",
              "Global time `t_global` is 0 at the matched reference collision. The local graphs were "
              "not modified: every node lists the local node(s) and local time(s) it comes from.", "",
+             _context_line(context), "",
              "## Entities", "", "| Entity | Kind | Details |", "|--------|------|---------|"]
     for entity in graph.entities:
         if entity["kind"] == "recorder":
@@ -270,7 +314,9 @@ def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
             node.node_id, _cell(node.t_global), node.event_type, _cell(node.actor_id), subject,
             provenance, _details(node.event_type, node.attributes)))
     lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```"]
-    lines += ["", "## Global trace", "", "| t_global | Events |", "|---------:|--------|"]
+    lines += ["", "## Global trace", "",
+              "Events in one row are simultaneous at 0.05 s resolution: their order is unresolved.", "",
+              "| t_global | Events |", "|---------:|--------|"]
     for row in trace:
         lines.append("| {0:+.2f} | {1} |".format(row["t_global"], row["text"]))
     lines += ["", "## Plain-language reading", ""]
@@ -291,11 +337,18 @@ def _dot(name: str, title: str, nodes: Sequence[Dict[str, Any]], edges: Iterable
              "  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label={0}];".format(_quote(title)),
              "  node [shape=box, style=\"rounded,filled\", fontname=Helvetica, fontsize=10];",
              "  edge [fontname=Helvetica, fontsize=8];"]
+    same_time: Dict[str, List[str]] = {}
     for node in nodes:
         extra = ", peripheries=2" if node.get("merged") else ""
         lines.append("  {0} [label={1}, fillcolor={2}{3}];".format(
             _quote(node["id"]), _quote("\n".join(node["label"])).replace("\n", "\\n"),
             _quote(KIND_COLOURS.get(node["kind"], "#ffffff")), extra))
+        if node.get("time") is not None:
+            same_time.setdefault(node["time"], []).append(node["id"])
+    # Simultaneous events share a column; they have no PRECEDES among them.
+    for ids in same_time.values():
+        if len(ids) > 1:
+            lines.append("  {{rank=same; {0};}}".format("; ".join(_quote(item) for item in ids)))
     for edge in edges:
         style = "" if edge.relation == "PRECEDES" else ", style=dashed, color=\"#2563eb\", constraint=false"
         lines.append("  {0} -> {1} [label={2}{3}];".format(
@@ -313,7 +366,7 @@ def local_graph_dot(graph: LocalGraph) -> str:
     nodes = []
     for node in graph.nodes:
         who = node.actor_id + (" -> " + node.subject_id if node.subject_id else "")
-        nodes.append({"id": node.node_id, "kind": node.kind,
+        nodes.append({"id": node.node_id, "kind": node.kind, "time": "{0:.4f}".format(node.t_local),
                       "label": _dot_label(node.event_type, who, "{0:.2f}".format(node.t_local), node.attributes)})
     return _dot("local_" + graph.owner, "Local graph - vehicle {0} (local time)".format(graph.owner),
                 nodes, graph.edges)
@@ -326,6 +379,7 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
             node.actor_id + (" -> " + node.subject_id if node.subject_id else ""))
         when = None if node.t_global is None else "{0:+.2f}".format(node.t_global)
         nodes.append({"id": node.node_id, "kind": node.kind,
+                      "time": None if node.t_global is None else "{0:.4f}".format(node.t_global),
                       "label": _dot_label(node.event_type, who, when, node.attributes),
                       "merged": len(node.observations) > 1})
     return _dot("global", "Global graph - {0} (t=0 at the matched collision)".format(title), nodes, graph.edges)
@@ -337,11 +391,13 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
 
 def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
                     associations: Sequence[Association], graph: GlobalGraph,
-                    trace: Sequence[Dict[str, Any]], config: Dict[str, Any]) -> str:
+                    trace: Sequence[Dict[str, Any]], config: Dict[str, Any],
+                    context: Optional[Mapping[str, Any]] = None) -> str:
     lines = ["# Reconstruction report - " + title, "",
-             "Inputs: `vehicles/{0}/` only (vehicle-local files). `ground_truth/` was not read; the "
-             "privileged comparison, if run, is in `evaluation/`.".format("/`, `vehicles/".join(
-                 local.owner for local in locals_)), "",
+             "Inputs: `vehicles/{0}/` (vehicle-local files) and the supplied `incident_context.json`. "
+             "`ground_truth/` and the run's `metadata.json` were not read; the privileged comparison, "
+             "if run, is in `evaluation/`.".format("/`, `vehicles/".join(local.owner for local in locals_)), "",
+             _context_line(context), "",
              "Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) "
              "-> graph-level alignment -> identity association -> global graph.", "",
              "## Local reconstructions", "",
@@ -365,6 +421,15 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
     lines += ["- `{0:+.2f}` {1}".format(row["t_global"], row["text"]) for row in trace] or ["- (none)"]
     lines += ["", "### What happened, in plain language", ""]
     lines += ["- " + global_sentence(node) for node in graph.nodes] or ["- Nothing to report."]
+    simultaneous = [row["text"] for row in trace if len(row["events"]) > 1]
+    lines += ["", "### Simultaneous events (order unresolved at 0.05 s)", ""]
+    lines += ["- " + text for text in simultaneous] or ["- none"]
+    lines += ["", "### States still active when observation ended", ""]
+    for local in locals_:
+        lines += ["{0}:".format(local.owner)] + _open_state_lines(local.graph)
+    lines += ["", "### Sign detection windows", ""]
+    for local in locals_:
+        lines += ["{0}:".format(local.owner)] + _sign_window_lines(local.graph)
 
     notes = []
     for local in locals_:

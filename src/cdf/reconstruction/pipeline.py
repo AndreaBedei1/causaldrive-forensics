@@ -106,12 +106,13 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     write_json(global_dir / "alignment.json", alignment.to_dict())
     write_json(global_dir / "associations.json", [item.to_dict() for item in associations])
     write_jsonl(global_dir / "global_trace.jsonl", trace)
-    write_json(global_dir / "global_graph.json", dict(graph.to_dict(), run=title,
+    write_json(global_dir / "global_graph.json", dict(graph.to_dict(), run=title, incident_context=context or None,
                                                      reconstruction_config=cfg.to_dict()))
-    write_text(global_dir / "global_graph.md", global_graph_markdown(title, graph, alignment, associations, trace))
+    write_text(global_dir / "global_graph.md",
+               global_graph_markdown(title, graph, alignment, associations, trace, context))
     write_text(global_dir / "global_graph.dot", global_graph_dot(title, graph))
     render_svg(global_dir / "global_graph.dot")
     write_text(output_dir / "report.md",
-               report_markdown(title, locals_, alignment, associations, graph, trace, cfg.to_dict()))
+               report_markdown(title, locals_, alignment, associations, graph, trace, cfg.to_dict(), context))
     return RunReconstruction(run_dir=run_dir, output_dir=output_dir, locals=locals_, alignment=alignment,
                              associations=associations, graph=graph, trace=trace)
