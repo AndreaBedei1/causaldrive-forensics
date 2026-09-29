@@ -51,29 +51,37 @@ class BoundaryTests(unittest.TestCase):
         self.assertEqual(output.returncode, 0, output.stderr)
         self.assertEqual(output.stdout.strip(), "[]")
 
-    def test_reconstruction_never_opens_ground_truth(self):
+    def test_reconstruction_never_opens_ground_truth_or_scenario_metadata(self):
         real_open = builtins.open
         real_path_open = pathlib.Path.open
+        forbidden_files = set()
+
+        def check(path):
+            if "ground_truth" in str(path) or Path(str(path)).resolve() in forbidden_files:
+                raise AssertionError("reconstruction opened " + str(path))
 
         def guarded_open(file, *args, **kwargs):
-            if "ground_truth" in str(file):
-                raise AssertionError("reconstruction opened " + str(file))
+            check(file)
             return real_open(file, *args, **kwargs)
 
         def guarded_path_open(self, *args, **kwargs):
-            if "ground_truth" in str(self):
-                raise AssertionError("reconstruction opened " + str(self))
+            check(self)
             return real_path_open(self, *args, **kwargs)
 
         with tempfile.TemporaryDirectory() as tmp:
-            with_truth = make_run(Path(tmp) / "with" / "S00" / "run_0", with_ground_truth=True)
-            without_truth = make_run(Path(tmp) / "without" / "S00" / "run_0", with_ground_truth=False)
+            with_truth = make_run(Path(tmp) / "with" / "S00" / "run_0", with_ground_truth=True, speed_limit_kmh=30)
+            without_truth = make_run(Path(tmp) / "without" / "S00" / "run_0", with_ground_truth=False,
+                                     speed_limit_kmh=30)
+            # The run's metadata.json names the scenario and variant: scenario design.
+            forbidden_files.add((with_truth / "metadata.json").resolve())
             with mock.patch("builtins.open", guarded_open), mock.patch.object(pathlib.Path, "open", guarded_path_open):
-                reconstruct_run(with_truth, ReconstructionConfig())
+                result = reconstruct_run(with_truth, ReconstructionConfig())
             reconstruct_run(without_truth, ReconstructionConfig())
             # The poisoned privileged folder changes nothing in the output.
             first = json.loads((with_truth / "reconstruction" / "global" / "global_graph.json").read_text())
             second = json.loads((without_truth / "reconstruction" / "global" / "global_graph.json").read_text())
+        # The supplied incident context, by contrast, is read.
+        self.assertEqual(result.locals[0].graph.recorder["incident_context"], {"speed_limit_kmh": 30})
         self.assertEqual(first, second)
 
 

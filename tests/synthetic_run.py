@@ -63,8 +63,9 @@ def _write_radar(folder: Path, times, detections) -> None:
 
 
 def make_run(root: Path, b_late_start_s: float = 0.5, a_sees_b_until: Optional[float] = None,
-             with_ground_truth: bool = True) -> Path:
-    """Write ``root/vehicles/{A,B}`` (and a poisoned ``ground_truth/``); return root."""
+             with_ground_truth: bool = True, speed_limit_kmh: Optional[float] = None) -> Path:
+    """Write ``root/vehicles/{A,B}``, optionally the supplied ``incident_context.json``,
+    and a poisoned ``ground_truth/`` and run ``metadata.json``; return root."""
     rng = np.random.RandomState(7)
     for owner, clock_zero, start in (("A", 100.0, 0.0), ("B", 250.0, b_late_start_s)):
         # Each recorder samples every 50 ms on its own grid from its own start.
@@ -102,6 +103,12 @@ def make_run(root: Path, b_late_start_s: float = 0.5, a_sees_b_until: Optional[f
         _write_jsonl(folder / "collisions.jsonl", [{"frame": 0, "timestamp": clock_zero + CONTACT_T, "impulse": IMPULSE}])
         _write_jsonl(folder / "traffic_signs.jsonl", [])
         _write_radar(folder / "radar", radar_times, radar_rows)
+    if speed_limit_kmh is not None:
+        (root / "incident_context.json").write_text(json.dumps({"speed_limit_kmh": speed_limit_kmh}),
+                                                    encoding="utf-8")
+    # Scenario design (ids, variant): never an inference input.
+    (root / "metadata.json").write_text("POISON: reconstruction must never read the run metadata\n",
+                                        encoding="utf-8")
     if with_ground_truth:
         truth = root / "ground_truth"
         truth.mkdir(parents=True, exist_ok=True)

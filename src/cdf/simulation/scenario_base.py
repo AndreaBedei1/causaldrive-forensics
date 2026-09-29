@@ -177,6 +177,10 @@ class ScenarioSpec:
     participants: List[ParticipantSpec] = field(default_factory=list)
 
     max_duration_s: float = 30.0
+    # Known incident context supplied with the scenario, e.g. the legal speed
+    # limit at the location (``speed_limit_kmh``).  Not perceived, not ground
+    # truth; the runner copies it to ``incident_context.json``.
+    context: Dict[str, Any] = field(default_factory=dict)
 
     def participant(self, participant_id: str) -> ParticipantSpec:
         for p in self.participants:
@@ -231,6 +235,7 @@ class ScenarioSpec:
             variant=chosen,
             participants=participants,
             max_duration_s=float(merged.get("max_duration_s", 30.0)),
+            context=dict(merged.get("context") or {}),
         )
         return spec
 

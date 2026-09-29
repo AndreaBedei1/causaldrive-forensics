@@ -5,13 +5,15 @@
             -> IDENTITY ASSOCIATION            (anonymous track -> recorder)
             -> GLOBAL GRAPH + GLOBAL TRACE
 
-Only ``<run>/vehicles/`` is read.  ``ground_truth/`` is never opened here; the
-privileged evaluation lives in ``cdf.evaluation`` and runs afterwards on the
-files this module wrote.
+Only ``<run>/vehicles/`` and the supplied ``<run>/incident_context.json`` are
+read.  ``ground_truth/`` and the run's ``metadata.json`` (scenario design) are
+never opened here; the privileged evaluation lives in ``cdf.evaluation`` and
+runs afterwards on the files this module wrote.
 """
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -38,6 +40,22 @@ class RunReconstruction:
 
 def run_title(run_dir: Path) -> str:
     return "{0}/{1}".format(run_dir.parent.name, run_dir.name)
+
+
+def read_incident_context(run_dir: Path) -> Dict[str, Any]:
+    """The run's supplied incident context, e.g. the known speed limit; {} if none.
+
+    ``incident_context.json`` is the only run-level file the reconstruction
+    reads: it is known context, not perception and not ground truth.
+    """
+    path = Path(run_dir) / "incident_context.json"
+    if not path.exists():
+        return {}
+    context = json.loads(path.read_text(encoding="utf-8"))
+    limit = context.get("speed_limit_kmh")
+    if limit is not None and (isinstance(limit, bool) or not isinstance(limit, (int, float)) or limit <= 0):
+        raise ValueError("incident_context.json: speed_limit_kmh must be a positive number")
+    return context
 
 
 def _on_trace_grid(t_local: float, trace_hz: float) -> bool:
@@ -68,9 +86,11 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
         if stale.exists():
             stale.unlink()
 
-    # 1-4. Every recorder alone: raw files -> local trace, anonymous tracks, local graph.
+    # 1-4. Every recorder alone: raw files (+ the supplied incident context)
+    #      -> local trace, anonymous tracks, local graph.
+    context = read_incident_context(run_dir)
     vehicle_dirs = sorted(path for path in (run_dir / "vehicles").iterdir() if path.is_dir())
-    locals_ = [reconstruct_vehicle(path, cfg) for path in vehicle_dirs]
+    locals_ = [reconstruct_vehicle(path, cfg, context=context) for path in vehicle_dirs]
     for local in locals_:
         write_local_outputs(output_dir / local.owner, local, cfg.trace_hz)
 

@@ -23,7 +23,7 @@ from ..reconstruction.alignment import align_graphs
 from ..reconstruction.config import ReconstructionConfig, config_from_mapping
 from ..reconstruction.fusion import associate_tracks, fuse_graphs
 from ..reconstruction.local import reconstruct_vehicle
-from ..reconstruction.pipeline import run_title
+from ..reconstruction.pipeline import read_incident_context, run_title
 from ..reconstruction.render import write_json, write_text
 
 # A track "is" a vehicle when its median distance to that vehicle's box is below this.
@@ -122,12 +122,13 @@ def _clock_shift_check(run_dir: Path, graph: Dict[str, Any], alignment: Dict[str
     later, then alignment and fusion are rerun in memory.  Uses no ground truth.
     """
     locals_ = []
+    context = read_incident_context(run_dir)
     shifted = sorted(alignment["graphs"])[-1]
     for vehicle_dir in sorted(path for path in (run_dir / "vehicles").iterdir() if path.is_dir()):
         origin = None
         if vehicle_dir.name == shifted:
             origin = _read_jsonl(vehicle_dir / "ego.jsonl")[0]["timestamp"] - CLOCK_SHIFT_S
-        locals_.append(reconstruct_vehicle(vehicle_dir, config, clock_origin=origin))
+        locals_.append(reconstruct_vehicle(vehicle_dir, config, clock_origin=origin, context=context))
     shifted_alignment = align_graphs([local.graph for local in locals_], config.fusion)
     associations = associate_tracks(locals_, shifted_alignment, config.fusion)
     shifted_graph = fuse_graphs(locals_, shifted_alignment, associations)
