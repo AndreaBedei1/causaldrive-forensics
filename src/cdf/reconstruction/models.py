@@ -37,12 +37,13 @@ SAME_TRACK = "SAME_TRACK"
 
 # Display and serialisation order of events that share a timestamp.  It only
 # makes files stable and readable (a collision first, then state ends from the
-# innermost state outwards, then state starts from the outermost inwards); it
-# never creates a PRECEDES edge.  Unknown types come last.  ``display_order``
-# applies it, keeping a zero-length state's START before its own END.
+# innermost state outwards, then state starts from the outermost inwards, and
+# a lost track last, as the last thing known about it); it never creates a
+# PRECEDES edge.  Unknown types come last.  ``display_order`` applies it,
+# keeping a zero-length state's START before its own END.
 SAME_TIME_ORDER = (
     "COLLISION",
-    "CRITICAL_TTC_END", "CLOSING_END", "EGO_PATH_EXIT", "TRACK_LOST",
+    "CRITICAL_TTC_END", "CLOSING_END", "EGO_PATH_EXIT",
     "STOP_SIGN_DETECTED_END", "YIELD_SIGN_DETECTED_END",
     "HARD_BRAKE_END", "BRAKE_END", "STRONG_THROTTLE_END",
     "SPEED_LIMIT_EXCEEDED_END", "MOVING_END", "STOP_END",
@@ -50,6 +51,7 @@ SAME_TIME_ORDER = (
     "STRONG_THROTTLE_START", "BRAKE_START", "HARD_BRAKE_START",
     "STOP_SIGN_DETECTED_START", "YIELD_SIGN_DETECTED_START",
     "TRACK_APPEARED", "EGO_PATH_ENTRY", "CLOSING_START", "CRITICAL_TTC_START",
+    "TRACK_LOST",
 )
 
 

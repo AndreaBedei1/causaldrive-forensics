@@ -215,6 +215,18 @@ class GraphTests(unittest.TestCase):
                                    ("CLOSING_END", 2.0, "track_002"), ("CLOSING_START", 2.0, "track_001"),
                                    ("CLOSING_END", 2.0, "track_001")])
 
+    def test_states_of_a_lost_track_stay_open_and_say_where_observation_ended(self):
+        graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
+                        _event("TRACK_LOST", 3.0, "track_001"), _event("MOVING_START", 0.0)])
+        found = {(item["state"], item["observed_until"], item["observed_until_t_local"]) for item in open_states(graph)}
+        self.assertEqual(found, {("CLOSING", "TRACK_LOST", 3.0), ("MOVING", "recording end", 9.0)})
+
+    def test_a_lost_track_is_listed_after_its_other_events_at_the_same_time(self):
+        graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("TRACK_LOST", 2.0, "track_001"),
+                        _event("EGO_PATH_ENTRY", 2.0, "track_001"), _event("COLLISION", 2.0)])
+        self.assertEqual([node.event_type for node in graph.nodes],
+                         ["TRACK_APPEARED", "COLLISION", "EGO_PATH_ENTRY", "TRACK_LOST"])
+
     def test_same_track_links_the_track_appearance_to_its_events(self):
         graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
                         _event("TRACK_APPEARED", 1.5, "track_002"), _event("CRITICAL_TTC_START", 2.0, "track_001")])

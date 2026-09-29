@@ -182,9 +182,10 @@ def _context_line(context: Optional[Mapping[str, Any]]) -> str:
 
 
 def _open_state_lines(graph: LocalGraph) -> List[str]:
-    lines = ["- {0}{1}, since {2} (t = {3:.2f} s)".format(
+    lines = ["- {0}{1}, since {2} (t = {3:.2f} s){4}".format(
         item["state"], " of " + item["subject"] if item["subject"] else "", item["since_node"],
-        item["since_t_local"]) for item in open_states(graph)]
+        item["since_t_local"], "; the track was lost at {0:.2f} s".format(item["observed_until_t_local"])
+        if item["observed_until"] == "TRACK_LOST" else "") for item in open_states(graph)]
     return lines or ["- none"]
 
 

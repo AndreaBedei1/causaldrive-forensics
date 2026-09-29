@@ -14,9 +14,16 @@ from .models import GraphNode, LocalGraph, transition_of
 
 
 def open_states(graph: LocalGraph) -> List[Dict[str, Any]]:
-    """States that started and never ended: still active when observation ended."""
+    """States that started and never ended: still active when observation ended.
+
+    Observation of a track's states ends at its TRACK_LOST; of everything else
+    at the end of the recording.  No END is inferred in either case.
+    """
     active: Dict[Tuple[str, Optional[str]], GraphNode] = {}
+    lost: Dict[Optional[str], float] = {}
     for node in graph.nodes:
+        if node.event_type == "TRACK_LOST":
+            lost[node.subject_id] = node.t_local
         transition = transition_of(node.event_type)
         if transition is None:
             continue
@@ -25,7 +32,9 @@ def open_states(graph: LocalGraph) -> List[Dict[str, Any]]:
             active[(name, node.subject_id)] = node
         else:
             active.pop((name, node.subject_id), None)
-    return [{"state": name, "subject": subject, "since_node": node.node_id, "since_t_local": node.t_local}
+    return [{"state": name, "subject": subject, "since_node": node.node_id, "since_t_local": node.t_local,
+             "observed_until": "TRACK_LOST" if subject in lost else "recording end",
+             "observed_until_t_local": lost.get(subject, graph.recorder.get("end_t_local"))}
             for (name, subject), node in sorted(active.items(), key=lambda item: item[1].node_id)]
 
 
