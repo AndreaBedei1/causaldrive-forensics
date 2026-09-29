@@ -9,6 +9,9 @@ scenario:
 
     '
   map: Town03_Opt
+  context:
+    road_environment: urban roundabout
+    speed_limit_kmh: 50
   default_variant: merge_conflict
   max_duration_s: 30.0
   participants:

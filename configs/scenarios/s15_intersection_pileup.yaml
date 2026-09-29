@@ -6,6 +6,9 @@ scenario:
 
     '
   map: Town05
+  context:
+    road_environment: urban junction, three approaches
+    speed_limit_kmh: 50
   default_variant: deflected_into_c
   max_duration_s: 14.0
   participants:

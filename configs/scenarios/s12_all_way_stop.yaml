@@ -6,6 +6,9 @@ scenario:
 
     '
   map: Town05
+  context:
+    road_environment: urban all-way-stop junction
+    speed_limit_kmh: 50
   default_variant: a_arrives_first
   max_duration_s: 18.0
   participants:

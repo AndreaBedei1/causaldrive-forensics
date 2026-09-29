@@ -6,6 +6,9 @@ scenario:
 
     '
   map: Town05
+  context:
+    road_environment: urban road, two adjacent lanes
+    speed_limit_kmh: 50
   default_variant: crash
   max_duration_s: 26.0
   participants:
