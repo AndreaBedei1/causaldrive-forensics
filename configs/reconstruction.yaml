@@ -20,12 +20,14 @@ reconstruction:
     acceleration_std_mps2: 6.0        # Kalman: unmodelled acceleration (emergency braking)
 
   semantics:
-    brake_onset_threshold: 0.1        # brake level that starts / (below) ends a BRAKE_EPISODE
-    throttle_onset_threshold: 0.8     # only strong throttle is an event
-    full_stop_speed_mps: 0.3
-    closing_speed_threshold_mps: 1.0
-    critical_ttc_s: 2.0
-    path_half_width_m: 1.5            # straight-ahead corridor for ENTERED_EGO_PATH
+    brake_onset_threshold: 0.1        # BRAKE_START at or above, BRAKE_END below (0.2 s release debounce)
+    hard_brake_threshold: 0.9         # HARD_BRAKE_START / HARD_BRAKE_END
+    strong_throttle_threshold: 0.8    # STRONG_THROTTLE_START / STRONG_THROTTLE_END
+    full_stop_speed_mps: 0.3          # STOP_START below; moving again above 1 m/s
+    speed_limit_hysteresis_kmh: 1.0   # exceeding: above limit + 1 km/h, ends at or below limit - 1 km/h
+    closing_speed_threshold_mps: 1.0  # CLOSING_START at or above, CLOSING_END below half of it
+    critical_ttc_s: 2.0               # CRITICAL_TTC_START at or below (while closing)
+    path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EGO_PATH_EXIT
 
   fusion:
     impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %

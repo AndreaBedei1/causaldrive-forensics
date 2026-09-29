@@ -46,14 +46,20 @@ class TrackingConfig:
 
 @dataclass
 class SemanticsConfig:
-    # Brake level that starts a BRAKE_EPISODE; falling below it ends one.
+    # Brake level that starts braking (BRAKE_START); below it braking ends.
     brake_onset_threshold: float = 0.1
-    # Throttle onsets are only reported for strong demand (e.g. hard acceleration).
-    throttle_onset_threshold: float = 0.8
+    # Brake level of strong braking (HARD_BRAKE_START / HARD_BRAKE_END).
+    hard_brake_threshold: float = 0.9
+    # Throttle level of strong throttle (STRONG_THROTTLE_START / _END).
+    strong_throttle_threshold: float = 0.8
+    # Below this speed the recorder is stopped (STOP_START); it moves again above 1 m/s.
     full_stop_speed_mps: float = 0.3
+    # Hysteresis around the supplied speed limit: exceeding starts above
+    # limit + this and ends at or below limit - this.
+    speed_limit_hysteresis_kmh: float = 1.0
     closing_speed_threshold_mps: float = 1.0
     critical_ttc_s: float = 2.0
-    # Half width of the straight-ahead corridor used for ENTERED_EGO_PATH.
+    # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT.
     path_half_width_m: float = 1.5
 
 

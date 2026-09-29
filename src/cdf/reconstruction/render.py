@@ -17,23 +17,6 @@ from .models import Alignment, Association, GlobalGraph, GlobalNode, LocalGraph
 
 KIND_COLOURS = {"ACTION": "#fde68a", "PERCEPTION": "#bfdbfe", "FACT": "#e5e7eb", "OUTCOME": "#fca5a5"}
 
-# The few attributes shown in the "Details" column of the node tables.
-DETAIL_KEYS = {
-    "BRAKE_EPISODE": ["start_t_local", "end_t_local", "duration_s", "peak_brake", "mean_brake",
-                      "speed_start_mps", "speed_end_mps", "min_speed_mps", "released"],
-    "THROTTLE_ONSET": ["throttle", "speed_mps"],
-    "FULL_STOP": ["stopped_for_s", "stopped_until_recording_end"],
-    "STOP_SIGN_DETECTED": ["n_detections", "relevant_to_ego_path"],
-    "YIELD_SIGN_DETECTED": ["n_detections", "relevant_to_ego_path"],
-    "TRACK_APPEARED": ["range_m", "bearing_deg", "speed_mps", "in_ego_path"],
-    "ENTERED_EGO_PATH": ["from_side", "longitudinal_m", "lateral_speed_mps"],
-    "CLOSING": ["range_m", "closing_speed_mps", "peak_closing_speed_mps", "duration_s"],
-    "CRITICAL_TTC": ["ttc_s", "range_m", "min_ttc_s"],
-    "TRACK_LOST": ["range_m", "bearing_deg", "tracked_for_s"],
-    "COLLISION": ["peak_impulse", "n_callbacks", "duration_s"],
-}
-
-
 # --------------------------------------------------------------------------
 # Files
 # --------------------------------------------------------------------------
@@ -82,12 +65,6 @@ def render_svg(dot_path: Path) -> Optional[Path]:
 # Plain language
 # --------------------------------------------------------------------------
 
-def _side(bearing_deg: float) -> str:
-    if abs(bearing_deg) < 5.0:
-        return "ahead"
-    return "{0:.0f} deg to the {1}".format(abs(bearing_deg), "right" if bearing_deg > 0 else "left")
-
-
 def _object(subject: Optional[str]) -> str:
     if subject is None:
         return "an unknown object"
@@ -96,48 +73,54 @@ def _object(subject: Optional[str]) -> str:
     return subject
 
 
+# One short sentence per event type; quantities stay in the trace facts.
+SENTENCES = {
+    "BRAKE_START": "{actor} started braking",
+    "BRAKE_END": "{actor} released the brake",
+    "HARD_BRAKE_START": "{actor} started braking hard",
+    "HARD_BRAKE_END": "{actor} stopped braking hard",
+    "STRONG_THROTTLE_START": "{actor} started applying strong throttle",
+    "STRONG_THROTTLE_END": "{actor} stopped applying strong throttle",
+    "MOVING_START": "{actor} started moving",
+    "MOVING_END": "{actor} stopped moving",
+    "STOP_START": "{actor} came to a stop",
+    "STOP_END": "{actor} left its stop",
+    "SPEED_LIMIT_EXCEEDED_START": "{actor} began exceeding the speed limit",
+    "SPEED_LIMIT_EXCEEDED_END": "{actor} returned within the speed limit",
+    "TRACK_APPEARED": "{actor}'s radar started tracking {subject}",
+    "TRACK_LOST": "{actor}'s radar lost {subject}",
+    "CLOSING_START": "{actor} observed {subject} start closing in",
+    "CLOSING_END": "{actor} observed {subject} stop closing in",
+    "CRITICAL_TTC_START": "{actor}'s time-to-contact with {subject} became critical",
+    "CRITICAL_TTC_END": "{actor}'s time-to-contact with {subject} stopped being critical",
+    "EGO_PATH_ENTRY": "{actor} observed {subject} enter its forward path corridor",
+    "EGO_PATH_EXIT": "{actor} observed {subject} leave its forward path corridor",
+    "STOP_SIGN_DETECTED_START": "{actor}'s camera established a STOP sign detection ({subject})",
+    "STOP_SIGN_DETECTED_END": "{actor}'s camera stopped detecting STOP sign {subject}",
+    "YIELD_SIGN_DETECTED_START": "{actor}'s camera established a YIELD sign detection ({subject})",
+    "YIELD_SIGN_DETECTED_END": "{actor}'s camera stopped detecting YIELD sign {subject}",
+}
+
+
 def sentence(event_type: str, actor: Optional[str], subject: Optional[str],
              attributes: Dict[str, Any], participants: Sequence[str] = ()) -> str:
-    """One plain sentence per event; says only what the event's own evidence supports."""
-    a = attributes
-    who = _object(subject)
-    if event_type == "BRAKE_EPISODE":
-        return "{0} braked for {1:.2f} s{2} (peak {3:.2f}, mean {4:.2f}), from {5:.1f} to {6:.1f} m/s, {7}".format(
-            actor, a["duration_s"], " (already braking when its recording started)" if a.get("began_before_recording") else "",
-            a["peak_brake"], a["mean_brake"], a["speed_start_mps"], a["speed_end_mps"],
-            "then released the brake" if a["released"] else "still braking when its recording ended")
-    if event_type == "THROTTLE_ONSET":
-        return "{0} applied strong throttle ({1:.2f} at {2:.1f} m/s)".format(actor, a["throttle"], a["speed_mps"])
-    if event_type == "FULL_STOP":
-        if a.get("stopped_until_recording_end"):
-            return "{0} came to a full stop and stayed stopped until its recording ended".format(actor)
-        return "{0} came to a full stop for {1:.1f} s".format(actor, a["stopped_for_s"])
-    if event_type in ("STOP_SIGN_DETECTED", "YIELD_SIGN_DETECTED"):
-        return "{0}'s camera confirmed a {1} sign ({2})".format(actor, event_type.split("_")[0], subject)
-    if event_type == "TRACK_APPEARED":
-        return "{0}'s radar started tracking {1} at {2:.1f} m, {3}, moving at {4:.1f} m/s{5}".format(
-            actor, who, a["range_m"], _side(a["bearing_deg"]), a["speed_mps"],
-            ", inside its path" if a.get("in_ego_path") else "")
-    if event_type == "ENTERED_EGO_PATH":
-        return "{0} observed {1} move into its path from the {2} ({3:.1f} m ahead, lateral speed {4:.1f} m/s)".format(
-            actor, who, a["from_side"], a["longitudinal_m"], abs(a["lateral_speed_mps"]))
-    if event_type == "CLOSING":
-        return "{0} observed {1} closing at {2:.1f} m/s from {3:.1f} m (peak {4:.1f} m/s, down to {5:.1f} m)".format(
-            actor, who, a["closing_speed_mps"], a["range_m"], a["peak_closing_speed_mps"], a["min_range_m"])
-    if event_type == "CRITICAL_TTC":
-        return "{0}'s time-to-contact with {1} fell to {2:.1f} s at {3:.1f} m (minimum {4:.1f} s)".format(
-            actor, who, a["ttc_s"], a["range_m"], a["min_ttc_s"])
-    if event_type == "TRACK_LOST":
-        return "{0} lost {1} at {2:.1f} m, {3}, after tracking it for {4:.1f} s".format(
-            actor, who, a["range_m"], _side(a["bearing_deg"]), a["tracked_for_s"])
+    """One plain sentence per event; says only what the event itself records."""
     if event_type == "COLLISION":
+        peaks = attributes["peak_impulse"]
         if actor is None:  # merged global collision
-            peaks = ", ".join("{0}: {1:.0f}".format(name, value) for name, value in sorted(a["peak_impulse"].items()))
             return "{0} both recorded this same collision (peak impulses {1} N*s)".format(
-                " and ".join(participants), peaks)
-        return "{0}'s collision sensor recorded a contact (peak impulse {1:.0f} N*s, {2} callback(s) over {3:.2f} s)".format(
-            actor, a["peak_impulse"], a["n_callbacks"], a["duration_s"])
-    return "{0}: {1}{2}".format(actor, event_type, " " + who if subject else "")
+                " and ".join(participants),
+                ", ".join("{0}: {1:.0f}".format(name, value) for name, value in sorted(peaks.items())))
+        return "{0}'s collision sensor recorded a contact (peak impulse {1:.0f} N*s)".format(actor, peaks)
+    template = SENTENCES.get(event_type)
+    if template is None:
+        return "{0}: {1}{2}".format(actor, event_type, " " + _object(subject) if subject else "")
+    text = template.format(actor=actor, subject=_object(subject))
+    if attributes.get("active_at_first_observation"):
+        text += " (already the case when first observed)"
+    if attributes.get("relevant_to_ego_path") is False:
+        text += " (the detector judged it not relevant to its path)"
+    return text
 
 
 def _when(t_global: float) -> str:
@@ -169,11 +152,9 @@ def _cell(value: Any) -> str:
 
 
 def _details(event_type: str, attributes: Dict[str, Any]) -> str:
+    """The few attributes an event carries (most carry none)."""
     parts = []
-    for key in DETAIL_KEYS.get(event_type, []):
-        if key not in attributes:
-            continue
-        value = attributes[key]
+    for key, value in attributes.items():
         if isinstance(value, dict):
             value = ", ".join("{0} {1}".format(name, _cell(item)) for name, item in sorted(value.items()))
         parts.append("{0}={1}".format(key, _cell(value)))
@@ -324,13 +305,8 @@ def _dot(name: str, title: str, nodes: Sequence[Dict[str, Any]], edges: Iterable
 
 
 def _dot_label(event_type: str, who: str, when: Optional[str], attributes: Dict[str, Any]) -> List[str]:
-    """Type, who and when; a braking episode also shows its length and peak."""
-    episode = event_type == "BRAKE_EPISODE"
-    label = [event_type, who, "unaligned" if when is None else ("start=" if episode else "t=") + when]
-    if episode:
-        label += ["duration={0:.2f}s".format(attributes["duration_s"]),
-                  "peak={0:.2f}".format(attributes["peak_brake"])]
-    return label
+    """Only type, who and when: the graph stays sparse."""
+    return [event_type, who, "unaligned" if when is None else "t=" + when]
 
 
 def local_graph_dot(graph: LocalGraph) -> str:

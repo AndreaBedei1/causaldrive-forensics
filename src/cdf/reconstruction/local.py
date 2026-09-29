@@ -1,6 +1,7 @@
 """Raw vehicle files -> local semantic trace -> sparse local event graph.
 
-Only ``vehicles/<owner>/`` is read and only the recorder's own clock is used:
+Only ``vehicles/<owner>/`` is read, plus the run's supplied incident context
+(the known speed limit), and only the recorder's own clock is used:
 
     t_local = source_timestamp - clock_origin
 
@@ -8,10 +9,11 @@ where ``clock_origin`` is, by default, this recorder's first ego sample.  The
 CARLA frame counter is shared by all recorders and is therefore never used.
 Nothing in this module looks at another recorder.
 
-Continuous information becomes FACTS in the 10 Hz trace; discrete changes
-become EVENTS, keep their exact local time, and are the nodes of the graph.
-To add a new event type, write one more extractor below and call it in
-``reconstruct_vehicle``.
+FACTS in the 10 Hz trace carry the quantitative evidence (speed, pedals,
+ranges, TTC, ...).  EVENTS are the semantic transitions derived from the same
+evidence, mostly NAME_START / NAME_END pairs, and they are the graph nodes.
+To add a state: compute its ``active_intervals`` and pass them to
+``state_events``.
 """
 
 from __future__ import annotations
@@ -24,22 +26,25 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..recording.compact_observations import load_observation_stream
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
-from .models import (ACTION, FACT, OUTCOME, PERCEPTION, PRECEDES, SAME_TRACK,
-                     GraphEdge, GraphNode, LocalGraph, SemanticEvent, TraceFrame, same_time_rank)
+from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
+                     LocalGraph, SemanticEvent, TraceFrame, precedes_edges, same_time_rank)
 from .tracking import (EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
 
-# The throttle must have been below its threshold this long before a new onset counts.
-THROTTLE_REARM_S = 0.5
-# A brake release shorter than this is a noisy dip, not the end of a braking episode.
-BRAKE_RELEASE_DEBOUNCE_S = 0.2
-# After a full stop the recorder must exceed this speed before another stop counts.
-STOP_REARM_SPEED_MPS = 1.0
-# Track episodes (closing, critical TTC) shorter than this are flicker, unless
-# they last until the track ends.
+# A pedal release shorter than this is a noisy dip, not the end of the action.
+PEDAL_RELEASE_DEBOUNCE_S = 0.2
+# After a stop the recorder is moving again only above this speed (hysteresis).
+MOVING_SPEED_MPS = 1.0
+# Track states (closing, critical TTC) shorter than this are flicker, unless
+# they are still active when the track ends.
 MIN_EPISODE_S = 0.3
-# A track must leave the path corridor by this margin before re-entering counts.
+# A track must leave the path corridor by this margin before EGO_PATH_EXIT.
 PATH_HYSTERESIS_M = 0.5
+# The camera sign tracker ends a track after this gap without a detection
+# (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
+DEFAULT_SIGN_TRACK_GAP_S = 0.6
+
+Span = Tuple[int, Optional[int]]
 
 
 def read_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -54,251 +59,249 @@ def _local_time(record: Mapping[str, Any], clock_origin: float, key: str = "time
 
 
 # --------------------------------------------------------------------------
-# Event extractors: each returns a list of SemanticEvent in local time
+# States: every semantic event below starts or ends a state interval
 # --------------------------------------------------------------------------
 
-def brake_episodes(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
-                   ego: EgoTrajectory, cfg: SemanticsConfig) -> List[SemanticEvent]:
-    """One BRAKE_EPISODE per continuous braking action, from press to release.
+def active_intervals(times: Sequence[float], values: Sequence[Any], turns_on: Callable[[Any], bool],
+                     turns_off: Callable[[Any], bool], release_debounce_s: float = 0.0,
+                     initially_on: Optional[bool] = None) -> List[Span]:
+    """(start, end) sample indices of the intervals in which a state is active.
 
-    An episode starts at the first sample at or above ``brake_onset_threshold``
-    and ends at the first sample below it, unless the brake comes back within
-    BRAKE_RELEASE_DEBOUNCE_S (a short dip does not split one action).  An
-    episode still active when the recording ends is ``released = False`` and
-    ends at the last control sample.
+    The state turns on at the first sample where ``turns_on`` holds and off at
+    the first sample where ``turns_off`` holds; values satisfying neither keep
+    the current state (hysteresis).  A release is ignored when the state turns
+    on again within ``release_debounce_s``.  ``end`` is the first inactive
+    sample, or None when the state is still active at the last sample.
     """
-    times = [_local_time(record, clock_origin) for record in controls]
-    brakes = [float(record["brake"]) for record in controls]
-    spans = []  # (index of the first braking sample, index of the release sample or None)
+    spans: List[Span] = []
     start: Optional[int] = None
     release: Optional[int] = None
-    for index, brake in enumerate(brakes):
-        if brake >= cfg.brake_onset_threshold:
-            if start is None:
+    for index, value in enumerate(values):
+        if start is None:
+            active = initially_on if index == 0 and initially_on is not None else turns_on(value)
+            if active:
                 start = index
-            release = None  # braking again: the dip was shorter than the debounce
-        elif start is not None:
-            if release is None:
-                release = index
-            if times[index] - times[release] >= BRAKE_RELEASE_DEBOUNCE_S - 1e-6:
-                spans.append((start, release))
-                start = release = None
-    if start is not None:
-        spans.append((start, release))
-    return [_brake_episode(owner, controls, times, brakes, ego, first, release) for first, release in spans]
-
-
-def _brake_episode(owner: str, controls: Sequence[Mapping[str, Any]], times: List[float],
-                   brakes: List[float], ego: EgoTrajectory, first: int, release: Optional[int]) -> SemanticEvent:
-    """Summarise one braking interval; the samples themselves stay in the trace."""
-    released = release is not None
-    last = release - 1 if released else len(brakes) - 1  # last braking sample of the episode
-    start_t = times[first]
-    end_t = times[release] if released else times[-1]
-    pressed = brakes[first:last + 1]
-    speed_start = ego.at(start_t).speed
-    speed_end = ego.at(end_t).speed
-    speeds = [speed_start, speed_end] + [state.speed for state in ego.states
-                                         if start_t <= state.t_local <= end_t]
-    return SemanticEvent(
-        type="BRAKE_EPISODE", kind=ACTION, actor_id=owner, t_local=start_t,
-        attributes={"start_t_local": start_t, "end_t_local": end_t,
-                    "duration_s": round(end_t - start_t, 3),
-                    "peak_brake": round(max(pressed), 3),
-                    "mean_brake": round(sum(pressed) / len(pressed), 3),
-                    "speed_start_mps": round(speed_start, 2), "speed_end_mps": round(speed_end, 2),
-                    "min_speed_mps": round(min(speeds), 2),
-                    "delta_speed_mps": round(speed_end - speed_start, 2),
-                    "released": released,
-                    "began_before_recording": first == 0,
-                    "n_samples": len(pressed),
-                    "t_source": float(controls[first]["timestamp"])},
-        source="controls")
-
-
-def throttle_onsets(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
-                    ego: EgoTrajectory, cfg: SemanticsConfig) -> List[SemanticEvent]:
-    """Strong throttle: first sample at or above ``throttle_onset_threshold``
-    after the throttle stayed below it for THROTTLE_REARM_S."""
-    events = []
-    below_since: Optional[float] = None
-    for record in controls:
-        t_local = _local_time(record, clock_origin)
-        value = float(record["throttle"])
-        if value < cfg.throttle_onset_threshold:
-            if below_since is None:
-                below_since = t_local
             continue
-        if below_since is not None and t_local - below_since >= THROTTLE_REARM_S:
-            events.append(SemanticEvent(
-                type="THROTTLE_ONSET", kind=ACTION, actor_id=owner, t_local=t_local,
-                attributes={"throttle": round(value, 3), "speed_mps": round(ego.at(t_local).speed, 2),
-                            "t_source": float(record["timestamp"])},
-                source="controls"))
-        below_since = None
-    return events
+        if turns_on(value):
+            release = None
+        elif release is None and turns_off(value):
+            release = index
+        if release is not None and times[index] - times[release] >= release_debounce_s - 1e-6:
+            spans.append((start, release))
+            start = release = None
+    if start is not None:
+        spans.append((start, None))
+    return spans
 
 
-def full_stops(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig) -> List[SemanticEvent]:
-    """The recorder's speed drops below ``full_stop_speed_mps`` after it was moving."""
+def state_events(owner: str, subject: Optional[str], start_type: str, end_type: str, kind: str,
+                 source: str, times: Sequence[float], spans: Sequence[Span],
+                 announce_initial: bool = True) -> List[SemanticEvent]:
+    """One start event and (unless still active at the end) one end event per interval.
+
+    An interval active at the first sample began before it was observed: its
+    start is marked ``active_at_first_observation``, or skipped entirely when
+    ``announce_initial`` is False (a transition such as EGO_PATH_ENTRY that
+    was never seen must not be invented).
+    """
     events = []
-    armed = False
-    states = ego.states
-    for index, state in enumerate(states):
-        if state.speed > STOP_REARM_SPEED_MPS:
-            armed = True
-        elif armed and state.speed < cfg.full_stop_speed_mps:
-            armed = False
-            restart = next((later.t_local for later in states[index:]
-                            if later.speed > STOP_REARM_SPEED_MPS), None)
-            events.append(SemanticEvent(
-                type="FULL_STOP", kind=FACT, actor_id=owner, t_local=state.t_local,
-                attributes={"speed_mps": round(state.speed, 3),
-                            "stopped_for_s": round((restart if restart is not None else ego.end) - state.t_local, 2),
-                            "stopped_until_recording_end": restart is None},
-                source="ego"))
+    for start, end in spans:
+        if start > 0 or announce_initial:
+            attributes = {"active_at_first_observation": True} if start == 0 else {}
+            events.append(SemanticEvent(type=start_type, kind=kind, actor_id=owner, subject_id=subject,
+                                        t_local=times[start], attributes=attributes, source=source))
+        if end is not None:
+            events.append(SemanticEvent(type=end_type, kind=kind, actor_id=owner, subject_id=subject,
+                                        t_local=times[end], source=source))
     return events
 
 
-def collision_episodes(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
-                       cfg: CollisionConfig) -> List[SemanticEvent]:
-    """Collapse the collision sensor's per-frame callbacks into one event per contact."""
-    episodes: List[Dict[str, Any]] = []
+def _gaps(spans: Sequence[Span], count: int) -> List[Span]:
+    """The intervals between active intervals (a stop is the time between movements)."""
+    gaps: List[Span] = []
+    cursor = 0
+    for start, end in spans:
+        if start > cursor:
+            gaps.append((cursor, start))
+        if end is None:
+            return gaps
+        cursor = end
+    if cursor < count:
+        gaps.append((cursor, None))
+    return gaps
+
+
+def _lasting(spans: Sequence[Span], times: Sequence[float]) -> List[Span]:
+    """Drop flicker: intervals shorter than MIN_EPISODE_S, unless still active at the end."""
+    return [(start, end) for start, end in spans
+            if end is None or times[end] - times[start] >= MIN_EPISODE_S - 1e-6]
+
+
+# --------------------------------------------------------------------------
+# Event extractors: each returns SemanticEvents in the recorder's local time
+# --------------------------------------------------------------------------
+
+def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
+                   cfg: SemanticsConfig) -> List[SemanticEvent]:
+    """BRAKE, HARD_BRAKE and STRONG_THROTTLE states from the recorder's own pedals.
+
+    HARD_BRAKE nests inside BRAKE because its threshold is higher.  Pedal values
+    stay in the EGO_CONTROL facts.
+    """
+    if not controls:
+        return []
+    times = [_local_time(record, clock_origin) for record in controls]
+    brake = [float(record["brake"]) for record in controls]
+    throttle = [float(record["throttle"]) for record in controls]
+
+    def pedal_state(name: str, values: List[float], level: float) -> List[SemanticEvent]:
+        spans = active_intervals(times, values, lambda value: value >= level, lambda value: value < level,
+                                 PEDAL_RELEASE_DEBOUNCE_S)
+        return state_events(owner, None, name + "_START", name + "_END", ACTION, "controls", times, spans)
+
+    return (pedal_state("BRAKE", brake, cfg.brake_onset_threshold)
+            + pedal_state("HARD_BRAKE", brake, cfg.hard_brake_threshold)
+            + pedal_state("STRONG_THROTTLE", throttle, cfg.strong_throttle_threshold))
+
+
+def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
+                  speed_limit_kmh: Optional[float]) -> List[SemanticEvent]:
+    """MOVING and STOP states and, given a supplied speed limit, SPEED_LIMIT_EXCEEDED.
+
+    A stop starts when moving ends (below ``full_stop_speed_mps``) and ends when
+    moving restarts (above MOVING_SPEED_MPS).  Exceeding the limit needs a
+    speed far above the stop thresholds, so it always nests inside MOVING.
+    """
+    times = [state.t_local for state in ego.states]
+    speeds = [state.speed for state in ego.states]
+    moving = active_intervals(times, speeds, lambda speed: speed > MOVING_SPEED_MPS,
+                              lambda speed: speed < cfg.full_stop_speed_mps,
+                              initially_on=speeds[0] >= cfg.full_stop_speed_mps)
+    events = state_events(owner, None, "MOVING_START", "MOVING_END", FACT, "ego", times, moving)
+    events += state_events(owner, None, "STOP_START", "STOP_END", FACT, "ego", times, _gaps(moving, len(times)))
+    if speed_limit_kmh is not None:
+        limit = float(speed_limit_kmh) / 3.6
+        margin = cfg.speed_limit_hysteresis_kmh / 3.6
+        speeding = active_intervals(times, speeds, lambda speed: speed > limit + margin,
+                                    lambda speed: speed <= limit - margin)
+        events += state_events(owner, None, "SPEED_LIMIT_EXCEEDED_START", "SPEED_LIMIT_EXCEEDED_END",
+                               FACT, "ego", times, speeding)
+    return events
+
+
+def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
+                     cfg: CollisionConfig) -> List[SemanticEvent]:
+    """One COLLISION per contact: callbacks closer than ``merge_gap_s`` are one contact.
+
+    Only the peak impulse is kept: graph alignment needs it to recognise the
+    same contact in two recorders.  Every callback stays in the raw log.
+    """
+    contacts: List[Dict[str, Any]] = []
     for record in sorted(collisions, key=lambda item: float(item["timestamp"])):
         t_local = _local_time(record, clock_origin)
         impulse = float(record["impulse"])
-        if episodes and t_local - episodes[-1]["last"] <= cfg.merge_gap_s:
-            episodes[-1]["last"] = t_local
-            episodes[-1]["impulses"].append(impulse)
+        if contacts and t_local - contacts[-1]["last"] <= cfg.merge_gap_s:
+            contacts[-1]["last"] = t_local
+            contacts[-1]["peak"] = max(contacts[-1]["peak"], impulse)
         else:
-            episodes.append({"first": t_local, "last": t_local, "impulses": [impulse],
-                             "t_source": float(record["timestamp"])})
-    return [SemanticEvent(
-        type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=episode["first"],
-        attributes={"peak_impulse": round(max(episode["impulses"]), 2),
-                    "total_impulse": round(sum(episode["impulses"]), 2),
-                    "duration_s": round(episode["last"] - episode["first"], 3),
-                    "n_callbacks": len(episode["impulses"]),
-                    "t_source": episode["t_source"]},
-        source="collision_sensor", confidence=1.0) for episode in episodes]
+            contacts.append({"first": t_local, "last": t_local, "peak": impulse})
+    return [SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
+                          attributes={"peak_impulse": round(contact["peak"], 2)},
+                          source="collision_sensor", confidence=1.0) for contact in contacts]
 
 
-SIGN_EVENT_TYPES = {"STOP": "STOP_SIGN_DETECTED", "YIELD": "YIELD_SIGN_DETECTED"}
+SIGN_STATES = {"STOP": "STOP_SIGN_DETECTED", "YIELD": "YIELD_SIGN_DETECTED"}
 
 
-def sign_detections(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: float) -> List[SemanticEvent]:
-    """One event per confirmed camera sign track, at its confirmation time."""
+def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: float,
+                recording_end: float, track_gap_s: float) -> List[SemanticEvent]:
+    """A detection window per confirmed camera sign track.
+
+    START: the track is confirmed, i.e. the detection is reliably established.
+    END: its last detection, provided the recording lasted long enough for the
+    tracker to give the track up; a sign still in view at the end has no END.
+    END means this recorder no longer perceives the sign, not that the legal
+    obligation it imposes ended.
+    """
     events = []
     for record in signs:
-        event_type = SIGN_EVENT_TYPES.get(str(record.get("class", "")).upper())
-        if event_type is None:
+        name = SIGN_STATES.get(str(record.get("class", "")).upper())
+        if name is None:
             continue
+        subject = "sign_" + str(record["sign_track_id"])
+        confidence = round(float(record.get("best_confidence", 0.0)), 3)
         events.append(SemanticEvent(
-            type=event_type, kind=PERCEPTION, actor_id=owner,
-            subject_id="sign_" + str(record["sign_track_id"]),
+            type=name + "_START", kind=PERCEPTION, actor_id=owner, subject_id=subject,
             t_local=_local_time(record, clock_origin, "timestamp_confirmed"),
-            attributes={"first_seen_t_local": _local_time(record, clock_origin, "timestamp_first"),
-                        "last_seen_t_local": _local_time(record, clock_origin, "timestamp_last"),
-                        "n_detections": record.get("n_detections"),
-                        "relevant_to_ego_path": record.get("relevant_to_ego_path"),
-                        "t_source": float(record["timestamp_confirmed"])},
-            source="camera", confidence=round(float(record.get("best_confidence", 0.0)), 3)))
+            # The detector's image-only judgement whether the sign governs this path.
+            attributes={"relevant_to_ego_path": bool(record.get("relevant_to_ego_path"))},
+            source="camera", confidence=confidence))
+        last = _local_time(record, clock_origin, "timestamp_last")
+        if recording_end - last > track_gap_s:
+            events.append(SemanticEvent(type=name + "_END", kind=PERCEPTION, actor_id=owner,
+                                        subject_id=subject, t_local=last, source="camera",
+                                        confidence=confidence))
     return events
-
-
-def _episodes(samples: Sequence[TrackSample], starts: Callable[[TrackSample], bool],
-              continues: Callable[[TrackSample], bool]) -> List[Tuple[int, int]]:
-    """Index ranges where ``starts`` switches on and ``continues`` holds (hysteresis)."""
-    found = []
-    begin: Optional[int] = None
-    for index, sample in enumerate(samples):
-        if begin is None:
-            if starts(sample):
-                begin = index
-        elif not continues(sample):
-            found.append((begin, index - 1))
-            begin = None
-    if begin is not None:
-        found.append((begin, len(samples) - 1))
-    last = len(samples) - 1
-    return [(a, b) for a, b in found
-            if b == last or samples[b].t_local - samples[a].t_local >= MIN_EPISODE_S]
-
-
-def _track_event(owner: str, track: LocalTrack, event_type: str, sample: TrackSample,
-                 attributes: Dict[str, Any]) -> SemanticEvent:
-    return SemanticEvent(type=event_type, kind=PERCEPTION, actor_id=owner, subject_id=track.track_id,
-                         t_local=round(sample.t_local, 4), attributes=attributes, source="radar")
-
-
-def _where(sample: TrackSample) -> Dict[str, Any]:
-    return {"range_m": round(sample.range_m, 2), "bearing_deg": round(sample.bearing_deg, 1),
-            "lateral_m": round(sample.lateral_m, 2), "closing_speed_mps": round(sample.closing_speed_mps, 2)}
 
 
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig) -> List[SemanticEvent]:
-    """Semantic transitions of one anonymous radar track."""
+    """TRACK_APPEARED / TRACK_LOST and the EGO_PATH, CLOSING and CRITICAL_TTC states of a track.
+
+    Ranges, speeds and TTC stay in the TRACK_STATE facts.
+    """
     samples = track.samples
-    first = samples[0]
-    in_path = first.longitudinal_m > 0 and abs(first.lateral_m) <= cfg.path_half_width_m
-    events = [_track_event(owner, track, "TRACK_APPEARED", first, dict(
-        _where(first), speed_mps=round(first.speed_mps, 2), in_ego_path=in_path))]
+    times = [round(sample.t_local, 4) for sample in samples]
+    subject = track.track_id
+    events = [SemanticEvent(type="TRACK_APPEARED", kind=PERCEPTION, actor_id=owner, subject_id=subject,
+                            t_local=times[0], source="radar")]
 
-    # ENTERED_EGO_PATH: from clearly outside the straight-ahead corridor to inside it.
-    outside_side: Optional[str] = None
-    for index, sample in enumerate(samples):
-        inside = sample.longitudinal_m > 0 and abs(sample.lateral_m) <= cfg.path_half_width_m
-        if inside and outside_side is not None:
-            before = samples[max(index - 2, 0)]
-            dt = max(sample.t_local - before.t_local, 1e-6)
-            events.append(_track_event(owner, track, "ENTERED_EGO_PATH", sample, dict(
-                _where(sample), from_side=outside_side,
-                longitudinal_m=round(sample.longitudinal_m, 2),
-                lateral_speed_mps=round((sample.lateral_m - before.lateral_m) / dt, 2))))
-            outside_side = None
-        elif abs(sample.lateral_m) > cfg.path_half_width_m + PATH_HYSTERESIS_M:
-            outside_side = "left" if sample.lateral_m < 0 else "right"
+    # Inside: ahead and within the corridor.  Out again only when clearly beside
+    # or behind the radar (at contact the target sits right at the radar plane).
+    corridor = cfg.path_half_width_m
+    path = active_intervals(times, samples,
+                            lambda s: s.longitudinal_m > 0 and abs(s.lateral_m) <= corridor,
+                            lambda s: (s.longitudinal_m < -PATH_HYSTERESIS_M
+                                       or abs(s.lateral_m) > corridor + PATH_HYSTERESIS_M))
+    # A track first seen inside the corridor has no observed entry.
+    events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
+                           times, path, announce_initial=False)
 
-    threshold = cfg.closing_speed_threshold_mps
-    for a, b in _episodes(samples, lambda s: s.closing_speed_mps >= threshold,
-                          lambda s: s.closing_speed_mps >= threshold / 2.0):
-        episode = samples[a:b + 1]
-        events.append(_track_event(owner, track, "CLOSING", samples[a], dict(
-            _where(samples[a]),
-            peak_closing_speed_mps=round(max(s.closing_speed_mps for s in episode), 2),
-            min_range_m=round(min(s.range_m for s in episode), 2),
-            end_t_local=samples[b].t_local, duration_s=round(samples[b].t_local - samples[a].t_local, 2))))
+    closing = cfg.closing_speed_threshold_mps
+    spans = active_intervals(times, samples, lambda s: s.closing_speed_mps >= closing,
+                             lambda s: s.closing_speed_mps < closing / 2.0)
+    events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
+                           times, _lasting(spans, times))
 
     critical = cfg.critical_ttc_s
-    for a, b in _episodes(samples,
-                          lambda s: s.ttc_s is not None and s.ttc_s <= critical and s.closing_speed_mps >= threshold,
-                          lambda s: s.ttc_s is not None and s.ttc_s <= critical):
-        episode = samples[a:b + 1]
-        events.append(_track_event(owner, track, "CRITICAL_TTC", samples[a], dict(
-            _where(samples[a]), ttc_s=samples[a].ttc_s,
-            min_ttc_s=min(s.ttc_s for s in episode if s.ttc_s is not None),
-            end_t_local=samples[b].t_local)))
+    spans = active_intervals(times, samples,
+                             lambda s: s.ttc_s is not None and s.ttc_s <= critical and s.closing_speed_mps >= closing,
+                             lambda s: s.ttc_s is None or s.ttc_s > critical)
+    events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
+                           times, _lasting(spans, times))
 
-    last = samples[-1]
-    if last.t_local < recording_end - 1e-3:
-        events.append(_track_event(owner, track, "TRACK_LOST", last, dict(
-            _where(last), tracked_for_s=round(last.t_local - first.t_local, 2))))
+    if times[-1] < recording_end - 1e-3:
+        events.append(SemanticEvent(type="TRACK_LOST", kind=PERCEPTION, actor_id=owner, subject_id=subject,
+                                    t_local=times[-1], source="radar"))
     return events
 
 
-def number_events(owner: str, events: List[SemanticEvent], clock_origin: float) -> List[SemanticEvent]:
-    """Sort by local time and give each event its graph id (A:e01, A:e02, ...)."""
+def number_events(owner: str, events: List[SemanticEvent]) -> List[SemanticEvent]:
+    """Sort by local time (stable display order at equal times) and give graph ids."""
     ordered = sorted(events, key=lambda event: (event.t_local, same_time_rank(event.type),
                                                  event.type, event.subject_id or ""))
     for index, event in enumerate(ordered, 1):
         event.event_id = "{0}:e{1:02d}".format(owner, index)
-        event.attributes.setdefault("t_source", round(event.t_local + clock_origin, 6))
     return ordered
 
 
 # --------------------------------------------------------------------------
 # Facts and the 10 Hz local trace
 # --------------------------------------------------------------------------
+
+def _where(sample: TrackSample) -> Dict[str, Any]:
+    return {"range_m": round(sample.range_m, 2), "bearing_deg": round(sample.bearing_deg, 1),
+            "lateral_m": round(sample.lateral_m, 2), "closing_speed_mps": round(sample.closing_speed_mps, 2)}
+
 
 def ego_motion_fact(owner: str, ego: EgoTrajectory, t_local: float) -> SemanticEvent:
     state = ego.at(t_local)
@@ -370,17 +373,17 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
 
 def build_local_graph(owner: str, trace: Sequence[TraceFrame], tracks: Sequence[LocalTrack],
                       recorder: Dict[str, Any]) -> LocalGraph:
-    """Nodes are the trace's events; PRECEDES chains them in local time and
-    SAME_TRACK links consecutive events about the same anonymous track."""
+    """Nodes are the trace's events.  PRECEDES links each event to the events of
+    the next later local time (simultaneous events stay unordered); SAME_TRACK
+    links a track's TRACK_APPEARED to every later event about that track."""
     events = sorted((event for frame in trace for event in frame.events), key=lambda event: event.event_id)
     nodes = [GraphNode.from_event(event) for event in events]
-    edges = [GraphEdge(first.node_id, second.node_id, PRECEDES) for first, second in zip(nodes, nodes[1:])]
-    previous: Dict[str, str] = {}
+    edges = precedes_edges(nodes, lambda node: node.t_local, lambda node: node.node_id)
+    appeared = {node.subject_id: node.node_id for node in nodes if node.event_type == "TRACK_APPEARED"}
     for node in nodes:
-        if node.subject_id and node.subject_id.startswith("track_"):
-            if node.subject_id in previous:
-                edges.append(GraphEdge(previous[node.subject_id], node.node_id, SAME_TRACK))
-            previous[node.subject_id] = node.node_id
+        origin = appeared.get(node.subject_id) if node.subject_id else None
+        if origin is not None and origin != node.node_id:
+            edges.append(GraphEdge(origin, node.node_id, SAME_TRACK))
     return LocalGraph(owner=owner, nodes=nodes, edges=edges,
                       tracks=[track.summary() for track in tracks], recorder=recorder)
 
@@ -397,16 +400,28 @@ class LocalReconstruction:
     graph: LocalGraph
 
 
-def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig,
-                        clock_origin: Optional[float] = None) -> LocalReconstruction:
+def _sign_track_gap(vehicle_dir: Path) -> float:
+    """The camera sign tracker's gap, as recorded in the vehicle's own metadata."""
+    path = vehicle_dir / "metadata.json"
+    if path.exists():
+        signs = json.loads(path.read_text(encoding="utf-8")).get("traffic_signs") or {}
+        if "max_time_gap_s" in signs:
+            return float(signs["max_time_gap_s"])
+    return DEFAULT_SIGN_TRACK_GAP_S
+
+
+def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_origin: Optional[float] = None,
+                        context: Optional[Mapping[str, Any]] = None) -> LocalReconstruction:
     """vehicles/<owner>/ -> local trace, anonymous tracks and local event graph.
 
-    ``clock_origin`` defaults to the recorder's first ego sample.  Passing
-    another value emulates a recorder whose clock started at another moment;
-    it exists for clock-robustness checks, never for synchronisation.
+    ``context`` is the supplied incident context (``speed_limit_kmh``); it is
+    known a priori, not perceived.  ``clock_origin`` defaults to the recorder's
+    first ego sample; another value emulates a recorder whose clock started at
+    another moment (clock-robustness checks only, never synchronisation).
     """
     vehicle_dir = Path(vehicle_dir)
     owner = vehicle_dir.name
+    context = dict(context or {})
     ego_records = read_jsonl(vehicle_dir / "ego.jsonl")
     if not ego_records:
         raise ValueError("no ego.jsonl records in " + str(vehicle_dir))
@@ -425,14 +440,13 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig,
 
     semantics = cfg.semantics
     events: List[SemanticEvent] = []
-    events += brake_episodes(owner, controls, clock_origin, ego, semantics)
-    events += throttle_onsets(owner, controls, clock_origin, ego, semantics)
-    events += full_stops(owner, ego, semantics)
-    events += collision_episodes(owner, collisions, clock_origin, cfg.collision)
-    events += sign_detections(owner, signs, clock_origin)
+    events += control_events(owner, controls, clock_origin, semantics)
+    events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"))
+    events += collision_events(owner, collisions, clock_origin, cfg.collision)
+    events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir))
     for track in tracks:
         events += track_events(owner, track, ego.end, semantics)
-    events = number_events(owner, events, clock_origin)
+    events = number_events(owner, events)
 
     trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz)
     recorder = {
@@ -441,6 +455,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig,
                   "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"},
         "frame": {"definition": "origin = first ego position; x = first heading; "
                                 "y = to the right of the first heading (CARLA convention)"},
+        "incident_context": context or None,
         "start_t_local": round(ego.start, 4),
         "end_t_local": round(ego.end, 4),
         "trace_hz": cfg.trace_hz,

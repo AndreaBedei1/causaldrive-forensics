@@ -1,40 +1,78 @@
 """Plain data model shared by every reconstruction stage.
 
 Everything is a small dataclass with ``to_dict``/``from_dict`` for JSON.
-Event types are plain strings and event-specific values live in the
-``attributes`` dictionary, so a new event type needs a new extractor, not a new
-class.  Kinds are ACTION (the recorder did something), FACT (a state of the
+Event types are plain strings, so a new event type needs a new extractor, not a
+new class.  Kinds are ACTION (the recorder did something), FACT (a state of the
 world or of the recorder), PERCEPTION (the recorder sensed something external)
 and OUTCOME (a consequence such as a collision).
+
+Graph events are semantic transitions, mostly NAME_START / NAME_END pairs (or
+EGO_PATH_ENTRY / EGO_PATH_EXIT).  Quantitative evidence (speeds, pedal values,
+ranges, TTC, ...) stays in the trace facts; ``attributes`` holds only what an
+event genuinely needs, such as a collision's peak impulse used by alignment.
+A START at the first observation (recording start, or a track's first sample)
+has ``{"active_at_first_observation": true}``: the state was already active and
+its real beginning was not observed.  A state still active when observation
+ends has no END.
 """
 
 from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 ACTION = "ACTION"
 FACT = "FACT"
 PERCEPTION = "PERCEPTION"
 OUTCOME = "OUTCOME"
 
-# The two local edge relations.  PRECEDES orders events in time; SAME_TRACK
-# links consecutive events about the same anonymous radar track.
+# The two edge relations.  PRECEDES links an event to every event at the next
+# later timestamp; events that share a timestamp are simultaneous at the
+# recorder's resolution and are never linked by PRECEDES.  SAME_TRACK links a
+# track's TRACK_APPEARED to every later event about that track; it groups
+# events and carries no temporal meaning.
 PRECEDES = "PRECEDES"
 SAME_TRACK = "SAME_TRACK"
 
-# Order of events that share a timestamp: a new object before what is observed
-# about it, and a collision before its aftermath.  Unknown types come last.
-SAME_TIME_ORDER = ("TRACK_APPEARED", "ENTERED_EGO_PATH", "CLOSING", "CRITICAL_TTC",
-                   "STOP_SIGN_DETECTED", "YIELD_SIGN_DETECTED", "THROTTLE_ONSET",
-                   "BRAKE_EPISODE", "COLLISION", "FULL_STOP", "TRACK_LOST")
+# Display and serialisation order of events that share a timestamp.  It only
+# makes files stable and readable (a collision first, then state ends from the
+# innermost state outwards, then state starts from the outermost inwards); it
+# never creates a PRECEDES edge.  Unknown types come last.
+SAME_TIME_ORDER = (
+    "COLLISION",
+    "CRITICAL_TTC_END", "CLOSING_END", "EGO_PATH_EXIT", "TRACK_LOST",
+    "STOP_SIGN_DETECTED_END", "YIELD_SIGN_DETECTED_END",
+    "HARD_BRAKE_END", "BRAKE_END", "STRONG_THROTTLE_END",
+    "SPEED_LIMIT_EXCEEDED_END", "MOVING_END", "STOP_END",
+    "STOP_START", "MOVING_START", "SPEED_LIMIT_EXCEEDED_START",
+    "STRONG_THROTTLE_START", "BRAKE_START", "HARD_BRAKE_START",
+    "STOP_SIGN_DETECTED_START", "YIELD_SIGN_DETECTED_START",
+    "TRACK_APPEARED", "EGO_PATH_ENTRY", "CLOSING_START", "CRITICAL_TTC_START",
+)
 
 
 def same_time_rank(event_type: str) -> int:
     if event_type in SAME_TIME_ORDER:
         return SAME_TIME_ORDER.index(event_type)
     return len(SAME_TIME_ORDER)
+
+
+def precedes_edges(ordered: Sequence[Any], time_of: Callable[[Any], float],
+                   id_of: Callable[[Any], str]) -> List["GraphEdge"]:
+    """PRECEDES from every item to every item at the next later timestamp.
+
+    ``ordered`` is sorted by time.  Items with equal times form one
+    simultaneous group and get no PRECEDES among themselves.
+    """
+    groups: List[List[Any]] = []
+    for item in ordered:
+        if groups and abs(time_of(item) - time_of(groups[-1][0])) < 1e-6:
+            groups[-1].append(item)
+        else:
+            groups.append([item])
+    return [GraphEdge(id_of(earlier), id_of(later), PRECEDES)
+            for first, second in zip(groups, groups[1:]) for earlier in first for later in second]
 
 
 def _drop_none(values: Dict[str, Any]) -> Dict[str, Any]:

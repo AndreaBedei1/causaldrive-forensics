@@ -14,12 +14,10 @@ from synthetic_run import CONTACT_T, make_run
 
 
 def _graph(owner, collision_t, impulse):
-    brake = GraphNode(owner + ":e01", "BRAKE_EPISODE", "ACTION", owner, None, round(collision_t - 2.4, 4),
-                      {"start_t_local": round(collision_t - 2.4, 4), "end_t_local": collision_t,
-                       "duration_s": 2.4, "peak_brake": 1.0, "released": False}, "controls", None)
+    brake = GraphNode(owner + ":e01", "BRAKE_START", "ACTION", owner, None, round(collision_t - 2.4, 4),
+                      {}, "controls", None)
     collision = GraphNode(owner + ":e02", "COLLISION", "OUTCOME", owner, None, collision_t,
-                          {"peak_impulse": impulse, "total_impulse": impulse, "duration_s": 0.0, "n_callbacks": 1},
-                          "collision_sensor", 1.0)
+                          {"peak_impulse": impulse}, "collision_sensor", 1.0)
     return LocalGraph(owner=owner, nodes=[brake, collision],
                       edges=[GraphEdge(brake.node_id, collision.node_id, "PRECEDES")])
 

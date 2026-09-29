@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from .config import FusionConfig
 from .local import LocalReconstruction
-from .models import (OUTCOME, PRECEDES, SAME_TRACK, Alignment, Association, GlobalGraph,
-                     GlobalNode, GraphClock, GraphEdge, Observation, same_time_rank)
+from .models import (OUTCOME, SAME_TRACK, Alignment, Association, GlobalGraph, GlobalNode,
+                     GraphClock, GraphEdge, Observation, precedes_edges, same_time_rank)
 from .tracking import LocalTrack
 
 ASSOCIATED = "ASSOCIATED"
@@ -181,8 +181,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             drafts.append(GlobalNode(
                 node_id="", event_type=node.event_type, kind=node.kind, actor_id=local.owner,
                 subject_id=subject, participants=participants, t_global=clock.to_global(node.t_local),
-                # The raw source clock reading is local provenance, not global evidence.
-                attributes={key: value for key, value in node.attributes.items() if key != "t_source"},
+                attributes=dict(node.attributes),
                 source=node.source, confidence=node.confidence,
                 observations=[Observation(local.owner, node.node_id, node.t_local)]))
     for event in merged_events:
@@ -193,8 +192,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             participants=graphs, t_global=round(sum(times) / len(times), 4),
             attributes={"matched_event": event["event_id"],
                         "reference_event": event["event_id"] == alignment.reference_event,
-                        "peak_impulse": dict(event["peak_impulse"]),
-                        "impulse_similarity": event["impulse_similarity"]},
+                        "peak_impulse": dict(event["peak_impulse"])},
             source="collision_sensor", confidence=event["confidence"],
             observations=[Observation(graph, event["nodes"][graph], event["t_local"][graph]) for graph in graphs]))
 
@@ -208,7 +206,8 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
         node.node_id = "g{0:02d}".format(number)
 
     global_id = {obs.local_node: node.node_id for node in nodes for obs in node.observations}
-    edges = [GraphEdge(first.node_id, second.node_id, PRECEDES) for first, second in zip(aligned, aligned[1:])]
+    # Nodes at the same global time are simultaneous at this resolution: no PRECEDES between them.
+    edges = precedes_edges(aligned, lambda node: node.t_global, lambda node: node.node_id)
     for local in sorted(locals_, key=lambda item: item.owner):
         for edge in local.graph.edges:
             if edge.relation == SAME_TRACK:
@@ -228,7 +227,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
 
 
 def short_label(node: GlobalNode) -> str:
-    """COLLISION(A,B), BRAKE_EPISODE(B), CLOSING(A,B), TRACK_APPEARED(A,A:track_002)."""
+    """COLLISION(A,B), BRAKE_START(B), CLOSING_START(A,B), TRACK_APPEARED(A,A:track_002)."""
     if node.actor_id is None:
         return "{0}({1})".format(node.event_type, ",".join(node.participants))
     names = [node.actor_id] + ([node.subject_id] if node.subject_id else [])

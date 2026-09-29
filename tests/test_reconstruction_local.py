@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from src.cdf.reconstruction.config import CollisionConfig, ReconstructionConfig
-from src.cdf.reconstruction.local import collision_episodes, reconstruct_vehicle
+from src.cdf.reconstruction.local import collision_events, reconstruct_vehicle
 from src.cdf.reconstruction.models import GraphEdge, GraphNode, LocalGraph, SemanticEvent
 
 from synthetic_run import CONTACT_T, make_run
@@ -51,9 +51,10 @@ class LocalClockTests(unittest.TestCase):
         b_collision = [n for n in b.graph.nodes if n.event_type == "COLLISION"][0]
         self.assertAlmostEqual(a_collision.t_local, CONTACT_T, places=3)
         self.assertAlmostEqual(b_collision.t_local, CONTACT_T - 0.5, places=3)
-        # The exact raw reading of the recorder's own clock is preserved.
-        self.assertAlmostEqual(a_collision.attributes["t_source"], 100.0 + CONTACT_T, places=6)
-        self.assertAlmostEqual(b_collision.attributes["t_source"], 250.0 + CONTACT_T, places=6)
+        # The raw reading of the recorder's own clock stays recoverable from its origin.
+        self.assertAlmostEqual(a.clock_origin + a_collision.t_local, 100.0 + CONTACT_T, places=4)
+        self.assertAlmostEqual(b.clock_origin + b_collision.t_local, 250.0 + CONTACT_T, places=4)
+        self.assertEqual(a.graph.recorder["clock"]["origin_source_timestamp"], 100.0)
         # Trace frames are on each recorder's own 10 Hz grid; events keep exact times.
         for frame in a.trace:
             self.assertAlmostEqual(frame.t_local * 10, round(frame.t_local * 10), places=6)
@@ -71,22 +72,16 @@ class LocalClockTests(unittest.TestCase):
         self.assertEqual(before, after)
 
 
-class CollisionEpisodeTests(unittest.TestCase):
-    def test_repeated_collision_callbacks_collapse_into_one_event(self):
+class CollisionEventTests(unittest.TestCase):
+    def test_repeated_collision_callbacks_collapse_into_one_minimal_event(self):
         burst = [{"timestamp": 10.0 + 0.05 * k, "impulse": 100.0 + k} for k in range(21)]
         later = [{"timestamp": 13.0, "impulse": 42.0}]
-        events = collision_episodes("A", copy.deepcopy(burst + later), clock_origin=10.0,
-                                    cfg=CollisionConfig(merge_gap_s=0.5))
-        self.assertEqual(len(events), 2)
-        first, second = events
-        self.assertEqual(first.type, "COLLISION")
-        self.assertEqual(first.t_local, 0.0)
-        self.assertEqual(first.attributes["n_callbacks"], 21)
-        self.assertEqual(first.attributes["peak_impulse"], 120.0)
-        self.assertAlmostEqual(first.attributes["total_impulse"], sum(100.0 + k for k in range(21)))
-        self.assertAlmostEqual(first.attributes["duration_s"], 1.0)
-        self.assertEqual(second.t_local, 3.0)
-        self.assertEqual(second.attributes["n_callbacks"], 1)
+        events = collision_events("A", copy.deepcopy(burst + later), clock_origin=10.0,
+                                  cfg=CollisionConfig(merge_gap_s=0.5))
+        self.assertEqual([(event.type, event.t_local) for event in events], [("COLLISION", 0.0), ("COLLISION", 3.0)])
+        # Only the peak impulse, which alignment needs; callback details stay in the raw log.
+        self.assertEqual(events[0].attributes, {"peak_impulse": 120.0})
+        self.assertEqual(events[1].attributes, {"peak_impulse": 42.0})
 
 
 if __name__ == "__main__":
