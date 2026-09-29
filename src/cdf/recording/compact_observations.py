@@ -17,6 +17,18 @@ OBSERVATION_COLUMNS = (
     "radial_velocity_mps",
 )
 
+# The radial-velocity column keeps each source's own sign, in files and in the
+# loader.  Radar stores CARLA's native RadarDetection.velocity, which is the
+# range rate: negative while the range shrinks (verified on recordings, although
+# CARLA documents it as velocity towards the sensor).  Depth stores the locally
+# estimated closing speed: positive while the range shrinks.
+CLOSING_SPEED_SIGN = {"radar": -1.0, "depth": 1.0}
+
+
+def closing_speed(values: Any, source: str) -> Any:
+    """Radial velocities of ``source`` as closing speed: positive = approaching."""
+    return CLOSING_SPEED_SIGN[str(source).lower()] * values
+
 
 def _json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, indent=2, allow_nan=False)

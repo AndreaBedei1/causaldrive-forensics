@@ -7,8 +7,10 @@ and must stay independent of privileged simulator state.
 """
 
 from .compact_observations import (
+    CLOSING_SPEED_SIGN,
     CompactObservationWriter,
     CompactObservations,
+    closing_speed,
     load_observation_stream,
     load_observations,
 )
@@ -20,7 +22,7 @@ from .depth_velocity import (
 )
 
 __all__ = [
-    "CompactObservationWriter", "CompactObservations", "load_observations",
-    "load_observation_stream", "ALGORITHM_VERSION", "DepthAssociationStats",
+    "CLOSING_SPEED_SIGN", "CompactObservationWriter", "CompactObservations", "closing_speed",
+    "load_observations", "load_observation_stream", "ALGORITHM_VERSION", "DepthAssociationStats",
     "DepthRadialVelocityConfig", "DepthRadialVelocityEstimator",
 ]

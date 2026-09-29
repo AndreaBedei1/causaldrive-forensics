@@ -19,7 +19,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cdf.recording.compact_observations import CompactObservations, load_observation_stream  # noqa: E402
+from cdf.recording.compact_observations import CompactObservations, closing_speed, load_observation_stream  # noqa: E402
 
 
 def source_switch_demo(vehicle_dir: Path, source: str = "radar") -> Dict[str, float]:
@@ -54,7 +54,11 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.03,
                         altitude_tolerance_deg: float = 4.0,
                         range_tolerance_m: float = 3.0,
                         sign_deadband_mps: float = 0.5) -> Dict[str, float]:
-    """Compare compatible post-acquisition returns in the common FOV."""
+    """Compare compatible post-acquisition returns in the common FOV.
+
+    Radar (range rate) and depth (closing speed) store opposite signs, so both
+    are compared as closing speed: positive = approaching.
+    """
     radar = load_observation_stream(vehicle_dir, source="radar", common_region=True)
     depth = load_observation_stream(vehicle_dir, source="depth", common_region=True)
     pairs: List[Tuple[float, float]] = []
@@ -78,7 +82,8 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.03,
             ]
             if len(compatible):
                 radar_detection = compatible[int(np.argmin(np.abs(compatible[:, 0] - depth_detection[0])))]
-                pairs.append((float(radar_detection[3]), float(depth_detection[3])))
+                pairs.append((float(closing_speed(radar_detection[3], "radar")),
+                              float(closing_speed(depth_detection[3], "depth"))))
     if not pairs:
         return {"matched_pairs": 0.0, "depth_finite_coverage_percentage": _coverage(depth)}
     values = np.asarray(pairs, dtype=np.float64)
@@ -92,8 +97,8 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.03,
         "median_absolute_error_mps": float(np.median(np.abs(error))),
         "rmse_mps": float(np.sqrt(np.mean(error * error))),
         "bias_mps": float(np.mean(error)),
-        "median_radar_velocity_mps": float(np.median(values[:, 0])),
-        "median_depth_velocity_mps": float(np.median(values[:, 1])),
+        "median_radar_closing_speed_mps": float(np.median(values[:, 0])),
+        "median_depth_closing_speed_mps": float(np.median(values[:, 1])),
     }
 
 

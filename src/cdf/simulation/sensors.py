@@ -72,6 +72,7 @@ class RadarSensor:
             except queue.Empty: return None
             if int(m.frame) < int(frame): continue
             self._delivered += 1
+            # d.velocity is kept native: the range rate, negative while the target approaches.
             return {"frame": int(m.frame), "timestamp": float(m.timestamp), "sensor_id": self.spec.sensor_id,
                     "source": "radar",
                     "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": self.spec.mount_z,

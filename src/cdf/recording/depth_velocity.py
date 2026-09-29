@@ -2,7 +2,8 @@
 
 The estimator deliberately has no knowledge of actors, world state, radar, or
 semantic labels.  It matches only adjacent compact geometric observations and
-derives the sensor-relative range rate.
+derives the sensor-relative closing speed, (previous - current range) / dt:
+positive while the range shrinks, the opposite sign of a range rate.
 """
 
 from __future__ import annotations

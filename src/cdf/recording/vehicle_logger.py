@@ -78,7 +78,10 @@ class VehicleLogger:
                     "vertical_fov_deg": float(radar.get("vertical_fov_deg", 10.0)),
                     "range_m": float(radar.get("range_m", 90.0)),
                     "radial_velocity_status": "measured",
-                    "radial_velocity_sign": "positive_towards_sensor",
+                    # CARLA's native value is the range rate: negative while the
+                    # target approaches (compact_observations.closing_speed).
+                    "radial_velocity_sign": "positive_away_from_sensor",
+                    "radial_velocity_definition": "carla_range_rate",
                 },
             )
         self._camera_metadata = {
@@ -122,6 +125,7 @@ class VehicleLogger:
                 "radial_velocity_status": "temporally_estimated" if depth_velocity.get("enabled", True) else "disabled",
                 "radial_velocity_method": "temporal_geometric_association_v1",
                 "radial_velocity_sign": "positive_towards_sensor",
+                "radial_velocity_definition": "closing_speed",
                 "uses_ground_truth": False,
                 "uses_radar_for_estimation": False,
                 "association": depth_velocity,

@@ -4,7 +4,8 @@
 This module is intentionally outside the acquisition path.  It uses only the
 ground-truth state trace to assign anonymous radar/depth returns to physical
 participants and compares each sensor independently with a target-centre
-range derivative.
+closing speed.  Radar and depth store opposite signs, so both are converted
+with ``closing_speed`` (positive = approaching) before they are scored.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cdf.recording.compact_observations import load_observation_stream  # noqa: E402
+from cdf.recording.compact_observations import closing_speed, load_observation_stream  # noqa: E402
 
 
 def _rotation(roll: float, pitch: float, yaw: float) -> np.ndarray:
@@ -98,6 +99,7 @@ def _target_envelope(observer: Dict[str, Any], target: Dict[str, Any], extrinsic
 
 
 def _oracle_velocity(observer_states: List[Dict[str, Any]], target_states: List[Dict[str, Any]], extrinsic: Dict[str, Any], t: float) -> Optional[float]:
+    """Closing speed of the target centre: positive while the range shrinks."""
     def radius(at: float) -> Optional[float]:
         obs, target = _state_at(observer_states, at), _state_at(target_states, at)
         if obs is None or target is None:
@@ -161,7 +163,7 @@ def evaluate(run_root: Path, observer_id: str, target_id: str, deadband: float =
                     continue
                 depth, az, alt = map(float, detection[:3])
                 if lo <= depth <= hi and amin <= az <= amax and zmin <= alt <= zmax:
-                    candidates.append(float(detection[3]))
+                    candidates.append(float(closing_speed(detection[3], source)))
             if candidates:
                 pairs.append((float(np.median(candidates)), oracle))
         results[source] = _metrics(pairs, deadband, available)

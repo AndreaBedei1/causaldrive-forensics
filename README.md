@@ -34,15 +34,29 @@ Every NPZ uses the same four float32 columns:
 `detections[offsets[i]:offsets[i+1]]`; no padding or auxiliary association
 files are stored. Native radar data outside the comparison region is kept.
 
-Radar velocity is CARLA's native `RadarDetection.velocity`. CARLA 0.9.15
-documents it as velocity towards the sensor, so positive means closing range
-and negative means receding range. Depth velocity uses the same convention but
-is estimated locally from temporally associated compact depth observations:
+The radial-velocity column has a different sign per source, in files and in
+the loader:
+
+- Radar stores CARLA's native `RadarDetection.velocity`. CARLA 0.9.15
+  documents it as velocity towards the sensor, but the recorded values are the
+  range rate: negative while the range shrinks. Static scenery ahead of a
+  recorder driving at speed v returns about `-v*cos(azimuth)`.
+- Depth stores a closing speed, positive while the range shrinks. It is
+  estimated locally from temporally associated compact depth observations:
 
 ```text
 radial_velocity_mps = (previous_depth_m - current_depth_m) /
                       (current_timestamp - previous_timestamp)
 ```
+
+For the same approaching object radar is negative and depth positive. Use
+`closing_speed(values, source)` from `cdf.recording` (positive = approaching)
+before comparing or mixing the two. Metadata says `radial_velocity_sign:
+positive_away_from_sensor` with `radial_velocity_definition: carla_range_rate`
+for radar, and `positive_towards_sensor` with `closing_speed` for depth. Radar
+metadata written before this correction (including the S01-S03 and S15 runs in
+`traces/`) says `positive_towards_sensor`; that label is wrong for the stored
+radar values, which are unchanged.
 
 The estimator version is `temporal_geometric_association_v1`. It uses only
 depth range, azimuth, altitude, and actual CARLA sensor timestamps. It never
@@ -68,7 +82,8 @@ for observation_frame in stream:
     radial_velocities = observation_frame["detections"][:, 3]
 ```
 
-Changing only `source="radar"` to `source="depth"` selects the other stream.
+Changing only `source="radar"` to `source="depth"` selects the other stream;
+the velocity column keeps that source's sign (see above).
 `common_region=True` exposes the physical overlap (azimuth -45..45 degrees,
 altitude -5..5 degrees, range 0..90 m) without changing native files. There is
 no automatic fallback and no radar/depth fusion in this task. Radar and depth
@@ -85,8 +100,9 @@ The versioned `scripts/validate_observations.py` exposes timestamp, angular,
 range, and sign-deadband tolerances and reports them with every metric.
 `scripts/evaluate_radial_oracle.py` is a separate privileged evaluation tool:
 it uses ground-truth vehicle poses only offline to compare radar and depth
-target-level velocities with a target-centre range-rate oracle. It is never
-imported by acquisition or the online depth estimator.
+target-level velocities, both converted to closing speed, with a target-centre
+closing-speed oracle. It is never imported by acquisition or the online depth
+estimator.
 Metric depth decoding is
 `1000 * (R + 256*G + 65536*B) / (256**3 - 1)` metres for CARLA BGRA bytes.
 
@@ -107,7 +123,8 @@ python scripts/validate_observations.py traces/S01/run_0_crash/vehicles/A --metr
 ```
 
 The helper reports finite depth coverage and compatible radar/depth matched
-pairs, sign agreement, MAE, median absolute error, and RMSE. Because radar and
+pairs, sign agreement, MAE, median absolute error, and RMSE, comparing both
+sources as closing speed. Because radar and
 depth sense different surfaces and have different native extrinsics, unmatched
 returns and disagreement are expected and must be interpreted as sensing or
 association differences rather than hidden with ground truth.
@@ -158,10 +175,8 @@ Rules the code follows:
   it was persistent, at contact range at the matched collision, the only such
   track, and its speed matches that recorder's own speed. Otherwise it stays
   anonymous (`A:track_001`) with the blocking reason in `associations.json`.
-- Radar detection velocity is used as the range rate (negative while the range
-  shrinks). This was verified on the recordings: static scenery ahead returns
-  about `-v*cos(azimuth)`, although the radar metadata labels it
-  `positive_towards_sensor`.
+- Radar detection velocity is used as stored: the range rate (negative while
+  the range shrinks), whatever label older radar metadata carries.
 
 The event vocabulary is small: BRAKE_ONSET, THROTTLE_ONSET (strong throttle),
 FULL_STOP, STOP/YIELD_SIGN_DETECTED, TRACK_APPEARED, ENTERED_EGO_PATH, CLOSING,
