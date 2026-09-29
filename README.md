@@ -178,10 +178,15 @@ Rules the code follows:
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
 
-The event vocabulary is small: BRAKE_ONSET, THROTTLE_ONSET (strong throttle),
+The event vocabulary is small: BRAKE_EPISODE, THROTTLE_ONSET (strong throttle),
 FULL_STOP, STOP/YIELD_SIGN_DETECTED, TRACK_APPEARED, ENTERED_EGO_PATH, CLOSING,
 CRITICAL_TTC (range-based), TRACK_LOST and COLLISION (callbacks within 0.5 s
-form one contact). Adding a type means adding one extractor in `local.py`.
+form one contact). A BRAKE_EPISODE is one node per continuous braking action:
+it is stamped at its start and records start, end, duration, peak and mean
+brake, speed at start/end, minimum speed and whether the brake was released
+before the recording ended; a release shorter than 0.2 s does not split it.
+The individual brake values stay in the trace's EGO_CONTROL facts. Adding a
+type means adding one extractor in `local.py`.
 Graph edges are PRECEDES (time order) and SAME_TRACK. Parameters are in
 `configs/reconstruction.yaml`.
 

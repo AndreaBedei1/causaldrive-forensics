@@ -19,7 +19,8 @@ KIND_COLOURS = {"ACTION": "#fde68a", "PERCEPTION": "#bfdbfe", "FACT": "#e5e7eb",
 
 # The few attributes shown in the "Details" column of the node tables.
 DETAIL_KEYS = {
-    "BRAKE_ONSET": ["brake", "speed_mps"],
+    "BRAKE_EPISODE": ["start_t_local", "end_t_local", "duration_s", "peak_brake", "mean_brake",
+                      "speed_start_mps", "speed_end_mps", "min_speed_mps", "released"],
     "THROTTLE_ONSET": ["throttle", "speed_mps"],
     "FULL_STOP": ["stopped_for_s", "stopped_until_recording_end"],
     "STOP_SIGN_DETECTED": ["n_detections", "relevant_to_ego_path"],
@@ -100,8 +101,11 @@ def sentence(event_type: str, actor: Optional[str], subject: Optional[str],
     """One plain sentence per event; says only what the event's own evidence supports."""
     a = attributes
     who = _object(subject)
-    if event_type == "BRAKE_ONSET":
-        return "{0} started braking (brake {1:.2f} at {2:.1f} m/s)".format(actor, a["brake"], a["speed_mps"])
+    if event_type == "BRAKE_EPISODE":
+        return "{0} braked for {1:.2f} s{2} (peak {3:.2f}, mean {4:.2f}), from {5:.1f} to {6:.1f} m/s, {7}".format(
+            actor, a["duration_s"], " (already braking when its recording started)" if a.get("began_before_recording") else "",
+            a["peak_brake"], a["mean_brake"], a["speed_start_mps"], a["speed_end_mps"],
+            "then released the brake" if a["released"] else "still braking when its recording ended")
     if event_type == "THROTTLE_ONSET":
         return "{0} applied strong throttle ({1:.2f} at {2:.1f} m/s)".format(actor, a["throttle"], a["speed_mps"])
     if event_type == "FULL_STOP":
@@ -319,10 +323,22 @@ def _dot(name: str, title: str, nodes: Sequence[Dict[str, Any]], edges: Iterable
     return "\n".join(lines) + "\n"
 
 
+def _dot_label(event_type: str, who: str, when: Optional[str], attributes: Dict[str, Any]) -> List[str]:
+    """Type, who and when; a braking episode also shows its length and peak."""
+    episode = event_type == "BRAKE_EPISODE"
+    label = [event_type, who, "unaligned" if when is None else ("start=" if episode else "t=") + when]
+    if episode:
+        label += ["duration={0:.2f}s".format(attributes["duration_s"]),
+                  "peak={0:.2f}".format(attributes["peak_brake"])]
+    return label
+
+
 def local_graph_dot(graph: LocalGraph) -> str:
-    nodes = [{"id": node.node_id, "kind": node.kind,
-              "label": [node.event_type, node.actor_id + (" -> " + node.subject_id if node.subject_id else ""),
-                        "t={0:.2f}".format(node.t_local)]} for node in graph.nodes]
+    nodes = []
+    for node in graph.nodes:
+        who = node.actor_id + (" -> " + node.subject_id if node.subject_id else "")
+        nodes.append({"id": node.node_id, "kind": node.kind,
+                      "label": _dot_label(node.event_type, who, "{0:.2f}".format(node.t_local), node.attributes)})
     return _dot("local_" + graph.owner, "Local graph - vehicle {0} (local time)".format(graph.owner),
                 nodes, graph.edges)
 
@@ -332,8 +348,9 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
     for node in graph.nodes:
         who = " + ".join(node.participants) if node.actor_id is None else (
             node.actor_id + (" -> " + node.subject_id if node.subject_id else ""))
-        when = "unaligned" if node.t_global is None else "t={0:+.2f}".format(node.t_global)
-        nodes.append({"id": node.node_id, "kind": node.kind, "label": [node.event_type, who, when],
+        when = None if node.t_global is None else "{0:+.2f}".format(node.t_global)
+        nodes.append({"id": node.node_id, "kind": node.kind,
+                      "label": _dot_label(node.event_type, who, when, node.attributes),
                       "merged": len(node.observations) > 1})
     return _dot("global", "Global graph - {0} (t=0 at the matched collision)".format(title), nodes, graph.edges)
 

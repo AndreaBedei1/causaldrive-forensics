@@ -123,6 +123,8 @@ class BrakeEpisodePipelineTests(unittest.TestCase):
         self.assertEqual([n.event_type for n in a.graph.nodes].count("BRAKE_EPISODE"), 1)
         self.assertEqual([n.event_type for n in result.graph.nodes].count("BRAKE_EPISODE"), 1)
         self.assertIn("BRAKE_EPISODE", texts["reconstruction/A/local_graph.dot"])
+        self.assertIn("duration=", texts["reconstruction/A/local_graph.dot"])
+        self.assertIn("A braked for 3.00 s", texts["reconstruction/A/local_graph.md"])
 
     def test_local_trace_keeps_every_brake_value_while_the_graph_has_one_node(self):
         with tempfile.TemporaryDirectory() as tmp:
