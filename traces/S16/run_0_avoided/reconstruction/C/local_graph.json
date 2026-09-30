@@ -1,0 +1,80 @@
+{
+  "graph_id": "C",
+  "owner": "C",
+  "recorder": {
+    "owner": "C",
+    "clock": {
+      "origin_source_timestamp": 531.2718035392463,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "incident_context": {
+      "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+      "road_environment": "urban road, multiple lanes",
+      "speed_limit_kmh": 50
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 9.95,
+    "trace_hz": 10.0,
+    "trace_frames": 101,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "C:e01",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 0.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e02",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 0.3,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e03",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 0.3,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "C:e01",
+      "to": "C:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e01",
+      "to": "C:e03",
+      "relation": "PRECEDES"
+    }
+  ],
+  "tracks": []
+}

@@ -1,0 +1,28 @@
+digraph "global" {
+  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Global graph - S02/run_0_avoided (t=0 at the matched collision)"];
+  node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
+  edge [fontname=Helvetica, fontsize=8];
+  "g01" [label="MOVING_START\nA\nunaligned", fillcolor="#e5e7eb"];
+  "g02" [label="TRACK_APPEARED\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g03" [label="CLOSING_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g04" [label="STRONG_THROTTLE_START\nA\nunaligned", fillcolor="#fde68a"];
+  "g05" [label="STRONG_THROTTLE_END\nA\nunaligned", fillcolor="#fde68a"];
+  "g06" [label="CRITICAL_TTC_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g07" [label="BRAKE_START\nA\nunaligned", fillcolor="#fde68a"];
+  "g08" [label="HARD_BRAKE_START\nA\nunaligned", fillcolor="#fde68a"];
+  "g09" [label="CRITICAL_TTC_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g10" [label="EGO_PATH_ENTRY\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g11" [label="HARD_BRAKE_END\nA\nunaligned", fillcolor="#fde68a"];
+  "g12" [label="CLOSING_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g13" [label="BRAKE_END\nA\nunaligned", fillcolor="#fde68a"];
+  "g14" [label="MOVING_START\nB\nunaligned", fillcolor="#e5e7eb"];
+  "g15" [label="STRONG_THROTTLE_START\nB\nunaligned", fillcolor="#fde68a"];
+  "g16" [label="STRONG_THROTTLE_END\nB\nunaligned", fillcolor="#fde68a"];
+  "g17" [label="BRAKE_START\nB\nunaligned", fillcolor="#fde68a"];
+  "g18" [label="BRAKE_END\nB\nunaligned", fillcolor="#fde68a"];
+  "g02" -> "g03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+}

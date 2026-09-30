@@ -4,16 +4,21 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 19.181726828217506,
+      "origin_source_timestamp": 29.69283339381218,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
+    "incident_context": {
+      "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+      "road_environment": "urban road, vehicles in the same lane",
+      "speed_limit_kmh": 50
+    },
     "start_t_local": 0.0,
     "end_t_local": 11.95,
     "trace_hz": 10.0,
-    "trace_frames": 120,
+    "trace_frames": 121,
     "inputs": [
       "collisions.jsonl",
       "controls.jsonl",
@@ -25,58 +30,92 @@
   "nodes": [
     {
       "node_id": "B:e01",
-      "event_type": "BRAKE_EPISODE",
-      "kind": "ACTION",
-      "actor_id": "B",
-      "subject_id": null,
-      "t_local": 3.95,
-      "attributes": {
-        "start_t_local": 3.95,
-        "end_t_local": 11.95,
-        "duration_s": 8.0,
-        "peak_brake": 1.0,
-        "mean_brake": 1.0,
-        "speed_start_mps": 13.78,
-        "speed_end_mps": 0.0,
-        "min_speed_mps": 0.0,
-        "delta_speed_mps": -13.78,
-        "released": false,
-        "began_before_recording": false,
-        "n_samples": 161,
-        "t_source": 23.131726887077093
-      },
-      "source": "controls",
-      "confidence": null
-    },
-    {
-      "node_id": "B:e02",
-      "event_type": "FULL_STOP",
+      "event_type": "MOVING_START",
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 5.15,
+      "t_local": 0.0,
       "attributes": {
-        "speed_mps": 0.006,
-        "stopped_for_s": 6.8,
-        "stopped_until_recording_end": true,
-        "t_source": 24.331727
+        "active_at_first_observation": true
       },
       "source": "ego",
       "confidence": null
     },
     {
+      "node_id": "B:e02",
+      "event_type": "STRONG_THROTTLE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 0.4,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
       "node_id": "B:e03",
+      "event_type": "STRONG_THROTTLE_END",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 1.75,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e04",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 3.95,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e05",
+      "event_type": "HARD_BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 3.95,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e06",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.15,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e07",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.15,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e08",
       "event_type": "COLLISION",
       "kind": "OUTCOME",
       "actor_id": "B",
       "subject_id": null,
       "t_local": 6.5,
       "attributes": {
-        "peak_impulse": 17663.06,
-        "total_impulse": 17663.06,
-        "duration_s": 0.0,
-        "n_callbacks": 1,
-        "t_source": 25.681726925075054
+        "peak_impulse": 17663.06
       },
       "source": "collision_sensor",
       "confidence": 1.0
@@ -91,6 +130,46 @@
     {
       "from": "B:e02",
       "to": "B:e03",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e04",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e08",
       "relation": "PRECEDES"
     }
   ],

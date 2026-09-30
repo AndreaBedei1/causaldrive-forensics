@@ -1,0 +1,48 @@
+{
+  "run": "S01/run_0_avoided",
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 1; max |t_global error| None s",
+  "privileged_assumption": "recorder raw clocks are CARLA simulator time",
+  "collisions": [],
+  "alignment": [
+    {
+      "graph": "A",
+      "status": "UNALIGNED",
+      "estimated_anchor_t_local": null,
+      "true_contact_t_local": null,
+      "error_s": null
+    },
+    {
+      "graph": "B",
+      "status": "UNALIGNED",
+      "estimated_anchor_t_local": null,
+      "true_contact_t_local": null,
+      "error_s": null
+    }
+  ],
+  "relative_clock_offsets": [],
+  "event_timing": {
+    "nodes": 0,
+    "max_abs_error_s": null,
+    "order_pairs": 0,
+    "order_concordant": 0
+  },
+  "tracks": [
+    {
+      "track": "A:track_001",
+      "decision": "A:track_001",
+      "status": "ANONYMOUS",
+      "true_identity": "B",
+      "median_box_distance_m": {
+        "B": 0.0
+      },
+      "verdict": "left anonymous (true identity B)",
+      "samples": 130,
+      "raw_rmse_to_surface_m": 0.814,
+      "smoothed_rmse_to_surface_m": 0.846,
+      "smoothed_rmse_to_centre_m": 1.273,
+      "raw_difference_speed_rmse_mps": 2.099,
+      "speed_rmse_mps": 0.114
+    }
+  ],
+  "clock_shift_check": null
+}

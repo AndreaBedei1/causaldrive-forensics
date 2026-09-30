@@ -1,0 +1,22 @@
+[
+  {
+    "local_graph": "A",
+    "local_track": "track_001",
+    "global_entity": "B",
+    "status": "ASSOCIATED",
+    "confidence": 0.97,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 3184.37 vs 3184.37 N*s)",
+      "tracked for 5.25 s before the matched collision",
+      "at the contact: minimum range 1.19 m in the last 0.50 s before the collision",
+      "the only track of A at the contact",
+      "track speed agrees with B's own speed: RMSE 0.36 m/s over 3.0 s"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  }
+]

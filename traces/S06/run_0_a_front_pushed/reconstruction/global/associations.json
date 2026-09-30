@@ -1,0 +1,66 @@
+[
+  {
+    "local_graph": "A",
+    "local_track": "track_001",
+    "global_entity": "B",
+    "status": "ASSOCIATED",
+    "confidence": 0.67,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 11621.71 vs 11621.71 N*s)",
+      "tracked for 5.90 s before the matched collision",
+      "at the contact: minimum range 1.23 m in the last 0.50 s before the collision",
+      "the only track of A at the contact",
+      "track speed agrees with B's own speed: RMSE 1.33 m/s over 3.0 s"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "A",
+    "local_track": "track_002",
+    "global_entity": "A:track_002",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 11621.71 vs 11621.71 N*s)",
+      "tracked for 4.35 s before the matched collision",
+      "not at the contact: last seen 2.95 s before the matched collision (window 0.50 s)",
+      "speed not comparable with B's own speed before the collision"
+    ],
+    "blocking": [
+      "not at the contact: last seen 2.95 s before the matched collision (window 0.50 s)",
+      "speed not comparable with B's own speed before the collision"
+    ],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "B:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 11621.71 vs 11621.71 N*s)",
+      "tracked for 5.90 s before the matched collision",
+      "at the contact: minimum range 1.24 m in the last 0.50 s before the collision",
+      "the only track of B at the contact",
+      "track speed disagrees with A's own speed: RMSE 10.78 m/s (> 1.50)"
+    ],
+    "blocking": [
+      "track speed disagrees with A's own speed: RMSE 10.78 m/s (> 1.50)"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  }
+]

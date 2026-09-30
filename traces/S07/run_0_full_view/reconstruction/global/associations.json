@@ -1,0 +1,44 @@
+[
+  {
+    "local_graph": "A",
+    "local_track": "track_001",
+    "global_entity": "B",
+    "status": "ASSOCIATED",
+    "confidence": 0.98,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 31406.82 vs 31406.82 N*s)",
+      "tracked for 5.70 s before the matched collision",
+      "at the contact: minimum range 0.72 m in the last 0.50 s before the collision",
+      "the only track of A at the contact",
+      "track speed agrees with B's own speed: RMSE 0.28 m/s over 3.0 s"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "B:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 31406.82 vs 31406.82 N*s)",
+      "tracked for 5.70 s before the matched collision",
+      "not at the contact: minimum range 10.80 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed disagrees with A's own speed: RMSE 10.21 m/s (> 1.50)"
+    ],
+    "blocking": [
+      "not at the contact: minimum range 10.80 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed disagrees with A's own speed: RMSE 10.21 m/s (> 1.50)"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  }
+]

@@ -1,0 +1,306 @@
+{
+  "entities": [
+    {
+      "entity_id": "A",
+      "kind": "recorder",
+      "clock": "UNALIGNED",
+      "observed_as": []
+    },
+    {
+      "entity_id": "B",
+      "kind": "recorder",
+      "clock": "UNALIGNED",
+      "observed_as": []
+    },
+    {
+      "entity_id": "A:track_001",
+      "kind": "anonymous_track",
+      "observed_by": "A",
+      "candidate": null
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "g01",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e01",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g02",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "A:track_001",
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e02",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g03",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "A:track_001",
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e03",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g04",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "A:track_001",
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e04",
+          "t_local": 1.4
+        }
+      ]
+    },
+    {
+      "node_id": "g05",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "A:track_001",
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e05",
+          "t_local": 2.55
+        }
+      ]
+    },
+    {
+      "node_id": "g06",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e06",
+          "t_local": 2.85
+        }
+      ]
+    },
+    {
+      "node_id": "g07",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "A:track_001",
+      "participants": [
+        "A"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e07",
+          "t_local": 5.35
+        }
+      ]
+    },
+    {
+      "node_id": "g08",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": null,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e01",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g09",
+      "event_type": "STRONG_THROTTLE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": null,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e02",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g10",
+      "event_type": "STRONG_THROTTLE_END",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": null,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e03",
+          "t_local": 1.25
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "g02",
+      "to": "g03",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g02",
+      "to": "g04",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g02",
+      "to": "g05",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g02",
+      "to": "g07",
+      "relation": "SAME_TRACK"
+    }
+  ],
+  "run": "S13/run_0_safe_lane_change",
+  "incident_context": {
+    "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+    "road_environment": "urban road, two lanes",
+    "speed_limit_kmh": 50
+  },
+  "reconstruction_config": {
+    "trace_hz": 10.0,
+    "collision": {
+      "merge_gap_s": 0.5
+    },
+    "tracking": {
+      "min_height_m": 0.3,
+      "max_height_m": 2.5,
+      "moving_speed_mps": 1.0,
+      "cluster_distance_m": 2.0,
+      "max_association_distance_m": 2.5,
+      "max_velocity_mismatch_mps": 4.0,
+      "max_track_gap_s": 0.5,
+      "min_track_frames": 5,
+      "measurement_std_m": 0.5,
+      "radial_speed_std_mps": 0.3,
+      "acceleration_std_mps2": 6.0
+    },
+    "semantics": {
+      "brake_onset_threshold": 0.1,
+      "hard_brake_threshold": 0.9,
+      "strong_throttle_threshold": 0.8,
+      "full_stop_speed_mps": 0.3,
+      "speed_limit_hysteresis_kmh": 1.0,
+      "closing_speed_threshold_mps": 1.0,
+      "critical_ttc_s": 2.0,
+      "path_half_width_m": 1.5
+    },
+    "fusion": {
+      "impulse_tolerance": 0.1,
+      "contact_window_s": 0.5,
+      "contact_range_m": 3.5,
+      "min_track_persistence_s": 1.0,
+      "speed_consistency_mps": 1.5
+    }
+  }
+}

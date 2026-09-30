@@ -1,0 +1,93 @@
+{
+  "run": "S10/run_0_rolls_through",
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
+  "privileged_assumption": "recorder raw clocks are CARLA simulator time",
+  "collisions": [
+    {
+      "participants": [
+        "A",
+        "B"
+      ],
+      "sim_time": 250.38908004015684,
+      "peak_impulse": 12489.76592698024,
+      "reconstructed_as": "g20",
+      "participants_correct": true,
+      "report_timing_error_s": 0.0
+    }
+  ],
+  "alignment": [
+    {
+      "graph": "A",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 5.25,
+      "true_contact_t_local": 5.25,
+      "error_s": 0.0
+    },
+    {
+      "graph": "B",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 5.25,
+      "true_contact_t_local": 5.25,
+      "error_s": 0.0
+    }
+  ],
+  "relative_clock_offsets": [
+    {
+      "pair": "B - A",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
+    }
+  ],
+  "event_timing": {
+    "nodes": 34,
+    "max_abs_error_s": 0.0,
+    "order_pairs": 526,
+    "order_concordant": 526
+  },
+  "tracks": [
+    {
+      "track": "A:track_001",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "true_identity": "B",
+      "median_box_distance_m": {
+        "B": 0.0
+      },
+      "verdict": "correct",
+      "samples": 15,
+      "raw_rmse_to_surface_m": 0.744,
+      "smoothed_rmse_to_surface_m": 0.801,
+      "smoothed_rmse_to_centre_m": 1.218,
+      "raw_difference_speed_rmse_mps": 3.7,
+      "speed_rmse_mps": 0.451
+    },
+    {
+      "track": "B:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0
+      },
+      "verdict": "correct",
+      "samples": 133,
+      "raw_rmse_to_surface_m": 0.722,
+      "smoothed_rmse_to_surface_m": 0.72,
+      "smoothed_rmse_to_centre_m": 1.27,
+      "raw_difference_speed_rmse_mps": 2.674,
+      "speed_rmse_mps": 0.33
+    }
+  ],
+  "clock_shift_check": {
+    "shifted_recorder": "B",
+    "shift_s": 0.73,
+    "shifted_local_collision_times": [
+      5.98
+    ],
+    "global_graph_identical": true,
+    "offset_to_global_before": -5.25,
+    "offset_to_global_after": -5.98,
+    "offset_change_s": -0.73
+  }
+}

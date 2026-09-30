@@ -1,0 +1,59 @@
+{
+  "method": "collision_anchor",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+  "reference_event": "collision_001",
+  "graphs": {
+    "A": {
+      "status": "ALIGNED",
+      "anchor_node": "A:e11",
+      "anchor_t_local": 4.25,
+      "offset_to_global": -4.25,
+      "reason": "reported the reference collision collision_001"
+    },
+    "B": {
+      "status": "ALIGNED",
+      "anchor_node": "B:e11",
+      "anchor_t_local": 4.25,
+      "offset_to_global": -4.25,
+      "reason": "reported the reference collision collision_001"
+    },
+    "C": {
+      "status": "UNALIGNED",
+      "anchor_node": null,
+      "anchor_t_local": null,
+      "offset_to_global": null,
+      "reason": "it recorded no collision to anchor on"
+    }
+  },
+  "relative_clock_offsets_s": {
+    "B - A": 0.0
+  },
+  "matched_events": [
+    {
+      "event_id": "collision_001",
+      "graphs": [
+        "A",
+        "B"
+      ],
+      "nodes": {
+        "A": "A:e11",
+        "B": "B:e11"
+      },
+      "t_local": {
+        "A": 4.25,
+        "B": 4.25
+      },
+      "peak_impulse": {
+        "A": 12077.22,
+        "B": 12077.22
+      },
+      "impulse_similarity": 1.0,
+      "confidence": 1.0,
+      "evidence": [
+        "A and B both recorded a collision",
+        "peak impulses 12077.22 vs 12077.22 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
+      ]
+    }
+  ]
+}

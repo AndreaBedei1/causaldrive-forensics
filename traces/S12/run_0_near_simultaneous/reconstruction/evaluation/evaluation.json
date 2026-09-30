@@ -1,0 +1,163 @@
+{
+  "run": "S12/run_0_near_simultaneous",
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 8; max |t_global error| 0.0 s",
+  "privileged_assumption": "recorder raw clocks are CARLA simulator time",
+  "collisions": [
+    {
+      "participants": [
+        "A",
+        "B"
+      ],
+      "sim_time": 421.3776031918824,
+      "peak_impulse": 4032.4899346424313,
+      "reconstructed_as": "g44",
+      "participants_correct": true,
+      "report_timing_error_s": 0.0
+    }
+  ],
+  "alignment": [
+    {
+      "graph": "A",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 9.5,
+      "true_contact_t_local": 9.5,
+      "error_s": 0.0
+    },
+    {
+      "graph": "B",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 9.5,
+      "true_contact_t_local": 9.5,
+      "error_s": 0.0
+    }
+  ],
+  "relative_clock_offsets": [
+    {
+      "pair": "B - A",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
+    }
+  ],
+  "event_timing": {
+    "nodes": 79,
+    "max_abs_error_s": 0.0,
+    "order_pairs": 2929,
+    "order_concordant": 2929
+  },
+  "tracks": [
+    {
+      "track": "A:track_001",
+      "decision": "A:track_001",
+      "status": "ANONYMOUS",
+      "true_identity": "B",
+      "median_box_distance_m": {
+        "B": 0.0
+      },
+      "verdict": "left anonymous (true identity B)",
+      "samples": 3,
+      "raw_rmse_to_surface_m": 0.427,
+      "smoothed_rmse_to_surface_m": 0.426,
+      "smoothed_rmse_to_centre_m": 1.68,
+      "raw_difference_speed_rmse_mps": 5.148,
+      "speed_rmse_mps": 0.174
+    },
+    {
+      "track": "A:track_002",
+      "decision": "A:track_002",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 87.02
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_003",
+      "decision": "A:track_003",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 85.51
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_004",
+      "decision": "A:track_004",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 15.87
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_005",
+      "decision": "A:track_005",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 17.99
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_006",
+      "decision": "A:track_006",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 33.88
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_007",
+      "decision": "A:track_007",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 25.36
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_008",
+      "decision": "A:track_008",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 38.75
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "B:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0
+      },
+      "verdict": "correct",
+      "samples": 71,
+      "raw_rmse_to_surface_m": 0.258,
+      "smoothed_rmse_to_surface_m": 0.327,
+      "smoothed_rmse_to_centre_m": 0.963,
+      "raw_difference_speed_rmse_mps": 6.168,
+      "speed_rmse_mps": 1.022
+    }
+  ],
+  "clock_shift_check": {
+    "shifted_recorder": "B",
+    "shift_s": 0.73,
+    "shifted_local_collision_times": [
+      10.23
+    ],
+    "global_graph_identical": true,
+    "offset_to_global_before": -9.5,
+    "offset_to_global_after": -10.23,
+    "offset_change_s": -0.73
+  }
+}

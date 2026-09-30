@@ -1,0 +1,2286 @@
+[
+ {
+  "run": "S03/run_0_crash",
+  "recorder": "A",
+  "end_t_local": 15.15,
+  "stop_starts": [
+   4.9
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#58",
+    "trigger_reached_t_local": 2.85,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.9": -17.9
+    }
+   },
+   {
+    "sign_actor": "stop#59",
+    "trigger_reached_t_local": 2.85,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.9": -18.1
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S03/run_0_crash",
+  "recorder": "B",
+  "end_t_local": 15.15,
+  "stop_starts": [
+   4.55
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#54",
+    "trigger_reached_t_local": 3.5,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -11.4
+    }
+   },
+   {
+    "sign_actor": "stop#57",
+    "trigger_reached_t_local": 3.5,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -11.7
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S04/run_0_yield",
+  "recorder": "A",
+  "end_t_local": 9.95,
+  "stop_starts": [],
+  "min_speed_mps": 9.33,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 9.15,
+    "closest_to_trigger_m": 0.7,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#58",
+    "trigger_reached_t_local": 3.7,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#59",
+    "trigger_reached_t_local": 3.7,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 6.4,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e06",
+    "start_t_local": 8.15,
+    "end_node": "A:e07",
+    "end_t_local": 8.45,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 8.6,
+      "right_m": 4.5,
+      "bearing_deg": 27.7,
+      "in_fov": true
+     },
+     "stop#58": {
+      "forward_m": -44.8,
+      "right_m": 4.2,
+      "bearing_deg": 174.7,
+      "in_fov": false
+     },
+     "stop#59": {
+      "forward_m": -44.8,
+      "right_m": 0.7,
+      "bearing_deg": 179.2,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -18.5,
+      "right_m": -3.5,
+      "bearing_deg": -169.4,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.6,
+      "right_m": 4.6,
+      "bearing_deg": 39.6,
+      "in_fov": true
+     },
+     "stop#58": {
+      "forward_m": -47.8,
+      "right_m": 3.6,
+      "bearing_deg": 175.7,
+      "in_fov": false
+     },
+     "stop#59": {
+      "forward_m": -47.7,
+      "right_m": 0.1,
+      "bearing_deg": 179.9,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -21.4,
+      "right_m": -3.7,
+      "bearing_deg": -170.2,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S04/run_0_yield",
+  "recorder": "B",
+  "end_t_local": 9.95,
+  "stop_starts": [
+   3.9
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#54",
+    "trigger_reached_t_local": 3.15,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.9": -6.0
+    }
+   },
+   {
+    "sign_actor": "stop#57",
+    "trigger_reached_t_local": 3.15,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.9": -5.9
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S05/run_0_crash",
+  "recorder": "A",
+  "end_t_local": 14.45,
+  "stop_starts": [
+   4.55
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#58",
+    "trigger_reached_t_local": 2.3,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -22.0
+    }
+   },
+   {
+    "sign_actor": "stop#59",
+    "trigger_reached_t_local": 2.35,
+    "closest_to_trigger_m": 0.3,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -21.7
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S05/run_0_crash",
+  "recorder": "B",
+  "end_t_local": 14.45,
+  "stop_starts": [
+   4.3
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#54",
+    "trigger_reached_t_local": 2.5,
+    "closest_to_trigger_m": 0.3,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.3": 9.7
+    }
+   },
+   {
+    "sign_actor": "stop#57",
+    "trigger_reached_t_local": 2.5,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.3": 12.4
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S08/run_0_crash",
+  "recorder": "A",
+  "end_t_local": 15.15,
+  "stop_starts": [
+   4.9
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#58",
+    "trigger_reached_t_local": 2.85,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.9": -17.9
+    }
+   },
+   {
+    "sign_actor": "stop#59",
+    "trigger_reached_t_local": 2.85,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.9": -18.1
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S08/run_0_crash",
+  "recorder": "B",
+  "end_t_local": 15.15,
+  "stop_starts": [
+   4.55
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#54",
+    "trigger_reached_t_local": 3.5,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -11.4
+    }
+   },
+   {
+    "sign_actor": "stop#57",
+    "trigger_reached_t_local": 3.5,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.55": -11.7
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S08/run_0_crash",
+  "recorder": "C",
+  "end_t_local": 15.15,
+  "stop_starts": [
+   2.85
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 15.15,
+    "closest_to_trigger_m": 1.9,
+    "stops_before_trigger": [
+     2.85
+    ],
+    "at_stops": {
+     "2.85": 0.6
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S10/run_0_rolls_through",
+  "recorder": "A",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   5.4
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 3.2,
+    "closest_to_trigger_m": 0.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.4": -11.3
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.4": -28.0
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 1.85,
+    "end_node": "A:e05",
+    "end_t_local": 2.15,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 8.4,
+      "right_m": 4.5,
+      "bearing_deg": 28.3,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -18.7,
+      "right_m": -3.4,
+      "bearing_deg": -169.6,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.8,
+      "right_m": 4.6,
+      "bearing_deg": 38.6,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.3,
+      "right_m": -3.6,
+      "bearing_deg": -170.4,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S10/run_0_rolls_through",
+  "recorder": "B",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   5.35
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.45,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.35": -9.3
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S10/run_0_stops_safely",
+  "recorder": "A",
+  "end_t_local": 9.55,
+  "stop_starts": [
+   3.35
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 3.0,
+    "closest_to_trigger_m": 0.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.35": -2.4
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.35": -28.0
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 1.9,
+    "end_node": "A:e03",
+    "end_t_local": 2.15,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 7.9,
+      "right_m": 4.5,
+      "bearing_deg": 29.6,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -19.2,
+      "right_m": -3.4,
+      "bearing_deg": -169.8,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.7,
+      "right_m": 4.6,
+      "bearing_deg": 38.9,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.3,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S10/run_0_stops_safely",
+  "recorder": "B",
+  "end_t_local": 9.55,
+  "stop_starts": [],
+  "min_speed_mps": 6.82,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.45,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 7.65,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e08",
+    "start_t_local": 7.55,
+    "end_node": "B:e09",
+    "end_t_local": 7.75,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -32.0,
+      "right_m": 0.1,
+      "bearing_deg": 179.8,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": -0.6,
+      "right_m": -3.6,
+      "bearing_deg": -99.5,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -34.0,
+      "right_m": 0.1,
+      "bearing_deg": 179.8,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": -2.6,
+      "right_m": -3.6,
+      "bearing_deg": -125.6,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S10/run_0_stops_then_proceeds",
+  "recorder": "A",
+  "end_t_local": 13.35,
+  "stop_starts": [
+   3.35
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 3.0,
+    "closest_to_trigger_m": 0.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.35": -2.4
+    }
+   },
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 10.0,
+    "closest_to_trigger_m": 2.6,
+    "stops_before_trigger": [
+     3.35
+    ],
+    "at_stops": {
+     "3.35": 10.4
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.35": -28.0
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 1.75,
+    "end_node": "A:e03",
+    "end_t_local": 2.15,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 9.2,
+      "right_m": 4.5,
+      "bearing_deg": 26.0,
+      "in_fov": true
+     },
+     "stop#36": {
+      "forward_m": 18.3,
+      "right_m": -17.7,
+      "bearing_deg": -44.1,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -17.9,
+      "right_m": -3.4,
+      "bearing_deg": -169.1,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.7,
+      "right_m": 4.6,
+      "bearing_deg": 38.9,
+      "in_fov": true
+     },
+     "stop#36": {
+      "forward_m": 15.0,
+      "right_m": -17.5,
+      "bearing_deg": -49.3,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -21.3,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S10/run_0_stops_then_proceeds",
+  "recorder": "B",
+  "end_t_local": 13.35,
+  "stop_starts": [],
+  "min_speed_mps": 6.82,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.45,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 7.65,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e08",
+    "start_t_local": 7.6,
+    "end_node": "B:e09",
+    "end_t_local": 7.7,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -32.5,
+      "right_m": 0.1,
+      "bearing_deg": 179.8,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": -1.1,
+      "right_m": -3.6,
+      "bearing_deg": -107.0,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -33.5,
+      "right_m": 0.1,
+      "bearing_deg": 179.8,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": -2.1,
+      "right_m": -3.6,
+      "bearing_deg": -120.1,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S11/run_0_rolls_through",
+  "recorder": "A",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   6.05
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.35,
+    "closest_to_trigger_m": 0.3,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "6.05": -14.9
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S11/run_0_rolls_through",
+  "recorder": "B",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   5.7
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 3.85,
+    "closest_to_trigger_m": 0.4,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.7": -8.5
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.7": -33.9
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e06",
+    "start_t_local": 2.1,
+    "end_node": "B:e08",
+    "end_t_local": 2.45,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 7.8,
+      "right_m": 4.5,
+      "bearing_deg": 30.2,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -19.3,
+      "right_m": -3.4,
+      "bearing_deg": -169.9,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.1,
+      "right_m": 4.6,
+      "bearing_deg": 41.7,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -22.0,
+      "right_m": -3.5,
+      "bearing_deg": -170.9,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S11/run_0_stops_safely",
+  "recorder": "A",
+  "end_t_local": 9.55,
+  "stop_starts": [],
+  "min_speed_mps": 9.33,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.35,
+    "closest_to_trigger_m": 0.3,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 7.55,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S11/run_0_stops_safely",
+  "recorder": "B",
+  "end_t_local": 9.55,
+  "stop_starts": [
+   3.25
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 4.45,
+    "closest_to_trigger_m": 1.0,
+    "stops_before_trigger": [
+     3.25
+    ],
+    "at_stops": {
+     "3.25": -0.6
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.25": -26.6
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e04",
+    "start_t_local": 2.1,
+    "end_node": "B:e05",
+    "end_t_local": 2.35,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 7.7,
+      "right_m": 4.5,
+      "bearing_deg": 30.2,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -19.4,
+      "right_m": -3.4,
+      "bearing_deg": -169.9,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.5,
+      "right_m": 4.6,
+      "bearing_deg": 40.3,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.5,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S11/run_0_stops_then_proceeds",
+  "recorder": "A",
+  "end_t_local": 13.35,
+  "stop_starts": [],
+  "min_speed_mps": 9.33,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 4.35,
+    "closest_to_trigger_m": 0.3,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 7.55,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S11/run_0_stops_then_proceeds",
+  "recorder": "B",
+  "end_t_local": 13.35,
+  "stop_starts": [
+   3.25
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 7.6,
+    "closest_to_trigger_m": 0.5,
+    "stops_before_trigger": [
+     3.25
+    ],
+    "at_stops": {
+     "3.25": -0.6
+    }
+   },
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 10.35,
+    "closest_to_trigger_m": 2.4,
+    "stops_before_trigger": [
+     3.25
+    ],
+    "at_stops": {
+     "3.25": 11.5
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.25": -26.6
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e04",
+    "start_t_local": 2.1,
+    "end_node": "B:e05",
+    "end_t_local": 2.4,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 7.7,
+      "right_m": 4.5,
+      "bearing_deg": 30.2,
+      "in_fov": true
+     },
+     "stop#36": {
+      "forward_m": 16.8,
+      "right_m": -17.7,
+      "bearing_deg": -46.5,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -19.4,
+      "right_m": -3.4,
+      "bearing_deg": -169.9,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.0,
+      "right_m": 4.7,
+      "bearing_deg": 43.0,
+      "in_fov": true
+     },
+     "stop#36": {
+      "forward_m": 14.4,
+      "right_m": -17.4,
+      "bearing_deg": -50.4,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -22.0,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_a_arrives_first",
+  "recorder": "A",
+  "end_t_local": 16.45,
+  "stop_starts": [
+   3.4
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 11.0,
+    "closest_to_trigger_m": 3.0,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": 13.4
+    }
+   },
+   {
+    "sign_actor": "stop#56",
+    "trigger_reached_t_local": 7.4,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": 0.8
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 0.65,
+    "end_node": "A:e03",
+    "end_t_local": 2.25,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#53": {
+      "forward_m": 35.4,
+      "right_m": -18.9,
+      "bearing_deg": -28.0,
+      "in_fov": true
+     },
+     "stop#56": {
+      "forward_m": 22.8,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#53": {
+      "forward_m": 21.5,
+      "right_m": -18.9,
+      "bearing_deg": -41.3,
+      "in_fov": true
+     },
+     "stop#56": {
+      "forward_m": 8.9,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_a_arrives_first",
+  "recorder": "B",
+  "end_t_local": 16.45,
+  "stop_starts": [
+   4.7
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#29",
+    "trigger_reached_t_local": 11.85,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     4.7
+    ],
+    "at_stops": {
+     "4.7": 2.0
+    }
+   },
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 11.8,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [
+     4.7
+    ],
+    "at_stops": {
+     "4.7": 1.4
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "B:e04",
+    "start_t_local": 2.1,
+    "end_node": "B:e07",
+    "end_t_local": 4.0,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#29": {
+      "forward_m": 15.6,
+      "right_m": 4.5,
+      "bearing_deg": 16.1,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 15.1,
+      "right_m": -3.5,
+      "bearing_deg": -13.0,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#29": {
+      "forward_m": 5.1,
+      "right_m": 4.5,
+      "bearing_deg": 41.3,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 4.6,
+      "right_m": -3.5,
+      "bearing_deg": -37.2,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_b_arrives_first",
+  "recorder": "A",
+  "end_t_local": 16.45,
+  "stop_starts": [
+   4.75
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 15.25,
+    "closest_to_trigger_m": 3.0,
+    "stops_before_trigger": [
+     4.75
+    ],
+    "at_stops": {
+     "4.75": 15.5
+    }
+   },
+   {
+    "sign_actor": "stop#56",
+    "trigger_reached_t_local": 11.75,
+    "closest_to_trigger_m": 0.0,
+    "stops_before_trigger": [
+     4.75
+    ],
+    "at_stops": {
+     "4.75": 2.9
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 1.05,
+    "end_node": "A:e05",
+    "end_t_local": 3.55,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#53": {
+      "forward_m": 35.7,
+      "right_m": -18.9,
+      "bearing_deg": -27.8,
+      "in_fov": true
+     },
+     "stop#56": {
+      "forward_m": 23.2,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#53": {
+      "forward_m": 21.4,
+      "right_m": -18.9,
+      "bearing_deg": -41.5,
+      "in_fov": true
+     },
+     "stop#56": {
+      "forward_m": 8.8,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_b_arrives_first",
+  "recorder": "B",
+  "end_t_local": 16.45,
+  "stop_starts": [
+   3.4
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#29",
+    "trigger_reached_t_local": 7.55,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": 0.2
+    }
+   },
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 7.4,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": -0.4
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e04",
+    "start_t_local": 2.1,
+    "end_node": "B:e05",
+    "end_t_local": 2.6,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#29": {
+      "forward_m": 9.4,
+      "right_m": 4.5,
+      "bearing_deg": 25.6,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 8.9,
+      "right_m": -3.5,
+      "bearing_deg": -21.5,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#29": {
+      "forward_m": 5.0,
+      "right_m": 4.5,
+      "bearing_deg": 42.1,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 4.5,
+      "right_m": -3.5,
+      "bearing_deg": -38.0,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_b_fails_to_stop",
+  "recorder": "A",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   3.4,
+   10.2
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#56",
+    "trigger_reached_t_local": 8.7,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": 0.8,
+     "10.2": -10.1
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 0.65,
+    "end_node": "A:e03",
+    "end_t_local": 2.25,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#56": {
+      "forward_m": 22.8,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#56": {
+      "forward_m": 8.9,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_b_fails_to_stop",
+  "recorder": "B",
+  "end_t_local": 15.95,
+  "stop_starts": [
+   10.05
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#29",
+    "trigger_reached_t_local": 6.7,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "10.05": -14.3
+    }
+   },
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 6.6,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "10.05": -13.7
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e10",
+    "start_t_local": 3.5,
+    "end_node": "B:e11",
+    "end_t_local": 5.3,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#29": {
+      "forward_m": 12.5,
+      "right_m": 4.5,
+      "bearing_deg": 19.9,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 11.9,
+      "right_m": -3.5,
+      "bearing_deg": -16.3,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#29": {
+      "forward_m": 4.8,
+      "right_m": 4.5,
+      "bearing_deg": 43.2,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 4.3,
+      "right_m": -3.5,
+      "bearing_deg": -39.3,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_near_simultaneous",
+  "recorder": "A",
+  "end_t_local": 14.95,
+  "stop_starts": [
+   3.4,
+   10.0
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#56",
+    "trigger_reached_t_local": 7.95,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     3.4
+    ],
+    "at_stops": {
+     "3.4": 0.9,
+     "10.0": -9.8
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e02",
+    "start_t_local": 0.65,
+    "end_node": "A:e03",
+    "end_t_local": 2.25,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#56": {
+      "forward_m": 22.8,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#56": {
+      "forward_m": 8.9,
+      "right_m": -0.0,
+      "bearing_deg": -0.1,
+      "in_fov": true
+     }
+    }
+   },
+   {
+    "sign": "sign-1",
+    "start_node": "A:e45",
+    "start_t_local": 11.7,
+    "end_node": "A:e46",
+    "end_t_local": 11.8,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#56": {
+      "forward_m": -9.8,
+      "right_m": -11.0,
+      "bearing_deg": -131.7,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#56": {
+      "forward_m": -9.8,
+      "right_m": -11.0,
+      "bearing_deg": -131.7,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-4",
+    "start_node": "A:e47",
+    "start_t_local": 13.95,
+    "end_node": "A:e48",
+    "end_t_local": 13.95,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#56": {
+      "forward_m": -9.8,
+      "right_m": -11.0,
+      "bearing_deg": -131.7,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#56": {
+      "forward_m": -9.8,
+      "right_m": -11.0,
+      "bearing_deg": -131.7,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S12/run_0_near_simultaneous",
+  "recorder": "B",
+  "end_t_local": 14.95,
+  "stop_starts": [
+   3.5,
+   9.95
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#29",
+    "trigger_reached_t_local": 7.75,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [
+     3.5
+    ],
+    "at_stops": {
+     "3.5": -0.6,
+     "9.95": -15.3
+    }
+   },
+   {
+    "sign_actor": "stop#53",
+    "trigger_reached_t_local": 7.45,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [
+     3.5
+    ],
+    "at_stops": {
+     "3.5": -1.2,
+     "9.95": -14.6
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-1",
+    "start_node": "B:e04",
+    "start_t_local": 2.1,
+    "end_node": "B:e07",
+    "end_t_local": 2.6,
+    "relevant_to_ego_path": true,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#29": {
+      "forward_m": 9.4,
+      "right_m": 4.5,
+      "bearing_deg": 25.6,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 8.9,
+      "right_m": -3.5,
+      "bearing_deg": -21.5,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#29": {
+      "forward_m": 5.0,
+      "right_m": 4.5,
+      "bearing_deg": 42.1,
+      "in_fov": true
+     },
+     "stop#53": {
+      "forward_m": 4.5,
+      "right_m": -3.5,
+      "bearing_deg": -38.0,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_b_stops",
+  "recorder": "A",
+  "end_t_local": 10.55,
+  "stop_starts": [],
+  "min_speed_mps": 10.27,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 2.75,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 5.75,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S15/run_0_b_stops",
+  "recorder": "B",
+  "end_t_local": 10.55,
+  "stop_starts": [
+   3.4
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 2.8,
+    "closest_to_trigger_m": 0.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.4": -4.5
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "3.4": -28.7
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "B:e06",
+    "start_t_local": 1.8,
+    "end_node": "B:e10",
+    "end_t_local": 2.1,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 8.5,
+      "right_m": 4.5,
+      "bearing_deg": 28.1,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -18.6,
+      "right_m": -3.4,
+      "bearing_deg": -169.6,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.5,
+      "right_m": 4.6,
+      "bearing_deg": 40.4,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.5,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-1",
+    "start_node": "B:e18",
+    "start_t_local": 3.4,
+    "end_node": "B:e19",
+    "end_t_local": 3.7,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-2",
+    "start_node": "B:e26",
+    "start_t_local": 4.8,
+    "end_node": "B:e28",
+    "end_t_local": 4.8,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-3",
+    "start_node": "B:e30",
+    "start_t_local": 5.6,
+    "end_node": "B:e31",
+    "end_t_local": 5.6,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-4",
+    "start_node": "B:e34",
+    "start_t_local": 6.7,
+    "end_node": null,
+    "end_t_local": null,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": -6.0,
+      "right_m": 4.9,
+      "bearing_deg": 140.8,
+      "in_fov": false
+     },
+     "stop#63": {
+      "forward_m": -28.7,
+      "right_m": -11.9,
+      "bearing_deg": -157.5,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_b_stops",
+  "recorder": "C",
+  "end_t_local": 10.55,
+  "stop_starts": [],
+  "min_speed_mps": 4.25,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 8.05,
+    "closest_to_trigger_m": 3.6,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 2.5,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {}
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S15/run_0_deflected_into_c",
+  "recorder": "A",
+  "end_t_local": 13.95,
+  "stop_starts": [
+   5.05
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 2.75,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.05": -17.7
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e12",
+    "start_t_local": 4.55,
+    "end_node": "A:e13",
+    "end_t_local": 4.55,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -16.7,
+      "right_m": -2.4,
+      "bearing_deg": -171.7,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -16.7,
+      "right_m": -2.4,
+      "bearing_deg": -171.7,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-2",
+    "start_node": "A:e20",
+    "start_t_local": 5.3,
+    "end_node": "A:e21",
+    "end_t_local": 7.8,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -17.7,
+      "right_m": -4.4,
+      "bearing_deg": -166.2,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.3,
+      "bearing_deg": -166.4,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-3",
+    "start_node": "A:e22",
+    "start_t_local": 8.7,
+    "end_node": "A:e23",
+    "end_t_local": 8.7,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.3,
+      "bearing_deg": -166.5,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.3,
+      "bearing_deg": -166.5,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-4",
+    "start_node": "A:e24",
+    "start_t_local": 9.75,
+    "end_node": "A:e25",
+    "end_t_local": 9.9,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.3,
+      "bearing_deg": -166.6,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.2,
+      "bearing_deg": -166.6,
+      "in_fov": false
+     }
+    }
+   },
+   {
+    "sign": "sign-5",
+    "start_node": "A:e26",
+    "start_t_local": 10.9,
+    "end_node": null,
+    "end_t_local": null,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": true,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -17.8,
+      "right_m": -4.2,
+      "bearing_deg": -166.7,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_deflected_into_c",
+  "recorder": "B",
+  "end_t_local": 13.95,
+  "stop_starts": [
+   4.0
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 2.8,
+    "closest_to_trigger_m": 0.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.0": -8.1
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.0": -34.6
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "B:e06",
+    "start_t_local": 1.8,
+    "end_node": "B:e10",
+    "end_t_local": 2.1,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 8.5,
+      "right_m": 4.5,
+      "bearing_deg": 28.1,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -18.6,
+      "right_m": -3.4,
+      "bearing_deg": -169.6,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.5,
+      "right_m": 4.6,
+      "bearing_deg": 40.4,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.5,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_deflected_into_c",
+  "recorder": "C",
+  "end_t_local": 13.95,
+  "stop_starts": [
+   5.05
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 2.5,
+    "closest_to_trigger_m": 0.1,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "5.05": -14.0
+    }
+   }
+  ],
+  "windows": []
+ },
+ {
+  "run": "S15/run_0_single_impact",
+  "recorder": "A",
+  "end_t_local": 13.95,
+  "stop_starts": [
+   11.55
+  ],
+  "min_speed_mps": 0.11,
+  "governing": [
+   {
+    "sign_actor": "stop#36",
+    "trigger_reached_t_local": 2.75,
+    "closest_to_trigger_m": 0.2,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "11.55": -29.4
+    }
+   },
+   {
+    "sign_actor": "stop#62",
+    "trigger_reached_t_local": 13.95,
+    "closest_to_trigger_m": 3.5,
+    "stops_before_trigger": [
+     11.55
+    ],
+    "at_stops": {
+     "11.55": 2.2
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "A:e15",
+    "start_t_local": 4.6,
+    "end_node": "A:e16",
+    "end_t_local": 4.6,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -17.0,
+      "right_m": -2.7,
+      "bearing_deg": -170.9,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": 14.4,
+      "right_m": 1.2,
+      "bearing_deg": 4.8,
+      "in_fov": true
+     }
+    },
+    "geometry_at_end": {
+     "stop#36": {
+      "forward_m": -17.0,
+      "right_m": -2.7,
+      "bearing_deg": -170.9,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": 14.4,
+      "right_m": 1.2,
+      "bearing_deg": 4.8,
+      "in_fov": true
+     }
+    }
+   },
+   {
+    "sign": "sign-1",
+    "start_node": "A:e17",
+    "start_t_local": 10.55,
+    "end_node": null,
+    "end_t_local": null,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [
+     "A:e19"
+    ],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#36": {
+      "forward_m": -29.0,
+      "right_m": -0.8,
+      "bearing_deg": -178.4,
+      "in_fov": false
+     },
+     "stop#62": {
+      "forward_m": 2.6,
+      "right_m": 1.6,
+      "bearing_deg": 31.1,
+      "in_fov": true
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_single_impact",
+  "recorder": "B",
+  "end_t_local": 13.95,
+  "stop_starts": [
+   4.0
+  ],
+  "min_speed_mps": 0.0,
+  "governing": [
+   {
+    "sign_actor": "stop#27",
+    "trigger_reached_t_local": 2.8,
+    "closest_to_trigger_m": 0.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.0": -8.1
+    }
+   },
+   {
+    "sign_actor": "stop#63",
+    "trigger_reached_t_local": 0.0,
+    "closest_to_trigger_m": 3.7,
+    "stops_before_trigger": [],
+    "at_stops": {
+     "4.0": -34.6
+    }
+   }
+  ],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "B:e04",
+    "start_t_local": 1.8,
+    "end_node": "B:e08",
+    "end_t_local": 2.1,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {
+     "stop#27": {
+      "forward_m": 8.5,
+      "right_m": 4.5,
+      "bearing_deg": 28.1,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -18.6,
+      "right_m": -3.4,
+      "bearing_deg": -169.6,
+      "in_fov": false
+     }
+    },
+    "geometry_at_end": {
+     "stop#27": {
+      "forward_m": 5.5,
+      "right_m": 4.6,
+      "bearing_deg": 40.4,
+      "in_fov": true
+     },
+     "stop#63": {
+      "forward_m": -21.5,
+      "right_m": -3.7,
+      "bearing_deg": -170.3,
+      "in_fov": false
+     }
+    }
+   }
+  ]
+ },
+ {
+  "run": "S15/run_0_single_impact",
+  "recorder": "C",
+  "end_t_local": 13.95,
+  "stop_starts": [],
+  "min_speed_mps": 0.94,
+  "governing": [],
+  "windows": [
+   {
+    "sign": "sign-0",
+    "start_node": "C:e06",
+    "start_t_local": 2.8,
+    "end_node": "C:e07",
+    "end_t_local": 2.8,
+    "relevant_to_ego_path": false,
+    "stop_starts_inside": [],
+    "already_stopped_at_start": false,
+    "geometry_at_start": {},
+    "geometry_at_end": {}
+   }
+  ]
+ }
+]

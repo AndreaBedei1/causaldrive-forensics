@@ -1,0 +1,2128 @@
+{
+  "graph_id": "B",
+  "owner": "B",
+  "recorder": {
+    "owner": "B",
+    "clock": {
+      "origin_source_timestamp": 432.100672993809,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "incident_context": {
+      "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+      "road_environment": "urban road, two lanes",
+      "speed_limit_kmh": 50
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 9.95,
+    "trace_hz": 10.0,
+    "trace_frames": 101,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "B:e01",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 0.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e02",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 0.8,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e03",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.65,
+      "attributes": {
+        "peak_impulse": 5215.85
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0
+    },
+    {
+      "node_id": "B:e04",
+      "event_type": "HARD_BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.65,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e05",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 5.95,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e06",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_002",
+      "t_local": 5.95,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e07",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 5.95,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e08",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_002",
+      "t_local": 5.95,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e09",
+      "event_type": "CRITICAL_TTC_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 5.95,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e10",
+      "event_type": "CRITICAL_TTC_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_002",
+      "t_local": 5.95,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e11",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_003",
+      "t_local": 6.0,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e12",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_004",
+      "t_local": 6.0,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e13",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_003",
+      "t_local": 6.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e14",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_004",
+      "t_local": 6.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e15",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_005",
+      "t_local": 6.2,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e16",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_005",
+      "t_local": 6.2,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e17",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_006",
+      "t_local": 6.25,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e18",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_006",
+      "t_local": 6.25,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e19",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_007",
+      "t_local": 6.3,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e20",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_008",
+      "t_local": 6.3,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e21",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_007",
+      "t_local": 6.3,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e22",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_008",
+      "t_local": 6.3,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e23",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_009",
+      "t_local": 6.35,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e24",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_009",
+      "t_local": 6.35,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e25",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_010",
+      "t_local": 6.4,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e26",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_010",
+      "t_local": 6.4,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e27",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_011",
+      "t_local": 6.45,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e28",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_011",
+      "t_local": 6.45,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e29",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_006",
+      "t_local": 6.45,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e30",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_012",
+      "t_local": 6.5,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e31",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_012",
+      "t_local": 6.5,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e32",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_013",
+      "t_local": 6.55,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e33",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_014",
+      "t_local": 6.55,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e34",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_013",
+      "t_local": 6.55,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e35",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_014",
+      "t_local": 6.55,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e36",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_008",
+      "t_local": 6.55,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e37",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_015",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e38",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_016",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e39",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e40",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_004",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e41",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_015",
+      "t_local": 6.6,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e42",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_016",
+      "t_local": 6.6,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e43",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_007",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e44",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_009",
+      "t_local": 6.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e45",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_010",
+      "t_local": 6.65,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e46",
+      "event_type": "EGO_PATH_EXIT",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_004",
+      "t_local": 6.7,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e47",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_011",
+      "t_local": 6.7,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e48",
+      "event_type": "CRITICAL_TTC_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_002",
+      "t_local": 6.75,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e49",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_012",
+      "t_local": 6.75,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e50",
+      "event_type": "CRITICAL_TTC_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 6.8,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e51",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_003",
+      "t_local": 6.8,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e52",
+      "event_type": "TRACK_LOST",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_013",
+      "t_local": 6.8,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e53",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e54",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_003",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e55",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_004",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e56",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_005",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e57",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_014",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e58",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_015",
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e59",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e60",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 6.9,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e61",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_016",
+      "t_local": 6.95,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    },
+    {
+      "node_id": "B:e62",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_002",
+      "t_local": 7.0,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "B:e01",
+      "to": "B:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e03",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e02",
+      "to": "B:e04",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e09",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e03",
+      "to": "B:e10",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e09",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e04",
+      "to": "B:e10",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e07",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e08",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e08",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e08",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e08",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e09",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e09",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e09",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e09",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e10",
+      "to": "B:e11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e10",
+      "to": "B:e12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e10",
+      "to": "B:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e10",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e11",
+      "to": "B:e15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e11",
+      "to": "B:e16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e13",
+      "to": "B:e15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e13",
+      "to": "B:e16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e14",
+      "to": "B:e15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e14",
+      "to": "B:e16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e15",
+      "to": "B:e17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e15",
+      "to": "B:e18",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e16",
+      "to": "B:e17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e16",
+      "to": "B:e18",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e19",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e20",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e21",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e22",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e18",
+      "to": "B:e19",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e18",
+      "to": "B:e20",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e18",
+      "to": "B:e21",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e18",
+      "to": "B:e22",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e19",
+      "to": "B:e23",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e19",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e20",
+      "to": "B:e23",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e20",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e21",
+      "to": "B:e23",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e21",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e22",
+      "to": "B:e23",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e22",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e25",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e26",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e24",
+      "to": "B:e25",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e24",
+      "to": "B:e26",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e25",
+      "to": "B:e27",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e25",
+      "to": "B:e28",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e25",
+      "to": "B:e29",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e26",
+      "to": "B:e27",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e26",
+      "to": "B:e28",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e26",
+      "to": "B:e29",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e27",
+      "to": "B:e30",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e27",
+      "to": "B:e31",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e28",
+      "to": "B:e30",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e28",
+      "to": "B:e31",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e29",
+      "to": "B:e30",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e29",
+      "to": "B:e31",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e32",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e33",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e34",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e35",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e36",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e31",
+      "to": "B:e32",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e31",
+      "to": "B:e33",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e31",
+      "to": "B:e34",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e31",
+      "to": "B:e35",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e31",
+      "to": "B:e36",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e37",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e38",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e39",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e40",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e41",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e42",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e43",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e44",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e37",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e38",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e39",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e40",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e41",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e42",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e43",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e44",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e37",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e38",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e39",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e40",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e41",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e42",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e43",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e34",
+      "to": "B:e44",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e37",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e38",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e39",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e40",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e41",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e42",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e43",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e35",
+      "to": "B:e44",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e37",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e38",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e39",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e40",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e41",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e42",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e43",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e36",
+      "to": "B:e44",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e37",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e38",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e39",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e40",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e41",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e42",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e43",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e44",
+      "to": "B:e45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e45",
+      "to": "B:e46",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e45",
+      "to": "B:e47",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e46",
+      "to": "B:e48",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e46",
+      "to": "B:e49",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e47",
+      "to": "B:e48",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e47",
+      "to": "B:e49",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e48",
+      "to": "B:e50",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e48",
+      "to": "B:e51",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e48",
+      "to": "B:e52",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e49",
+      "to": "B:e50",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e49",
+      "to": "B:e51",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e49",
+      "to": "B:e52",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e53",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e54",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e55",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e56",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e57",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e58",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e59",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e50",
+      "to": "B:e60",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e53",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e54",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e55",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e56",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e57",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e58",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e59",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e51",
+      "to": "B:e60",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e53",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e54",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e55",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e56",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e57",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e58",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e59",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e52",
+      "to": "B:e60",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e53",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e54",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e55",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e56",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e57",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e58",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e59",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e60",
+      "to": "B:e61",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e61",
+      "to": "B:e62",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e07",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e08",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e09",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e10",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e11",
+      "to": "B:e13",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e14",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e15",
+      "to": "B:e16",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e18",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e19",
+      "to": "B:e21",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e20",
+      "to": "B:e22",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e24",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e25",
+      "to": "B:e26",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e27",
+      "to": "B:e28",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e17",
+      "to": "B:e29",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e31",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e34",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e35",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e20",
+      "to": "B:e36",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e39",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e40",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e37",
+      "to": "B:e41",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e38",
+      "to": "B:e42",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e19",
+      "to": "B:e43",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e44",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e25",
+      "to": "B:e45",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e46",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e27",
+      "to": "B:e47",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e48",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e30",
+      "to": "B:e49",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e50",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e11",
+      "to": "B:e51",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e32",
+      "to": "B:e52",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e53",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e11",
+      "to": "B:e54",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e12",
+      "to": "B:e55",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e15",
+      "to": "B:e56",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e33",
+      "to": "B:e57",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e37",
+      "to": "B:e58",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e38",
+      "to": "B:e61",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e62",
+      "relation": "SAME_TRACK"
+    }
+  ],
+  "tracks": [
+    {
+      "track_id": "track_001",
+      "first_seen_t_local": 5.95,
+      "last_seen_t_local": 9.95,
+      "duration_s": 4.0,
+      "measured_sweeps": 81,
+      "radar_returns": 7066,
+      "min_range_m": 6.0,
+      "min_range_t_local": 6.95,
+      "max_speed_mps": 4.45,
+      "first_range_m": 12.17,
+      "first_bearing_deg": 49.1,
+      "last_range_m": 6.03,
+      "last_bearing_deg": -0.2
+    },
+    {
+      "track_id": "track_002",
+      "first_seen_t_local": 5.95,
+      "last_seen_t_local": 9.95,
+      "duration_s": 4.0,
+      "measured_sweeps": 81,
+      "radar_returns": 4224,
+      "min_range_m": 6.76,
+      "min_range_t_local": 9.95,
+      "max_speed_mps": 2.64,
+      "first_range_m": 13.28,
+      "first_bearing_deg": 53.2,
+      "last_range_m": 6.76,
+      "last_bearing_deg": 41.5
+    },
+    {
+      "track_id": "track_003",
+      "first_seen_t_local": 6.0,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.95,
+      "measured_sweeps": 80,
+      "radar_returns": 485,
+      "min_range_m": 21.96,
+      "min_range_t_local": 6.9,
+      "max_speed_mps": 4.03,
+      "first_range_m": 27.51,
+      "first_bearing_deg": 56.2,
+      "last_range_m": 22.2,
+      "last_bearing_deg": -1.2
+    },
+    {
+      "track_id": "track_004",
+      "first_seen_t_local": 6.0,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.95,
+      "measured_sweeps": 50,
+      "radar_returns": 87,
+      "min_range_m": 16.56,
+      "min_range_t_local": 7.0,
+      "max_speed_mps": 5.69,
+      "first_range_m": 22.46,
+      "first_bearing_deg": 44.9,
+      "last_range_m": 16.82,
+      "last_bearing_deg": -22.8
+    },
+    {
+      "track_id": "track_005",
+      "first_seen_t_local": 6.2,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.75,
+      "measured_sweeps": 74,
+      "radar_returns": 280,
+      "min_range_m": 22.62,
+      "min_range_t_local": 7.0,
+      "max_speed_mps": 3.27,
+      "first_range_m": 26.56,
+      "first_bearing_deg": 59.1,
+      "last_range_m": 22.69,
+      "last_bearing_deg": 13.4
+    },
+    {
+      "track_id": "track_006",
+      "first_seen_t_local": 6.25,
+      "last_seen_t_local": 6.45,
+      "duration_s": 0.2,
+      "measured_sweeps": 5,
+      "radar_returns": 14,
+      "min_range_m": 36.55,
+      "min_range_t_local": 6.45,
+      "max_speed_mps": 5.21,
+      "first_range_m": 37.23,
+      "first_bearing_deg": -44.1,
+      "last_range_m": 36.55,
+      "last_bearing_deg": -58.9
+    },
+    {
+      "track_id": "track_007",
+      "first_seen_t_local": 6.3,
+      "last_seen_t_local": 6.6,
+      "duration_s": 0.3,
+      "measured_sweeps": 7,
+      "radar_returns": 14,
+      "min_range_m": 32.78,
+      "min_range_t_local": 6.6,
+      "max_speed_mps": 13.78,
+      "first_range_m": 33.71,
+      "first_bearing_deg": -38.8,
+      "last_range_m": 32.78,
+      "last_bearing_deg": -58.1
+    },
+    {
+      "track_id": "track_008",
+      "first_seen_t_local": 6.3,
+      "last_seen_t_local": 6.55,
+      "duration_s": 0.25,
+      "measured_sweeps": 6,
+      "radar_returns": 12,
+      "min_range_m": 43.25,
+      "min_range_t_local": 6.55,
+      "max_speed_mps": 12.33,
+      "first_range_m": 44.01,
+      "first_bearing_deg": -41.7,
+      "last_range_m": 43.25,
+      "last_bearing_deg": -58.8
+    },
+    {
+      "track_id": "track_009",
+      "first_seen_t_local": 6.35,
+      "last_seen_t_local": 6.6,
+      "duration_s": 0.25,
+      "measured_sweeps": 6,
+      "radar_returns": 16,
+      "min_range_m": 37.54,
+      "min_range_t_local": 6.6,
+      "max_speed_mps": 6.01,
+      "first_range_m": 38.23,
+      "first_bearing_deg": -39.0,
+      "last_range_m": 37.54,
+      "last_bearing_deg": -58.8
+    },
+    {
+      "track_id": "track_010",
+      "first_seen_t_local": 6.4,
+      "last_seen_t_local": 6.65,
+      "duration_s": 0.25,
+      "measured_sweeps": 6,
+      "radar_returns": 10,
+      "min_range_m": 45.39,
+      "min_range_t_local": 6.65,
+      "max_speed_mps": 4.15,
+      "first_range_m": 46.04,
+      "first_bearing_deg": -35.8,
+      "last_range_m": 45.39,
+      "last_bearing_deg": -56.9
+    },
+    {
+      "track_id": "track_011",
+      "first_seen_t_local": 6.45,
+      "last_seen_t_local": 6.7,
+      "duration_s": 0.25,
+      "measured_sweeps": 5,
+      "radar_returns": 17,
+      "min_range_m": 31.6,
+      "min_range_t_local": 6.7,
+      "max_speed_mps": 2.39,
+      "first_range_m": 32.15,
+      "first_bearing_deg": -34.2,
+      "last_range_m": 31.6,
+      "last_bearing_deg": -56.5
+    },
+    {
+      "track_id": "track_012",
+      "first_seen_t_local": 6.5,
+      "last_seen_t_local": 6.75,
+      "duration_s": 0.25,
+      "measured_sweeps": 6,
+      "radar_returns": 30,
+      "min_range_m": 27.82,
+      "min_range_t_local": 6.7,
+      "max_speed_mps": 1.7,
+      "first_range_m": 28.19,
+      "first_bearing_deg": -36.3,
+      "last_range_m": 27.83,
+      "last_bearing_deg": -59.1
+    },
+    {
+      "track_id": "track_013",
+      "first_seen_t_local": 6.55,
+      "last_seen_t_local": 6.8,
+      "duration_s": 0.25,
+      "measured_sweeps": 5,
+      "radar_returns": 25,
+      "min_range_m": 23.08,
+      "min_range_t_local": 6.75,
+      "max_speed_mps": 1.64,
+      "first_range_m": 23.32,
+      "first_bearing_deg": -38.3,
+      "last_range_m": 23.1,
+      "last_bearing_deg": -59.2
+    },
+    {
+      "track_id": "track_014",
+      "first_seen_t_local": 6.55,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.4,
+      "measured_sweeps": 55,
+      "radar_returns": 115,
+      "min_range_m": 19.43,
+      "min_range_t_local": 7.05,
+      "max_speed_mps": 1.69,
+      "first_range_m": 20.92,
+      "first_bearing_deg": 45.6,
+      "last_range_m": 19.47,
+      "last_bearing_deg": 25.5
+    },
+    {
+      "track_id": "track_015",
+      "first_seen_t_local": 6.6,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.35,
+      "measured_sweeps": 68,
+      "radar_returns": 1040,
+      "min_range_m": 14.31,
+      "min_range_t_local": 9.95,
+      "max_speed_mps": 1.24,
+      "first_range_m": 14.96,
+      "first_bearing_deg": -34.7,
+      "last_range_m": 14.31,
+      "last_bearing_deg": -52.2
+    },
+    {
+      "track_id": "track_016",
+      "first_seen_t_local": 6.6,
+      "last_seen_t_local": 9.95,
+      "duration_s": 3.35,
+      "measured_sweeps": 56,
+      "radar_returns": 336,
+      "min_range_m": 8.51,
+      "min_range_t_local": 9.95,
+      "max_speed_mps": 3.23,
+      "first_range_m": 10.04,
+      "first_bearing_deg": 57.8,
+      "last_range_m": 8.51,
+      "last_bearing_deg": 57.6
+    }
+  ]
+}

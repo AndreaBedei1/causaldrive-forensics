@@ -1,0 +1,85 @@
+{
+  "method": "collision_anchor",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+  "reference_event": "collision_002",
+  "graphs": {
+    "A": {
+      "status": "ALIGNED",
+      "anchor_node": "A:e22",
+      "anchor_t_local": 14.1,
+      "offset_to_global": -14.1,
+      "reason": "reported the reference collision collision_002"
+    },
+    "B": {
+      "status": "UNALIGNED",
+      "anchor_node": null,
+      "anchor_t_local": null,
+      "offset_to_global": null,
+      "reason": "shares only a non-reference collision (multi-hop alignment not implemented)"
+    },
+    "C": {
+      "status": "ALIGNED",
+      "anchor_node": "C:e06",
+      "anchor_t_local": 14.1,
+      "offset_to_global": -14.1,
+      "reason": "reported the reference collision collision_002"
+    }
+  },
+  "relative_clock_offsets_s": {
+    "C - A": 0.0
+  },
+  "matched_events": [
+    {
+      "event_id": "collision_001",
+      "graphs": [
+        "A",
+        "B"
+      ],
+      "nodes": {
+        "A": "A:e05",
+        "B": "B:e12"
+      },
+      "t_local": {
+        "A": 5.15,
+        "B": 5.15
+      },
+      "peak_impulse": {
+        "A": 6073.81,
+        "B": 6073.81
+      },
+      "impulse_similarity": 1.0,
+      "confidence": 1.0,
+      "evidence": [
+        "A and B both recorded a collision",
+        "peak impulses 6073.81 vs 6073.81 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
+      ]
+    },
+    {
+      "event_id": "collision_002",
+      "graphs": [
+        "A",
+        "C"
+      ],
+      "nodes": {
+        "A": "A:e22",
+        "C": "C:e06"
+      },
+      "t_local": {
+        "A": 14.1,
+        "C": 14.1
+      },
+      "peak_impulse": {
+        "A": 9089.81,
+        "C": 9089.81
+      },
+      "impulse_similarity": 1.0,
+      "confidence": 1.0,
+      "evidence": [
+        "A and C both recorded a collision",
+        "peak impulses 9089.81 vs 9089.81 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "run": "S16/run_0_avoided",
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s",
+  "privileged_assumption": "recorder raw clocks are CARLA simulator time",
+  "collisions": [
+    {
+      "participants": [
+        "A",
+        "B"
+      ],
+      "sim_time": 536.4218036159873,
+      "peak_impulse": 6073.814538141226,
+      "reconstructed_as": "g16",
+      "participants_correct": true,
+      "report_timing_error_s": 0.0
+    }
+  ],
+  "alignment": [
+    {
+      "graph": "A",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 5.15,
+      "true_contact_t_local": 5.15,
+      "error_s": 0.0
+    },
+    {
+      "graph": "B",
+      "status": "ALIGNED",
+      "estimated_anchor_t_local": 5.15,
+      "true_contact_t_local": 5.15,
+      "error_s": 0.0
+    },
+    {
+      "graph": "C",
+      "status": "UNALIGNED",
+      "estimated_anchor_t_local": null,
+      "true_contact_t_local": 5.15,
+      "error_s": null
+    }
+  ],
+  "relative_clock_offsets": [
+    {
+      "pair": "B - A",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
+    }
+  ],
+  "event_timing": {
+    "nodes": 24,
+    "max_abs_error_s": 0.0,
+    "order_pairs": 263,
+    "order_concordant": 263
+  },
+  "tracks": [
+    {
+      "track": "B:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0,
+        "C": 7.28
+      },
+      "verdict": "correct",
+      "samples": 100,
+      "raw_rmse_to_surface_m": 0.532,
+      "smoothed_rmse_to_surface_m": 0.51,
+      "smoothed_rmse_to_centre_m": 1.59,
+      "raw_difference_speed_rmse_mps": 0.77,
+      "speed_rmse_mps": 0.241
+    }
+  ],
+  "clock_shift_check": {
+    "shifted_recorder": "C",
+    "shift_s": 0.73,
+    "shifted_local_collision_times": [],
+    "global_graph_identical": true,
+    "offset_to_global_before": null,
+    "offset_to_global_after": null,
+    "offset_change_s": null
+  }
+}

@@ -1,0 +1,591 @@
+{
+  "entities": [
+    {
+      "entity_id": "A",
+      "kind": "recorder",
+      "clock": "ALIGNED",
+      "observed_as": []
+    },
+    {
+      "entity_id": "B",
+      "kind": "recorder",
+      "clock": "ALIGNED",
+      "observed_as": [
+        "A:track_001"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "g01",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": -5.25,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e01",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g02",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": -5.25,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e01",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g03",
+      "event_type": "TRACK_APPEARED",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": -5.25,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e02",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g04",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": -5.25,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e03",
+          "t_local": 0.0
+        }
+      ]
+    },
+    {
+      "node_id": "g05",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": -4.45,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e02",
+          "t_local": 0.8
+        }
+      ]
+    },
+    {
+      "node_id": "g06",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": -2.4,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e04",
+          "t_local": 2.85
+        }
+      ]
+    },
+    {
+      "node_id": "g07",
+      "event_type": "CRITICAL_TTC_START",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": -1.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e05",
+          "t_local": 3.65
+        }
+      ]
+    },
+    {
+      "node_id": "g08",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": -0.45,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e06",
+          "t_local": 4.8
+        }
+      ]
+    },
+    {
+      "node_id": "g09",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": null,
+      "subject_id": null,
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": 0.0,
+      "attributes": {
+        "matched_event": "collision_001",
+        "reference_event": true,
+        "peak_impulse": {
+          "A": 3184.37,
+          "B": 3184.37
+        }
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e07",
+          "t_local": 5.25
+        },
+        {
+          "graph": "B",
+          "local_node": "B:e03",
+          "t_local": 5.25
+        }
+      ]
+    },
+    {
+      "node_id": "g10",
+      "event_type": "CRITICAL_TTC_END",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": 0.0,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e08",
+          "t_local": 5.25
+        }
+      ]
+    },
+    {
+      "node_id": "g11",
+      "event_type": "HARD_BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": 0.0,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e04",
+          "t_local": 5.25
+        }
+      ]
+    },
+    {
+      "node_id": "g12",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": 0.05,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e09",
+          "t_local": 5.3
+        }
+      ]
+    },
+    {
+      "node_id": "g13",
+      "event_type": "HARD_BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": 0.05,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e10",
+          "t_local": 5.3
+        }
+      ]
+    },
+    {
+      "node_id": "g14",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": 1.15,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e11",
+          "t_local": 6.4
+        }
+      ]
+    },
+    {
+      "node_id": "g15",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "A",
+      "subject_id": null,
+      "participants": [
+        "A"
+      ],
+      "t_global": 1.15,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e12",
+          "t_local": 6.4
+        }
+      ]
+    },
+    {
+      "node_id": "g16",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": 1.2,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e05",
+          "t_local": 6.45
+        }
+      ]
+    },
+    {
+      "node_id": "g17",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "participants": [
+        "B"
+      ],
+      "t_global": 1.2,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "B",
+          "local_node": "B:e06",
+          "t_local": 6.45
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "g01",
+      "to": "g05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g02",
+      "to": "g05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g03",
+      "to": "g05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g04",
+      "to": "g05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g05",
+      "to": "g06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g06",
+      "to": "g07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g07",
+      "to": "g08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g08",
+      "to": "g09",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g08",
+      "to": "g10",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g08",
+      "to": "g11",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g09",
+      "to": "g12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g09",
+      "to": "g13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g10",
+      "to": "g12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g10",
+      "to": "g13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g11",
+      "to": "g12",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g11",
+      "to": "g13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g12",
+      "to": "g14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g12",
+      "to": "g15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g13",
+      "to": "g14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g13",
+      "to": "g15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g14",
+      "to": "g16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g14",
+      "to": "g17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g15",
+      "to": "g16",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g15",
+      "to": "g17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g03",
+      "to": "g04",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g03",
+      "to": "g07",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g03",
+      "to": "g08",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g03",
+      "to": "g10",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g03",
+      "to": "g12",
+      "relation": "SAME_TRACK"
+    }
+  ],
+  "run": "S13/run_0_cut_in",
+  "incident_context": {
+    "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+    "road_environment": "urban road, two lanes",
+    "speed_limit_kmh": 50
+  },
+  "reconstruction_config": {
+    "trace_hz": 10.0,
+    "collision": {
+      "merge_gap_s": 0.5
+    },
+    "tracking": {
+      "min_height_m": 0.3,
+      "max_height_m": 2.5,
+      "moving_speed_mps": 1.0,
+      "cluster_distance_m": 2.0,
+      "max_association_distance_m": 2.5,
+      "max_velocity_mismatch_mps": 4.0,
+      "max_track_gap_s": 0.5,
+      "min_track_frames": 5,
+      "measurement_std_m": 0.5,
+      "radial_speed_std_mps": 0.3,
+      "acceleration_std_mps2": 6.0
+    },
+    "semantics": {
+      "brake_onset_threshold": 0.1,
+      "hard_brake_threshold": 0.9,
+      "strong_throttle_threshold": 0.8,
+      "full_stop_speed_mps": 0.3,
+      "speed_limit_hysteresis_kmh": 1.0,
+      "closing_speed_threshold_mps": 1.0,
+      "critical_ttc_s": 2.0,
+      "path_half_width_m": 1.5
+    },
+    "fusion": {
+      "impulse_tolerance": 0.1,
+      "contact_window_s": 0.5,
+      "contact_range_m": 3.5,
+      "min_track_persistence_s": 1.0,
+      "speed_consistency_mps": 1.5
+    }
+  }
+}

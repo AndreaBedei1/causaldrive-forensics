@@ -1,0 +1,6103 @@
+[
+ {
+  "run": "S01/run_0_avoided",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    15,
+    23
+   ],
+   "B": [
+    12,
+    20
+   ]
+  },
+  "global": [
+   27,
+   6
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    1
+   ],
+   "HARD_BRAKE": [
+    2,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    4,
+    2
+   ],
+   "MOVING": [
+    3,
+    2
+   ],
+   "STOP": [
+    2,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    2
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP",
+    "STRONG_THROTTLE"
+   ],
+   "B": [
+    "STRONG_THROTTLE",
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 27,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.60 CLOSING_END(track_001)",
+    "4.25 CLOSING_START(track_001)",
+    "5.00 CRITICAL_TTC_START(track_001)",
+    "5.05 BRAKE_START",
+    "5.05 HARD_BRAKE_START",
+    "6.25 CRITICAL_TTC_END(track_001)",
+    "6.35 CLOSING_END(track_001)",
+    "6.35 MOVING_END",
+    "6.35 STOP_START",
+    "13.05 STRONG_THROTTLE_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.40 STRONG_THROTTLE_START",
+    "1.75 STRONG_THROTTLE_END",
+    "3.95 BRAKE_START",
+    "3.95 HARD_BRAKE_START",
+    "5.15 MOVING_END",
+    "5.15 STOP_START",
+    "11.95 HARD_BRAKE_END",
+    "11.95 BRAKE_END",
+    "11.95 STRONG_THROTTLE_START",
+    "12.35 STOP_END",
+    "12.35 MOVING_START"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 1; max |t_global error| None s"
+ },
+ {
+  "run": "S01/run_0_crash",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    15,
+    26
+   ],
+   "B": [
+    8,
+    10
+   ]
+  },
+  "global": [
+   22,
+   35
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.99"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    2
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "STOP",
+    "HARD_BRAKE"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)",
+   "MOVING_END(A); STOP_START(A); HARD_BRAKE_START(A)"
+  ],
+  "sequence": [
+   "-6.50 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B)",
+   "-6.10 STRONG_THROTTLE_START(B)",
+   "-6.05 CLOSING_START(A,B)",
+   "-5.35 STRONG_THROTTLE_START(A)",
+   "-5.15 STRONG_THROTTLE_END(A)",
+   "-4.90 CLOSING_END(A,B)",
+   "-4.75 STRONG_THROTTLE_END(B)",
+   "-2.55 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-2.25 CLOSING_START(A,B)",
+   "-1.50 CRITICAL_TTC_START(A,B)",
+   "-1.35 MOVING_END(B); STOP_START(B)",
+   "-0.95 BRAKE_START(A)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)",
+   "+0.05 MOVING_END(A); STOP_START(A); HARD_BRAKE_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.60 CLOSING_END(track_001)",
+    "4.25 CLOSING_START(track_001)",
+    "5.00 CRITICAL_TTC_START(track_001)",
+    "5.55 BRAKE_START",
+    "6.50 COLLISION",
+    "6.50 CRITICAL_TTC_END(track_001)",
+    "6.50 CLOSING_END(track_001)",
+    "6.55 MOVING_END",
+    "6.55 STOP_START",
+    "6.55 HARD_BRAKE_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.40 STRONG_THROTTLE_START",
+    "1.75 STRONG_THROTTLE_END",
+    "3.95 BRAKE_START",
+    "3.95 HARD_BRAKE_START",
+    "5.15 MOVING_END",
+    "5.15 STOP_START",
+    "6.50 COLLISION"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S02/run_0_avoided",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    13,
+    18
+   ],
+   "B": [
+    5,
+    4
+   ]
+  },
+  "global": [
+   18,
+   5
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    2
+   ],
+   "HARD_BRAKE": [
+    1,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    2,
+    0
+   ],
+   "STOP": [
+    0,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    1,
+    1
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "EGO_PATH(track_001)"
+   ],
+   "B": [
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 18,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "2.75 CRITICAL_TTC_START(track_001)",
+    "2.85 BRAKE_START",
+    "2.85 HARD_BRAKE_START",
+    "3.10 CRITICAL_TTC_END(track_001)",
+    "3.15 EGO_PATH_ENTRY(track_001)",
+    "3.70 HARD_BRAKE_END",
+    "4.05 CLOSING_END(track_001)",
+    "4.10 BRAKE_END"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.35 STRONG_THROTTLE_START",
+    "1.30 STRONG_THROTTLE_END",
+    "3.15 BRAKE_START",
+    "3.60 BRAKE_END"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 1; max |t_global error| None s"
+ },
+ {
+  "run": "S02/run_0_crash",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    14,
+    20
+   ],
+   "B": [
+    10,
+    13
+   ]
+  },
+  "global": [
+   23,
+   33
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.97"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    1,
+    1
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(A); STOP_START(A)",
+   "MOVING_END(B); STOP_START(B)"
+  ],
+  "sequence": [
+   "-4.25 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-3.90 STRONG_THROTTLE_START(B)",
+   "-3.10 STRONG_THROTTLE_START(A)",
+   "-2.95 STRONG_THROTTLE_END(B)",
+   "-2.90 STRONG_THROTTLE_END(A)",
+   "-1.45 CRITICAL_TTC_START(A,B)",
+   "-1.10 BRAKE_START(B)",
+   "-1.05 EGO_PATH_ENTRY(A,B)",
+   "-0.65 BRAKE_END(B)",
+   "-0.40 BRAKE_START(A)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "+0.05 HARD_BRAKE_START(A)",
+   "+0.60 MOVING_END(A); STOP_START(A)",
+   "+0.75 MOVING_END(B); STOP_START(B)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "2.80 CRITICAL_TTC_START(track_001)",
+    "3.20 EGO_PATH_ENTRY(track_001)",
+    "3.85 BRAKE_START",
+    "4.25 COLLISION",
+    "4.25 CRITICAL_TTC_END(track_001)",
+    "4.25 CLOSING_END(track_001)",
+    "4.30 HARD_BRAKE_START",
+    "4.85 MOVING_END",
+    "4.85 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.35 STRONG_THROTTLE_START",
+    "1.30 STRONG_THROTTLE_END",
+    "3.15 BRAKE_START",
+    "3.60 BRAKE_END",
+    "4.25 COLLISION",
+    "4.25 BRAKE_START",
+    "4.25 HARD_BRAKE_START",
+    "5.00 MOVING_END",
+    "5.00 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S03/run_0_crash",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    10,
+    15
+   ],
+   "B": [
+    17,
+    37
+   ]
+  },
+  "global": [
+   26,
+   59
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "B:track_001->A ASSOCIATED 0.84"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   1
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "CRITICAL_TTC_START(A,A:track_001); CRITICAL_TTC_START(B,A)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-4.25 MOVING_START(A); MOVING_START(B)",
+   "-3.10 STRONG_THROTTLE_START(B)",
+   "-2.20 TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-2.10 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-1.90 CRITICAL_TTC_START(A,A:track_001); CRITICAL_TTC_START(B,A)",
+   "-1.85 STRONG_THROTTLE_END(B)",
+   "-0.90 TRACK_LOST(A,A:track_001)",
+   "-0.15 EGO_PATH_ENTRY(B,A)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(B)",
+   "+0.05 CRITICAL_TTC_END(B,A); CLOSING_END(B,A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.30 MOVING_END(B); STOP_START(B)",
+   "+0.45 EGO_PATH_EXIT(B,A)",
+   "+0.65 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "2.05 TRACK_APPEARED(track_001)",
+    "2.05 CLOSING_START(track_001)*",
+    "2.35 CRITICAL_TTC_START(track_001)",
+    "3.35 TRACK_LOST(track_001)",
+    "4.25 COLLISION",
+    "4.30 BRAKE_START",
+    "4.30 HARD_BRAKE_START",
+    "4.90 MOVING_END",
+    "4.90 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.15 STRONG_THROTTLE_START",
+    "2.15 TRACK_APPEARED(track_001)",
+    "2.15 CLOSING_START(track_001)*",
+    "2.35 CRITICAL_TTC_START(track_001)",
+    "2.40 STRONG_THROTTLE_END",
+    "4.10 EGO_PATH_ENTRY(track_001)",
+    "4.25 COLLISION",
+    "4.25 STRONG_THROTTLE_START",
+    "4.30 CRITICAL_TTC_END(track_001)",
+    "4.30 CLOSING_END(track_001)",
+    "4.30 STRONG_THROTTLE_END",
+    "4.30 BRAKE_START",
+    "4.30 HARD_BRAKE_START",
+    "4.55 MOVING_END",
+    "4.55 STOP_START",
+    "4.70 EGO_PATH_EXIT(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S04/run_0_yield",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    9,
+    13
+   ],
+   "B": [
+    26,
+    47
+   ]
+  },
+  "global": [
+   35,
+   13
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    2
+   ],
+   "HARD_BRAKE": [
+    1,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    3,
+    1
+   ],
+   "STOP": [
+    1,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    4,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    1,
+    1
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   4,
+   3
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "CLOSING(track_002)"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e06",
+     "start_t_local": 8.15,
+     "end_node": "A:e07",
+     "end_t_local": 8.45,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": []
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 35,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "2.10 TRACK_APPEARED(track_001)",
+    "2.10 CLOSING_START(track_001)*",
+    "3.00 CRITICAL_TTC_START(track_001)",
+    "4.95 TRACK_LOST(track_001)",
+    "8.15 STOP_SIGN_DETECTED_START(sign-0)",
+    "8.45 STOP_SIGN_DETECTED_END(sign-0)",
+    "9.70 TRACK_APPEARED(track_002)",
+    "9.70 CLOSING_START(track_002)*"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "2.00 TRACK_APPEARED(track_001)",
+    "2.00 CLOSING_START(track_001)*",
+    "2.35 TRACK_LOST(track_001)",
+    "3.15 BRAKE_START",
+    "3.15 HARD_BRAKE_START",
+    "3.90 MOVING_END",
+    "3.90 STOP_START",
+    "4.35 TRACK_APPEARED(track_002)",
+    "4.35 CLOSING_START(track_002)*",
+    "4.35 CRITICAL_TTC_START(track_002)*",
+    "5.40 EGO_PATH_ENTRY(track_002)",
+    "5.45 CRITICAL_TTC_END(track_002)",
+    "5.55 CLOSING_END(track_002)",
+    "5.90 EGO_PATH_EXIT(track_002)",
+    "6.90 TRACK_LOST(track_002)",
+    "7.15 HARD_BRAKE_END",
+    "7.15 BRAKE_END",
+    "7.15 STRONG_THROTTLE_START",
+    "7.55 STOP_END",
+    "7.55 MOVING_START",
+    "8.55 STRONG_THROTTLE_END",
+    "8.75 BRAKE_START",
+    "9.00 BRAKE_END"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 4; max |t_global error| None s"
+ },
+ {
+  "run": "S05/run_0_crash",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    16,
+    34
+   ],
+   "B": [
+    63,
+    301
+   ]
+  },
+  "global": [
+   78,
+   417
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.89",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "B:track_003->B:track_003 ANONYMOUS",
+   "B:track_004->B:track_004 ANONYMOUS",
+   "B:track_005->B:track_005 ANONYMOUS",
+   "B:track_006->B:track_006 ANONYMOUS",
+   "B:track_007->B:track_007 ANONYMOUS",
+   "B:track_008->B:track_008 ANONYMOUS",
+   "B:track_009->B:track_009 ANONYMOUS",
+   "B:track_010->B:track_010 ANONYMOUS",
+   "B:track_011->B:track_011 ANONYMOUS",
+   "B:track_012->B:track_012 ANONYMOUS",
+   "B:track_013->B:track_013 ANONYMOUS",
+   "B:track_014->B:track_014 ANONYMOUS",
+   "B:track_015->B:track_015 ANONYMOUS",
+   "B:track_016->B:track_016 ANONYMOUS",
+   "B:track_017->B:track_017 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    3
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    11,
+    9
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   18,
+   9
+  ],
+  "path": [
+   6,
+   5
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "CLOSING(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "EGO_PATH(track_012)",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "TRACK_APPEARED(B,B:track_001); CLOSING_START(B,B:track_001)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); TRACK_APPEARED(B,B:track_005); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_006); TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_008); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_008)",
+   "EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED(B,B:track_010); EGO_PATH_ENTRY(B,B:track_006)",
+   "EGO_PATH_EXIT(B,B:track_006); TRACK_APPEARED(B,B:track_009); TRACK_APPEARED(B,B:track_011); TRACK_APPEARED(B,B:track_013); EGO_PATH_ENTRY(B,B:track_003)",
+   "EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED(B,B:track_012)",
+   "TRACK_APPEARED(B,B:track_014); TRACK_APPEARED(B,B:track_015); CLOSING_START(B,B:track_012); TRACK_LOST(A,B); TRACK_LOST(B,B:track_002)",
+   "CLOSING_END(B,B:track_003); CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_005); TRACK_APPEARED(B,B:track_016); TRACK_APPEARED(B,B:track_017); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); TRACK_LOST(B,B:track_003); TRACK_LOST(B,B:track_006)",
+   "CLOSING_END(B,B:track_007); CLOSING_END(B,B:track_008); EGO_PATH_ENTRY(B,B:track_013); TRACK_LOST(B,B:track_004); TRACK_LOST(B,B:track_005)",
+   "CLOSING_END(B,B:track_014); CLOSING_END(B,B:track_015); MOVING_END(B); STOP_START(B); TRACK_LOST(B,B:track_017)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-3.70 MOVING_START(A); MOVING_START(B)",
+   "-2.85 STRONG_THROTTLE_START(B)",
+   "-2.50 TRACK_APPEARED(B,B:track_001); CLOSING_START(B,B:track_001)",
+   "-2.45 TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-2.10 STRONG_THROTTLE_END(B)",
+   "-2.05 CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "-0.85 TRACK_LOST(B,B:track_001)",
+   "-0.20 EGO_PATH_ENTRY(A,B)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); TRACK_APPEARED(B,B:track_005); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_006); TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_008); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_008)",
+   "+0.10 EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED(B,B:track_010); EGO_PATH_ENTRY(B,B:track_006)",
+   "+0.15 EGO_PATH_EXIT(B,B:track_006); TRACK_APPEARED(B,B:track_009); TRACK_APPEARED(B,B:track_011); TRACK_APPEARED(B,B:track_013); EGO_PATH_ENTRY(B,B:track_003)",
+   "+0.20 EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED(B,B:track_012)",
+   "+0.25 TRACK_APPEARED(B,B:track_014); TRACK_APPEARED(B,B:track_015); CLOSING_START(B,B:track_012); TRACK_LOST(A,B); TRACK_LOST(B,B:track_002)",
+   "+0.30 CLOSING_END(B,B:track_003); CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_005); TRACK_APPEARED(B,B:track_016); TRACK_APPEARED(B,B:track_017); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); TRACK_LOST(B,B:track_003); TRACK_LOST(B,B:track_006)",
+   "+0.35 CLOSING_END(B,B:track_007); CLOSING_END(B,B:track_008); EGO_PATH_ENTRY(B,B:track_013); TRACK_LOST(B,B:track_004); TRACK_LOST(B,B:track_005)",
+   "+0.40 EGO_PATH_EXIT(B,B:track_013)",
+   "+0.50 EGO_PATH_ENTRY(B,B:track_012)",
+   "+0.55 CLOSING_END(B,B:track_012)",
+   "+0.60 CLOSING_END(B,B:track_014); CLOSING_END(B,B:track_015); MOVING_END(B); STOP_START(B); TRACK_LOST(B,B:track_017)",
+   "+0.75 TRACK_LOST(B,B:track_008)",
+   "+0.85 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "1.25 TRACK_APPEARED(track_001)",
+    "1.25 CLOSING_START(track_001)*",
+    "1.65 CRITICAL_TTC_START(track_001)",
+    "3.50 EGO_PATH_ENTRY(track_001)",
+    "3.70 COLLISION",
+    "3.70 CRITICAL_TTC_END(track_001)",
+    "3.70 CLOSING_END(track_001)",
+    "3.70 STRONG_THROTTLE_START",
+    "3.75 STRONG_THROTTLE_END",
+    "3.75 BRAKE_START",
+    "3.75 HARD_BRAKE_START",
+    "3.90 EGO_PATH_EXIT(track_001)",
+    "3.95 TRACK_LOST(track_001)",
+    "4.55 MOVING_END",
+    "4.55 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.85 STRONG_THROTTLE_START",
+    "1.20 TRACK_APPEARED(track_001)",
+    "1.20 CLOSING_START(track_001)*",
+    "1.60 STRONG_THROTTLE_END",
+    "1.65 CRITICAL_TTC_START(track_001)",
+    "2.85 TRACK_LOST(track_001)",
+    "3.70 COLLISION",
+    "3.70 STRONG_THROTTLE_START",
+    "3.70 TRACK_APPEARED(track_002)",
+    "3.70 TRACK_APPEARED(track_003)",
+    "3.70 TRACK_APPEARED(track_004)",
+    "3.70 TRACK_APPEARED(track_005)",
+    "3.70 CLOSING_START(track_002)*",
+    "3.70 CLOSING_START(track_003)*",
+    "3.70 CLOSING_START(track_004)*",
+    "3.70 CLOSING_START(track_005)*",
+    "3.75 STRONG_THROTTLE_END",
+    "3.75 BRAKE_START",
+    "3.75 HARD_BRAKE_START",
+    "3.75 TRACK_APPEARED(track_006)",
+    "3.75 TRACK_APPEARED(track_007)",
+    "3.75 TRACK_APPEARED(track_008)",
+    "3.75 EGO_PATH_ENTRY(track_002)",
+    "3.75 CLOSING_START(track_007)*",
+    "3.75 CLOSING_START(track_008)*",
+    "3.80 EGO_PATH_EXIT(track_002)",
+    "3.80 TRACK_APPEARED(track_010)",
+    "3.80 EGO_PATH_ENTRY(track_006)",
+    "3.85 EGO_PATH_EXIT(track_006)",
+    "3.85 TRACK_APPEARED(track_009)",
+    "3.85 TRACK_APPEARED(track_011)",
+    "3.85 TRACK_APPEARED(track_013)",
+    "3.85 EGO_PATH_ENTRY(track_003)",
+    "3.90 EGO_PATH_EXIT(track_003)",
+    "3.90 TRACK_APPEARED(track_012)",
+    "3.95 TRACK_APPEARED(track_014)",
+    "3.95 TRACK_APPEARED(track_015)",
+    "3.95 CLOSING_START(track_012)",
+    "3.95 TRACK_LOST(track_002)",
+    "4.00 CLOSING_END(track_003)",
+    "4.00 CLOSING_END(track_004)",
+    "4.00 CLOSING_END(track_005)",
+    "4.00 TRACK_APPEARED(track_016)",
+    "4.00 TRACK_APPEARED(track_017)",
+    "4.00 CLOSING_START(track_014)",
+    "4.00 CLOSING_START(track_015)",
+    "4.00 TRACK_LOST(track_003)",
+    "4.00 TRACK_LOST(track_006)",
+    "4.05 CLOSING_END(track_007)",
+    "4.05 CLOSING_END(track_008)",
+    "4.05 EGO_PATH_ENTRY(track_013)",
+    "4.05 TRACK_LOST(track_004)",
+    "4.05 TRACK_LOST(track_005)",
+    "4.10 EGO_PATH_EXIT(track_013)",
+    "4.20 EGO_PATH_ENTRY(track_012)",
+    "4.25 CLOSING_END(track_012)",
+    "4.30 CLOSING_END(track_014)",
+    "4.30 CLOSING_END(track_015)",
+    "4.30 MOVING_END",
+    "4.30 STOP_START",
+    "4.30 TRACK_LOST(track_017)",
+    "4.45 TRACK_LOST(track_008)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 17; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S06/run_0_a_front_pushed",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    17,
+    23
+   ],
+   "B": [
+    23,
+    54
+   ],
+   "C": [
+    10,
+    11
+   ]
+  },
+  "global": [
+   49,
+   71
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.67",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    4,
+    3
+   ],
+   "MOVING": [
+    4,
+    4
+   ],
+   "STOP": [
+    4,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    1,
+    1
+   ],
+   "CLOSING": [
+    4,
+    4
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   3,
+   2
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 2,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "STRONG_THROTTLE",
+    "STOP"
+   ],
+   "C": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "BRAKE_START(B); HARD_BRAKE_START(B); CRITICAL_TTC_START(B,B:track_001)",
+   "CRITICAL_TTC_END(B,B:track_001); CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "HARD_BRAKE_END(B); BRAKE_END(B); STRONG_THROTTLE_START(B)",
+   "COLLISION(A,B); STOP_END(B); MOVING_START(B)",
+   "CRITICAL_TTC_END(A,B); CLOSING_END(A,B); MOVING_END(A); STOP_START(A)",
+   "MOVING_END(B); STOP_START(B)"
+  ],
+  "sequence": [
+   "-5.90 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "-5.55 STRONG_THROTTLE_START(B)",
+   "-5.45 CLOSING_START(A,B)",
+   "-4.80 CLOSING_START(B,B:track_001)",
+   "-4.75 STRONG_THROTTLE_START(A)",
+   "-4.55 STRONG_THROTTLE_END(A)",
+   "-4.35 TRACK_APPEARED(A,A:track_002)",
+   "-4.30 CLOSING_END(A,B)",
+   "-4.15 STRONG_THROTTLE_END(B)",
+   "-3.80 CLOSING_END(B,B:track_001)",
+   "-2.95 TRACK_LOST(A,A:track_002)",
+   "-2.70 CLOSING_START(B,B:track_001)",
+   "-2.20 BRAKE_START(B); HARD_BRAKE_START(B); CRITICAL_TTC_START(B,B:track_001)",
+   "-1.90 CLOSING_START(A,B)",
+   "-1.20 CRITICAL_TTC_START(A,B)",
+   "-1.00 CRITICAL_TTC_END(B,B:track_001); CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "-0.35 BRAKE_START(A)",
+   "-0.20 HARD_BRAKE_END(B); BRAKE_END(B); STRONG_THROTTLE_START(B)",
+   "+0.00 COLLISION(A,B); STOP_END(B); MOVING_START(B)",
+   "+0.05 HARD_BRAKE_START(A)",
+   "+0.30 TRACK_LOST(B,B:track_001)",
+   "+0.35 CRITICAL_TTC_END(A,B); CLOSING_END(A,B); MOVING_END(A); STOP_START(A)",
+   "+0.40 MOVING_END(B); STOP_START(B)"
+  ],
+  "unaligned_nodes": 10,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.55 TRACK_APPEARED(track_002)",
+    "1.60 CLOSING_END(track_001)",
+    "2.95 TRACK_LOST(track_002)",
+    "4.00 CLOSING_START(track_001)",
+    "4.70 CRITICAL_TTC_START(track_001)",
+    "5.55 BRAKE_START",
+    "5.90 COLLISION",
+    "5.95 HARD_BRAKE_START",
+    "6.25 CRITICAL_TTC_END(track_001)",
+    "6.25 CLOSING_END(track_001)",
+    "6.25 MOVING_END",
+    "6.25 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.35 STRONG_THROTTLE_START",
+    "1.10 CLOSING_START(track_001)",
+    "1.75 STRONG_THROTTLE_END",
+    "2.10 CLOSING_END(track_001)",
+    "3.20 CLOSING_START(track_001)",
+    "3.70 BRAKE_START",
+    "3.70 HARD_BRAKE_START",
+    "3.70 CRITICAL_TTC_START(track_001)",
+    "4.90 CRITICAL_TTC_END(track_001)",
+    "4.90 CLOSING_END(track_001)",
+    "4.90 MOVING_END",
+    "4.90 STOP_START",
+    "5.70 HARD_BRAKE_END",
+    "5.70 BRAKE_END",
+    "5.70 STRONG_THROTTLE_START",
+    "5.90 COLLISION",
+    "5.90 STOP_END",
+    "5.90 MOVING_START",
+    "6.20 TRACK_LOST(track_001)",
+    "6.30 MOVING_END",
+    "6.30 STOP_START"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.50 STRONG_THROTTLE_START",
+    "2.05 STRONG_THROTTLE_END",
+    "2.40 SPEED_LIMIT_EXCEEDED_START",
+    "2.95 BRAKE_START",
+    "2.95 HARD_BRAKE_START",
+    "3.05 SPEED_LIMIT_EXCEEDED_END",
+    "4.05 MOVING_END",
+    "4.05 STOP_START",
+    "6.15 COLLISION"
+   ]
+  },
+  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 2; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S06/run_0_b_rear_first",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    16,
+    26
+   ],
+   "B": [
+    18,
+    37
+   ],
+   "C": [
+    10,
+    11
+   ]
+  },
+  "global": [
+   43,
+   64
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    0
+   ],
+   "HARD_BRAKE": [
+    3,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    5
+   ],
+   "MOVING": [
+    3,
+    3
+   ],
+   "STOP": [
+    3,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    1,
+    1
+   ],
+   "CLOSING": [
+    3,
+    3
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   3,
+   2
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 3,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); TRACK_APPEARED(B,B:track_001)",
+   "COLLISION(B); STRONG_THROTTLE_START(B)",
+   "CRITICAL_TTC_END(B,B:track_001); CLOSING_END(B,B:track_001); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A)",
+   "STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-6.00 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); TRACK_APPEARED(B,B:track_001)",
+   "-5.65 STRONG_THROTTLE_START(B)",
+   "-5.55 CLOSING_START(A,A:track_001)",
+   "-4.90 CLOSING_START(B,B:track_001)",
+   "-4.85 STRONG_THROTTLE_START(A)",
+   "-4.65 STRONG_THROTTLE_END(A)",
+   "-4.45 TRACK_APPEARED(A,A:track_002)",
+   "-4.40 CLOSING_END(A,A:track_001)",
+   "-4.25 STRONG_THROTTLE_END(B)",
+   "-3.90 CLOSING_END(B,B:track_001)",
+   "-3.05 TRACK_LOST(A,A:track_002)",
+   "-2.80 CLOSING_START(B,B:track_001)",
+   "-2.30 CRITICAL_TTC_START(B,B:track_001)",
+   "-1.45 TRACK_LOST(A,A:track_001)",
+   "-1.40 COLLISION(B); STRONG_THROTTLE_START(B)",
+   "-1.35 CRITICAL_TTC_END(B,B:track_001); CLOSING_END(B,B:track_001); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-1.25 MOVING_END(B); STOP_START(B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A)",
+   "+0.05 STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "+0.20 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 10,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.55 TRACK_APPEARED(track_002)",
+    "1.60 CLOSING_END(track_001)",
+    "2.95 TRACK_LOST(track_002)",
+    "4.55 TRACK_LOST(track_001)",
+    "6.00 COLLISION",
+    "6.00 STRONG_THROTTLE_START",
+    "6.05 STRONG_THROTTLE_END",
+    "6.05 BRAKE_START",
+    "6.05 HARD_BRAKE_START",
+    "6.20 MOVING_END",
+    "6.20 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.35 STRONG_THROTTLE_START",
+    "1.10 CLOSING_START(track_001)",
+    "1.75 STRONG_THROTTLE_END",
+    "2.10 CLOSING_END(track_001)",
+    "3.20 CLOSING_START(track_001)",
+    "3.70 CRITICAL_TTC_START(track_001)",
+    "4.60 COLLISION",
+    "4.60 STRONG_THROTTLE_START",
+    "4.65 CRITICAL_TTC_END(track_001)",
+    "4.65 CLOSING_END(track_001)",
+    "4.65 STRONG_THROTTLE_END",
+    "4.65 BRAKE_START",
+    "4.65 HARD_BRAKE_START",
+    "4.75 MOVING_END",
+    "4.75 STOP_START",
+    "6.00 COLLISION"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.50 STRONG_THROTTLE_START",
+    "2.05 STRONG_THROTTLE_END",
+    "2.40 SPEED_LIMIT_EXCEEDED_START",
+    "2.95 BRAKE_START",
+    "2.95 HARD_BRAKE_START",
+    "3.05 SPEED_LIMIT_EXCEEDED_END",
+    "4.05 MOVING_END",
+    "4.05 STOP_START",
+    "4.60 COLLISION"
+   ]
+  },
+  "headline": "collision reconstructed: NO; associations correct: 0/0; anonymous: 3; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S07/run_0_full_view",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    17,
+    35
+   ],
+   "B": [
+    15,
+    23
+   ],
+   "C": [
+    14,
+    21
+   ]
+  },
+  "global": [
+   45,
+   70
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.98",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    4
+   ],
+   "MOVING": [
+    4,
+    3
+   ],
+   "STOP": [
+    3,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    1,
+    1
+   ],
+   "CLOSING": [
+    4,
+    4
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   0
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "STRONG_THROTTLE",
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "STRONG_THROTTLE_START(B); CLOSING_START(A,B)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "CLOSING_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A)",
+   "STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.70 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "-5.25 STRONG_THROTTLE_START(B); CLOSING_START(A,B)",
+   "-4.60 CLOSING_START(B,B:track_001)",
+   "-4.55 STRONG_THROTTLE_START(A)",
+   "-4.35 STRONG_THROTTLE_END(A)",
+   "-4.10 CLOSING_END(A,B)",
+   "-3.95 STRONG_THROTTLE_END(B)",
+   "-3.60 CLOSING_END(B,B:track_001)",
+   "-2.45 CLOSING_START(B,B:track_001)",
+   "-2.05 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-1.80 CLOSING_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "-1.10 CRITICAL_TTC_START(A,B)",
+   "-1.05 CRITICAL_TTC_END(B,B:track_001)",
+   "-0.85 CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A)",
+   "+0.05 STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "+0.15 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 14,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.60 CLOSING_END(track_001)",
+    "3.90 CLOSING_START(track_001)",
+    "4.60 CRITICAL_TTC_START(track_001)",
+    "5.70 COLLISION",
+    "5.70 CRITICAL_TTC_END(track_001)",
+    "5.70 CLOSING_END(track_001)",
+    "5.70 STRONG_THROTTLE_START",
+    "5.75 STRONG_THROTTLE_END",
+    "5.75 BRAKE_START",
+    "5.75 HARD_BRAKE_START",
+    "5.85 MOVING_END",
+    "5.85 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 STRONG_THROTTLE_START",
+    "1.10 CLOSING_START(track_001)",
+    "1.75 STRONG_THROTTLE_END",
+    "2.10 CLOSING_END(track_001)",
+    "3.25 CLOSING_START(track_001)",
+    "3.65 BRAKE_START",
+    "3.65 HARD_BRAKE_START",
+    "3.90 CRITICAL_TTC_START(track_001)",
+    "4.65 CRITICAL_TTC_END(track_001)",
+    "4.85 CLOSING_END(track_001)",
+    "4.85 MOVING_END",
+    "4.85 STOP_START",
+    "5.70 COLLISION"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.50 STRONG_THROTTLE_START",
+    "2.05 STRONG_THROTTLE_END",
+    "2.40 SPEED_LIMIT_EXCEEDED_START",
+    "2.95 BRAKE_START",
+    "2.95 HARD_BRAKE_START",
+    "3.10 SPEED_LIMIT_EXCEEDED_END",
+    "4.05 MOVING_END",
+    "4.05 STOP_START",
+    "12.95 HARD_BRAKE_END",
+    "12.95 BRAKE_END",
+    "12.95 STRONG_THROTTLE_START",
+    "13.75 STOP_END",
+    "13.75 MOVING_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S07/run_0_occluded",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    17,
+    35
+   ],
+   "B": [
+    15,
+    23
+   ],
+   "C": [
+    14,
+    21
+   ]
+  },
+  "global": [
+   45,
+   70
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.98",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    4
+   ],
+   "MOVING": [
+    4,
+    3
+   ],
+   "STOP": [
+    3,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    1,
+    1
+   ],
+   "CLOSING": [
+    4,
+    4
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   0
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "STRONG_THROTTLE",
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "STRONG_THROTTLE_START(B); CLOSING_START(A,B)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "CLOSING_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A)",
+   "STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.70 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001)",
+   "-5.25 STRONG_THROTTLE_START(B); CLOSING_START(A,B)",
+   "-4.60 CLOSING_START(B,B:track_001)",
+   "-4.55 STRONG_THROTTLE_START(A)",
+   "-4.35 STRONG_THROTTLE_END(A)",
+   "-4.10 CLOSING_END(A,B)",
+   "-3.95 STRONG_THROTTLE_END(B)",
+   "-3.60 CLOSING_END(B,B:track_001)",
+   "-2.45 CLOSING_START(B,B:track_001)",
+   "-2.05 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-1.80 CLOSING_START(A,B); CRITICAL_TTC_START(B,B:track_001)",
+   "-1.10 CRITICAL_TTC_START(A,B)",
+   "-1.05 CRITICAL_TTC_END(B,B:track_001)",
+   "-0.85 CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A)",
+   "+0.05 STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "+0.15 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 14,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 CLOSING_START(track_001)",
+    "1.15 STRONG_THROTTLE_START",
+    "1.35 STRONG_THROTTLE_END",
+    "1.60 CLOSING_END(track_001)",
+    "3.90 CLOSING_START(track_001)",
+    "4.60 CRITICAL_TTC_START(track_001)",
+    "5.70 COLLISION",
+    "5.70 CRITICAL_TTC_END(track_001)",
+    "5.70 CLOSING_END(track_001)",
+    "5.70 STRONG_THROTTLE_START",
+    "5.75 STRONG_THROTTLE_END",
+    "5.75 BRAKE_START",
+    "5.75 HARD_BRAKE_START",
+    "5.85 MOVING_END",
+    "5.85 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.45 STRONG_THROTTLE_START",
+    "1.10 CLOSING_START(track_001)",
+    "1.75 STRONG_THROTTLE_END",
+    "2.10 CLOSING_END(track_001)",
+    "3.25 CLOSING_START(track_001)",
+    "3.65 BRAKE_START",
+    "3.65 HARD_BRAKE_START",
+    "3.90 CRITICAL_TTC_START(track_001)",
+    "4.65 CRITICAL_TTC_END(track_001)",
+    "4.85 CLOSING_END(track_001)",
+    "4.85 MOVING_END",
+    "4.85 STOP_START",
+    "5.70 COLLISION"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.50 STRONG_THROTTLE_START",
+    "2.05 STRONG_THROTTLE_END",
+    "2.40 SPEED_LIMIT_EXCEEDED_START",
+    "2.95 BRAKE_START",
+    "2.95 HARD_BRAKE_START",
+    "3.10 SPEED_LIMIT_EXCEEDED_END",
+    "4.05 MOVING_END",
+    "4.05 STOP_START",
+    "12.95 HARD_BRAKE_END",
+    "12.95 BRAKE_END",
+    "12.95 STRONG_THROTTLE_START",
+    "13.75 STOP_END",
+    "13.75 MOVING_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S08/run_0_crash",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    17,
+    29
+   ],
+   "B": [
+    20,
+    44
+   ],
+   "C": [
+    20,
+    34
+   ]
+  },
+  "global": [
+   56,
+   90
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->A ASSOCIATED 0.84",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "C:track_001->C:track_001 ANONYMOUS",
+   "C:track_002->C:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    2
+   ],
+   "MOVING": [
+    3,
+    3
+   ],
+   "STOP": [
+    3,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    6,
+    4
+   ],
+   "CRITICAL_TTC": [
+    7,
+    6
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   6,
+   2
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_002)",
+    "CRITICAL_TTC(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "CLOSING(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "STOP",
+    "STRONG_THROTTLE"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "TRACK_APPEARED(A,A:track_002); CLOSING_START(A,A:track_002)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_002)",
+   "CRITICAL_TTC_START(A,A:track_002); CRITICAL_TTC_START(B,A)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "CLOSING_END(A,A:track_001); MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-4.25 MOVING_START(A); MOVING_START(B)",
+   "-4.20 TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-3.10 STRONG_THROTTLE_START(B)",
+   "-2.20 TRACK_APPEARED(A,A:track_002); CLOSING_START(A,A:track_002)",
+   "-2.15 CRITICAL_TTC_START(A,A:track_001)",
+   "-2.10 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-2.05 TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_002)",
+   "-1.90 CRITICAL_TTC_START(A,A:track_002); CRITICAL_TTC_START(B,A)",
+   "-1.85 STRONG_THROTTLE_END(B)",
+   "-1.55 CRITICAL_TTC_END(A,A:track_001)",
+   "-0.90 TRACK_LOST(A,A:track_002)",
+   "-0.80 CRITICAL_TTC_START(A,A:track_001)",
+   "-0.20 TRACK_LOST(B,B:track_002)",
+   "-0.15 EGO_PATH_ENTRY(B,A)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(B)",
+   "+0.05 CRITICAL_TTC_END(B,A); CLOSING_END(B,A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.30 MOVING_END(B); STOP_START(B)",
+   "+0.45 EGO_PATH_EXIT(B,A)",
+   "+0.50 CRITICAL_TTC_END(A,A:track_001)",
+   "+0.65 CLOSING_END(A,A:track_001); MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 20,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.05 TRACK_APPEARED(track_001)",
+    "0.05 CLOSING_START(track_001)*",
+    "2.05 TRACK_APPEARED(track_002)",
+    "2.05 CLOSING_START(track_002)*",
+    "2.10 CRITICAL_TTC_START(track_001)",
+    "2.35 CRITICAL_TTC_START(track_002)",
+    "2.70 CRITICAL_TTC_END(track_001)",
+    "3.35 TRACK_LOST(track_002)",
+    "3.45 CRITICAL_TTC_START(track_001)",
+    "4.25 COLLISION",
+    "4.30 BRAKE_START",
+    "4.30 HARD_BRAKE_START",
+    "4.75 CRITICAL_TTC_END(track_001)",
+    "4.90 CLOSING_END(track_001)",
+    "4.90 MOVING_END",
+    "4.90 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.15 STRONG_THROTTLE_START",
+    "2.15 TRACK_APPEARED(track_001)",
+    "2.15 CLOSING_START(track_001)*",
+    "2.20 TRACK_APPEARED(track_002)",
+    "2.20 CLOSING_START(track_002)*",
+    "2.35 CRITICAL_TTC_START(track_001)",
+    "2.40 STRONG_THROTTLE_END",
+    "4.05 TRACK_LOST(track_002)",
+    "4.10 EGO_PATH_ENTRY(track_001)",
+    "4.25 COLLISION",
+    "4.25 STRONG_THROTTLE_START",
+    "4.30 CRITICAL_TTC_END(track_001)",
+    "4.30 CLOSING_END(track_001)",
+    "4.30 STRONG_THROTTLE_END",
+    "4.30 BRAKE_START",
+    "4.30 HARD_BRAKE_START",
+    "4.55 MOVING_END",
+    "4.55 STOP_START",
+    "4.70 EGO_PATH_EXIT(track_001)"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.05 TRACK_APPEARED(track_001)",
+    "0.05 CLOSING_START(track_001)*",
+    "2.15 CRITICAL_TTC_START(track_001)",
+    "2.35 BRAKE_START",
+    "2.35 HARD_BRAKE_START",
+    "2.75 CRITICAL_TTC_END(track_001)",
+    "2.85 MOVING_END",
+    "2.85 STOP_START",
+    "3.00 TRACK_APPEARED(track_002)",
+    "3.00 CLOSING_START(track_002)*",
+    "3.35 CRITICAL_TTC_START(track_002)",
+    "3.55 CRITICAL_TTC_START(track_001)",
+    "4.20 CRITICAL_TTC_END(track_002)",
+    "4.55 CLOSING_END(track_002)",
+    "4.70 CRITICAL_TTC_END(track_001)",
+    "4.90 CLOSING_END(track_001)",
+    "14.35 HARD_BRAKE_END",
+    "14.35 BRAKE_END",
+    "14.35 STRONG_THROTTLE_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 5; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S09/run_0_merge_conflict",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    18,
+    44
+   ],
+   "B": [
+    15,
+    24
+   ]
+  },
+  "global": [
+   32,
+   108
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.63",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    1,
+    1
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    5,
+    3
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   5,
+   2
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "CRITICAL_TTC(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)",
+   "TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); TRACK_APPEARED(B,B:track_001); TRACK_APPEARED(B,B:track_002); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001)",
+   "BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "CRITICAL_TTC_END(A,B); CLOSING_END(A,B); TRACK_LOST(B,B:track_002)",
+   "CLOSING_END(A,A:track_002); CLOSING_END(A,A:track_003); MOVING_END(A); STOP_START(A)",
+   "MOVING_END(B); STOP_START(B)"
+  ],
+  "sequence": [
+   "-1.80 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)",
+   "-1.60 TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); TRACK_APPEARED(B,B:track_001); TRACK_APPEARED(B,B:track_002); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001)",
+   "-1.00 STRONG_THROTTLE_START(B)",
+   "-0.35 EGO_PATH_ENTRY(A,B)",
+   "-0.20 STRONG_THROTTLE_END(B)",
+   "-0.15 TRACK_LOST(B,B:track_001)",
+   "+0.00 COLLISION(A,B)",
+   "+0.05 BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.10 CRITICAL_TTC_END(A,B); CLOSING_END(A,B); TRACK_LOST(B,B:track_002)",
+   "+0.70 CLOSING_END(A,A:track_002); CLOSING_END(A,A:track_003); MOVING_END(A); STOP_START(A)",
+   "+0.75 MOVING_END(B); STOP_START(B)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "0.00 CRITICAL_TTC_START(track_001)*",
+    "0.20 TRACK_APPEARED(track_002)",
+    "0.20 TRACK_APPEARED(track_003)",
+    "0.20 CLOSING_START(track_002)*",
+    "0.20 CLOSING_START(track_003)*",
+    "1.45 EGO_PATH_ENTRY(track_001)",
+    "1.80 COLLISION",
+    "1.85 BRAKE_START",
+    "1.85 HARD_BRAKE_START",
+    "1.90 CRITICAL_TTC_END(track_001)",
+    "1.90 CLOSING_END(track_001)",
+    "2.50 CLOSING_END(track_002)",
+    "2.50 CLOSING_END(track_003)",
+    "2.50 MOVING_END",
+    "2.50 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.20 TRACK_APPEARED(track_001)",
+    "0.20 TRACK_APPEARED(track_002)",
+    "0.20 CLOSING_START(track_001)*",
+    "0.20 CLOSING_START(track_002)*",
+    "0.20 CRITICAL_TTC_START(track_001)*",
+    "0.80 STRONG_THROTTLE_START",
+    "1.60 STRONG_THROTTLE_END",
+    "1.65 TRACK_LOST(track_001)",
+    "1.80 COLLISION",
+    "1.85 BRAKE_START",
+    "1.85 HARD_BRAKE_START",
+    "1.90 TRACK_LOST(track_002)",
+    "2.55 MOVING_END",
+    "2.55 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 4; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S10/run_0_rolls_through",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    19,
+    38
+   ],
+   "B": [
+    16,
+    30
+   ]
+  },
+  "global": [
+   34,
+   76
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.96",
+   "B:track_001->A ASSOCIATED 0.91"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    3
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    1,
+    1
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   1
+  ],
+  "path": [
+   2,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 1.85,
+     "end_node": "A:e05",
+     "end_t_local": 2.15,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "BRAKE_START(A); HARD_BRAKE_START(A)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "BRAKE_END(A); TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)",
+   "EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A); MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.25 MOVING_START(A); MOVING_START(B)",
+   "-4.05 STRONG_THROTTLE_START(B)",
+   "-3.45 STRONG_THROTTLE_END(B)",
+   "-3.40 STOP_SIGN_DETECTED_START(A,A:sign-0)",
+   "-3.30 BRAKE_START(A); HARD_BRAKE_START(A)",
+   "-3.10 STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "-3.05 HARD_BRAKE_END(A)",
+   "-2.60 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-1.75 CRITICAL_TTC_START(B,A)",
+   "-1.45 BRAKE_END(A); TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)",
+   "-0.35 EGO_PATH_ENTRY(B,A)",
+   "-0.05 EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.10 MOVING_END(B); STOP_START(B)",
+   "+0.15 CRITICAL_TTC_END(B,A); CLOSING_END(B,A); MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "1.85 STOP_SIGN_DETECTED_START(sign-0)",
+    "1.95 BRAKE_START",
+    "1.95 HARD_BRAKE_START",
+    "2.15 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.20 HARD_BRAKE_END",
+    "3.80 BRAKE_END",
+    "3.80 TRACK_APPEARED(track_001)",
+    "3.80 CLOSING_START(track_001)*",
+    "3.80 CRITICAL_TTC_START(track_001)*",
+    "5.20 EGO_PATH_ENTRY(track_001)",
+    "5.20 TRACK_LOST(track_001)",
+    "5.25 COLLISION",
+    "5.25 STRONG_THROTTLE_START",
+    "5.30 STRONG_THROTTLE_END",
+    "5.30 BRAKE_START",
+    "5.30 HARD_BRAKE_START",
+    "5.40 MOVING_END",
+    "5.40 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "2.65 TRACK_APPEARED(track_001)",
+    "2.65 CLOSING_START(track_001)*",
+    "3.50 CRITICAL_TTC_START(track_001)",
+    "4.90 EGO_PATH_ENTRY(track_001)",
+    "5.25 COLLISION",
+    "5.25 STRONG_THROTTLE_START",
+    "5.30 STRONG_THROTTLE_END",
+    "5.30 BRAKE_START",
+    "5.30 HARD_BRAKE_START",
+    "5.35 MOVING_END",
+    "5.35 STOP_START",
+    "5.40 CRITICAL_TTC_END(track_001)",
+    "5.40 CLOSING_END(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S10/run_0_stops_safely",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    16,
+    27
+   ],
+   "B": [
+    9,
+    12
+   ]
+  },
+  "global": [
+   25,
+   10
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    0
+   ],
+   "HARD_BRAKE": [
+    1,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    1
+   ],
+   "MOVING": [
+    2,
+    1
+   ],
+   "STOP": [
+    1,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    2,
+    2
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   2
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP",
+    "STRONG_THROTTLE"
+   ],
+   "B": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 1.9,
+     "end_node": "A:e03",
+     "end_t_local": 2.15,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e08",
+     "start_t_local": 7.55,
+     "end_node": "B:e09",
+     "end_t_local": 7.75,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 25,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "1.90 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.15 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.55 BRAKE_START",
+    "2.55 HARD_BRAKE_START",
+    "3.35 MOVING_END",
+    "3.35 STOP_START",
+    "3.70 TRACK_APPEARED(track_001)",
+    "3.70 CLOSING_START(track_001)*",
+    "4.25 CRITICAL_TTC_START(track_001)",
+    "5.80 EGO_PATH_ENTRY(track_001)",
+    "5.95 CRITICAL_TTC_END(track_001)",
+    "6.10 CLOSING_END(track_001)",
+    "6.25 EGO_PATH_EXIT(track_001)",
+    "7.00 TRACK_LOST(track_001)",
+    "9.55 STRONG_THROTTLE_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "2.55 TRACK_APPEARED(track_001)",
+    "2.55 CLOSING_START(track_001)*",
+    "4.30 CRITICAL_TTC_START(track_001)",
+    "5.50 TRACK_LOST(track_001)",
+    "7.55 STOP_SIGN_DETECTED_START(sign-1)",
+    "7.75 STOP_SIGN_DETECTED_END(sign-1)"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 2; max |t_global error| None s"
+ },
+ {
+  "run": "S10/run_0_stops_then_proceeds",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    41,
+    87
+   ],
+   "B": [
+    9,
+    12
+   ]
+  },
+  "global": [
+   50,
+   23
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "A:track_004->A:track_004 ANONYMOUS",
+   "A:track_005->A:track_005 ANONYMOUS",
+   "A:track_006->A:track_006 ANONYMOUS",
+   "A:track_007->A:track_007 ANONYMOUS",
+   "A:track_008->A:track_008 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    1
+   ],
+   "HARD_BRAKE": [
+    1,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    3,
+    1
+   ],
+   "STOP": [
+    1,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    9,
+    1
+   ],
+   "CRITICAL_TTC": [
+    3,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    2,
+    2
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   9,
+   7
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_002)",
+    "CLOSING(track_003)",
+    "CLOSING(track_004)",
+    "CLOSING(track_005)",
+    "CLOSING(track_006)",
+    "CLOSING(track_007)",
+    "CLOSING(track_008)",
+    "CRITICAL_TTC(track_003)"
+   ],
+   "B": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 1.75,
+     "end_node": "A:e03",
+     "end_t_local": 2.15,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e08",
+     "start_t_local": 7.6,
+     "end_node": "B:e09",
+     "end_t_local": 7.7,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 50,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "1.75 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.15 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.55 BRAKE_START",
+    "2.55 HARD_BRAKE_START",
+    "3.35 MOVING_END",
+    "3.35 STOP_START",
+    "3.70 TRACK_APPEARED(track_001)",
+    "3.70 CLOSING_START(track_001)*",
+    "4.25 CRITICAL_TTC_START(track_001)",
+    "5.80 EGO_PATH_ENTRY(track_001)",
+    "5.95 CRITICAL_TTC_END(track_001)",
+    "6.10 CLOSING_END(track_001)",
+    "6.25 EGO_PATH_EXIT(track_001)",
+    "6.75 HARD_BRAKE_END",
+    "6.75 BRAKE_END",
+    "6.75 STRONG_THROTTLE_START",
+    "7.00 TRACK_LOST(track_001)",
+    "7.10 STOP_END",
+    "7.10 MOVING_START",
+    "8.20 TRACK_APPEARED(track_002)",
+    "8.20 CLOSING_START(track_002)*",
+    "8.25 STRONG_THROTTLE_END",
+    "8.25 TRACK_APPEARED(track_003)",
+    "8.25 CLOSING_START(track_003)*",
+    "8.30 TRACK_APPEARED(track_004)",
+    "8.30 CLOSING_START(track_004)*",
+    "8.35 TRACK_APPEARED(track_005)",
+    "8.35 CLOSING_START(track_005)*",
+    "8.40 TRACK_APPEARED(track_006)",
+    "8.40 CLOSING_START(track_006)*",
+    "8.45 TRACK_APPEARED(track_007)",
+    "8.45 TRACK_APPEARED(track_008)",
+    "8.45 CLOSING_START(track_007)*",
+    "8.45 CLOSING_START(track_008)*",
+    "9.00 CRITICAL_TTC_START(track_003)",
+    "9.25 TRACK_LOST(track_003)",
+    "9.50 TRACK_LOST(track_002)",
+    "10.75 TRACK_LOST(track_006)",
+    "11.60 TRACK_LOST(track_007)",
+    "12.45 TRACK_LOST(track_005)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "2.55 TRACK_APPEARED(track_001)",
+    "2.55 CLOSING_START(track_001)*",
+    "4.30 CRITICAL_TTC_START(track_001)",
+    "5.50 TRACK_LOST(track_001)",
+    "7.60 STOP_SIGN_DETECTED_START(sign-1)",
+    "7.70 STOP_SIGN_DETECTED_END(sign-1)"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 9; max |t_global error| None s"
+ },
+ {
+  "run": "S11/run_0_rolls_through",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    13,
+    26
+   ],
+   "B": [
+    24,
+    40
+   ]
+  },
+  "global": [
+   36,
+   77
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.94",
+   "B:track_001->A ASSOCIATED 0.95"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    3,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    4,
+    4
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    1,
+    1
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   1
+  ],
+  "path": [
+   2,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e06",
+     "start_t_local": 2.1,
+     "end_node": "B:e08",
+     "end_t_local": 2.45,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A); CRITICAL_TTC_START(B,A)",
+   "EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.50 MOVING_START(A); MOVING_START(B)",
+   "-4.25 STRONG_THROTTLE_START(B)",
+   "-3.65 STRONG_THROTTLE_END(B)",
+   "-3.55 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-3.40 STOP_SIGN_DETECTED_START(B,B:sign-1)",
+   "-3.30 HARD_BRAKE_END(B)",
+   "-3.05 STOP_SIGN_DETECTED_END(B,B:sign-1)",
+   "-2.85 BRAKE_END(B)",
+   "-2.75 TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-2.50 STRONG_THROTTLE_START(B)",
+   "-2.25 STRONG_THROTTLE_END(B)",
+   "-1.80 CRITICAL_TTC_START(A,B)",
+   "-1.55 TRACK_APPEARED(B,A); CLOSING_START(B,A); CRITICAL_TTC_START(B,A)",
+   "-0.20 EGO_PATH_ENTRY(B,A)",
+   "-0.05 EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.20 MOVING_END(B); STOP_START(B)",
+   "+0.25 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "+0.55 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "2.75 TRACK_APPEARED(track_001)",
+    "2.75 CLOSING_START(track_001)*",
+    "3.70 CRITICAL_TTC_START(track_001)",
+    "5.45 EGO_PATH_ENTRY(track_001)",
+    "5.45 TRACK_LOST(track_001)",
+    "5.50 COLLISION",
+    "5.50 STRONG_THROTTLE_START",
+    "5.55 STRONG_THROTTLE_END",
+    "5.55 BRAKE_START",
+    "5.55 HARD_BRAKE_START",
+    "6.05 MOVING_END",
+    "6.05 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "1.95 BRAKE_START",
+    "1.95 HARD_BRAKE_START",
+    "2.10 STOP_SIGN_DETECTED_START(sign-1)",
+    "2.20 HARD_BRAKE_END",
+    "2.45 STOP_SIGN_DETECTED_END(sign-1)",
+    "2.65 BRAKE_END",
+    "3.00 STRONG_THROTTLE_START",
+    "3.25 STRONG_THROTTLE_END",
+    "3.95 TRACK_APPEARED(track_001)",
+    "3.95 CLOSING_START(track_001)*",
+    "3.95 CRITICAL_TTC_START(track_001)*",
+    "5.30 EGO_PATH_ENTRY(track_001)",
+    "5.50 COLLISION",
+    "5.50 STRONG_THROTTLE_START",
+    "5.55 STRONG_THROTTLE_END",
+    "5.55 BRAKE_START",
+    "5.55 HARD_BRAKE_START",
+    "5.70 MOVING_END",
+    "5.70 STOP_START",
+    "5.75 CRITICAL_TTC_END(track_001)",
+    "5.75 CLOSING_END(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S11/run_0_stops_safely",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    6,
+    10
+   ],
+   "B": [
+    18,
+    29
+   ]
+  },
+  "global": [
+   24,
+   11
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    0
+   ],
+   "HARD_BRAKE": [
+    1,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    1
+   ],
+   "MOVING": [
+    2,
+    1
+   ],
+   "STOP": [
+    1,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    1,
+    1
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   2,
+   2
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP",
+    "STRONG_THROTTLE"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e04",
+     "start_t_local": 2.1,
+     "end_node": "B:e05",
+     "end_t_local": 2.35,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 24,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "2.60 TRACK_APPEARED(track_001)",
+    "2.60 CLOSING_START(track_001)*",
+    "4.65 CRITICAL_TTC_START(track_001)",
+    "5.25 CRITICAL_TTC_END(track_001)",
+    "5.35 TRACK_LOST(track_001)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "2.10 STOP_SIGN_DETECTED_START(sign-1)",
+    "2.35 STOP_SIGN_DETECTED_END(sign-1)",
+    "2.55 BRAKE_START",
+    "2.55 HARD_BRAKE_START",
+    "3.25 MOVING_END",
+    "3.25 STOP_START",
+    "3.50 TRACK_APPEARED(track_001)",
+    "3.50 CLOSING_START(track_001)*",
+    "4.40 CRITICAL_TTC_START(track_001)",
+    "5.75 CRITICAL_TTC_END(track_001)",
+    "5.80 EGO_PATH_ENTRY(track_001)",
+    "6.10 CLOSING_END(track_001)",
+    "6.20 EGO_PATH_EXIT(track_001)",
+    "7.30 TRACK_LOST(track_001)",
+    "9.55 STRONG_THROTTLE_START"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 2; max |t_global error| None s"
+ },
+ {
+  "run": "S11/run_0_stops_then_proceeds",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    6,
+    10
+   ],
+   "B": [
+    37,
+    76
+   ]
+  },
+  "global": [
+   43,
+   21
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "B:track_003->B:track_003 ANONYMOUS",
+   "B:track_004->B:track_004 ANONYMOUS",
+   "B:track_005->B:track_005 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    1
+   ],
+   "HARD_BRAKE": [
+    1,
+    1
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    3,
+    1
+   ],
+   "STOP": [
+    1,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    6,
+    1
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    1,
+    1
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   6,
+   4
+  ],
+  "path": [
+   3,
+   3
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)"
+   ],
+   "B": [
+    "MOVING",
+    "CLOSING(track_002)",
+    "CLOSING(track_003)",
+    "CLOSING(track_004)",
+    "CLOSING(track_005)"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e04",
+     "start_t_local": 2.1,
+     "end_node": "B:e05",
+     "end_t_local": 2.4,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 43,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "2.60 TRACK_APPEARED(track_001)",
+    "2.60 CLOSING_START(track_001)*",
+    "4.65 CRITICAL_TTC_START(track_001)",
+    "5.25 CRITICAL_TTC_END(track_001)",
+    "5.35 TRACK_LOST(track_001)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "2.10 STOP_SIGN_DETECTED_START(sign-1)",
+    "2.40 STOP_SIGN_DETECTED_END(sign-1)",
+    "2.55 BRAKE_START",
+    "2.55 HARD_BRAKE_START",
+    "3.25 MOVING_END",
+    "3.25 STOP_START",
+    "3.50 TRACK_APPEARED(track_001)",
+    "3.50 CLOSING_START(track_001)*",
+    "4.40 CRITICAL_TTC_START(track_001)",
+    "5.75 CRITICAL_TTC_END(track_001)",
+    "5.80 EGO_PATH_ENTRY(track_001)",
+    "6.10 CLOSING_END(track_001)",
+    "6.20 EGO_PATH_EXIT(track_001)",
+    "6.75 HARD_BRAKE_END",
+    "6.75 BRAKE_END",
+    "6.75 STRONG_THROTTLE_START",
+    "7.20 STOP_END",
+    "7.20 MOVING_START",
+    "7.30 TRACK_LOST(track_001)",
+    "8.40 STRONG_THROTTLE_END",
+    "8.40 TRACK_APPEARED(track_002)",
+    "8.40 TRACK_APPEARED(track_003)",
+    "8.40 TRACK_APPEARED(track_004)",
+    "8.40 CLOSING_START(track_002)*",
+    "8.40 CLOSING_START(track_003)*",
+    "8.40 CLOSING_START(track_004)*",
+    "8.45 TRACK_APPEARED(track_005)",
+    "8.45 CLOSING_START(track_005)*",
+    "8.65 TRACK_LOST(track_005)",
+    "9.60 EGO_PATH_ENTRY(track_004)",
+    "9.70 EGO_PATH_ENTRY(track_003)",
+    "9.85 EGO_PATH_EXIT(track_004)",
+    "9.90 EGO_PATH_EXIT(track_003)",
+    "9.90 TRACK_LOST(track_002)"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 6; max |t_global error| None s"
+ },
+ {
+  "run": "S12/run_0_a_arrives_first",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    49,
+    123
+   ],
+   "B": [
+    23,
+    45
+   ]
+  },
+  "global": [
+   72,
+   31
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "A:track_004->A:track_004 ANONYMOUS",
+   "A:track_005->A:track_005 ANONYMOUS",
+   "A:track_006->A:track_006 ANONYMOUS",
+   "A:track_007->A:track_007 ANONYMOUS",
+   "A:track_008->A:track_008 ANONYMOUS",
+   "A:track_009->A:track_009 ANONYMOUS",
+   "A:track_010->A:track_010 ANONYMOUS",
+   "A:track_011->A:track_011 ANONYMOUS",
+   "A:track_012->A:track_012 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    2
+   ],
+   "HARD_BRAKE": [
+    2,
+    2
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    3
+   ],
+   "MOVING": [
+    4,
+    2
+   ],
+   "STOP": [
+    2,
+    2
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    14,
+    1
+   ],
+   "CRITICAL_TTC": [
+    3,
+    0
+   ],
+   "STOP_SIGN_DETECTED": [
+    2,
+    2
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   13,
+   10
+  ],
+  "path": [
+   2,
+   1
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "CLOSING(track_003)",
+    "CLOSING(track_004)",
+    "CLOSING(track_005)",
+    "CLOSING(track_007)",
+    "CLOSING(track_006)",
+    "CLOSING(track_008)",
+    "CLOSING(track_009)",
+    "CLOSING(track_010)",
+    "CLOSING(track_011)",
+    "CLOSING(track_012)",
+    "CRITICAL_TTC(track_009)",
+    "CRITICAL_TTC(track_004)",
+    "EGO_PATH(track_001)"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 0.65,
+     "end_node": "A:e03",
+     "end_t_local": 2.25,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-0",
+     "start_node": "B:e04",
+     "start_t_local": 2.1,
+     "end_node": "B:e07",
+     "end_t_local": 4.0,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 72,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.65 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.25 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.65 BRAKE_START",
+    "2.65 HARD_BRAKE_START",
+    "3.40 MOVING_END",
+    "3.40 STOP_START",
+    "6.45 HARD_BRAKE_END",
+    "6.45 BRAKE_END",
+    "6.45 STRONG_THROTTLE_START",
+    "6.80 STOP_END",
+    "6.80 MOVING_START",
+    "7.80 STRONG_THROTTLE_END",
+    "8.85 TRACK_APPEARED(track_001)",
+    "8.85 TRACK_APPEARED(track_002)",
+    "8.85 CLOSING_START(track_001)*",
+    "8.85 CLOSING_START(track_002)*",
+    "8.95 TRACK_APPEARED(track_003)",
+    "8.95 CLOSING_START(track_003)*",
+    "9.00 TRACK_APPEARED(track_004)",
+    "9.00 CLOSING_START(track_004)*",
+    "9.05 TRACK_APPEARED(track_005)",
+    "9.05 TRACK_APPEARED(track_007)",
+    "9.05 CLOSING_START(track_005)*",
+    "9.05 CLOSING_START(track_007)*",
+    "9.10 TRACK_APPEARED(track_006)",
+    "9.10 TRACK_APPEARED(track_008)",
+    "9.10 CLOSING_START(track_006)*",
+    "9.10 CLOSING_START(track_008)*",
+    "9.15 TRACK_APPEARED(track_009)",
+    "9.15 CLOSING_START(track_009)*",
+    "9.20 TRACK_APPEARED(track_010)",
+    "9.20 TRACK_APPEARED(track_011)",
+    "9.20 CLOSING_START(track_010)*",
+    "9.20 CLOSING_START(track_011)*",
+    "9.25 TRACK_APPEARED(track_012)",
+    "9.25 CLOSING_START(track_012)*",
+    "9.45 CRITICAL_TTC_START(track_009)",
+    "10.05 CRITICAL_TTC_START(track_004)",
+    "10.25 TRACK_LOST(track_004)",
+    "10.70 TRACK_LOST(track_009)",
+    "12.00 EGO_PATH_ENTRY(track_001)",
+    "12.25 TRACK_LOST(track_012)",
+    "12.75 TRACK_LOST(track_011)",
+    "13.35 TRACK_LOST(track_006)",
+    "14.50 TRACK_LOST(track_008)",
+    "14.65 TRACK_LOST(track_010)",
+    "15.75 TRACK_LOST(track_005)",
+    "16.30 TRACK_LOST(track_007)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.65 STRONG_THROTTLE_START",
+    "2.10 STRONG_THROTTLE_END",
+    "2.10 STOP_SIGN_DETECTED_START(sign-0)",
+    "3.00 TRACK_APPEARED(track_001)",
+    "3.00 CLOSING_START(track_001)*",
+    "4.00 STOP_SIGN_DETECTED_END(sign-0)",
+    "4.35 BRAKE_START",
+    "4.35 HARD_BRAKE_START",
+    "4.70 CLOSING_END(track_001)",
+    "4.70 MOVING_END",
+    "4.70 STOP_START",
+    "6.95 CLOSING_START(track_001)",
+    "8.50 EGO_PATH_ENTRY(track_001)",
+    "9.05 EGO_PATH_EXIT(track_001)",
+    "9.55 CRITICAL_TTC_START(track_001)",
+    "10.45 HARD_BRAKE_END",
+    "10.45 BRAKE_END",
+    "10.45 STRONG_THROTTLE_START",
+    "10.85 STOP_END",
+    "10.85 MOVING_START",
+    "10.85 TRACK_LOST(track_001)",
+    "11.95 STRONG_THROTTLE_END"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 13; max |t_global error| None s"
+ },
+ {
+  "run": "S12/run_0_b_arrives_first",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    51,
+    132
+   ],
+   "B": [
+    20,
+    33
+   ]
+  },
+  "global": [
+   71,
+   29
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "A:track_004->A:track_004 ANONYMOUS",
+   "A:track_005->A:track_005 ANONYMOUS",
+   "A:track_006->A:track_006 ANONYMOUS",
+   "A:track_007->A:track_007 ANONYMOUS",
+   "A:track_008->A:track_008 ANONYMOUS",
+   "A:track_009->A:track_009 ANONYMOUS",
+   "A:track_010->A:track_010 ANONYMOUS",
+   "A:track_011->A:track_011 ANONYMOUS",
+   "A:track_012->A:track_012 ANONYMOUS",
+   "A:track_013->A:track_013 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    2
+   ],
+   "HARD_BRAKE": [
+    2,
+    2
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    3
+   ],
+   "MOVING": [
+    4,
+    2
+   ],
+   "STOP": [
+    2,
+    2
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    16,
+    3
+   ],
+   "CRITICAL_TTC": [
+    1,
+    0
+   ],
+   "STOP_SIGN_DETECTED": [
+    2,
+    2
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   14,
+   5
+  ],
+  "path": [
+   2,
+   2
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_002)",
+    "CLOSING(track_003)",
+    "CLOSING(track_004)",
+    "CLOSING(track_006)",
+    "CLOSING(track_005)",
+    "CLOSING(track_007)",
+    "CLOSING(track_009)",
+    "CLOSING(track_008)",
+    "CLOSING(track_010)",
+    "CLOSING(track_011)",
+    "CLOSING(track_012)",
+    "CLOSING(track_013)",
+    "CRITICAL_TTC(track_007)"
+   ],
+   "B": [
+    "MOVING",
+    "CLOSING(track_001)"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 1.05,
+     "end_node": "A:e05",
+     "end_t_local": 3.55,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e04",
+     "start_t_local": 2.1,
+     "end_node": "B:e05",
+     "end_t_local": 2.6,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 71,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "1.05 STOP_SIGN_DETECTED_START(sign-0)",
+    "3.00 TRACK_APPEARED(track_001)",
+    "3.00 CLOSING_START(track_001)*",
+    "3.55 STOP_SIGN_DETECTED_END(sign-0)",
+    "4.35 BRAKE_START",
+    "4.35 HARD_BRAKE_START",
+    "4.70 CLOSING_END(track_001)",
+    "4.75 MOVING_END",
+    "4.75 STOP_START",
+    "7.00 CLOSING_START(track_001)",
+    "9.70 EGO_PATH_ENTRY(track_001)",
+    "9.85 CLOSING_END(track_001)",
+    "10.20 EGO_PATH_EXIT(track_001)",
+    "10.45 HARD_BRAKE_END",
+    "10.45 BRAKE_END",
+    "10.45 STRONG_THROTTLE_START",
+    "10.80 STOP_END",
+    "10.80 MOVING_START",
+    "11.65 TRACK_LOST(track_001)",
+    "11.80 STRONG_THROTTLE_END",
+    "13.10 TRACK_APPEARED(track_002)",
+    "13.10 TRACK_APPEARED(track_003)",
+    "13.10 TRACK_APPEARED(track_004)",
+    "13.10 TRACK_APPEARED(track_006)",
+    "13.10 CLOSING_START(track_002)*",
+    "13.10 CLOSING_START(track_003)*",
+    "13.10 CLOSING_START(track_004)*",
+    "13.10 CLOSING_START(track_006)*",
+    "13.25 TRACK_APPEARED(track_005)",
+    "13.25 CLOSING_START(track_005)*",
+    "13.30 TRACK_APPEARED(track_007)",
+    "13.30 TRACK_APPEARED(track_009)",
+    "13.30 CLOSING_START(track_007)*",
+    "13.30 CLOSING_START(track_009)*",
+    "13.35 TRACK_APPEARED(track_008)",
+    "13.35 TRACK_APPEARED(track_010)",
+    "13.35 CLOSING_START(track_008)*",
+    "13.35 CLOSING_START(track_010)*",
+    "13.45 TRACK_APPEARED(track_011)",
+    "13.45 TRACK_APPEARED(track_012)",
+    "13.45 CLOSING_START(track_011)*",
+    "13.45 CLOSING_START(track_012)*",
+    "13.50 TRACK_APPEARED(track_013)",
+    "13.50 CLOSING_START(track_013)*",
+    "13.80 CRITICAL_TTC_START(track_007)",
+    "14.00 TRACK_LOST(track_007)",
+    "14.40 TRACK_LOST(track_003)",
+    "15.00 EGO_PATH_ENTRY(track_006)",
+    "15.60 TRACK_LOST(track_013)",
+    "15.95 EGO_PATH_EXIT(track_006)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "2.10 STOP_SIGN_DETECTED_START(sign-1)",
+    "2.60 STOP_SIGN_DETECTED_END(sign-1)",
+    "2.65 BRAKE_START",
+    "2.65 HARD_BRAKE_START",
+    "3.00 TRACK_APPEARED(track_001)",
+    "3.00 CLOSING_START(track_001)*",
+    "3.40 MOVING_END",
+    "3.40 STOP_START",
+    "4.70 CLOSING_END(track_001)",
+    "6.45 HARD_BRAKE_END",
+    "6.45 BRAKE_END",
+    "6.45 STRONG_THROTTLE_START",
+    "6.85 STOP_END",
+    "6.85 MOVING_START",
+    "7.00 CLOSING_START(track_001)",
+    "7.90 STRONG_THROTTLE_END",
+    "8.75 TRACK_LOST(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 14; max |t_global error| None s"
+ },
+ {
+  "run": "S12/run_0_b_fails_to_stop",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    25,
+    49
+   ],
+   "B": [
+    30,
+    67
+   ]
+  },
+  "global": [
+   54,
+   139
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.90",
+   "B:track_001->A ASSOCIATED 0.88",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "B:track_003->B:track_003 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    4,
+    2
+   ],
+   "HARD_BRAKE": [
+    4,
+    2
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    5
+   ],
+   "MOVING": [
+    3,
+    3
+   ],
+   "STOP": [
+    3,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    4,
+    3
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    2,
+    2
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   4,
+   1
+  ],
+  "path": [
+   2,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CRITICAL_TTC(track_001)",
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "EGO_PATH(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 0.65,
+     "end_node": "A:e03",
+     "end_t_local": 2.25,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e10",
+     "start_t_local": 3.5,
+     "end_node": "B:e11",
+     "end_t_local": 5.3,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "BRAKE_END(B); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "MOVING_END(A); STOP_START(A)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "HARD_BRAKE_END(A); BRAKE_END(A); STRONG_THROTTLE_START(A)",
+   "STOP_END(A); MOVING_START(A)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_002)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_003); CLOSING_START(B,B:track_003)",
+   "MOVING_END(B); STOP_START(B)",
+   "CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_003)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-9.70 MOVING_START(A); MOVING_START(B)",
+   "-9.05 STOP_SIGN_DETECTED_START(A,A:sign-0)",
+   "-8.45 STRONG_THROTTLE_START(B)",
+   "-7.85 STRONG_THROTTLE_END(B)",
+   "-7.75 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-7.45 STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "-7.40 HARD_BRAKE_END(B)",
+   "-7.05 BRAKE_END(B); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "-6.45 STRONG_THROTTLE_START(B)",
+   "-6.40 STRONG_THROTTLE_END(B)",
+   "-6.30 MOVING_END(A); STOP_START(A)",
+   "-6.20 STOP_SIGN_DETECTED_START(B,B:sign-1)",
+   "-4.40 STOP_SIGN_DETECTED_END(B,B:sign-1)",
+   "-2.95 TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-1.95 HARD_BRAKE_END(A); BRAKE_END(A); STRONG_THROTTLE_START(A)",
+   "-1.60 STOP_END(A); MOVING_START(A)",
+   "-1.55 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-1.20 CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "-0.60 STRONG_THROTTLE_END(A)",
+   "-0.10 EGO_PATH_ENTRY(B,A)",
+   "-0.05 EGO_PATH_ENTRY(A,B); TRACK_LOST(A,B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_002)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_003); CLOSING_START(B,B:track_003)",
+   "+0.35 MOVING_END(B); STOP_START(B)",
+   "+0.40 CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_003)",
+   "+0.45 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "+0.50 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.65 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.25 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.65 BRAKE_START",
+    "2.65 HARD_BRAKE_START",
+    "3.40 MOVING_END",
+    "3.40 STOP_START",
+    "6.75 TRACK_APPEARED(track_001)",
+    "6.75 CLOSING_START(track_001)*",
+    "7.75 HARD_BRAKE_END",
+    "7.75 BRAKE_END",
+    "7.75 STRONG_THROTTLE_START",
+    "8.10 STOP_END",
+    "8.10 MOVING_START",
+    "8.50 CRITICAL_TTC_START(track_001)",
+    "9.10 STRONG_THROTTLE_END",
+    "9.65 EGO_PATH_ENTRY(track_001)",
+    "9.65 TRACK_LOST(track_001)",
+    "9.70 COLLISION",
+    "9.70 STRONG_THROTTLE_START",
+    "9.75 STRONG_THROTTLE_END",
+    "9.75 BRAKE_START",
+    "9.75 HARD_BRAKE_START",
+    "10.20 MOVING_END",
+    "10.20 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "1.95 BRAKE_START",
+    "1.95 HARD_BRAKE_START",
+    "2.30 HARD_BRAKE_END",
+    "2.65 BRAKE_END",
+    "3.25 STRONG_THROTTLE_START",
+    "3.30 STRONG_THROTTLE_END",
+    "3.50 STOP_SIGN_DETECTED_START(sign-1)",
+    "5.30 STOP_SIGN_DETECTED_END(sign-1)",
+    "8.15 TRACK_APPEARED(track_001)",
+    "8.15 CLOSING_START(track_001)*",
+    "8.50 CRITICAL_TTC_START(track_001)",
+    "9.60 EGO_PATH_ENTRY(track_001)",
+    "9.70 COLLISION",
+    "9.70 STRONG_THROTTLE_START",
+    "9.70 TRACK_APPEARED(track_002)",
+    "9.70 CLOSING_START(track_002)*",
+    "9.75 STRONG_THROTTLE_END",
+    "9.75 BRAKE_START",
+    "9.75 HARD_BRAKE_START",
+    "9.75 TRACK_APPEARED(track_003)",
+    "9.75 CLOSING_START(track_003)*",
+    "10.05 MOVING_END",
+    "10.05 STOP_START",
+    "10.10 CLOSING_END(track_002)",
+    "10.10 CLOSING_END(track_003)",
+    "10.15 CRITICAL_TTC_END(track_001)",
+    "10.15 CLOSING_END(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 2; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S12/run_0_near_simultaneous",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    48,
+    129
+   ],
+   "B": [
+    32,
+    64
+   ]
+  },
+  "global": [
+   79,
+   255
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "A:track_004->A:track_004 ANONYMOUS",
+   "A:track_005->A:track_005 ANONYMOUS",
+   "A:track_006->A:track_006 ANONYMOUS",
+   "A:track_007->A:track_007 ANONYMOUS",
+   "A:track_008->A:track_008 ANONYMOUS",
+   "B:track_001->A ASSOCIATED 0.79"
+  ],
+  "pairs": {
+   "BRAKE": [
+    4,
+    2
+   ],
+   "HARD_BRAKE": [
+    4,
+    2
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    5
+   ],
+   "MOVING": [
+    4,
+    4
+   ],
+   "STOP": [
+    4,
+    2
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    10,
+    8
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    4,
+    4
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   9,
+   3
+  ],
+  "path": [
+   1,
+   1
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e02",
+     "start_t_local": 0.65,
+     "end_node": "A:e03",
+     "end_t_local": 2.25,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    },
+    {
+     "sign": "sign-1",
+     "start_node": "A:e45",
+     "start_t_local": 11.7,
+     "end_node": "A:e46",
+     "end_t_local": 11.8,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-4",
+     "start_node": "A:e47",
+     "start_t_local": 13.95,
+     "end_node": "A:e48",
+     "end_t_local": 13.95,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-1",
+     "start_node": "B:e04",
+     "start_t_local": 2.1,
+     "end_node": "B:e07",
+     "end_t_local": 2.6,
+     "relevant_to_ego_path": true,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "BRAKE_START(A); HARD_BRAKE_START(A)",
+   "BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(A); STOP_START(A)",
+   "CLOSING_END(B,A); MOVING_END(B); STOP_START(B)",
+   "HARD_BRAKE_END(A); HARD_BRAKE_END(B); BRAKE_END(A); BRAKE_END(B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "STOP_END(A); MOVING_START(A); CLOSING_START(B,A)",
+   "STOP_END(B); MOVING_START(B)",
+   "TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "COLLISION(A,B); EGO_PATH_EXIT(B,A); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(A,A:track_004)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(A,A:track_005); TRACK_APPEARED(A,A:track_006); TRACK_APPEARED(A,A:track_007); TRACK_APPEARED(A,A:track_008); CLOSING_START(A,A:track_005); CLOSING_START(A,A:track_006); CLOSING_START(A,A:track_007); CLOSING_START(A,A:track_008)",
+   "CLOSING_START(A,A:track_004); TRACK_LOST(B,A)",
+   "MOVING_END(B); STOP_START(B)",
+   "CLOSING_END(A,A:track_005); MOVING_END(A); STOP_START(A)",
+   "CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_007); CLOSING_END(A,A:track_008)",
+   "STOP_SIGN_DETECTED_START(A,A:sign-4); STOP_SIGN_DETECTED_END(A,A:sign-4)"
+  ],
+  "sequence": [
+   "-9.50 MOVING_START(A); MOVING_START(B)",
+   "-8.85 STOP_SIGN_DETECTED_START(A,A:sign-0)",
+   "-8.25 STRONG_THROTTLE_START(B)",
+   "-7.65 STRONG_THROTTLE_END(B)",
+   "-7.40 STOP_SIGN_DETECTED_START(B,B:sign-1)",
+   "-7.25 STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "-7.00 TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-6.95 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-6.90 STOP_SIGN_DETECTED_END(B,B:sign-1)",
+   "-6.85 BRAKE_START(A); HARD_BRAKE_START(A)",
+   "-6.75 BRAKE_START(B); HARD_BRAKE_START(B)",
+   "-6.70 TRACK_LOST(A,A:track_001)",
+   "-6.10 MOVING_END(A); STOP_START(A)",
+   "-6.00 CLOSING_END(B,A); MOVING_END(B); STOP_START(B)",
+   "-2.55 HARD_BRAKE_END(A); HARD_BRAKE_END(B); BRAKE_END(A); BRAKE_END(B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "-2.20 STOP_END(A); MOVING_START(A); CLOSING_START(B,A)",
+   "-2.15 STOP_END(B); MOVING_START(B)",
+   "-1.25 CRITICAL_TTC_START(B,A)",
+   "-1.20 STRONG_THROTTLE_END(A)",
+   "-0.85 STRONG_THROTTLE_END(B)",
+   "-0.55 EGO_PATH_ENTRY(B,A)",
+   "-0.10 TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003)",
+   "-0.05 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "+0.00 COLLISION(A,B); EGO_PATH_EXIT(B,A); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(A,A:track_004)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(A,A:track_005); TRACK_APPEARED(A,A:track_006); TRACK_APPEARED(A,A:track_007); TRACK_APPEARED(A,A:track_008); CLOSING_START(A,A:track_005); CLOSING_START(A,A:track_006); CLOSING_START(A,A:track_007); CLOSING_START(A,A:track_008)",
+   "+0.10 CLOSING_START(A,A:track_004); TRACK_LOST(B,A)",
+   "+0.30 TRACK_LOST(A,A:track_002)",
+   "+0.45 MOVING_END(B); STOP_START(B)",
+   "+0.50 CLOSING_END(A,A:track_005); MOVING_END(A); STOP_START(A)",
+   "+0.55 CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_007); CLOSING_END(A,A:track_008)",
+   "+2.20 STOP_SIGN_DETECTED_START(A,A:sign-1)",
+   "+2.30 STOP_SIGN_DETECTED_END(A,A:sign-1)",
+   "+4.45 STOP_SIGN_DETECTED_START(A,A:sign-4); STOP_SIGN_DETECTED_END(A,A:sign-4)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.65 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.25 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.50 TRACK_APPEARED(track_001)",
+    "2.50 CLOSING_START(track_001)*",
+    "2.65 BRAKE_START",
+    "2.65 HARD_BRAKE_START",
+    "2.80 TRACK_LOST(track_001)",
+    "3.40 MOVING_END",
+    "3.40 STOP_START",
+    "6.95 HARD_BRAKE_END",
+    "6.95 BRAKE_END",
+    "6.95 STRONG_THROTTLE_START",
+    "7.30 STOP_END",
+    "7.30 MOVING_START",
+    "8.30 STRONG_THROTTLE_END",
+    "9.40 TRACK_APPEARED(track_002)",
+    "9.40 TRACK_APPEARED(track_003)",
+    "9.40 CLOSING_START(track_002)*",
+    "9.40 CLOSING_START(track_003)*",
+    "9.50 COLLISION",
+    "9.50 STRONG_THROTTLE_START",
+    "9.50 TRACK_APPEARED(track_004)",
+    "9.55 STRONG_THROTTLE_END",
+    "9.55 BRAKE_START",
+    "9.55 HARD_BRAKE_START",
+    "9.55 TRACK_APPEARED(track_005)",
+    "9.55 TRACK_APPEARED(track_006)",
+    "9.55 TRACK_APPEARED(track_007)",
+    "9.55 TRACK_APPEARED(track_008)",
+    "9.55 CLOSING_START(track_005)*",
+    "9.55 CLOSING_START(track_006)*",
+    "9.55 CLOSING_START(track_007)*",
+    "9.55 CLOSING_START(track_008)*",
+    "9.60 CLOSING_START(track_004)",
+    "9.80 TRACK_LOST(track_002)",
+    "10.00 CLOSING_END(track_005)",
+    "10.00 MOVING_END",
+    "10.00 STOP_START",
+    "10.05 CLOSING_END(track_003)",
+    "10.05 CLOSING_END(track_004)",
+    "10.05 CLOSING_END(track_006)",
+    "10.05 CLOSING_END(track_007)",
+    "10.05 CLOSING_END(track_008)",
+    "11.70 STOP_SIGN_DETECTED_START(sign-1)",
+    "11.80 STOP_SIGN_DETECTED_END(sign-1)",
+    "13.95 STOP_SIGN_DETECTED_START(sign-4)",
+    "13.95 STOP_SIGN_DETECTED_END(sign-4)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.25 STRONG_THROTTLE_START",
+    "1.85 STRONG_THROTTLE_END",
+    "2.10 STOP_SIGN_DETECTED_START(sign-1)",
+    "2.55 TRACK_APPEARED(track_001)",
+    "2.55 CLOSING_START(track_001)*",
+    "2.60 STOP_SIGN_DETECTED_END(sign-1)",
+    "2.75 BRAKE_START",
+    "2.75 HARD_BRAKE_START",
+    "3.50 CLOSING_END(track_001)",
+    "3.50 MOVING_END",
+    "3.50 STOP_START",
+    "6.95 HARD_BRAKE_END",
+    "6.95 BRAKE_END",
+    "6.95 STRONG_THROTTLE_START",
+    "7.30 CLOSING_START(track_001)",
+    "7.35 STOP_END",
+    "7.35 MOVING_START",
+    "8.25 CRITICAL_TTC_START(track_001)",
+    "8.65 STRONG_THROTTLE_END",
+    "8.95 EGO_PATH_ENTRY(track_001)",
+    "9.45 CRITICAL_TTC_END(track_001)",
+    "9.45 CLOSING_END(track_001)",
+    "9.50 COLLISION",
+    "9.50 EGO_PATH_EXIT(track_001)",
+    "9.50 STRONG_THROTTLE_START",
+    "9.55 STRONG_THROTTLE_END",
+    "9.55 BRAKE_START",
+    "9.55 HARD_BRAKE_START",
+    "9.60 TRACK_LOST(track_001)",
+    "9.95 MOVING_END",
+    "9.95 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 8; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S13/run_0_accelerates_into_gap",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    25,
+    53
+   ],
+   "B": [
+    62,
+    226
+   ]
+  },
+  "global": [
+   86,
+   307
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->B ASSOCIATED 0.93",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "B:track_003->B:track_003 ANONYMOUS",
+   "B:track_004->B:track_004 ANONYMOUS",
+   "B:track_005->B:track_005 ANONYMOUS",
+   "B:track_006->B:track_006 ANONYMOUS",
+   "B:track_007->B:track_007 ANONYMOUS",
+   "B:track_008->B:track_008 ANONYMOUS",
+   "B:track_009->B:track_009 ANONYMOUS",
+   "B:track_010->B:track_010 ANONYMOUS",
+   "B:track_011->B:track_011 ANONYMOUS",
+   "B:track_012->B:track_012 ANONYMOUS",
+   "B:track_013->B:track_013 ANONYMOUS",
+   "B:track_014->B:track_014 ANONYMOUS",
+   "B:track_015->B:track_015 ANONYMOUS",
+   "B:track_016->B:track_016 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    1,
+    1
+   ],
+   "CLOSING": [
+    19,
+    10
+   ],
+   "CRITICAL_TTC": [
+    4,
+    4
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   18,
+   9
+  ],
+  "path": [
+   4,
+   1
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "EGO_PATH(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "CLOSING(track_006)",
+    "CLOSING(track_007)",
+    "CLOSING(track_008)",
+    "CLOSING(track_009)",
+    "CLOSING(track_010)",
+    "CLOSING(track_011)",
+    "CLOSING(track_012)",
+    "CLOSING(track_013)",
+    "EGO_PATH(track_001)",
+    "EGO_PATH(track_003)",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "STRONG_THROTTLE_END(A); SPEED_LIMIT_EXCEEDED_START(A)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "COLLISION(A,B); SPEED_LIMIT_EXCEEDED_END(A); STRONG_THROTTLE_START(A); HARD_BRAKE_START(B)",
+   "CRITICAL_TTC_END(A,B); STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "TRACK_APPEARED(B,B:track_001); TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001); CRITICAL_TTC_START(B,B:track_002)",
+   "TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004)",
+   "TRACK_APPEARED(B,B:track_005); CLOSING_START(B,B:track_005)",
+   "TRACK_APPEARED(B,B:track_006); CLOSING_START(B,B:track_006)",
+   "TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_008); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_008)",
+   "TRACK_APPEARED(B,B:track_009); CLOSING_START(B,B:track_009)",
+   "TRACK_APPEARED(B,B:track_010); CLOSING_START(A,B); CLOSING_START(B,B:track_010); CRITICAL_TTC_START(A,B)",
+   "TRACK_APPEARED(B,B:track_011); CLOSING_START(B,B:track_011); TRACK_LOST(B,B:track_006)",
+   "TRACK_APPEARED(B,B:track_012); CLOSING_START(B,B:track_012)",
+   "TRACK_APPEARED(B,B:track_013); TRACK_APPEARED(B,B:track_014); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); TRACK_LOST(B,B:track_008)",
+   "TRACK_APPEARED(B,B:track_015); TRACK_APPEARED(B,B:track_016); EGO_PATH_ENTRY(B,B:track_001); EGO_PATH_ENTRY(B,B:track_004); CLOSING_START(B,B:track_015); CLOSING_START(B,B:track_016); TRACK_LOST(B,B:track_007); TRACK_LOST(B,B:track_009)",
+   "EGO_PATH_EXIT(B,B:track_004); TRACK_LOST(B,B:track_011)",
+   "CRITICAL_TTC_END(B,B:track_002); TRACK_LOST(B,B:track_012)",
+   "CRITICAL_TTC_END(B,B:track_001); EGO_PATH_ENTRY(B,B:track_003); TRACK_LOST(B,B:track_013)",
+   "CRITICAL_TTC_END(A,B); CLOSING_END(A,B); CLOSING_END(B,B:track_001); CLOSING_END(B,B:track_003); CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_005); CLOSING_END(B,B:track_014); CLOSING_END(B,B:track_015); MOVING_END(B); STOP_START(B)",
+   "CLOSING_END(B,B:track_016); MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.65 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-4.85 BRAKE_START(B)",
+   "-4.65 TRACK_LOST(A,A:track_001)",
+   "-3.70 STRONG_THROTTLE_START(A)",
+   "-2.90 STRONG_THROTTLE_END(A); SPEED_LIMIT_EXCEEDED_START(A)",
+   "-2.30 TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-1.85 CRITICAL_TTC_START(A,B)",
+   "-0.40 EGO_PATH_ENTRY(A,B)",
+   "+0.00 COLLISION(A,B); SPEED_LIMIT_EXCEEDED_END(A); STRONG_THROTTLE_START(A); HARD_BRAKE_START(B)",
+   "+0.05 CRITICAL_TTC_END(A,B); STRONG_THROTTLE_END(A); BRAKE_START(A); HARD_BRAKE_START(A)",
+   "+0.15 CLOSING_END(A,B)",
+   "+0.30 TRACK_APPEARED(B,B:track_001); TRACK_APPEARED(B,B:track_002); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001); CRITICAL_TTC_START(B,B:track_002)",
+   "+0.35 TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004)",
+   "+0.55 TRACK_APPEARED(B,B:track_005); CLOSING_START(B,B:track_005)",
+   "+0.60 TRACK_APPEARED(B,B:track_006); CLOSING_START(B,B:track_006)",
+   "+0.65 TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_008); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_008)",
+   "+0.70 TRACK_APPEARED(B,B:track_009); CLOSING_START(B,B:track_009)",
+   "+0.75 TRACK_APPEARED(B,B:track_010); CLOSING_START(A,B); CLOSING_START(B,B:track_010); CRITICAL_TTC_START(A,B)",
+   "+0.80 TRACK_APPEARED(B,B:track_011); CLOSING_START(B,B:track_011); TRACK_LOST(B,B:track_006)",
+   "+0.85 TRACK_APPEARED(B,B:track_012); CLOSING_START(B,B:track_012)",
+   "+0.90 TRACK_APPEARED(B,B:track_013); TRACK_APPEARED(B,B:track_014); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); TRACK_LOST(B,B:track_008)",
+   "+0.95 TRACK_APPEARED(B,B:track_015); TRACK_APPEARED(B,B:track_016); EGO_PATH_ENTRY(B,B:track_001); EGO_PATH_ENTRY(B,B:track_004); CLOSING_START(B,B:track_015); CLOSING_START(B,B:track_016); TRACK_LOST(B,B:track_007); TRACK_LOST(B,B:track_009)",
+   "+1.00 TRACK_LOST(B,B:track_010)",
+   "+1.05 EGO_PATH_EXIT(B,B:track_004); TRACK_LOST(B,B:track_011)",
+   "+1.10 CRITICAL_TTC_END(B,B:track_002); TRACK_LOST(B,B:track_012)",
+   "+1.15 CRITICAL_TTC_END(B,B:track_001); EGO_PATH_ENTRY(B,B:track_003); TRACK_LOST(B,B:track_013)",
+   "+1.25 CRITICAL_TTC_END(A,B); CLOSING_END(A,B); CLOSING_END(B,B:track_001); CLOSING_END(B,B:track_003); CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_005); CLOSING_END(B,B:track_014); CLOSING_END(B,B:track_015); MOVING_END(B); STOP_START(B)",
+   "+1.30 CLOSING_END(B,B:track_016); MOVING_END(A); STOP_START(A)",
+   "+1.35 CLOSING_END(B,B:track_002)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "1.00 TRACK_LOST(track_001)",
+    "1.95 STRONG_THROTTLE_START",
+    "2.75 STRONG_THROTTLE_END",
+    "2.75 SPEED_LIMIT_EXCEEDED_START",
+    "3.35 TRACK_APPEARED(track_002)",
+    "3.35 CLOSING_START(track_002)*",
+    "3.80 CRITICAL_TTC_START(track_002)",
+    "5.25 EGO_PATH_ENTRY(track_002)",
+    "5.65 COLLISION",
+    "5.65 SPEED_LIMIT_EXCEEDED_END",
+    "5.65 STRONG_THROTTLE_START",
+    "5.70 CRITICAL_TTC_END(track_002)",
+    "5.70 STRONG_THROTTLE_END",
+    "5.70 BRAKE_START",
+    "5.70 HARD_BRAKE_START",
+    "5.80 CLOSING_END(track_002)",
+    "6.40 CLOSING_START(track_002)",
+    "6.40 CRITICAL_TTC_START(track_002)",
+    "6.90 CRITICAL_TTC_END(track_002)",
+    "6.90 CLOSING_END(track_002)",
+    "6.95 MOVING_END",
+    "6.95 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.80 BRAKE_START",
+    "5.65 COLLISION",
+    "5.65 HARD_BRAKE_START",
+    "5.95 TRACK_APPEARED(track_001)",
+    "5.95 TRACK_APPEARED(track_002)",
+    "5.95 CLOSING_START(track_001)*",
+    "5.95 CLOSING_START(track_002)*",
+    "5.95 CRITICAL_TTC_START(track_001)*",
+    "5.95 CRITICAL_TTC_START(track_002)*",
+    "6.00 TRACK_APPEARED(track_003)",
+    "6.00 TRACK_APPEARED(track_004)",
+    "6.00 CLOSING_START(track_003)*",
+    "6.00 CLOSING_START(track_004)*",
+    "6.20 TRACK_APPEARED(track_005)",
+    "6.20 CLOSING_START(track_005)*",
+    "6.25 TRACK_APPEARED(track_006)",
+    "6.25 CLOSING_START(track_006)*",
+    "6.30 TRACK_APPEARED(track_007)",
+    "6.30 TRACK_APPEARED(track_008)",
+    "6.30 CLOSING_START(track_007)*",
+    "6.30 CLOSING_START(track_008)*",
+    "6.35 TRACK_APPEARED(track_009)",
+    "6.35 CLOSING_START(track_009)*",
+    "6.40 TRACK_APPEARED(track_010)",
+    "6.40 CLOSING_START(track_010)*",
+    "6.45 TRACK_APPEARED(track_011)",
+    "6.45 CLOSING_START(track_011)*",
+    "6.45 TRACK_LOST(track_006)",
+    "6.50 TRACK_APPEARED(track_012)",
+    "6.50 CLOSING_START(track_012)*",
+    "6.55 TRACK_APPEARED(track_013)",
+    "6.55 TRACK_APPEARED(track_014)",
+    "6.55 CLOSING_START(track_013)*",
+    "6.55 CLOSING_START(track_014)*",
+    "6.55 TRACK_LOST(track_008)",
+    "6.60 TRACK_APPEARED(track_015)",
+    "6.60 TRACK_APPEARED(track_016)",
+    "6.60 EGO_PATH_ENTRY(track_001)",
+    "6.60 EGO_PATH_ENTRY(track_004)",
+    "6.60 CLOSING_START(track_015)*",
+    "6.60 CLOSING_START(track_016)*",
+    "6.60 TRACK_LOST(track_007)",
+    "6.60 TRACK_LOST(track_009)",
+    "6.65 TRACK_LOST(track_010)",
+    "6.70 EGO_PATH_EXIT(track_004)",
+    "6.70 TRACK_LOST(track_011)",
+    "6.75 CRITICAL_TTC_END(track_002)",
+    "6.75 TRACK_LOST(track_012)",
+    "6.80 CRITICAL_TTC_END(track_001)",
+    "6.80 EGO_PATH_ENTRY(track_003)",
+    "6.80 TRACK_LOST(track_013)",
+    "6.90 CLOSING_END(track_001)",
+    "6.90 CLOSING_END(track_003)",
+    "6.90 CLOSING_END(track_004)",
+    "6.90 CLOSING_END(track_005)",
+    "6.90 CLOSING_END(track_014)",
+    "6.90 CLOSING_END(track_015)",
+    "6.90 MOVING_END",
+    "6.90 STOP_START",
+    "6.95 CLOSING_END(track_016)",
+    "7.00 CLOSING_END(track_002)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 17; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S13/run_0_cut_in",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    12,
+    20
+   ],
+   "B": [
+    6,
+    7
+   ]
+  },
+  "global": [
+   17,
+   29
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->B ASSOCIATED 0.97"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    0,
+    0
+   ],
+   "MOVING": [
+    2,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    1,
+    1
+   ],
+   "CRITICAL_TTC": [
+    1,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "EGO_PATH(track_001)",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "COLLISION(A,B); CRITICAL_TTC_END(A,B); HARD_BRAKE_START(B)",
+   "CLOSING_END(A,B); HARD_BRAKE_START(A)",
+   "MOVING_END(A); STOP_START(A)",
+   "MOVING_END(B); STOP_START(B)"
+  ],
+  "sequence": [
+   "-5.25 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)",
+   "-4.45 BRAKE_START(B)",
+   "-2.40 BRAKE_START(A)",
+   "-1.60 CRITICAL_TTC_START(A,B)",
+   "-0.45 EGO_PATH_ENTRY(A,B)",
+   "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); HARD_BRAKE_START(B)",
+   "+0.05 CLOSING_END(A,B); HARD_BRAKE_START(A)",
+   "+1.15 MOVING_END(A); STOP_START(A)",
+   "+1.20 MOVING_END(B); STOP_START(B)"
+  ],
+  "unaligned_nodes": 0,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "2.85 BRAKE_START",
+    "3.65 CRITICAL_TTC_START(track_001)",
+    "4.80 EGO_PATH_ENTRY(track_001)",
+    "5.25 COLLISION",
+    "5.25 CRITICAL_TTC_END(track_001)",
+    "5.30 CLOSING_END(track_001)",
+    "5.30 HARD_BRAKE_START",
+    "6.40 MOVING_END",
+    "6.40 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.80 BRAKE_START",
+    "5.25 COLLISION",
+    "5.25 HARD_BRAKE_START",
+    "6.45 MOVING_END",
+    "6.45 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S13/run_0_safe_lane_change",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    7,
+    10
+   ],
+   "B": [
+    3,
+    2
+   ]
+  },
+  "global": [
+   10,
+   4
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    0
+   ],
+   "HARD_BRAKE": [
+    0,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    1,
+    1
+   ],
+   "MOVING": [
+    2,
+    0
+   ],
+   "STOP": [
+    0,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    1
+   ],
+   "CRITICAL_TTC": [
+    0,
+    0
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "BRAKE",
+    "EGO_PATH(track_001)"
+   ],
+   "B": [
+    "MOVING"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": []
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 10,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "1.40 CLOSING_END(track_001)",
+    "2.55 CLOSING_START(track_001)",
+    "2.85 BRAKE_START",
+    "5.35 EGO_PATH_ENTRY(track_001)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 STRONG_THROTTLE_START*",
+    "1.25 STRONG_THROTTLE_END"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 1; max |t_global error| None s"
+ },
+ {
+  "run": "S15/run_0_b_stops",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    9,
+    20
+   ],
+   "B": [
+    35,
+    61
+   ],
+   "C": [
+    14,
+    22
+   ]
+  },
+  "global": [
+   58,
+   30
+  ],
+  "alignment": {
+   "A": "UNALIGNED",
+   "B": "UNALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": null,
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS",
+   "B:track_003->B:track_003 ANONYMOUS",
+   "C:track_001->C:track_001 ANONYMOUS",
+   "C:track_002->C:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    1,
+    0
+   ],
+   "HARD_BRAKE": [
+    1,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    2
+   ],
+   "MOVING": [
+    3,
+    1
+   ],
+   "STOP": [
+    1,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    7,
+    3
+   ],
+   "CRITICAL_TTC": [
+    6,
+    4
+   ],
+   "STOP_SIGN_DETECTED": [
+    5,
+    4
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   7,
+   6
+  ],
+  "path": [
+   2,
+   2
+  ],
+  "collisions": 0,
+  "open": {
+   "A": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "CRITICAL_TTC(track_002)",
+    "CRITICAL_TTC(track_001)"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP",
+    "STOP_SIGN_DETECTED(sign-4)",
+    "STRONG_THROTTLE"
+   ],
+   "C": [
+    "MOVING",
+    "CLOSING(track_002)"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [
+    {
+     "sign": "sign-0",
+     "start_node": "B:e06",
+     "start_t_local": 1.8,
+     "end_node": "B:e10",
+     "end_t_local": 2.1,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    },
+    {
+     "sign": "sign-1",
+     "start_node": "B:e18",
+     "start_t_local": 3.4,
+     "end_node": "B:e19",
+     "end_t_local": 3.7,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    },
+    {
+     "sign": "sign-2",
+     "start_node": "B:e26",
+     "start_t_local": 4.8,
+     "end_node": "B:e28",
+     "end_t_local": 4.8,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-3",
+     "start_node": "B:e30",
+     "start_t_local": 5.6,
+     "end_node": "B:e31",
+     "end_t_local": 5.6,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-4",
+     "start_node": "B:e34",
+     "start_t_local": 6.7,
+     "end_node": null,
+     "end_t_local": null,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    }
+   ],
+   "C": []
+  },
+  "simultaneous": [],
+  "sequence": [],
+  "unaligned_nodes": 58,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "2.00 TRACK_APPEARED(track_002)",
+    "2.00 CLOSING_START(track_002)*",
+    "2.00 CRITICAL_TTC_START(track_002)*",
+    "2.45 CRITICAL_TTC_START(track_001)",
+    "3.80 TRACK_LOST(track_002)",
+    "4.45 TRACK_LOST(track_001)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.45 TRACK_APPEARED(track_001)",
+    "1.45 CLOSING_START(track_001)*",
+    "1.80 STRONG_THROTTLE_END",
+    "1.80 STOP_SIGN_DETECTED_START(sign-0)",
+    "1.95 TRACK_APPEARED(track_002)",
+    "1.95 CLOSING_START(track_002)*",
+    "2.00 CRITICAL_TTC_START(track_002)",
+    "2.10 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.35 CRITICAL_TTC_START(track_001)",
+    "2.55 BRAKE_START",
+    "2.55 HARD_BRAKE_START",
+    "2.70 CRITICAL_TTC_END(track_001)",
+    "2.85 TRACK_LOST(track_001)",
+    "3.40 MOVING_END",
+    "3.40 STOP_START",
+    "3.40 STOP_SIGN_DETECTED_START(sign-1)",
+    "3.70 STOP_SIGN_DETECTED_END(sign-1)",
+    "3.90 EGO_PATH_ENTRY(track_002)",
+    "3.95 TRACK_APPEARED(track_003)",
+    "3.95 CLOSING_START(track_003)*",
+    "4.20 CRITICAL_TTC_END(track_002)",
+    "4.25 CLOSING_END(track_002)",
+    "4.40 EGO_PATH_EXIT(track_002)",
+    "4.80 STOP_SIGN_DETECTED_START(sign-2)",
+    "4.80 TRACK_LOST(track_002)",
+    "4.80 STOP_SIGN_DETECTED_END(sign-2)",
+    "5.35 CLOSING_END(track_003)",
+    "5.60 STOP_SIGN_DETECTED_START(sign-3)",
+    "5.60 STOP_SIGN_DETECTED_END(sign-3)",
+    "5.65 EGO_PATH_ENTRY(track_003)",
+    "6.45 EGO_PATH_EXIT(track_003)",
+    "6.70 STOP_SIGN_DETECTED_START(sign-4)",
+    "10.55 STRONG_THROTTLE_START"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 TRACK_APPEARED(track_002)",
+    "0.00 CLOSING_START(track_001)*",
+    "0.00 CLOSING_START(track_002)*",
+    "1.65 STRONG_THROTTLE_START",
+    "2.10 STRONG_THROTTLE_END",
+    "2.25 CRITICAL_TTC_START(track_002)",
+    "2.45 CRITICAL_TTC_START(track_001)",
+    "2.95 CRITICAL_TTC_END(track_002)",
+    "4.00 TRACK_LOST(track_002)",
+    "4.50 CRITICAL_TTC_END(track_001)",
+    "4.50 CLOSING_END(track_001)",
+    "4.50 TRACK_LOST(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 7; max |t_global error| None s"
+ },
+ {
+  "run": "S15/run_0_deflected_into_c",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    26,
+    45
+   ],
+   "B": [
+    25,
+    47
+   ],
+   "C": [
+    21,
+    34
+   ]
+  },
+  "global": [
+   71,
+   109
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->B ASSOCIATED 0.97",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->A ASSOCIATED 0.90",
+   "C:track_001->C:track_001 ANONYMOUS",
+   "C:track_002->C:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    5,
+    5
+   ],
+   "MOVING": [
+    3,
+    3
+   ],
+   "STOP": [
+    3,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    6,
+    3
+   ],
+   "CRITICAL_TTC": [
+    6,
+    5
+   ],
+   "STOP_SIGN_DETECTED": [
+    6,
+    5
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   6,
+   3
+  ],
+  "path": [
+   3,
+   0
+  ],
+  "collisions": 3,
+  "open": {
+   "A": [
+    "CLOSING(track_002)",
+    "CRITICAL_TTC(track_002)",
+    "EGO_PATH(track_001)",
+    "STOP",
+    "STOP_SIGN_DETECTED(sign-5)"
+   ],
+   "B": [
+    "CLOSING(track_001)",
+    "EGO_PATH(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "CLOSING(track_002)",
+    "BRAKE",
+    "HARD_BRAKE",
+    "EGO_PATH(track_001)",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e12",
+     "start_t_local": 4.55,
+     "end_node": "A:e13",
+     "end_t_local": 4.55,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    },
+    {
+     "sign": "sign-2",
+     "start_node": "A:e20",
+     "start_t_local": 5.3,
+     "end_node": "A:e21",
+     "end_t_local": 7.8,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-3",
+     "start_node": "A:e22",
+     "start_t_local": 8.7,
+     "end_node": "A:e23",
+     "end_t_local": 8.7,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-4",
+     "start_node": "A:e24",
+     "start_t_local": 9.75,
+     "end_node": "A:e25",
+     "end_t_local": 9.9,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    },
+    {
+     "sign": "sign-5",
+     "start_node": "A:e26",
+     "start_t_local": 10.9,
+     "end_node": null,
+     "end_t_local": null,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": true
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-0",
+     "start_node": "B:e06",
+     "start_t_local": 1.8,
+     "end_node": "B:e10",
+     "end_t_local": 2.1,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "TRACK_APPEARED(B,B:track_001); CLOSING_START(B,B:track_001)",
+   "STRONG_THROTTLE_END(B); STOP_SIGN_DETECTED_START(B,B:sign-0)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "STOP_SIGN_DETECTED_START(A,A:sign-0); STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "CRITICAL_TTC_END(A,A:track_001); CLOSING_END(A,A:track_001)",
+   "MOVING_END(A); STOP_START(A)",
+   "STOP_SIGN_DETECTED_START(A,A:sign-3); STOP_SIGN_DETECTED_END(A,A:sign-3)"
+  ],
+  "sequence": [
+   "-3.80 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-2.60 STRONG_THROTTLE_START(B)",
+   "-2.35 TRACK_APPEARED(B,B:track_001); CLOSING_START(B,B:track_001)",
+   "-2.00 STRONG_THROTTLE_END(B); STOP_SIGN_DETECTED_START(B,B:sign-0)",
+   "-1.85 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-1.80 TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "-1.70 STOP_SIGN_DETECTED_END(B,B:sign-0)",
+   "-1.45 CRITICAL_TTC_START(B,B:track_001)",
+   "-1.30 CRITICAL_TTC_START(A,A:track_001)",
+   "-1.05 CRITICAL_TTC_END(B,B:track_001)",
+   "-1.00 TRACK_LOST(B,B:track_001)",
+   "-0.85 BRAKE_START(B)",
+   "-0.30 BRAKE_END(B)",
+   "-0.20 EGO_PATH_ENTRY(B,A)",
+   "-0.05 TRACK_LOST(A,B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)",
+   "+0.05 STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "+0.20 MOVING_END(B); STOP_START(B)",
+   "+0.25 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "+0.75 STOP_SIGN_DETECTED_START(A,A:sign-0); STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "+0.80 EGO_PATH_ENTRY(A,A:track_001)",
+   "+0.95 COLLISION(A)",
+   "+1.15 CRITICAL_TTC_END(A,A:track_001); CLOSING_END(A,A:track_001)",
+   "+1.25 MOVING_END(A); STOP_START(A)",
+   "+1.50 STOP_SIGN_DETECTED_START(A,A:sign-2)",
+   "+4.00 STOP_SIGN_DETECTED_END(A,A:sign-2)",
+   "+4.90 STOP_SIGN_DETECTED_START(A,A:sign-3); STOP_SIGN_DETECTED_END(A,A:sign-3)",
+   "+5.95 STOP_SIGN_DETECTED_START(A,A:sign-4)",
+   "+6.10 STOP_SIGN_DETECTED_END(A,A:sign-4)",
+   "+7.10 STOP_SIGN_DETECTED_START(A,A:sign-5)"
+  ],
+  "unaligned_nodes": 21,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 CLOSING_START(track_001)*",
+    "2.00 TRACK_APPEARED(track_002)",
+    "2.00 CLOSING_START(track_002)*",
+    "2.00 CRITICAL_TTC_START(track_002)*",
+    "2.50 CRITICAL_TTC_START(track_001)",
+    "3.75 TRACK_LOST(track_002)",
+    "3.80 COLLISION",
+    "3.80 STRONG_THROTTLE_START",
+    "3.85 STRONG_THROTTLE_END",
+    "4.55 STOP_SIGN_DETECTED_START(sign-0)",
+    "4.55 STOP_SIGN_DETECTED_END(sign-0)",
+    "4.60 EGO_PATH_ENTRY(track_001)",
+    "4.75 COLLISION",
+    "4.95 CRITICAL_TTC_END(track_001)",
+    "4.95 CLOSING_END(track_001)",
+    "5.05 MOVING_END",
+    "5.05 STOP_START",
+    "5.30 STOP_SIGN_DETECTED_START(sign-2)",
+    "7.80 STOP_SIGN_DETECTED_END(sign-2)",
+    "8.70 STOP_SIGN_DETECTED_START(sign-3)",
+    "8.70 STOP_SIGN_DETECTED_END(sign-3)",
+    "9.75 STOP_SIGN_DETECTED_START(sign-4)",
+    "9.90 STOP_SIGN_DETECTED_END(sign-4)",
+    "10.90 STOP_SIGN_DETECTED_START(sign-5)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.45 TRACK_APPEARED(track_001)",
+    "1.45 CLOSING_START(track_001)*",
+    "1.80 STRONG_THROTTLE_END",
+    "1.80 STOP_SIGN_DETECTED_START(sign-0)",
+    "1.95 TRACK_APPEARED(track_002)",
+    "1.95 CLOSING_START(track_002)*",
+    "2.00 CRITICAL_TTC_START(track_002)",
+    "2.10 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.35 CRITICAL_TTC_START(track_001)",
+    "2.75 CRITICAL_TTC_END(track_001)",
+    "2.80 TRACK_LOST(track_001)",
+    "2.95 BRAKE_START",
+    "3.50 BRAKE_END",
+    "3.60 EGO_PATH_ENTRY(track_002)",
+    "3.80 COLLISION",
+    "3.80 STRONG_THROTTLE_START",
+    "3.85 STRONG_THROTTLE_END",
+    "3.85 BRAKE_START",
+    "3.85 HARD_BRAKE_START",
+    "4.00 MOVING_END",
+    "4.00 STOP_START",
+    "4.05 CRITICAL_TTC_END(track_002)",
+    "4.05 CLOSING_END(track_002)"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.00 TRACK_APPEARED(track_002)",
+    "0.00 CLOSING_START(track_001)*",
+    "0.00 CLOSING_START(track_002)*",
+    "1.65 STRONG_THROTTLE_START",
+    "2.10 STRONG_THROTTLE_END",
+    "2.25 CRITICAL_TTC_START(track_002)",
+    "2.50 CRITICAL_TTC_START(track_001)",
+    "3.15 CRITICAL_TTC_END(track_002)",
+    "4.45 TRACK_LOST(track_002)",
+    "4.75 COLLISION",
+    "4.75 STRONG_THROTTLE_START",
+    "4.80 STRONG_THROTTLE_END",
+    "4.80 BRAKE_START",
+    "4.80 HARD_BRAKE_START",
+    "5.00 EGO_PATH_ENTRY(track_001)",
+    "5.05 CRITICAL_TTC_END(track_001)",
+    "5.05 CLOSING_END(track_001)",
+    "5.05 MOVING_END",
+    "5.05 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: NO; associations correct: 2/2; anonymous: 4; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S15/run_0_single_impact",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    19,
+    37
+   ],
+   "B": [
+    22,
+    41
+   ],
+   "C": [
+    10,
+    21
+   ]
+  },
+  "global": [
+   50,
+   97
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->B ASSOCIATED 0.97",
+   "B:track_001->A ASSOCIATED 0.90",
+   "C:track_001->C:track_001 ANONYMOUS",
+   "C:track_002->C:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    1
+   ],
+   "HARD_BRAKE": [
+    1,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    3,
+    3
+   ],
+   "MOVING": [
+    3,
+    2
+   ],
+   "STOP": [
+    2,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    6,
+    2
+   ],
+   "CRITICAL_TTC": [
+    2,
+    1
+   ],
+   "STOP_SIGN_DETECTED": [
+    4,
+    3
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   5,
+   2
+  ],
+  "path": [
+   4,
+   3
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "CRITICAL_TTC(track_002)",
+    "STOP_SIGN_DETECTED(sign-1)",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "MOVING",
+    "CLOSING(track_001)",
+    "CLOSING(track_002)",
+    "EGO_PATH(track_001)"
+   ]
+  },
+  "signs": {
+   "A": [
+    {
+     "sign": "sign-0",
+     "start_node": "A:e15",
+     "start_t_local": 4.6,
+     "end_node": "A:e16",
+     "end_t_local": 4.6,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    },
+    {
+     "sign": "sign-1",
+     "start_node": "A:e17",
+     "start_t_local": 10.55,
+     "end_node": null,
+     "end_t_local": null,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [
+      "A:e19"
+     ],
+     "already_stopped_at_start": false
+    }
+   ],
+   "B": [
+    {
+     "sign": "sign-0",
+     "start_node": "B:e04",
+     "start_t_local": 1.8,
+     "end_node": "B:e08",
+     "end_t_local": 2.1,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ],
+   "C": [
+    {
+     "sign": "sign-0",
+     "start_node": "C:e06",
+     "start_t_local": 2.8,
+     "end_node": "C:e07",
+     "end_t_local": 2.8,
+     "relevant_to_ego_path": false,
+     "stop_starts_inside": [],
+     "already_stopped_at_start": false
+    }
+   ]
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B)",
+   "TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "STRONG_THROTTLE_END(B); STOP_SIGN_DETECTED_START(B,B:sign-0)",
+   "TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); EGO_PATH_ENTRY(A,A:track_001)",
+   "EGO_PATH_EXIT(A,A:track_001); STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "STOP_SIGN_DETECTED_START(A,A:sign-0); STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-3.80 MOVING_START(A); MOVING_START(B)",
+   "-3.00 TRACK_APPEARED(A,A:track_001); CLOSING_START(A,A:track_001)",
+   "-2.60 STRONG_THROTTLE_START(B)",
+   "-2.00 STRONG_THROTTLE_END(B); STOP_SIGN_DETECTED_START(B,B:sign-0)",
+   "-1.85 TRACK_APPEARED(B,A); CLOSING_START(B,A)",
+   "-1.80 TRACK_APPEARED(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,A)",
+   "-1.70 STOP_SIGN_DETECTED_END(B,B:sign-0)",
+   "-0.85 BRAKE_START(B)",
+   "-0.30 BRAKE_END(B)",
+   "-0.20 EGO_PATH_ENTRY(B,A)",
+   "-0.05 TRACK_LOST(A,B)",
+   "+0.00 COLLISION(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); EGO_PATH_ENTRY(A,A:track_001)",
+   "+0.05 EGO_PATH_EXIT(A,A:track_001); STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(B); HARD_BRAKE_START(B)",
+   "+0.20 MOVING_END(B); STOP_START(B)",
+   "+0.25 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "+0.30 EGO_PATH_ENTRY(A,A:track_001)",
+   "+0.50 EGO_PATH_EXIT(A,A:track_001)",
+   "+0.80 STOP_SIGN_DETECTED_START(A,A:sign-0); STOP_SIGN_DETECTED_END(A,A:sign-0)",
+   "+1.05 EGO_PATH_EXIT(B,A)",
+   "+1.70 TRACK_LOST(B,A)",
+   "+6.75 STOP_SIGN_DETECTED_START(A,A:sign-1)",
+   "+7.75 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 10,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.80 TRACK_APPEARED(track_001)",
+    "0.80 CLOSING_START(track_001)*",
+    "2.00 TRACK_APPEARED(track_002)",
+    "2.00 CLOSING_START(track_002)*",
+    "2.00 CRITICAL_TTC_START(track_002)*",
+    "3.75 TRACK_LOST(track_002)",
+    "3.80 COLLISION",
+    "3.80 STRONG_THROTTLE_START",
+    "3.80 EGO_PATH_ENTRY(track_001)",
+    "3.85 EGO_PATH_EXIT(track_001)",
+    "3.85 STRONG_THROTTLE_END",
+    "4.10 EGO_PATH_ENTRY(track_001)",
+    "4.30 EGO_PATH_EXIT(track_001)",
+    "4.60 STOP_SIGN_DETECTED_START(sign-0)",
+    "4.60 STOP_SIGN_DETECTED_END(sign-0)",
+    "10.55 STOP_SIGN_DETECTED_START(sign-1)",
+    "11.55 MOVING_END",
+    "11.55 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "1.20 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "1.80 STOP_SIGN_DETECTED_START(sign-0)",
+    "1.95 TRACK_APPEARED(track_001)",
+    "1.95 CLOSING_START(track_001)*",
+    "2.00 CRITICAL_TTC_START(track_001)",
+    "2.10 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.95 BRAKE_START",
+    "3.50 BRAKE_END",
+    "3.60 EGO_PATH_ENTRY(track_001)",
+    "3.80 COLLISION",
+    "3.80 STRONG_THROTTLE_START",
+    "3.85 STRONG_THROTTLE_END",
+    "3.85 BRAKE_START",
+    "3.85 HARD_BRAKE_START",
+    "4.00 MOVING_END",
+    "4.00 STOP_START",
+    "4.05 CRITICAL_TTC_END(track_001)",
+    "4.05 CLOSING_END(track_001)",
+    "4.85 EGO_PATH_EXIT(track_001)",
+    "5.50 TRACK_LOST(track_001)"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.80 TRACK_APPEARED(track_001)",
+    "0.80 TRACK_APPEARED(track_002)",
+    "0.80 CLOSING_START(track_001)*",
+    "0.80 CLOSING_START(track_002)*",
+    "2.80 STOP_SIGN_DETECTED_START(sign-0)",
+    "2.80 STOP_SIGN_DETECTED_END(sign-0)",
+    "2.95 CLOSING_END(track_002)",
+    "3.85 CLOSING_START(track_002)",
+    "5.00 EGO_PATH_ENTRY(track_001)"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 3; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S16/run_0_avoided",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    8,
+    7
+   ],
+   "B": [
+    17,
+    29
+   ],
+   "C": [
+    3,
+    2
+   ]
+  },
+  "global": [
+   27,
+   43
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "B:track_001->A ASSOCIATED 0.95"
+  ],
+  "pairs": {
+   "BRAKE": [
+    2,
+    0
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    3,
+    3
+   ],
+   "STOP": [
+    3,
+    0
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    2,
+    2
+   ],
+   "CRITICAL_TTC": [
+    2,
+    2
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   1,
+   0
+  ],
+  "path": [
+   0,
+   0
+  ],
+  "collisions": 1,
+  "open": {
+   "A": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(B,A)",
+   "STRONG_THROTTLE_START(A); CLOSING_START(B,A)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "MOVING_END(B); STOP_START(B)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.15 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(B,A)",
+   "-4.45 STRONG_THROTTLE_START(A); CLOSING_START(B,A)",
+   "-4.40 CRITICAL_TTC_START(B,A)",
+   "-3.80 STRONG_THROTTLE_START(B)",
+   "-3.75 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "-3.35 STRONG_THROTTLE_END(A)",
+   "-2.65 STRONG_THROTTLE_END(B)",
+   "-1.20 BRAKE_START(A)",
+   "-0.90 CLOSING_START(B,A)",
+   "-0.80 CRITICAL_TTC_START(B,A)",
+   "-0.40 BRAKE_START(B)",
+   "+0.00 COLLISION(A,B)",
+   "+0.05 CRITICAL_TTC_END(B,A); CLOSING_END(B,A); HARD_BRAKE_START(A); HARD_BRAKE_START(B)",
+   "+0.45 MOVING_END(B); STOP_START(B)",
+   "+0.60 MOVING_END(A); STOP_START(A)"
+  ],
+  "unaligned_nodes": 3,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.70 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "3.95 BRAKE_START",
+    "5.15 COLLISION",
+    "5.20 HARD_BRAKE_START",
+    "5.75 MOVING_END",
+    "5.75 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.70 CLOSING_START(track_001)",
+    "0.75 CRITICAL_TTC_START(track_001)",
+    "1.35 STRONG_THROTTLE_START",
+    "1.40 CRITICAL_TTC_END(track_001)",
+    "1.40 CLOSING_END(track_001)",
+    "2.50 STRONG_THROTTLE_END",
+    "4.25 CLOSING_START(track_001)",
+    "4.35 CRITICAL_TTC_START(track_001)",
+    "4.75 BRAKE_START",
+    "5.15 COLLISION",
+    "5.20 CRITICAL_TTC_END(track_001)",
+    "5.20 CLOSING_END(track_001)",
+    "5.20 HARD_BRAKE_START",
+    "5.60 MOVING_END",
+    "5.60 STOP_START"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.30 MOVING_END",
+    "0.30 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S16/run_0_consequential",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    21,
+    38
+   ],
+   "B": [
+    17,
+    29
+   ],
+   "C": [
+    10,
+    18
+   ]
+  },
+  "global": [
+   47,
+   88
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "ALIGNED",
+   "C": "UNALIGNED"
+  },
+  "reference": "collision_001",
+  "associations": [
+   "A:track_001->A:track_001 ANONYMOUS",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "A:track_003->A:track_003 ANONYMOUS",
+   "B:track_001->A ASSOCIATED 0.95"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    2,
+    2
+   ],
+   "MOVING": [
+    4,
+    4
+   ],
+   "STOP": [
+    4,
+    1
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    4,
+    4
+   ],
+   "CRITICAL_TTC": [
+    3,
+    3
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   4,
+   2
+  ],
+  "path": [
+   1,
+   0
+  ],
+  "collisions": 3,
+  "open": {
+   "A": [
+    "EGO_PATH(track_001)",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(B); TRACK_APPEARED(B,A)",
+   "STRONG_THROTTLE_START(A); CLOSING_START(B,A)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "COLLISION(A,B); TRACK_APPEARED(A,A:track_001); TRACK_APPEARED(A,A:track_002); CLOSING_START(A,A:track_001); CLOSING_START(A,A:track_002); CRITICAL_TTC_START(A,A:track_001)",
+   "CRITICAL_TTC_END(B,A); CLOSING_END(B,A); BRAKE_END(A); HARD_BRAKE_START(B)",
+   "CLOSING_END(A,A:track_002); MOVING_END(B); STOP_START(B)",
+   "EGO_PATH_ENTRY(A,A:track_001); TRACK_LOST(A,A:track_002)",
+   "CRITICAL_TTC_END(A,A:track_001); CLOSING_END(A,A:track_001)",
+   "MOVING_END(A); STOP_START(A)"
+  ],
+  "sequence": [
+   "-5.15 MOVING_START(A); MOVING_START(B); TRACK_APPEARED(B,A)",
+   "-4.45 STRONG_THROTTLE_START(A); CLOSING_START(B,A)",
+   "-4.40 CRITICAL_TTC_START(B,A)",
+   "-3.80 STRONG_THROTTLE_START(B)",
+   "-3.75 CRITICAL_TTC_END(B,A); CLOSING_END(B,A)",
+   "-3.35 STRONG_THROTTLE_END(A)",
+   "-2.65 STRONG_THROTTLE_END(B)",
+   "-1.20 BRAKE_START(A)",
+   "-0.90 CLOSING_START(B,A)",
+   "-0.75 CRITICAL_TTC_START(B,A)",
+   "-0.40 BRAKE_START(B)",
+   "+0.00 COLLISION(A,B); TRACK_APPEARED(A,A:track_001); TRACK_APPEARED(A,A:track_002); CLOSING_START(A,A:track_001); CLOSING_START(A,A:track_002); CRITICAL_TTC_START(A,A:track_001)",
+   "+0.05 CRITICAL_TTC_END(B,A); CLOSING_END(B,A); BRAKE_END(A); HARD_BRAKE_START(B)",
+   "+0.40 TRACK_APPEARED(A,A:track_003)",
+   "+0.45 CLOSING_END(A,A:track_002); MOVING_END(B); STOP_START(B)",
+   "+0.50 EGO_PATH_ENTRY(A,A:track_001); TRACK_LOST(A,A:track_002)",
+   "+0.75 COLLISION(A)",
+   "+0.85 CRITICAL_TTC_END(A,A:track_001); CLOSING_END(A,A:track_001)",
+   "+0.90 MOVING_END(A); STOP_START(A)",
+   "+1.05 TRACK_LOST(A,A:track_003)"
+  ],
+  "unaligned_nodes": 10,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.70 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "3.95 BRAKE_START",
+    "5.15 COLLISION",
+    "5.15 TRACK_APPEARED(track_001)",
+    "5.15 TRACK_APPEARED(track_002)",
+    "5.15 CLOSING_START(track_001)*",
+    "5.15 CLOSING_START(track_002)*",
+    "5.15 CRITICAL_TTC_START(track_001)*",
+    "5.20 BRAKE_END",
+    "5.55 TRACK_APPEARED(track_003)",
+    "5.60 CLOSING_END(track_002)",
+    "5.65 EGO_PATH_ENTRY(track_001)",
+    "5.65 TRACK_LOST(track_002)",
+    "5.90 COLLISION",
+    "6.00 CRITICAL_TTC_END(track_001)",
+    "6.00 CLOSING_END(track_001)",
+    "6.05 MOVING_END",
+    "6.05 STOP_START",
+    "6.20 TRACK_LOST(track_003)"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.70 CLOSING_START(track_001)",
+    "0.75 CRITICAL_TTC_START(track_001)",
+    "1.35 STRONG_THROTTLE_START",
+    "1.40 CRITICAL_TTC_END(track_001)",
+    "1.40 CLOSING_END(track_001)",
+    "2.50 STRONG_THROTTLE_END",
+    "4.25 CLOSING_START(track_001)",
+    "4.40 CRITICAL_TTC_START(track_001)",
+    "4.75 BRAKE_START",
+    "5.15 COLLISION",
+    "5.20 CRITICAL_TTC_END(track_001)",
+    "5.20 CLOSING_END(track_001)",
+    "5.20 HARD_BRAKE_START",
+    "5.60 MOVING_END",
+    "5.60 STOP_START"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.30 MOVING_END",
+    "0.30 STOP_START",
+    "5.90 COLLISION",
+    "5.90 STOP_END",
+    "5.90 MOVING_START",
+    "5.95 BRAKE_START",
+    "5.95 HARD_BRAKE_START",
+    "6.05 MOVING_END",
+    "6.05 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 3; max |t_global error| 0.0 s"
+ },
+ {
+  "run": "S16/run_0_independent",
+  "speed_limit_kmh": 50,
+  "local": {
+   "A": [
+    28,
+    49
+   ],
+   "B": [
+    20,
+    35
+   ],
+   "C": [
+    10,
+    14
+   ]
+  },
+  "global": [
+   57,
+   73
+  ],
+  "alignment": {
+   "A": "ALIGNED",
+   "B": "UNALIGNED",
+   "C": "ALIGNED"
+  },
+  "reference": "collision_002",
+  "associations": [
+   "A:track_001->C ASSOCIATED 1.00",
+   "A:track_002->A:track_002 ANONYMOUS",
+   "B:track_001->B:track_001 ANONYMOUS",
+   "B:track_002->B:track_002 ANONYMOUS"
+  ],
+  "pairs": {
+   "BRAKE": [
+    3,
+    1
+   ],
+   "HARD_BRAKE": [
+    2,
+    0
+   ],
+   "STRONG_THROTTLE": [
+    4,
+    3
+   ],
+   "MOVING": [
+    5,
+    5
+   ],
+   "STOP": [
+    5,
+    2
+   ],
+   "SPEED_LIMIT_EXCEEDED": [
+    0,
+    0
+   ],
+   "CLOSING": [
+    4,
+    3
+   ],
+   "CRITICAL_TTC": [
+    4,
+    3
+   ],
+   "STOP_SIGN_DETECTED": [
+    0,
+    0
+   ],
+   "YIELD_SIGN_DETECTED": [
+    0,
+    0
+   ]
+  },
+  "track": [
+   4,
+   3
+  ],
+  "path": [
+   2,
+   1
+  ],
+  "collisions": 3,
+  "open": {
+   "A": [
+    "CLOSING(track_002)",
+    "EGO_PATH(track_002)",
+    "EGO_PATH(track_001)",
+    "CRITICAL_TTC(track_002)",
+    "STRONG_THROTTLE",
+    "STOP"
+   ],
+   "B": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ],
+   "C": [
+    "BRAKE",
+    "HARD_BRAKE",
+    "STOP"
+   ]
+  },
+  "signs": {
+   "A": [],
+   "B": [],
+   "C": []
+  },
+  "simultaneous": [
+   "MOVING_START(A); MOVING_START(C)",
+   "MOVING_END(C); STOP_START(C)",
+   "MOVING_END(A); STOP_START(A)",
+   "BRAKE_END(A); STRONG_THROTTLE_START(A)",
+   "TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,C)",
+   "STOP_END(A); MOVING_START(A)",
+   "CLOSING_START(A,A:track_002); CLOSING_START(A,C)",
+   "STOP_END(C); MOVING_START(C)",
+   "COLLISION(A,C); CRITICAL_TTC_END(A,C); CLOSING_END(A,C); STRONG_THROTTLE_START(A); BRAKE_START(C)",
+   "MOVING_END(A); MOVING_END(C); STOP_START(A); STOP_START(C)"
+  ],
+  "sequence": [
+   "-14.10 MOVING_START(A); MOVING_START(C)",
+   "-13.60 MOVING_END(C); STOP_START(C)",
+   "-13.40 STRONG_THROTTLE_START(A)",
+   "-12.30 STRONG_THROTTLE_END(A)",
+   "-10.15 BRAKE_START(A)",
+   "-8.95 COLLISION(A)",
+   "-8.30 MOVING_END(A); STOP_START(A)",
+   "-3.15 BRAKE_END(A); STRONG_THROTTLE_START(A)",
+   "-2.95 TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,C)",
+   "-2.70 STOP_END(A); MOVING_START(A)",
+   "-2.30 CLOSING_START(A,A:track_002); CLOSING_START(A,C)",
+   "-2.15 STOP_END(C); MOVING_START(C)",
+   "-2.10 EGO_PATH_ENTRY(A,A:track_002)",
+   "-1.90 EGO_PATH_ENTRY(A,C)",
+   "-1.55 CRITICAL_TTC_START(A,C)",
+   "-1.40 STRONG_THROTTLE_END(A)",
+   "-1.35 CRITICAL_TTC_START(A,A:track_002)",
+   "-0.60 TRACK_LOST(A,A:track_002)",
+   "+0.00 COLLISION(A,C); CRITICAL_TTC_END(A,C); CLOSING_END(A,C); STRONG_THROTTLE_START(A); BRAKE_START(C)",
+   "+0.05 HARD_BRAKE_START(C)",
+   "+0.25 TRACK_LOST(A,C)",
+   "+0.55 MOVING_END(A); MOVING_END(C); STOP_START(A); STOP_START(C)"
+  ],
+  "unaligned_nodes": 20,
+  "local_sequences": {
+   "A": [
+    "0.00 MOVING_START*",
+    "0.70 STRONG_THROTTLE_START",
+    "1.80 STRONG_THROTTLE_END",
+    "3.95 BRAKE_START",
+    "5.15 COLLISION",
+    "5.80 MOVING_END",
+    "5.80 STOP_START",
+    "10.95 BRAKE_END",
+    "10.95 STRONG_THROTTLE_START",
+    "11.15 TRACK_APPEARED(track_001)",
+    "11.15 TRACK_APPEARED(track_002)",
+    "11.40 STOP_END",
+    "11.40 MOVING_START",
+    "11.80 CLOSING_START(track_001)",
+    "11.80 CLOSING_START(track_002)",
+    "12.00 EGO_PATH_ENTRY(track_002)",
+    "12.20 EGO_PATH_ENTRY(track_001)",
+    "12.55 CRITICAL_TTC_START(track_001)",
+    "12.70 STRONG_THROTTLE_END",
+    "12.75 CRITICAL_TTC_START(track_002)",
+    "13.50 TRACK_LOST(track_002)",
+    "14.10 COLLISION",
+    "14.10 CRITICAL_TTC_END(track_001)",
+    "14.10 CLOSING_END(track_001)",
+    "14.10 STRONG_THROTTLE_START",
+    "14.35 TRACK_LOST(track_001)",
+    "14.65 MOVING_END",
+    "14.65 STOP_START"
+   ],
+   "B": [
+    "0.00 MOVING_START*",
+    "0.00 TRACK_APPEARED(track_001)",
+    "0.70 CLOSING_START(track_001)",
+    "0.75 CRITICAL_TTC_START(track_001)",
+    "1.35 STRONG_THROTTLE_START",
+    "1.40 CRITICAL_TTC_END(track_001)",
+    "1.40 CLOSING_END(track_001)",
+    "2.50 STRONG_THROTTLE_END",
+    "4.25 CLOSING_START(track_001)",
+    "4.35 CRITICAL_TTC_START(track_001)",
+    "4.75 BRAKE_START",
+    "5.15 COLLISION",
+    "5.20 CRITICAL_TTC_END(track_001)",
+    "5.20 CLOSING_END(track_001)",
+    "5.20 HARD_BRAKE_START",
+    "5.60 MOVING_END",
+    "5.60 STOP_START",
+    "12.55 TRACK_APPEARED(track_002)",
+    "13.55 EGO_PATH_EXIT(track_001)",
+    "14.05 TRACK_LOST(track_001)"
+   ],
+   "C": [
+    "0.00 MOVING_START*",
+    "0.50 MOVING_END",
+    "0.50 STOP_START",
+    "11.95 STOP_END",
+    "11.95 MOVING_START",
+    "14.10 COLLISION",
+    "14.10 BRAKE_START",
+    "14.15 HARD_BRAKE_START",
+    "14.65 MOVING_END",
+    "14.65 STOP_START"
+   ]
+  },
+  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 3; max |t_global error| 0.0 s"
+ }
+]

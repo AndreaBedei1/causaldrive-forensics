@@ -1,0 +1,120 @@
+[
+  {
+    "local_graph": "A",
+    "local_track": "track_001",
+    "global_entity": "A:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
+      "tracked for 3.80 s before the matched collision",
+      "not at the contact: minimum range 11.09 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed disagrees with B's own speed: RMSE 3.70 m/s (> 1.50)"
+    ],
+    "blocking": [
+      "not at the contact: minimum range 11.09 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed disagrees with B's own speed: RMSE 3.70 m/s (> 1.50)"
+    ],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "A",
+    "local_track": "track_002",
+    "global_entity": "B",
+    "status": "ASSOCIATED",
+    "confidence": 0.97,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
+      "tracked for 1.80 s before the matched collision",
+      "at the contact: minimum range 1.67 m in the last 0.50 s before the collision",
+      "the only track of A at the contact",
+      "track speed agrees with B's own speed: RMSE 0.35 m/s over 1.8 s"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "B:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
+      "tracked for 2.35 s before the matched collision",
+      "not at the contact: last seen 1.00 s before the matched collision (window 0.50 s)",
+      "track speed disagrees with A's own speed: RMSE 5.84 m/s (> 1.50)"
+    ],
+    "blocking": [
+      "not at the contact: last seen 1.00 s before the matched collision (window 0.50 s)",
+      "track speed disagrees with A's own speed: RMSE 5.84 m/s (> 1.50)"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_002",
+    "global_entity": "A",
+    "status": "ASSOCIATED",
+    "confidence": 0.9,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
+      "tracked for 1.85 s before the matched collision",
+      "at the contact: minimum range 0.40 m in the last 0.50 s before the collision",
+      "the only track of B at the contact",
+      "track speed agrees with A's own speed: RMSE 0.68 m/s over 1.8 s"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  },
+  {
+    "local_graph": "C",
+    "local_track": "track_001",
+    "global_entity": "C:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": null,
+    "evidence": [
+      "graph C is not aligned: shares only a non-reference collision (multi-hop alignment not implemented)"
+    ],
+    "blocking": [
+      "graph C is not aligned: shares only a non-reference collision (multi-hop alignment not implemented)"
+    ],
+    "source_graphs": [
+      "C"
+    ]
+  },
+  {
+    "local_graph": "C",
+    "local_track": "track_002",
+    "global_entity": "C:track_002",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": null,
+    "evidence": [
+      "graph C is not aligned: shares only a non-reference collision (multi-hop alignment not implemented)"
+    ],
+    "blocking": [
+      "graph C is not aligned: shares only a non-reference collision (multi-hop alignment not implemented)"
+    ],
+    "source_graphs": [
+      "C"
+    ]
+  }
+]

@@ -1,0 +1,67 @@
+[
+  {
+    "local_graph": "A",
+    "local_track": "track_001",
+    "global_entity": "A:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 31488.29 vs 31488.29 N*s)",
+      "tracked for 6.00 s before the matched collision",
+      "not at the contact: last seen 1.45 s before the matched collision (window 0.50 s)",
+      "track speed agrees with B's own speed: RMSE 0.04 m/s over 1.5 s"
+    ],
+    "blocking": [
+      "not at the contact: last seen 1.45 s before the matched collision (window 0.50 s)"
+    ],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "A",
+    "local_track": "track_002",
+    "global_entity": "A:track_002",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "B",
+    "evidence": [
+      "A and B both reported collision_001 (peak impulse 31488.29 vs 31488.29 N*s)",
+      "tracked for 4.45 s before the matched collision",
+      "not at the contact: last seen 3.05 s before the matched collision (window 0.50 s)",
+      "speed not comparable with B's own speed before the collision"
+    ],
+    "blocking": [
+      "not at the contact: last seen 3.05 s before the matched collision (window 0.50 s)",
+      "speed not comparable with B's own speed before the collision"
+    ],
+    "source_graphs": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "B:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 31488.29 vs 31488.29 N*s)",
+      "tracked for 6.00 s before the matched collision",
+      "at the contact: minimum range 0.21 m in the last 0.50 s before the collision",
+      "the only track of B at the contact",
+      "track speed disagrees with A's own speed: RMSE 11.16 m/s (> 1.50)"
+    ],
+    "blocking": [
+      "track speed disagrees with A's own speed: RMSE 11.16 m/s (> 1.50)"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  }
+]

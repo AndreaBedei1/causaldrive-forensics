@@ -1,0 +1,204 @@
+{
+  "graph_id": "C",
+  "owner": "C",
+  "recorder": {
+    "owner": "C",
+    "clock": {
+      "origin_source_timestamp": 135.76189954578876,
+      "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
+    },
+    "frame": {
+      "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
+    },
+    "incident_context": {
+      "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
+      "road_environment": "urban road, single lane",
+      "speed_limit_kmh": 50
+    },
+    "start_t_local": 0.0,
+    "end_t_local": 29.95,
+    "trace_hz": 10.0,
+    "trace_frames": 301,
+    "inputs": [
+      "collisions.jsonl",
+      "controls.jsonl",
+      "ego.jsonl",
+      "radar",
+      "traffic_signs.jsonl"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "C:e01",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 0.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e02",
+      "event_type": "STRONG_THROTTLE_START",
+      "kind": "ACTION",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 0.5,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e03",
+      "event_type": "STRONG_THROTTLE_END",
+      "kind": "ACTION",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 2.05,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e04",
+      "event_type": "SPEED_LIMIT_EXCEEDED_START",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 2.4,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e05",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 2.95,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e06",
+      "event_type": "HARD_BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 2.95,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e07",
+      "event_type": "SPEED_LIMIT_EXCEEDED_END",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 3.05,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e08",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 4.05,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e09",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 4.05,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null
+    },
+    {
+      "node_id": "C:e10",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "C",
+      "subject_id": null,
+      "t_local": 6.15,
+      "attributes": {
+        "peak_impulse": 9832.4
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0
+    }
+  ],
+  "edges": [
+    {
+      "from": "C:e01",
+      "to": "C:e02",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e02",
+      "to": "C:e03",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e03",
+      "to": "C:e04",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e04",
+      "to": "C:e05",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e04",
+      "to": "C:e06",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e05",
+      "to": "C:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e06",
+      "to": "C:e07",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e07",
+      "to": "C:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e07",
+      "to": "C:e09",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e08",
+      "to": "C:e10",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e09",
+      "to": "C:e10",
+      "relation": "PRECEDES"
+    }
+  ],
+  "tracks": []
+}
