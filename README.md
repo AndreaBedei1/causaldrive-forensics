@@ -237,3 +237,52 @@ Parameters are in `configs/reconstruction.yaml`.
 (collision participants, clock anchors, identity decisions, track accuracy)
 and reruns alignment with one recorder's clock shifted by 0.73 s to check that
 the global graph does not change. Tests: `python -m pytest tests`.
+
+## Interactive incident replay
+
+```
+python scripts/replay_run.py traces/S01/run_0_crash
+python scripts/replay_run.py traces/S01/run_0_crash --speed 0.25 --start 0.45 --paused --show-tracks
+```
+
+This is an offline visualization of recorded trajectories. It does not rerun
+scenario physics and does not participate in reconstruction: every rendered
+frame, each vehicle's `vehicles/<id>/ego.jsonl` pose is interpolated at the
+playback time (position linearly, angles the short way round) and applied to a
+physics-less CARLA actor, so 0.25x, 0.5x (default), 1x and 2x all show exactly
+the recorded trajectories. The replay timeline is the recorded simulator time
+(0 s = the earliest ego sample); reconstructed events are placed on it through
+each local graph's own clock origin, for display only (this is not the
+graph-level alignment). The viewer only reads the run: `ego.jsonl`, the
+recorded blueprint in `vehicles/<id>/metadata.json`, and, when present,
+`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl` and
+`reconstruction/global/` (COLLISION participants, track identities). The map
+comes from the scenario configuration of the run's `scenario_id`/`variant`;
+`ground_truth/` is never read.
+
+| Key | Action |
+|-----|--------|
+| SPACE | play / pause |
+| R | restart |
+| LEFT / RIGHT | seek -/+0.5 s (SHIFT: 0.05 s, one recorded sample) |
+| N / P | jump to the next / previous reconstructed event (pauses) |
+| 1 / 2 / 3 / 4 | 0.25x / 0.5x / 1.0x / 2.0x |
+| C | camera: overview, follow selected vehicle, free |
+| TAB | next vehicle (follow camera, radar tracks) |
+| T | show the selected recorder's anonymous radar tracks |
+| H | hide / show the key help |
+| ESC | exit |
+
+Mouse: drag to orbit (overview/follow) or look (free camera), wheel to zoom;
+click the timeline to seek. Free camera: W/A/S/D/Q/E move, SHIFT faster.
+Each vehicle has a letter badge above its roof and a panel on the right with
+its recorded speed, its active reconstructed states (START..END) and the
+events of the last second. A reconstructed COLLISION shows its participants
+from the global graph. Track markers show the reconstruction's own range and
+closing speed; they are drawn at road height because tracks are planar.
+
+The viewer starts CARLA if none is running (`--no-autostart` to only connect)
+and stops a server it started on exit (`--keep-server` to leave it running).
+It renders through its own camera into a pygame window, runs the world in
+synchronous mode while open, and on exit destroys its actors and restores the
+world settings.
