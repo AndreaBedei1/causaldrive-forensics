@@ -4,11 +4,11 @@ Every state variable is a timeline whose value is True, False or UNKNOWN:
 
   True / False  established from this recorder's own evidence
   UNKNOWN       the recorder cannot establish it: before its first observation,
-                without the needed context, or after the subject was lost
+                while an estimate is too uncertain, or after the subject was lost
 
 A value holds from the sample where it was established until evidence changes
-it, so the events are exactly the transitions of a variable into and out of
-True.  Losing
+it (an uncertain sample in between neither confirms nor refutes it), so the
+events are exactly the transitions of a variable into and out of True.  Losing
 sight of a subject (TRACK_LOST) moves its states to UNKNOWN; that is not an
 END and no END is invented for it.
 
@@ -26,7 +26,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 UNKNOWN = "UNKNOWN"
 EGO_STATES = ("MOVING", "STOP", "BRAKE", "HARD_BRAKE", "STRONG_THROTTLE", "SPEED_LIMIT_EXCEEDED")
-TRACK_STATES = ("CLOSING", "CRITICAL_TTC", "IN_EGO_PATH")
+TRACK_STATES = ("CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "PREDICTED_PATH_CONFLICT",
+                "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 _EPS = 1e-6
 
 Span = Tuple[int, Optional[int]]
@@ -66,12 +67,15 @@ def timeline_from_samples(times: Sequence[float], values: Sequence[Any]) -> Time
     return timeline
 
 
-def span_values(count: int, spans: Sequence[Span]) -> List[Any]:
-    """Per-sample True inside a span and False outside."""
+def span_values(count: int, spans: Sequence[Span], unknown_before: int = 0) -> List[Any]:
+    """Per-sample True inside a span and False outside; UNKNOWN before sample
+    ``unknown_before``, the first one precise enough to establish the state."""
     values: List[Any] = [False] * count
     for start, end in spans:
         for index in range(start, count if end is None else end):
             values[index] = True
+    for index in range(min(unknown_before, count)):
+        values[index] = UNKNOWN
     return values
 
 
@@ -170,7 +174,7 @@ def compact_state(snapshot: Optional[Dict[str, Any]]) -> List[str]:
         if not state.get("visible"):
             lost.append(track_id)
             continue
-        names = [(name, state.get(name)) for name in TRACK_STATES]
+        names = [(name.replace("PREDICTED_PATH_CONFLICT", "PATH_CONFLICT"), state.get(name)) for name in TRACK_STATES]
         shown = [name for name, value in names if value is True] + [name + "?" for name, value in names if value == UNKNOWN]
         lines.append("{0}: VISIBLE{1}".format(track_id, "".join(", " + item for item in shown)))
     if lost:

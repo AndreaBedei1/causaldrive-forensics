@@ -10,11 +10,11 @@ CARLA frame counter is shared by all recorders and is therefore never used.
 Nothing in this module looks at another recorder.
 
 FACTS in the 10 Hz trace carry the quantitative evidence (speed, pedals,
-ranges, TTC, ...).  EVENTS are the semantic transitions derived from the same
-evidence, mostly NAME_START / NAME_END pairs, and they are the graph nodes.
-The same intervals also feed the recorder's PERCEIVED STATE (``world_state``):
-true / false / UNKNOWN per state, attached to every event as the state just
-before it and to every trace frame.
+ranges, TTC, relative motion, CPA, ...).  EVENTS are the semantic transitions
+derived from the same evidence, mostly NAME_START / NAME_END pairs, and they
+are the graph nodes.  The same intervals also feed the recorder's PERCEIVED
+STATE (``world_state``): true / false / UNKNOWN per state, attached to every
+event as the state just before it and to every trace frame.
 To add a state: compute its ``active_intervals``, pass them to
 ``state_events`` and register the per-sample values with the world.
 """
@@ -32,9 +32,9 @@ from ..recording.compact_observations import load_observation_stream
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
-from .tracking import (EgoTrajectory, LocalTrack, RadarMount, TrackSample,
+from .tracking import (EgoState, EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
-from .world_state import PerceivedWorld, span_values
+from .world_state import UNKNOWN, PerceivedWorld, span_values
 
 # A pedal release shorter than this is a noisy dip, not the end of the action.
 PEDAL_RELEASE_DEBOUNCE_S = 0.2
@@ -48,6 +48,12 @@ PATH_HYSTERESIS_M = 0.5
 # The camera sign tracker ends a track after this gap without a detection
 # (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
 DEFAULT_SIGN_TRACK_GAP_S = 0.6
+# A predicted path conflict must clear for this long before it ends.
+CONFLICT_RELEASE_DEBOUNCE_S = 0.2
+# Below this relative speed there is no closest point of approach to predict.
+MIN_RELATIVE_SPEED_MPS = 0.3
+# Qualitative motion relation of a track to the recorder (a TRACK_STATE fact).
+SAME_DIRECTION_DEG, OPPOSING_DEG, CROSSING_DEG = 30.0, 150.0, (60.0, 120.0)
 # Local sign continuity: a sign track that starts within this gap after an
 # earlier one of the same class vanished, at the same image place (centres and
 # sizes of their best detections), while the recorder stood still (so image
@@ -110,18 +116,20 @@ def active_intervals(times: Sequence[float], values: Sequence[Any], turns_on: Ca
 
 def state_events(owner: str, subject: Optional[str], start_type: str, end_type: str, kind: str,
                  source: str, times: Sequence[float], spans: Sequence[Span],
-                 announce_initial: bool = True) -> List[SemanticEvent]:
+                 announce_initial: bool = True, first_observed: int = 0) -> List[SemanticEvent]:
     """One start event and (unless still active at the end) one end event per interval.
 
-    An interval active at the first sample began before it was observed: its
-    start is marked ``active_at_first_observation``, or skipped entirely when
+    An interval active at the first sample where the state could be observed
+    (``first_observed``, normally 0) began before it was observed: its start is
+    marked ``active_at_first_observation``, or skipped entirely when
     ``announce_initial`` is False (a transition such as EGO_PATH_ENTRY that
     was never seen must not be invented).
     """
     events = []
     for start, end in spans:
-        if start > 0 or announce_initial:
-            attributes = {"active_at_first_observation": True} if start == 0 else {}
+        initial = start <= first_observed
+        if not initial or announce_initial:
+            attributes = {"active_at_first_observation": True} if initial else {}
             events.append(SemanticEvent(type=start_type, kind=kind, actor_id=owner, subject_id=subject,
                                         t_local=times[start], attributes=attributes, source=source))
         if end is not None:
@@ -326,15 +334,147 @@ def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: fl
     return events
 
 
-def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
-                 world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
-    """TRACK_APPEARED / TRACK_LOST and the EGO_PATH, CLOSING and CRITICAL_TTC states of a track.
+@dataclass
+class RelativeMotion:
+    """A track sample's motion relative to the recorder, in the recorder's current frame."""
 
-    Ranges, speeds and TTC stay in the TRACK_STATE facts.  With ``world``, the
-    per-sample states are registered as the recorder's perceived state.
+    longitudinal_speed_mps: float  # target minus recorder, along the recorder's heading
+    lateral_speed_mps: float  # + = to the recorder's right
+    heading_deg: Optional[float]  # target's direction of motion minus the recorder's heading
+    t_cpa_s: Optional[float]  # time of closest approach of the relative motion (None: no relative motion)
+    d_cpa_m: Optional[float]  # predicted miss distance at that time
+    known: bool  # the estimate is precise enough for semantic claims
+
+
+def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig) -> RelativeMotion:
+    """Constant-velocity closest point of approach of the target relative to the radar.
+
+    r = (longitudinal, lateral) of the target's surface from the radar and v =
+    target velocity - recorder velocity, both in the recorder's frame:
+    t_CPA = -(r . v) / |v|^2 and d_CPA = |r + v t_CPA|.
     """
+    c, s = math.cos(own.heading), math.sin(own.heading)
+    dvx, dvy = sample.vx_mps - own.vx, sample.vy_mps - own.vy
+    v_long, v_lat = c * dvx + s * dvy, -s * dvx + c * dvy
+    heading = None
+    if sample.speed_mps >= 1.0:
+        heading = (math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - own.heading) + 180.0) % 360.0 - 180.0
+    speed2 = v_long * v_long + v_lat * v_lat
+    t_cpa = d_cpa = None
+    if speed2 >= MIN_RELATIVE_SPEED_MPS ** 2:
+        t_cpa = -(sample.longitudinal_m * v_long + sample.lateral_m * v_lat) / speed2
+        d_cpa = math.hypot(sample.longitudinal_m + v_long * t_cpa, sample.lateral_m + v_lat * t_cpa)
+    known = sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
+    return RelativeMotion(v_long, v_lat, heading, t_cpa, d_cpa, known)
+
+
+def motion_relation(sample: TrackSample, motion: RelativeMotion, cfg: SemanticsConfig) -> str:
+    """SAME_DIRECTION / OPPOSING / CROSSING, or UNKNOWN (slow, uncertain or oblique); a fact only."""
+    if not motion.known or motion.heading_deg is None or sample.speed_mps < cfg.cut_in_min_target_speed_mps:
+        return UNKNOWN
+    angle = abs(motion.heading_deg)
+    if angle <= SAME_DIRECTION_DEG:
+        return "SAME_DIRECTION"
+    if angle >= OPPOSING_DEG:
+        return "OPPOSING"
+    if CROSSING_DEG[0] <= angle <= CROSSING_DEG[1]:
+        return "CROSSING"
+    return UNKNOWN
+
+
+def conflict_spans(times: Sequence[float], motions: Sequence[RelativeMotion], cfg: SemanticsConfig) -> List[Span]:
+    """PREDICTED_PATH_CONFLICT intervals: a future CPA within the horizon and miss distance.
+
+    Uncertain samples neither start nor end a conflict; flicker shorter than
+    MIN_EPISODE_S is dropped.
+    """
+    def starts(index: int) -> bool:
+        m = motions[index]
+        return (m.known and m.t_cpa_s is not None and 0.0 < m.t_cpa_s <= cfg.conflict_horizon_s
+                and m.d_cpa_m <= cfg.conflict_distance_m)
+
+    def ends(index: int) -> bool:
+        m = motions[index]
+        return m.known and (m.t_cpa_s is None or m.t_cpa_s <= 0.0 or m.t_cpa_s > cfg.conflict_release_horizon_s
+                            or m.d_cpa_m > cfg.conflict_release_distance_m)
+
+    spans = active_intervals(times, list(range(len(times))), starts, ends, CONFLICT_RELEASE_DEBOUNCE_S)
+    return _lasting(spans, times)
+
+
+def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
+                 cfg: SemanticsConfig) -> Tuple[List[Span], List[Span]]:
+    """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
+
+    Kinematic only: a target ahead, moving within ``cut_in_max_heading_deg`` of
+    the recorder's heading (so not crossing traffic), approaches the corridor
+    laterally at ``cut_in_lateral_speed_mps`` or more without interruption.
+    The cut-in STARTS once that run has lasted ``cut_in_persistence_s``,
+    began at least ``cut_in_outside_margin_m`` outside the corridor, has moved
+    the target ``cut_in_min_displacement_m`` closer, and the corridor is due
+    within ``cut_in_horizon_s`` at the current lateral speed.  The side at the
+    start gives the direction, from the recorder's viewpoint (negative lateral
+    = left).  It ENDS once the lateral approach has stayed below
+    ``cut_in_settle_speed_mps`` for ``cut_in_settle_s``: a collision does not
+    end it by itself.  Uncertain samples give no evidence either way.
+    """
+    corridor = cfg.path_half_width_m
+    left: List[Span] = []
+    right: List[Span] = []
+    run: Optional[Tuple[int, int, float]] = None  # (start index, side, |lateral| at the start)
+    active: Optional[Tuple[int, int]] = None  # (start index, side)
+    settle: Optional[int] = None
+    for index, (sample, motion) in enumerate(zip(samples, motions)):
+        if not motion.known:
+            run, settle = (None if active is None else run), None
+            continue
+        if active is not None:
+            start, side = active
+            if -side * motion.lateral_speed_mps < cfg.cut_in_settle_speed_mps:
+                settle = index if settle is None else settle
+                if times[index] - times[settle] >= cfg.cut_in_settle_s - 1e-6:
+                    (left if side < 0 else right).append((start, settle))
+                    active, run, settle = None, None, None
+            else:
+                settle = None
+            continue
+        side = -1 if sample.lateral_m < 0 else 1
+        toward = -side * motion.lateral_speed_mps
+        parallel = (motion.heading_deg is not None and abs(motion.heading_deg) <= cfg.cut_in_max_heading_deg
+                    and sample.speed_mps >= cfg.cut_in_min_target_speed_mps)
+        if not (sample.longitudinal_m > 0 and parallel and toward >= cfg.cut_in_lateral_speed_mps):
+            run = None
+            continue
+        if run is None or run[1] != side:
+            run = (index, side, abs(sample.lateral_m))
+        lateral = abs(sample.lateral_m)
+        due = lateral <= corridor or (lateral - corridor) / toward <= cfg.cut_in_horizon_s
+        if (run[2] >= corridor + cfg.cut_in_outside_margin_m
+                and run[2] - lateral >= cfg.cut_in_min_displacement_m
+                and times[index] - times[run[0]] >= cfg.cut_in_persistence_s - 1e-6 and due):
+            active, settle = (index, run[1]), None
+    if active is not None:
+        (left if active[1] < 0 else right).append((active[0], None))
+    return left, right
+
+
+def _stationary_ego() -> EgoTrajectory:
+    return EgoTrajectory([EgoState(t_local=0.0, x=0.0, y=0.0, heading=0.0, vx=0.0, vy=0.0)])
+
+
+def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
+                 ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
+    """TRACK_APPEARED / TRACK_LOST and the EGO_PATH, CLOSING, CRITICAL_TTC,
+    PREDICTED_PATH_CONFLICT and CUT_IN states of a track.
+
+    Ranges, speeds, TTC and the relative motion stay in the TRACK_STATE facts.
+    ``ego`` is the recorder's own trajectory (relative motion needs its
+    velocity); without it the recorder is taken as standing still.
+    """
+    ego = ego or _stationary_ego()
     samples = track.samples
     times = [round(sample.t_local, 4) for sample in samples]
+    motions = [relative_motion(sample, ego.at(sample.t_local), cfg) for sample in samples]
     subject = track.track_id
     events = [SemanticEvent(type="TRACK_APPEARED", kind=PERCEPTION, actor_id=owner, subject_id=subject,
                             t_local=times[0], source="radar")]
@@ -367,6 +507,17 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, critical_spans)
 
+    # Relative-motion states can be established only once the estimate is precise enough.
+    first_known = next((index for index, motion in enumerate(motions) if motion.known), len(motions))
+    conflicts = conflict_spans(times, motions, cfg)
+    events += state_events(owner, subject, "PREDICTED_PATH_CONFLICT_START", "PREDICTED_PATH_CONFLICT_END",
+                           PERCEPTION, "radar", times, conflicts, first_observed=first_known)
+    from_left, from_right = cut_in_spans(times, samples, motions, cfg)
+    events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
+                           PERCEPTION, "radar", times, from_left)
+    events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
+                           PERCEPTION, "radar", times, from_right)
+
     lost_at = times[-1] if times[-1] < recording_end - 1e-3 else None
     if lost_at is not None:
         events.append(SemanticEvent(type="TRACK_LOST", kind=PERCEPTION, actor_id=owner, subject_id=subject,
@@ -377,6 +528,9 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
             "CLOSING": span_values(count, closing_spans),
             "CRITICAL_TTC": span_values(count, critical_spans),
             "IN_EGO_PATH": span_values(count, path),
+            "PREDICTED_PATH_CONFLICT": span_values(count, conflicts, first_known),
+            "CUT_IN_FROM_LEFT": span_values(count, from_left, first_known),
+            "CUT_IN_FROM_RIGHT": span_values(count, from_right, first_known),
         }, lost_at)
     return events
 
@@ -419,19 +573,36 @@ def ego_control_fact(owner: str, record: Mapping[str, Any], t_local: float) -> S
                                      "steer": round(float(record["steer"]), 3)})
 
 
-def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: float) -> SemanticEvent:
+def _rounded(value: Optional[float], digits: int) -> Optional[float]:
+    return None if value is None else round(value, digits)
+
+
+def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: float,
+                     motion: Optional[RelativeMotion] = None,
+                     cfg: Optional[SemanticsConfig] = None) -> SemanticEvent:
+    """Quantitative state of a track: geometry, its own velocity in the local
+    frame (vx/vy), uncertainty, and the motion relative to the recorder."""
+    attributes = dict(_where(sample), longitudinal_m=round(sample.longitudinal_m, 2),
+                      ttc_s=None if sample.ttc_s is None else round(sample.ttc_s, 2),
+                      speed_mps=round(sample.speed_mps, 2),
+                      x_m=round(sample.x_m, 2), y_m=round(sample.y_m, 2),
+                      vx_mps=round(sample.vx_mps, 2), vy_mps=round(sample.vy_mps, 2),
+                      pos_std_m=round(sample.pos_std_m, 2), vel_std_mps=round(sample.vel_std_mps, 2),
+                      measured=sample.measured)
+    if motion is not None:
+        attributes.update(
+            relative_longitudinal_speed_mps=round(motion.longitudinal_speed_mps, 2),
+            relative_lateral_speed_mps=round(motion.lateral_speed_mps, 2),
+            relative_motion_angle_deg=_rounded(motion.heading_deg, 1),
+            motion_relation=motion_relation(sample, motion, cfg or SemanticsConfig()),
+            t_cpa_s=_rounded(motion.t_cpa_s, 2), d_cpa_m=_rounded(motion.d_cpa_m, 2))
     return SemanticEvent(type="TRACK_STATE", kind=FACT, actor_id=owner, subject_id=track_id,
-                         t_local=t_local, source="radar", attributes=dict(
-                             _where(sample), longitudinal_m=round(sample.longitudinal_m, 2),
-                             ttc_s=None if sample.ttc_s is None else round(sample.ttc_s, 2),
-                             speed_mps=round(sample.speed_mps, 2),
-                             x_m=round(sample.x_m, 2), y_m=round(sample.y_m, 2),
-                             pos_std_m=round(sample.pos_std_m, 2), measured=sample.measured))
+                         t_local=t_local, source="radar", attributes=attributes)
 
 
 def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, Any]],
                 tracks: Sequence[LocalTrack], events: Sequence[SemanticEvent],
-                clock_origin: float, trace_hz: float,
+                clock_origin: float, trace_hz: float, semantics: Optional[SemanticsConfig] = None,
                 world: Optional[PerceivedWorld] = None) -> List[TraceFrame]:
     """Sample what the recorder knows every 1/trace_hz seconds of its own clock.
 
@@ -442,6 +613,7 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
     (previous frame, t].  With ``world``, each frame also holds the recorder's
     perceived state at t (after the transitions at t).
     """
+    semantics = semantics or SemanticsConfig()
     step = 1.0 / trace_hz
     first = int(math.ceil(ego.start / step - 1e-6))
     last = int(math.floor(ego.end / step + 1e-6))
@@ -465,7 +637,8 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
             if track.first_t - 1e-6 <= t_local <= track.last_t + 1e-6:
                 sample = track.sample_near(t_local)
                 if sample is not None:
-                    facts.append(track_state_fact(owner, track.track_id, sample, t_local))
+                    motion = relative_motion(sample, ego.at(sample.t_local), semantics)
+                    facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics))
         frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
                                  perceived_state=None if world is None else world.snapshot(t_local, before=False)))
     return frames
@@ -550,10 +723,10 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     events += collision_events(owner, collisions, clock_origin, cfg.collision)
     events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
     for track in tracks:
-        events += track_events(owner, track, ego.end, semantics, world=world)
+        events += track_events(owner, track, ego.end, semantics, ego, world)
     events = number_events(owner, events)
 
-    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, world=world)
+    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world)
     frame_times = [frame.t_local for frame in trace]
     for event in events:
         # The state just before the event: all events at one timestamp share it.

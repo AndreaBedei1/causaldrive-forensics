@@ -23,14 +23,14 @@ class RenderTests(unittest.TestCase):
 
         self.assertIn("Speed limit 30 km/h, supplied as incident context", local_md)
         self.assertIn("Speed limit 30 km/h, supplied as incident context", report)
-        self.assertIn("- BRAKE, since A:e06", local_md)  # still braking when the recording ends
+        self.assertIn("- BRAKE, since A:e07", local_md)  # still braking when the recording ends
         self.assertIn("A began exceeding the speed limit (already the case when first observed)", local_md)
         # Simultaneous events share a DOT column and are listed as unresolved in the report.
-        self.assertIn('{rank=same; "A:e07"; "A:e08"; "A:e09"; "A:e10";}', local_dot)
+        self.assertIn('{rank=same; "A:e08"; "A:e09"; "A:e10"; "A:e11";}', local_dot)
         self.assertIn("COLLISION(A,B); SPEED_LIMIT_EXCEEDED_END(A)", report)
         self.assertIn("simultaneous at 0.05 s resolution", global_md)
         # DOT labels stay minimal: type, who, time.
-        self.assertIn('"A:e06" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
+        self.assertIn('"A:e07" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
 
 
 if __name__ == "__main__":

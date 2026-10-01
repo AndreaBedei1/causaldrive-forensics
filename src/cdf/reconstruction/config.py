@@ -61,6 +61,33 @@ class SemanticsConfig:
     critical_ttc_s: float = 2.0
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT.
     path_half_width_m: float = 1.5
+    # Track estimates more uncertain than this (Kalman standard deviations)
+    # support no CUT_IN or PREDICTED_PATH_CONFLICT claim: those stay UNKNOWN.
+    max_position_std_m: float = 1.0
+    max_velocity_std_mps: float = 1.0
+    # PREDICTED_PATH_CONFLICT: the relative motion's closest point of approach
+    # lies ahead in time, within this horizon and this miss distance (the
+    # corridor half width, measured from the radar to the target's surface)...
+    conflict_horizon_s: float = 4.0
+    conflict_distance_m: float = 1.5
+    # ...and the conflict ends beyond these, or once the CPA lies in the past.
+    conflict_release_horizon_s: float = 5.0
+    conflict_release_distance_m: float = 2.5
+    # CUT_IN_FROM_LEFT/RIGHT: a target ahead, moving within this angle of the
+    # recorder's heading and at least this fast, approaches the corridor
+    # laterally at this speed or more, for this long, starting at least this
+    # far outside the corridor, by at least this lateral displacement, and is
+    # due to reach the corridor within this lateral time.
+    cut_in_max_heading_deg: float = 25.0
+    cut_in_min_target_speed_mps: float = 2.0
+    cut_in_lateral_speed_mps: float = 0.3
+    cut_in_persistence_s: float = 0.5
+    cut_in_outside_margin_m: float = 0.5
+    cut_in_min_displacement_m: float = 0.5
+    cut_in_horizon_s: float = 3.0
+    # The manoeuvre ends once its lateral approach stays below this speed this long.
+    cut_in_settle_speed_mps: float = 0.2
+    cut_in_settle_s: float = 0.3
 
 
 @dataclass
