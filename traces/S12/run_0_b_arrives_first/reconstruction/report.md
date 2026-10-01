@@ -53,7 +53,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
 - (unaligned, A local time 1.05 s) A's camera established a STOP sign detection (unidentified object A:sign-0).
-- (unaligned, A local time 3.00 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 3.00 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
 - (unaligned, A local time 3.00 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 3.55 s) A's camera stopped detecting STOP sign unidentified object A:sign-0.
 - (unaligned, A local time 4.35 s) A started braking.
@@ -72,29 +72,29 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 10.80 s) A started moving.
 - (unaligned, A local time 11.65 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 11.80 s) A stopped applying strong throttle.
-- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_002.
-- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_003.
-- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_004.
-- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_006.
+- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_002, which appeared on its left.
+- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_004, which appeared on its left.
+- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_006, which appeared on its left.
+- (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_003, which appeared on its right.
 - (unaligned, A local time 13.10 s) A observed unidentified object A:track_002 start closing in (already the case when first observed).
 - (unaligned, A local time 13.10 s) A observed unidentified object A:track_003 start closing in (already the case when first observed).
 - (unaligned, A local time 13.10 s) A observed unidentified object A:track_004 start closing in (already the case when first observed).
 - (unaligned, A local time 13.10 s) A observed unidentified object A:track_006 start closing in (already the case when first observed).
-- (unaligned, A local time 13.25 s) A's radar started tracking unidentified object A:track_005.
+- (unaligned, A local time 13.25 s) A's radar started tracking unidentified object A:track_005, which appeared on its left.
 - (unaligned, A local time 13.25 s) A observed unidentified object A:track_005 start closing in (already the case when first observed).
-- (unaligned, A local time 13.30 s) A's radar started tracking unidentified object A:track_007.
-- (unaligned, A local time 13.30 s) A's radar started tracking unidentified object A:track_009.
+- (unaligned, A local time 13.30 s) A's radar started tracking unidentified object A:track_009, which appeared on its left.
+- (unaligned, A local time 13.30 s) A's radar started tracking unidentified object A:track_007, which appeared on its right.
 - (unaligned, A local time 13.30 s) A observed unidentified object A:track_007 start closing in (already the case when first observed).
 - (unaligned, A local time 13.30 s) A observed unidentified object A:track_009 start closing in (already the case when first observed).
-- (unaligned, A local time 13.35 s) A's radar started tracking unidentified object A:track_008.
-- (unaligned, A local time 13.35 s) A's radar started tracking unidentified object A:track_010.
+- (unaligned, A local time 13.35 s) A's radar started tracking unidentified object A:track_008, which appeared on its left.
+- (unaligned, A local time 13.35 s) A's radar started tracking unidentified object A:track_010, which appeared on its left.
 - (unaligned, A local time 13.35 s) A observed unidentified object A:track_008 start closing in (already the case when first observed).
 - (unaligned, A local time 13.35 s) A observed unidentified object A:track_010 start closing in (already the case when first observed).
-- (unaligned, A local time 13.45 s) A's radar started tracking unidentified object A:track_011.
-- (unaligned, A local time 13.45 s) A's radar started tracking unidentified object A:track_012.
+- (unaligned, A local time 13.45 s) A's radar started tracking unidentified object A:track_011, which appeared on its left.
+- (unaligned, A local time 13.45 s) A's radar started tracking unidentified object A:track_012, which appeared on its left.
 - (unaligned, A local time 13.45 s) A observed unidentified object A:track_011 start closing in (already the case when first observed).
 - (unaligned, A local time 13.45 s) A observed unidentified object A:track_012 start closing in (already the case when first observed).
-- (unaligned, A local time 13.50 s) A's radar started tracking unidentified object A:track_013.
+- (unaligned, A local time 13.50 s) A's radar started tracking unidentified object A:track_013, which appeared on its left.
 - (unaligned, A local time 13.50 s) A observed unidentified object A:track_013 start closing in (already the case when first observed).
 - (unaligned, A local time 13.80 s) A's time-to-contact with unidentified object A:track_007 became critical.
 - (unaligned, A local time 14.00 s) A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
@@ -109,7 +109,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, B local time 2.60 s) B's camera stopped detecting STOP sign unidentified object B:sign-1.
 - (unaligned, B local time 2.65 s) B started braking.
 - (unaligned, B local time 2.65 s) B started braking hard.
-- (unaligned, B local time 3.00 s) B's radar started tracking unidentified object B:track_001.
+- (unaligned, B local time 3.00 s) B's radar started tracking unidentified object B:track_001, which appeared on its right.
 - (unaligned, B local time 3.00 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
 - (unaligned, B local time 3.40 s) B stopped moving.
 - (unaligned, B local time 3.40 s) B came to a stop.
@@ -227,12 +227,9 @@ B:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,

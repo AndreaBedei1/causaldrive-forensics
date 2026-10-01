@@ -10,7 +10,10 @@ A value holds from the sample where it was established until evidence changes
 it (an uncertain sample in between neither confirms nor refutes it), so the
 events are exactly the transitions of a variable into and out of True.  Losing
 sight of a subject (TRACK_LOST) moves its states to UNKNOWN; that is not an
-END and no END is invented for it.
+END and no END is invented for it.  There is no separate visibility state:
+TRACK_APPEARED_* / TRACK_LOST and the sign detection windows already say when
+a subject is observed.  A track enters the state at its first observation; a
+sign, once detected, stays known.
 
 ``snapshot(t, before=True)`` is the state just BEFORE ``t``: none of the
 transitions at ``t`` are applied, so every event at one timestamp shares it.
@@ -22,12 +25,11 @@ names (``track_001``, ``sign-0``): no global identity enters a local state.
 from __future__ import annotations
 
 from bisect import bisect_left, bisect_right
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 UNKNOWN = "UNKNOWN"
 EGO_STATES = ("MOVING", "STOP", "BRAKE", "HARD_BRAKE", "STRONG_THROTTLE", "SPEED_LIMIT_EXCEEDED")
-TRACK_STATES = ("CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "PREDICTED_PATH_CONFLICT",
-                "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
+TRACK_STATES = ("CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 _EPS = 1e-6
 
 Span = Tuple[int, Optional[int]]
@@ -83,6 +85,11 @@ def _json(value: Any) -> Any:
     return UNKNOWN if value is None else value
 
 
+def track_lost(state: Mapping[str, Any]) -> bool:
+    """A track whose every state is UNKNOWN: after TRACK_LOST nothing about it is observable."""
+    return bool(state) and all(value == UNKNOWN for value in state.values())
+
+
 class PerceivedWorld:
     """Timelines of one recorder: its own states, its radar tracks and its signs."""
 
@@ -104,27 +111,20 @@ class PerceivedWorld:
 
     def add_track(self, track_id: str, times: Sequence[float], states: Dict[str, Sequence[Any]],
                   lost_at: Optional[float]) -> None:
-        """Per-sample state values of one track; after ``lost_at`` everything is UNKNOWN."""
-        timelines = {"visible": timeline_from_samples(times, [True] * len(times))}
-        for name, values in states.items():
-            timelines[name] = timeline_from_samples(times, values)
+        """Per-sample state values of one track; from ``lost_at`` on everything is UNKNOWN."""
+        timelines = {name: timeline_from_samples(times, values) for name, values in states.items()}
         if lost_at is not None:
             # From the TRACK_LOST instant on, nothing about the track is observable.
-            timelines["visible"].set(lost_at, False)
-            for name in states:
-                timelines[name].set(lost_at, UNKNOWN)
+            for timeline in timelines.values():
+                timeline.set(lost_at, UNKNOWN)
         self.tracks[track_id] = timelines
         self.track_first[track_id] = float(times[0])
 
-    def add_sign_window(self, sign_id: str, sign_class: str, start: float, end: Optional[float],
-                        relevant: Optional[bool]) -> None:
-        sign = self.signs.setdefault(sign_id, {"class": sign_class, "visible": Timeline(), "relevant": Timeline(),
-                                               "first": start})
+    def add_sign(self, sign_id: str, sign_class: str, start: float, relevant: Optional[bool]) -> None:
+        """A detection window of a sign starting at ``start``; the sign is known from its first one."""
+        sign = self.signs.setdefault(sign_id, {"class": sign_class, "relevant": Timeline(), "first": start})
         sign["first"] = min(sign["first"], start)
-        sign["visible"].set(start, True)
         sign["relevant"].set(start, UNKNOWN if relevant is None else bool(relevant))
-        if end is not None:
-            sign["visible"].set(end, False)
 
     # -- queries --------------------------------------------------------------------
 
@@ -138,11 +138,8 @@ class PerceivedWorld:
             if not seen(self.track_first[track_id]):
                 continue
             timelines = self.tracks[track_id]
-            state = {"visible": bool(timelines["visible"].value(t, before))}
-            for name in TRACK_STATES:
-                if name in timelines:
-                    state[name] = _json(timelines[name].value(t, before))
-            external[track_id] = state
+            external[track_id] = {name: _json(timelines[name].value(t, before))
+                                  for name in TRACK_STATES if name in timelines}
         signs: Dict[str, Any] = {}
         for sign_id in sorted(self.signs):
             sign = self.signs[sign_id]
@@ -151,8 +148,8 @@ class PerceivedWorld:
             # Known: perceived at some point and remembered.  No admissible local
             # evidence tells when the controlled point has been passed, so the
             # knowledge is never cleared here.
-            signs[sign_id] = {"class": sign["class"], "visible": bool(sign["visible"].value(t, before)),
-                              "known": True, "relevant_to_ego_path": _json(sign["relevant"].value(t, before))}
+            signs[sign_id] = {"class": sign["class"], "known": True,
+                              "relevant_to_ego_path": _json(sign["relevant"].value(t, before))}
         return {"ego": ego, "external": external, "signs": signs}
 
 
@@ -173,16 +170,15 @@ def compact_state(snapshot: Optional[Dict[str, Any]], name_of: Optional[Callable
         lines.append("ego: " + (", ".join(true + unknown) or "no active state"))
     lost = []
     for track_id, state in snapshot.get("external", {}).items():
-        if not state.get("visible"):
+        if track_lost(state):
             lost.append(name_of(track_id))
             continue
-        names = [(name.replace("PREDICTED_PATH_CONFLICT", "PATH_CONFLICT"), state.get(name)) for name in TRACK_STATES]
-        shown = [name for name, value in names if value is True] + [name + "?" for name, value in names if value == UNKNOWN]
-        lines.append("{0}: VISIBLE{1}".format(name_of(track_id), "".join(", " + item for item in shown)))
+        shown = ([name for name in TRACK_STATES if state.get(name) is True]
+                 + [name + "?" for name in TRACK_STATES if state.get(name) == UNKNOWN])
+        lines.append("{0}: {1}".format(name_of(track_id), ", ".join(shown) or "no active state"))
     if lost:
-        lines.append("lost (states UNKNOWN): " + ", ".join(lost))
+        lines.append("track lost, states UNKNOWN: " + ", ".join(lost))
     for sign_id, sign in snapshot.get("signs", {}).items():
-        lines.append("{0}: {1} sign {2}, known{3}".format(
-            sign_id, sign.get("class"), "VISIBLE" if sign.get("visible") else "not visible",
-            "" if sign.get("relevant_to_ego_path") is not True else ", relevant to the path"))
+        lines.append("{0}: {1} sign known{2}".format(
+            sign_id, sign.get("class"), ", relevant to the path" if sign.get("relevant_to_ego_path") is True else ""))
     return lines

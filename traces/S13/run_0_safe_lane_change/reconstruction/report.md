@@ -39,7 +39,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 ### What happened, in plain language
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
 - (unaligned, A local time 0.00 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 1.40 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 2.55 s) A observed unidentified object A:track_001 start closing in.
@@ -129,12 +129,9 @@ B:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,

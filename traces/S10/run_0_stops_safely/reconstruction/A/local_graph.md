@@ -19,7 +19,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e05 | 2.55 | HARD_BRAKE_START | A | - | controls |  |
 | A:e06 | 3.35 | MOVING_END | A | - | ego |  |
 | A:e07 | 3.35 | STOP_START | A | - | ego |  |
-| A:e08 | 3.70 | TRACK_APPEARED | A | track_001 | radar |  |
+| A:e08 | 3.70 | TRACK_APPEARED_LEFT | A | track_001 | radar |  |
 | A:e09 | 3.70 | CLOSING_START | A | track_001 | radar | active_at_first_observation=True |
 | A:e10 | 4.25 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e11 | 5.80 | EGO_PATH_ENTRY | A | track_001 | radar |  |
@@ -29,7 +29,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e15 | 7.00 | TRACK_LOST | A | track_001 | radar |  |
 | A:e16 | 9.55 | STRONG_THROTTLE_START | A | - | controls |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -71,17 +71,17 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
 | 1.90 | A:e02 STOP_SIGN_DETECTED_START sign-0 | ego: MOVING | 1.80 |
-| 2.15 | A:e03 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING<br>sign-0: STOP sign VISIBLE, known | 2.10 |
-| 2.55 | A:e04 BRAKE_START<br>A:e05 HARD_BRAKE_START | ego: MOVING<br>sign-0: STOP sign not visible, known | 2.50 |
-| 3.35 | A:e06 MOVING_END<br>A:e07 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known | 3.30 |
-| 3.70 | A:e08 TRACK_APPEARED track_001<br>A:e09 CLOSING_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known | 3.60 |
-| 4.25 | A:e10 CRITICAL_TTC_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 4.20 |
-| 5.80 | A:e11 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>sign-0: STOP sign not visible, known | 5.70 |
-| 5.95 | A:e12 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 5.90 |
-| 6.10 | A:e13 CLOSING_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 6.00 |
-| 6.25 | A:e14 EGO_PATH_EXIT track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 6.20 |
-| 7.00 | A:e15 TRACK_LOST track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE<br>sign-0: STOP sign not visible, known | 6.90 |
-| 9.55 | A:e16 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known | 9.50 |
+| 2.15 | A:e03 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING<br>sign-0: STOP sign known | 2.10 |
+| 2.55 | A:e04 BRAKE_START<br>A:e05 HARD_BRAKE_START | ego: MOVING<br>sign-0: STOP sign known | 2.50 |
+| 3.35 | A:e06 MOVING_END<br>A:e07 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>sign-0: STOP sign known | 3.30 |
+| 3.70 | A:e08 TRACK_APPEARED_LEFT track_001<br>A:e09 CLOSING_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>sign-0: STOP sign known | 3.60 |
+| 4.25 | A:e10 CRITICAL_TTC_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known | 4.20 |
+| 5.80 | A:e11 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known | 5.70 |
+| 5.95 | A:e12 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known | 5.90 |
+| 6.10 | A:e13 CLOSING_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known | 6.00 |
+| 6.25 | A:e14 EGO_PATH_EXIT track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: IN_EGO_PATH<br>sign-0: STOP sign known | 6.20 |
+| 7.00 | A:e15 TRACK_LOST track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: no active state<br>sign-0: STOP sign known | 6.90 |
+| 9.55 | A:e16 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>track lost, states UNKNOWN: track_001<br>sign-0: STOP sign known | 9.50 |
 
 ## States still active when observation ended
 
@@ -117,7 +117,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 2.55 s: A started braking hard.
 - t = 3.35 s: A stopped moving.
 - t = 3.35 s: A came to a stop.
-- t = 3.70 s: A's radar started tracking track_001.
+- t = 3.70 s: A's radar started tracking track_001, which appeared on its left.
 - t = 3.70 s: A observed track_001 start closing in (already the case when first observed).
 - t = 4.25 s: A's time-to-contact with track_001 became critical.
 - t = 5.80 s: A observed track_001 enter its forward path corridor.

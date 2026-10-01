@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 18 | 36 | 1 | A:e11 @ 4.25 s |
+| A | 15.15 s | 153 | 16 | 29 | 1 | A:e10 @ 4.25 s |
 | B | 15.15 s | 153 | 10 | 13 | 0 | B:e06 @ 4.25 s |
 
 ## Graph alignment
@@ -19,7 +19,7 @@ Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e11 | 4.25 | -4.25 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e10 | 4.25 | -4.25 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e06 | 4.25 | -4.25 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -34,16 +34,15 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 5953.8
 
 ## Global graph
 
-27 nodes, 55 edges; 1 merged node(s): g16 COLLISION(A,B) from A:e11 + B:e06.
+25 nodes, 46 edges; 1 merged node(s): g15 COLLISION(A,B) from A:e10 + B:e06.
 
 ### Event sequence (global time)
 
-- `-4.25` MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)
+- `-4.25` MOVING_START(A); MOVING_START(B); TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - `-3.90` STRONG_THROTTLE_START(B)
 - `-3.10` STRONG_THROTTLE_START(A)
 - `-2.95` STRONG_THROTTLE_END(B)
 - `-2.90` STRONG_THROTTLE_END(A)
-- `-2.35` PREDICTED_PATH_CONFLICT_START(A,B)
 - `-1.90` CUT_IN_FROM_LEFT_START(A,B)
 - `-1.45` CRITICAL_TTC_START(A,B)
 - `-1.10` BRAKE_START(B)
@@ -51,7 +50,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 5953.8
 - `-0.65` BRAKE_END(B)
 - `-0.40` BRAKE_START(A)
 - `+0.00` COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); BRAKE_START(B); HARD_BRAKE_START(B)
-- `+0.05` PREDICTED_PATH_CONFLICT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); HARD_BRAKE_START(A)
+- `+0.05` CRITICAL_TTC_END(A,B); CLOSING_END(A,B); HARD_BRAKE_START(A)
 - `+0.60` MOVING_END(A); STOP_START(A)
 - `+0.75` MOVING_END(B); STOP_START(B)
 
@@ -59,13 +58,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 5953.8
 
 - 4.25 s before the matched collision, A started moving (already the case when first observed).
 - 4.25 s before the matched collision, B started moving (already the case when first observed).
-- 4.25 s before the matched collision, A's radar started tracking B.
+- 4.25 s before the matched collision, A's radar started tracking B, which appeared on its left.
 - 4.25 s before the matched collision, A observed B start closing in (already the case when first observed).
 - 3.90 s before the matched collision, B started applying strong throttle.
 - 3.10 s before the matched collision, A started applying strong throttle.
 - 2.95 s before the matched collision, B stopped applying strong throttle.
 - 2.90 s before the matched collision, A stopped applying strong throttle.
-- 2.35 s before the matched collision, A predicted a path conflict with B (close approach ahead if both keep their motion).
 - 1.90 s before the matched collision, A observed B cutting in from the left.
 - 1.45 s before the matched collision, A's time-to-contact with B became critical.
 - 1.10 s before the matched collision, B started braking.
@@ -76,7 +74,6 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 5953.8
 - At the matched collision, A observed B's cut-in from the left settle.
 - At the matched collision, B started braking.
 - At the matched collision, B started braking hard.
-- 0.05 s after the matched collision, A stopped predicting a path conflict with B.
 - 0.05 s after the matched collision, A's time-to-contact with B stopped being critical.
 - 0.05 s after the matched collision, A observed B stop closing in.
 - 0.05 s after the matched collision, A started braking hard.
@@ -87,19 +84,19 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 5953.8
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
-- MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B); CLOSING_START(A,B)
+- MOVING_START(A); MOVING_START(B); TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); BRAKE_START(B); HARD_BRAKE_START(B)
-- PREDICTED_PATH_CONFLICT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); HARD_BRAKE_START(A)
+- CRITICAL_TTC_END(A,B); CLOSING_END(A,B); HARD_BRAKE_START(A)
 - MOVING_END(A); STOP_START(A)
 - MOVING_END(B); STOP_START(B)
 
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e09 (t = 3.30 s)
-- BRAKE, since A:e10 (t = 3.85 s)
-- HARD_BRAKE, since A:e16 (t = 4.30 s)
-- STOP, since A:e18 (t = 4.85 s)
+- EGO_PATH of track_001, since A:e08 (t = 3.30 s)
+- BRAKE, since A:e09 (t = 3.85 s)
+- HARD_BRAKE, since A:e14 (t = 4.30 s)
+- STOP, since A:e16 (t = 4.85 s)
 B:
 - BRAKE, since B:e07 (t = 4.25 s)
 - HARD_BRAKE, since B:e08 (t = 4.25 s)
@@ -114,7 +111,7 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e11 at 4.25 s (local): ego: MOVING, BRAKE; track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH, PATH_CONFLICT, CUT_IN_FROM_LEFT
+- A A:e10 at 4.25 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT
 - B B:e06 at 4.25 s (local): ego: MOVING
 
 ### Tracks lost while a state was active
@@ -167,12 +164,9 @@ B:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,

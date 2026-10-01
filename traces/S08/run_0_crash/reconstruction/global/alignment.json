@@ -5,14 +5,14 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e12",
+      "anchor_node": "A:e11",
       "anchor_t_local": 4.25,
       "offset_to_global": -4.25,
       "reason": "reported the reference collision collision_001"
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e12",
+      "anchor_node": "B:e11",
       "anchor_t_local": 4.25,
       "offset_to_global": -4.25,
       "reason": "reported the reference collision collision_001"
@@ -36,8 +36,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e12",
-        "B": "B:e12"
+        "A": "A:e11",
+        "B": "B:e11"
       },
       "t_local": {
         "A": 4.25,

@@ -9,7 +9,7 @@ digraph "global" {
   "g05" [label="HARD_BRAKE_START\nA\nunaligned", fillcolor="#fde68a"];
   "g06" [label="MOVING_END\nA\nunaligned", fillcolor="#e5e7eb"];
   "g07" [label="STOP_START\nA\nunaligned", fillcolor="#e5e7eb"];
-  "g08" [label="TRACK_APPEARED\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g08" [label="TRACK_APPEARED_LEFT\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g09" [label="CLOSING_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g10" [label="CRITICAL_TTC_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g11" [label="EGO_PATH_ENTRY\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
@@ -21,14 +21,12 @@ digraph "global" {
   "g17" [label="MOVING_START\nB\nunaligned", fillcolor="#e5e7eb"];
   "g18" [label="STRONG_THROTTLE_START\nB\nunaligned", fillcolor="#fde68a"];
   "g19" [label="STRONG_THROTTLE_END\nB\nunaligned", fillcolor="#fde68a"];
-  "g20" [label="TRACK_APPEARED\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g20" [label="TRACK_APPEARED_RIGHT\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g21" [label="CLOSING_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g22" [label="PREDICTED_PATH_CONFLICT_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g23" [label="PREDICTED_PATH_CONFLICT_END\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g24" [label="CRITICAL_TTC_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g25" [label="TRACK_LOST\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g26" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
-  "g27" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
+  "g22" [label="CRITICAL_TTC_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g23" [label="TRACK_LOST\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g24" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
+  "g25" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
   "g08" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -39,6 +37,4 @@ digraph "global" {
   "g20" -> "g21" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g20" -> "g22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g20" -> "g23" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g20" -> "g24" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g20" -> "g25" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

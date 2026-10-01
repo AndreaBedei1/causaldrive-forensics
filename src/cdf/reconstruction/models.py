@@ -34,7 +34,7 @@ OUTCOME = "OUTCOME"
 # The two edge relations.  PRECEDES links an event to every event at the next
 # later timestamp; events that share a timestamp are simultaneous at the
 # recorder's resolution and are never linked by PRECEDES.  SAME_TRACK links a
-# track's TRACK_APPEARED to every other event whose subject is that same local
+# track's TRACK_APPEARED_* to every other event whose subject is that same local
 # track: it is exactly "same subject_id", made explicit as graph structure for
 # graph queries.  It groups events, carries no temporal meaning, and its
 # direction (from the appearance) implies no order.
@@ -49,7 +49,7 @@ SAME_TRACK = "SAME_TRACK"
 # keeping a zero-length state's START before its own END.
 SAME_TIME_ORDER = (
     "COLLISION",
-    "CUT_IN_FROM_LEFT_END", "CUT_IN_FROM_RIGHT_END", "PREDICTED_PATH_CONFLICT_END",
+    "CUT_IN_FROM_LEFT_END", "CUT_IN_FROM_RIGHT_END",
     "CRITICAL_TTC_END", "CLOSING_END", "EGO_PATH_EXIT",
     "STOP_SIGN_DETECTED_END", "YIELD_SIGN_DETECTED_END",
     "HARD_BRAKE_END", "BRAKE_END", "STRONG_THROTTLE_END",
@@ -57,8 +57,9 @@ SAME_TIME_ORDER = (
     "STOP_START", "MOVING_START", "SPEED_LIMIT_EXCEEDED_START",
     "STRONG_THROTTLE_START", "BRAKE_START", "HARD_BRAKE_START",
     "STOP_SIGN_DETECTED_START", "YIELD_SIGN_DETECTED_START",
-    "TRACK_APPEARED", "EGO_PATH_ENTRY", "CLOSING_START", "CRITICAL_TTC_START",
-    "PREDICTED_PATH_CONFLICT_START", "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START",
+    "TRACK_APPEARED_FRONT", "TRACK_APPEARED_LEFT", "TRACK_APPEARED_RIGHT",
+    "EGO_PATH_ENTRY", "CLOSING_START", "CRITICAL_TTC_START",
+    "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START",
     "TRACK_LOST",
 )
 

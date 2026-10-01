@@ -89,7 +89,9 @@ SENTENCES = {
     "STOP_END": "{actor} left its stop",
     "SPEED_LIMIT_EXCEEDED_START": "{actor} began exceeding the speed limit",
     "SPEED_LIMIT_EXCEEDED_END": "{actor} returned within the speed limit",
-    "TRACK_APPEARED": "{actor}'s radar started tracking {subject}",
+    "TRACK_APPEARED_FRONT": "{actor}'s radar started tracking {subject}, which appeared in front of it",
+    "TRACK_APPEARED_LEFT": "{actor}'s radar started tracking {subject}, which appeared on its left",
+    "TRACK_APPEARED_RIGHT": "{actor}'s radar started tracking {subject}, which appeared on its right",
     "TRACK_LOST": "{actor}'s radar lost {subject} (its states are UNKNOWN from then on, not ended)",
     "CLOSING_START": "{actor} observed {subject} start closing in",
     "CLOSING_END": "{actor} observed {subject} stop closing in",
@@ -97,8 +99,6 @@ SENTENCES = {
     "CRITICAL_TTC_END": "{actor}'s time-to-contact with {subject} stopped being critical",
     "EGO_PATH_ENTRY": "{actor} observed {subject} enter its forward path corridor",
     "EGO_PATH_EXIT": "{actor} observed {subject} leave its forward path corridor",
-    "PREDICTED_PATH_CONFLICT_START": "{actor} predicted a path conflict with {subject} (close approach ahead if both keep their motion)",
-    "PREDICTED_PATH_CONFLICT_END": "{actor} stopped predicting a path conflict with {subject}",
     "CUT_IN_FROM_LEFT_START": "{actor} observed {subject} cutting in from the left",
     "CUT_IN_FROM_LEFT_END": "{actor} observed {subject}'s cut-in from the left settle",
     "CUT_IN_FROM_RIGHT_START": "{actor} observed {subject} cutting in from the right",
@@ -297,7 +297,7 @@ def local_graph_markdown(graph: LocalGraph) -> str:
     lines += ["", "Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, "
               "relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are "
               "simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links "
-              "a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order)."]
+              "a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order)."]
     lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```", ""]
     lines += ["## Perceived state before each event", ""] + _perceived_state_lines(graph)
     lines += ["", "## States still active when observation ended", ""] + _open_state_lines(graph)

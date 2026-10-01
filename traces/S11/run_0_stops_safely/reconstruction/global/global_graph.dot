@@ -3,7 +3,7 @@ digraph "global" {
   node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
   edge [fontname=Helvetica, fontsize=8];
   "g01" [label="MOVING_START\nA\nunaligned", fillcolor="#e5e7eb"];
-  "g02" [label="TRACK_APPEARED\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g02" [label="TRACK_APPEARED_RIGHT\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g03" [label="CLOSING_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g04" [label="CRITICAL_TTC_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g05" [label="CRITICAL_TTC_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
@@ -17,7 +17,7 @@ digraph "global" {
   "g13" [label="HARD_BRAKE_START\nB\nunaligned", fillcolor="#fde68a"];
   "g14" [label="MOVING_END\nB\nunaligned", fillcolor="#e5e7eb"];
   "g15" [label="STOP_START\nB\nunaligned", fillcolor="#e5e7eb"];
-  "g16" [label="TRACK_APPEARED\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g16" [label="TRACK_APPEARED_LEFT\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g17" [label="CLOSING_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g18" [label="CRITICAL_TTC_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g19" [label="CRITICAL_TTC_END\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];

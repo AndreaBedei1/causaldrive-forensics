@@ -56,7 +56,7 @@
     },
     {
       "node_id": "C:e02",
-      "event_type": "TRACK_APPEARED",
+      "event_type": "TRACK_APPEARED_FRONT",
       "kind": "PERCEPTION",
       "actor_id": "C",
       "subject_id": "track_001",
@@ -80,7 +80,7 @@
     },
     {
       "node_id": "C:e03",
-      "event_type": "TRACK_APPEARED",
+      "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "C",
       "subject_id": "track_002",
@@ -156,92 +156,6 @@
     },
     {
       "node_id": "C:e06",
-      "event_type": "PREDICTED_PATH_CONFLICT_START",
-      "kind": "PERCEPTION",
-      "actor_id": "C",
-      "subject_id": "track_002",
-      "t_local": 0.45,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "visible": true,
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          },
-          "track_002": {
-            "visible": true,
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {},
-        "facts_t_local": 0.4
-      }
-    },
-    {
-      "node_id": "C:e07",
-      "event_type": "PREDICTED_PATH_CONFLICT_END",
-      "kind": "PERCEPTION",
-      "actor_id": "C",
-      "subject_id": "track_002",
-      "t_local": 1.65,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "visible": true,
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          },
-          "track_002": {
-            "visible": true,
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": true,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {},
-        "facts_t_local": 1.6
-      }
-    },
-    {
-      "node_id": "C:e08",
       "event_type": "STRONG_THROTTLE_START",
       "kind": "ACTION",
       "actor_id": "C",
@@ -261,20 +175,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -284,7 +194,7 @@
       }
     },
     {
-      "node_id": "C:e09",
+      "node_id": "C:e07",
       "event_type": "STRONG_THROTTLE_END",
       "kind": "ACTION",
       "actor_id": "C",
@@ -304,20 +214,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -327,7 +233,7 @@
       }
     },
     {
-      "node_id": "C:e10",
+      "node_id": "C:e08",
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -347,20 +253,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -370,7 +272,7 @@
       }
     },
     {
-      "node_id": "C:e11",
+      "node_id": "C:e09",
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -390,20 +292,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -413,7 +311,7 @@
       }
     },
     {
-      "node_id": "C:e12",
+      "node_id": "C:e10",
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -433,20 +331,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -456,7 +350,7 @@
       }
     },
     {
-      "node_id": "C:e13",
+      "node_id": "C:e11",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -476,20 +370,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -499,7 +389,7 @@
       }
     },
     {
-      "node_id": "C:e14",
+      "node_id": "C:e12",
       "event_type": "COLLISION",
       "kind": "OUTCOME",
       "actor_id": "C",
@@ -521,20 +411,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -544,7 +430,7 @@
       }
     },
     {
-      "node_id": "C:e15",
+      "node_id": "C:e13",
       "event_type": "STRONG_THROTTLE_START",
       "kind": "ACTION",
       "actor_id": "C",
@@ -564,20 +450,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -587,7 +469,7 @@
       }
     },
     {
-      "node_id": "C:e16",
+      "node_id": "C:e14",
       "event_type": "STRONG_THROTTLE_END",
       "kind": "ACTION",
       "actor_id": "C",
@@ -607,20 +489,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -630,7 +508,7 @@
       }
     },
     {
-      "node_id": "C:e17",
+      "node_id": "C:e15",
       "event_type": "BRAKE_START",
       "kind": "ACTION",
       "actor_id": "C",
@@ -650,20 +528,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -673,7 +547,7 @@
       }
     },
     {
-      "node_id": "C:e18",
+      "node_id": "C:e16",
       "event_type": "HARD_BRAKE_START",
       "kind": "ACTION",
       "actor_id": "C",
@@ -693,20 +567,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -716,50 +586,7 @@
       }
     },
     {
-      "node_id": "C:e19",
-      "event_type": "PREDICTED_PATH_CONFLICT_START",
-      "kind": "PERCEPTION",
-      "actor_id": "C",
-      "subject_id": "track_001",
-      "t_local": 4.85,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": true,
-          "HARD_BRAKE": true,
-          "STRONG_THROTTLE": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "visible": true,
-            "CLOSING": true,
-            "CRITICAL_TTC": true,
-            "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          },
-          "track_002": {
-            "visible": false,
-            "CLOSING": "UNKNOWN",
-            "CRITICAL_TTC": "UNKNOWN",
-            "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
-            "CUT_IN_FROM_LEFT": "UNKNOWN",
-            "CUT_IN_FROM_RIGHT": "UNKNOWN"
-          }
-        },
-        "signs": {},
-        "facts_t_local": 4.8
-      }
-    },
-    {
-      "node_id": "C:e20",
+      "node_id": "C:e17",
       "event_type": "EGO_PATH_ENTRY",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -779,20 +606,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -802,7 +625,7 @@
       }
     },
     {
-      "node_id": "C:e21",
+      "node_id": "C:e18",
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -822,20 +645,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -845,7 +664,7 @@
       }
     },
     {
-      "node_id": "C:e22",
+      "node_id": "C:e19",
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "C",
@@ -865,20 +684,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -888,7 +703,7 @@
       }
     },
     {
-      "node_id": "C:e23",
+      "node_id": "C:e20",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "C",
@@ -908,20 +723,16 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
@@ -931,7 +742,7 @@
       }
     },
     {
-      "node_id": "C:e24",
+      "node_id": "C:e21",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "C",
@@ -951,69 +762,22 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002": {
-            "visible": false,
             "CLOSING": "UNKNOWN",
             "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
             "CUT_IN_FROM_LEFT": "UNKNOWN",
             "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
         },
         "signs": {},
         "facts_t_local": 5.0
-      }
-    },
-    {
-      "node_id": "C:e25",
-      "event_type": "PREDICTED_PATH_CONFLICT_END",
-      "kind": "PERCEPTION",
-      "actor_id": "C",
-      "subject_id": "track_001",
-      "t_local": 5.2,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": false,
-          "STOP": true,
-          "BRAKE": true,
-          "HARD_BRAKE": true,
-          "STRONG_THROTTLE": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "visible": true,
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          },
-          "track_002": {
-            "visible": false,
-            "CLOSING": "UNKNOWN",
-            "CRITICAL_TTC": "UNKNOWN",
-            "IN_EGO_PATH": "UNKNOWN",
-            "PREDICTED_PATH_CONFLICT": "UNKNOWN",
-            "CUT_IN_FROM_LEFT": "UNKNOWN",
-            "CUT_IN_FROM_RIGHT": "UNKNOWN"
-          }
-        },
-        "signs": {},
-        "facts_t_local": 5.1
       }
     }
   ],
@@ -1049,13 +813,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e06",
-      "to": "C:e08",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "C:e07",
-      "to": "C:e09",
+      "to": "C:e08",
       "relation": "PRECEDES"
     },
     {
@@ -1079,8 +838,23 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e12",
+      "from": "C:e11",
       "to": "C:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e12",
+      "to": "C:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e12",
+      "to": "C:e15",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e12",
+      "to": "C:e16",
       "relation": "PRECEDES"
     },
     {
@@ -1094,7 +868,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e14",
+      "from": "C:e13",
       "to": "C:e16",
       "relation": "PRECEDES"
     },
@@ -1104,28 +878,18 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e14",
-      "to": "C:e18",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e15",
-      "to": "C:e16",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "C:e15",
       "to": "C:e17",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e15",
-      "to": "C:e18",
       "relation": "PRECEDES"
     },
     {
       "from": "C:e16",
-      "to": "C:e19",
+      "to": "C:e17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "C:e17",
+      "to": "C:e18",
       "relation": "PRECEDES"
     },
     {
@@ -1134,53 +898,13 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e18",
-      "to": "C:e19",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e19",
+      "from": "C:e17",
       "to": "C:e20",
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e20",
+      "from": "C:e17",
       "to": "C:e21",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e20",
-      "to": "C:e22",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e20",
-      "to": "C:e23",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e20",
-      "to": "C:e24",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e21",
-      "to": "C:e25",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e22",
-      "to": "C:e25",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e23",
-      "to": "C:e25",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e24",
-      "to": "C:e25",
       "relation": "PRECEDES"
     },
     {
@@ -1195,12 +919,12 @@
     },
     {
       "from": "C:e03",
-      "to": "C:e06",
+      "to": "C:e08",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e03",
-      "to": "C:e07",
+      "from": "C:e02",
+      "to": "C:e09",
       "relation": "SAME_TRACK"
     },
     {
@@ -1209,43 +933,23 @@
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e02",
+      "from": "C:e03",
       "to": "C:e11",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e03",
-      "to": "C:e12",
+      "from": "C:e02",
+      "to": "C:e17",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e03",
-      "to": "C:e13",
+      "from": "C:e02",
+      "to": "C:e18",
       "relation": "SAME_TRACK"
     },
     {
       "from": "C:e02",
       "to": "C:e19",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "C:e02",
-      "to": "C:e20",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "C:e02",
-      "to": "C:e21",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "C:e02",
-      "to": "C:e22",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "C:e02",
-      "to": "C:e25",
       "relation": "SAME_TRACK"
     }
   ],

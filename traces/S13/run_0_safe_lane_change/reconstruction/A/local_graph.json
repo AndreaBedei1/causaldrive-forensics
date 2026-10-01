@@ -56,7 +56,7 @@
     },
     {
       "node_id": "A:e02",
-      "event_type": "TRACK_APPEARED",
+      "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
@@ -125,11 +125,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -159,11 +157,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": false,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -193,11 +189,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -227,11 +221,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -261,11 +253,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": true,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -295,11 +285,9 @@
         },
         "external": {
           "track_001": {
-            "visible": true,
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": true,
             "CUT_IN_FROM_RIGHT": false
           }

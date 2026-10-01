@@ -28,12 +28,9 @@ reconstruction:
     closing_speed_threshold_mps: 1.0  # CLOSING_START at or above, CLOSING_END below half of it
     critical_ttc_s: 2.0               # CRITICAL_TTC_START at or below (while closing)
     path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EGO_PATH_EXIT
+    track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first azimuth, else _LEFT / _RIGHT
     max_position_std_m: 1.0           # track estimates more uncertain than these (Kalman std)...
-    max_velocity_std_mps: 1.0         # ...leave PATH_CONFLICT and CUT_IN UNKNOWN
-    conflict_horizon_s: 4.0           # PREDICTED_PATH_CONFLICT_START: closest approach due within this...
-    conflict_distance_m: 1.5          # ...with a predicted miss distance at or below this
-    conflict_release_horizon_s: 5.0   # _END: closest approach past, later than this...
-    conflict_release_distance_m: 2.5  # ...or predicted miss distance above this
+    max_velocity_std_mps: 1.0         # ...leave CUT_IN UNKNOWN
     cut_in_max_heading_deg: 25.0      # CUT_IN: target moves within this angle of the recorder's heading
     cut_in_min_target_speed_mps: 2.0  # ...at least this fast (a slow or standing object does not cut in)
     cut_in_lateral_speed_mps: 0.3     # ...approaching the corridor laterally at least this fast

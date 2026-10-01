@@ -9,7 +9,7 @@ digraph "local_B" {
   "B:e05" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=2.60", fillcolor="#bfdbfe"];
   "B:e06" [label="BRAKE_START\nB\nt=2.65", fillcolor="#fde68a"];
   "B:e07" [label="HARD_BRAKE_START\nB\nt=2.65", fillcolor="#fde68a"];
-  "B:e08" [label="TRACK_APPEARED\nB -> track_001\nt=3.00", fillcolor="#bfdbfe"];
+  "B:e08" [label="TRACK_APPEARED_RIGHT\nB -> track_001\nt=3.00", fillcolor="#bfdbfe"];
   "B:e09" [label="CLOSING_START\nB -> track_001\nt=3.00", fillcolor="#bfdbfe"];
   "B:e10" [label="MOVING_END\nB\nt=3.40", fillcolor="#e5e7eb"];
   "B:e11" [label="STOP_START\nB\nt=3.40", fillcolor="#e5e7eb"];

@@ -22,7 +22,7 @@ from .carla_client import import_carla
 class RadarSpec:
     sensor_id: str = "front"
     blueprint: str = "sensor.other.radar"
-    horizontal_fov_deg: float = 120.0
+    horizontal_fov_deg: float = 200.0
     vertical_fov_deg: float = 10.0
     range_m: float = 90.0
     points_per_second: int = 6000
@@ -47,7 +47,7 @@ def radar_specs_from_config(cfg: Config) -> List[RadarSpec]:
     for e in entries:
         m = e.get("mount", {}) or {}
         out.append(RadarSpec(sensor_id=str(e.get("sensor_id", "front")), blueprint=str(e.get("blueprint", "sensor.other.radar")),
-            horizontal_fov_deg=float(e.get("horizontal_fov_deg", 120)), vertical_fov_deg=float(e.get("vertical_fov_deg", 10)),
+            horizontal_fov_deg=float(e.get("horizontal_fov_deg", 200)), vertical_fov_deg=float(e.get("vertical_fov_deg", 10)),
             range_m=float(e.get("range_m", 90)), points_per_second=int(e.get("points_per_second", 6000)),
             sensor_tick_s=float(e.get("sensor_tick_s", 0.05)), mount_x=float(m.get("x", 2.2)), mount_y=float(m.get("y", 0)),
             mount_z=float(m.get("z", 1)), mount_yaw_deg=float(m.get("yaw_deg", 0)), mount_pitch_deg=float(m.get("pitch_deg", 0))))

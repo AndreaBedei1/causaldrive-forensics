@@ -1,5 +1,5 @@
-"""The local semantic world model: perceived state, track loss, cut-in,
-predicted path conflict, STOP-sign knowledge and the radar audit boundary."""
+"""The local semantic world model: perceived state, track loss, track
+appearance side, cut-in, STOP-sign knowledge and the radar audit boundary."""
 
 import ast
 import json
@@ -10,8 +10,8 @@ from pathlib import Path
 
 from src.cdf.reconstruction.checks import sign_windows
 from src.cdf.reconstruction.config import ReconstructionConfig, SemanticsConfig
-from src.cdf.reconstruction.local import (build_local_graph, number_events, relative_motion, sign_continuity,
-                                          sign_events, track_events)
+from src.cdf.reconstruction.local import (appearance_side, build_local_graph, number_events, relative_motion,
+                                          sign_continuity, sign_events, track_events)
 from src.cdf.reconstruction.models import TraceFrame
 from src.cdf.reconstruction.pipeline import reconstruct_run
 from src.cdf.reconstruction.tracking import EgoState, EgoTrajectory, LocalTrack, TrackSample
@@ -118,8 +118,22 @@ class PerceivedStateTests(unittest.TestCase):
             for name in node.perceived_state_before["external"]:
                 self.assertTrue(name.startswith("track_"), name)
         later = self.local["A"].graph.nodes[-1].perceived_state_before["external"]["track_001"]
-        self.assertEqual(set(later), {"visible", "CLOSING", "CRITICAL_TTC", "IN_EGO_PATH",
-                                      "PREDICTED_PATH_CONFLICT", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT"})
+        self.assertEqual(set(later), {"CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT"})
+
+    def test_no_visibility_state_and_no_path_conflict_anywhere(self):
+        rec = Path(self._tmp.name) / "seen" / "reconstruction"
+        for path in [rec / "A" / "local_graph.json", rec / "A" / "local_trace.jsonl", rec / "global" / "global_graph.json"]:
+            text = path.read_text(encoding="utf-8")
+            for gone in ('"visible"', "VISIBLE", "PATH_CONFLICT", "conflict"):
+                self.assertNotIn(gone, text, path.name)
+
+    def test_track_appearance_names_the_side_and_groups_the_track(self):
+        graph = self.local["A"].graph
+        appeared = [node for node in graph.nodes if node.event_type.startswith("TRACK_APPEARED")]
+        self.assertEqual([(node.event_type, node.subject_id) for node in appeared],
+                         [("TRACK_APPEARED_FRONT", "track_001")])  # B straight ahead of A's radar
+        same = {edge.from_node for edge in graph.edges if edge.relation == "SAME_TRACK"}
+        self.assertEqual(same, {appeared[0].node_id})
 
     def test_global_nodes_keep_each_observers_local_belief(self):
         for node in self.result.graph.nodes:
@@ -139,16 +153,15 @@ class PerceivedStateTests(unittest.TestCase):
         graph = self.lost["A"].graph
         lost = next(node for node in graph.nodes if node.event_type == "TRACK_LOST")
         before = lost.perceived_state_before["external"]["track_001"]
-        self.assertTrue(before["visible"])
         self.assertIs(before["CLOSING"], True)  # closing in when it was lost
         self.assertNotIn("CLOSING_END", [node.event_type for node in graph.nodes if node.subject_id == "track_001"])
         later = [node for node in graph.nodes if node.t_local > lost.t_local]
         self.assertTrue(later)
         for node in later:
             state = node.perceived_state_before["external"]["track_001"]
-            self.assertFalse(state["visible"])
-            self.assertTrue(all(value == UNKNOWN for key, value in state.items() if key != "visible"))
-        self.assertIn("lost (states UNKNOWN): track_001", compact_state(later[0].perceived_state_before))
+            self.assertEqual(set(state), {"CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT"})
+            self.assertTrue(all(value == UNKNOWN for value in state.values()))
+        self.assertIn("track lost, states UNKNOWN: track_001", compact_state(later[0].perceived_state_before))
 
 
 class WorldStateUnitTests(unittest.TestCase):
@@ -165,13 +178,24 @@ class WorldStateUnitTests(unittest.TestCase):
     def test_span_values_are_unknown_until_the_state_can_be_established(self):
         self.assertEqual(span_values(5, [(2, 4)], unknown_before=1), [UNKNOWN, False, True, True, False])
 
-    def test_a_sign_stays_known_after_it_leaves_view(self):
+    def test_a_sign_is_known_from_its_first_detection_on(self):
         world = PerceivedWorld()
-        world.add_sign_window("sign-0", "STOP", 2.0, 4.0, True)
+        world.add_sign("sign-0", "STOP", 2.0, True)
         self.assertNotIn("sign-0", world.snapshot(2.0, before=True)["signs"])
-        self.assertTrue(world.snapshot(3.0)["signs"]["sign-0"]["visible"])
-        after = world.snapshot(9.0)["signs"]["sign-0"]
-        self.assertEqual((after["visible"], after["known"], after["relevant_to_ego_path"]), (False, True, True))
+        for t in (2.5, 9.0):  # in view or not: the window events say that, the state keeps the knowledge
+            self.assertEqual(world.snapshot(t)["signs"]["sign-0"],
+                             {"class": "STOP", "known": True, "relevant_to_ego_path": True})
+
+    def test_compact_state_names_true_and_unknown_states_and_groups_lost_tracks(self):
+        snapshot = {"ego": {"MOVING": True, "BRAKE": False},
+                    "external": {"track_001": {"CLOSING": True, "CUT_IN_FROM_LEFT": UNKNOWN},
+                                 "track_002": {"CLOSING": False},
+                                 "track_003": {"CLOSING": UNKNOWN, "IN_EGO_PATH": UNKNOWN}},
+                    "signs": {"sign-0": {"class": "STOP", "known": True, "relevant_to_ego_path": False}}}
+        self.assertEqual(compact_state(snapshot), ["ego: MOVING", "track_001: CLOSING, CUT_IN_FROM_LEFT?",
+                                                   "track_002: no active state",
+                                                   "track lost, states UNKNOWN: track_003",
+                                                   "sign-0: STOP sign known"])
 
 
 class RelativeMotionTests(unittest.TestCase):
@@ -189,35 +213,31 @@ class RelativeMotionTests(unittest.TestCase):
         self.assertIsNone(motion.d_cpa_m)
 
 
-class PathConflictTests(unittest.TestCase):
-    def test_conflict_starts_within_the_horizon_and_ends_once_the_approach_is_past(self):
-        # Oncoming 1 m beside the radar line at 5 m/s from 30 m: closest approach due in 4 s at t = 3 s.
-        events = _events(_target(lambda t: (30.0 - 5.0 * (t - 1.0), 1.0, -5.0, 0.0), end=9.0), recording_end=12.0)
-        self.assertIn(("PREDICTED_PATH_CONFLICT_START", 3.0), events)
-        self.assertIn(("PREDICTED_PATH_CONFLICT_END", 7.0), events)
+class TrackAppearanceTests(unittest.TestCase):
+    def test_the_side_comes_from_the_first_azimuth(self):
+        for lateral, side in ((-8.0, "LEFT"), (8.0, "RIGHT"), (1.0, "FRONT"), (-1.0, "FRONT")):
+            events = _events(_target(lambda t, lat=lateral: (20.0, lat, 0.0, 0.0), end=3.0))
+            self.assertEqual(events[0], ("TRACK_APPEARED_" + side, 1.0), lateral)
 
-    def test_adjacent_lane_traffic_is_not_a_conflict(self):
-        events = _events(_target(lambda t: (30.0 - 5.0 * (t - 1.0), 3.5, -5.0, 0.0), end=9.0), recording_end=12.0)
-        self.assertNotIn("PREDICTED_PATH_CONFLICT_START", _types(events))
+    def test_the_front_sector_is_the_configured_half_angle(self):
+        self.assertEqual(appearance_side(CFG.track_appeared_front_deg, CFG), "FRONT")
+        self.assertEqual(appearance_side(-CFG.track_appeared_front_deg - 0.01, CFG), "LEFT")
+        self.assertEqual(appearance_side(CFG.track_appeared_front_deg + 0.01, CFG), "RIGHT")
 
-    def test_crossing_traffic_on_a_collision_course_is_a_conflict(self):
+    def test_only_the_first_detection_counts(self):
+        # Appears on the right, then crosses to the left: one appearance, on the right.
+        events = _events(_target(lambda t: (20.0, 8.0 - 4.0 * (t - 1.0), 0.0, -4.0), end=6.0), recording_end=12.0)
+        appeared = [name for name in _types(events) if name.startswith("TRACK_APPEARED")]
+        self.assertEqual(appeared, ["TRACK_APPEARED_RIGHT"])
+
+    def test_crossing_traffic_is_not_a_cut_in_and_no_path_conflict_is_emitted(self):
         # Recorder at 10 m/s; a car from the right at 10 m/s, both 20 m from the meeting point.
         def motion(t):
             return 20.0 - 10.0 * (t - 1.0), 20.0 - 10.0 * (t - 1.0), 0.0, -10.0
         events = _events(_target(motion, end=2.5), ego=_ego(10.0), recording_end=12.0)
-        self.assertEqual(events[:2], [("TRACK_APPEARED", 1.0), ("PREDICTED_PATH_CONFLICT_START", 1.0)])
-        self.assertNotIn("CUT_IN_FROM_RIGHT_START", _types(events))  # crossing is not a cut-in
-
-    def test_a_lead_car_at_constant_gap_is_not_a_conflict(self):
-        events = _events(_target(lambda t: (15.0, 0.0, 10.0, 0.0)), ego=_ego(10.0))
-        self.assertNotIn("PREDICTED_PATH_CONFLICT_START", _types(events))
-
-    def test_uncertain_estimates_leave_the_conflict_unknown(self):
-        world = PerceivedWorld()
-        events = _events(_target(lambda t: (30.0 - 5.0 * (t - 1.0), 0.0, -5.0, 0.0), vel_std=2.0), world=world)
-        self.assertNotIn("PREDICTED_PATH_CONFLICT_START", _types(events))
-        self.assertEqual(world.snapshot(5.0)["external"]["track_001"]["PREDICTED_PATH_CONFLICT"], UNKNOWN)
-        self.assertIs(world.snapshot(5.0)["external"]["track_001"]["CLOSING"], False)
+        self.assertEqual(events[0], ("TRACK_APPEARED_RIGHT", 1.0))
+        self.assertNotIn("CUT_IN_FROM_RIGHT_START", _types(events))
+        self.assertFalse([name for name in _types(events) if "CONFLICT" in name])
 
 
 class CutInTests(unittest.TestCase):
@@ -256,7 +276,7 @@ class CutInTests(unittest.TestCase):
         self.assertNotIn("CUT_IN_FROM_LEFT_END", _types(events))
         self.assertIs(world.snapshot(3.5, before=True)["external"]["track_001"]["CUT_IN_FROM_LEFT"], True)
         after = world.snapshot(3.5, before=False)["external"]["track_001"]
-        self.assertEqual((after["visible"], after["CUT_IN_FROM_LEFT"]), (False, UNKNOWN))
+        self.assertTrue(all(value == UNKNOWN for value in after.values()))
 
 
 class SignKnowledgeTests(unittest.TestCase):
@@ -276,8 +296,8 @@ class SignKnowledgeTests(unittest.TestCase):
                           ("STOP_SIGN_DETECTED_START", "sign-1"), ("STOP_SIGN_DETECTED_END", "sign-1")])
         self.assertEqual(events[2].attributes, {"relevant_to_ego_path": True, "reacquired": True,
                                                 "sign_track": "sign-2"})
-        between = world.snapshot(3.5)["signs"]["sign-1"]
-        self.assertEqual((between["visible"], between["known"]), (False, True))
+        between = world.snapshot(3.5)["signs"]["sign-1"]  # out of view between the two windows
+        self.assertEqual(between, {"class": "STOP", "known": True, "relevant_to_ego_path": True})
         graph = build_local_graph("A", [TraceFrame(t_local=e.t_local, events=[e])
                                         for e in number_events("A", events)], [], {"end_t_local": 12.0})
         windows = sign_windows(graph)

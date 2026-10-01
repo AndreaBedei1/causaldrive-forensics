@@ -48,8 +48,6 @@ PATH_HYSTERESIS_M = 0.5
 # The camera sign tracker ends a track after this gap without a detection
 # (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
 DEFAULT_SIGN_TRACK_GAP_S = 0.6
-# A predicted path conflict must clear for this long before it ends.
-CONFLICT_RELEASE_DEBOUNCE_S = 0.2
 # Below this relative speed there is no closest point of approach to predict.
 MIN_RELATIVE_SPEED_MPS = 0.3
 # Qualitative motion relation of a track to the recorder (a TRACK_STATE fact).
@@ -116,20 +114,18 @@ def active_intervals(times: Sequence[float], values: Sequence[Any], turns_on: Ca
 
 def state_events(owner: str, subject: Optional[str], start_type: str, end_type: str, kind: str,
                  source: str, times: Sequence[float], spans: Sequence[Span],
-                 announce_initial: bool = True, first_observed: int = 0) -> List[SemanticEvent]:
+                 announce_initial: bool = True) -> List[SemanticEvent]:
     """One start event and (unless still active at the end) one end event per interval.
 
-    An interval active at the first sample where the state could be observed
-    (``first_observed``, normally 0) began before it was observed: its start is
-    marked ``active_at_first_observation``, or skipped entirely when
+    An interval active at the first sample began before it was observed: its
+    start is marked ``active_at_first_observation``, or skipped entirely when
     ``announce_initial`` is False (a transition such as EGO_PATH_ENTRY that
     was never seen must not be invented).
     """
     events = []
     for start, end in spans:
-        initial = start <= first_observed
-        if not initial or announce_initial:
-            attributes = {"active_at_first_observation": True} if initial else {}
+        if start > 0 or announce_initial:
+            attributes = {"active_at_first_observation": True} if start == 0 else {}
             events.append(SemanticEvent(type=start_type, kind=kind, actor_id=owner, subject_id=subject,
                                         t_local=times[start], attributes=attributes, source=source))
         if end is not None:
@@ -299,9 +295,9 @@ def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: fl
     START: the track is confirmed, i.e. the detection is reliably established.
     END: its last detection, provided the recording lasted long enough for the
     tracker to give the track up; a sign still in view at the end has no END.
-    END means this recorder no longer perceives the sign (it is no longer
-    VISIBLE), not that the legal obligation it imposes ended; the sign stays
-    KNOWN in the perceived state.  A track that reacquires an earlier sign
+    END means this recorder no longer perceives the sign, not that the legal
+    obligation it imposes ended; the sign stays KNOWN in the perceived state
+    from its first window on.  A track that reacquires an earlier sign
     (``sign_continuity``) keeps that sign's id, with ``reacquired`` and its own
     ``sign_track`` id as attributes.
     """
@@ -329,8 +325,7 @@ def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: fl
                                         subject_id=subject, t_local=end, source="camera", confidence=confidence,
                                         attributes={} if subject == track_id else {"sign_track": track_id}))
         if world is not None:
-            world.add_sign_window(subject, str(record.get("class", "")).upper(), start, end,
-                                  bool(record.get("relevant_to_ego_path")))
+            world.add_sign(subject, str(record.get("class", "")).upper(), start, bool(record.get("relevant_to_ego_path")))
     return events
 
 
@@ -382,24 +377,16 @@ def motion_relation(sample: TrackSample, motion: RelativeMotion, cfg: SemanticsC
     return UNKNOWN
 
 
-def conflict_spans(times: Sequence[float], motions: Sequence[RelativeMotion], cfg: SemanticsConfig) -> List[Span]:
-    """PREDICTED_PATH_CONFLICT intervals: a future CPA within the horizon and miss distance.
+def appearance_side(bearing_deg: float, cfg: SemanticsConfig) -> str:
+    """FRONT, LEFT or RIGHT: where a track entered the recorder's radar field.
 
-    Uncertain samples neither start nor end a conflict; flicker shorter than
-    MIN_EPISODE_S is dropped.
+    From the track's own azimuth at its first detection, seen from the radar
+    (negative = left): within ``track_appeared_front_deg`` of the recorder's
+    heading it appeared in front, otherwise on that side.
     """
-    def starts(index: int) -> bool:
-        m = motions[index]
-        return (m.known and m.t_cpa_s is not None and 0.0 < m.t_cpa_s <= cfg.conflict_horizon_s
-                and m.d_cpa_m <= cfg.conflict_distance_m)
-
-    def ends(index: int) -> bool:
-        m = motions[index]
-        return m.known and (m.t_cpa_s is None or m.t_cpa_s <= 0.0 or m.t_cpa_s > cfg.conflict_release_horizon_s
-                            or m.d_cpa_m > cfg.conflict_release_distance_m)
-
-    spans = active_intervals(times, list(range(len(times))), starts, ends, CONFLICT_RELEASE_DEBOUNCE_S)
-    return _lasting(spans, times)
+    if abs(bearing_deg) <= cfg.track_appeared_front_deg:
+        return "FRONT"
+    return "LEFT" if bearing_deg < 0 else "RIGHT"
 
 
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
@@ -464,10 +451,12 @@ def _stationary_ego() -> EgoTrajectory:
 
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
                  ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
-    """TRACK_APPEARED / TRACK_LOST and the EGO_PATH, CLOSING, CRITICAL_TTC,
-    PREDICTED_PATH_CONFLICT and CUT_IN states of a track.
+    """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
+    CRITICAL_TTC and CUT_IN states of a track.
 
-    Ranges, speeds, TTC and the relative motion stay in the TRACK_STATE facts.
+    The appearance side comes from the track's azimuth at its first detection
+    (``appearance_side``).  Ranges, speeds, TTC and the relative motion stay in
+    the TRACK_STATE facts.
     ``ego`` is the recorder's own trajectory (relative motion needs its
     velocity); without it the recorder is taken as standing still.
     """
@@ -476,8 +465,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     times = [round(sample.t_local, 4) for sample in samples]
     motions = [relative_motion(sample, ego.at(sample.t_local), cfg) for sample in samples]
     subject = track.track_id
-    events = [SemanticEvent(type="TRACK_APPEARED", kind=PERCEPTION, actor_id=owner, subject_id=subject,
-                            t_local=times[0], source="radar")]
+    events = [SemanticEvent(type="TRACK_APPEARED_" + appearance_side(samples[0].bearing_deg, cfg), kind=PERCEPTION,
+                            actor_id=owner, subject_id=subject, t_local=times[0], source="radar")]
 
     # Inside: ahead and within the corridor.  Out again only when clearly beside
     # or behind the radar (at contact the target sits right at the radar plane).
@@ -507,11 +496,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, critical_spans)
 
-    # Relative-motion states can be established only once the estimate is precise enough.
+    # A cut-in can be established only once the estimate is precise enough.
     first_known = next((index for index, motion in enumerate(motions) if motion.known), len(motions))
-    conflicts = conflict_spans(times, motions, cfg)
-    events += state_events(owner, subject, "PREDICTED_PATH_CONFLICT_START", "PREDICTED_PATH_CONFLICT_END",
-                           PERCEPTION, "radar", times, conflicts, first_observed=first_known)
     from_left, from_right = cut_in_spans(times, samples, motions, cfg)
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
@@ -528,7 +514,6 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
             "CLOSING": span_values(count, closing_spans),
             "CRITICAL_TTC": span_values(count, critical_spans),
             "IN_EGO_PATH": span_values(count, path),
-            "PREDICTED_PATH_CONFLICT": span_values(count, conflicts, first_known),
             "CUT_IN_FROM_LEFT": span_values(count, from_left, first_known),
             "CUT_IN_FROM_RIGHT": span_values(count, from_right, first_known),
         }, lost_at)
@@ -652,11 +637,11 @@ def build_local_graph(owner: str, trace: Sequence[TraceFrame], tracks: Sequence[
                       recorder: Dict[str, Any]) -> LocalGraph:
     """Nodes are the trace's events.  PRECEDES links each event to the events of
     the next later local time (simultaneous events stay unordered); SAME_TRACK
-    links a track's TRACK_APPEARED to every later event about that track."""
+    links a track's TRACK_APPEARED_* to every later event about that track."""
     events = sorted((event for frame in trace for event in frame.events), key=lambda event: event.event_id)
     nodes = [GraphNode.from_event(event) for event in events]
     edges = precedes_edges(nodes, lambda node: node.t_local, lambda node: node.node_id)
-    appeared = {node.subject_id: node.node_id for node in nodes if node.event_type == "TRACK_APPEARED"}
+    appeared = {node.subject_id: node.node_id for node in nodes if node.event_type.startswith("TRACK_APPEARED")}
     for node in nodes:
         origin = appeared.get(node.subject_id) if node.subject_id else None
         if origin is not None and origin != node.node_id:

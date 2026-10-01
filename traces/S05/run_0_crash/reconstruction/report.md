@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 14.45 s | 146 | 18 | 41 | 1 | A:e07 @ 3.70 s |
+| A | 14.45 s | 146 | 16 | 34 | 1 | A:e06 @ 3.70 s |
 | B | 14.45 s | 146 | 84 | 445 | 19 | B:e08 @ 3.70 s |
 
 ## Graph alignment
@@ -19,7 +19,7 @@ Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e07 | 3.70 | -3.70 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e06 | 3.70 | -3.70 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e08 | 3.70 | -3.70 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -53,25 +53,24 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 
 ## Global graph
 
-101 nodes, 591 edges; 1 merged node(s): g14 COLLISION(A,B) from A:e07 + B:e08.
+99 nodes, 577 edges; 1 merged node(s): g13 COLLISION(A,B) from A:e06 + B:e08.
 
 ### Event sequence (global time)
 
 - `-3.70` MOVING_START(A); MOVING_START(B)
 - `-2.85` STRONG_THROTTLE_START(B)
-- `-2.50` TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001); CLOSING_START(A,B); CLOSING_START(B,B:track_001)
-- `-2.20` PREDICTED_PATH_CONFLICT_START(A,B)
+- `-2.50` TRACK_APPEARED_LEFT(B,B:track_001); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CLOSING_START(B,B:track_001)
 - `-2.10` STRONG_THROTTLE_END(B)
 - `-2.05` CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)
 - `-0.35` TRACK_LOST(B,B:track_001)
 - `-0.25` EGO_PATH_ENTRY(A,B)
-- `+0.00` COLLISION(A,B); PREDICTED_PATH_CONFLICT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); TRACK_APPEARED(B,B:track_005); TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_018); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_018)
-- `+0.05` STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_006); TRACK_APPEARED(B,B:track_012); EGO_PATH_ENTRY(B,B:track_003); CLOSING_START(B,B:track_012)
-- `+0.10` EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED(B,B:track_008); TRACK_APPEARED(B,B:track_009); TRACK_APPEARED(B,B:track_010); TRACK_APPEARED(B,B:track_011); EGO_PATH_ENTRY(B,B:track_005); CLOSING_START(B,B:track_009)
-- `+0.15` EGO_PATH_EXIT(B,B:track_005); TRACK_APPEARED(B,B:track_013); TRACK_APPEARED(B,B:track_014); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_008)
-- `+0.20` EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED(B,B:track_015); TRACK_APPEARED(B,B:track_016); TRACK_APPEARED(B,B:track_017); EGO_PATH_ENTRY(B,B:track_018); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); CRITICAL_TTC_START(B,B:track_015)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED_LEFT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_003); TRACK_APPEARED_LEFT(B,B:track_004); TRACK_APPEARED_LEFT(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_007); TRACK_APPEARED_LEFT(B,B:track_018); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_018)
+- `+0.05` STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED_LEFT(B,B:track_012); TRACK_APPEARED_RIGHT(B,B:track_006); EGO_PATH_ENTRY(B,B:track_003); CLOSING_START(B,B:track_012)
+- `+0.10` EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED_LEFT(B,B:track_008); TRACK_APPEARED_LEFT(B,B:track_009); TRACK_APPEARED_LEFT(B,B:track_010); TRACK_APPEARED_RIGHT(B,B:track_011); EGO_PATH_ENTRY(B,B:track_005); CLOSING_START(B,B:track_009)
+- `+0.15` EGO_PATH_EXIT(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_013); TRACK_APPEARED_LEFT(B,B:track_014); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_008)
+- `+0.20` EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_015); TRACK_APPEARED_LEFT(B,B:track_016); TRACK_APPEARED_LEFT(B,B:track_017); EGO_PATH_ENTRY(B,B:track_018); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); CRITICAL_TTC_START(B,B:track_015)
 - `+0.25` EGO_PATH_EXIT(B,B:track_018); CLOSING_START(B,B:track_016); CLOSING_START(B,B:track_017); TRACK_LOST(B,B:track_006)
-- `+0.30` CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_005); TRACK_APPEARED(B,B:track_019); TRACK_LOST(B,B:track_011)
+- `+0.30` CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_019); TRACK_LOST(B,B:track_011)
 - `+0.35` CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_007); CLOSING_END(B,B:track_012); EGO_PATH_ENTRY(B,B:track_009); TRACK_LOST(A,B); TRACK_LOST(B,B:track_003)
 - `+0.40` CLOSING_END(B,B:track_009); CLOSING_END(B,B:track_018); EGO_PATH_EXIT(B,B:track_009); EGO_PATH_ENTRY(B,B:track_010)
 - `+0.45` CLOSING_END(B,B:track_008); EGO_PATH_EXIT(B,B:track_010); EGO_PATH_ENTRY(B,B:track_008); TRACK_LOST(B,B:track_005)
@@ -89,28 +88,26 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 - 3.70 s before the matched collision, A started moving (already the case when first observed).
 - 3.70 s before the matched collision, B started moving (already the case when first observed).
 - 2.85 s before the matched collision, B started applying strong throttle.
-- 2.50 s before the matched collision, A's radar started tracking B.
-- 2.50 s before the matched collision, B's radar started tracking unidentified object B:track_001.
+- 2.50 s before the matched collision, B's radar started tracking unidentified object B:track_001, which appeared on its left.
+- 2.50 s before the matched collision, A's radar started tracking B, which appeared on its right.
 - 2.50 s before the matched collision, A observed B start closing in (already the case when first observed).
 - 2.50 s before the matched collision, B observed unidentified object B:track_001 start closing in (already the case when first observed).
-- 2.20 s before the matched collision, A predicted a path conflict with B (close approach ahead if both keep their motion).
 - 2.10 s before the matched collision, B stopped applying strong throttle.
 - 2.05 s before the matched collision, A's time-to-contact with B became critical.
 - 2.05 s before the matched collision, B's time-to-contact with unidentified object B:track_001 became critical.
 - 0.35 s before the matched collision, B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
 - 0.25 s before the matched collision, A observed B enter its forward path corridor.
 - At the matched collision, A and B both recorded this same collision (peak impulses A: 6116, B: 6116 N*s).
-- At the matched collision, A stopped predicting a path conflict with B.
 - At the matched collision, A's time-to-contact with B stopped being critical.
 - At the matched collision, A observed B stop closing in.
 - At the matched collision, A started applying strong throttle.
 - At the matched collision, B started applying strong throttle.
-- At the matched collision, B's radar started tracking unidentified object B:track_002.
-- At the matched collision, B's radar started tracking unidentified object B:track_003.
-- At the matched collision, B's radar started tracking unidentified object B:track_004.
-- At the matched collision, B's radar started tracking unidentified object B:track_005.
-- At the matched collision, B's radar started tracking unidentified object B:track_007.
-- At the matched collision, B's radar started tracking unidentified object B:track_018.
+- At the matched collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
+- At the matched collision, B's radar started tracking unidentified object B:track_003, which appeared on its left.
+- At the matched collision, B's radar started tracking unidentified object B:track_004, which appeared on its left.
+- At the matched collision, B's radar started tracking unidentified object B:track_005, which appeared on its left.
+- At the matched collision, B's radar started tracking unidentified object B:track_007, which appeared on its left.
+- At the matched collision, B's radar started tracking unidentified object B:track_018, which appeared on its left.
 - At the matched collision, B observed unidentified object B:track_002 start closing in (already the case when first observed).
 - At the matched collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
 - At the matched collision, B observed unidentified object B:track_005 start closing in (already the case when first observed).
@@ -122,27 +119,27 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 - 0.05 s after the matched collision, B started braking.
 - 0.05 s after the matched collision, A started braking hard.
 - 0.05 s after the matched collision, B started braking hard.
-- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_006.
-- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_012.
+- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_012, which appeared on its left.
+- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_006, which appeared on its right.
 - 0.05 s after the matched collision, B observed unidentified object B:track_003 enter its forward path corridor.
 - 0.05 s after the matched collision, B observed unidentified object B:track_012 start closing in (already the case when first observed).
 - 0.10 s after the matched collision, B observed unidentified object B:track_003 leave its forward path corridor.
-- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_008.
-- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_009.
-- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_010.
-- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_011.
+- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_008, which appeared on its left.
+- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_009, which appeared on its left.
+- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_010, which appeared on its left.
+- 0.10 s after the matched collision, B's radar started tracking unidentified object B:track_011, which appeared on its right.
 - 0.10 s after the matched collision, B observed unidentified object B:track_005 enter its forward path corridor.
 - 0.10 s after the matched collision, B observed unidentified object B:track_009 start closing in (already the case when first observed).
 - 0.15 s after the matched collision, B observed unidentified object B:track_005 leave its forward path corridor.
-- 0.15 s after the matched collision, B's radar started tracking unidentified object B:track_013.
-- 0.15 s after the matched collision, B's radar started tracking unidentified object B:track_014.
+- 0.15 s after the matched collision, B's radar started tracking unidentified object B:track_013, which appeared on its left.
+- 0.15 s after the matched collision, B's radar started tracking unidentified object B:track_014, which appeared on its left.
 - 0.15 s after the matched collision, B observed unidentified object B:track_002 enter its forward path corridor.
 - 0.15 s after the matched collision, B observed unidentified object B:track_008 start closing in.
 - 0.20 s after the matched collision, A observed B leave its forward path corridor.
 - 0.20 s after the matched collision, B observed unidentified object B:track_002 leave its forward path corridor.
-- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_015.
-- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_016.
-- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_017.
+- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_015, which appeared on its left.
+- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_016, which appeared on its left.
+- 0.20 s after the matched collision, B's radar started tracking unidentified object B:track_017, which appeared on its left.
 - 0.20 s after the matched collision, B observed unidentified object B:track_018 enter its forward path corridor.
 - 0.20 s after the matched collision, B observed unidentified object B:track_013 start closing in.
 - 0.20 s after the matched collision, B observed unidentified object B:track_014 start closing in.
@@ -154,7 +151,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 - 0.25 s after the matched collision, B's radar lost unidentified object B:track_006 (its states are UNKNOWN from then on, not ended).
 - 0.30 s after the matched collision, B observed unidentified object B:track_002 stop closing in.
 - 0.30 s after the matched collision, B observed unidentified object B:track_005 stop closing in.
-- 0.30 s after the matched collision, B's radar started tracking unidentified object B:track_019.
+- 0.30 s after the matched collision, B's radar started tracking unidentified object B:track_019, which appeared on its left.
 - 0.30 s after the matched collision, B's radar lost unidentified object B:track_011 (its states are UNKNOWN from then on, not ended).
 - 0.35 s after the matched collision, B observed unidentified object B:track_004 stop closing in.
 - 0.35 s after the matched collision, B observed unidentified object B:track_007 stop closing in.
@@ -191,15 +188,15 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 ### Simultaneous events (order unresolved at 0.05 s)
 
 - MOVING_START(A); MOVING_START(B)
-- TRACK_APPEARED(A,B); TRACK_APPEARED(B,B:track_001); CLOSING_START(A,B); CLOSING_START(B,B:track_001)
+- TRACK_APPEARED_LEFT(B,B:track_001); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CLOSING_START(B,B:track_001)
 - CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)
-- COLLISION(A,B); PREDICTED_PATH_CONFLICT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(B,B:track_002); TRACK_APPEARED(B,B:track_003); TRACK_APPEARED(B,B:track_004); TRACK_APPEARED(B,B:track_005); TRACK_APPEARED(B,B:track_007); TRACK_APPEARED(B,B:track_018); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_018)
-- STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED(B,B:track_006); TRACK_APPEARED(B,B:track_012); EGO_PATH_ENTRY(B,B:track_003); CLOSING_START(B,B:track_012)
-- EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED(B,B:track_008); TRACK_APPEARED(B,B:track_009); TRACK_APPEARED(B,B:track_010); TRACK_APPEARED(B,B:track_011); EGO_PATH_ENTRY(B,B:track_005); CLOSING_START(B,B:track_009)
-- EGO_PATH_EXIT(B,B:track_005); TRACK_APPEARED(B,B:track_013); TRACK_APPEARED(B,B:track_014); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_008)
-- EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED(B,B:track_015); TRACK_APPEARED(B,B:track_016); TRACK_APPEARED(B,B:track_017); EGO_PATH_ENTRY(B,B:track_018); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); CRITICAL_TTC_START(B,B:track_015)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED_LEFT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_003); TRACK_APPEARED_LEFT(B,B:track_004); TRACK_APPEARED_LEFT(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_007); TRACK_APPEARED_LEFT(B,B:track_018); CLOSING_START(B,B:track_002); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_007); CLOSING_START(B,B:track_018)
+- STRONG_THROTTLE_END(A); STRONG_THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B); TRACK_APPEARED_LEFT(B,B:track_012); TRACK_APPEARED_RIGHT(B,B:track_006); EGO_PATH_ENTRY(B,B:track_003); CLOSING_START(B,B:track_012)
+- EGO_PATH_EXIT(B,B:track_003); TRACK_APPEARED_LEFT(B,B:track_008); TRACK_APPEARED_LEFT(B,B:track_009); TRACK_APPEARED_LEFT(B,B:track_010); TRACK_APPEARED_RIGHT(B,B:track_011); EGO_PATH_ENTRY(B,B:track_005); CLOSING_START(B,B:track_009)
+- EGO_PATH_EXIT(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_013); TRACK_APPEARED_LEFT(B,B:track_014); EGO_PATH_ENTRY(B,B:track_002); CLOSING_START(B,B:track_008)
+- EGO_PATH_EXIT(A,B); EGO_PATH_EXIT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_015); TRACK_APPEARED_LEFT(B,B:track_016); TRACK_APPEARED_LEFT(B,B:track_017); EGO_PATH_ENTRY(B,B:track_018); CLOSING_START(B,B:track_013); CLOSING_START(B,B:track_014); CLOSING_START(B,B:track_015); CRITICAL_TTC_START(B,B:track_015)
 - EGO_PATH_EXIT(B,B:track_018); CLOSING_START(B,B:track_016); CLOSING_START(B,B:track_017); TRACK_LOST(B,B:track_006)
-- CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_005); TRACK_APPEARED(B,B:track_019); TRACK_LOST(B,B:track_011)
+- CLOSING_END(B,B:track_002); CLOSING_END(B,B:track_005); TRACK_APPEARED_LEFT(B,B:track_019); TRACK_LOST(B,B:track_011)
 - CLOSING_END(B,B:track_004); CLOSING_END(B,B:track_007); CLOSING_END(B,B:track_012); EGO_PATH_ENTRY(B,B:track_009); TRACK_LOST(A,B); TRACK_LOST(B,B:track_003)
 - CLOSING_END(B,B:track_009); CLOSING_END(B,B:track_018); EGO_PATH_EXIT(B,B:track_009); EGO_PATH_ENTRY(B,B:track_010)
 - CLOSING_END(B,B:track_008); EGO_PATH_EXIT(B,B:track_010); EGO_PATH_ENTRY(B,B:track_008); TRACK_LOST(B,B:track_005)
@@ -210,9 +207,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 6116.2
 ### States still active when observation ended
 
 A:
-- BRAKE, since A:e13 (t = 3.75 s)
-- HARD_BRAKE, since A:e14 (t = 3.75 s)
-- STOP, since A:e18 (t = 4.55 s)
+- BRAKE, since A:e11 (t = 3.75 s)
+- HARD_BRAKE, since A:e12 (t = 3.75 s)
+- STOP, since A:e16 (t = 4.55 s)
 B:
 - CLOSING of track_001, since B:e04 (t = 1.20 s); the track was lost at 3.35 s
 - CRITICAL_TTC of track_001, since B:e06 (t = 1.65 s); the track was lost at 3.35 s
@@ -231,8 +228,8 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e07 at 3.70 s (local): ego: MOVING; track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH, PATH_CONFLICT
-- B B:e08 at 3.70 s (local): ego: MOVING; lost (states UNKNOWN): track_001
+- A A:e06 at 3.70 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e08 at 3.70 s (local): ego: MOVING; track lost, states UNKNOWN: track_001
 
 ### Tracks lost while a state was active
 
@@ -303,12 +300,9 @@ B:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,

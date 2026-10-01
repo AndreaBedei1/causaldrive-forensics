@@ -66,7 +66,7 @@
     },
     {
       "node_id": "g02",
-      "event_type": "TRACK_APPEARED",
+      "event_type": "TRACK_APPEARED_RIGHT",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "A:track_001",
@@ -170,11 +170,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -216,11 +214,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": true,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -262,11 +258,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -458,7 +452,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": true,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -501,7 +494,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -544,7 +536,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -587,7 +578,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -630,7 +620,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -641,7 +630,7 @@
     },
     {
       "node_id": "g16",
-      "event_type": "TRACK_APPEARED",
+      "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "B:track_001",
@@ -673,7 +662,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -718,7 +706,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -759,11 +746,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -771,7 +756,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -812,11 +796,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": true,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -824,7 +806,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -865,11 +846,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -877,7 +856,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -918,11 +896,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": true,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": true,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -930,7 +906,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -971,11 +946,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": false,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": true,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -983,7 +956,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -1024,11 +996,9 @@
           },
           "external": {
             "track_001": {
-              "visible": true,
               "CLOSING": false,
               "CRITICAL_TTC": false,
               "IN_EGO_PATH": false,
-              "PREDICTED_PATH_CONFLICT": false,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
             }
@@ -1036,7 +1006,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -1077,11 +1046,9 @@
           },
           "external": {
             "track_001": {
-              "visible": false,
               "CLOSING": "UNKNOWN",
               "CRITICAL_TTC": "UNKNOWN",
               "IN_EGO_PATH": "UNKNOWN",
-              "PREDICTED_PATH_CONFLICT": "UNKNOWN",
               "CUT_IN_FROM_LEFT": "UNKNOWN",
               "CUT_IN_FROM_RIGHT": "UNKNOWN"
             }
@@ -1089,7 +1056,6 @@
           "signs": {
             "sign-1": {
               "class": "STOP",
-              "visible": false,
               "known": true,
               "relevant_to_ego_path": false
             }
@@ -1189,12 +1155,9 @@
       "closing_speed_threshold_mps": 1.0,
       "critical_ttc_s": 2.0,
       "path_half_width_m": 1.5,
+      "track_appeared_front_deg": 5.0,
       "max_position_std_m": 1.0,
       "max_velocity_std_mps": 1.0,
-      "conflict_horizon_s": 4.0,
-      "conflict_distance_m": 1.5,
-      "conflict_release_horizon_s": 5.0,
-      "conflict_release_distance_m": 2.5,
       "cut_in_max_heading_deg": 25.0,
       "cut_in_min_target_speed_mps": 2.0,
       "cut_in_lateral_speed_mps": 0.3,

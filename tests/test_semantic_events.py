@@ -172,7 +172,7 @@ class SignTests(unittest.TestCase):
     def test_sign_confirmed_at_its_last_detection_gives_a_zero_length_window(self):
         # Confirmed and last seen in the same frame: START and END share one timestamp.
         events = sign_events("A", [self._sign("STOP", 3.15, 3.15)], ORIGIN, recording_end=12.0, track_gap_s=0.6)
-        graph = _graph(events + [_event("MOVING_START", 0.0), _event("TRACK_APPEARED", 3.15, "track_001")])
+        graph = _graph(events + [_event("MOVING_START", 0.0), _event("TRACK_APPEARED_FRONT", 3.15, "track_001")])
         types = [node.event_type for node in graph.nodes if node.subject_id == "sign-3"]
         self.assertEqual(types, ["STOP_SIGN_DETECTED_START", "STOP_SIGN_DETECTED_END"])
         self.assertEqual([item["state"] for item in open_states(graph)], ["MOVING"])
@@ -216,20 +216,20 @@ class GraphTests(unittest.TestCase):
                                    ("CLOSING_END", 2.0, "track_001")])
 
     def test_states_of_a_lost_track_stay_open_and_say_where_observation_ended(self):
-        graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
+        graph = _graph([_event("TRACK_APPEARED_FRONT", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
                         _event("TRACK_LOST", 3.0, "track_001"), _event("MOVING_START", 0.0)])
         found = {(item["state"], item["observed_until"], item["observed_until_t_local"]) for item in open_states(graph)}
         self.assertEqual(found, {("CLOSING", "TRACK_LOST", 3.0), ("MOVING", "recording end", 9.0)})
 
     def test_a_lost_track_is_listed_after_its_other_events_at_the_same_time(self):
-        graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("TRACK_LOST", 2.0, "track_001"),
+        graph = _graph([_event("TRACK_APPEARED_FRONT", 1.0, "track_001"), _event("TRACK_LOST", 2.0, "track_001"),
                         _event("EGO_PATH_ENTRY", 2.0, "track_001"), _event("COLLISION", 2.0)])
         self.assertEqual([node.event_type for node in graph.nodes],
-                         ["TRACK_APPEARED", "COLLISION", "EGO_PATH_ENTRY", "TRACK_LOST"])
+                         ["TRACK_APPEARED_FRONT", "COLLISION", "EGO_PATH_ENTRY", "TRACK_LOST"])
 
     def test_same_track_links_the_track_appearance_to_its_events(self):
-        graph = _graph([_event("TRACK_APPEARED", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
-                        _event("TRACK_APPEARED", 1.5, "track_002"), _event("CRITICAL_TTC_START", 2.0, "track_001")])
+        graph = _graph([_event("TRACK_APPEARED_FRONT", 1.0, "track_001"), _event("CLOSING_START", 1.0, "track_001"),
+                        _event("TRACK_APPEARED_FRONT", 1.5, "track_002"), _event("CRITICAL_TTC_START", 2.0, "track_001")])
         same = {(edge.from_node, edge.to_node) for edge in graph.edges if edge.relation == "SAME_TRACK"}
         self.assertEqual(same, {("A:e01", "A:e02"), ("A:e01", "A:e04")})
 
@@ -248,7 +248,7 @@ class GraphTests(unittest.TestCase):
             self.assertFalse(any(old in text for text in texts), old)
         a_types = [node.event_type for node in next(l for l in result.locals if l.owner == "A").graph.nodes]
         for expected in ("MOVING_START", "BRAKE_START", "COLLISION", "MOVING_END", "STOP_START",
-                         "TRACK_APPEARED", "CLOSING_START", "CRITICAL_TTC_START"):
+                         "TRACK_APPEARED_FRONT", "CLOSING_START", "CRITICAL_TTC_START"):
             self.assertIn(expected, a_types)
         self.assertNotIn("BRAKE_END", a_types)  # still braking when the synthetic recording ends
         allowed = {"peak_impulse", "active_at_first_observation", "relevant_to_ego_path"}

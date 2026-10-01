@@ -15,29 +15,29 @@ digraph "local_A" {
   "A:e11" [label="STOP_END\nA\nt=6.80", fillcolor="#e5e7eb"];
   "A:e12" [label="MOVING_START\nA\nt=6.80", fillcolor="#e5e7eb"];
   "A:e13" [label="STRONG_THROTTLE_END\nA\nt=7.80", fillcolor="#fde68a"];
-  "A:e14" [label="TRACK_APPEARED\nA -> track_001\nt=8.85", fillcolor="#bfdbfe"];
-  "A:e15" [label="TRACK_APPEARED\nA -> track_002\nt=8.85", fillcolor="#bfdbfe"];
+  "A:e14" [label="TRACK_APPEARED_LEFT\nA -> track_001\nt=8.85", fillcolor="#bfdbfe"];
+  "A:e15" [label="TRACK_APPEARED_LEFT\nA -> track_002\nt=8.85", fillcolor="#bfdbfe"];
   "A:e16" [label="CLOSING_START\nA -> track_001\nt=8.85", fillcolor="#bfdbfe"];
   "A:e17" [label="CLOSING_START\nA -> track_002\nt=8.85", fillcolor="#bfdbfe"];
-  "A:e18" [label="TRACK_APPEARED\nA -> track_003\nt=8.95", fillcolor="#bfdbfe"];
+  "A:e18" [label="TRACK_APPEARED_LEFT\nA -> track_003\nt=8.95", fillcolor="#bfdbfe"];
   "A:e19" [label="CLOSING_START\nA -> track_003\nt=8.95", fillcolor="#bfdbfe"];
-  "A:e20" [label="TRACK_APPEARED\nA -> track_004\nt=9.00", fillcolor="#bfdbfe"];
+  "A:e20" [label="TRACK_APPEARED_RIGHT\nA -> track_004\nt=9.00", fillcolor="#bfdbfe"];
   "A:e21" [label="CLOSING_START\nA -> track_004\nt=9.00", fillcolor="#bfdbfe"];
-  "A:e22" [label="TRACK_APPEARED\nA -> track_005\nt=9.05", fillcolor="#bfdbfe"];
-  "A:e23" [label="TRACK_APPEARED\nA -> track_007\nt=9.05", fillcolor="#bfdbfe"];
+  "A:e22" [label="TRACK_APPEARED_LEFT\nA -> track_005\nt=9.05", fillcolor="#bfdbfe"];
+  "A:e23" [label="TRACK_APPEARED_LEFT\nA -> track_007\nt=9.05", fillcolor="#bfdbfe"];
   "A:e24" [label="CLOSING_START\nA -> track_005\nt=9.05", fillcolor="#bfdbfe"];
   "A:e25" [label="CLOSING_START\nA -> track_007\nt=9.05", fillcolor="#bfdbfe"];
-  "A:e26" [label="TRACK_APPEARED\nA -> track_006\nt=9.10", fillcolor="#bfdbfe"];
-  "A:e27" [label="TRACK_APPEARED\nA -> track_008\nt=9.10", fillcolor="#bfdbfe"];
+  "A:e26" [label="TRACK_APPEARED_LEFT\nA -> track_006\nt=9.10", fillcolor="#bfdbfe"];
+  "A:e27" [label="TRACK_APPEARED_LEFT\nA -> track_008\nt=9.10", fillcolor="#bfdbfe"];
   "A:e28" [label="CLOSING_START\nA -> track_006\nt=9.10", fillcolor="#bfdbfe"];
   "A:e29" [label="CLOSING_START\nA -> track_008\nt=9.10", fillcolor="#bfdbfe"];
-  "A:e30" [label="TRACK_APPEARED\nA -> track_009\nt=9.15", fillcolor="#bfdbfe"];
+  "A:e30" [label="TRACK_APPEARED_LEFT\nA -> track_009\nt=9.15", fillcolor="#bfdbfe"];
   "A:e31" [label="CLOSING_START\nA -> track_009\nt=9.15", fillcolor="#bfdbfe"];
-  "A:e32" [label="TRACK_APPEARED\nA -> track_010\nt=9.20", fillcolor="#bfdbfe"];
-  "A:e33" [label="TRACK_APPEARED\nA -> track_011\nt=9.20", fillcolor="#bfdbfe"];
+  "A:e32" [label="TRACK_APPEARED_LEFT\nA -> track_010\nt=9.20", fillcolor="#bfdbfe"];
+  "A:e33" [label="TRACK_APPEARED_LEFT\nA -> track_011\nt=9.20", fillcolor="#bfdbfe"];
   "A:e34" [label="CLOSING_START\nA -> track_010\nt=9.20", fillcolor="#bfdbfe"];
   "A:e35" [label="CLOSING_START\nA -> track_011\nt=9.20", fillcolor="#bfdbfe"];
-  "A:e36" [label="TRACK_APPEARED\nA -> track_012\nt=9.25", fillcolor="#bfdbfe"];
+  "A:e36" [label="TRACK_APPEARED_LEFT\nA -> track_012\nt=9.25", fillcolor="#bfdbfe"];
   "A:e37" [label="CLOSING_START\nA -> track_012\nt=9.25", fillcolor="#bfdbfe"];
   "A:e38" [label="CRITICAL_TTC_START\nA -> track_009\nt=9.45", fillcolor="#bfdbfe"];
   "A:e39" [label="CRITICAL_TTC_START\nA -> track_004\nt=10.05", fillcolor="#bfdbfe"];
@@ -49,9 +49,8 @@ digraph "local_A" {
   "A:e45" [label="TRACK_LOST\nA -> track_006\nt=13.35", fillcolor="#bfdbfe"];
   "A:e46" [label="TRACK_LOST\nA -> track_008\nt=14.50", fillcolor="#bfdbfe"];
   "A:e47" [label="TRACK_LOST\nA -> track_010\nt=14.65", fillcolor="#bfdbfe"];
-  "A:e48" [label="PREDICTED_PATH_CONFLICT_START\nA -> track_001\nt=15.55", fillcolor="#bfdbfe"];
-  "A:e49" [label="TRACK_LOST\nA -> track_005\nt=15.75", fillcolor="#bfdbfe"];
-  "A:e50" [label="TRACK_LOST\nA -> track_007\nt=16.30", fillcolor="#bfdbfe"];
+  "A:e48" [label="TRACK_LOST\nA -> track_005\nt=15.75", fillcolor="#bfdbfe"];
+  "A:e49" [label="TRACK_LOST\nA -> track_007\nt=16.30", fillcolor="#bfdbfe"];
   {rank=same; "A:e04"; "A:e05";}
   {rank=same; "A:e06"; "A:e07";}
   {rank=same; "A:e08"; "A:e09"; "A:e10";}
@@ -163,7 +162,6 @@ digraph "local_A" {
   "A:e46" -> "A:e47" [label="PRECEDES"];
   "A:e47" -> "A:e48" [label="PRECEDES"];
   "A:e48" -> "A:e49" [label="PRECEDES"];
-  "A:e49" -> "A:e50" [label="PRECEDES"];
   "A:e14" -> "A:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e15" -> "A:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e18" -> "A:e19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -186,7 +184,6 @@ digraph "local_A" {
   "A:e26" -> "A:e45" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e27" -> "A:e46" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e32" -> "A:e47" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e14" -> "A:e48" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e22" -> "A:e49" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e23" -> "A:e50" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e22" -> "A:e48" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e23" -> "A:e49" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

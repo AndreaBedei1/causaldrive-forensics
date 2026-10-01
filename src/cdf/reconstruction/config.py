@@ -61,18 +61,14 @@ class SemanticsConfig:
     critical_ttc_s: float = 2.0
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT.
     path_half_width_m: float = 1.5
+    # TRACK_APPEARED_FRONT when the track's first azimuth from the radar lies
+    # within this angle of the recorder's heading (about its own lane at 20 m);
+    # otherwise TRACK_APPEARED_LEFT (negative azimuth) or _RIGHT.
+    track_appeared_front_deg: float = 5.0
     # Track estimates more uncertain than this (Kalman standard deviations)
-    # support no CUT_IN or PREDICTED_PATH_CONFLICT claim: those stay UNKNOWN.
+    # support no CUT_IN claim: it stays UNKNOWN.
     max_position_std_m: float = 1.0
     max_velocity_std_mps: float = 1.0
-    # PREDICTED_PATH_CONFLICT: the relative motion's closest point of approach
-    # lies ahead in time, within this horizon and this miss distance (the
-    # corridor half width, measured from the radar to the target's surface)...
-    conflict_horizon_s: float = 4.0
-    conflict_distance_m: float = 1.5
-    # ...and the conflict ends beyond these, or once the CPA lies in the past.
-    conflict_release_horizon_s: float = 5.0
-    conflict_release_distance_m: float = 2.5
     # CUT_IN_FROM_LEFT/RIGHT: a target ahead, moving within this angle of the
     # recorder's heading and at least this fast, approaches the corridor
     # laterally at this speed or more, for this long, starting at least this

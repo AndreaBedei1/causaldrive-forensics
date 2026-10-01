@@ -39,7 +39,7 @@ def _make_run(root, blueprint_a="vehicle.tesla.model3", b_offset=0.5):
            [_record(100.0 + b_offset + 0.05 * k, 30.0, 0.0, 180.0, 0.0) for k in range(141)], True)
     _write(run / "vehicles" / "A" / "metadata.json", {"blueprint": blueprint_a} if blueprint_a else {})
     graph = {"owner": "A", "recorder": {"clock": {"origin_source_timestamp": 100.0}},
-             "nodes": [_node("A:e01", 0.0, "MOVING_START"), _node("A:e02", 0.0, "TRACK_APPEARED", "track_001"),
+             "nodes": [_node("A:e01", 0.0, "MOVING_START"), _node("A:e02", 0.0, "TRACK_APPEARED_FRONT", "track_001"),
                        _node("A:e03", 0.45, "CLOSING_START", "track_001"),
                        _node("A:e04", 1.6, "CLOSING_END", "track_001"), _node("A:e05", 6.5, "COLLISION")]}
     _write(run / "reconstruction" / "A" / "local_graph.json", graph)
@@ -143,21 +143,22 @@ class EventTimelineTests(unittest.TestCase):
         self.assertIsNone(run.perceived_lines("A", 1.0))  # no perceived state written: pairs are used
 
     def test_perceived_state_is_read_from_the_trace_frames(self):
-        def frame(t, closing, visible=True):
-            track = {"visible": visible, "CLOSING": closing if visible else "UNKNOWN"}
+        def frame(t, closing, path=False):
+            track = {"CLOSING": closing, "IN_EGO_PATH": path}
             return {"t_local": t, "facts": [], "events": [],
                     "perceived_state": {"ego": {"MOVING": True}, "external": {"track_001": track}, "signs": {}}}
         with tempfile.TemporaryDirectory() as tmp:
             run_dir = _make_run(Path(tmp))
             _write(run_dir / "reconstruction" / "A" / "local_trace.jsonl",
-                   [frame(0.0, False), frame(0.5, True), frame(1.0, True, visible=False)], True)
+                   [frame(0.0, False), frame(0.5, True), frame(1.0, "UNKNOWN", "UNKNOWN")], True)
             run = ReplayRun.load(run_dir)
-        self.assertEqual(run.perceived_lines("A", 0.45), ["ego: MOVING", "track_001 (B): VISIBLE"])
-        self.assertEqual(run.perceived_lines("A", 0.5), ["ego: MOVING", "track_001 (B): VISIBLE, CLOSING"])
-        self.assertEqual(run.perceived_lines("A", 2.0), ["ego: MOVING", "lost (states UNKNOWN): track_001 (B)"])
+        self.assertEqual(run.perceived_lines("A", 0.45), ["ego: MOVING", "track_001 (B): no active state"])
+        self.assertEqual(run.perceived_lines("A", 0.5), ["ego: MOVING", "track_001 (B): CLOSING"])
+        # After TRACK_LOST every state of the track is UNKNOWN.
+        self.assertEqual(run.perceived_lines("A", 2.0), ["ego: MOVING", "track lost, states UNKNOWN: track_001 (B)"])
 
     def test_zero_length_open_and_unentered_states(self):
-        events = [ReplayEvent(1.0, "A", "TRACK_APPEARED", "t1", "e1"),
+        events = [ReplayEvent(1.0, "A", "TRACK_APPEARED_FRONT", "t1", "e1"),
                   ReplayEvent(2.0, "A", "STOP_SIGN_DETECTED_START", "sign-0", "e2"),
                   ReplayEvent(2.0, "A", "STOP_SIGN_DETECTED_END", "sign-0", "e3"),
                   ReplayEvent(3.0, "A", "EGO_PATH_EXIT", "t1", "e4"),

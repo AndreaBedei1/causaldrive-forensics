@@ -8,13 +8,15 @@ interpolated at the playback time and applied directly to a physics-less CARLA
 actor.  No scenario controller runs and CARLA simulates no vehicle physics, so
 every playback speed shows exactly the recorded trajectories.  Reconstructed
 events (local graphs, global collisions, track associations) and each
-recorder's perceived state (``local_trace.jsonl``: visible / lost tracks,
-CLOSING, CRITICAL_TTC, PATH_CONFLICT, CUT_IN, ...) are only read and
-displayed, never derived here; nothing is written anywhere.
+recorder's perceived state (``local_trace.jsonl``: its tracks with CLOSING,
+CRITICAL_TTC, CUT_IN, ..., lost tracks, known signs) are only read and
+displayed, never derived here; nothing is written anywhere.  What each
+recorder perceives is drawn in the scene: a dot in the recorder's colour at
+every tracked target's estimated position, labelled with the local track id.
 
 Controls: SPACE play/pause, R restart, LEFT/RIGHT seek 0.5 s (with SHIFT
 0.05 s), N/P next/previous reconstructed event, 1-4 speed 0.25/0.5/1/2x,
-C camera mode, TAB next vehicle, T radar tracks, H help, ESC exit.  In the free
+C camera mode, TAB next vehicle, T perceived tracks, H help, ESC exit.  In the free
 camera: W/A/S/D/Q/E move (SHIFT faster); drag with the mouse to look or orbit,
 wheel to zoom.
 """
@@ -49,7 +51,7 @@ EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
 COLLISION_WINDOW_S = 1.5
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
 HELP = ("SPACE play/pause   R restart   ←/→ ±0.5 s (SHIFT ±0.05 s)   N/P next/prev event   "
-        "1-4 speed   C camera   TAB vehicle   T tracks   H help   ESC exit")
+        "1-4 speed   C camera   TAB vehicle   T perceived tracks   H help   ESC exit")
 FREE_HELP = "free camera: W/A/S/D/Q/E move (SHIFT faster), drag to look, wheel to move"
 
 
@@ -60,9 +62,10 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--start", type=float, default=0.0, help="start at this replay time [s]")
     parser.add_argument("--paused", action="store_true", help="start paused")
     parser.add_argument("--camera", choices=CAMERA_MODES, default="overview")
-    parser.add_argument("--follow", default=None, help="vehicle selected for the follow camera and tracks")
-    parser.add_argument("--show-tracks", action="store_true",
-                        help="show the selected recorder's reconstructed radar tracks (toggle with T)")
+    parser.add_argument("--follow", default=None, help="vehicle selected for the follow camera")
+    parser.add_argument("--hide-tracks", action="store_true",
+                        help="start with the perceived-track markers hidden (toggle with T)")
+    parser.add_argument("--show-tracks", action="store_true", help=argparse.SUPPRESS)  # markers are on by default
     parser.add_argument("--res", default="1280x720", help="window size WxH")
     parser.add_argument("--fov", type=float, default=90.0)
     parser.add_argument("--fps", type=float, default=30.0, help="render rate (CARLA ticks per wall second)")
@@ -104,7 +107,7 @@ class ReplayApp:
         self.zoom = 1.0
         self.follow_orbit, self.follow_distance = 0.0, 9.0
         self.free: Optional[FreeCamera] = None
-        self.show_tracks = bool(args.show_tracks)
+        self.show_tracks = not args.hide_tracks
         self.show_help = True
         self.running = True
         self.dragging = False
@@ -424,8 +427,8 @@ class ReplayApp:
         perceived = self.run.perceived_lines(pid, t)
         if perceived is not None:
             for text in perceived:
-                lost = text.startswith("lost")
-                alert = any(name in text for name in ("CUT_IN", "PATH_CONFLICT", "CRITICAL_TTC"))
+                lost = text.startswith("track lost")
+                alert = any(name in text for name in ("CUT_IN", "CRITICAL_TTC"))
                 rgb = (150, 150, 150) if lost else (255, 150, 90) if alert else (255, 255, 255)
                 lines.append((text, rgb, self.font_small))
         else:
@@ -487,34 +490,32 @@ class ReplayApp:
         return near_z
 
     def _draw_tracks(self, poses: Dict[str, Pose], t: float) -> None:
+        """What each recorder perceives: a dot in the recorder's colour at every track it is
+        tracking at ``t`` (estimated position, as reconstructed), labelled with the local id."""
         pg = self.pygame
-        recorder = self.selected
-        near_z = poses[recorder].z
-        color = self.colors[recorder]
-        for track in self.run.tracks.get(recorder, []):
-            position = track.position_at(t)
-            if position is None:
+        for index, recorder in enumerate(self.ids):
+            if recorder not in poses:
                 continue
-            z = self._ground_z(position[0], position[1], near_z) + 0.8
-            uv = self._project((position[0], position[1], z))
-            if uv is None:
-                continue
-            u, v = uv
-            measured = track.measurement_at(t)
-            if measured is not None:
-                muv = self._project((measured[0], measured[1], z))
-                if muv is not None:
-                    pg.draw.circle(self.screen, (255, 255, 255), muv, 3)
-            pg.draw.polygon(self.screen, color, [(u, v - 9), (u + 9, v), (u, v + 9), (u - 9, v)])
-            pg.draw.polygon(self.screen, (255, 255, 255), [(u, v - 9), (u + 9, v), (u, v + 9), (u - 9, v)], width=2)
-            rng, closing = track.facts_at(t)
-            label = "{0}:{1}".format(recorder, self.run.subject_name(recorder, track.track_id))
-            if rng is not None:
-                label += "  r {0:.1f} m  closing {1:+.2f} m/s".format(rng, closing or 0.0)
-            text = self.font_small.render(label, True, (255, 255, 255))
-            left = u - 16 - text.get_width()  # left of the marker: vehicle panels sit to the right
-            self._panel((left - 4, v - 9, text.get_width() + 8, text.get_height() + 2), 150)
-            self.screen.blit(text, (left, v - 8))
+            color = self.colors[recorder]
+            for track in self.run.tracks.get(recorder, []):
+                position = track.position_at(t)  # None once the track is lost
+                if position is None:
+                    continue
+                z = self._ground_z(position[0], position[1], poses[recorder].z) + 0.8
+                uv = self._project((position[0], position[1], z))
+                if uv is None:
+                    continue
+                u, v = uv
+                pg.draw.circle(self.screen, color, (u, v), 7)
+                pg.draw.circle(self.screen, (255, 255, 255), (u, v), 7, width=2)
+                text = self.font_small.render(track.track_id, True, (255, 255, 255))
+                # Left of the dot (vehicle panels sit to the right); recorders stacked so labels of
+                # several recorders tracking the same target do not cover each other.
+                left = u - 14 - text.get_width()
+                top = int(round(v - 8 + 16 * (index - (len(self.ids) - 1) / 2.0)))
+                self._panel((left - 7, top - 1, text.get_width() + 11, text.get_height() + 2), 160)
+                pg.draw.rect(self.screen, color, (left - 7, top - 1, 4, text.get_height() + 2))
+                self.screen.blit(text, (left, top))
 
     def _draw_collision_banner(self, t: float) -> None:
         marks = self.run.collisions_near(t, COLLISION_WINDOW_S)
@@ -533,7 +534,8 @@ class ReplayApp:
                  ("Time  {0:6.2f} / {1:.2f} s".format(t, self.run.duration), self.font, (255, 255, 255)),
                  ("Speed {0:.2f}x   {1}".format(self.clock.speed, state), self.font,
                   (120, 230, 120) if state == "PLAYING" else (255, 170, 60)),
-                 ("Camera {0}   selected {1}{2}".format(camera, self.selected, "   tracks on" if self.show_tracks else ""),
+                 ("Camera {0}   selected {1}{2}".format(camera, self.selected,
+                                                      "   perceived tracks shown" if self.show_tracks else ""),
                   self.font_small, (200, 200, 200))]
         passed = [e for e in self.events if e.time <= t + 1e-6]
         upcoming = [e for e in self.events if e.time > t + 1e-6]

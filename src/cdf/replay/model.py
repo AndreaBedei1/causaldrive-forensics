@@ -224,7 +224,7 @@ def state_intervals(events: Sequence[ReplayEvent], observed_from: float = 0.0) -
     appeared: Dict[Optional[str], float] = {}
     out: List[StateInterval] = []
     for event in events:
-        if event.event_type == "TRACK_APPEARED":
+        if event.event_type.startswith("TRACK_APPEARED"):
             appeared.setdefault(event.subject, event.time)
         transition = transition_of(event.event_type)
         if transition is None:

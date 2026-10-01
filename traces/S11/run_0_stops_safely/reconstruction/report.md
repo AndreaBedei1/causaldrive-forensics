@@ -40,7 +40,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 ### What happened, in plain language
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 2.60 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 2.60 s) A's radar started tracking unidentified object A:track_001, which appeared on its right.
 - (unaligned, A local time 2.60 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 4.65 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 5.25 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
@@ -54,7 +54,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, B local time 2.55 s) B started braking hard.
 - (unaligned, B local time 3.25 s) B stopped moving.
 - (unaligned, B local time 3.25 s) B came to a stop.
-- (unaligned, B local time 3.50 s) B's radar started tracking unidentified object B:track_001.
+- (unaligned, B local time 3.50 s) B's radar started tracking unidentified object B:track_001, which appeared on its left.
 - (unaligned, B local time 3.50 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
 - (unaligned, B local time 4.40 s) B's time-to-contact with unidentified object B:track_001 became critical.
 - (unaligned, B local time 5.75 s) B's time-to-contact with unidentified object B:track_001 stopped being critical.
@@ -143,12 +143,9 @@ B:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,

@@ -74,7 +74,7 @@ class VehicleLogger:
                         "pitch_deg": float(radar.get("mount_pitch_deg", 0.0)),
                     },
                     "sensor_tick_s": float(radar.get("sensor_tick_s", 0.05)),
-                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 120.0)),
+                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 200.0)),
                     "vertical_fov_deg": float(radar.get("vertical_fov_deg", 10.0)),
                     "range_m": float(radar.get("range_m", 90.0)),
                     "radial_velocity_status": "measured",

@@ -13,7 +13,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | Id | Local time | Type | Actor | Subject | Source | Details |
 |----|-----------:|------|-------|---------|--------|---------|
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
-| A:e02 | 2.05 | TRACK_APPEARED | A | track_001 | radar |  |
+| A:e02 | 2.05 | TRACK_APPEARED_RIGHT | A | track_001 | radar |  |
 | A:e03 | 2.05 | CLOSING_START | A | track_001 | radar | active_at_first_observation=True |
 | A:e04 | 2.40 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e05 | 4.10 | TRACK_LOST | A | track_001 | radar |  |
@@ -23,7 +23,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e09 | 4.90 | MOVING_END | A | - | ego |  |
 | A:e10 | 4.90 | STOP_START | A | - | ego |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -52,12 +52,12 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
-| 2.05 | A:e02 TRACK_APPEARED track_001<br>A:e03 CLOSING_START track_001 | ego: MOVING | 2.00 |
-| 2.40 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING | 2.30 |
-| 4.10 | A:e05 TRACK_LOST track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC | 4.00 |
-| 4.25 | A:e06 COLLISION | ego: MOVING<br>lost (states UNKNOWN): track_001 | 4.20 |
-| 4.30 | A:e07 BRAKE_START<br>A:e08 HARD_BRAKE_START | ego: MOVING<br>lost (states UNKNOWN): track_001 | 4.20 |
-| 4.90 | A:e09 MOVING_END<br>A:e10 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>lost (states UNKNOWN): track_001 | 4.80 |
+| 2.05 | A:e02 TRACK_APPEARED_RIGHT track_001<br>A:e03 CLOSING_START track_001 | ego: MOVING | 2.00 |
+| 2.40 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: CLOSING | 2.30 |
+| 4.10 | A:e05 TRACK_LOST track_001 | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC | 4.00 |
+| 4.25 | A:e06 COLLISION | ego: MOVING<br>track lost, states UNKNOWN: track_001 | 4.20 |
+| 4.30 | A:e07 BRAKE_START<br>A:e08 HARD_BRAKE_START | ego: MOVING<br>track lost, states UNKNOWN: track_001 | 4.20 |
+| 4.90 | A:e09 MOVING_END<br>A:e10 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>track lost, states UNKNOWN: track_001 | 4.80 |
 
 ## States still active when observation ended
 
@@ -88,7 +88,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 ## Plain-language reading
 
 - t = 0.00 s: A started moving (already the case when first observed).
-- t = 2.05 s: A's radar started tracking track_001.
+- t = 2.05 s: A's radar started tracking track_001, which appeared on its right.
 - t = 2.05 s: A observed track_001 start closing in (already the case when first observed).
 - t = 2.40 s: A's time-to-contact with track_001 became critical.
 - t = 4.10 s: A's radar lost track_001 (its states are UNKNOWN from then on, not ended).

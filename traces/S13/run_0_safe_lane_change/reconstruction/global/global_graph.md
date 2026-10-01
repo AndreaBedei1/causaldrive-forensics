@@ -32,7 +32,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | Id | Global time | Type | Actor | Subject / participants | Observed by (local node @ local time) | Details |
 |----|------------:|------|-------|------------------------|----------------------------------------|---------|
 | g01 | - | MOVING_START | A | - | A:e01 @ 0.00 | active_at_first_observation=True |
-| g02 | - | TRACK_APPEARED | A | A:track_001 | A:e02 @ 0.00 |  |
+| g02 | - | TRACK_APPEARED_LEFT | A | A:track_001 | A:e02 @ 0.00 |  |
 | g03 | - | CLOSING_START | A | A:track_001 | A:e03 @ 0.00 | active_at_first_observation=True |
 | g04 | - | CLOSING_END | A | A:track_001 | A:e04 @ 1.40 |  |
 | g05 | - | CLOSING_START | A | A:track_001 | A:e05 @ 2.55 |  |
@@ -68,20 +68,20 @@ Each recorder's own belief just before its events, in its own local names (track
 
 | t_global | Recorder | Events (local node) | Perceived state just before |
 |---------:|----------|---------------------|-----------------------------|
-| - | A | g01 MOVING_START(A) (A:e01)<br>g02 TRACK_APPEARED(A,A:track_001) (A:e02)<br>g03 CLOSING_START(A,A:track_001) (A:e03) | ego: not yet observed |
-| - | A | g04 CLOSING_END(A,A:track_001) (A:e04) | ego: MOVING<br>track_001: VISIBLE, CLOSING |
-| - | A | g05 CLOSING_START(A,A:track_001) (A:e05) | ego: MOVING<br>track_001: VISIBLE |
-| - | A | g06 BRAKE_START(A) (A:e06) | ego: MOVING<br>track_001: VISIBLE, CLOSING |
-| - | A | g07 CUT_IN_FROM_LEFT_START(A,A:track_001) (A:e07) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING |
-| - | A | g08 EGO_PATH_ENTRY(A,A:track_001) (A:e08) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING, CUT_IN_FROM_LEFT |
-| - | A | g09 CUT_IN_FROM_LEFT_END(A,A:track_001) (A:e09) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH, CUT_IN_FROM_LEFT |
+| - | A | g01 MOVING_START(A) (A:e01)<br>g02 TRACK_APPEARED_LEFT(A,A:track_001) (A:e02)<br>g03 CLOSING_START(A,A:track_001) (A:e03) | ego: not yet observed |
+| - | A | g04 CLOSING_END(A,A:track_001) (A:e04) | ego: MOVING<br>track_001: CLOSING |
+| - | A | g05 CLOSING_START(A,A:track_001) (A:e05) | ego: MOVING<br>track_001: no active state |
+| - | A | g06 BRAKE_START(A) (A:e06) | ego: MOVING<br>track_001: CLOSING |
+| - | A | g07 CUT_IN_FROM_LEFT_START(A,A:track_001) (A:e07) | ego: MOVING, BRAKE<br>track_001: CLOSING |
+| - | A | g08 EGO_PATH_ENTRY(A,A:track_001) (A:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CUT_IN_FROM_LEFT |
+| - | A | g09 CUT_IN_FROM_LEFT_END(A,A:track_001) (A:e09) | ego: MOVING, BRAKE<br>track_001: CLOSING, IN_EGO_PATH, CUT_IN_FROM_LEFT |
 | - | B | g10 MOVING_START(B) (B:e01)<br>g11 STRONG_THROTTLE_START(B) (B:e02) | ego: not yet observed |
 | - | B | g12 STRONG_THROTTLE_END(B) (B:e03) | ego: MOVING, STRONG_THROTTLE |
 
 ## Plain-language reading
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
 - (unaligned, A local time 0.00 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 1.40 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 2.55 s) A observed unidentified object A:track_001 start closing in.

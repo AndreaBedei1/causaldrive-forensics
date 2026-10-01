@@ -33,9 +33,9 @@ def _events(track, recording_end=10.0):
 class RadarTransitionTests(unittest.TestCase):
     def test_track_appeared_and_lost(self):
         events = _events(_track(lambda t: (30.0, 8.0, 0.0), start=1.0, end=3.0), recording_end=10.0)
-        self.assertEqual(events, [("TRACK_APPEARED", 1.0), ("TRACK_LOST", 3.0)])
+        self.assertEqual(events, [("TRACK_APPEARED_RIGHT", 1.0), ("TRACK_LOST", 3.0)])
         still_tracked = _events(_track(lambda t: (30.0, 8.0, 0.0), start=1.0, end=10.0), recording_end=10.0)
-        self.assertEqual(still_tracked, [("TRACK_APPEARED", 1.0)])
+        self.assertEqual(still_tracked, [("TRACK_APPEARED_RIGHT", 1.0)])
 
     def test_closing_start_and_end(self):
         events = _events(_track(lambda t: (30.0, 8.0, 3.0 if 2.0 <= t < 3.0 else 0.0)))

@@ -5,7 +5,7 @@ digraph "local_B" {
   "B:e01" [label="MOVING_START\nB\nt=0.00", fillcolor="#e5e7eb"];
   "B:e02" [label="STRONG_THROTTLE_START\nB\nt=1.25", fillcolor="#fde68a"];
   "B:e03" [label="STRONG_THROTTLE_END\nB\nt=1.85", fillcolor="#fde68a"];
-  "B:e04" [label="TRACK_APPEARED\nB -> track_001\nt=1.95", fillcolor="#bfdbfe"];
+  "B:e04" [label="TRACK_APPEARED_LEFT\nB -> track_001\nt=1.95", fillcolor="#bfdbfe"];
   "B:e05" [label="CLOSING_START\nB -> track_001\nt=1.95", fillcolor="#bfdbfe"];
   "B:e06" [label="BRAKE_START\nB\nt=3.15", fillcolor="#fde68a"];
   "B:e07" [label="HARD_BRAKE_START\nB\nt=3.15", fillcolor="#fde68a"];

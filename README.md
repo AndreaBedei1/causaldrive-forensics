@@ -212,11 +212,10 @@ holds only semantic EVENTS, which are state transitions without telemetry:
 | STRONG_THROTTLE_START / _END | throttle at or above 0.8 |
 | MOVING_START / _END, STOP_START / _END | stop below 0.3 m/s, moving again above 1 m/s |
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
-| TRACK_APPEARED / TRACK_LOST | lifetime of an anonymous radar track |
+| TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radar field: its azimuth at the first detection within 5 deg of the recorder's heading (FRONT), else its sign (negative = LEFT) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
 | CRITICAL_TTC_START / _END | range / closing speed at most 2 s while closing; ends at the latest with CLOSING |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
-| PREDICTED_PATH_CONFLICT_START / _END | the relative motion's closest approach lies ahead within 4 s and 1.5 m; ends once it is past, beyond 5 s or 2.5 m |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
 | COLLISION | one per contact (callbacks within 0.5 s); keeps its peak impulse for alignment |
@@ -227,12 +226,16 @@ not invented; a state still active when observation ends has no END. A sign
 END means this recorder stopped detecting the sign, not that its obligation
 ended; `checks.sign_windows` lists the STOP_START events inside each window.
 
-PREDICTED_PATH_CONFLICT and CUT_IN are kinematic observations, not normative
-judgements, and neither predicts a collision with certainty. The conflict uses
-the target's position r and the relative velocity v in the recorder's frame:
-`t_CPA = -(r.v)/|v|^2`, `d_CPA = |r + v t_CPA|`; it needs a future t_CPA within
-the horizon and a small miss distance (with hysteresis and a 0.2 s release
-debounce). A CUT_IN needs a car ahead moving roughly in the recorder's
+The appearance side is local evidence only: the track's own azimuth from the
+radar at its first detection (`track_appeared_front_deg`), never ground truth.
+A lead car in the recorder's lane appears FRONT, crossing traffic emerging on
+the right appears RIGHT; a target present from the start appears where it was
+first seen.
+
+CUT_IN is a kinematic observation, not a normative judgement. The closest point
+of approach of the relative motion stays a quantitative fact (`t_CPA =
+-(r.v)/|v|^2`, `d_CPA = |r + v t_CPA|` in TRACK_STATE); no event is derived
+from it. A CUT_IN needs a car ahead moving roughly in the recorder's
 direction (so crossing traffic is never a cut-in) that approaches the corridor
 laterally at 0.3 m/s or more for 0.5 s, starting at least 0.5 m outside it,
 having closed 0.5 m, and due to reach it within 3 s. The side is the
@@ -241,7 +244,7 @@ approach stays below 0.2 m/s for 0.3 s; a COLLISION does not end it, and a lost
 track leaves it UNKNOWN. Thresholds are global (`configs/reconstruction.yaml`),
 never per scenario. Limitation: the corridor is straight ahead, so on a curved
 road an adjacent-lane car could look like a cut-in. A track estimate with
-position std above 1 m or velocity std above 1 m/s supports neither state.
+position std above 1 m or velocity std above 1 m/s supports no cut-in claim.
 
 Every event node carries `perceived_state_before`: the recorder's own semantic
 state just BEFORE the event, built only from its own evidence
@@ -252,17 +255,18 @@ transitions):
 
 ```text
 ego:      MOVING, STOP, BRAKE, HARD_BRAKE, STRONG_THROTTLE, SPEED_LIMIT_EXCEEDED
-external: track_NNN -> visible, CLOSING, CRITICAL_TTC, IN_EGO_PATH,
-                       PREDICTED_PATH_CONFLICT, CUT_IN_FROM_LEFT, CUT_IN_FROM_RIGHT
-signs:    sign-N    -> class, visible, known, relevant_to_ego_path
+external: track_NNN -> CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT, CUT_IN_FROM_RIGHT
+signs:    sign-N    -> class, known, relevant_to_ego_path
 ```
 
 Values are true, false or "UNKNOWN". UNKNOWN means the recorder cannot tell:
 before its first sample, without a supplied speed limit, while a track
-estimate is too uncertain, and for every state of a track after TRACK_LOST
-(then `visible` is false). A loss never invents an END. A sign that leaves view
-stays `known` (visible false): nothing admissible tells when its controlled
-point has been passed, so knowledge is not cleared. Names stay local
+estimate is too uncertain, and for every state of a track after TRACK_LOST.
+There is no separate visibility state: a track is in the state from its
+TRACK_APPEARED_* on, TRACK_LOST turns all its states UNKNOWN (a loss never
+invents an END), and the sign detection windows say when a sign is in view. A
+sign stays `known` from its first detection: nothing admissible tells when its
+controlled point has been passed, so knowledge is not cleared. Names stay local
 (`track_001`, `sign-0`): global identities never enter a local state. The
 global graph keeps, per node, the belief of each observing recorder, unrenamed.
 The Markdown files render it compactly, once per timestamp.
@@ -280,7 +284,7 @@ them.
 
 Graph edges are PRECEDES, which links an event to every event at the next
 later time (events with equal times are simultaneous, their order unresolved),
-and SAME_TRACK, which links a track's TRACK_APPEARED to every other event whose
+and SAME_TRACK, which links a track's TRACK_APPEARED_* to every other event whose
 subject is the same local track. SAME_TRACK is exactly "same subject_id" made
 explicit for graph queries: it groups events and implies no order.
 Adding a state means computing its active intervals in `local.py`.
@@ -308,7 +312,7 @@ python scripts/audit_radar_visibility.py traces/S15/run_0_single_impact --json a
 
 ```
 python scripts/replay_run.py traces/S01/run_0_crash
-python scripts/replay_run.py traces/S01/run_0_crash --speed 0.25 --start 0.45 --paused --show-tracks
+python scripts/replay_run.py traces/S01/run_0_crash --speed 0.25 --start 0.45 --paused --follow A
 ```
 
 This is an offline visualization of recorded trajectories. It does not rerun
@@ -334,8 +338,8 @@ comes from the scenario configuration of the run's `scenario_id`/`variant`;
 | N / P | jump to the next / previous reconstructed event (pauses) |
 | 1 / 2 / 3 / 4 | 0.25x / 0.5x / 1.0x / 2.0x |
 | C | camera: overview, follow selected vehicle, free |
-| TAB | next vehicle (follow camera, radar tracks) |
-| T | show the selected recorder's anonymous radar tracks |
+| TAB | next vehicle (follow camera) |
+| T | hide / show the perceived-track markers of every recorder (`--hide-tracks` starts hidden) |
 | H | hide / show the key help |
 | ESC | exit |
 
@@ -343,12 +347,15 @@ Mouse: drag to orbit (overview/follow) or look (free camera), wheel to zoom;
 click the timeline to seek. Free camera: W/A/S/D/Q/E move, SHIFT faster.
 Each vehicle has a letter badge above its roof and a panel on the right with
 its recorded speed, its perceived state as the reconstruction wrote it in
-`local_trace.jsonl` (visible tracks with CLOSING, CRITICAL_TTC, PATH_CONFLICT,
+`local_trace.jsonl` (its tracks with CLOSING, CRITICAL_TTC, IN_EGO_PATH,
 CUT_IN..., lost tracks greyed with their states UNKNOWN, known signs; older
 outputs without it show the open START..END pairs) and the events of the last
-second. A reconstructed COLLISION shows its participants
-from the global graph. Track markers show the reconstruction's own range and
-closing speed; they are drawn at road height because tracks are planar.
+second, such as TRACK_APPEARED_LEFT. A reconstructed COLLISION shows its
+participants from the global graph. What each recorder perceives is drawn in
+the scene: for every track it is tracking, a dot in the recorder's colour at
+the track's estimated position, labelled with the local id (`track_001`); a
+lost track's dot disappears. Dots are drawn at road height because tracks are
+planar.
 
 The viewer starts CARLA if none is running (`--no-autostart` to only connect)
 and stops a server it started on exit (`--keep-server` to leave it running).

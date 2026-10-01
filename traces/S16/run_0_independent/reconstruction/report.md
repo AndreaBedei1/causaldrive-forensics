@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 17.95 s | 181 | 29 | 51 | 2 | A:e05 @ 5.15 s, A:e23 @ 14.10 s |
-| B | 17.95 s | 181 | 24 | 46 | 2 | B:e15 @ 5.15 s |
+| A | 17.95 s | 181 | 28 | 49 | 2 | A:e05 @ 5.15 s, A:e22 @ 14.10 s |
+| B | 17.95 s | 181 | 20 | 35 | 2 | B:e12 @ 5.15 s |
 | C | 17.95 s | 181 | 10 | 14 | 0 | C:e06 @ 14.10 s |
 
 ## Graph alignment
@@ -20,7 +20,7 @@ Reference event: `collision_002`; `t_global = t_local + offset_to_global`.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e23 | 14.10 | -14.10 | reported the reference collision collision_002 |
+| A | ALIGNED | A:e22 | 14.10 | -14.10 | reported the reference collision collision_002 |
 | B | UNALIGNED | - | - | - | shares only a non-reference collision (multi-hop alignment not implemented) |
 | C | ALIGNED | C:e06 | 14.10 | -14.10 | reported the reference collision collision_002 |
 
@@ -41,7 +41,7 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 
 ## Global graph
 
-62 nodes, 79 edges; 1 merged node(s): g28 COLLISION(A,C) from A:e23 + C:e06.
+57 nodes, 73 edges; 1 merged node(s): g27 COLLISION(A,C) from A:e22 + C:e06.
 
 ### Event sequence (global time)
 
@@ -53,12 +53,11 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 - `-8.95` COLLISION(A)
 - `-8.30` MOVING_END(A); STOP_START(A)
 - `-3.15` BRAKE_END(A); STRONG_THROTTLE_START(A)
-- `-2.95` TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,C)
+- `-2.95` TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,C)
 - `-2.70` STOP_END(A); MOVING_START(A)
 - `-2.30` CLOSING_START(A,A:track_002); CLOSING_START(A,C)
 - `-2.15` STOP_END(C); MOVING_START(C)
 - `-2.10` EGO_PATH_ENTRY(A,A:track_002)
-- `-1.95` PREDICTED_PATH_CONFLICT_START(A,C)
 - `-1.90` EGO_PATH_ENTRY(A,C)
 - `-1.55` CRITICAL_TTC_START(A,C)
 - `-1.40` STRONG_THROTTLE_END(A)
@@ -83,8 +82,8 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 - 8.30 s before the matched collision, A came to a stop.
 - 3.15 s before the matched collision, A released the brake.
 - 3.15 s before the matched collision, A started applying strong throttle.
-- 2.95 s before the matched collision, A's radar started tracking unidentified object A:track_002.
-- 2.95 s before the matched collision, A's radar started tracking C.
+- 2.95 s before the matched collision, A's radar started tracking unidentified object A:track_002, which appeared on its left.
+- 2.95 s before the matched collision, A's radar started tracking C, which appeared on its left.
 - 2.70 s before the matched collision, A left its stop.
 - 2.70 s before the matched collision, A started moving.
 - 2.30 s before the matched collision, A observed unidentified object A:track_002 start closing in.
@@ -92,7 +91,6 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 - 2.15 s before the matched collision, C left its stop.
 - 2.15 s before the matched collision, C started moving.
 - 2.10 s before the matched collision, A observed unidentified object A:track_002 enter its forward path corridor.
-- 1.95 s before the matched collision, A predicted a path conflict with C (close approach ahead if both keep their motion).
 - 1.90 s before the matched collision, A observed C enter its forward path corridor.
 - 1.55 s before the matched collision, A's time-to-contact with C became critical.
 - 1.40 s before the matched collision, A stopped applying strong throttle.
@@ -110,27 +108,23 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 - 0.55 s after the matched collision, A came to a stop.
 - 0.55 s after the matched collision, C came to a stop.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
-- (unaligned, B local time 0.00 s) B's radar started tracking unidentified object B:track_001.
-- (unaligned, B local time 0.65 s) B predicted a path conflict with unidentified object B:track_001 (close approach ahead if both keep their motion).
+- (unaligned, B local time 0.00 s) B's radar started tracking unidentified object B:track_001, which appeared in front of it.
 - (unaligned, B local time 0.70 s) B observed unidentified object B:track_001 start closing in.
 - (unaligned, B local time 0.75 s) B's time-to-contact with unidentified object B:track_001 became critical.
 - (unaligned, B local time 1.35 s) B started applying strong throttle.
-- (unaligned, B local time 1.40 s) B stopped predicting a path conflict with unidentified object B:track_001.
 - (unaligned, B local time 1.40 s) B's time-to-contact with unidentified object B:track_001 stopped being critical.
 - (unaligned, B local time 1.40 s) B observed unidentified object B:track_001 stop closing in.
 - (unaligned, B local time 2.50 s) B stopped applying strong throttle.
-- (unaligned, B local time 4.20 s) B predicted a path conflict with unidentified object B:track_001 (close approach ahead if both keep their motion).
 - (unaligned, B local time 4.25 s) B observed unidentified object B:track_001 start closing in.
 - (unaligned, B local time 4.35 s) B's time-to-contact with unidentified object B:track_001 became critical.
 - (unaligned, B local time 4.75 s) B started braking.
 - (unaligned, B local time 5.15 s) B's collision sensor recorded a contact (peak impulse 6074 N*s).
-- (unaligned, B local time 5.20 s) B stopped predicting a path conflict with unidentified object B:track_001.
 - (unaligned, B local time 5.20 s) B's time-to-contact with unidentified object B:track_001 stopped being critical.
 - (unaligned, B local time 5.20 s) B observed unidentified object B:track_001 stop closing in.
 - (unaligned, B local time 5.20 s) B started braking hard.
 - (unaligned, B local time 5.60 s) B stopped moving.
 - (unaligned, B local time 5.60 s) B came to a stop.
-- (unaligned, B local time 12.55 s) B's radar started tracking unidentified object B:track_002.
+- (unaligned, B local time 12.55 s) B's radar started tracking unidentified object B:track_002, which appeared on its left.
 - (unaligned, B local time 13.55 s) B observed unidentified object B:track_001 leave its forward path corridor.
 - (unaligned, B local time 14.05 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
 
@@ -140,7 +134,7 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 - MOVING_END(C); STOP_START(C)
 - MOVING_END(A); STOP_START(A)
 - BRAKE_END(A); STRONG_THROTTLE_START(A)
-- TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,C)
+- TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,C)
 - STOP_END(A); MOVING_START(A)
 - CLOSING_START(A,A:track_002); CLOSING_START(A,C)
 - STOP_END(C); MOVING_START(C)
@@ -152,15 +146,14 @@ Matched `collision_002`: A and C both recorded a collision; peak impulses 9089.8
 A:
 - CLOSING of track_002, since A:e15 (t = 11.80 s); the track was lost at 13.50 s
 - EGO_PATH of track_002, since A:e16 (t = 12.00 s); the track was lost at 13.50 s
-- PREDICTED_PATH_CONFLICT of track_001, since A:e17 (t = 12.15 s); the track was lost at 14.35 s
-- EGO_PATH of track_001, since A:e18 (t = 12.20 s); the track was lost at 14.35 s
-- CRITICAL_TTC of track_002, since A:e21 (t = 12.75 s); the track was lost at 13.50 s
-- STRONG_THROTTLE, since A:e26 (t = 14.10 s)
-- STOP, since A:e29 (t = 14.65 s)
+- EGO_PATH of track_001, since A:e17 (t = 12.20 s); the track was lost at 14.35 s
+- CRITICAL_TTC of track_002, since A:e20 (t = 12.75 s); the track was lost at 13.50 s
+- STRONG_THROTTLE, since A:e25 (t = 14.10 s)
+- STOP, since A:e28 (t = 14.65 s)
 B:
-- BRAKE, since B:e14 (t = 4.75 s)
-- HARD_BRAKE, since B:e19 (t = 5.20 s)
-- STOP, since B:e21 (t = 5.60 s)
+- BRAKE, since B:e11 (t = 4.75 s)
+- HARD_BRAKE, since B:e15 (t = 5.20 s)
+- STOP, since B:e17 (t = 5.60 s)
 C:
 - BRAKE, since C:e07 (t = 14.10 s)
 - HARD_BRAKE, since C:e08 (t = 14.15 s)
@@ -178,8 +171,8 @@ C:
 ### Perceived state just before each collision report
 
 - A A:e05 at 5.15 s (local): ego: MOVING, BRAKE
-- A A:e23 at 14.10 s (local): ego: MOVING; track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH, PATH_CONFLICT; lost (states UNKNOWN): track_002
-- B B:e15 at 5.15 s (local): ego: MOVING, BRAKE; track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH, PATH_CONFLICT
+- A A:e22 at 14.10 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track lost, states UNKNOWN: track_002
+- B B:e12 at 5.15 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
 - C C:e06 at 14.10 s (local): ego: MOVING
 
 ### Tracks lost while a state was active
@@ -187,8 +180,8 @@ C:
 A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
 
 A:
-- track_002 at 13.50 s (A:e22): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
-- track_001 at 14.35 s (A:e27): IN_EGO_PATH, PREDICTED_PATH_CONFLICT were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 13.50 s (A:e21): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 14.35 s (A:e26): IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
 B:
 - lost with no state active: track_001
 C:
@@ -239,12 +232,9 @@ C:
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
     "path_half_width_m": 1.5,
+    "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
-    "conflict_horizon_s": 4.0,
-    "conflict_distance_m": 1.5,
-    "conflict_release_horizon_s": 5.0,
-    "conflict_release_distance_m": 2.5,
     "cut_in_max_heading_deg": 25.0,
     "cut_in_min_target_speed_mps": 2.0,
     "cut_in_lateral_speed_mps": 0.3,
