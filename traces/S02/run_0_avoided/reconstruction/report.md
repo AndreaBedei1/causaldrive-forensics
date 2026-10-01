@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 17 | 27 | 1 | none |
+| A | 15.15 s | 153 | 17 | 26 | 1 | none |
 | B | 15.15 s | 153 | 5 | 4 | 0 | none |
 
 ## Graph alignment
@@ -43,18 +43,18 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 0.00 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 1.15 s) A started applying strong throttle.
 - (unaligned, A local time 1.35 s) A stopped applying strong throttle.
-- (unaligned, A local time 1.65 s) A predicted a path conflict with unidentified object A:track_001 (close approach ahead if both keep their motion).
-- (unaligned, A local time 2.20 s) A observed unidentified object A:track_001 cutting in from the left.
-- (unaligned, A local time 2.75 s) A's time-to-contact with unidentified object A:track_001 became critical.
+- (unaligned, A local time 1.90 s) A predicted a path conflict with unidentified object A:track_001 (close approach ahead if both keep their motion).
+- (unaligned, A local time 2.35 s) A observed unidentified object A:track_001 cutting in from the left.
+- (unaligned, A local time 2.80 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 2.85 s) A started braking.
 - (unaligned, A local time 2.85 s) A started braking hard.
 - (unaligned, A local time 3.10 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
-- (unaligned, A local time 3.15 s) A observed unidentified object A:track_001 enter its forward path corridor.
-- (unaligned, A local time 3.70 s) A stopped predicting a path conflict with unidentified object A:track_001.
+- (unaligned, A local time 3.25 s) A observed unidentified object A:track_001 enter its forward path corridor.
+- (unaligned, A local time 3.65 s) A stopped predicting a path conflict with unidentified object A:track_001.
 - (unaligned, A local time 3.70 s) A stopped braking hard.
 - (unaligned, A local time 4.05 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 4.10 s) A released the brake.
-- (unaligned, A local time 5.25 s) A observed unidentified object A:track_001's cut-in from the left settle.
+- (unaligned, A local time 5.30 s) A observed unidentified object A:track_001's cut-in from the left settle.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
 - (unaligned, B local time 0.35 s) B started applying strong throttle.
 - (unaligned, B local time 1.30 s) B stopped applying strong throttle.
@@ -69,7 +69,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 A:
 - MOVING, since A:e01 (t = 0.00 s)
-- EGO_PATH of track_001, since A:e12 (t = 3.15 s)
+- EGO_PATH of track_001, since A:e12 (t = 3.25 s)
 B:
 - MOVING, since B:e01 (t = 0.00 s)
 

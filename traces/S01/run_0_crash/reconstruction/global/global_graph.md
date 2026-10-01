@@ -28,7 +28,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)<br>tracked for 6.50 s before the matched collision<br>at the contact: minimum range 0.78 m in the last 0.50 s before the collision<br>the only track of A at the contact<br>track speed agrees with B's own speed: RMSE 0.21 m/s over 3.0 s |
+| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)<br>tracked for 6.40 s before the matched collision<br>at the contact: minimum range 0.77 m in the last 0.50 s before the collision<br>the only track of A at the contact<br>track speed agrees with B's own speed: RMSE 0.24 m/s over 3.0 s |
 
 ## Nodes
 
@@ -36,7 +36,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 |----|------------:|------|-------|------------------------|----------------------------------------|---------|
 | g01 | -6.50 | MOVING_START | A | - | A:e01 @ 0.00 | active_at_first_observation=True |
 | g02 | -6.50 | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
-| g03 | -6.50 | TRACK_APPEARED | A | B | A:e02 @ 0.00 |  |
+| g03 | -6.40 | TRACK_APPEARED | A | B | A:e02 @ 0.10 |  |
 | g04 | -6.10 | STRONG_THROTTLE_START | B | - | B:e02 @ 0.40 |  |
 | g05 | -6.05 | CLOSING_START | A | B | A:e03 @ 0.45 |  |
 | g06 | -5.35 | STRONG_THROTTLE_START | A | - | A:e04 @ 1.15 |  |
@@ -62,8 +62,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 ## Edges
 
 ```
-    g01 --PRECEDES--> g04
-    g02 --PRECEDES--> g04
+    g01 --PRECEDES--> g03
+    g02 --PRECEDES--> g03
     g03 --PRECEDES--> g04
     g04 --PRECEDES--> g05
     g05 --PRECEDES--> g06
@@ -112,7 +112,8 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 | t_global | Events |
 |---------:|--------|
-| -6.50 | MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B) |
+| -6.50 | MOVING_START(A); MOVING_START(B) |
+| -6.40 | TRACK_APPEARED(A,B) |
 | -6.10 | STRONG_THROTTLE_START(B) |
 | -6.05 | CLOSING_START(A,B) |
 | -5.35 | STRONG_THROTTLE_START(A) |
@@ -134,8 +135,9 @@ Each recorder's own belief just before its events, in its own local names (track
 
 | t_global | Recorder | Events (local node) | Perceived state just before |
 |---------:|----------|---------------------|-----------------------------|
-| -6.50 | A | g01 MOVING_START(A) (A:e01)<br>g03 TRACK_APPEARED(A,B) (A:e02) | ego: not yet observed |
+| -6.50 | A | g01 MOVING_START(A) (A:e01) | ego: not yet observed |
 | -6.50 | B | g02 MOVING_START(B) (B:e01) | ego: not yet observed |
+| -6.40 | A | g03 TRACK_APPEARED(A,B) (A:e02) | ego: MOVING |
 | -6.10 | B | g04 STRONG_THROTTLE_START(B) (B:e02) | ego: MOVING |
 | -6.05 | A | g05 CLOSING_START(A,B) (A:e03) | ego: MOVING<br>track_001: VISIBLE, IN_EGO_PATH |
 | -5.35 | A | g06 STRONG_THROTTLE_START(A) (A:e04) | ego: MOVING<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH |
@@ -156,7 +158,7 @@ Each recorder's own belief just before its events, in its own local names (track
 
 - 6.50 s before the matched collision, A started moving (already the case when first observed).
 - 6.50 s before the matched collision, B started moving (already the case when first observed).
-- 6.50 s before the matched collision, A's radar started tracking B.
+- 6.40 s before the matched collision, A's radar started tracking B.
 - 6.10 s before the matched collision, B started applying strong throttle.
 - 6.05 s before the matched collision, A observed B start closing in.
 - 5.35 s before the matched collision, A started applying strong throttle.

@@ -4,7 +4,7 @@ digraph "global" {
   edge [fontname=Helvetica, fontsize=8];
   "g01" [label="MOVING_START\nA\nt=-6.50", fillcolor="#e5e7eb"];
   "g02" [label="MOVING_START\nB\nt=-6.50", fillcolor="#e5e7eb"];
-  "g03" [label="TRACK_APPEARED\nA -> B\nt=-6.50", fillcolor="#bfdbfe"];
+  "g03" [label="TRACK_APPEARED\nA -> B\nt=-6.40", fillcolor="#bfdbfe"];
   "g04" [label="STRONG_THROTTLE_START\nB\nt=-6.10", fillcolor="#fde68a"];
   "g05" [label="CLOSING_START\nA -> B\nt=-6.05", fillcolor="#bfdbfe"];
   "g06" [label="STRONG_THROTTLE_START\nA\nt=-5.35", fillcolor="#fde68a"];
@@ -26,13 +26,13 @@ digraph "global" {
   "g22" [label="MOVING_END\nA\nt=+0.05", fillcolor="#e5e7eb"];
   "g23" [label="STOP_START\nA\nt=+0.05", fillcolor="#e5e7eb"];
   "g24" [label="HARD_BRAKE_START\nA\nt=+0.05", fillcolor="#fde68a"];
-  {rank=same; "g01"; "g02"; "g03";}
+  {rank=same; "g01"; "g02";}
   {rank=same; "g10"; "g11";}
   {rank=same; "g15"; "g16";}
   {rank=same; "g18"; "g19"; "g20"; "g21";}
   {rank=same; "g22"; "g23"; "g24";}
-  "g01" -> "g04" [label="PRECEDES"];
-  "g02" -> "g04" [label="PRECEDES"];
+  "g01" -> "g03" [label="PRECEDES"];
+  "g02" -> "g03" [label="PRECEDES"];
   "g03" -> "g04" [label="PRECEDES"];
   "g04" -> "g05" [label="PRECEDES"];
   "g05" -> "g06" [label="PRECEDES"];

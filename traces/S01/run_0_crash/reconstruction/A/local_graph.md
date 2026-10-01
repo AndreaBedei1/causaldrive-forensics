@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 29.69283339381218 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 40.224254708737135 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)
@@ -13,7 +13,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | Id | Local time | Type | Actor | Subject | Source | Details |
 |----|-----------:|------|-------|---------|--------|---------|
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
-| A:e02 | 0.00 | TRACK_APPEARED | A | track_001 | radar |  |
+| A:e02 | 0.10 | TRACK_APPEARED | A | track_001 | radar |  |
 | A:e03 | 0.45 | CLOSING_START | A | track_001 | radar |  |
 | A:e04 | 1.15 | STRONG_THROTTLE_START | A | - | controls |  |
 | A:e05 | 1.35 | STRONG_THROTTLE_END | A | - | controls |  |
@@ -35,7 +35,7 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
 ## Edges
 
 ```
-    A:e01 --PRECEDES--> A:e03
+    A:e01 --PRECEDES--> A:e02
     A:e02 --PRECEDES--> A:e03
     A:e03 --PRECEDES--> A:e04
     A:e04 --PRECEDES--> A:e05
@@ -76,7 +76,8 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
-| 0.00 | A:e01 MOVING_START<br>A:e02 TRACK_APPEARED track_001 | ego: not yet observed | - |
+| 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
+| 0.10 | A:e02 TRACK_APPEARED track_001 | ego: MOVING | 0.00 |
 | 0.45 | A:e03 CLOSING_START track_001 | ego: MOVING<br>track_001: VISIBLE, IN_EGO_PATH | 0.40 |
 | 1.15 | A:e04 STRONG_THROTTLE_START | ego: MOVING<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH | 1.10 |
 | 1.35 | A:e05 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH | 1.30 |
@@ -108,14 +109,14 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 11.95 | 238 | 23.5 m / -1 deg | 0.75 m (11.95) | 0.8 m / +0 deg | 14.0 m/s |
+| track_001 | 0.10 | 11.95 | 229 | 23.6 m / -1 deg | 0.75 m (11.95) | 0.8 m / -2 deg | 14.0 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
 ## Plain-language reading
 
 - t = 0.00 s: A started moving (already the case when first observed).
-- t = 0.00 s: A's radar started tracking track_001.
+- t = 0.10 s: A's radar started tracking track_001.
 - t = 0.45 s: A observed track_001 start closing in.
 - t = 1.15 s: A started applying strong throttle.
 - t = 1.35 s: A stopped applying strong throttle.

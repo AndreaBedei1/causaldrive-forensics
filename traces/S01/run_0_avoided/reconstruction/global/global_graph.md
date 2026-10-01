@@ -32,7 +32,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | Id | Global time | Type | Actor | Subject / participants | Observed by (local node @ local time) | Details |
 |----|------------:|------|-------|------------------------|----------------------------------------|---------|
 | g01 | - | MOVING_START | A | - | A:e01 @ 0.00 | active_at_first_observation=True |
-| g02 | - | TRACK_APPEARED | A | A:track_001 | A:e02 @ 0.00 |  |
+| g02 | - | TRACK_APPEARED | A | A:track_001 | A:e02 @ 0.10 |  |
 | g03 | - | CLOSING_START | A | A:track_001 | A:e03 @ 0.45 |  |
 | g04 | - | STRONG_THROTTLE_START | A | - | A:e04 @ 1.15 |  |
 | g05 | - | STRONG_THROTTLE_END | A | - | A:e05 @ 1.35 |  |
@@ -87,7 +87,8 @@ Each recorder's own belief just before its events, in its own local names (track
 
 | t_global | Recorder | Events (local node) | Perceived state just before |
 |---------:|----------|---------------------|-----------------------------|
-| - | A | g01 MOVING_START(A) (A:e01)<br>g02 TRACK_APPEARED(A,A:track_001) (A:e02) | ego: not yet observed |
+| - | A | g01 MOVING_START(A) (A:e01) | ego: not yet observed |
+| - | A | g02 TRACK_APPEARED(A,A:track_001) (A:e02) | ego: MOVING |
 | - | A | g03 CLOSING_START(A,A:track_001) (A:e03) | ego: MOVING<br>track_001: VISIBLE, IN_EGO_PATH |
 | - | A | g04 STRONG_THROTTLE_START(A) (A:e04) | ego: MOVING<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH |
 | - | A | g05 STRONG_THROTTLE_END(A) (A:e05) | ego: MOVING, STRONG_THROTTLE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH |
@@ -110,7 +111,7 @@ Each recorder's own belief just before its events, in its own local names (track
 ## Plain-language reading
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 0.10 s) A's radar started tracking unidentified object A:track_001.
 - (unaligned, A local time 0.45 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 1.15 s) A started applying strong throttle.
 - (unaligned, A local time 1.35 s) A stopped applying strong throttle.

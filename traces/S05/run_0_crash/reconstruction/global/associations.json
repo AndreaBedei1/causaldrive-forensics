@@ -4,14 +4,14 @@
     "local_track": "track_001",
     "global_entity": "B",
     "status": "ASSOCIATED",
-    "confidence": 0.89,
+    "confidence": 0.9,
     "candidate": "B",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
-      "tracked for 2.45 s before the matched collision",
-      "at the contact: minimum range 0.85 m in the last 0.50 s before the collision",
+      "tracked for 2.50 s before the matched collision",
+      "at the contact: minimum range 0.90 m in the last 0.50 s before the collision",
       "the only track of A at the contact",
-      "track speed agrees with B's own speed: RMSE 0.73 m/s over 2.5 s"
+      "track speed agrees with B's own speed: RMSE 0.70 m/s over 2.5 s"
     ],
     "blocking": [],
     "source_graphs": [
@@ -29,11 +29,11 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked for 2.50 s before the matched collision",
-      "not at the contact: last seen 0.85 s before the matched collision (window 0.50 s)",
-      "track speed agrees with A's own speed: RMSE 1.00 m/s over 1.7 s"
+      "not at the contact: minimum range 5.59 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed agrees with A's own speed: RMSE 0.58 m/s over 2.2 s"
     ],
     "blocking": [
-      "not at the contact: last seen 0.85 s before the matched collision (window 0.50 s)"
+      "not at the contact: minimum range 5.59 m in the last 0.50 s (needs <= 3.50 m)"
     ],
     "source_graphs": [
       "B",
@@ -50,12 +50,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 30.54 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 18.91 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 30.54 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 18.91 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -73,12 +73,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 29.63 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 32.42 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 29.63 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 32.42 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -96,12 +96,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 19.90 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 37.27 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 19.90 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 37.27 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -119,12 +119,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 30.38 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 22.75 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: minimum range 30.38 m in the last 0.50 s (needs <= 3.50 m)",
+      "not at the contact: minimum range 22.75 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -165,12 +165,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.05 s after the matched collision",
+      "not at the contact: minimum range 29.98 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.05 s after the matched collision",
+      "not at the contact: minimum range 29.98 m in the last 0.50 s (needs <= 3.50 m)",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -188,12 +188,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.05 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.05 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -211,12 +211,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.15 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.15 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -257,12 +257,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.15 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.15 s after the matched collision",
+      "not at the contact: first seen 0.10 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -280,12 +280,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.20 s after the matched collision",
+      "not at the contact: first seen 0.05 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.20 s after the matched collision",
+      "not at the contact: first seen 0.05 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -326,12 +326,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.25 s after the matched collision",
+      "not at the contact: first seen 0.15 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.25 s after the matched collision",
+      "not at the contact: first seen 0.15 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -349,12 +349,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.25 s after the matched collision",
+      "not at the contact: first seen 0.20 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.25 s after the matched collision",
+      "not at the contact: first seen 0.20 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -372,12 +372,12 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.30 s after the matched collision",
+      "not at the contact: first seen 0.20 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "blocking": [
       "tracked only 0.00 s before the matched collision (needs 1.00 s)",
-      "not at the contact: first seen 0.30 s after the matched collision",
+      "not at the contact: first seen 0.20 s after the matched collision",
       "speed not comparable with A's own speed before the collision"
     ],
     "source_graphs": [
@@ -389,6 +389,52 @@
     "local_graph": "B",
     "local_track": "track_017",
     "global_entity": "B:track_017",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
+      "tracked only 0.00 s before the matched collision (needs 1.00 s)",
+      "not at the contact: first seen 0.20 s after the matched collision",
+      "speed not comparable with A's own speed before the collision"
+    ],
+    "blocking": [
+      "tracked only 0.00 s before the matched collision (needs 1.00 s)",
+      "not at the contact: first seen 0.20 s after the matched collision",
+      "speed not comparable with A's own speed before the collision"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_018",
+    "global_entity": "B:track_018",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": "A",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 6116.26 vs 6116.26 N*s)",
+      "tracked only 0.00 s before the matched collision (needs 1.00 s)",
+      "not at the contact: minimum range 27.37 m in the last 0.50 s (needs <= 3.50 m)",
+      "speed not comparable with A's own speed before the collision"
+    ],
+    "blocking": [
+      "tracked only 0.00 s before the matched collision (needs 1.00 s)",
+      "not at the contact: minimum range 27.37 m in the last 0.50 s (needs <= 3.50 m)",
+      "speed not comparable with A's own speed before the collision"
+    ],
+    "source_graphs": [
+      "B",
+      "A"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_019",
+    "global_entity": "B:track_019",
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",

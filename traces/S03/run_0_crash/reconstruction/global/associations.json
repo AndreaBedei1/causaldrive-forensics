@@ -9,11 +9,11 @@
     "evidence": [
       "A and B both reported collision_001 (peak impulse 12077.22 vs 12077.22 N*s)",
       "tracked for 2.20 s before the matched collision",
-      "not at the contact: last seen 0.90 s before the matched collision (window 0.50 s)",
-      "track speed agrees with B's own speed: RMSE 0.45 m/s over 1.3 s"
+      "not at the contact: minimum range 3.78 m in the last 0.50 s (needs <= 3.50 m)",
+      "track speed agrees with B's own speed: RMSE 0.38 m/s over 2.0 s"
     ],
     "blocking": [
-      "not at the contact: last seen 0.90 s before the matched collision (window 0.50 s)"
+      "not at the contact: minimum range 3.78 m in the last 0.50 s (needs <= 3.50 m)"
     ],
     "source_graphs": [
       "A",
@@ -25,14 +25,14 @@
     "local_track": "track_001",
     "global_entity": "A",
     "status": "ASSOCIATED",
-    "confidence": 0.84,
+    "confidence": 0.75,
     "candidate": "A",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 12077.22 vs 12077.22 N*s)",
-      "tracked for 2.10 s before the matched collision",
-      "at the contact: minimum range 0.93 m in the last 0.50 s before the collision",
+      "tracked for 2.05 s before the matched collision",
+      "at the contact: minimum range 1.07 m in the last 0.50 s before the collision",
       "the only track of B at the contact",
-      "track speed agrees with A's own speed: RMSE 0.89 m/s over 2.1 s"
+      "track speed agrees with A's own speed: RMSE 1.14 m/s over 2.0 s"
     ],
     "blocking": [],
     "source_graphs": [

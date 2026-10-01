@@ -26,6 +26,6 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | A:track_001 | B | left anonymous (true identity B) | 150 | 0.618 / 0.677 m | 1.436 m | 2.788 / 0.083 m/s |
+| A:track_001 | A:track_001 | B | left anonymous (true identity B) | 138 | 0.602 / 0.699 m | 1.413 m | 3.548 / 0.085 m/s |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).

@@ -102,7 +102,7 @@
         "A",
         "B"
       ],
-      "t_global": -6.5,
+      "t_global": -6.4,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -110,22 +110,22 @@
         {
           "graph": "A",
           "local_node": "A:e02",
-          "t_local": 0.0
+          "t_local": 0.1
         }
       ],
       "perceived_state_before": {
         "A": {
           "ego": {
-            "MOVING": "UNKNOWN",
-            "STOP": "UNKNOWN",
-            "BRAKE": "UNKNOWN",
-            "HARD_BRAKE": "UNKNOWN",
-            "STRONG_THROTTLE": "UNKNOWN",
-            "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+            "MOVING": true,
+            "STOP": false,
+            "BRAKE": false,
+            "HARD_BRAKE": false,
+            "STRONG_THROTTLE": false,
+            "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
           "signs": {},
-          "facts_t_local": null
+          "facts_t_local": 0.0
         }
       }
     },
@@ -1073,12 +1073,12 @@
   "edges": [
     {
       "from": "g01",
-      "to": "g04",
+      "to": "g03",
       "relation": "PRECEDES"
     },
     {
       "from": "g02",
-      "to": "g04",
+      "to": "g03",
       "relation": "PRECEDES"
     },
     {

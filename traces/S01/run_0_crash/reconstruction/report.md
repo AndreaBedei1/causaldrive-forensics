@@ -30,7 +30,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)<br>tracked for 6.50 s before the matched collision<br>at the contact: minimum range 0.78 m in the last 0.50 s before the collision<br>the only track of A at the contact<br>track speed agrees with B's own speed: RMSE 0.21 m/s over 3.0 s |
+| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)<br>tracked for 6.40 s before the matched collision<br>at the contact: minimum range 0.77 m in the last 0.50 s before the collision<br>the only track of A at the contact<br>track speed agrees with B's own speed: RMSE 0.24 m/s over 3.0 s |
 
 ## Global graph
 
@@ -38,7 +38,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 ### Event sequence (global time)
 
-- `-6.50` MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B)
+- `-6.50` MOVING_START(A); MOVING_START(B)
+- `-6.40` TRACK_APPEARED(A,B)
 - `-6.10` STRONG_THROTTLE_START(B)
 - `-6.05` CLOSING_START(A,B)
 - `-5.35` STRONG_THROTTLE_START(A)
@@ -58,7 +59,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 - 6.50 s before the matched collision, A started moving (already the case when first observed).
 - 6.50 s before the matched collision, B started moving (already the case when first observed).
-- 6.50 s before the matched collision, A's radar started tracking B.
+- 6.40 s before the matched collision, A's radar started tracking B.
 - 6.10 s before the matched collision, B started applying strong throttle.
 - 6.05 s before the matched collision, A observed B start closing in.
 - 5.35 s before the matched collision, A started applying strong throttle.
@@ -83,7 +84,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
-- MOVING_START(A); MOVING_START(B); TRACK_APPEARED(A,B)
+- MOVING_START(A); MOVING_START(B)
 - BRAKE_START(B); HARD_BRAKE_START(B)
 - MOVING_END(B); STOP_START(B)
 - COLLISION(A,B); PREDICTED_PATH_CONFLICT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)

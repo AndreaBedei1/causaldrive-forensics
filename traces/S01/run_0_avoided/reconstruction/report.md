@@ -39,7 +39,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 ### What happened, in plain language
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001.
+- (unaligned, A local time 0.10 s) A's radar started tracking unidentified object A:track_001.
 - (unaligned, A local time 0.45 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 1.15 s) A started applying strong throttle.
 - (unaligned, A local time 1.35 s) A stopped applying strong throttle.

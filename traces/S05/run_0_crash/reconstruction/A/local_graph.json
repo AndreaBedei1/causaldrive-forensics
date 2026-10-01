@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 116.97939620912075,
+      "origin_source_timestamp": 130.43641052767634,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -60,7 +60,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 1.25,
+      "t_local": 1.2,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -75,7 +75,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 1.2
+        "facts_t_local": 1.1
       }
     },
     {
@@ -84,7 +84,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 1.25,
+      "t_local": 1.2,
       "attributes": {
         "active_at_first_observation": true
       },
@@ -101,7 +101,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 1.2
+        "facts_t_local": 1.1
       }
     },
     {
@@ -178,7 +178,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.5,
+      "t_local": 3.45,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -520,7 +520,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.95,
+      "t_local": 4.05,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -545,7 +545,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 3.9
+        "facts_t_local": 4.0
       }
     },
     {
@@ -827,18 +827,18 @@
   "tracks": [
     {
       "track_id": "track_001",
-      "first_seen_t_local": 1.25,
-      "last_seen_t_local": 3.95,
-      "duration_s": 2.7,
-      "measured_sweeps": 55,
-      "radar_returns": 2321,
-      "min_range_m": 0.85,
-      "min_range_t_local": 3.7,
-      "max_speed_mps": 11.66,
-      "first_range_m": 36.7,
-      "first_bearing_deg": 43.4,
-      "last_range_m": 2.42,
-      "last_bearing_deg": -107.4
+      "first_seen_t_local": 1.2,
+      "last_seen_t_local": 4.05,
+      "duration_s": 2.85,
+      "measured_sweeps": 57,
+      "radar_returns": 1814,
+      "min_range_m": 0.9,
+      "min_range_t_local": 3.65,
+      "max_speed_mps": 11.47,
+      "first_range_m": 37.1,
+      "first_bearing_deg": 42.4,
+      "last_range_m": 2.98,
+      "last_bearing_deg": -107.0
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Local graph - vehicle B
 
-All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 29.69283339381218 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
+All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 40.224254708737135 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)

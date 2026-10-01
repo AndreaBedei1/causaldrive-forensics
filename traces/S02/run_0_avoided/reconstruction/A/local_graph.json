@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 46.201942194253206,
+      "origin_source_timestamp": 56.33916341140866,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -178,7 +178,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 1.65,
+      "t_local": 1.9,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -203,7 +203,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 1.6
+        "facts_t_local": 1.8
       }
     },
     {
@@ -212,7 +212,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.2,
+      "t_local": 2.35,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -237,7 +237,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 2.1
+        "facts_t_local": 2.3
       }
     },
     {
@@ -246,7 +246,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.75,
+      "t_local": 2.8,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -382,7 +382,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.15,
+      "t_local": 3.25,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -407,7 +407,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 3.1
+        "facts_t_local": 3.2
       }
     },
     {
@@ -416,7 +416,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.7,
+      "t_local": 3.65,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -469,7 +469,7 @@
             "CLOSING": true,
             "CRITICAL_TTC": false,
             "IN_EGO_PATH": true,
-            "PREDICTED_PATH_CONFLICT": true,
+            "PREDICTED_PATH_CONFLICT": false,
             "CUT_IN_FROM_LEFT": true,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -552,7 +552,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 5.25,
+      "t_local": 5.3,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -648,13 +648,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "A:e12",
-      "to": "A:e14",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "A:e13",
-      "to": "A:e15",
+      "to": "A:e14",
       "relation": "PRECEDES"
     },
     {
@@ -724,15 +719,15 @@
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 15.15,
       "duration_s": 15.15,
-      "measured_sweeps": 302,
-      "radar_returns": 6710,
-      "min_range_m": 6.34,
+      "measured_sweeps": 277,
+      "radar_returns": 2673,
+      "min_range_m": 6.36,
       "min_range_t_local": 4.15,
-      "max_speed_mps": 8.97,
+      "max_speed_mps": 8.93,
       "first_range_m": 24.56,
-      "first_bearing_deg": -7.8,
-      "last_range_m": 15.18,
-      "last_bearing_deg": -0.0
+      "first_bearing_deg": -7.6,
+      "last_range_m": 15.23,
+      "last_bearing_deg": -0.7
     }
   ]
 }

@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 12.805227477103472,
+      "origin_source_timestamp": 21.149357691407204,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -60,22 +60,22 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 0.0,
+      "t_local": 0.1,
       "attributes": {},
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
         "ego": {
-          "MOVING": "UNKNOWN",
-          "STOP": "UNKNOWN",
-          "BRAKE": "UNKNOWN",
-          "HARD_BRAKE": "UNKNOWN",
-          "STRONG_THROTTLE": "UNKNOWN",
-          "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "HARD_BRAKE": false,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": null
+        "facts_t_local": 0.0
       }
     },
     {
@@ -592,7 +592,7 @@
   "edges": [
     {
       "from": "A:e01",
-      "to": "A:e03",
+      "to": "A:e02",
       "relation": "PRECEDES"
     },
     {
@@ -734,18 +734,18 @@
   "tracks": [
     {
       "track_id": "track_001",
-      "first_seen_t_local": 0.0,
+      "first_seen_t_local": 0.1,
       "last_seen_t_local": 13.05,
-      "duration_s": 13.05,
-      "measured_sweeps": 260,
-      "radar_returns": 8073,
-      "min_range_m": 6.14,
+      "duration_s": 12.95,
+      "measured_sweeps": 251,
+      "radar_returns": 3136,
+      "min_range_m": 6.16,
       "min_range_t_local": 6.45,
-      "max_speed_mps": 14.03,
-      "first_range_m": 23.55,
-      "first_bearing_deg": -0.7,
-      "last_range_m": 7.82,
-      "last_bearing_deg": -0.0
+      "max_speed_mps": 14.02,
+      "first_range_m": 23.58,
+      "first_bearing_deg": -0.6,
+      "last_range_m": 7.84,
+      "last_bearing_deg": 1.1
     }
   ]
 }

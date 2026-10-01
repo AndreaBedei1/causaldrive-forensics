@@ -6,7 +6,7 @@ radar:
   sensors:
     - sensor_id: "front"
       blueprint: "sensor.other.radar"
-      horizontal_fov_deg: 120.0
+      horizontal_fov_deg: 200.0
       vertical_fov_deg: 10.0
       range_m: 90.0
       points_per_second: 6000

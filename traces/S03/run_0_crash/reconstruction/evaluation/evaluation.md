@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 88.484 | 12077.2 | g15 | yes | 0.0 s |
+| A + B | 98.808 | 12077.2 | g14 | yes | 0.0 s |
 
 ## Graph alignment accuracy
 
@@ -23,14 +23,14 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-29 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 371/371 pairs.
+28 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 356/356 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | A:track_001 | B | left anonymous (true identity B) | 12 | 0.448 / 0.613 m | 1.51 m | 5.321 / 0.405 m/s |
-| B:track_001 | A | A | correct | 129 | 0.188 / 0.355 m | 1.077 m | 3.011 / 0.449 m/s |
+| A:track_001 | A:track_001 | B | left anonymous (true identity B) | 21 | 0.421 / 0.504 m | 0.964 m | 4.85 / 0.376 m/s |
+| B:track_001 | A | A | correct | 129 | 0.186 / 0.369 m | 1.052 m | 3.397 / 0.531 m/s |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 
