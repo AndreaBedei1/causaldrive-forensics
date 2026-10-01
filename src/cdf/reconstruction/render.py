@@ -14,7 +14,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from .checks import open_states, sign_windows
 from .fusion import ASSOCIATED, short_label
-from .models import Alignment, Association, GlobalGraph, GlobalNode, LocalGraph
+from .models import Alignment, Association, GlobalGraph, GlobalNode, GraphNode, LocalGraph
+from .world_state import TRACK_STATES, compact_state
 
 KIND_COLOURS = {"ACTION": "#fde68a", "PERCEPTION": "#bfdbfe", "FACT": "#e5e7eb", "OUTCOME": "#fca5a5"}
 
@@ -89,13 +90,19 @@ SENTENCES = {
     "SPEED_LIMIT_EXCEEDED_START": "{actor} began exceeding the speed limit",
     "SPEED_LIMIT_EXCEEDED_END": "{actor} returned within the speed limit",
     "TRACK_APPEARED": "{actor}'s radar started tracking {subject}",
-    "TRACK_LOST": "{actor}'s radar lost {subject}",
+    "TRACK_LOST": "{actor}'s radar lost {subject} (its states are UNKNOWN from then on, not ended)",
     "CLOSING_START": "{actor} observed {subject} start closing in",
     "CLOSING_END": "{actor} observed {subject} stop closing in",
     "CRITICAL_TTC_START": "{actor}'s time-to-contact with {subject} became critical",
     "CRITICAL_TTC_END": "{actor}'s time-to-contact with {subject} stopped being critical",
     "EGO_PATH_ENTRY": "{actor} observed {subject} enter its forward path corridor",
     "EGO_PATH_EXIT": "{actor} observed {subject} leave its forward path corridor",
+    "PREDICTED_PATH_CONFLICT_START": "{actor} predicted a path conflict with {subject} (close approach ahead if both keep their motion)",
+    "PREDICTED_PATH_CONFLICT_END": "{actor} stopped predicting a path conflict with {subject}",
+    "CUT_IN_FROM_LEFT_START": "{actor} observed {subject} cutting in from the left",
+    "CUT_IN_FROM_LEFT_END": "{actor} observed {subject}'s cut-in from the left settle",
+    "CUT_IN_FROM_RIGHT_START": "{actor} observed {subject} cutting in from the right",
+    "CUT_IN_FROM_RIGHT_END": "{actor} observed {subject}'s cut-in from the right settle",
     "STOP_SIGN_DETECTED_START": "{actor}'s camera established a STOP sign detection ({subject})",
     "STOP_SIGN_DETECTED_END": "{actor}'s camera stopped detecting STOP sign {subject}",
     "YIELD_SIGN_DETECTED_START": "{actor}'s camera established a YIELD sign detection ({subject})",
@@ -121,6 +128,8 @@ def sentence(event_type: str, actor: Optional[str], subject: Optional[str],
         text += " (already the case when first observed)"
     if attributes.get("relevant_to_ego_path") is False:
         text += " (the detector judged it not relevant to its path)"
+    if attributes.get("reacquired"):
+        text += " (the same sign reacquired, as camera track {0})".format(attributes.get("sign_track"))
     return text
 
 
@@ -203,6 +212,62 @@ def _sign_window_lines(graph: LocalGraph) -> List[str]:
     return lines or ["- none"]
 
 
+def _state_cell(state: Optional[Dict[str, Any]]) -> str:
+    return "<br>".join(compact_state(state)) or "-"
+
+
+def _groups(nodes: Sequence[Any], time_of) -> List[List[Any]]:
+    """Consecutive nodes with equal times: they share one perceived state before them."""
+    groups: List[List[Any]] = []
+    for node in nodes:
+        if groups and abs(time_of(node) - time_of(groups[-1][0])) < 1e-6:
+            groups[-1].append(node)
+        else:
+            groups.append([node])
+    return groups
+
+
+def _event_names(nodes: Sequence[Any]) -> str:
+    return "<br>".join("{0} {1}{2}".format(node.node_id, node.event_type,
+                                           " " + node.subject_id if node.subject_id else "") for node in nodes)
+
+
+def _perceived_state_lines(graph: LocalGraph) -> List[str]:
+    lines = ["Each row is the state just BEFORE its events (none of them applied): events at one time are "
+             "simultaneous and share it. True states are named, unknown ones end with `?`, false ones are "
+             "omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.", "",
+             "| Local time | Events | Perceived state just before | Facts at |",
+             "|-----------:|--------|-----------------------------|---------:|"]
+    for group in _groups(graph.nodes, lambda node: node.t_local):
+        state = group[0].perceived_state_before
+        lines.append("| {0:.2f} | {1} | {2} | {3} |".format(
+            group[0].t_local, _event_names(group), _state_cell(state), _cell((state or {}).get("facts_t_local"))))
+    return lines
+
+
+def lost_while_active(graph: LocalGraph) -> List[Dict[str, Any]]:
+    """TRACK_LOST nodes and the states of the lost track that were true just before."""
+    out = []
+    for node in graph.nodes:
+        if node.event_type != "TRACK_LOST":
+            continue
+        state = ((node.perceived_state_before or {}).get("external") or {}).get(node.subject_id) or {}
+        out.append({"node": node.node_id, "track": node.subject_id, "t_local": node.t_local,
+                    "active": [name for name in TRACK_STATES if state.get(name) is True]})
+    return out
+
+
+def _lost_lines(graph: LocalGraph) -> List[str]:
+    lost = lost_while_active(graph)
+    lines = ["- {0} at {1:.2f} s ({2}): {3} were true; they are UNKNOWN afterwards (no END recorded)".format(
+        item["track"], item["t_local"], item["node"], ", ".join(item["active"]))
+        for item in lost if item["active"]]
+    quiet = [item["track"] for item in lost if not item["active"]]
+    if quiet:
+        lines.append("- lost with no state active: " + ", ".join(quiet))
+    return lines or ["- no track was lost"]
+
+
 def local_graph_markdown(graph: LocalGraph) -> str:
     owner = graph.owner
     clock = graph.recorder.get("clock", {})
@@ -229,11 +294,14 @@ def local_graph_markdown(graph: LocalGraph) -> str:
         lines.append("| {0} | {1:.2f} | {2} | {3} | {4} | {5} | {6} |".format(
             node.node_id, node.t_local, node.event_type, node.actor_id, _cell(node.subject_id),
             node.source, _details(node.event_type, node.attributes)))
-    lines += ["", "Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) "
-              "are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the "
-              "recorder's resolution: PRECEDES links only different times."]
+    lines += ["", "Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, "
+              "relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are "
+              "simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links "
+              "a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order)."]
     lines += ["", "## Edges", "", "```"] + (_edge_lines(graph.edges) or ["    (none)"]) + ["```", ""]
-    lines += ["## States still active when observation ended", ""] + _open_state_lines(graph)
+    lines += ["## Perceived state before each event", ""] + _perceived_state_lines(graph)
+    lines += ["", "## States still active when observation ended", ""] + _open_state_lines(graph)
+    lines += ["", "## Tracks lost", ""] + _lost_lines(graph)
     lines += ["", "## Sign detection windows", ""] + _sign_window_lines(graph)
     lines += ["", "An END means this recorder stopped detecting the sign, not that its obligation ended.", ""]
     lines += ["## Anonymous radar tracks", ""]
@@ -327,9 +395,36 @@ def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
               "| t_global | Events |", "|---------:|--------|"]
     for row in trace:
         lines.append("| {0:+.2f} | {1} |".format(row["t_global"], row["text"]))
+    lines += ["", "## Perceived state before each event, per observing recorder", "",
+              "Each recorder's own belief just before its events, in its own local names (track_001, ...): "
+              "fusion does not rewrite it. True states are named, unknown ones end with `?`.", "",
+              "| t_global | Recorder | Events (local node) | Perceived state just before |",
+              "|---------:|----------|---------------------|-----------------------------|"]
+    for t_global, recorder, nodes in _belief_rows(graph):
+        lines.append("| {0} | {1} | {2} | {3} |".format(
+            "-" if t_global is None else "{0:+.2f}".format(t_global), recorder,
+            "<br>".join("{0} {1} ({2})".format(node.node_id, short_label(node), next(
+                obs.local_node for obs in node.observations if obs.graph == recorder)) for node in nodes),
+            _state_cell(nodes[0].perceived_state_before.get(recorder))))
     lines += ["", "## Plain-language reading", ""]
     lines += ["- " + global_sentence(node) for node in graph.nodes] or ["- Nothing to report."]
     return "\n".join(lines) + "\n"
+
+
+def _belief_rows(graph: GlobalGraph) -> List[Any]:
+    """(t_global, recorder, nodes) for each recorder's simultaneous local events, in global order."""
+    rows: List[Any] = []
+    index: Dict[Any, int] = {}
+    for node in graph.nodes:
+        for obs in node.observations:
+            if obs.graph not in node.perceived_state_before:
+                continue
+            key = (obs.graph, round(obs.t_local, 4))
+            if key not in index:
+                index[key] = len(rows)
+                rows.append((node.t_global, obs.graph, []))
+            rows[index[key]][2].append(node)
+    return rows
 
 
 # --------------------------------------------------------------------------
@@ -438,6 +533,20 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
     lines += ["", "### Sign detection windows", ""]
     for local in locals_:
         lines += ["{0}:".format(local.owner)] + _sign_window_lines(local.graph)
+    lines += ["", "### Perceived state just before each collision report", ""]
+    reported = False
+    for local in locals_:
+        for node in local.graph.nodes:
+            if node.event_type == "COLLISION":
+                reported = True
+                lines.append("- {0} {1} at {2:.2f} s (local): {3}".format(
+                    local.owner, node.node_id, node.t_local, "; ".join(compact_state(node.perceived_state_before))))
+    if not reported:
+        lines.append("- no collision was reported")
+    lines += ["", "### Tracks lost while a state was active", "",
+              "A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.", ""]
+    for local in locals_:
+        lines += ["{0}:".format(local.owner)] + _lost_lines(local.graph)
 
     notes = []
     for local in locals_:

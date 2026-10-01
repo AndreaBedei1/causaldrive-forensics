@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..reconstruction.models import transition_of
+from ..reconstruction.world_state import compact_state
 
 FALLBACK_BLUEPRINT = "vehicle.tesla.model3"
 SPEEDS = (0.25, 0.5, 1.0, 2.0)
@@ -244,6 +245,32 @@ def state_intervals(events: Sequence[ReplayEvent], observed_from: float = 0.0) -
 
 
 @dataclass
+class PerceivedStates:
+    """A recorder's perceived state per trace frame (``local_trace.jsonl``), on the replay timeline.
+
+    Read as written by the reconstruction: the state AT each frame time, after
+    its transitions.  Between frames the latest frame holds (frames are 0.1 s apart).
+    """
+
+    times: List[float]
+    states: List[Dict[str, Any]]
+
+    def state_at(self, t: float) -> Optional[Dict[str, Any]]:
+        index = bisect_right(self.times, t + _EPS) - 1
+        return None if index < 0 else self.states[index]
+
+
+def load_perceived_states(path: Path, origin: float, run_start: float) -> Optional[PerceivedStates]:
+    """None when the trace predates perceived states (the viewer then pairs START/END events)."""
+    times, states = [], []
+    for row in _read_jsonl(path):
+        if row.get("perceived_state") is not None:
+            times.append(round(origin + float(row["t_local"]) - run_start, 6))
+            states.append(row["perceived_state"])
+    return PerceivedStates(times, states) if states else None
+
+
+@dataclass
 class LocalEvents:
     recorder: str
     origin: float  # source timestamp of the recorder's t_local = 0
@@ -388,6 +415,7 @@ class ReplayRun:
     collisions: List[CollisionMark] = field(default_factory=list)
     identities: Dict[Tuple[str, str], str] = field(default_factory=dict)
     tracks: Dict[str, List[TrackPath]] = field(default_factory=dict)
+    perceived: Dict[str, PerceivedStates] = field(default_factory=dict)
     notes: List[str] = field(default_factory=list)
 
     @classmethod
@@ -444,6 +472,10 @@ class ReplayRun:
             tracks = rec / pid / "local_tracks.jsonl"
             if tracks.exists():
                 self.tracks[pid] = load_tracks(tracks, pid, participant.frame_origin, local.origin, self.start)
+            trace = rec / pid / "local_trace.jsonl"
+            perceived = load_perceived_states(trace, local.origin, self.start) if trace.exists() else None
+            if perceived is not None:
+                self.perceived[pid] = perceived
         origins = {pid: local.origin for pid, local in self.local_events.items()}
         if (rec / "global" / "global_graph.json").exists():
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
@@ -469,6 +501,14 @@ class ReplayRun:
     def active_states(self, actor: str, t: float) -> List[StateInterval]:
         local = self.local_events.get(actor)
         return [] if local is None else [item for item in local.intervals if item.active_at(t)]
+
+    def perceived_lines(self, actor: str, t: float) -> Optional[List[str]]:
+        """The recorder's own perceived state at ``t`` as compact lines (tracks named
+        as in ``subject_name``); None when the reconstruction wrote no perceived state."""
+        perceived = self.perceived.get(actor)
+        if perceived is None:
+            return None
+        return compact_state(perceived.state_at(t), lambda track: self.subject_name(actor, track))
 
     def collisions_near(self, t: float, window: float) -> List[CollisionMark]:
         """Collisions in (t - window, t]."""

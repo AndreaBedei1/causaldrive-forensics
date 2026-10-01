@@ -140,6 +140,21 @@ class EventTimelineTests(unittest.TestCase):
         self.assertEqual(active(0.45), [("MOVING", None), ("CLOSING", "track_001")])
         self.assertEqual(active(1.6), [("MOVING", None)])
         self.assertEqual([e.event_type for e in run.recent_events("A", 1.7, 1.0)], ["CLOSING_END"])
+        self.assertIsNone(run.perceived_lines("A", 1.0))  # no perceived state written: pairs are used
+
+    def test_perceived_state_is_read_from_the_trace_frames(self):
+        def frame(t, closing, visible=True):
+            track = {"visible": visible, "CLOSING": closing if visible else "UNKNOWN"}
+            return {"t_local": t, "facts": [], "events": [],
+                    "perceived_state": {"ego": {"MOVING": True}, "external": {"track_001": track}, "signs": {}}}
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = _make_run(Path(tmp))
+            _write(run_dir / "reconstruction" / "A" / "local_trace.jsonl",
+                   [frame(0.0, False), frame(0.5, True), frame(1.0, True, visible=False)], True)
+            run = ReplayRun.load(run_dir)
+        self.assertEqual(run.perceived_lines("A", 0.45), ["ego: MOVING", "track_001 (B): VISIBLE"])
+        self.assertEqual(run.perceived_lines("A", 0.5), ["ego: MOVING", "track_001 (B): VISIBLE, CLOSING"])
+        self.assertEqual(run.perceived_lines("A", 2.0), ["ego: MOVING", "lost (states UNKNOWN): track_001 (B)"])
 
     def test_zero_length_open_and_unentered_states(self):
         events = [ReplayEvent(1.0, "A", "TRACK_APPEARED", "t1", "e1"),

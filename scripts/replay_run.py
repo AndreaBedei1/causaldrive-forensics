@@ -7,8 +7,10 @@ Every rendered frame, the recorded ego.jsonl pose of each vehicle is
 interpolated at the playback time and applied directly to a physics-less CARLA
 actor.  No scenario controller runs and CARLA simulates no vehicle physics, so
 every playback speed shows exactly the recorded trajectories.  Reconstructed
-events (local graphs, global collisions, track associations) are only read and
-displayed; nothing is written anywhere.
+events (local graphs, global collisions, track associations) and each
+recorder's perceived state (``local_trace.jsonl``: visible / lost tracks,
+CLOSING, CRITICAL_TTC, PATH_CONFLICT, CUT_IN, ...) are only read and
+displayed, never derived here; nothing is written anywhere.
 
 Controls: SPACE play/pause, R restart, LEFT/RIGHT seek 0.5 s (with SHIFT
 0.05 s), N/P next/previous reconstructed event, 1-4 speed 0.25/0.5/1/2x,
@@ -416,11 +418,20 @@ class ReplayApp:
         return box
 
     def _vehicle_lines(self, pid: str, t: float) -> List[Tuple[str, Tuple[int, int, int], Any]]:
-        """Active reconstructed states, then the events of the last EVENT_WINDOW_S (newest first)."""
+        """The recorder's perceived state as the reconstruction wrote it (else its open
+        START/END pairs), then the events of the last EVENT_WINDOW_S (newest first)."""
         lines = []
-        for state in self.run.active_states(pid, t):
-            subject = self.run.subject_name(pid, state.subject)
-            lines.append((state.state + (" → " + subject if subject else ""), (255, 255, 255), self.font_small))
+        perceived = self.run.perceived_lines(pid, t)
+        if perceived is not None:
+            for text in perceived:
+                lost = text.startswith("lost")
+                alert = any(name in text for name in ("CUT_IN", "PATH_CONFLICT", "CRITICAL_TTC"))
+                rgb = (150, 150, 150) if lost else (255, 150, 90) if alert else (255, 255, 255)
+                lines.append((text, rgb, self.font_small))
+        else:
+            for state in self.run.active_states(pid, t):
+                subject = self.run.subject_name(pid, state.subject)
+                lines.append((state.state + (" → " + subject if subject else ""), (255, 255, 255), self.font_small))
         for event in reversed(self.run.recent_events(pid, t, EVENT_WINDOW_S)):
             subject = self.run.subject_name(pid, event.subject)
             lines.append(("» " + event.event_type + (" → " + subject if subject else ""),

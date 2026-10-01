@@ -22,7 +22,7 @@ names (``track_001``, ``sign-0``): no global identity enters a local state.
 from __future__ import annotations
 
 from bisect import bisect_left, bisect_right
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 UNKNOWN = "UNKNOWN"
 EGO_STATES = ("MOVING", "STOP", "BRAKE", "HARD_BRAKE", "STRONG_THROTTLE", "SPEED_LIMIT_EXCEEDED")
@@ -156,11 +156,13 @@ class PerceivedWorld:
         return {"ego": ego, "external": external, "signs": signs}
 
 
-def compact_state(snapshot: Optional[Dict[str, Any]]) -> List[str]:
+def compact_state(snapshot: Optional[Dict[str, Any]], name_of: Optional[Callable[[str], str]] = None) -> List[str]:
     """Short human-readable lines: true states by name, unknown ones with '?',
-    false ones omitted, lost tracks on one line."""
+    false ones omitted, lost tracks on one line.  ``name_of`` may decorate the
+    local track names for display; the state itself is never renamed."""
     if not snapshot:
         return []
+    name_of = name_of or (lambda name: name)
     lines = []
     ego = snapshot.get("ego", {})
     if ego and all(value == UNKNOWN for value in ego.values()):
@@ -172,11 +174,11 @@ def compact_state(snapshot: Optional[Dict[str, Any]]) -> List[str]:
     lost = []
     for track_id, state in snapshot.get("external", {}).items():
         if not state.get("visible"):
-            lost.append(track_id)
+            lost.append(name_of(track_id))
             continue
         names = [(name.replace("PREDICTED_PATH_CONFLICT", "PATH_CONFLICT"), state.get(name)) for name in TRACK_STATES]
         shown = [name for name, value in names if value is True] + [name + "?" for name, value in names if value == UNKNOWN]
-        lines.append("{0}: VISIBLE{1}".format(track_id, "".join(", " + item for item in shown)))
+        lines.append("{0}: VISIBLE{1}".format(name_of(track_id), "".join(", " + item for item in shown)))
     if lost:
         lines.append("lost (states UNKNOWN): " + ", ".join(lost))
     for sign_id, sign in snapshot.get("signs", {}).items():

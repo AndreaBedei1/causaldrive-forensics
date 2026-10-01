@@ -31,6 +31,14 @@ class RenderTests(unittest.TestCase):
         self.assertIn("simultaneous at 0.05 s resolution", global_md)
         # DOT labels stay minimal: type, who, time.
         self.assertIn('"A:e07" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
+        # The perceived state is rendered compactly, once per timestamp, never as JSON in the node table.
+        self.assertIn("## Perceived state before each event", local_md)
+        self.assertIn("| 3.00 | A:e07 BRAKE_START | ego: MOVING, SPEED_LIMIT_EXCEEDED<br>track_001: VISIBLE, "
+                      "CLOSING, CRITICAL_TTC, IN_EGO_PATH, PATH_CONFLICT | 2.90 |", local_md)
+        self.assertNotIn('{"ego"', local_md)
+        self.assertIn("## Perceived state before each event, per observing recorder", global_md)
+        self.assertIn("### Perceived state just before each collision report", report)
+        self.assertIn("### Tracks lost while a state was active", report)
 
 
 if __name__ == "__main__":
