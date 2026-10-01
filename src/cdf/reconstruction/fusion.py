@@ -8,12 +8,14 @@ This runs only after every local graph exists and the alignment is known.
    name such as ``A:track_001``: nothing is guessed.
 2. ``fuse_graphs`` places every local node on the global time axis, merges the
    matched collision reports into one node and keeps the provenance (graph,
-   local node, local time) of everything.
+   local node, local time) of everything, including each observing recorder's
+   own perceived state just before the event (local names, never rewritten).
 3. ``global_trace`` groups the global nodes by global time for humans.
 """
 
 from __future__ import annotations
 
+import copy
 import math
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -171,6 +173,16 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
     merged_node_ids = {node_id for event in merged_events for node_id in event["nodes"].values()}
 
     drafts: List[GlobalNode] = []
+    local_nodes = {(local.owner, node.node_id): node for local in locals_ for node in local.graph.nodes}
+
+    def beliefs(observations: Sequence[Observation]) -> Dict[str, Dict[str, Any]]:
+        out = {}
+        for obs in observations:
+            state = local_nodes[(obs.graph, obs.local_node)].perceived_state_before
+            if state is not None:
+                out[obs.graph] = copy.deepcopy(state)
+        return out
+
     for local in sorted(locals_, key=lambda item: item.owner):
         clock = alignment.graphs[local.owner]
         for node in local.graph.nodes:
@@ -184,6 +196,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                 attributes=dict(node.attributes),
                 source=node.source, confidence=node.confidence,
                 observations=[Observation(local.owner, node.node_id, node.t_local)]))
+            drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
     for event in merged_events:
         graphs = sorted(event["graphs"])
         times = [alignment.graphs[graph].to_global(event["t_local"][graph]) for graph in graphs]
@@ -195,6 +208,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                         "peak_impulse": dict(event["peak_impulse"])},
             source="collision_sensor", confidence=event["confidence"],
             observations=[Observation(graph, event["nodes"][graph], event["t_local"][graph]) for graph in graphs]))
+        drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
 
     aligned = display_order([node for node in drafts if node.t_global is not None],
                             lambda node: node.t_global, lambda node: node.event_type,

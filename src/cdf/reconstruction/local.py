@@ -12,8 +12,11 @@ Nothing in this module looks at another recorder.
 FACTS in the 10 Hz trace carry the quantitative evidence (speed, pedals,
 ranges, TTC, ...).  EVENTS are the semantic transitions derived from the same
 evidence, mostly NAME_START / NAME_END pairs, and they are the graph nodes.
-To add a state: compute its ``active_intervals`` and pass them to
-``state_events``.
+The same intervals also feed the recorder's PERCEIVED STATE (``world_state``):
+true / false / UNKNOWN per state, attached to every event as the state just
+before it and to every trace frame.
+To add a state: compute its ``active_intervals``, pass them to
+``state_events`` and register the per-sample values with the world.
 """
 
 from __future__ import annotations
@@ -31,6 +34,7 @@ from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, G
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
 from .tracking import (EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
+from .world_state import PerceivedWorld, span_values
 
 # A pedal release shorter than this is a noisy dip, not the end of the action.
 PEDAL_RELEASE_DEBOUNCE_S = 0.2
@@ -44,6 +48,15 @@ PATH_HYSTERESIS_M = 0.5
 # The camera sign tracker ends a track after this gap without a detection
 # (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
 DEFAULT_SIGN_TRACK_GAP_S = 0.6
+# Local sign continuity: a sign track that starts within this gap after an
+# earlier one of the same class vanished, at the same image place (centres and
+# sizes of their best detections), while the recorder stood still (so image
+# positions are comparable), is the same sign reacquired.
+SIGN_REACQUIRE_MAX_GAP_S = 5.0
+SIGN_REACQUIRE_MAX_SPEED_MPS = 0.5
+SIGN_REACQUIRE_MAX_TURN_DEG = 3.0
+SIGN_REACQUIRE_MAX_CENTRE_PX = 15.0
+SIGN_REACQUIRE_MAX_SIZE_RATIO = 1.25
 
 Span = Tuple[int, Optional[int]]
 
@@ -143,7 +156,7 @@ def _lasting(spans: Sequence[Span], times: Sequence[float]) -> List[Span]:
 # --------------------------------------------------------------------------
 
 def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
-                   cfg: SemanticsConfig) -> List[SemanticEvent]:
+                   cfg: SemanticsConfig, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
     """BRAKE, HARD_BRAKE and STRONG_THROTTLE states from the recorder's own pedals.
 
     HARD_BRAKE nests inside BRAKE because its threshold is higher.  Pedal values
@@ -158,6 +171,8 @@ def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_orig
     def pedal_state(name: str, values: List[float], level: float) -> List[SemanticEvent]:
         spans = active_intervals(times, values, lambda value: value >= level, lambda value: value < level,
                                  PEDAL_RELEASE_DEBOUNCE_S)
+        if world is not None:
+            world.add_ego_state(name, times, spans)
         return state_events(owner, None, name + "_START", name + "_END", ACTION, "controls", times, spans)
 
     return (pedal_state("BRAKE", brake, cfg.brake_onset_threshold)
@@ -166,7 +181,7 @@ def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_orig
 
 
 def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
-                  speed_limit_kmh: Optional[float]) -> List[SemanticEvent]:
+                  speed_limit_kmh: Optional[float], world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
     """MOVING and STOP states and, given a supplied speed limit, SPEED_LIMIT_EXCEEDED.
 
     A stop starts when moving ends (below ``full_stop_speed_mps``) and ends when
@@ -178,8 +193,12 @@ def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
     moving = active_intervals(times, speeds, lambda speed: speed > MOVING_SPEED_MPS,
                               lambda speed: speed < cfg.full_stop_speed_mps,
                               initially_on=speeds[0] >= cfg.full_stop_speed_mps)
+    stopped = _gaps(moving, len(times))
     events = state_events(owner, None, "MOVING_START", "MOVING_END", FACT, "ego", times, moving)
-    events += state_events(owner, None, "STOP_START", "STOP_END", FACT, "ego", times, _gaps(moving, len(times)))
+    events += state_events(owner, None, "STOP_START", "STOP_END", FACT, "ego", times, stopped)
+    if world is not None:
+        world.add_ego_state("MOVING", times, moving)
+        world.add_ego_state("STOP", times, stopped)
     if speed_limit_kmh is not None:
         limit = float(speed_limit_kmh) / 3.6
         margin = cfg.speed_limit_hysteresis_kmh / 3.6
@@ -187,6 +206,10 @@ def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
                                     lambda speed: speed <= limit - margin)
         events += state_events(owner, None, "SPEED_LIMIT_EXCEEDED_START", "SPEED_LIMIT_EXCEEDED_END",
                                FACT, "ego", times, speeding)
+        if world is not None:
+            world.add_ego_state("SPEED_LIMIT_EXCEEDED", times, speeding)
+    elif world is not None:
+        world.add_ego_unknown("SPEED_LIMIT_EXCEEDED", times[0])  # no limit supplied: cannot be established
     return events
 
 
@@ -214,41 +237,101 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
 SIGN_STATES = {"STOP": "STOP_SIGN_DETECTED", "YIELD": "YIELD_SIGN_DETECTED"}
 
 
+def _stood_still(ego: EgoTrajectory, start: float, end: float) -> bool:
+    """The recorder did not move or turn between two of its own instants (odometry only)."""
+    during = [state for state in ego.states if start - 1e-6 <= state.t_local <= end + 1e-6]
+    turn = abs(math.degrees(ego.at(end).heading - ego.at(start).heading))
+    return (bool(during) and turn <= SIGN_REACQUIRE_MAX_TURN_DEG
+            and all(state.speed <= SIGN_REACQUIRE_MAX_SPEED_MPS for state in during))
+
+
+def _same_image_place(first: Sequence[float], second: Sequence[float]) -> bool:
+    (x1, y1, w1, h1), (x2, y2, w2, h2) = first, second
+    if min(w1, h1, w2, h2) <= 0:
+        return False
+    centre = math.hypot((x1 + w1 / 2.0) - (x2 + w2 / 2.0), (y1 + h1 / 2.0) - (y2 + h2 / 2.0))
+    return (centre <= SIGN_REACQUIRE_MAX_CENTRE_PX and max(w1 / w2, w2 / w1) <= SIGN_REACQUIRE_MAX_SIZE_RATIO
+            and max(h1 / h2, h2 / h1) <= SIGN_REACQUIRE_MAX_SIZE_RATIO)
+
+
+def sign_continuity(signs: Sequence[Mapping[str, Any]], clock_origin: float,
+                    ego: Optional[EgoTrajectory]) -> Dict[str, str]:
+    """Camera tracker id -> local sign id.
+
+    A sign track is the same sign as an earlier one (and takes its id) only on
+    conservative local evidence: same class, it starts within
+    SIGN_REACQUIRE_MAX_GAP_S of the earlier one's last detection, at the same
+    image place, and the recorder stood still in between, so that image
+    positions are comparable.  Otherwise it stays a sign of its own.
+    """
+    ordered = sorted(signs, key=lambda record: float(record["timestamp_first"]))
+    local_id: Dict[str, str] = {}
+    for index, record in enumerate(ordered):
+        track_id = str(record["sign_track_id"])
+        local_id[track_id] = track_id
+        if ego is None or not record.get("best_bbox"):
+            continue
+        first = _local_time(record, clock_origin, "timestamp_first")
+        for earlier in reversed(ordered[:index]):
+            if str(earlier.get("class", "")).upper() != str(record.get("class", "")).upper():
+                continue
+            last = _local_time(earlier, clock_origin, "timestamp_last")
+            if (0.0 <= first - last <= SIGN_REACQUIRE_MAX_GAP_S and earlier.get("best_bbox")
+                    and _stood_still(ego, last, first) and _same_image_place(earlier["best_bbox"], record["best_bbox"])):
+                local_id[track_id] = local_id[str(earlier["sign_track_id"])]
+                break
+    return local_id
+
+
 def sign_events(owner: str, signs: Sequence[Mapping[str, Any]], clock_origin: float,
-                recording_end: float, track_gap_s: float) -> List[SemanticEvent]:
+                recording_end: float, track_gap_s: float, ego: Optional[EgoTrajectory] = None,
+                world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
     """A detection window per confirmed camera sign track.
 
     START: the track is confirmed, i.e. the detection is reliably established.
     END: its last detection, provided the recording lasted long enough for the
     tracker to give the track up; a sign still in view at the end has no END.
-    END means this recorder no longer perceives the sign, not that the legal
-    obligation it imposes ended.
+    END means this recorder no longer perceives the sign (it is no longer
+    VISIBLE), not that the legal obligation it imposes ended; the sign stays
+    KNOWN in the perceived state.  A track that reacquires an earlier sign
+    (``sign_continuity``) keeps that sign's id, with ``reacquired`` and its own
+    ``sign_track`` id as attributes.
     """
     events = []
-    for record in signs:
+    local_id = sign_continuity(signs, clock_origin, ego)
+    for record in sorted(signs, key=lambda item: float(item["timestamp_first"])):
         name = SIGN_STATES.get(str(record.get("class", "")).upper())
         if name is None:
             continue
-        subject = str(record["sign_track_id"])  # the camera tracker's own id, e.g. sign-0
+        track_id = str(record["sign_track_id"])  # the camera tracker's own id, e.g. sign-0
+        subject = local_id[track_id]
         confidence = round(float(record.get("best_confidence", 0.0)), 3)
+        start = _local_time(record, clock_origin, "timestamp_confirmed")
+        # The detector's image-only judgement whether the sign governs this path.
+        attributes: Dict[str, Any] = {"relevant_to_ego_path": bool(record.get("relevant_to_ego_path"))}
+        if subject != track_id:
+            attributes.update(reacquired=True, sign_track=track_id)
         events.append(SemanticEvent(
             type=name + "_START", kind=PERCEPTION, actor_id=owner, subject_id=subject,
-            t_local=_local_time(record, clock_origin, "timestamp_confirmed"),
-            # The detector's image-only judgement whether the sign governs this path.
-            attributes={"relevant_to_ego_path": bool(record.get("relevant_to_ego_path"))},
-            source="camera", confidence=confidence))
+            t_local=start, attributes=attributes, source="camera", confidence=confidence))
         last = _local_time(record, clock_origin, "timestamp_last")
-        if recording_end - last > track_gap_s:
+        end = last if recording_end - last > track_gap_s else None
+        if end is not None:
             events.append(SemanticEvent(type=name + "_END", kind=PERCEPTION, actor_id=owner,
-                                        subject_id=subject, t_local=last, source="camera",
-                                        confidence=confidence))
+                                        subject_id=subject, t_local=end, source="camera", confidence=confidence,
+                                        attributes={} if subject == track_id else {"sign_track": track_id}))
+        if world is not None:
+            world.add_sign_window(subject, str(record.get("class", "")).upper(), start, end,
+                                  bool(record.get("relevant_to_ego_path")))
     return events
 
 
-def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig) -> List[SemanticEvent]:
+def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
+                 world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
     """TRACK_APPEARED / TRACK_LOST and the EGO_PATH, CLOSING and CRITICAL_TTC states of a track.
 
-    Ranges, speeds and TTC stay in the TRACK_STATE facts.
+    Ranges, speeds and TTC stay in the TRACK_STATE facts.  With ``world``, the
+    per-sample states are registered as the recorder's perceived state.
     """
     samples = track.samples
     times = [round(sample.t_local, 4) for sample in samples]
@@ -270,8 +353,9 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     closing = cfg.closing_speed_threshold_mps
     spans = active_intervals(times, samples, lambda s: s.closing_speed_mps >= closing,
                              lambda s: s.closing_speed_mps < closing / 2.0)
+    closing_spans = _lasting(spans, times)
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
-                           times, _lasting(spans, times))
+                           times, closing_spans)
 
     # A critical TTC needs closing: it ends at the latest with CLOSING (at very
     # short range a slow residual closing speed would otherwise keep TTC low).
@@ -279,12 +363,21 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     spans = active_intervals(times, samples,
                              lambda s: s.ttc_s is not None and s.ttc_s <= critical and s.closing_speed_mps >= closing,
                              lambda s: s.ttc_s is None or s.ttc_s > critical or s.closing_speed_mps < closing / 2.0)
+    critical_spans = _lasting(spans, times)
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
-                           times, _lasting(spans, times))
+                           times, critical_spans)
 
-    if times[-1] < recording_end - 1e-3:
+    lost_at = times[-1] if times[-1] < recording_end - 1e-3 else None
+    if lost_at is not None:
         events.append(SemanticEvent(type="TRACK_LOST", kind=PERCEPTION, actor_id=owner, subject_id=subject,
-                                    t_local=times[-1], source="radar"))
+                                    t_local=lost_at, source="radar"))
+    if world is not None:
+        count = len(times)
+        world.add_track(subject, times, {
+            "CLOSING": span_values(count, closing_spans),
+            "CRITICAL_TTC": span_values(count, critical_spans),
+            "IN_EGO_PATH": span_values(count, path),
+        }, lost_at)
     return events
 
 
@@ -338,14 +431,16 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
 
 def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, Any]],
                 tracks: Sequence[LocalTrack], events: Sequence[SemanticEvent],
-                clock_origin: float, trace_hz: float) -> List[TraceFrame]:
+                clock_origin: float, trace_hz: float,
+                world: Optional[PerceivedWorld] = None) -> List[TraceFrame]:
     """Sample what the recorder knows every 1/trace_hz seconds of its own clock.
 
     When the recording ends between two grid instants, one last frame is added
     at the recording end, so no fact is extrapolated and no event is listed
     before it happens.  Each discrete event keeps its exact ``t_local`` and is
     listed once, in the first frame at or after it: frame t holds the events of
-    (previous frame, t].
+    (previous frame, t].  With ``world``, each frame also holds the recorder's
+    perceived state at t (after the transitions at t).
     """
     step = 1.0 / trace_hz
     first = int(math.ceil(ego.start / step - 1e-6))
@@ -371,7 +466,8 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
                 sample = track.sample_near(t_local)
                 if sample is not None:
                     facts.append(track_state_fact(owner, track.track_id, sample, t_local))
-        frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, [])))
+        frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
+                                 perceived_state=None if world is None else world.snapshot(t_local, before=False)))
     return frames
 
 
@@ -447,16 +543,25 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
                                     clock_origin, cfg.tracking)
 
     semantics = cfg.semantics
+    world = PerceivedWorld()
     events: List[SemanticEvent] = []
-    events += control_events(owner, controls, clock_origin, semantics)
-    events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"))
+    events += control_events(owner, controls, clock_origin, semantics, world)
+    events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"), world)
     events += collision_events(owner, collisions, clock_origin, cfg.collision)
-    events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir))
+    events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
     for track in tracks:
-        events += track_events(owner, track, ego.end, semantics)
+        events += track_events(owner, track, ego.end, semantics, world=world)
     events = number_events(owner, events)
 
-    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz)
+    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, world=world)
+    frame_times = [frame.t_local for frame in trace]
+    for event in events:
+        # The state just before the event: all events at one timestamp share it.
+        state = world.snapshot(event.t_local, before=True)
+        # The latest trace frame before the event: its facts are the quantities behind this state.
+        earlier = bisect.bisect_left(frame_times, event.t_local - 1e-6) - 1
+        state["facts_t_local"] = frame_times[earlier] if earlier >= 0 else None
+        event.perceived_state_before = state
     recorder = {
         "owner": owner,
         "clock": {"origin_source_timestamp": clock_origin,

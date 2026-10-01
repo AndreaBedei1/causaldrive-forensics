@@ -57,14 +57,22 @@ def sign_windows(graph: LocalGraph, sign: str = "STOP_SIGN_DETECTED") -> List[Di
     Inside means strictly after the window's START and strictly before its END
     (equal times are simultaneous, hence unresolved).  A window without END (the
     sign still in view when the recording ended) lasts until the recording end.
+    A reacquired sign has several windows; each START pairs with the next END
+    of the same sign.
     """
-    starts = [node for node in graph.nodes if node.event_type == sign + "_START"]
-    ends = {node.subject_id: node for node in graph.nodes if node.event_type == sign + "_END"}
     stops = [node for node in graph.nodes if node.event_type == "STOP_START"]
     recording_end = float(graph.recorder.get("end_t_local", float("inf")))
+    pairs: List[Tuple[GraphNode, Optional[GraphNode]]] = []
+    open_: Dict[Optional[str], int] = {}
+    for node in graph.nodes:
+        if node.event_type == sign + "_START":
+            open_[node.subject_id] = len(pairs)
+            pairs.append((node, None))
+        elif node.event_type == sign + "_END" and node.subject_id in open_:
+            index = open_.pop(node.subject_id)
+            pairs[index] = (pairs[index][0], node)
     windows = []
-    for start in starts:
-        end = ends.get(start.subject_id)
+    for start, end in pairs:
         if end is not None:
             inside = [stop for stop in stops if start.t_local < stop.t_local < end.t_local]
         else:
@@ -73,6 +81,7 @@ def sign_windows(graph: LocalGraph, sign: str = "STOP_SIGN_DETECTED") -> List[Di
                         "end_node": None if end is None else end.node_id,
                         "end_t_local": None if end is None else end.t_local,
                         "relevant_to_ego_path": start.attributes.get("relevant_to_ego_path"),
+                        "reacquired": bool(start.attributes.get("reacquired")),
                         "stop_starts_inside": [stop.node_id for stop in inside],
                         "already_stopped_at_start": _stopped_at(graph, start.t_local)})
     return windows

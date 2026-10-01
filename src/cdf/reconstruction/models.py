@@ -14,6 +14,10 @@ A START at the first observation (recording start, or a track's first sample)
 has ``{"active_at_first_observation": true}``: the state was already active and
 its real beginning was not observed.  A state still active when observation
 ends has no END.
+
+Every event also carries ``perceived_state_before``: the recorder's own
+semantic state just before the event's timestamp (see ``world_state``), shared
+by all events at that timestamp.  States are true, false or "UNKNOWN".
 """
 
 from __future__ import annotations
@@ -30,8 +34,10 @@ OUTCOME = "OUTCOME"
 # The two edge relations.  PRECEDES links an event to every event at the next
 # later timestamp; events that share a timestamp are simultaneous at the
 # recorder's resolution and are never linked by PRECEDES.  SAME_TRACK links a
-# track's TRACK_APPEARED to every later event about that track; it groups
-# events and carries no temporal meaning.
+# track's TRACK_APPEARED to every other event whose subject is that same local
+# track: it is exactly "same subject_id", made explicit as graph structure for
+# graph queries.  It groups events, carries no temporal meaning, and its
+# direction (from the appearance) implies no order.
 PRECEDES = "PRECEDES"
 SAME_TRACK = "SAME_TRACK"
 
@@ -133,6 +139,8 @@ class SemanticEvent:
     source: str = ""
     confidence: Optional[float] = None
     event_id: Optional[str] = None
+    # The recorder's semantic state just before t_local (graph events only).
+    perceived_state_before: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return _drop_none({
@@ -140,6 +148,7 @@ class SemanticEvent:
             "actor_id": self.actor_id, "subject_id": self.subject_id,
             "t_local": self.t_local, "attributes": copy.deepcopy(self.attributes),
             "source": self.source or None, "confidence": self.confidence,
+            "perceived_state_before": copy.deepcopy(self.perceived_state_before),
         })
 
     @classmethod
@@ -148,7 +157,8 @@ class SemanticEvent:
                    t_local=data["t_local"], subject_id=data.get("subject_id"),
                    attributes=copy.deepcopy(data.get("attributes", {})),
                    source=data.get("source", ""), confidence=data.get("confidence"),
-                   event_id=data.get("event_id"))
+                   event_id=data.get("event_id"),
+                   perceived_state_before=copy.deepcopy(data.get("perceived_state_before")))
 
 
 @dataclass
@@ -158,11 +168,16 @@ class TraceFrame:
     t_local: float
     facts: List[SemanticEvent] = field(default_factory=list)
     events: List[SemanticEvent] = field(default_factory=list)
+    # The recorder's semantic state at t_local, after the transitions at t_local.
+    perceived_state: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"t_local": self.t_local,
-                "facts": [fact.to_dict() for fact in self.facts],
-                "events": [event.to_dict() for event in self.events]}
+        out = {"t_local": self.t_local,
+               "facts": [fact.to_dict() for fact in self.facts],
+               "events": [event.to_dict() for event in self.events]}
+        if self.perceived_state is not None:
+            out["perceived_state"] = copy.deepcopy(self.perceived_state)
+        return out
 
 
 @dataclass
@@ -178,6 +193,7 @@ class GraphNode:
     attributes: Dict[str, Any]
     source: str
     confidence: Optional[float]
+    perceived_state_before: Optional[Dict[str, Any]] = None
 
     @classmethod
     def from_event(cls, event: SemanticEvent) -> "GraphNode":
@@ -186,19 +202,25 @@ class GraphNode:
         return cls(node_id=event.event_id, event_type=event.type, kind=event.kind,
                    actor_id=event.actor_id, subject_id=event.subject_id,
                    t_local=event.t_local, attributes=copy.deepcopy(event.attributes),
-                   source=event.source, confidence=event.confidence)
+                   source=event.source, confidence=event.confidence,
+                   perceived_state_before=copy.deepcopy(event.perceived_state_before))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"node_id": self.node_id, "event_type": self.event_type, "kind": self.kind,
-                "actor_id": self.actor_id, "subject_id": self.subject_id,
-                "t_local": self.t_local, "attributes": copy.deepcopy(self.attributes),
-                "source": self.source, "confidence": self.confidence}
+        out = {"node_id": self.node_id, "event_type": self.event_type, "kind": self.kind,
+               "actor_id": self.actor_id, "subject_id": self.subject_id,
+               "t_local": self.t_local, "attributes": copy.deepcopy(self.attributes),
+               "source": self.source, "confidence": self.confidence}
+        if self.perceived_state_before is not None:
+            out["perceived_state_before"] = copy.deepcopy(self.perceived_state_before)
+        return out
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "GraphNode":
-        return cls(**{key: copy.deepcopy(data[key]) for key in (
+        node = cls(**{key: copy.deepcopy(data[key]) for key in (
             "node_id", "event_type", "kind", "actor_id", "subject_id", "t_local",
             "attributes", "source", "confidence")})
+        node.perceived_state_before = copy.deepcopy(data.get("perceived_state_before"))
+        return node
 
 
 @dataclass
@@ -348,6 +370,9 @@ class GlobalNode:
     source: str
     confidence: Optional[float]
     observations: List[Observation]
+    # Local beliefs just before the event, per observing recorder, in that
+    # recorder's own local names (track_001, ...): never rewritten by fusion.
+    perceived_state_before: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {"node_id": self.node_id, "event_type": self.event_type, "kind": self.kind,
@@ -355,7 +380,8 @@ class GlobalNode:
                 "participants": list(self.participants), "t_global": self.t_global,
                 "attributes": copy.deepcopy(self.attributes), "source": self.source,
                 "confidence": self.confidence,
-                "observations": [obs.to_dict() for obs in self.observations]}
+                "observations": [obs.to_dict() for obs in self.observations],
+                "perceived_state_before": copy.deepcopy(self.perceived_state_before)}
 
 
 @dataclass
