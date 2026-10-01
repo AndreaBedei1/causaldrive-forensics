@@ -17,34 +17,36 @@ digraph "local_B" {
   "B:e13" [label="HARD_BRAKE_START\nB\nt=2.55", fillcolor="#fde68a"];
   "B:e14" [label="CRITICAL_TTC_END\nB -> track_001\nt=2.70", fillcolor="#bfdbfe"];
   "B:e15" [label="TRACK_LOST\nB -> track_001\nt=2.85", fillcolor="#bfdbfe"];
-  "B:e16" [label="MOVING_END\nB\nt=3.40", fillcolor="#e5e7eb"];
-  "B:e17" [label="STOP_START\nB\nt=3.40", fillcolor="#e5e7eb"];
-  "B:e18" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=3.40", fillcolor="#bfdbfe"];
-  "B:e19" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=3.70", fillcolor="#bfdbfe"];
-  "B:e20" [label="EGO_PATH_ENTRY\nB -> track_002\nt=3.90", fillcolor="#bfdbfe"];
-  "B:e21" [label="TRACK_APPEARED\nB -> track_003\nt=3.95", fillcolor="#bfdbfe"];
-  "B:e22" [label="CLOSING_START\nB -> track_003\nt=3.95", fillcolor="#bfdbfe"];
-  "B:e23" [label="CRITICAL_TTC_END\nB -> track_002\nt=4.20", fillcolor="#bfdbfe"];
-  "B:e24" [label="CLOSING_END\nB -> track_002\nt=4.25", fillcolor="#bfdbfe"];
-  "B:e25" [label="EGO_PATH_EXIT\nB -> track_002\nt=4.40", fillcolor="#bfdbfe"];
-  "B:e26" [label="STOP_SIGN_DETECTED_START\nB -> sign-2\nt=4.80", fillcolor="#bfdbfe"];
-  "B:e27" [label="TRACK_LOST\nB -> track_002\nt=4.80", fillcolor="#bfdbfe"];
-  "B:e28" [label="STOP_SIGN_DETECTED_END\nB -> sign-2\nt=4.80", fillcolor="#bfdbfe"];
-  "B:e29" [label="CLOSING_END\nB -> track_003\nt=5.35", fillcolor="#bfdbfe"];
-  "B:e30" [label="STOP_SIGN_DETECTED_START\nB -> sign-3\nt=5.60", fillcolor="#bfdbfe"];
-  "B:e31" [label="STOP_SIGN_DETECTED_END\nB -> sign-3\nt=5.60", fillcolor="#bfdbfe"];
-  "B:e32" [label="EGO_PATH_ENTRY\nB -> track_003\nt=5.65", fillcolor="#bfdbfe"];
-  "B:e33" [label="EGO_PATH_EXIT\nB -> track_003\nt=6.45", fillcolor="#bfdbfe"];
-  "B:e34" [label="STOP_SIGN_DETECTED_START\nB -> sign-4\nt=6.70", fillcolor="#bfdbfe"];
-  "B:e35" [label="STRONG_THROTTLE_START\nB\nt=10.55", fillcolor="#fde68a"];
+  "B:e16" [label="PREDICTED_PATH_CONFLICT_START\nB -> track_002\nt=2.95", fillcolor="#bfdbfe"];
+  "B:e17" [label="PREDICTED_PATH_CONFLICT_END\nB -> track_002\nt=3.30", fillcolor="#bfdbfe"];
+  "B:e18" [label="MOVING_END\nB\nt=3.40", fillcolor="#e5e7eb"];
+  "B:e19" [label="STOP_START\nB\nt=3.40", fillcolor="#e5e7eb"];
+  "B:e20" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=3.40", fillcolor="#bfdbfe"];
+  "B:e21" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=3.70", fillcolor="#bfdbfe"];
+  "B:e22" [label="EGO_PATH_ENTRY\nB -> track_002\nt=3.90", fillcolor="#bfdbfe"];
+  "B:e23" [label="TRACK_APPEARED\nB -> track_003\nt=3.95", fillcolor="#bfdbfe"];
+  "B:e24" [label="CLOSING_START\nB -> track_003\nt=3.95", fillcolor="#bfdbfe"];
+  "B:e25" [label="CRITICAL_TTC_END\nB -> track_002\nt=4.20", fillcolor="#bfdbfe"];
+  "B:e26" [label="CLOSING_END\nB -> track_002\nt=4.25", fillcolor="#bfdbfe"];
+  "B:e27" [label="EGO_PATH_EXIT\nB -> track_002\nt=4.40", fillcolor="#bfdbfe"];
+  "B:e28" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=4.80", fillcolor="#bfdbfe"];
+  "B:e29" [label="TRACK_LOST\nB -> track_002\nt=4.80", fillcolor="#bfdbfe"];
+  "B:e30" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=4.80", fillcolor="#bfdbfe"];
+  "B:e31" [label="CLOSING_END\nB -> track_003\nt=5.35", fillcolor="#bfdbfe"];
+  "B:e32" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=5.60", fillcolor="#bfdbfe"];
+  "B:e33" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=5.60", fillcolor="#bfdbfe"];
+  "B:e34" [label="EGO_PATH_ENTRY\nB -> track_003\nt=5.65", fillcolor="#bfdbfe"];
+  "B:e35" [label="EGO_PATH_EXIT\nB -> track_003\nt=6.45", fillcolor="#bfdbfe"];
+  "B:e36" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=6.70", fillcolor="#bfdbfe"];
+  "B:e37" [label="STRONG_THROTTLE_START\nB\nt=10.55", fillcolor="#fde68a"];
   {rank=same; "B:e03"; "B:e04";}
   {rank=same; "B:e05"; "B:e06";}
   {rank=same; "B:e07"; "B:e08";}
   {rank=same; "B:e12"; "B:e13";}
-  {rank=same; "B:e16"; "B:e17"; "B:e18";}
-  {rank=same; "B:e21"; "B:e22";}
-  {rank=same; "B:e26"; "B:e27"; "B:e28";}
-  {rank=same; "B:e30"; "B:e31";}
+  {rank=same; "B:e18"; "B:e19"; "B:e20";}
+  {rank=same; "B:e23"; "B:e24";}
+  {rank=same; "B:e28"; "B:e29"; "B:e30";}
+  {rank=same; "B:e32"; "B:e33";}
   "B:e01" -> "B:e02" [label="PRECEDES"];
   "B:e02" -> "B:e03" [label="PRECEDES"];
   "B:e02" -> "B:e04" [label="PRECEDES"];
@@ -66,44 +68,48 @@ digraph "local_B" {
   "B:e13" -> "B:e14" [label="PRECEDES"];
   "B:e14" -> "B:e15" [label="PRECEDES"];
   "B:e15" -> "B:e16" [label="PRECEDES"];
-  "B:e15" -> "B:e17" [label="PRECEDES"];
-  "B:e15" -> "B:e18" [label="PRECEDES"];
-  "B:e16" -> "B:e19" [label="PRECEDES"];
+  "B:e16" -> "B:e17" [label="PRECEDES"];
+  "B:e17" -> "B:e18" [label="PRECEDES"];
   "B:e17" -> "B:e19" [label="PRECEDES"];
-  "B:e18" -> "B:e19" [label="PRECEDES"];
-  "B:e19" -> "B:e20" [label="PRECEDES"];
+  "B:e17" -> "B:e20" [label="PRECEDES"];
+  "B:e18" -> "B:e21" [label="PRECEDES"];
+  "B:e19" -> "B:e21" [label="PRECEDES"];
   "B:e20" -> "B:e21" [label="PRECEDES"];
-  "B:e20" -> "B:e22" [label="PRECEDES"];
-  "B:e21" -> "B:e23" [label="PRECEDES"];
+  "B:e21" -> "B:e22" [label="PRECEDES"];
   "B:e22" -> "B:e23" [label="PRECEDES"];
-  "B:e23" -> "B:e24" [label="PRECEDES"];
+  "B:e22" -> "B:e24" [label="PRECEDES"];
+  "B:e23" -> "B:e25" [label="PRECEDES"];
   "B:e24" -> "B:e25" [label="PRECEDES"];
   "B:e25" -> "B:e26" [label="PRECEDES"];
-  "B:e25" -> "B:e27" [label="PRECEDES"];
-  "B:e25" -> "B:e28" [label="PRECEDES"];
-  "B:e26" -> "B:e29" [label="PRECEDES"];
+  "B:e26" -> "B:e27" [label="PRECEDES"];
+  "B:e27" -> "B:e28" [label="PRECEDES"];
   "B:e27" -> "B:e29" [label="PRECEDES"];
-  "B:e28" -> "B:e29" [label="PRECEDES"];
-  "B:e29" -> "B:e30" [label="PRECEDES"];
+  "B:e27" -> "B:e30" [label="PRECEDES"];
+  "B:e28" -> "B:e31" [label="PRECEDES"];
   "B:e29" -> "B:e31" [label="PRECEDES"];
-  "B:e30" -> "B:e32" [label="PRECEDES"];
+  "B:e30" -> "B:e31" [label="PRECEDES"];
   "B:e31" -> "B:e32" [label="PRECEDES"];
-  "B:e32" -> "B:e33" [label="PRECEDES"];
+  "B:e31" -> "B:e33" [label="PRECEDES"];
+  "B:e32" -> "B:e34" [label="PRECEDES"];
   "B:e33" -> "B:e34" [label="PRECEDES"];
   "B:e34" -> "B:e35" [label="PRECEDES"];
+  "B:e35" -> "B:e36" [label="PRECEDES"];
+  "B:e36" -> "B:e37" [label="PRECEDES"];
   "B:e03" -> "B:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e07" -> "B:e08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e07" -> "B:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e07" -> "B:e20" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e21" -> "B:e22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e07" -> "B:e23" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e07" -> "B:e24" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e07" -> "B:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e07" -> "B:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e07" -> "B:e22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e23" -> "B:e24" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e07" -> "B:e25" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e07" -> "B:e26" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e07" -> "B:e27" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e21" -> "B:e29" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e21" -> "B:e32" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e21" -> "B:e33" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e07" -> "B:e29" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e23" -> "B:e31" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e23" -> "B:e34" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e23" -> "B:e35" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

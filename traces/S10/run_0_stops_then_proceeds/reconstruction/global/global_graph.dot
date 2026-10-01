@@ -48,10 +48,12 @@ digraph "global" {
   "g44" [label="STRONG_THROTTLE_END\nB\nunaligned", fillcolor="#fde68a"];
   "g45" [label="TRACK_APPEARED\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g46" [label="CLOSING_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g47" [label="CRITICAL_TTC_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g48" [label="TRACK_LOST\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g49" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
-  "g50" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
+  "g47" [label="PREDICTED_PATH_CONFLICT_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g48" [label="PREDICTED_PATH_CONFLICT_END\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g49" [label="CRITICAL_TTC_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g50" [label="TRACK_LOST\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g51" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
+  "g52" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-1\nunaligned", fillcolor="#bfdbfe"];
   "g08" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -75,4 +77,6 @@ digraph "global" {
   "g45" -> "g46" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g45" -> "g47" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g45" -> "g48" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g45" -> "g49" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g45" -> "g50" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

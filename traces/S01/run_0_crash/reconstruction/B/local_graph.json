@@ -39,7 +39,20 @@
         "active_at_first_observation": true
       },
       "source": "ego",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": "UNKNOWN",
+          "STOP": "UNKNOWN",
+          "BRAKE": "UNKNOWN",
+          "HARD_BRAKE": "UNKNOWN",
+          "STRONG_THROTTLE": "UNKNOWN",
+          "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": null
+      }
     },
     {
       "node_id": "B:e02",
@@ -50,7 +63,20 @@
       "t_local": 0.4,
       "attributes": {},
       "source": "controls",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "HARD_BRAKE": false,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 0.3
+      }
     },
     {
       "node_id": "B:e03",
@@ -61,7 +87,20 @@
       "t_local": 1.75,
       "attributes": {},
       "source": "controls",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "HARD_BRAKE": false,
+          "STRONG_THROTTLE": true,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 1.7
+      }
     },
     {
       "node_id": "B:e04",
@@ -72,7 +111,20 @@
       "t_local": 3.95,
       "attributes": {},
       "source": "controls",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "HARD_BRAKE": false,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 3.9
+      }
     },
     {
       "node_id": "B:e05",
@@ -83,7 +135,20 @@
       "t_local": 3.95,
       "attributes": {},
       "source": "controls",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "HARD_BRAKE": false,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 3.9
+      }
     },
     {
       "node_id": "B:e06",
@@ -94,7 +159,20 @@
       "t_local": 5.15,
       "attributes": {},
       "source": "ego",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": true,
+          "HARD_BRAKE": true,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 5.1
+      }
     },
     {
       "node_id": "B:e07",
@@ -105,7 +183,20 @@
       "t_local": 5.15,
       "attributes": {},
       "source": "ego",
-      "confidence": null
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": true,
+          "HARD_BRAKE": true,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 5.1
+      }
     },
     {
       "node_id": "B:e08",
@@ -118,7 +209,20 @@
         "peak_impulse": 17663.06
       },
       "source": "collision_sensor",
-      "confidence": 1.0
+      "confidence": 1.0,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": true,
+          "HARD_BRAKE": true,
+          "STRONG_THROTTLE": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": 6.4
+      }
     }
   ],
   "edges": [

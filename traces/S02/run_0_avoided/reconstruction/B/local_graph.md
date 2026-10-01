@@ -18,7 +18,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e04 | 3.15 | BRAKE_START | B | - | controls |  |
 | B:e05 | 3.60 | BRAKE_END | B | - | controls |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -29,9 +29,25 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e04 --PRECEDES--> B:e05
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
+| 0.35 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 0.30 |
+| 1.30 | B:e03 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE | 1.20 |
+| 3.15 | B:e04 BRAKE_START | ego: MOVING | 3.10 |
+| 3.60 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
+
 ## States still active when observation ended
 
 - MOVING, since B:e01 (t = 0.00 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 

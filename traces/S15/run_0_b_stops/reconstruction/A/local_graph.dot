@@ -9,8 +9,10 @@ digraph "local_A" {
   "A:e05" [label="CLOSING_START\nA -> track_002\nt=2.00", fillcolor="#bfdbfe"];
   "A:e06" [label="CRITICAL_TTC_START\nA -> track_002\nt=2.00", fillcolor="#bfdbfe"];
   "A:e07" [label="CRITICAL_TTC_START\nA -> track_001\nt=2.45", fillcolor="#bfdbfe"];
-  "A:e08" [label="TRACK_LOST\nA -> track_002\nt=3.80", fillcolor="#bfdbfe"];
-  "A:e09" [label="TRACK_LOST\nA -> track_001\nt=4.45", fillcolor="#bfdbfe"];
+  "A:e08" [label="PREDICTED_PATH_CONFLICT_START\nA -> track_002\nt=2.55", fillcolor="#bfdbfe"];
+  "A:e09" [label="PREDICTED_PATH_CONFLICT_END\nA -> track_002\nt=3.20", fillcolor="#bfdbfe"];
+  "A:e10" [label="TRACK_LOST\nA -> track_002\nt=3.80", fillcolor="#bfdbfe"];
+  "A:e11" [label="TRACK_LOST\nA -> track_001\nt=4.45", fillcolor="#bfdbfe"];
   {rank=same; "A:e01"; "A:e02"; "A:e03";}
   {rank=same; "A:e04"; "A:e05"; "A:e06";}
   "A:e01" -> "A:e04" [label="PRECEDES"];
@@ -27,10 +29,14 @@ digraph "local_A" {
   "A:e06" -> "A:e07" [label="PRECEDES"];
   "A:e07" -> "A:e08" [label="PRECEDES"];
   "A:e08" -> "A:e09" [label="PRECEDES"];
+  "A:e09" -> "A:e10" [label="PRECEDES"];
+  "A:e10" -> "A:e11" [label="PRECEDES"];
   "A:e02" -> "A:e03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e04" -> "A:e05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e04" -> "A:e06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e02" -> "A:e07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e04" -> "A:e08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e02" -> "A:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e04" -> "A:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e04" -> "A:e10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

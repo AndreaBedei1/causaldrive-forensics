@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 9.95 s | 101 | 7 | 10 | 1 | none |
+| A | 9.95 s | 101 | 9 | 14 | 1 | none |
 | B | 9.95 s | 101 | 3 | 2 | 0 | none |
 
 ## Graph alignment
@@ -30,7 +30,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 ## Global graph
 
-10 nodes, 4 edges; 0 merged node(s): none.
+12 nodes, 6 edges; 0 merged node(s): none.
 
 ### Event sequence (global time)
 
@@ -44,7 +44,9 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 1.40 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 2.55 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 2.85 s) A started braking.
+- (unaligned, A local time 4.05 s) A observed unidentified object A:track_001 cutting in from the left.
 - (unaligned, A local time 5.35 s) A observed unidentified object A:track_001 enter its forward path corridor.
+- (unaligned, A local time 7.25 s) A observed unidentified object A:track_001's cut-in from the left settle.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
 - (unaligned, B local time 0.00 s) B started applying strong throttle (already the case when first observed).
 - (unaligned, B local time 1.25 s) B stopped applying strong throttle.
@@ -59,7 +61,7 @@ A:
 - MOVING, since A:e01 (t = 0.00 s)
 - CLOSING of track_001, since A:e05 (t = 2.55 s)
 - BRAKE, since A:e06 (t = 2.85 s)
-- EGO_PATH of track_001, since A:e07 (t = 5.35 s)
+- EGO_PATH of track_001, since A:e08 (t = 5.35 s)
 B:
 - MOVING, since B:e01 (t = 0.00 s)
 
@@ -69,6 +71,19 @@ A:
 - none
 B:
 - none
+
+### Perceived state just before each collision report
+
+- no collision was reported
+
+### Tracks lost while a state was active
+
+A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
+
+A:
+- no track was lost
+B:
+- no track was lost
 
 ## Uncertainty and limitations
 
@@ -113,7 +128,22 @@ B:
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
-    "path_half_width_m": 1.5
+    "path_half_width_m": 1.5,
+    "max_position_std_m": 1.0,
+    "max_velocity_std_mps": 1.0,
+    "conflict_horizon_s": 4.0,
+    "conflict_distance_m": 1.5,
+    "conflict_release_horizon_s": 5.0,
+    "conflict_release_distance_m": 2.5,
+    "cut_in_max_heading_deg": 25.0,
+    "cut_in_min_target_speed_mps": 2.0,
+    "cut_in_lateral_speed_mps": 0.3,
+    "cut_in_persistence_s": 0.5,
+    "cut_in_outside_margin_m": 0.5,
+    "cut_in_min_displacement_m": 0.5,
+    "cut_in_horizon_s": 3.0,
+    "cut_in_settle_speed_mps": 0.2,
+    "cut_in_settle_s": 0.3
   },
   "fusion": {
     "impulse_tolerance": 0.1,

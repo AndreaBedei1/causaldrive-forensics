@@ -70,7 +70,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 10.45 s) A started applying strong throttle.
 - (unaligned, A local time 10.80 s) A left its stop.
 - (unaligned, A local time 10.80 s) A started moving.
-- (unaligned, A local time 11.65 s) A's radar lost unidentified object A:track_001.
+- (unaligned, A local time 11.65 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 11.80 s) A stopped applying strong throttle.
 - (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_002.
 - (unaligned, A local time 13.10 s) A's radar started tracking unidentified object A:track_003.
@@ -97,10 +97,10 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 13.50 s) A's radar started tracking unidentified object A:track_013.
 - (unaligned, A local time 13.50 s) A observed unidentified object A:track_013 start closing in (already the case when first observed).
 - (unaligned, A local time 13.80 s) A's time-to-contact with unidentified object A:track_007 became critical.
-- (unaligned, A local time 14.00 s) A's radar lost unidentified object A:track_007.
-- (unaligned, A local time 14.40 s) A's radar lost unidentified object A:track_003.
+- (unaligned, A local time 14.00 s) A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 14.40 s) A's radar lost unidentified object A:track_003 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 15.00 s) A observed unidentified object A:track_006 enter its forward path corridor.
-- (unaligned, A local time 15.60 s) A's radar lost unidentified object A:track_013.
+- (unaligned, A local time 15.60 s) A's radar lost unidentified object A:track_013 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 15.95 s) A observed unidentified object A:track_006 leave its forward path corridor.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
 - (unaligned, B local time 1.25 s) B started applying strong throttle.
@@ -121,7 +121,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, B local time 6.85 s) B started moving.
 - (unaligned, B local time 7.00 s) B observed unidentified object B:track_001 start closing in.
 - (unaligned, B local time 7.90 s) B stopped applying strong throttle.
-- (unaligned, B local time 8.75 s) B's radar lost unidentified object B:track_001.
+- (unaligned, B local time 8.75 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -154,6 +154,22 @@ A:
 - STOP sign sign-0: detected 1.05 s -> 3.55 s; relevant to the path: True; STOP_START inside: none
 B:
 - STOP sign sign-1: detected 2.10 s -> 2.60 s; relevant to the path: True; STOP_START inside: none
+
+### Perceived state just before each collision report
+
+- no collision was reported
+
+### Tracks lost while a state was active
+
+A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
+
+A:
+- track_007 at 14.00 s (A:e47): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_003 at 14.40 s (A:e48): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_013 at 15.60 s (A:e50): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_001
+B:
+- track_001 at 8.75 s (B:e20): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Uncertainty and limitations
 
@@ -210,7 +226,22 @@ B:
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
-    "path_half_width_m": 1.5
+    "path_half_width_m": 1.5,
+    "max_position_std_m": 1.0,
+    "max_velocity_std_mps": 1.0,
+    "conflict_horizon_s": 4.0,
+    "conflict_distance_m": 1.5,
+    "conflict_release_horizon_s": 5.0,
+    "conflict_release_distance_m": 2.5,
+    "cut_in_max_heading_deg": 25.0,
+    "cut_in_min_target_speed_mps": 2.0,
+    "cut_in_lateral_speed_mps": 0.3,
+    "cut_in_persistence_s": 0.5,
+    "cut_in_outside_margin_m": 0.5,
+    "cut_in_min_displacement_m": 0.5,
+    "cut_in_horizon_s": 3.0,
+    "cut_in_settle_speed_mps": 0.2,
+    "cut_in_settle_s": 0.3
   },
   "fusion": {
     "impulse_tolerance": 0.1,

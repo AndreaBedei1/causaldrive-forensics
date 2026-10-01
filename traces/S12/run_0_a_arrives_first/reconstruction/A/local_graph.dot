@@ -49,8 +49,9 @@ digraph "local_A" {
   "A:e45" [label="TRACK_LOST\nA -> track_006\nt=13.35", fillcolor="#bfdbfe"];
   "A:e46" [label="TRACK_LOST\nA -> track_008\nt=14.50", fillcolor="#bfdbfe"];
   "A:e47" [label="TRACK_LOST\nA -> track_010\nt=14.65", fillcolor="#bfdbfe"];
-  "A:e48" [label="TRACK_LOST\nA -> track_005\nt=15.75", fillcolor="#bfdbfe"];
-  "A:e49" [label="TRACK_LOST\nA -> track_007\nt=16.30", fillcolor="#bfdbfe"];
+  "A:e48" [label="PREDICTED_PATH_CONFLICT_START\nA -> track_001\nt=15.55", fillcolor="#bfdbfe"];
+  "A:e49" [label="TRACK_LOST\nA -> track_005\nt=15.75", fillcolor="#bfdbfe"];
+  "A:e50" [label="TRACK_LOST\nA -> track_007\nt=16.30", fillcolor="#bfdbfe"];
   {rank=same; "A:e04"; "A:e05";}
   {rank=same; "A:e06"; "A:e07";}
   {rank=same; "A:e08"; "A:e09"; "A:e10";}
@@ -162,6 +163,7 @@ digraph "local_A" {
   "A:e46" -> "A:e47" [label="PRECEDES"];
   "A:e47" -> "A:e48" [label="PRECEDES"];
   "A:e48" -> "A:e49" [label="PRECEDES"];
+  "A:e49" -> "A:e50" [label="PRECEDES"];
   "A:e14" -> "A:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e15" -> "A:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e18" -> "A:e19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -184,6 +186,7 @@ digraph "local_A" {
   "A:e26" -> "A:e45" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e27" -> "A:e46" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e32" -> "A:e47" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e22" -> "A:e48" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e23" -> "A:e49" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e14" -> "A:e48" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e22" -> "A:e49" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e23" -> "A:e50" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

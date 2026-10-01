@@ -37,10 +37,12 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | g04 | - | CLOSING_END | A | A:track_001 | A:e04 @ 1.40 |  |
 | g05 | - | CLOSING_START | A | A:track_001 | A:e05 @ 2.55 |  |
 | g06 | - | BRAKE_START | A | - | A:e06 @ 2.85 |  |
-| g07 | - | EGO_PATH_ENTRY | A | A:track_001 | A:e07 @ 5.35 |  |
-| g08 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
-| g09 | - | STRONG_THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
-| g10 | - | STRONG_THROTTLE_END | B | - | B:e03 @ 1.25 |  |
+| g07 | - | CUT_IN_FROM_LEFT_START | A | A:track_001 | A:e07 @ 4.05 |  |
+| g08 | - | EGO_PATH_ENTRY | A | A:track_001 | A:e08 @ 5.35 |  |
+| g09 | - | CUT_IN_FROM_LEFT_END | A | A:track_001 | A:e09 @ 7.25 |  |
+| g10 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
+| g11 | - | STRONG_THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
+| g12 | - | STRONG_THROTTLE_END | B | - | B:e03 @ 1.25 |  |
 
 ## Edges
 
@@ -49,6 +51,8 @@ No collision was matched across recorders, so no local graph could be aligned; e
     g02 --SAME_TRACK--> g04
     g02 --SAME_TRACK--> g05
     g02 --SAME_TRACK--> g07
+    g02 --SAME_TRACK--> g08
+    g02 --SAME_TRACK--> g09
 ```
 
 ## Global trace
@@ -58,6 +62,22 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | t_global | Events |
 |---------:|--------|
 
+## Perceived state before each event, per observing recorder
+
+Each recorder's own belief just before its events, in its own local names (track_001, ...): fusion does not rewrite it. True states are named, unknown ones end with `?`.
+
+| t_global | Recorder | Events (local node) | Perceived state just before |
+|---------:|----------|---------------------|-----------------------------|
+| - | A | g01 MOVING_START(A) (A:e01)<br>g02 TRACK_APPEARED(A,A:track_001) (A:e02)<br>g03 CLOSING_START(A,A:track_001) (A:e03) | ego: not yet observed |
+| - | A | g04 CLOSING_END(A,A:track_001) (A:e04) | ego: MOVING<br>track_001: VISIBLE, CLOSING |
+| - | A | g05 CLOSING_START(A,A:track_001) (A:e05) | ego: MOVING<br>track_001: VISIBLE |
+| - | A | g06 BRAKE_START(A) (A:e06) | ego: MOVING<br>track_001: VISIBLE, CLOSING |
+| - | A | g07 CUT_IN_FROM_LEFT_START(A,A:track_001) (A:e07) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING |
+| - | A | g08 EGO_PATH_ENTRY(A,A:track_001) (A:e08) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING, CUT_IN_FROM_LEFT |
+| - | A | g09 CUT_IN_FROM_LEFT_END(A,A:track_001) (A:e09) | ego: MOVING, BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH, CUT_IN_FROM_LEFT |
+| - | B | g10 MOVING_START(B) (B:e01)<br>g11 STRONG_THROTTLE_START(B) (B:e02) | ego: not yet observed |
+| - | B | g12 STRONG_THROTTLE_END(B) (B:e03) | ego: MOVING, STRONG_THROTTLE |
+
 ## Plain-language reading
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
@@ -66,7 +86,9 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 - (unaligned, A local time 1.40 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 2.55 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 2.85 s) A started braking.
+- (unaligned, A local time 4.05 s) A observed unidentified object A:track_001 cutting in from the left.
 - (unaligned, A local time 5.35 s) A observed unidentified object A:track_001 enter its forward path corridor.
+- (unaligned, A local time 7.25 s) A observed unidentified object A:track_001's cut-in from the left settle.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
 - (unaligned, B local time 0.00 s) B started applying strong throttle (already the case when first observed).
 - (unaligned, B local time 1.25 s) B stopped applying strong throttle.

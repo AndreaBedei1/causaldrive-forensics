@@ -8,12 +8,16 @@ digraph "global" {
   "g04" [label="CLOSING_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g05" [label="CLOSING_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g06" [label="BRAKE_START\nA\nunaligned", fillcolor="#fde68a"];
-  "g07" [label="EGO_PATH_ENTRY\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
-  "g08" [label="MOVING_START\nB\nunaligned", fillcolor="#e5e7eb"];
-  "g09" [label="STRONG_THROTTLE_START\nB\nunaligned", fillcolor="#fde68a"];
-  "g10" [label="STRONG_THROTTLE_END\nB\nunaligned", fillcolor="#fde68a"];
+  "g07" [label="CUT_IN_FROM_LEFT_START\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g08" [label="EGO_PATH_ENTRY\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g09" [label="CUT_IN_FROM_LEFT_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g10" [label="MOVING_START\nB\nunaligned", fillcolor="#e5e7eb"];
+  "g11" [label="STRONG_THROTTLE_START\nB\nunaligned", fillcolor="#fde68a"];
+  "g12" [label="STRONG_THROTTLE_END\nB\nunaligned", fillcolor="#fde68a"];
   "g02" -> "g03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g02" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

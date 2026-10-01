@@ -11,7 +11,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
 | A | 14.95 s | 151 | 48 | 129 | 8 | A:e21 @ 9.50 s |
-| B | 14.95 s | 151 | 32 | 64 | 1 | B:e24 @ 9.50 s |
+| B | 14.95 s | 151 | 33 | 68 | 1 | B:e25 @ 9.50 s |
 
 ## Graph alignment
 
@@ -20,7 +20,7 @@ Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
 | A | ALIGNED | A:e21 | 9.50 | -9.50 | reported the reference collision collision_001 |
-| B | ALIGNED | B:e24 | 9.50 | -9.50 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e25 | 9.50 | -9.50 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
 
@@ -42,7 +42,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 
 ## Global graph
 
-79 nodes, 255 edges; 1 merged node(s): g44 COLLISION(A,B) from A:e21 + B:e24.
+80 nodes, 261 edges; 1 merged node(s): g45 COLLISION(A,B) from A:e21 + B:e25.
 
 ### Event sequence (global time)
 
@@ -66,7 +66,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - `-1.25` CRITICAL_TTC_START(B,A)
 - `-1.20` STRONG_THROTTLE_END(A)
 - `-0.85` STRONG_THROTTLE_END(B)
-- `-0.55` EGO_PATH_ENTRY(B,A)
+- `-0.55` EGO_PATH_ENTRY(B,A); PREDICTED_PATH_CONFLICT_START(B,A)
 - `-0.10` TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003)
 - `-0.05` CRITICAL_TTC_END(B,A); CLOSING_END(B,A)
 - `+0.00` COLLISION(A,B); EGO_PATH_EXIT(B,A); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(A,A:track_004)
@@ -78,7 +78,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - `+0.55` CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_007); CLOSING_END(A,A:track_008)
 - `+2.20` STOP_SIGN_DETECTED_START(A,A:sign-1)
 - `+2.30` STOP_SIGN_DETECTED_END(A,A:sign-1)
-- `+4.45` STOP_SIGN_DETECTED_START(A,A:sign-4); STOP_SIGN_DETECTED_END(A,A:sign-4)
+- `+4.45` STOP_SIGN_DETECTED_START(A,A:sign-1); STOP_SIGN_DETECTED_END(A,A:sign-1)
 
 ### What happened, in plain language
 
@@ -98,7 +98,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - 6.85 s before the matched collision, A started braking hard.
 - 6.75 s before the matched collision, B started braking.
 - 6.75 s before the matched collision, B started braking hard.
-- 6.70 s before the matched collision, A's radar lost unidentified object A:track_001.
+- 6.70 s before the matched collision, A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - 6.10 s before the matched collision, A stopped moving.
 - 6.10 s before the matched collision, A came to a stop.
 - 6.00 s before the matched collision, B observed A stop closing in.
@@ -119,6 +119,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - 1.20 s before the matched collision, A stopped applying strong throttle.
 - 0.85 s before the matched collision, B stopped applying strong throttle.
 - 0.55 s before the matched collision, B observed A enter its forward path corridor.
+- 0.55 s before the matched collision, B predicted a path conflict with A (close approach ahead if both keep their motion).
 - 0.10 s before the matched collision, A's radar started tracking unidentified object A:track_002.
 - 0.10 s before the matched collision, A's radar started tracking unidentified object A:track_003.
 - 0.10 s before the matched collision, A observed unidentified object A:track_002 start closing in (already the case when first observed).
@@ -145,8 +146,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - 0.05 s after the matched collision, A observed unidentified object A:track_007 start closing in (already the case when first observed).
 - 0.05 s after the matched collision, A observed unidentified object A:track_008 start closing in (already the case when first observed).
 - 0.10 s after the matched collision, A observed unidentified object A:track_004 start closing in.
-- 0.10 s after the matched collision, B's radar lost A.
-- 0.30 s after the matched collision, A's radar lost unidentified object A:track_002.
+- 0.10 s after the matched collision, B's radar lost A (its states are UNKNOWN from then on, not ended).
+- 0.30 s after the matched collision, A's radar lost unidentified object A:track_002 (its states are UNKNOWN from then on, not ended).
 - 0.45 s after the matched collision, B stopped moving.
 - 0.45 s after the matched collision, B came to a stop.
 - 0.50 s after the matched collision, A observed unidentified object A:track_005 stop closing in.
@@ -159,8 +160,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - 0.55 s after the matched collision, A observed unidentified object A:track_008 stop closing in.
 - 2.20 s after the matched collision, A's camera established a STOP sign detection (unidentified object A:sign-1) (the detector judged it not relevant to its path).
 - 2.30 s after the matched collision, A's camera stopped detecting STOP sign unidentified object A:sign-1.
-- 4.45 s after the matched collision, A's camera established a STOP sign detection (unidentified object A:sign-4) (the detector judged it not relevant to its path).
-- 4.45 s after the matched collision, A's camera stopped detecting STOP sign unidentified object A:sign-4.
+- 4.45 s after the matched collision, A's camera established a STOP sign detection (unidentified object A:sign-1) (the detector judged it not relevant to its path) (the same sign reacquired, as camera track sign-4).
+- 4.45 s after the matched collision, A's camera stopped detecting STOP sign unidentified object A:sign-1.
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -174,6 +175,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - HARD_BRAKE_END(A); HARD_BRAKE_END(B); BRAKE_END(A); BRAKE_END(B); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B)
 - STOP_END(A); MOVING_START(A); CLOSING_START(B,A)
 - STOP_END(B); MOVING_START(B)
+- EGO_PATH_ENTRY(B,A); PREDICTED_PATH_CONFLICT_START(B,A)
 - TRACK_APPEARED(A,A:track_002); TRACK_APPEARED(A,A:track_003); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003)
 - CRITICAL_TTC_END(B,A); CLOSING_END(B,A)
 - COLLISION(A,B); EGO_PATH_EXIT(B,A); STRONG_THROTTLE_START(A); STRONG_THROTTLE_START(B); TRACK_APPEARED(A,A:track_004)
@@ -182,7 +184,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 4032.4
 - MOVING_END(B); STOP_START(B)
 - CLOSING_END(A,A:track_005); MOVING_END(A); STOP_START(A)
 - CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_007); CLOSING_END(A,A:track_008)
-- STOP_SIGN_DETECTED_START(A,A:sign-4); STOP_SIGN_DETECTED_END(A,A:sign-4)
+- STOP_SIGN_DETECTED_START(A,A:sign-1); STOP_SIGN_DETECTED_END(A,A:sign-1)
 
 ### States still active when observation ended
 
@@ -193,18 +195,34 @@ A:
 - HARD_BRAKE, since A:e26 (t = 9.55 s)
 - STOP, since A:e39 (t = 10.00 s)
 B:
-- BRAKE, since B:e28 (t = 9.55 s)
-- HARD_BRAKE, since B:e29 (t = 9.55 s)
-- STOP, since B:e32 (t = 9.95 s)
+- PREDICTED_PATH_CONFLICT of track_001, since B:e22 (t = 8.95 s); the track was lost at 9.60 s
+- BRAKE, since B:e29 (t = 9.55 s)
+- HARD_BRAKE, since B:e30 (t = 9.55 s)
+- STOP, since B:e33 (t = 9.95 s)
 
 ### Sign detection windows
 
 A:
 - STOP sign sign-0: detected 0.65 s -> 2.25 s; relevant to the path: True; STOP_START inside: none
 - STOP sign sign-1: detected 11.70 s -> 11.80 s; relevant to the path: False; STOP_START inside: none; already stopped when the window opened
-- STOP sign sign-4: detected 13.95 s -> 13.95 s; relevant to the path: False; STOP_START inside: none; already stopped when the window opened
+- STOP sign sign-1: detected 13.95 s -> 13.95 s; relevant to the path: False; STOP_START inside: none; already stopped when the window opened
 B:
 - STOP sign sign-1: detected 2.10 s -> 2.60 s; relevant to the path: True; STOP_START inside: none
+
+### Perceived state just before each collision report
+
+- A A:e21 at 9.50 s (local): ego: MOVING; track_002: VISIBLE, CLOSING, PATH_CONFLICT?, CUT_IN_FROM_LEFT?, CUT_IN_FROM_RIGHT?; track_003: VISIBLE, CLOSING; lost (states UNKNOWN): track_001; sign-0: STOP sign not visible, known, relevant to the path
+- B B:e25 at 9.50 s (local): ego: MOVING; track_001: VISIBLE, IN_EGO_PATH, PATH_CONFLICT; sign-1: STOP sign not visible, known, relevant to the path
+
+### Tracks lost while a state was active
+
+A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
+
+A:
+- track_001 at 2.80 s (A:e08): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 9.80 s (A:e36): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+B:
+- track_001 at 9.60 s (B:e31): PREDICTED_PATH_CONFLICT were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Uncertainty and limitations
 
@@ -253,7 +271,22 @@ B:
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
-    "path_half_width_m": 1.5
+    "path_half_width_m": 1.5,
+    "max_position_std_m": 1.0,
+    "max_velocity_std_mps": 1.0,
+    "conflict_horizon_s": 4.0,
+    "conflict_distance_m": 1.5,
+    "conflict_release_horizon_s": 5.0,
+    "conflict_release_distance_m": 2.5,
+    "cut_in_max_heading_deg": 25.0,
+    "cut_in_min_target_speed_mps": 2.0,
+    "cut_in_lateral_speed_mps": 0.3,
+    "cut_in_persistence_s": 0.5,
+    "cut_in_outside_margin_m": 0.5,
+    "cut_in_min_displacement_m": 0.5,
+    "cut_in_horizon_s": 3.0,
+    "cut_in_settle_speed_mps": 0.2,
+    "cut_in_settle_s": 0.3
   },
   "fusion": {
     "impulse_tolerance": 0.1,

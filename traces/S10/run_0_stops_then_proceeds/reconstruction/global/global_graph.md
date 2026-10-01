@@ -93,10 +93,12 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | g44 | - | STRONG_THROTTLE_END | B | - | B:e03 @ 1.80 |  |
 | g45 | - | TRACK_APPEARED | B | B:track_001 | B:e04 @ 2.55 |  |
 | g46 | - | CLOSING_START | B | B:track_001 | B:e05 @ 2.55 | active_at_first_observation=True |
-| g47 | - | CRITICAL_TTC_START | B | B:track_001 | B:e06 @ 4.30 |  |
-| g48 | - | TRACK_LOST | B | B:track_001 | B:e07 @ 5.50 |  |
-| g49 | - | STOP_SIGN_DETECTED_START | B | B:sign-1 | B:e08 @ 7.60 | relevant_to_ego_path=False |
-| g50 | - | STOP_SIGN_DETECTED_END | B | B:sign-1 | B:e09 @ 7.70 |  |
+| g47 | - | PREDICTED_PATH_CONFLICT_START | B | B:track_001 | B:e06 @ 2.55 | active_at_first_observation=True |
+| g48 | - | PREDICTED_PATH_CONFLICT_END | B | B:track_001 | B:e07 @ 3.35 |  |
+| g49 | - | CRITICAL_TTC_START | B | B:track_001 | B:e08 @ 4.30 |  |
+| g50 | - | TRACK_LOST | B | B:track_001 | B:e09 @ 5.50 |  |
+| g51 | - | STOP_SIGN_DETECTED_START | B | B:sign-1 | B:e10 @ 7.60 | relevant_to_ego_path=False |
+| g52 | - | STOP_SIGN_DETECTED_END | B | B:sign-1 | B:e11 @ 7.70 |  |
 
 ## Edges
 
@@ -124,6 +126,8 @@ No collision was matched across recorders, so no local graph could be aligned; e
     g45 --SAME_TRACK--> g46
     g45 --SAME_TRACK--> g47
     g45 --SAME_TRACK--> g48
+    g45 --SAME_TRACK--> g49
+    g45 --SAME_TRACK--> g50
 ```
 
 ## Global trace
@@ -132,6 +136,48 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 | t_global | Events |
 |---------:|--------|
+
+## Perceived state before each event, per observing recorder
+
+Each recorder's own belief just before its events, in its own local names (track_001, ...): fusion does not rewrite it. True states are named, unknown ones end with `?`.
+
+| t_global | Recorder | Events (local node) | Perceived state just before |
+|---------:|----------|---------------------|-----------------------------|
+| - | A | g01 MOVING_START(A) (A:e01) | ego: not yet observed |
+| - | A | g02 STOP_SIGN_DETECTED_START(A,A:sign-0) (A:e02) | ego: MOVING |
+| - | A | g03 STOP_SIGN_DETECTED_END(A,A:sign-0) (A:e03) | ego: MOVING<br>sign-0: STOP sign VISIBLE, known |
+| - | A | g04 BRAKE_START(A) (A:e04)<br>g05 HARD_BRAKE_START(A) (A:e05) | ego: MOVING<br>sign-0: STOP sign not visible, known |
+| - | A | g06 MOVING_END(A) (A:e06)<br>g07 STOP_START(A) (A:e07) | ego: MOVING, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known |
+| - | A | g08 TRACK_APPEARED(A,A:track_001) (A:e08)<br>g09 CLOSING_START(A,A:track_001) (A:e09) | ego: STOP, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known |
+| - | A | g10 CRITICAL_TTC_START(A,A:track_001) (A:e10) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known |
+| - | A | g11 EGO_PATH_ENTRY(A,A:track_001) (A:e11) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>sign-0: STOP sign not visible, known |
+| - | A | g12 CRITICAL_TTC_END(A,A:track_001) (A:e12) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign not visible, known |
+| - | A | g13 CLOSING_END(A,A:track_001) (A:e13) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH<br>sign-0: STOP sign not visible, known |
+| - | A | g14 EGO_PATH_EXIT(A,A:track_001) (A:e14) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, IN_EGO_PATH<br>sign-0: STOP sign not visible, known |
+| - | A | g15 HARD_BRAKE_END(A) (A:e15)<br>g16 BRAKE_END(A) (A:e16)<br>g17 STRONG_THROTTLE_START(A) (A:e17) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE<br>sign-0: STOP sign not visible, known |
+| - | A | g18 TRACK_LOST(A,A:track_001) (A:e18) | ego: STOP, STRONG_THROTTLE<br>track_001: VISIBLE<br>sign-0: STOP sign not visible, known |
+| - | A | g19 STOP_END(A) (A:e19)<br>g20 MOVING_START(A) (A:e20) | ego: STOP, STRONG_THROTTLE<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g21 TRACK_APPEARED(A,A:track_002) (A:e21)<br>g22 CLOSING_START(A,A:track_002) (A:e22) | ego: MOVING, STRONG_THROTTLE<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g23 STRONG_THROTTLE_END(A) (A:e23)<br>g24 TRACK_APPEARED(A,A:track_003) (A:e24)<br>g25 CLOSING_START(A,A:track_003) (A:e25) | ego: MOVING, STRONG_THROTTLE<br>track_002: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g26 TRACK_APPEARED(A,A:track_004) (A:e26)<br>g27 CLOSING_START(A,A:track_004) (A:e27) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g28 TRACK_APPEARED(A,A:track_005) (A:e28)<br>g29 CLOSING_START(A,A:track_005) (A:e29) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING<br>track_004: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g30 TRACK_APPEARED(A,A:track_006) (A:e30)<br>g31 CLOSING_START(A,A:track_006) (A:e31) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g32 TRACK_APPEARED(A,A:track_007) (A:e32)<br>g33 TRACK_APPEARED(A,A:track_008) (A:e33)<br>g34 CLOSING_START(A,A:track_007) (A:e34)<br>g35 CLOSING_START(A,A:track_008) (A:e35) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_006: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g36 CRITICAL_TTC_START(A,A:track_003) (A:e36) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_006: VISIBLE, CLOSING<br>track_007: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g37 TRACK_LOST(A,A:track_003) (A:e37) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_003: VISIBLE, CLOSING, CRITICAL_TTC<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_006: VISIBLE, CLOSING<br>track_007: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known |
+| - | A | g38 TRACK_LOST(A,A:track_002) (A:e38) | ego: MOVING<br>track_002: VISIBLE, CLOSING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_006: VISIBLE, CLOSING<br>track_007: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001, track_003<br>sign-0: STOP sign not visible, known |
+| - | A | g39 TRACK_LOST(A,A:track_006) (A:e39) | ego: MOVING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_006: VISIBLE, CLOSING<br>track_007: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001, track_002, track_003<br>sign-0: STOP sign not visible, known |
+| - | A | g40 TRACK_LOST(A,A:track_007) (A:e40) | ego: MOVING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_007: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001, track_002, track_003, track_006<br>sign-0: STOP sign not visible, known |
+| - | A | g41 TRACK_LOST(A,A:track_005) (A:e41) | ego: MOVING<br>track_004: VISIBLE, CLOSING<br>track_005: VISIBLE, CLOSING<br>track_008: VISIBLE, CLOSING<br>lost (states UNKNOWN): track_001, track_002, track_003, track_006, track_007<br>sign-0: STOP sign not visible, known |
+| - | B | g42 MOVING_START(B) (B:e01) | ego: not yet observed |
+| - | B | g43 STRONG_THROTTLE_START(B) (B:e02) | ego: MOVING |
+| - | B | g44 STRONG_THROTTLE_END(B) (B:e03) | ego: MOVING, STRONG_THROTTLE |
+| - | B | g45 TRACK_APPEARED(B,B:track_001) (B:e04)<br>g46 CLOSING_START(B,B:track_001) (B:e05)<br>g47 PREDICTED_PATH_CONFLICT_START(B,B:track_001) (B:e06) | ego: MOVING |
+| - | B | g48 PREDICTED_PATH_CONFLICT_END(B,B:track_001) (B:e07) | ego: MOVING<br>track_001: VISIBLE, CLOSING, PATH_CONFLICT |
+| - | B | g49 CRITICAL_TTC_START(B,B:track_001) (B:e08) | ego: MOVING<br>track_001: VISIBLE, CLOSING |
+| - | B | g50 TRACK_LOST(B,B:track_001) (B:e09) | ego: MOVING<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC |
+| - | B | g51 STOP_SIGN_DETECTED_START(B,B:sign-1) (B:e10) | ego: MOVING<br>lost (states UNKNOWN): track_001 |
+| - | B | g52 STOP_SIGN_DETECTED_END(B,B:sign-1) (B:e11) | ego: MOVING<br>lost (states UNKNOWN): track_001<br>sign-1: STOP sign VISIBLE, known |
 
 ## Plain-language reading
 
@@ -152,7 +198,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 - (unaligned, A local time 6.75 s) A stopped braking hard.
 - (unaligned, A local time 6.75 s) A released the brake.
 - (unaligned, A local time 6.75 s) A started applying strong throttle.
-- (unaligned, A local time 7.00 s) A's radar lost unidentified object A:track_001.
+- (unaligned, A local time 7.00 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 7.10 s) A left its stop.
 - (unaligned, A local time 7.10 s) A started moving.
 - (unaligned, A local time 8.20 s) A's radar started tracking unidentified object A:track_002.
@@ -171,17 +217,19 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 - (unaligned, A local time 8.45 s) A observed unidentified object A:track_007 start closing in (already the case when first observed).
 - (unaligned, A local time 8.45 s) A observed unidentified object A:track_008 start closing in (already the case when first observed).
 - (unaligned, A local time 9.00 s) A's time-to-contact with unidentified object A:track_003 became critical.
-- (unaligned, A local time 9.25 s) A's radar lost unidentified object A:track_003.
-- (unaligned, A local time 9.50 s) A's radar lost unidentified object A:track_002.
-- (unaligned, A local time 10.75 s) A's radar lost unidentified object A:track_006.
-- (unaligned, A local time 11.60 s) A's radar lost unidentified object A:track_007.
-- (unaligned, A local time 12.45 s) A's radar lost unidentified object A:track_005.
+- (unaligned, A local time 9.25 s) A's radar lost unidentified object A:track_003 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 9.50 s) A's radar lost unidentified object A:track_002 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 10.75 s) A's radar lost unidentified object A:track_006 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 11.60 s) A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 12.45 s) A's radar lost unidentified object A:track_005 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
 - (unaligned, B local time 1.20 s) B started applying strong throttle.
 - (unaligned, B local time 1.80 s) B stopped applying strong throttle.
 - (unaligned, B local time 2.55 s) B's radar started tracking unidentified object B:track_001.
 - (unaligned, B local time 2.55 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
+- (unaligned, B local time 2.55 s) B predicted a path conflict with unidentified object B:track_001 (close approach ahead if both keep their motion) (already the case when first observed).
+- (unaligned, B local time 3.35 s) B stopped predicting a path conflict with unidentified object B:track_001.
 - (unaligned, B local time 4.30 s) B's time-to-contact with unidentified object B:track_001 became critical.
-- (unaligned, B local time 5.50 s) B's radar lost unidentified object B:track_001.
+- (unaligned, B local time 5.50 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 7.60 s) B's camera established a STOP sign detection (unidentified object B:sign-1) (the detector judged it not relevant to its path).
 - (unaligned, B local time 7.70 s) B's camera stopped detecting STOP sign unidentified object B:sign-1.

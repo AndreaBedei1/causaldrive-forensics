@@ -19,7 +19,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e05 | 5.25 | CRITICAL_TTC_END | A | track_001 | radar |  |
 | A:e06 | 5.35 | TRACK_LOST | A | track_001 | radar |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -36,10 +36,26 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     A:e02 --SAME_TRACK--> A:e06
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
+| 2.60 | A:e02 TRACK_APPEARED track_001<br>A:e03 CLOSING_START track_001 | ego: MOVING | 2.50 |
+| 4.65 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING | 4.60 |
+| 5.25 | A:e05 CRITICAL_TTC_END track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC | 5.20 |
+| 5.35 | A:e06 TRACK_LOST track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING | 5.30 |
+
 ## States still active when observation ended
 
 - MOVING, since A:e01 (t = 0.00 s)
 - CLOSING of track_001, since A:e03 (t = 2.60 s); the track was lost at 5.35 s
+
+## Tracks lost
+
+- track_001 at 5.35 s (A:e06): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Sign detection windows
 
@@ -62,4 +78,4 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 2.60 s: A observed track_001 start closing in (already the case when first observed).
 - t = 4.65 s: A's time-to-contact with track_001 became critical.
 - t = 5.25 s: A's time-to-contact with track_001 stopped being critical.
-- t = 5.35 s: A's radar lost track_001.
+- t = 5.35 s: A's radar lost track_001 (its states are UNKNOWN from then on, not ended).

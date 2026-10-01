@@ -29,7 +29,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e15 | 7.00 | TRACK_LOST | A | track_001 | radar |  |
 | A:e16 | 9.55 | STRONG_THROTTLE_START | A | - | controls |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -63,12 +63,36 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     A:e08 --SAME_TRACK--> A:e15
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
+| 1.90 | A:e02 STOP_SIGN_DETECTED_START sign-0 | ego: MOVING | 1.80 |
+| 2.15 | A:e03 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING<br>sign-0: STOP sign VISIBLE, known | 2.10 |
+| 2.55 | A:e04 BRAKE_START<br>A:e05 HARD_BRAKE_START | ego: MOVING<br>sign-0: STOP sign not visible, known | 2.50 |
+| 3.35 | A:e06 MOVING_END<br>A:e07 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known | 3.30 |
+| 3.70 | A:e08 TRACK_APPEARED track_001<br>A:e09 CLOSING_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>sign-0: STOP sign not visible, known | 3.60 |
+| 4.25 | A:e10 CRITICAL_TTC_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 4.20 |
+| 5.80 | A:e11 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>sign-0: STOP sign not visible, known | 5.70 |
+| 5.95 | A:e12 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 5.90 |
+| 6.10 | A:e13 CLOSING_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 6.00 |
+| 6.25 | A:e14 EGO_PATH_EXIT track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 6.20 |
+| 7.00 | A:e15 TRACK_LOST track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE<br>sign-0: STOP sign not visible, known | 6.90 |
+| 9.55 | A:e16 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known | 9.50 |
+
 ## States still active when observation ended
 
 - BRAKE, since A:e04 (t = 2.55 s)
 - HARD_BRAKE, since A:e05 (t = 2.55 s)
 - STOP, since A:e07 (t = 3.35 s)
 - STRONG_THROTTLE, since A:e16 (t = 9.55 s)
+
+## Tracks lost
+
+- lost with no state active: track_001
 
 ## Sign detection windows
 
@@ -100,5 +124,5 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 5.95 s: A's time-to-contact with track_001 stopped being critical.
 - t = 6.10 s: A observed track_001 stop closing in.
 - t = 6.25 s: A observed track_001 leave its forward path corridor.
-- t = 7.00 s: A's radar lost track_001.
+- t = 7.00 s: A's radar lost track_001 (its states are UNKNOWN from then on, not ended).
 - t = 9.55 s: A started applying strong throttle.

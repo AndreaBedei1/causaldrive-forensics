@@ -21,7 +21,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e07 | 5.15 | STOP_START | B | - | ego |  |
 | B:e08 | 6.50 | COLLISION | B | - | collision_sensor | peak_impulse=17663.06 |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -38,11 +38,28 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e07 --PRECEDES--> B:e08
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
+| 0.40 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 0.30 |
+| 1.75 | B:e03 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE | 1.70 |
+| 3.95 | B:e04 BRAKE_START<br>B:e05 HARD_BRAKE_START | ego: MOVING | 3.90 |
+| 5.15 | B:e06 MOVING_END<br>B:e07 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE | 5.10 |
+| 6.50 | B:e08 COLLISION | ego: STOP, BRAKE, HARD_BRAKE | 6.40 |
+
 ## States still active when observation ended
 
 - BRAKE, since B:e04 (t = 3.95 s)
 - HARD_BRAKE, since B:e05 (t = 3.95 s)
 - STOP, since B:e07 (t = 5.15 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 

@@ -10,21 +10,25 @@ digraph "local_A" {
   "A:e06" [label="TRACK_APPEARED\nA -> track_003\nt=0.20", fillcolor="#bfdbfe"];
   "A:e07" [label="CLOSING_START\nA -> track_002\nt=0.20", fillcolor="#bfdbfe"];
   "A:e08" [label="CLOSING_START\nA -> track_003\nt=0.20", fillcolor="#bfdbfe"];
-  "A:e09" [label="EGO_PATH_ENTRY\nA -> track_001\nt=1.45", fillcolor="#bfdbfe"];
-  "A:e10" [label="COLLISION\nA\nt=1.80", fillcolor="#fca5a5"];
-  "A:e11" [label="BRAKE_START\nA\nt=1.85", fillcolor="#fde68a"];
-  "A:e12" [label="HARD_BRAKE_START\nA\nt=1.85", fillcolor="#fde68a"];
-  "A:e13" [label="CRITICAL_TTC_END\nA -> track_001\nt=1.90", fillcolor="#bfdbfe"];
-  "A:e14" [label="CLOSING_END\nA -> track_001\nt=1.90", fillcolor="#bfdbfe"];
-  "A:e15" [label="CLOSING_END\nA -> track_002\nt=2.50", fillcolor="#bfdbfe"];
-  "A:e16" [label="CLOSING_END\nA -> track_003\nt=2.50", fillcolor="#bfdbfe"];
-  "A:e17" [label="MOVING_END\nA\nt=2.50", fillcolor="#e5e7eb"];
-  "A:e18" [label="STOP_START\nA\nt=2.50", fillcolor="#e5e7eb"];
+  "A:e09" [label="PREDICTED_PATH_CONFLICT_START\nA -> track_001\nt=0.65", fillcolor="#bfdbfe"];
+  "A:e10" [label="EGO_PATH_ENTRY\nA -> track_001\nt=1.45", fillcolor="#bfdbfe"];
+  "A:e11" [label="COLLISION\nA\nt=1.80", fillcolor="#fca5a5"];
+  "A:e12" [label="BRAKE_START\nA\nt=1.85", fillcolor="#fde68a"];
+  "A:e13" [label="HARD_BRAKE_START\nA\nt=1.85", fillcolor="#fde68a"];
+  "A:e14" [label="PREDICTED_PATH_CONFLICT_END\nA -> track_001\nt=1.90", fillcolor="#bfdbfe"];
+  "A:e15" [label="CRITICAL_TTC_END\nA -> track_001\nt=1.90", fillcolor="#bfdbfe"];
+  "A:e16" [label="CLOSING_END\nA -> track_001\nt=1.90", fillcolor="#bfdbfe"];
+  "A:e17" [label="PREDICTED_PATH_CONFLICT_START\nA -> track_001\nt=2.35", fillcolor="#bfdbfe"];
+  "A:e18" [label="CLOSING_END\nA -> track_002\nt=2.50", fillcolor="#bfdbfe"];
+  "A:e19" [label="CLOSING_END\nA -> track_003\nt=2.50", fillcolor="#bfdbfe"];
+  "A:e20" [label="MOVING_END\nA\nt=2.50", fillcolor="#e5e7eb"];
+  "A:e21" [label="STOP_START\nA\nt=2.50", fillcolor="#e5e7eb"];
+  "A:e22" [label="PREDICTED_PATH_CONFLICT_END\nA -> track_001\nt=2.95", fillcolor="#bfdbfe"];
   {rank=same; "A:e01"; "A:e02"; "A:e03"; "A:e04";}
   {rank=same; "A:e05"; "A:e06"; "A:e07"; "A:e08";}
-  {rank=same; "A:e11"; "A:e12";}
-  {rank=same; "A:e13"; "A:e14";}
-  {rank=same; "A:e15"; "A:e16"; "A:e17"; "A:e18";}
+  {rank=same; "A:e12"; "A:e13";}
+  {rank=same; "A:e14"; "A:e15"; "A:e16";}
+  {rank=same; "A:e18"; "A:e19"; "A:e20"; "A:e21";}
   "A:e01" -> "A:e05" [label="PRECEDES"];
   "A:e01" -> "A:e06" [label="PRECEDES"];
   "A:e01" -> "A:e07" [label="PRECEDES"];
@@ -47,26 +51,36 @@ digraph "local_A" {
   "A:e08" -> "A:e09" [label="PRECEDES"];
   "A:e09" -> "A:e10" [label="PRECEDES"];
   "A:e10" -> "A:e11" [label="PRECEDES"];
-  "A:e10" -> "A:e12" [label="PRECEDES"];
+  "A:e11" -> "A:e12" [label="PRECEDES"];
   "A:e11" -> "A:e13" [label="PRECEDES"];
-  "A:e11" -> "A:e14" [label="PRECEDES"];
-  "A:e12" -> "A:e13" [label="PRECEDES"];
   "A:e12" -> "A:e14" [label="PRECEDES"];
+  "A:e12" -> "A:e15" [label="PRECEDES"];
+  "A:e12" -> "A:e16" [label="PRECEDES"];
+  "A:e13" -> "A:e14" [label="PRECEDES"];
   "A:e13" -> "A:e15" [label="PRECEDES"];
   "A:e13" -> "A:e16" [label="PRECEDES"];
-  "A:e13" -> "A:e17" [label="PRECEDES"];
-  "A:e13" -> "A:e18" [label="PRECEDES"];
-  "A:e14" -> "A:e15" [label="PRECEDES"];
-  "A:e14" -> "A:e16" [label="PRECEDES"];
   "A:e14" -> "A:e17" [label="PRECEDES"];
-  "A:e14" -> "A:e18" [label="PRECEDES"];
+  "A:e15" -> "A:e17" [label="PRECEDES"];
+  "A:e16" -> "A:e17" [label="PRECEDES"];
+  "A:e17" -> "A:e18" [label="PRECEDES"];
+  "A:e17" -> "A:e19" [label="PRECEDES"];
+  "A:e17" -> "A:e20" [label="PRECEDES"];
+  "A:e17" -> "A:e21" [label="PRECEDES"];
+  "A:e18" -> "A:e22" [label="PRECEDES"];
+  "A:e19" -> "A:e22" [label="PRECEDES"];
+  "A:e20" -> "A:e22" [label="PRECEDES"];
+  "A:e21" -> "A:e22" [label="PRECEDES"];
   "A:e02" -> "A:e03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e02" -> "A:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e05" -> "A:e07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e06" -> "A:e08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e02" -> "A:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e02" -> "A:e13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e02" -> "A:e14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e05" -> "A:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "A:e06" -> "A:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e05" -> "A:e18" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e06" -> "A:e19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e02" -> "A:e22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

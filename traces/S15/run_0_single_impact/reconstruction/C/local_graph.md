@@ -23,7 +23,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e09 | 3.85 | CLOSING_START | C | track_002 | radar |  |
 | C:e10 | 5.00 | EGO_PATH_ENTRY | C | track_001 | radar |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -51,12 +51,29 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e02 --SAME_TRACK--> C:e10
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | C:e01 MOVING_START | ego: not yet observed | - |
+| 0.80 | C:e02 TRACK_APPEARED track_001<br>C:e03 TRACK_APPEARED track_002<br>C:e04 CLOSING_START track_001<br>C:e05 CLOSING_START track_002 | ego: MOVING | 0.70 |
+| 2.80 | C:e06 STOP_SIGN_DETECTED_START sign-0<br>C:e07 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE, CLOSING | 2.70 |
+| 2.95 | C:e08 CLOSING_END track_002 | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 2.90 |
+| 3.85 | C:e09 CLOSING_START track_002 | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE<br>sign-0: STOP sign not visible, known | 3.80 |
+| 5.00 | C:e10 EGO_PATH_ENTRY track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 4.90 |
+
 ## States still active when observation ended
 
 - MOVING, since C:e01 (t = 0.00 s)
 - CLOSING of track_001, since C:e04 (t = 0.80 s)
 - CLOSING of track_002, since C:e09 (t = 3.85 s)
 - EGO_PATH of track_001, since C:e10 (t = 5.00 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 

@@ -6,7 +6,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
 - Anonymous radar tracks: 2 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 20; edges: 34 (PRECEDES 24, SAME_TRACK 10)
+- Nodes: 22; edges: 38 (PRECEDES 26, SAME_TRACK 12)
 
 ## Nodes
 
@@ -25,15 +25,17 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e11 | 3.00 | CLOSING_START | C | track_002 | radar | active_at_first_observation=True |
 | C:e12 | 3.35 | CRITICAL_TTC_START | C | track_002 | radar |  |
 | C:e13 | 3.55 | CRITICAL_TTC_START | C | track_001 | radar |  |
-| C:e14 | 4.20 | CRITICAL_TTC_END | C | track_002 | radar |  |
-| C:e15 | 4.55 | CLOSING_END | C | track_002 | radar |  |
-| C:e16 | 4.70 | CRITICAL_TTC_END | C | track_001 | radar |  |
-| C:e17 | 4.90 | CLOSING_END | C | track_001 | radar |  |
-| C:e18 | 14.35 | HARD_BRAKE_END | C | - | controls |  |
-| C:e19 | 14.35 | BRAKE_END | C | - | controls |  |
-| C:e20 | 14.35 | STRONG_THROTTLE_START | C | - | controls |  |
+| C:e14 | 4.15 | PREDICTED_PATH_CONFLICT_START | C | track_001 | radar |  |
+| C:e15 | 4.20 | CRITICAL_TTC_END | C | track_002 | radar |  |
+| C:e16 | 4.55 | CLOSING_END | C | track_002 | radar |  |
+| C:e17 | 4.70 | CRITICAL_TTC_END | C | track_001 | radar |  |
+| C:e18 | 4.85 | PREDICTED_PATH_CONFLICT_END | C | track_001 | radar |  |
+| C:e19 | 4.90 | CLOSING_END | C | track_001 | radar |  |
+| C:e20 | 14.35 | HARD_BRAKE_END | C | - | controls |  |
+| C:e21 | 14.35 | BRAKE_END | C | - | controls |  |
+| C:e22 | 14.35 | STRONG_THROTTLE_START | C | - | controls |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -60,24 +62,55 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e15 --PRECEDES--> C:e16
     C:e16 --PRECEDES--> C:e17
     C:e17 --PRECEDES--> C:e18
-    C:e17 --PRECEDES--> C:e19
-    C:e17 --PRECEDES--> C:e20
+    C:e18 --PRECEDES--> C:e19
+    C:e19 --PRECEDES--> C:e20
+    C:e19 --PRECEDES--> C:e21
+    C:e19 --PRECEDES--> C:e22
     C:e02 --SAME_TRACK--> C:e03
     C:e02 --SAME_TRACK--> C:e04
     C:e02 --SAME_TRACK--> C:e07
     C:e10 --SAME_TRACK--> C:e11
     C:e10 --SAME_TRACK--> C:e12
     C:e02 --SAME_TRACK--> C:e13
-    C:e10 --SAME_TRACK--> C:e14
+    C:e02 --SAME_TRACK--> C:e14
     C:e10 --SAME_TRACK--> C:e15
-    C:e02 --SAME_TRACK--> C:e16
+    C:e10 --SAME_TRACK--> C:e16
     C:e02 --SAME_TRACK--> C:e17
+    C:e02 --SAME_TRACK--> C:e18
+    C:e02 --SAME_TRACK--> C:e19
 ```
+
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | C:e01 MOVING_START | ego: not yet observed | - |
+| 0.05 | C:e02 TRACK_APPEARED track_001<br>C:e03 CLOSING_START track_001 | ego: MOVING | 0.00 |
+| 2.15 | C:e04 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: VISIBLE, CLOSING | 2.10 |
+| 2.35 | C:e05 BRAKE_START<br>C:e06 HARD_BRAKE_START | ego: MOVING<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC | 2.30 |
+| 2.75 | C:e07 CRITICAL_TTC_END track_001 | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC | 2.70 |
+| 2.85 | C:e08 MOVING_END<br>C:e09 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING | 2.80 |
+| 3.00 | C:e10 TRACK_APPEARED track_002<br>C:e11 CLOSING_START track_002 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING | 2.90 |
+| 3.35 | C:e12 CRITICAL_TTC_START track_002 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE, CLOSING | 3.30 |
+| 3.55 | C:e13 CRITICAL_TTC_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE, CLOSING, CRITICAL_TTC | 3.50 |
+| 4.15 | C:e14 PREDICTED_PATH_CONFLICT_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>track_002: VISIBLE, CLOSING, CRITICAL_TTC | 4.10 |
+| 4.20 | C:e15 CRITICAL_TTC_END track_002 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, PATH_CONFLICT<br>track_002: VISIBLE, CLOSING, CRITICAL_TTC | 4.10 |
+| 4.55 | C:e16 CLOSING_END track_002 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, PATH_CONFLICT<br>track_002: VISIBLE, CLOSING | 4.50 |
+| 4.70 | C:e17 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC, PATH_CONFLICT<br>track_002: VISIBLE | 4.60 |
+| 4.85 | C:e18 PREDICTED_PATH_CONFLICT_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, PATH_CONFLICT<br>track_002: VISIBLE | 4.80 |
+| 4.90 | C:e19 CLOSING_END track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>track_002: VISIBLE | 4.80 |
+| 14.35 | C:e20 HARD_BRAKE_END<br>C:e21 BRAKE_END<br>C:e22 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE<br>track_002: VISIBLE | 14.30 |
 
 ## States still active when observation ended
 
 - STOP, since C:e09 (t = 2.85 s)
-- STRONG_THROTTLE, since C:e20 (t = 14.35 s)
+- STRONG_THROTTLE, since C:e22 (t = 14.35 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 
@@ -109,9 +142,11 @@ Bearing: positive = to C's right. Ranges are measured from the radar to the visi
 - t = 3.00 s: C observed track_002 start closing in (already the case when first observed).
 - t = 3.35 s: C's time-to-contact with track_002 became critical.
 - t = 3.55 s: C's time-to-contact with track_001 became critical.
+- t = 4.15 s: C predicted a path conflict with track_001 (close approach ahead if both keep their motion).
 - t = 4.20 s: C's time-to-contact with track_002 stopped being critical.
 - t = 4.55 s: C observed track_002 stop closing in.
 - t = 4.70 s: C's time-to-contact with track_001 stopped being critical.
+- t = 4.85 s: C stopped predicting a path conflict with track_001.
 - t = 4.90 s: C observed track_001 stop closing in.
 - t = 14.35 s: C stopped braking hard.
 - t = 14.35 s: C released the brake.

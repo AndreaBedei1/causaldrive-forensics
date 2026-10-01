@@ -36,7 +36,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e22 | 10.85 | TRACK_LOST | B | track_001 | radar |  |
 | B:e23 | 11.95 | STRONG_THROTTLE_END | B | - | controls |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -88,11 +88,36 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e05 --SAME_TRACK--> B:e22
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
+| 1.65 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 1.60 |
+| 2.10 | B:e03 STRONG_THROTTLE_END<br>B:e04 STOP_SIGN_DETECTED_START sign-0 | ego: MOVING, STRONG_THROTTLE | 2.00 |
+| 3.00 | B:e05 TRACK_APPEARED track_001<br>B:e06 CLOSING_START track_001 | ego: MOVING<br>sign-0: STOP sign VISIBLE, known | 2.90 |
+| 4.00 | B:e07 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign VISIBLE, known | 3.90 |
+| 4.35 | B:e08 BRAKE_START<br>B:e09 HARD_BRAKE_START | ego: MOVING<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 4.30 |
+| 4.70 | B:e10 CLOSING_END track_001<br>B:e11 MOVING_END<br>B:e12 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 4.60 |
+| 6.95 | B:e13 CLOSING_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE<br>sign-0: STOP sign not visible, known | 6.90 |
+| 8.50 | B:e14 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 8.40 |
+| 9.05 | B:e15 EGO_PATH_EXIT track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, IN_EGO_PATH<br>sign-0: STOP sign not visible, known | 9.00 |
+| 9.55 | B:e16 CRITICAL_TTC_START track_001 | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING<br>sign-0: STOP sign not visible, known | 9.50 |
+| 10.45 | B:e17 HARD_BRAKE_END<br>B:e18 BRAKE_END<br>B:e19 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>sign-0: STOP sign not visible, known | 10.40 |
+| 10.85 | B:e20 STOP_END<br>B:e21 MOVING_START<br>B:e22 TRACK_LOST track_001 | ego: STOP, STRONG_THROTTLE<br>track_001: VISIBLE, CLOSING, CRITICAL_TTC<br>sign-0: STOP sign not visible, known | 10.80 |
+| 11.95 | B:e23 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE<br>lost (states UNKNOWN): track_001<br>sign-0: STOP sign not visible, known | 11.90 |
+
 ## States still active when observation ended
 
 - CLOSING of track_001, since B:e13 (t = 6.95 s); the track was lost at 10.85 s
 - CRITICAL_TTC of track_001, since B:e16 (t = 9.55 s); the track was lost at 10.85 s
 - MOVING, since B:e21 (t = 10.85 s)
+
+## Tracks lost
+
+- track_001 at 10.85 s (B:e22): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Sign detection windows
 
@@ -131,5 +156,5 @@ Bearing: positive = to B's right. Ranges are measured from the radar to the visi
 - t = 10.45 s: B started applying strong throttle.
 - t = 10.85 s: B left its stop.
 - t = 10.85 s: B started moving.
-- t = 10.85 s: B's radar lost track_001.
+- t = 10.85 s: B's radar lost track_001 (its states are UNKNOWN from then on, not ended).
 - t = 11.95 s: B stopped applying strong throttle.

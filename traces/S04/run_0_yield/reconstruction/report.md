@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 9.95 s | 101 | 9 | 13 | 2 | none |
+| A | 9.95 s | 101 | 11 | 17 | 2 | none |
 | B | 9.95 s | 101 | 26 | 47 | 2 | none |
 
 ## Graph alignment
@@ -33,7 +33,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 ## Global graph
 
-35 nodes, 13 edges; 0 merged node(s): none.
+37 nodes, 15 edges; 0 merged node(s): none.
 
 ### Event sequence (global time)
 
@@ -45,7 +45,9 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 2.10 s) A's radar started tracking unidentified object A:track_001.
 - (unaligned, A local time 2.10 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 3.00 s) A's time-to-contact with unidentified object A:track_001 became critical.
-- (unaligned, A local time 4.95 s) A's radar lost unidentified object A:track_001.
+- (unaligned, A local time 3.45 s) A predicted a path conflict with unidentified object A:track_001 (close approach ahead if both keep their motion).
+- (unaligned, A local time 3.75 s) A stopped predicting a path conflict with unidentified object A:track_001.
+- (unaligned, A local time 4.95 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, A local time 8.15 s) A's camera established a STOP sign detection (unidentified object A:sign-0) (the detector judged it not relevant to its path).
 - (unaligned, A local time 8.45 s) A's camera stopped detecting STOP sign unidentified object A:sign-0.
 - (unaligned, A local time 9.70 s) A's radar started tracking unidentified object A:track_002.
@@ -55,7 +57,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, B local time 1.85 s) B stopped applying strong throttle.
 - (unaligned, B local time 2.00 s) B's radar started tracking unidentified object B:track_001.
 - (unaligned, B local time 2.00 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
-- (unaligned, B local time 2.35 s) B's radar lost unidentified object B:track_001.
+- (unaligned, B local time 2.35 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 3.15 s) B started braking.
 - (unaligned, B local time 3.15 s) B started braking hard.
 - (unaligned, B local time 3.90 s) B stopped moving.
@@ -67,7 +69,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, B local time 5.45 s) B's time-to-contact with unidentified object B:track_002 stopped being critical.
 - (unaligned, B local time 5.55 s) B observed unidentified object B:track_002 stop closing in.
 - (unaligned, B local time 5.90 s) B observed unidentified object B:track_002 leave its forward path corridor.
-- (unaligned, B local time 6.90 s) B's radar lost unidentified object B:track_002.
+- (unaligned, B local time 6.90 s) B's radar lost unidentified object B:track_002 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 7.15 s) B stopped braking hard.
 - (unaligned, B local time 7.15 s) B released the brake.
 - (unaligned, B local time 7.15 s) B started applying strong throttle.
@@ -87,7 +89,7 @@ A:
 - MOVING, since A:e01 (t = 0.00 s)
 - CLOSING of track_001, since A:e03 (t = 2.10 s); the track was lost at 4.95 s
 - CRITICAL_TTC of track_001, since A:e04 (t = 3.00 s); the track was lost at 4.95 s
-- CLOSING of track_002, since A:e09 (t = 9.70 s)
+- CLOSING of track_002, since A:e11 (t = 9.70 s)
 B:
 - CLOSING of track_001, since B:e05 (t = 2.00 s); the track was lost at 2.35 s
 - MOVING, since B:e23 (t = 7.55 s)
@@ -98,6 +100,20 @@ A:
 - STOP sign sign-0: detected 8.15 s -> 8.45 s; relevant to the path: False; STOP_START inside: none
 B:
 - none
+
+### Perceived state just before each collision report
+
+- no collision was reported
+
+### Tracks lost while a state was active
+
+A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
+
+A:
+- track_001 at 4.95 s (A:e07): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+B:
+- track_001 at 2.35 s (B:e06): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_002
 
 ## Uncertainty and limitations
 
@@ -144,7 +160,22 @@ B:
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
     "critical_ttc_s": 2.0,
-    "path_half_width_m": 1.5
+    "path_half_width_m": 1.5,
+    "max_position_std_m": 1.0,
+    "max_velocity_std_mps": 1.0,
+    "conflict_horizon_s": 4.0,
+    "conflict_distance_m": 1.5,
+    "conflict_release_horizon_s": 5.0,
+    "conflict_release_distance_m": 2.5,
+    "cut_in_max_heading_deg": 25.0,
+    "cut_in_min_target_speed_mps": 2.0,
+    "cut_in_lateral_speed_mps": 0.3,
+    "cut_in_persistence_s": 0.5,
+    "cut_in_outside_margin_m": 0.5,
+    "cut_in_min_displacement_m": 0.5,
+    "cut_in_horizon_s": 3.0,
+    "cut_in_settle_speed_mps": 0.2,
+    "cut_in_settle_s": 0.3
   },
   "fusion": {
     "impulse_tolerance": 0.1,

@@ -23,7 +23,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e09 | 5.00 | MOVING_END | B | - | ego |  |
 | B:e10 | 5.00 | STOP_START | B | - | ego |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -43,11 +43,29 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e08 --PRECEDES--> B:e10
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
+| 0.35 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 0.30 |
+| 1.30 | B:e03 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE | 1.20 |
+| 3.15 | B:e04 BRAKE_START | ego: MOVING | 3.10 |
+| 3.60 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
+| 4.25 | B:e06 COLLISION<br>B:e07 BRAKE_START<br>B:e08 HARD_BRAKE_START | ego: MOVING | 4.20 |
+| 5.00 | B:e09 MOVING_END<br>B:e10 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE | 4.90 |
+
 ## States still active when observation ended
 
 - BRAKE, since B:e07 (t = 4.25 s)
 - HARD_BRAKE, since B:e08 (t = 4.25 s)
 - STOP, since B:e10 (t = 5.00 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 

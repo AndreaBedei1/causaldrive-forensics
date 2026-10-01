@@ -16,7 +16,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e02 | 0.30 | MOVING_END | C | - | ego |  |
 | C:e03 | 0.30 | STOP_START | C | - | ego |  |
 
-Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times.
+Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
@@ -25,9 +25,22 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e01 --PRECEDES--> C:e03
 ```
 
+## Perceived state before each event
+
+Each row is the state just BEFORE its events (none of them applied): events at one time are simultaneous and share it. True states are named, unknown ones end with `?`, false ones are omitted; a lost track's states are UNKNOWN, never ended. Facts: the trace frame at the time shown.
+
+| Local time | Events | Perceived state just before | Facts at |
+|-----------:|--------|-----------------------------|---------:|
+| 0.00 | C:e01 MOVING_START | ego: not yet observed | - |
+| 0.30 | C:e02 MOVING_END<br>C:e03 STOP_START | ego: MOVING | 0.20 |
+
 ## States still active when observation ended
 
 - STOP, since C:e03 (t = 0.30 s)
+
+## Tracks lost
+
+- no track was lost
 
 ## Sign detection windows
 

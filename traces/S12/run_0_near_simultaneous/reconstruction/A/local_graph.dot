@@ -48,8 +48,8 @@ digraph "local_A" {
   "A:e44" [label="CLOSING_END\nA -> track_008\nt=10.05", fillcolor="#bfdbfe"];
   "A:e45" [label="STOP_SIGN_DETECTED_START\nA -> sign-1\nt=11.70", fillcolor="#bfdbfe"];
   "A:e46" [label="STOP_SIGN_DETECTED_END\nA -> sign-1\nt=11.80", fillcolor="#bfdbfe"];
-  "A:e47" [label="STOP_SIGN_DETECTED_START\nA -> sign-4\nt=13.95", fillcolor="#bfdbfe"];
-  "A:e48" [label="STOP_SIGN_DETECTED_END\nA -> sign-4\nt=13.95", fillcolor="#bfdbfe"];
+  "A:e47" [label="STOP_SIGN_DETECTED_START\nA -> sign-1\nt=13.95", fillcolor="#bfdbfe"];
+  "A:e48" [label="STOP_SIGN_DETECTED_END\nA -> sign-1\nt=13.95", fillcolor="#bfdbfe"];
   {rank=same; "A:e04"; "A:e05";}
   {rank=same; "A:e06"; "A:e07";}
   {rank=same; "A:e09"; "A:e10";}

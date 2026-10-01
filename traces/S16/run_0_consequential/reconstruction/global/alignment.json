@@ -12,7 +12,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e12",
+      "anchor_node": "B:e15",
       "anchor_t_local": 5.15,
       "offset_to_global": -5.15,
       "reason": "reported the reference collision collision_001"
@@ -37,7 +37,7 @@
       ],
       "nodes": {
         "A": "A:e05",
-        "B": "B:e12"
+        "B": "B:e15"
       },
       "t_local": {
         "A": 5.15,
@@ -62,7 +62,7 @@
         "C"
       ],
       "nodes": {
-        "A": "A:e16",
+        "A": "A:e17",
         "C": "C:e04"
       },
       "t_local": {
