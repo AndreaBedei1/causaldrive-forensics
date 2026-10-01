@@ -1,6 +1,7 @@
 """The local semantic world model: perceived state, track loss, cut-in,
-predicted path conflict and STOP-sign knowledge."""
+predicted path conflict, STOP-sign knowledge and the radar audit boundary."""
 
+import ast
 import json
 import math
 import tempfile
@@ -21,6 +22,7 @@ from synthetic_run import CONTACT_T, make_run
 
 CFG = SemanticsConfig()
 ORIGIN = 100.0
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _ego(speed=0.0, end=12.0):
@@ -296,6 +298,37 @@ class SignKnowledgeTests(unittest.TestCase):
         events = sign_events("A", [self._sign("sign-1", 2.0, 3.0)], ORIGIN, recording_end=12.0, track_gap_s=0.6)
         self.assertEqual({event.kind for event in events}, {"PERCEPTION"})
         self.assertEqual([event.t_local for event in events], [2.2, 3.0])  # confirmation .. last detection
+
+
+class RadarBoundaryTests(unittest.TestCase):
+    def test_reconstruction_never_imports_the_privileged_audit_or_ground_truth(self):
+        for path in sorted((ROOT / "src" / "cdf" / "reconstruction").glob("*.py")):
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                names = []
+                if isinstance(node, ast.Import):
+                    names = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    names = [node.module or ""]
+                for name in names:
+                    self.assertNotIn("audit", name, path.name)
+                    self.assertNotIn("evaluation", name, path.name)
+                    self.assertNotIn("replay", name, path.name)
+
+    def test_the_audit_is_marked_privileged(self):
+        text = (ROOT / "scripts" / "audit_radar_visibility.py").read_text(encoding="utf-8")
+        self.assertIn("PRIVILEGED EVALUATION", text.split("\n\n")[0] + text[:400])
+
+    def test_the_campaign_sensor_setup_is_still_one_forward_radar(self):
+        import yaml
+        default = yaml.safe_load((ROOT / "configs" / "default.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(default["sensors"]["profile"], "radar_baseline")
+        profile = yaml.safe_load((ROOT / "configs" / "sensors" / "radar_baseline.yaml").read_text(encoding="utf-8"))
+        sensors = profile["radar"]["sensors"]
+        self.assertEqual(len(sensors), 1)
+        self.assertEqual((sensors[0]["horizontal_fov_deg"], sensors[0]["range_m"], sensors[0]["mount"]["x"]),
+                         (120.0, 90.0, 2.2))
+
 
 if __name__ == "__main__":
     unittest.main()
