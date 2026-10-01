@@ -6,6 +6,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "B",
+    "collision_event": "collision_001",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 2.90 s before the matched collision",
@@ -29,6 +30,7 @@
     "status": "ASSOCIATED",
     "confidence": 0.85,
     "candidate": "B",
+    "collision_event": "collision_001",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 1.80 s before the matched collision",
@@ -51,6 +53,7 @@
     "status": "ASSOCIATED",
     "confidence": 0.88,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 1.85 s before the matched collision",
@@ -73,6 +76,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 0.75 s before the matched collision (needs 1.00 s)",
@@ -97,6 +101,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 0.75 s before the matched collision (needs 1.00 s)",
@@ -121,6 +126,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 0.75 s before the matched collision (needs 1.00 s)",
@@ -145,6 +151,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 0.75 s before the matched collision (needs 1.00 s)",
@@ -169,6 +176,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 9797.5 vs 9797.5 N*s)",
       "tracked for 0.70 s before the matched collision (needs 1.00 s)",
@@ -193,6 +201,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": null,
+    "collision_event": null,
     "evidence": [
       "graph C is not aligned: it recorded no collision to anchor on"
     ],
@@ -210,6 +219,7 @@
     "status": "ANONYMOUS",
     "confidence": null,
     "candidate": null,
+    "collision_event": null,
     "evidence": [
       "graph C is not aligned: it recorded no collision to anchor on"
     ],

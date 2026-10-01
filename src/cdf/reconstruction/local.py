@@ -24,6 +24,7 @@ from __future__ import annotations
 import bisect
 import json
 import math
+import statistics
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -275,24 +276,88 @@ def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
     return events
 
 
-def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
-                     cfg: CollisionConfig) -> List[SemanticEvent]:
-    """One COLLISION per contact: callbacks closer than ``merge_gap_s`` are one contact.
+def sample_period(ego: EgoTrajectory) -> float:
+    """The recorder's own sample period: the median interval between its ego samples.
 
-    Only the peak impulse is kept: graph alignment needs it to recognise the
-    same contact in two recorders.  Every callback stays in the raw log.
+    0 when unknown (a single sample): then every pause between callbacks is a break.
     """
-    contacts: List[Dict[str, Any]] = []
+    times = [float(t) for t in ego.times]
+    return statistics.median(b - a for a, b in zip(times, times[1:])) if len(times) > 1 else 0.0
+
+
+def velocity_jump(ego: EgoTrajectory, t_local: float, period: float) -> Tuple[float, float]:
+    """The recorder's own velocity change from one sample before ``t_local`` to one after:
+    (mean acceleration in m/s^2, direction in radians in the local frame)."""
+    before, after = ego.at(t_local - period), ego.at(t_local + period)
+    dvx, dvy = after.vx - before.vx, after.vy - before.vy
+    return math.hypot(dvx, dvy) / (2.0 * period), math.atan2(dvy, dvx)
+
+
+def _reversed_impact(ego: EgoTrajectory, contact_t: float, burst_t: float, period: float,
+                     cfg: CollisionConfig) -> Optional[float]:
+    """Angle (deg) between two impact-like velocity jumps more than ``reversal_angle_deg`` apart, else None."""
+    if period <= 0.0:
+        return None
+    first, second = velocity_jump(ego, contact_t, period), velocity_jump(ego, burst_t, period)
+    if min(first[0], second[0]) < cfg.impact_acceleration_mps2:
+        return None
+    angle = abs(math.degrees(math.remainder(second[1] - first[1], 2.0 * math.pi)))
+    return angle if angle > cfg.reversal_angle_deg else None
+
+
+def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
+                     cfg: CollisionConfig, ego: EgoTrajectory) -> List[SemanticEvent]:
+    """One COLLISION per contact, from the recorder's own collision sensor.
+
+    The sensor calls back once per sample while the bodies touch and reports
+    the impulse magnitude only (no partner).  Callbacks without a missing
+    sample between them form a burst.  A burst starts a new contact when
+
+    1. more than ``merge_gap_s`` passed since the previous callback; or
+    2. it follows a break (at least one sample without a callback) and peaks
+       at ``new_impact_ratio`` x the current contact's peak or more; or
+    3. supplementary evidence: it follows a break, peaks at
+       ``reversal_impact_ratio`` x the contact's peak or more, and the
+       recorder's own velocity jumps like an impact both at the contact's start
+       and at the burst's, in directions more than ``reversal_angle_deg`` apart.
+
+    Any other burst continues the current contact (rebound, persistent
+    contact).  The COLLISION is at the contact's first callback and keeps its
+    peak impulse, which graph alignment needs to recognise the same contact in
+    another recorder; a contact started within ``merge_gap_s`` of the previous
+    one also states why.  Every callback stays in the raw log.
+    """
+    period = sample_period(ego)
+    bursts: List[Dict[str, Any]] = []
     for record in sorted(collisions, key=lambda item: float(item["timestamp"])):
         t_local = _local_time(record, clock_origin)
         impulse = float(record["impulse"])
-        if contacts and t_local - contacts[-1]["last"] <= cfg.merge_gap_s:
-            contacts[-1]["last"] = t_local
-            contacts[-1]["peak"] = max(contacts[-1]["peak"], impulse)
+        if bursts and t_local - bursts[-1]["last"] <= 1.5 * period:
+            bursts[-1]["last"] = t_local
+            bursts[-1]["peak"] = max(bursts[-1]["peak"], impulse)
         else:
-            contacts.append({"first": t_local, "last": t_local, "peak": impulse})
+            bursts.append({"first": t_local, "last": t_local, "peak": impulse})
+
+    contacts: List[Dict[str, Any]] = []
+    for burst in bursts:
+        current = contacts[-1] if contacts else None
+        attributes: Dict[str, Any] = {}
+        if current is not None and burst["first"] - current["last"] <= cfg.merge_gap_s:
+            ratio = burst["peak"] / current["peak"] if current["peak"] > 0 else math.inf
+            reversal = None
+            if cfg.reversal_impact_ratio <= ratio < cfg.new_impact_ratio:
+                reversal = _reversed_impact(ego, current["first"], burst["first"], period, cfg)
+            if ratio < cfg.new_impact_ratio and reversal is None:
+                current["last"] = burst["last"]
+                current["peak"] = max(current["peak"], burst["peak"])
+                continue
+            attributes["new_contact"] = {"break_s": round(burst["first"] - current["last"], 2),
+                                         "peak_ratio": round(ratio, 2)}
+            if reversal is not None:
+                attributes["new_contact"]["reversal_deg"] = round(reversal)
+        contacts.append(dict(burst, attributes=attributes))
     return [SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
-                          attributes={"peak_impulse": round(contact["peak"], 2)},
+                          attributes=dict({"peak_impulse": round(contact["peak"], 2)}, **contact["attributes"]),
                           source="collision_sensor", confidence=1.0) for contact in contacts]
 
 
@@ -861,7 +926,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     events += control_events(owner, controls, clock_origin, semantics, world)
     events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"), world)
     events += turn_events(owner, ego, semantics, world)
-    events += collision_events(owner, collisions, clock_origin, cfg.collision)
+    events += collision_events(owner, collisions, clock_origin, cfg.collision, ego)
     events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
     for track in tracks:
         events += track_events(owner, track, ego.end, semantics, ego, world)

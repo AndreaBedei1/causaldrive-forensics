@@ -15,7 +15,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 ## Graph alignment
 
-Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
@@ -52,28 +52,28 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 17663.
 
 ### What happened, in plain language
 
-- 6.50 s before the matched collision, A started moving (already the case when first observed).
-- 6.50 s before the matched collision, B started moving (already the case when first observed).
-- 6.40 s before the matched collision, A's radar started tracking B, which appeared in front of it.
-- 6.05 s before the matched collision, A observed B start closing in.
-- 4.90 s before the matched collision, A observed B stop closing in.
-- 2.55 s before the matched collision, B started braking.
-- 2.25 s before the matched collision, A observed B start closing in.
-- 1.50 s before the matched collision, A's time-to-contact with B became critical.
-- 1.35 s before the matched collision, B stopped moving.
-- 1.35 s before the matched collision, B came to a stop.
-- 0.95 s before the matched collision, A started braking.
-- At the matched collision, A and B both recorded this same collision (peak impulses A: 17663, B: 17663 N*s).
-- At the matched collision, A's time-to-contact with B stopped being critical.
-- At the matched collision, A observed B stop closing in.
-- 0.05 s after the matched collision, A stopped moving.
-- 0.05 s after the matched collision, A came to a stop.
+- 6.50 s before the reference collision, A started moving (already the case when first observed).
+- 6.50 s before the reference collision, B started moving (already the case when first observed).
+- 6.40 s before the reference collision, A's radar started tracking B, which appeared in front of it.
+- 6.05 s before the reference collision, A observed B start closing in.
+- 4.90 s before the reference collision, A observed B stop closing in.
+- 2.55 s before the reference collision, B started braking.
+- 2.25 s before the reference collision, A observed B start closing in.
+- 1.50 s before the reference collision, A's time-to-contact with B became critical.
+- 1.35 s before the reference collision, B stopped moving.
+- 1.35 s before the reference collision, B came to a stop.
+- 0.95 s before the reference collision, A started braking.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 17663, B: 17663 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
+- At the reference collision, A observed B stop closing in.
+- 0.05 s after the reference collision, A stopped moving.
+- 0.05 s after the reference collision, A came to a stop.
 
 ### Temporal safety relations
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 5.00, COLLISION 6.50 (+1.50 s) [local times; t_global: critical_ttc_start -1.50, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 5.00, COLLISION with B 6.50 (+1.50 s) [local times; t_global: critical_ttc_start -1.50, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -115,7 +115,7 @@ B:
 ## Uncertainty and limitations
 
 - B built no radar track: nothing moving stayed in its forward radar view long enough, so B has no perception of the others.
-- Global time rests on one collision anchor and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from t_global = 0.
+- Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
 - Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
 
 ## Files
@@ -129,7 +129,11 @@ B:
 {
   "trace_hz": 10.0,
   "collision": {
-    "merge_gap_s": 0.5
+    "merge_gap_s": 0.5,
+    "new_impact_ratio": 0.5,
+    "reversal_impact_ratio": 0.25,
+    "impact_acceleration_mps2": 20.0,
+    "reversal_angle_deg": 90.0
   },
   "tracking": {
     "min_height_m": 0.3,
@@ -176,6 +180,7 @@ B:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "clock_tolerance_s": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
     "contact_range_scale_m": 3.0,

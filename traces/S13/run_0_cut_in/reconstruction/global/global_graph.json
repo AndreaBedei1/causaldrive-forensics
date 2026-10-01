@@ -2405,6 +2405,7 @@
         "collision_minus_critical_ttc_start": 1.3,
         "ego_path_entry_minus_critical_ttc_start": 0.95
       },
+      "collision_with": "B",
       "recorder": "A",
       "entity": "B",
       "association": "ASSOCIATED",
@@ -2419,7 +2420,11 @@
   "reconstruction_config": {
     "trace_hz": 10.0,
     "collision": {
-      "merge_gap_s": 0.5
+      "merge_gap_s": 0.5,
+      "new_impact_ratio": 0.5,
+      "reversal_impact_ratio": 0.25,
+      "impact_acceleration_mps2": 20.0,
+      "reversal_angle_deg": 90.0
     },
     "tracking": {
       "min_height_m": 0.3,
@@ -2466,6 +2471,7 @@
     },
     "fusion": {
       "impulse_tolerance": 0.1,
+      "clock_tolerance_s": 0.1,
       "contact_window_s": 0.5,
       "contact_range_m": 3.5,
       "contact_range_scale_m": 3.0,

@@ -1,5 +1,5 @@
 digraph "global" {
-  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Global graph - S12/run_0_near_simultaneous (t=0 at the matched collision)"];
+  graph [rankdir=LR, labelloc=t, fontname=Helvetica, label="Global graph - S12/run_0_near_simultaneous (t=0 at the reference collision)"];
   node [shape=box, style="rounded,filled", fontname=Helvetica, fontsize=10];
   edge [fontname=Helvetica, fontsize=8];
   "g01" [label="MOVING_START\nA\nt=-9.50", fillcolor="#e5e7eb"];

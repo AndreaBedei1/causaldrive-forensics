@@ -6,6 +6,7 @@
     "status": "ASSOCIATED",
     "confidence": 0.9,
     "candidate": "B",
+    "collision_event": "collision_001",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 8859.58 vs 8859.58 N*s)",
       "tracked for 2.75 s before the matched collision",
@@ -28,6 +29,7 @@
     "status": "ASSOCIATED",
     "confidence": 0.98,
     "candidate": "A",
+    "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 8859.58 vs 8859.58 N*s)",
       "tracked for 2.90 s before the matched collision",

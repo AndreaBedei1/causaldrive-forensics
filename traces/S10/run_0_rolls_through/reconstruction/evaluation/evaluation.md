@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -12,12 +12,16 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
 | A + B | 131.255 | 12489.8 | g15 | yes | 0.0 s |
 
+Reconstructed COLLISION nodes that reproduce no true contact: none.
+
 ## Graph alignment accuracy
 
-| Graph | Status | Estimated anchor (local) | True contact (local) | Error |
-|-------|--------|-------------------------:|---------------------:|------:|
-| A | ALIGNED | 5.25 | 5.25 | 0.0 s |
-| B | ALIGNED | 5.25 | 5.25 | 0.0 s |
+Local time at which each graph reads t_global = 0, against the true local time of the reference contact; the chain lists the matched collisions that aligned the graph.
+
+| Graph | Status | Chain | Estimated (local) | True (local) | Error |
+|-------|--------|-------|------------------:|-------------:|------:|
+| A | ALIGNED | collision_001 | 5.25 | 5.25 | 0.0 s |
+| B | ALIGNED | collision_001 | 5.25 | 5.25 | 0.0 s |
 
 Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 

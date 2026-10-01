@@ -4,7 +4,17 @@ reconstruction:
   trace_hz: 10                        # readable local trace rate (local clock)
 
   collision:
-    merge_gap_s: 0.5                  # callbacks closer than this = one contact episode
+    # One COLLISION per contact. Callbacks without a missing sample between them form a burst;
+    # a burst starts a new contact after a pause > merge_gap_s, or after a break (>= 1 sample
+    # without callback) when it peaks at >= new_impact_ratio x the current contact's peak.
+    merge_gap_s: 0.5                  # a longer pause always separates two contacts
+    new_impact_ratio: 0.5             # rebound ~ restitution (< 0.5) x first impulse; persistent contact far less
+    # Supplementary evidence only: a weaker burst (>= reversal_impact_ratio x peak) also starts a
+    # new contact when the recorder's own velocity jumps like an impact at the contact's start and
+    # at the burst's, in directions > reversal_angle_deg apart (a rebound pushes the same way again).
+    reversal_impact_ratio: 0.25
+    impact_acceleration_mps2: 20.0    # impact-like jump: mean |dv|/dt over the samples around the callback (~2 g)
+    reversal_angle_deg: 90.0
 
   tracking:
     min_height_m: 0.3                 # returns below: road surface
@@ -54,6 +64,7 @@ reconstruction:
 
   fusion:
     impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %
+    clock_tolerance_s: 0.1            # matches between graphs already linked must agree on the clock offset
     contact_window_s: 0.5             # a partner track is still observed within this window before the contact
     contact_range_m: 3.5              # range at the contact counts fully up to this (evidence, not a veto)...
     contact_range_scale_m: 3.0        # ...and lowers the confidence beyond it with this scale

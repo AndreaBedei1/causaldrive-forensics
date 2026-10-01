@@ -95,8 +95,9 @@ class CollisionEventTests(unittest.TestCase):
     def test_repeated_collision_callbacks_collapse_into_one_minimal_event(self):
         burst = [{"timestamp": 10.0 + 0.05 * k, "impulse": 100.0 + k} for k in range(21)]
         later = [{"timestamp": 13.0, "impulse": 42.0}]
+        ego = EgoTrajectory([EgoState(0.05 * k, 0.0, 0.0, 0.0, 0.0, 0.0) for k in range(81)])
         events = collision_events("A", copy.deepcopy(burst + later), clock_origin=10.0,
-                                  cfg=CollisionConfig(merge_gap_s=0.5))
+                                  cfg=CollisionConfig(merge_gap_s=0.5), ego=ego)
         self.assertEqual([(event.type, event.t_local) for event in events], [("COLLISION", 0.0), ("COLLISION", 3.0)])
         # Only the peak impulse, which alignment needs; callback details stay in the raw log.
         self.assertEqual(events[0].attributes, {"peak_impulse": 120.0})

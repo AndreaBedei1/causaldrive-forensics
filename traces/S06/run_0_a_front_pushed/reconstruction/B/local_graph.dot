@@ -18,13 +18,14 @@ digraph "local_B" {
   "B:e14" [label="STOP_END\nB\nt=5.90", fillcolor="#e5e7eb"];
   "B:e15" [label="MOVING_START\nB\nt=5.90", fillcolor="#e5e7eb"];
   "B:e16" [label="CRITICAL_TTC_START\nB -> track_001\nt=5.90", fillcolor="#bfdbfe"];
-  "B:e17" [label="TRACK_LOST\nB -> track_001\nt=6.20", fillcolor="#bfdbfe"];
-  "B:e18" [label="MOVING_END\nB\nt=6.30", fillcolor="#e5e7eb"];
-  "B:e19" [label="STOP_START\nB\nt=6.30", fillcolor="#e5e7eb"];
+  "B:e17" [label="COLLISION\nB\nt=6.15", fillcolor="#fca5a5"];
+  "B:e18" [label="TRACK_LOST\nB -> track_001\nt=6.20", fillcolor="#bfdbfe"];
+  "B:e19" [label="MOVING_END\nB\nt=6.30", fillcolor="#e5e7eb"];
+  "B:e20" [label="STOP_START\nB\nt=6.30", fillcolor="#e5e7eb"];
   {rank=same; "B:e01"; "B:e02";}
   {rank=same; "B:e08"; "B:e09"; "B:e10"; "B:e11";}
   {rank=same; "B:e13"; "B:e14"; "B:e15"; "B:e16";}
-  {rank=same; "B:e18"; "B:e19";}
+  {rank=same; "B:e19"; "B:e20";}
   "B:e01" -> "B:e03" [label="PRECEDES"];
   "B:e02" -> "B:e03" [label="PRECEDES"];
   "B:e03" -> "B:e04" [label="PRECEDES"];
@@ -48,7 +49,8 @@ digraph "local_B" {
   "B:e15" -> "B:e17" [label="PRECEDES"];
   "B:e16" -> "B:e17" [label="PRECEDES"];
   "B:e17" -> "B:e18" [label="PRECEDES"];
-  "B:e17" -> "B:e19" [label="PRECEDES"];
+  "B:e18" -> "B:e19" [label="PRECEDES"];
+  "B:e18" -> "B:e20" [label="PRECEDES"];
   "B:e02" -> "B:e03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e02" -> "B:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e02" -> "B:e05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -56,5 +58,5 @@ digraph "local_B" {
   "B:e02" -> "B:e08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e02" -> "B:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e02" -> "B:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e02" -> "B:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e02" -> "B:e18" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

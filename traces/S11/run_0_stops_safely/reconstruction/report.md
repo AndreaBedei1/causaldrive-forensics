@@ -101,7 +101,7 @@ B:
 - B:track_001 stays anonymous: graph B is not aligned: it recorded no collision to anchor on.
 - A is UNALIGNED: it recorded no collision to anchor on.
 - B is UNALIGNED: it recorded no collision to anchor on.
-- Global time rests on one collision anchor and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from t_global = 0.
+- Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
 - Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
 
 ## Files
@@ -115,7 +115,11 @@ B:
 {
   "trace_hz": 10.0,
   "collision": {
-    "merge_gap_s": 0.5
+    "merge_gap_s": 0.5,
+    "new_impact_ratio": 0.5,
+    "reversal_impact_ratio": 0.25,
+    "impact_acceleration_mps2": 20.0,
+    "reversal_angle_deg": 90.0
   },
   "tracking": {
     "min_height_m": 0.3,
@@ -162,6 +166,7 @@ B:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "clock_tolerance_s": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
     "contact_range_scale_m": 3.0,

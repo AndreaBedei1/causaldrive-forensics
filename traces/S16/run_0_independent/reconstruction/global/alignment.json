@@ -1,6 +1,6 @@
 {
-  "method": "collision_anchor",
-  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+  "method": "matched_collisions",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; a graph is aligned through any chain of matched collisions linking it to the reference one",
   "reference_event": "collision_002",
   "graphs": {
     "A": {
@@ -8,25 +8,37 @@
       "anchor_node": "A:e16",
       "anchor_t_local": 14.1,
       "offset_to_global": -14.1,
+      "chain": [
+        "collision_002"
+      ],
       "reason": "reported the reference collision collision_002"
     },
     "B": {
-      "status": "UNALIGNED",
-      "anchor_node": null,
-      "anchor_t_local": null,
-      "offset_to_global": null,
-      "reason": "shares only a non-reference collision (multi-hop alignment not implemented)"
+      "status": "ALIGNED",
+      "anchor_node": "B:e10",
+      "anchor_t_local": 5.15,
+      "offset_to_global": -14.1,
+      "chain": [
+        "collision_002",
+        "collision_001"
+      ],
+      "reason": "shares collision_001 with A, aligned through collision_002 -> collision_001"
     },
     "C": {
       "status": "ALIGNED",
       "anchor_node": "C:e10",
       "anchor_t_local": 14.1,
       "offset_to_global": -14.1,
+      "chain": [
+        "collision_002"
+      ],
       "reason": "reported the reference collision collision_002"
     }
   },
   "relative_clock_offsets_s": {
-    "C - A": 0.0
+    "B - A": 0.0,
+    "C - A": 0.0,
+    "C - B": 0.0
   },
   "matched_events": [
     {
@@ -81,5 +93,6 @@
         "no competing report within tolerance"
       ]
     }
-  ]
+  ],
+  "rejected_matches": []
 }

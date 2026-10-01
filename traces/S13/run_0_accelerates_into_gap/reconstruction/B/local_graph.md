@@ -1055,8 +1055,8 @@ Order of each track's cut-in, critical TTC and path entry and of the collision r
 
 - track_005: EGO_PATH_ENTRY 6.80, no critical TTC
 - track_006: EGO_PATH_ENTRY 7.70, no critical TTC
-- track_012: CRITICAL_TTC_START 6.15, COLLISION 5.65 (+-0.50 s); EGO_PATH_ENTRY 6.65 after critical TTC (+0.50 s)
-- track_013: CRITICAL_TTC_START 6.15, COLLISION 5.65 (+-0.50 s); EGO_PATH_ENTRY 6.65 after critical TTC (+0.50 s)
+- track_012: CRITICAL_TTC_START 6.15; EGO_PATH_ENTRY 6.65 after critical TTC (+0.50 s)
+- track_013: CRITICAL_TTC_START 6.15; EGO_PATH_ENTRY 6.65 after critical TTC (+0.50 s)
 
 ## Sign detection windows
 

@@ -1,6 +1,6 @@
 {
   "run": "S16/run_0_consequential",
-  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 6; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 1/1; anonymous: 6; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 201.87307806313038,
       "peak_impulse": 6073.814538141226,
-      "reconstructed_as": "g12",
+      "reconstructed_as": "g15",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -21,32 +21,43 @@
       ],
       "sim_time": 202.62307807430625,
       "peak_impulse": 2695.6822522355824,
-      "reconstructed_as": null,
-      "participants_correct": false,
-      "report_timing_error_s": null
+      "reconstructed_as": "g37",
+      "participants_correct": true,
+      "report_timing_error_s": 0.0
     }
   ],
+  "extra_collisions": [],
   "alignment": [
     {
       "graph": "A",
       "status": "ALIGNED",
-      "estimated_anchor_t_local": 5.15,
-      "true_contact_t_local": 5.15,
+      "chain": [
+        "collision_001"
+      ],
+      "estimated_reference_t_local": 5.15,
+      "true_reference_t_local": 5.15,
       "error_s": 0.0
     },
     {
       "graph": "B",
       "status": "ALIGNED",
-      "estimated_anchor_t_local": 5.15,
-      "true_contact_t_local": 5.15,
+      "chain": [
+        "collision_001"
+      ],
+      "estimated_reference_t_local": 5.15,
+      "true_reference_t_local": 5.15,
       "error_s": 0.0
     },
     {
       "graph": "C",
-      "status": "UNALIGNED",
-      "estimated_anchor_t_local": null,
-      "true_contact_t_local": 5.15,
-      "error_s": null
+      "status": "ALIGNED",
+      "chain": [
+        "collision_001",
+        "collision_002"
+      ],
+      "estimated_reference_t_local": 5.15,
+      "true_reference_t_local": 5.15,
+      "error_s": 0.0
     }
   ],
   "relative_clock_offsets": [
@@ -55,13 +66,25 @@
       "estimated_s": 0.0,
       "true_s": 0.0,
       "error_s": 0.0
+    },
+    {
+      "pair": "C - A",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
+    },
+    {
+      "pair": "C - B",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
     }
   ],
   "event_timing": {
-    "nodes": 40,
+    "nodes": 48,
     "max_abs_error_s": 0.0,
-    "order_pairs": 720,
-    "order_concordant": 720
+    "order_pairs": 1053,
+    "order_concordant": 1053
   },
   "tracks": [
     {
@@ -161,8 +184,8 @@
       6.63
     ],
     "global_graph_identical": true,
-    "offset_to_global_before": null,
-    "offset_to_global_after": null,
-    "offset_change_s": null
+    "offset_to_global_before": -5.15,
+    "offset_to_global_after": -5.88,
+    "offset_change_s": -0.73
   }
 }

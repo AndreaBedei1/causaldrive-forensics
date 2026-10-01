@@ -1,6 +1,6 @@
 {
-  "method": "collision_anchor",
-  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+  "method": "matched_collisions",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; a graph is aligned through any chain of matched collisions linking it to the reference one",
   "reference_event": null,
   "graphs": {
     "A": {
@@ -8,6 +8,7 @@
       "anchor_node": null,
       "anchor_t_local": null,
       "offset_to_global": null,
+      "chain": [],
       "reason": "it recorded no collision to anchor on"
     },
     "B": {
@@ -15,9 +16,11 @@
       "anchor_node": null,
       "anchor_t_local": null,
       "offset_to_global": null,
+      "chain": [],
       "reason": "it recorded no collision to anchor on"
     }
   },
   "relative_clock_offsets_s": {},
-  "matched_events": []
+  "matched_events": [],
+  "rejected_matches": []
 }

@@ -30,6 +30,9 @@ from ..reconstruction.render import write_json, write_text
 IDENTITY_MAX_BOX_DISTANCE_M = 1.5
 # The clock-robustness check makes one recorder's local clock read this much later.
 CLOCK_SHIFT_S = 0.73
+# Ground-truth callbacks of one pair closer than this are one true contact, and a
+# reconstructed COLLISION reproduces a true contact only if reported within this of it.
+TRUTH_CONTACT_GAP_S = 0.5
 
 
 def _read_json(path: Path) -> Any:
@@ -102,7 +105,7 @@ def _truth_contacts(collisions: Sequence[Dict[str, Any]], actor_to_participant: 
         other = actor_to_participant.get(record.get("other_actor_id"))
         pair = sorted([record["participant_id"], other]) if other else [record["participant_id"], "static/unrecorded"]
         previous = next((contact for contact in contacts if contact["participants"] == pair
-                         and record["timestamp"] - contact["last_time"] <= 0.5), None)
+                         and record["timestamp"] - contact["last_time"] <= TRUTH_CONTACT_GAP_S), None)
         if previous is None:
             contacts.append({"participants": pair, "sim_time": record["timestamp"], "last_time": record["timestamp"],
                              "peak_impulse": record["impulse"]})
@@ -178,31 +181,41 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         if candidates:
             reference_truth = min(candidates, key=lambda c: abs(c["sim_time"] - reported_at))
 
-    # 1. Collisions.
+    # 1. Collisions: each true contact against the COLLISION node of the same participants
+    #    reported closest to it (within TRUTH_CONTACT_GAP_S); every node is used once.
+    def report_error(node: Dict[str, Any], contact: Dict[str, Any]) -> float:
+        return max(abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in node["observations"])
+
     collision_rows = []
+    used = set()
     for contact in contacts:
         # A contact with a static or unrecorded object has one report: a single-recorder node.
         expected = [contact["participants"][0]] if "static/unrecorded" in contact["participants"] else contact["participants"]
-        match = next((node for node in collision_nodes if sorted(node["participants"]) == expected), None)
-        timing = None
+        options = [node for node in collision_nodes if sorted(node["participants"]) == expected
+                   and node["node_id"] not in used and report_error(node, contact) <= TRUTH_CONTACT_GAP_S]
+        match = min(options, key=lambda node: report_error(node, contact)) if options else None
         if match is not None:
-            timing = max(abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in match["observations"])
+            used.add(match["node_id"])
         collision_rows.append({"participants": contact["participants"], "sim_time": contact["sim_time"],
                                "peak_impulse": contact["peak_impulse"],
                                "reconstructed_as": None if match is None else match["node_id"],
                                "participants_correct": match is not None,
-                               "report_timing_error_s": None if timing is None else round(timing, 4)})
+                               "report_timing_error_s": None if match is None else round(report_error(match, contact), 4)})
+    # Reconstructed collisions that reproduce no true contact (e.g. one contact split in two).
+    extra_collisions = [{"node": node["node_id"], "participants": node["participants"], "t_global": node["t_global"]}
+                        for node in collision_nodes if node["node_id"] not in used]
 
-    # 2. Alignment accuracy (true local time of the reference contact per recorder).
+    # 2. Alignment accuracy: per recorder, the local time at which t_global = 0 (-offset_to_global)
+    #    against the true local time of the reference contact, whatever chain aligned it.
     alignment_rows = []
     for name in recorders:
         clock = alignment["graphs"][name]
-        true_anchor = None if reference_truth is None else round(reference_truth["sim_time"] - origins[name], 4)
-        error = (None if clock["anchor_t_local"] is None or true_anchor is None
-                 else round(clock["anchor_t_local"] - true_anchor, 4))
-        alignment_rows.append({"graph": name, "status": clock["status"],
-                               "estimated_anchor_t_local": clock["anchor_t_local"],
-                               "true_contact_t_local": true_anchor, "error_s": error})
+        true_reference = None if reference_truth is None else round(reference_truth["sim_time"] - origins[name], 4)
+        estimated = None if clock["offset_to_global"] is None else round(-clock["offset_to_global"], 4)
+        error = None if estimated is None or true_reference is None else round(estimated - true_reference, 4)
+        alignment_rows.append({"graph": name, "status": clock["status"], "chain": clock.get("chain", []),
+                               "estimated_reference_t_local": estimated,
+                               "true_reference_t_local": true_reference, "error_s": error})
     relative = []
     for name, estimated in alignment["relative_clock_offsets_s"].items():
         second, first = [part.strip() for part in name.split(" - ")]
@@ -286,7 +299,10 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     between = [row for row in collision_rows if "static/unrecorded" not in row["participants"]]
     merged = [node for node in collision_nodes if node["actor_id"] is None]
     if between:
-        collision_text = "yes" if all(row["participants_correct"] for row in between) else "NO"
+        collision_text = "{0} ({1}/{2} vehicle contacts{3})".format(
+            "yes" if all(row["participants_correct"] for row in between) and not extra_collisions else "NO",
+            sum(row["participants_correct"] for row in between), len(between),
+            "" if not extra_collisions else ", {0} extra collision node(s)".format(len(extra_collisions)))
     else:
         collision_text = "no vehicle-vehicle collision in ground truth" + (
             "" if not merged else ", but {0} merged collision node(s) reconstructed".format(len(merged)))
@@ -298,7 +314,8 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         None if not time_errors else round(max(abs(e) for e in time_errors), 4))
     result = {"run": run_title(run_dir), "headline": headline,
               "privileged_assumption": "recorder raw clocks are CARLA simulator time",
-              "collisions": collision_rows, "alignment": alignment_rows, "relative_clock_offsets": relative,
+              "collisions": collision_rows, "extra_collisions": extra_collisions,
+              "alignment": alignment_rows, "relative_clock_offsets": relative,
               "event_timing": {"nodes": len(timed),
                                "max_abs_error_s": None if not time_errors else round(max(abs(e) for e in time_errors), 4),
                                "order_pairs": total, "order_concordant": concordant},
@@ -324,13 +341,19 @@ def evaluation_markdown(result: Dict[str, Any]) -> str:
         lines.append("| {0} | {1:.3f} | {2:.1f} | {3} | {4} | {5} s |".format(
             " + ".join(row["participants"]), row["sim_time"], row["peak_impulse"], cell(row["reconstructed_as"]),
             "yes" if row["participants_correct"] else "NO", cell(row["report_timing_error_s"])))
+    extra = result.get("extra_collisions") or []
+    lines += ["", "Reconstructed COLLISION nodes that reproduce no true contact: " + (", ".join(
+        "{0} ({1}, t_global {2})".format(item["node"], " + ".join(item["participants"]), cell(item["t_global"]))
+        for item in extra) or "none") + "."]
     lines += ["", "## Graph alignment accuracy", "",
-              "| Graph | Status | Estimated anchor (local) | True contact (local) | Error |",
-              "|-------|--------|-------------------------:|---------------------:|------:|"]
+              "Local time at which each graph reads t_global = 0, against the true local time of the "
+              "reference contact; the chain lists the matched collisions that aligned the graph.", "",
+              "| Graph | Status | Chain | Estimated (local) | True (local) | Error |",
+              "|-------|--------|-------|------------------:|-------------:|------:|"]
     for row in result["alignment"]:
-        lines.append("| {0} | {1} | {2} | {3} | {4} s |".format(
-            row["graph"], row["status"], cell(row["estimated_anchor_t_local"]),
-            cell(row["true_contact_t_local"]), cell(row["error_s"])))
+        lines.append("| {0} | {1} | {2} | {3} | {4} | {5} s |".format(
+            row["graph"], row["status"], " -> ".join(row["chain"]) or "-", cell(row["estimated_reference_t_local"]),
+            cell(row["true_reference_t_local"]), cell(row["error_s"])))
     for row in result["relative_clock_offsets"]:
         lines.append("")
         lines.append("Relative clock offset {0}: estimated {1:+.3f} s, true {2:+.3f} s (error {3:+.3f} s).".format(

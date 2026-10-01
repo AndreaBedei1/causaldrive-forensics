@@ -1,6 +1,6 @@
 # Global graph - S12/run_0_b_fails_to_stop
 
-Global time `t_global` is 0 at the matched reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
+Global time `t_global` is 0 at the reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
 
 Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
 
@@ -16,7 +16,7 @@ Speed limit 50 km/h, supplied as incident context: known a priori, not perceived
 
 ## Graph alignment
 
-Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
@@ -217,8 +217,8 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 8.65, COLLISION 9.70 (+1.05 s) [local times; t_global: critical_ttc_start -1.05, collision +0.00]
-- B's track_001 (A): CRITICAL_TTC_START 8.65, COLLISION 9.70 (+1.05 s); EGO_PATH_ENTRY 9.60 after critical TTC (+0.95 s) [local times; t_global: critical_ttc_start -1.05, ego_path_entry -0.10, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 8.65, COLLISION with B 9.70 (+1.05 s) [local times; t_global: critical_ttc_start -1.05, collision +0.00]
+- B's track_001 (A): CRITICAL_TTC_START 8.65, COLLISION with A 9.70 (+1.05 s); EGO_PATH_ENTRY 9.60 after critical TTC (+0.95 s) [local times; t_global: critical_ttc_start -1.05, ego_path_entry -0.10, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
 
@@ -260,46 +260,46 @@ Each recorder's own belief just before its events, in its own local names (track
 
 ## Plain-language reading
 
-- 9.70 s before the matched collision, A started moving (already the case when first observed).
-- 9.70 s before the matched collision, B started moving (already the case when first observed).
-- 9.00 s before the matched collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
-- 7.75 s before the matched collision, B started braking.
-- 7.45 s before the matched collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
-- 7.05 s before the matched collision, B released the brake.
-- 7.05 s before the matched collision, A started braking.
-- 6.55 s before the matched collision, A's radar started tracking B, which appeared on its left.
-- 6.55 s before the matched collision, A observed B start closing in (already the case when first observed).
-- 6.30 s before the matched collision, A stopped moving.
-- 6.30 s before the matched collision, A came to a stop.
-- 6.20 s before the matched collision, B's camera established a STOP sign detection (unidentified object B:sign-1).
-- 4.40 s before the matched collision, B's camera stopped detecting STOP sign unidentified object B:sign-1.
-- 1.95 s before the matched collision, A released the brake.
-- 1.60 s before the matched collision, A left its stop.
-- 1.60 s before the matched collision, A started moving.
-- 1.55 s before the matched collision, B's radar started tracking A, which appeared on its right.
-- 1.55 s before the matched collision, B observed A start closing in (already the case when first observed).
-- 1.05 s before the matched collision, A's time-to-contact with B became critical.
-- 1.05 s before the matched collision, B's time-to-contact with A became critical.
-- 0.60 s before the matched collision, A started turning left.
-- 0.10 s before the matched collision, B observed A enter its forward path corridor.
-- 0.05 s before the matched collision, A's radar lost B (its states are UNKNOWN from then on, not ended).
-- At the matched collision, A and B both recorded this same collision (peak impulses A: 7340, B: 7340 N*s).
-- At the matched collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
-- At the matched collision, B observed unidentified object B:track_002 start closing in (already the case when first observed).
-- 0.05 s after the matched collision, A started braking.
-- 0.05 s after the matched collision, B started braking.
-- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_003, which appeared on its left.
-- 0.05 s after the matched collision, B's radar started tracking unidentified object B:track_004, which appeared on its left.
-- 0.05 s after the matched collision, B observed unidentified object B:track_003 start closing in (already the case when first observed).
-- 0.05 s after the matched collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
-- 0.10 s after the matched collision, A stopped turning left.
-- 0.15 s after the matched collision, B's time-to-contact with A stopped being critical.
-- 0.25 s after the matched collision, B observed A stop closing in.
-- 0.35 s after the matched collision, B stopped moving.
-- 0.35 s after the matched collision, B came to a stop.
-- 0.40 s after the matched collision, B observed unidentified object B:track_002 stop closing in.
-- 0.40 s after the matched collision, B observed unidentified object B:track_004 stop closing in.
-- 0.50 s after the matched collision, A stopped moving.
-- 0.50 s after the matched collision, A came to a stop.
-- 0.50 s after the matched collision, B's radar lost unidentified object B:track_004 (its states are UNKNOWN from then on, not ended).
-- 0.55 s after the matched collision, B observed unidentified object B:track_003 stop closing in.
+- 9.70 s before the reference collision, A started moving (already the case when first observed).
+- 9.70 s before the reference collision, B started moving (already the case when first observed).
+- 9.00 s before the reference collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
+- 7.75 s before the reference collision, B started braking.
+- 7.45 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
+- 7.05 s before the reference collision, B released the brake.
+- 7.05 s before the reference collision, A started braking.
+- 6.55 s before the reference collision, A's radar started tracking B, which appeared on its left.
+- 6.55 s before the reference collision, A observed B start closing in (already the case when first observed).
+- 6.30 s before the reference collision, A stopped moving.
+- 6.30 s before the reference collision, A came to a stop.
+- 6.20 s before the reference collision, B's camera established a STOP sign detection (unidentified object B:sign-1).
+- 4.40 s before the reference collision, B's camera stopped detecting STOP sign unidentified object B:sign-1.
+- 1.95 s before the reference collision, A released the brake.
+- 1.60 s before the reference collision, A left its stop.
+- 1.60 s before the reference collision, A started moving.
+- 1.55 s before the reference collision, B's radar started tracking A, which appeared on its right.
+- 1.55 s before the reference collision, B observed A start closing in (already the case when first observed).
+- 1.05 s before the reference collision, A's time-to-contact with B became critical.
+- 1.05 s before the reference collision, B's time-to-contact with A became critical.
+- 0.60 s before the reference collision, A started turning left.
+- 0.10 s before the reference collision, B observed A enter its forward path corridor.
+- 0.05 s before the reference collision, A's radar lost B (its states are UNKNOWN from then on, not ended).
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 7340, B: 7340 N*s).
+- At the reference collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
+- At the reference collision, B observed unidentified object B:track_002 start closing in (already the case when first observed).
+- 0.05 s after the reference collision, A started braking.
+- 0.05 s after the reference collision, B started braking.
+- 0.05 s after the reference collision, B's radar started tracking unidentified object B:track_003, which appeared on its left.
+- 0.05 s after the reference collision, B's radar started tracking unidentified object B:track_004, which appeared on its left.
+- 0.05 s after the reference collision, B observed unidentified object B:track_003 start closing in (already the case when first observed).
+- 0.05 s after the reference collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
+- 0.10 s after the reference collision, A stopped turning left.
+- 0.15 s after the reference collision, B's time-to-contact with A stopped being critical.
+- 0.25 s after the reference collision, B observed A stop closing in.
+- 0.35 s after the reference collision, B stopped moving.
+- 0.35 s after the reference collision, B came to a stop.
+- 0.40 s after the reference collision, B observed unidentified object B:track_002 stop closing in.
+- 0.40 s after the reference collision, B observed unidentified object B:track_004 stop closing in.
+- 0.50 s after the reference collision, A stopped moving.
+- 0.50 s after the reference collision, A came to a stop.
+- 0.50 s after the reference collision, B's radar lost unidentified object B:track_004 (its states are UNKNOWN from then on, not ended).
+- 0.55 s after the reference collision, B observed unidentified object B:track_003 stop closing in.

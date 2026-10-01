@@ -186,21 +186,51 @@ Rules the code follows:
   recorder's own first ego sample (stored in `local_graph.json`, so the raw
   reading is `origin + t_local`). Local frame: origin and x axis at the
   recorder's first pose, y to its right.
+- One COLLISION per contact, from the recorder's own collision sensor, which
+  calls back once per sample (0.05 s) while the bodies touch and reports only
+  the impulse magnitude. Callbacks without a missing sample between them form
+  a burst; a burst starts a new contact when (1) the pause since the previous
+  callback exceeds `merge_gap_s` = 0.5 s, or (2) it follows a real break (at
+  least one sample without a callback) and peaks at `new_impact_ratio` = 0.5 x
+  the current contact's peak or more: a rebound of the same two bodies comes
+  back with about the restitution coefficient times the first impulse (below
+  0.5 between vehicles; 0.43 is the largest in the campaign) and persistent
+  contact with far less (2-25 %). (3) Supplementary evidence, never decisive
+  alone: a burst from `reversal_impact_ratio` = 0.25 x the peak also starts a
+  new contact when the recorder's own velocity jumps like an impact (mean
+  acceleration of at least 20 m/s^2, twice what tyres can produce, over the
+  samples around the callback) both at the contact's start and at the burst's,
+  in directions more than 90 deg apart: a rebound pushes the recorder the same
+  way again, a second body from the other side does not. Every other burst
+  continues the contact. A contact opened within 0.5 s of the previous one
+  carries `new_contact` (`break_s`, `peak_ratio`, `reversal_deg`). In S06
+  `a_front_pushed`, B is struck by A (11622 N*s) and 0.25 s later meets C
+  (9832 N*s = 0.85 x): two COLLISIONs; the ~470 small callbacks of B's
+  persistent contact with C add none.
 - No log is synchronised. Two COLLISION nodes of different graphs are the same
-  contact when their peak impulses agree (equal and opposite impulses);
-  `alignment.json` stores `t_global = t_local + offset_to_global` with
-  `t_global = 0` at that contact. Local graphs are never modified. Recorders
-  without a matched collision stay `UNALIGNED` (no multi-hop alignment yet).
-- A local track is named after another recorder only at fusion. The matched
-  collision is the primary evidence of who the partner is; the track must then
+  contact when their peak impulses agree (equal and opposite impulses). A match
+  also fixes the clock offset between its two graphs, so matches must agree in
+  time: one between graphs already linked by other matches must imply the same
+  offset within `clock_tolerance_s` = 0.1 s, or it is rejected
+  (`rejected_matches`). `alignment.json` stores `t_global = t_local +
+  offset_to_global`; the strongest matched contact only defines `t_global = 0`.
+  Every matched contact can align a graph: one that shares a contact with an
+  aligned graph is aligned through it (multi-hop: A-B by one collision and B-C
+  by another put C on the same clock through B; `chain` lists the collisions).
+  Local graphs are never modified. Recorders linked to the reference by no
+  chain of matched collisions stay `UNALIGNED`.
+- A local track is named after another recorder only at fusion. Every matched
+  collision of the recorder names a partner; for that contact the track must
   be its recorder's only track that is persistent (tracked at least 1 s before
   the contact), continuous up to the contact (still observed within 0.5 s of
   it: no TRACK_LOST before), approaching (range shrinking over its last second)
   and as fast as the partner says it was (speed RMSE at most 1.5 m/s). The
   range at the contact is evidence, not a veto: radar mount, vehicle geometry
   and impact angle can keep it above 3.5 m, so beyond that it only lowers the
-  confidence. Two or more such tracks are an ambiguity and stay anonymous
-  (`A:track_001`); every reason is in `associations.json`. Ground truth is never used.
+  confidence. Two or more such tracks for one contact are an ambiguity, a
+  track compatible with two partners a conflict: both stay anonymous
+  (`A:track_001`); every reason, and the collision the decision rests on, is
+  in `associations.json`. Ground truth is never used.
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
 
@@ -227,7 +257,7 @@ EVENTS, which are state transitions without telemetry:
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
-| COLLISION | one per contact (callbacks within 0.5 s); keeps its peak impulse for alignment |
+| COLLISION | one per contact (see the segmentation rule above); keeps its peak impulse for alignment |
 
 A START at the first observation (recording start, or a track's first sample)
 carries `active_at_first_observation`; an EGO_PATH_ENTRY that was never seen is
@@ -280,7 +310,11 @@ recorder's own clock: whether a CUT_IN started before the critical TTC
 (`CUT_IN_* < CRITICAL_TTC_START < COLLISION` when all three hold) or the
 critical TTC was already active at the cut-in (`CRITICAL_TTC_START <=
 CUT_IN_*_START`), whether EGO_PATH_ENTRY came before or after the critical TTC,
-and the deltas in seconds. They are temporal properties only, not causes.
+and the deltas in seconds. A recorder can collide more than once: the
+COLLISION is its first one at or after the track's critical TTC start (without
+one, after the cut-in or path entry), and in the global graph, once the track
+is identified, its first such collision with that entity (`collision_with`).
+They are temporal properties only, not causes.
 
 The appearance side is local evidence only: the track's own azimuth from the
 radar at its first detection (`track_appeared_front_deg`), never ground truth.
@@ -348,7 +382,9 @@ Parameters are in `configs/reconstruction.yaml`.
 
 `src/cdf/evaluation/reconstruction.py` is the only code that reads
 `ground_truth/`; it compares the written files with the simulator state
-(collision participants, clock anchors, identity decisions, track accuracy)
+(each true contact against the COLLISION node of the same pair reported
+closest to it, extra COLLISION nodes, every recorder's clock whatever chain
+aligned it, identity decisions, track accuracy)
 and reruns alignment with one recorder's clock shifted by 0.73 s to check that
 the global graph does not change. Tests: `python -m pytest tests`.
 

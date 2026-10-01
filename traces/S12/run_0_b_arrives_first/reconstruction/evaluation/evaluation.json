@@ -3,19 +3,22 @@
   "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 20; max |t_global error| None s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [],
+  "extra_collisions": [],
   "alignment": [
     {
       "graph": "A",
       "status": "UNALIGNED",
-      "estimated_anchor_t_local": null,
-      "true_contact_t_local": null,
+      "chain": [],
+      "estimated_reference_t_local": null,
+      "true_reference_t_local": null,
       "error_s": null
     },
     {
       "graph": "B",
       "status": "UNALIGNED",
-      "estimated_anchor_t_local": null,
-      "true_contact_t_local": null,
+      "chain": [],
+      "estimated_reference_t_local": null,
+      "true_reference_t_local": null,
       "error_s": null
     }
   ],

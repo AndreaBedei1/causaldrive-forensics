@@ -1,6 +1,6 @@
 # Global graph - S07/run_0_full_view
 
-Global time `t_global` is 0 at the matched reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
+Global time `t_global` is 0 at the reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
 
 Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
 
@@ -15,7 +15,7 @@ Speed limit 50 km/h, supplied as incident context: known a priori, not perceived
 
 ## Graph alignment
 
-Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
@@ -147,7 +147,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 4.60, COLLISION 5.70 (+1.10 s) [local times; t_global: critical_ttc_start -1.10, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 4.60, COLLISION with B 5.70 (+1.10 s) [local times; t_global: critical_ttc_start -1.10, collision +0.00]
 - B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 3.95, COLLISION 5.70 (+1.75 s) [local times; t_global: critical_ttc_start -1.75, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
@@ -184,29 +184,29 @@ Each recorder's own belief just before its events, in its own local names (track
 
 ## Plain-language reading
 
-- 5.70 s before the matched collision, A started moving (already the case when first observed).
-- 5.70 s before the matched collision, B started moving (already the case when first observed).
-- 5.70 s before the matched collision, B's radar started tracking unidentified object B:track_001, which appeared in front of it.
-- 5.65 s before the matched collision, A's radar started tracking B, which appeared in front of it.
-- 5.25 s before the matched collision, A observed B start closing in.
-- 4.60 s before the matched collision, B observed unidentified object B:track_001 start closing in.
-- 4.10 s before the matched collision, A observed B stop closing in.
-- 3.60 s before the matched collision, B observed unidentified object B:track_001 stop closing in.
-- 2.45 s before the matched collision, B observed unidentified object B:track_001 start closing in.
-- 2.05 s before the matched collision, B started braking.
-- 1.80 s before the matched collision, A observed B start closing in.
-- 1.75 s before the matched collision, B's time-to-contact with unidentified object B:track_001 became critical.
-- 1.10 s before the matched collision, B's time-to-contact with unidentified object B:track_001 stopped being critical.
-- 1.10 s before the matched collision, A's time-to-contact with B became critical.
-- 0.85 s before the matched collision, B observed unidentified object B:track_001 stop closing in.
-- 0.85 s before the matched collision, B stopped moving.
-- 0.85 s before the matched collision, B came to a stop.
-- At the matched collision, A and B both recorded this same collision (peak impulses A: 31407, B: 31407 N*s).
-- At the matched collision, A's time-to-contact with B stopped being critical.
-- At the matched collision, A observed B stop closing in.
-- 0.05 s after the matched collision, A started braking.
-- 0.15 s after the matched collision, A stopped moving.
-- 0.15 s after the matched collision, A came to a stop.
+- 5.70 s before the reference collision, A started moving (already the case when first observed).
+- 5.70 s before the reference collision, B started moving (already the case when first observed).
+- 5.70 s before the reference collision, B's radar started tracking unidentified object B:track_001, which appeared in front of it.
+- 5.65 s before the reference collision, A's radar started tracking B, which appeared in front of it.
+- 5.25 s before the reference collision, A observed B start closing in.
+- 4.60 s before the reference collision, B observed unidentified object B:track_001 start closing in.
+- 4.10 s before the reference collision, A observed B stop closing in.
+- 3.60 s before the reference collision, B observed unidentified object B:track_001 stop closing in.
+- 2.45 s before the reference collision, B observed unidentified object B:track_001 start closing in.
+- 2.05 s before the reference collision, B started braking.
+- 1.80 s before the reference collision, A observed B start closing in.
+- 1.75 s before the reference collision, B's time-to-contact with unidentified object B:track_001 became critical.
+- 1.10 s before the reference collision, B's time-to-contact with unidentified object B:track_001 stopped being critical.
+- 1.10 s before the reference collision, A's time-to-contact with B became critical.
+- 0.85 s before the reference collision, B observed unidentified object B:track_001 stop closing in.
+- 0.85 s before the reference collision, B stopped moving.
+- 0.85 s before the reference collision, B came to a stop.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 31407, B: 31407 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
+- At the reference collision, A observed B stop closing in.
+- 0.05 s after the reference collision, A started braking.
+- 0.15 s after the reference collision, A stopped moving.
+- 0.15 s after the reference collision, A came to a stop.
 - (unaligned, C local time 0.00 s) C started moving (already the case when first observed).
 - (unaligned, C local time 2.40 s) C began exceeding the speed limit.
 - (unaligned, C local time 2.95 s) C started braking.

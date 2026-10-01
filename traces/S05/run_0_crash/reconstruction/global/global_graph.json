@@ -13215,6 +13215,7 @@
         "ego_path_entry_minus_critical_ttc_start": 1.8,
         "collision_minus_critical_ttc_start": 2.05
       },
+      "collision_with": "B",
       "recorder": "A",
       "entity": "B",
       "association": "ASSOCIATED",
@@ -13236,6 +13237,7 @@
       "deltas_s": {
         "collision_minus_critical_ttc_start": 2.05
       },
+      "collision_with": "A",
       "recorder": "B",
       "entity": "A",
       "association": "ASSOCIATED",
@@ -13249,7 +13251,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 3.85,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13258,8 +13260,7 @@
       "entity": "B:track_002",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.15,
-        "collision": 0.0
+        "ego_path_entry": 0.15
       }
     },
     {
@@ -13267,7 +13268,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 3.75,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13276,8 +13277,7 @@
       "entity": "B:track_003",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.05,
-        "collision": 0.0
+        "ego_path_entry": 0.05
       }
     },
     {
@@ -13285,7 +13285,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 3.8,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13294,8 +13294,7 @@
       "entity": "B:track_005",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.1,
-        "collision": 0.0
+        "ego_path_entry": 0.1
       }
     },
     {
@@ -13303,7 +13302,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 4.15,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13312,8 +13311,7 @@
       "entity": "B:track_008",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.45,
-        "collision": 0.0
+        "ego_path_entry": 0.45
       }
     },
     {
@@ -13321,7 +13319,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 4.05,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13330,8 +13328,7 @@
       "entity": "B:track_009",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.35,
-        "collision": 0.0
+        "ego_path_entry": 0.35
       }
     },
     {
@@ -13339,7 +13336,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 4.1,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13348,8 +13345,7 @@
       "entity": "B:track_010",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.4,
-        "collision": 0.0
+        "ego_path_entry": 0.4
       }
     },
     {
@@ -13357,7 +13353,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 4.25,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13366,8 +13362,7 @@
       "entity": "B:track_013",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.55,
-        "collision": 0.0
+        "ego_path_entry": 0.55
       }
     },
     {
@@ -13375,19 +13370,16 @@
       "cut_in": null,
       "critical_ttc_start": 3.9,
       "ego_path_entry": null,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
-      "deltas_s": {
-        "collision_minus_critical_ttc_start": -0.2
-      },
+      "deltas_s": {},
       "recorder": "B",
       "entity": "B:track_015",
       "association": "ANONYMOUS",
       "t_global": {
-        "critical_ttc_start": 0.2,
-        "collision": 0.0
+        "critical_ttc_start": 0.2
       }
     },
     {
@@ -13395,7 +13387,7 @@
       "cut_in": null,
       "critical_ttc_start": null,
       "ego_path_entry": 3.9,
-      "collision": 3.7,
+      "collision": null,
       "cut_in_vs_critical_ttc": null,
       "chain": null,
       "ego_path_entry_vs_critical_ttc": null,
@@ -13404,15 +13396,18 @@
       "entity": "B:track_018",
       "association": "ANONYMOUS",
       "t_global": {
-        "ego_path_entry": 0.2,
-        "collision": 0.0
+        "ego_path_entry": 0.2
       }
     }
   ],
   "reconstruction_config": {
     "trace_hz": 10.0,
     "collision": {
-      "merge_gap_s": 0.5
+      "merge_gap_s": 0.5,
+      "new_impact_ratio": 0.5,
+      "reversal_impact_ratio": 0.25,
+      "impact_acceleration_mps2": 20.0,
+      "reversal_angle_deg": 90.0
     },
     "tracking": {
       "min_height_m": 0.3,
@@ -13459,6 +13454,7 @@
     },
     "fusion": {
       "impulse_tolerance": 0.1,
+      "clock_tolerance_s": 0.1,
       "contact_window_s": 0.5,
       "contact_range_m": 3.5,
       "contact_range_scale_m": 3.0,

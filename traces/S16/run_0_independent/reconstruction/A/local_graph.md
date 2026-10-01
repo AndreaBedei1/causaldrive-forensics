@@ -109,7 +109,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_002: CRITICAL_TTC_START 12.65, COLLISION 5.15 (+-7.50 s); EGO_PATH_ENTRY 12.10 before critical TTC (-0.55 s)
+- track_002: CRITICAL_TTC_START 12.65, COLLISION 14.10 (+1.45 s); EGO_PATH_ENTRY 12.10 before critical TTC (-0.55 s)
 
 ## Sign detection windows
 

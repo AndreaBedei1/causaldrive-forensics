@@ -1,6 +1,6 @@
 {
-  "method": "collision_anchor",
-  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+  "method": "matched_collisions",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; a graph is aligned through any chain of matched collisions linking it to the reference one",
   "reference_event": "collision_001",
   "graphs": {
     "A": {
@@ -8,6 +8,9 @@
       "anchor_node": "A:e08",
       "anchor_t_local": 5.9,
       "offset_to_global": -5.9,
+      "chain": [
+        "collision_001"
+      ],
       "reason": "reported the reference collision collision_001"
     },
     "B": {
@@ -15,18 +18,27 @@
       "anchor_node": "B:e13",
       "anchor_t_local": 5.9,
       "offset_to_global": -5.9,
+      "chain": [
+        "collision_001"
+      ],
       "reason": "reported the reference collision collision_001"
     },
     "C": {
-      "status": "UNALIGNED",
-      "anchor_node": null,
-      "anchor_t_local": null,
-      "offset_to_global": null,
-      "reason": "its collision report matched no other graph"
+      "status": "ALIGNED",
+      "anchor_node": "C:e07",
+      "anchor_t_local": 6.15,
+      "offset_to_global": -5.9,
+      "chain": [
+        "collision_001",
+        "collision_002"
+      ],
+      "reason": "shares collision_002 with B, aligned through collision_001 -> collision_002"
     }
   },
   "relative_clock_offsets_s": {
-    "B - A": 0.0
+    "B - A": 0.0,
+    "C - A": 0.0,
+    "C - B": 0.0
   },
   "matched_events": [
     {
@@ -54,6 +66,33 @@
         "peak impulses 11621.71 vs 11621.71 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance"
       ]
+    },
+    {
+      "event_id": "collision_002",
+      "graphs": [
+        "B",
+        "C"
+      ],
+      "nodes": {
+        "B": "B:e17",
+        "C": "C:e07"
+      },
+      "t_local": {
+        "B": 6.15,
+        "C": 6.15
+      },
+      "peak_impulse": {
+        "B": 9832.4,
+        "C": 9832.4
+      },
+      "impulse_similarity": 1.0,
+      "confidence": 1.0,
+      "evidence": [
+        "B and C both recorded a collision",
+        "peak impulses 9832.4 vs 9832.4 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
+      ]
     }
-  ]
+  ],
+  "rejected_matches": []
 }

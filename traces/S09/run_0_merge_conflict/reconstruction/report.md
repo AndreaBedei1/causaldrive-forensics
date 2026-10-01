@@ -15,7 +15,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 ## Graph alignment
 
-Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
@@ -95,102 +95,102 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1247.1
 
 ### What happened, in plain language
 
-- 1.80 s before the matched collision, A started moving (already the case when first observed).
-- 1.80 s before the matched collision, B started moving (already the case when first observed).
-- 1.80 s before the matched collision, A started turning left (already the case when first observed).
-- 1.80 s before the matched collision, B started turning right (already the case when first observed).
-- 1.80 s before the matched collision, B's radar started tracking unidentified object B:track_001, which appeared on its left.
-- 1.80 s before the matched collision, A's radar started tracking B, which appeared on its right.
-- 1.80 s before the matched collision, A observed B start closing in (already the case when first observed).
-- 1.80 s before the matched collision, B observed unidentified object B:track_001 start closing in (already the case when first observed).
-- 1.80 s before the matched collision, A's time-to-contact with B became critical (already the case when first observed).
-- 1.80 s before the matched collision, B's time-to-contact with unidentified object B:track_001 became critical (already the case when first observed).
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_002, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_003, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_004, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_005, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_006, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_007, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_008, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_009, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_010, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_012, which appeared on its left.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_007, which appeared on its left.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_008, which appeared on its left.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_011, which appeared on its right.
-- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_013, which appeared on its right.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_003, which appeared on its right.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_004, which appeared on its right.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_005, which appeared on its right.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_006, which appeared on its right.
-- 1.60 s before the matched collision, A observed unidentified object A:track_002 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_003 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_004 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_005 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_006 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_007 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_008 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_009 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_010 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, A observed unidentified object A:track_012 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_003 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_005 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_006 start closing in (already the case when first observed).
-- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_009, which appeared on its left.
-- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_010, which appeared on its left.
-- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_011, which appeared on its left.
-- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_012, which appeared on its left.
-- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_013, which appeared on its left.
-- 1.55 s before the matched collision, A's radar started tracking unidentified object A:track_014, which appeared on its right.
-- 1.55 s before the matched collision, B observed unidentified object B:track_009 start closing in (already the case when first observed).
-- 1.55 s before the matched collision, B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
-- 1.50 s before the matched collision, B's radar started tracking unidentified object B:track_014, which appeared on its left.
-- 1.50 s before the matched collision, B observed unidentified object B:track_014 start closing in (already the case when first observed).
-- 1.40 s before the matched collision, A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
-- 1.40 s before the matched collision, A's radar lost unidentified object A:track_011 (its states are UNKNOWN from then on, not ended).
-- 1.40 s before the matched collision, B's radar lost unidentified object B:track_002 (its states are UNKNOWN from then on, not ended).
-- 1.40 s before the matched collision, B's radar lost unidentified object B:track_007 (its states are UNKNOWN from then on, not ended).
-- 1.35 s before the matched collision, A's radar lost unidentified object A:track_013 (its states are UNKNOWN from then on, not ended).
-- 1.35 s before the matched collision, B's radar lost unidentified object B:track_008 (its states are UNKNOWN from then on, not ended).
-- 1.30 s before the matched collision, B's radar lost unidentified object B:track_011 (its states are UNKNOWN from then on, not ended).
-- 1.25 s before the matched collision, B's radar lost unidentified object B:track_012 (its states are UNKNOWN from then on, not ended).
-- 1.20 s before the matched collision, A's radar lost unidentified object A:track_014 (its states are UNKNOWN from then on, not ended).
-- 1.20 s before the matched collision, B's radar lost unidentified object B:track_013 (its states are UNKNOWN from then on, not ended).
-- 1.15 s before the matched collision, B's radar lost unidentified object B:track_010 (its states are UNKNOWN from then on, not ended).
-- 1.00 s before the matched collision, B observed unidentified object B:track_009 stop closing in.
-- 0.90 s before the matched collision, B's radar lost unidentified object B:track_009 (its states are UNKNOWN from then on, not ended).
-- 0.60 s before the matched collision, B stopped turning right.
-- 0.35 s before the matched collision, A's radar lost unidentified object A:track_002 (its states are UNKNOWN from then on, not ended).
-- 0.30 s before the matched collision, B's radar lost unidentified object B:track_006 (its states are UNKNOWN from then on, not ended).
-- 0.25 s before the matched collision, A's radar lost unidentified object A:track_009 (its states are UNKNOWN from then on, not ended).
-- 0.20 s before the matched collision, A observed B enter its forward path corridor.
-- 0.15 s before the matched collision, A observed B cutting in from the right.
-- 0.15 s before the matched collision, A's radar lost unidentified object A:track_005 (its states are UNKNOWN from then on, not ended).
-- 0.05 s before the matched collision, A's time-to-contact with B stopped being critical.
-- At the matched collision, A and B both recorded this same collision (peak impulses A: 1247, B: 1247 N*s).
-- 0.05 s after the matched collision, A started braking.
-- 0.05 s after the matched collision, B started braking.
-- 0.05 s after the matched collision, B started turning left.
-- 0.05 s after the matched collision, A's radar lost unidentified object A:track_012 (its states are UNKNOWN from then on, not ended).
-- 0.05 s after the matched collision, B's radar lost unidentified object B:track_003 (its states are UNKNOWN from then on, not ended).
-- 0.10 s after the matched collision, A observed B stop closing in.
-- 0.10 s after the matched collision, B's radar lost unidentified object B:track_005 (its states are UNKNOWN from then on, not ended).
-- 0.15 s after the matched collision, A observed B's cut-in from the right settle.
-- 0.15 s after the matched collision, B's radar lost unidentified object B:track_004 (its states are UNKNOWN from then on, not ended).
-- 0.35 s after the matched collision, B observed unidentified object B:track_014 stop closing in.
-- 0.65 s after the matched collision, A observed unidentified object A:track_010 stop closing in.
-- 0.65 s after the matched collision, A stopped turning left.
-- 0.70 s after the matched collision, A observed unidentified object A:track_003 stop closing in.
-- 0.70 s after the matched collision, A observed unidentified object A:track_004 stop closing in.
-- 0.70 s after the matched collision, A observed unidentified object A:track_006 stop closing in.
-- 0.70 s after the matched collision, A observed unidentified object A:track_008 stop closing in.
-- 0.70 s after the matched collision, B stopped turning left.
-- 0.70 s after the matched collision, A stopped moving.
-- 0.70 s after the matched collision, A came to a stop.
-- 0.75 s after the matched collision, B stopped moving.
-- 0.75 s after the matched collision, B came to a stop.
+- 1.80 s before the reference collision, A started moving (already the case when first observed).
+- 1.80 s before the reference collision, B started moving (already the case when first observed).
+- 1.80 s before the reference collision, A started turning left (already the case when first observed).
+- 1.80 s before the reference collision, B started turning right (already the case when first observed).
+- 1.80 s before the reference collision, B's radar started tracking unidentified object B:track_001, which appeared on its left.
+- 1.80 s before the reference collision, A's radar started tracking B, which appeared on its right.
+- 1.80 s before the reference collision, A observed B start closing in (already the case when first observed).
+- 1.80 s before the reference collision, B observed unidentified object B:track_001 start closing in (already the case when first observed).
+- 1.80 s before the reference collision, A's time-to-contact with B became critical (already the case when first observed).
+- 1.80 s before the reference collision, B's time-to-contact with unidentified object B:track_001 became critical (already the case when first observed).
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_002, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_003, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_004, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_005, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_006, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_007, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_008, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_009, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_010, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_012, which appeared on its left.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_007, which appeared on its left.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_008, which appeared on its left.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_011, which appeared on its right.
+- 1.60 s before the reference collision, A's radar started tracking unidentified object A:track_013, which appeared on its right.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_003, which appeared on its right.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_004, which appeared on its right.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_005, which appeared on its right.
+- 1.60 s before the reference collision, B's radar started tracking unidentified object B:track_006, which appeared on its right.
+- 1.60 s before the reference collision, A observed unidentified object A:track_002 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_003 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_004 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_005 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_006 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_007 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_008 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_009 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_010 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, A observed unidentified object A:track_012 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, B observed unidentified object B:track_003 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, B observed unidentified object B:track_005 start closing in (already the case when first observed).
+- 1.60 s before the reference collision, B observed unidentified object B:track_006 start closing in (already the case when first observed).
+- 1.55 s before the reference collision, B's radar started tracking unidentified object B:track_009, which appeared on its left.
+- 1.55 s before the reference collision, B's radar started tracking unidentified object B:track_010, which appeared on its left.
+- 1.55 s before the reference collision, B's radar started tracking unidentified object B:track_011, which appeared on its left.
+- 1.55 s before the reference collision, B's radar started tracking unidentified object B:track_012, which appeared on its left.
+- 1.55 s before the reference collision, B's radar started tracking unidentified object B:track_013, which appeared on its left.
+- 1.55 s before the reference collision, A's radar started tracking unidentified object A:track_014, which appeared on its right.
+- 1.55 s before the reference collision, B observed unidentified object B:track_009 start closing in (already the case when first observed).
+- 1.55 s before the reference collision, B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
+- 1.50 s before the reference collision, B's radar started tracking unidentified object B:track_014, which appeared on its left.
+- 1.50 s before the reference collision, B observed unidentified object B:track_014 start closing in (already the case when first observed).
+- 1.40 s before the reference collision, A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the reference collision, A's radar lost unidentified object A:track_011 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the reference collision, B's radar lost unidentified object B:track_002 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the reference collision, B's radar lost unidentified object B:track_007 (its states are UNKNOWN from then on, not ended).
+- 1.35 s before the reference collision, A's radar lost unidentified object A:track_013 (its states are UNKNOWN from then on, not ended).
+- 1.35 s before the reference collision, B's radar lost unidentified object B:track_008 (its states are UNKNOWN from then on, not ended).
+- 1.30 s before the reference collision, B's radar lost unidentified object B:track_011 (its states are UNKNOWN from then on, not ended).
+- 1.25 s before the reference collision, B's radar lost unidentified object B:track_012 (its states are UNKNOWN from then on, not ended).
+- 1.20 s before the reference collision, A's radar lost unidentified object A:track_014 (its states are UNKNOWN from then on, not ended).
+- 1.20 s before the reference collision, B's radar lost unidentified object B:track_013 (its states are UNKNOWN from then on, not ended).
+- 1.15 s before the reference collision, B's radar lost unidentified object B:track_010 (its states are UNKNOWN from then on, not ended).
+- 1.00 s before the reference collision, B observed unidentified object B:track_009 stop closing in.
+- 0.90 s before the reference collision, B's radar lost unidentified object B:track_009 (its states are UNKNOWN from then on, not ended).
+- 0.60 s before the reference collision, B stopped turning right.
+- 0.35 s before the reference collision, A's radar lost unidentified object A:track_002 (its states are UNKNOWN from then on, not ended).
+- 0.30 s before the reference collision, B's radar lost unidentified object B:track_006 (its states are UNKNOWN from then on, not ended).
+- 0.25 s before the reference collision, A's radar lost unidentified object A:track_009 (its states are UNKNOWN from then on, not ended).
+- 0.20 s before the reference collision, A observed B enter its forward path corridor.
+- 0.15 s before the reference collision, A observed B cutting in from the right.
+- 0.15 s before the reference collision, A's radar lost unidentified object A:track_005 (its states are UNKNOWN from then on, not ended).
+- 0.05 s before the reference collision, A's time-to-contact with B stopped being critical.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 1247, B: 1247 N*s).
+- 0.05 s after the reference collision, A started braking.
+- 0.05 s after the reference collision, B started braking.
+- 0.05 s after the reference collision, B started turning left.
+- 0.05 s after the reference collision, A's radar lost unidentified object A:track_012 (its states are UNKNOWN from then on, not ended).
+- 0.05 s after the reference collision, B's radar lost unidentified object B:track_003 (its states are UNKNOWN from then on, not ended).
+- 0.10 s after the reference collision, A observed B stop closing in.
+- 0.10 s after the reference collision, B's radar lost unidentified object B:track_005 (its states are UNKNOWN from then on, not ended).
+- 0.15 s after the reference collision, A observed B's cut-in from the right settle.
+- 0.15 s after the reference collision, B's radar lost unidentified object B:track_004 (its states are UNKNOWN from then on, not ended).
+- 0.35 s after the reference collision, B observed unidentified object B:track_014 stop closing in.
+- 0.65 s after the reference collision, A observed unidentified object A:track_010 stop closing in.
+- 0.65 s after the reference collision, A stopped turning left.
+- 0.70 s after the reference collision, A observed unidentified object A:track_003 stop closing in.
+- 0.70 s after the reference collision, A observed unidentified object A:track_004 stop closing in.
+- 0.70 s after the reference collision, A observed unidentified object A:track_006 stop closing in.
+- 0.70 s after the reference collision, A observed unidentified object A:track_008 stop closing in.
+- 0.70 s after the reference collision, B stopped turning left.
+- 0.70 s after the reference collision, A stopped moving.
+- 0.70 s after the reference collision, A came to a stop.
+- 0.75 s after the reference collision, B stopped moving.
+- 0.75 s after the reference collision, B came to a stop.
 
 ### Temporal safety relations
 
@@ -297,7 +297,7 @@ B:
 - B:track_012 stays anonymous: lost 1.25 s before the matched collision (window 0.50 s); not approaching before the contact: range 59.4 m -> 59.7 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.94 m/s over 0.3 s (> 1.50).
 - B:track_013 stays anonymous: lost 1.20 s before the matched collision (window 0.50 s); not approaching before the contact: range 28.9 m -> 29.1 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.28 m/s over 0.3 s (> 1.50).
 - B:track_014 stays anonymous: track speed disagrees with A's own speed: RMSE 2.86 m/s over 1.5 s (> 1.50).
-- Global time rests on one collision anchor and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from t_global = 0.
+- Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
 - Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
 
 ## Files
@@ -311,7 +311,11 @@ B:
 {
   "trace_hz": 10.0,
   "collision": {
-    "merge_gap_s": 0.5
+    "merge_gap_s": 0.5,
+    "new_impact_ratio": 0.5,
+    "reversal_impact_ratio": 0.25,
+    "impact_acceleration_mps2": 20.0,
+    "reversal_angle_deg": 90.0
   },
   "tracking": {
     "min_height_m": 0.3,
@@ -358,6 +362,7 @@ B:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "clock_tolerance_s": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
     "contact_range_scale_m": 3.0,

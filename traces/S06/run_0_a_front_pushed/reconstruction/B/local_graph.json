@@ -530,6 +530,44 @@
     },
     {
       "node_id": "B:e17",
+      "event_type": "COLLISION",
+      "kind": "OUTCOME",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 6.15,
+      "attributes": {
+        "peak_impulse": 9832.4,
+        "new_contact": {
+          "break_s": 0.25,
+          "peak_ratio": 0.85
+        }
+      },
+      "source": "collision_sensor",
+      "confidence": 1.0,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": false,
+            "CRITICAL_TTC": true,
+            "IN_EGO_PATH": true,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {},
+        "facts_t_local": 6.1
+      }
+    },
+    {
+      "node_id": "B:e18",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -561,7 +599,7 @@
       }
     },
     {
-      "node_id": "B:e18",
+      "node_id": "B:e19",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "B",
@@ -593,7 +631,7 @@
       }
     },
     {
-      "node_id": "B:e19",
+      "node_id": "B:e20",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "B",
@@ -742,8 +780,13 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e17",
+      "from": "B:e18",
       "to": "B:e19",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e18",
+      "to": "B:e20",
       "relation": "PRECEDES"
     },
     {
@@ -783,7 +826,7 @@
     },
     {
       "from": "B:e02",
-      "to": "B:e17",
+      "to": "B:e18",
       "relation": "SAME_TRACK"
     }
   ],

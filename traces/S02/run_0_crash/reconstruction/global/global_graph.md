@@ -1,6 +1,6 @@
 # Global graph - S02/run_0_crash
 
-Global time `t_global` is 0 at the matched reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
+Global time `t_global` is 0 at the reference collision. The local graphs were not modified: every node lists the local node(s) and local time(s) it comes from.
 
 Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
 
@@ -13,7 +13,7 @@ Speed limit 50 km/h, supplied as incident context: known a priori, not perceived
 
 ## Graph alignment
 
-Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
@@ -114,7 +114,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 2.35 < CRITICAL_TTC_START 3.20 (+0.85 s) < COLLISION 4.25 (+1.05 s); EGO_PATH_ENTRY 3.30 after critical TTC (+0.10 s) [local times; t_global: cut_in -1.90, critical_ttc_start -1.05, ego_path_entry -0.95, collision +0.00]
+- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 2.35 < CRITICAL_TTC_START 3.20 (+0.85 s) < COLLISION with B 4.25 (+1.05 s); EGO_PATH_ENTRY 3.30 after critical TTC (+0.10 s) [local times; t_global: cut_in -1.90, critical_ttc_start -1.05, ego_path_entry -0.95, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
 
@@ -138,22 +138,22 @@ Each recorder's own belief just before its events, in its own local names (track
 
 ## Plain-language reading
 
-- 4.25 s before the matched collision, A started moving (already the case when first observed).
-- 4.25 s before the matched collision, B started moving (already the case when first observed).
-- 4.25 s before the matched collision, A's radar started tracking B, which appeared on its left.
-- 4.25 s before the matched collision, A observed B start closing in (already the case when first observed).
-- 1.90 s before the matched collision, A observed B cutting in from the left.
-- 1.10 s before the matched collision, B started braking.
-- 1.05 s before the matched collision, A's time-to-contact with B became critical.
-- 0.95 s before the matched collision, A observed B enter its forward path corridor.
-- 0.65 s before the matched collision, B released the brake.
-- 0.40 s before the matched collision, A started braking.
-- At the matched collision, A and B both recorded this same collision (peak impulses A: 5954, B: 5954 N*s).
-- At the matched collision, A observed B's cut-in from the left settle.
-- At the matched collision, B started braking.
-- 0.05 s after the matched collision, A's time-to-contact with B stopped being critical.
-- 0.05 s after the matched collision, A observed B stop closing in.
-- 0.60 s after the matched collision, A stopped moving.
-- 0.60 s after the matched collision, A came to a stop.
-- 0.75 s after the matched collision, B stopped moving.
-- 0.75 s after the matched collision, B came to a stop.
+- 4.25 s before the reference collision, A started moving (already the case when first observed).
+- 4.25 s before the reference collision, B started moving (already the case when first observed).
+- 4.25 s before the reference collision, A's radar started tracking B, which appeared on its left.
+- 4.25 s before the reference collision, A observed B start closing in (already the case when first observed).
+- 1.90 s before the reference collision, A observed B cutting in from the left.
+- 1.10 s before the reference collision, B started braking.
+- 1.05 s before the reference collision, A's time-to-contact with B became critical.
+- 0.95 s before the reference collision, A observed B enter its forward path corridor.
+- 0.65 s before the reference collision, B released the brake.
+- 0.40 s before the reference collision, A started braking.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 5954, B: 5954 N*s).
+- At the reference collision, A observed B's cut-in from the left settle.
+- At the reference collision, B started braking.
+- 0.05 s after the reference collision, A's time-to-contact with B stopped being critical.
+- 0.05 s after the reference collision, A observed B stop closing in.
+- 0.60 s after the reference collision, A stopped moving.
+- 0.60 s after the reference collision, A came to a stop.
+- 0.75 s after the reference collision, B stopped moving.
+- 0.75 s after the reference collision, B came to a stop.

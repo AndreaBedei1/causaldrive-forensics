@@ -11,13 +11,17 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
 
+Reconstructed COLLISION nodes that reproduce no true contact: none.
+
 ## Graph alignment accuracy
 
-| Graph | Status | Estimated anchor (local) | True contact (local) | Error |
-|-------|--------|-------------------------:|---------------------:|------:|
-| A | UNALIGNED | - | - | - s |
-| B | UNALIGNED | - | - | - s |
-| C | UNALIGNED | - | - | - s |
+Local time at which each graph reads t_global = 0, against the true local time of the reference contact; the chain lists the matched collisions that aligned the graph.
+
+| Graph | Status | Chain | Estimated (local) | True (local) | Error |
+|-------|--------|-------|------------------:|-------------:|------:|
+| A | UNALIGNED | - | - | - | - s |
+| B | UNALIGNED | - | - | - | - s |
+| C | UNALIGNED | - | - | - | - s |
 
 ## Global event times
 

@@ -13,8 +13,27 @@ from typing import Any, Dict, Mapping, Optional
 
 @dataclass
 class CollisionConfig:
-    # Collision callbacks closer than this belong to the same contact episode.
+    # The collision sensor calls back once per sample while bodies touch, with
+    # the impulse magnitude only.  Callbacks without a missing sample between
+    # them form a burst.  A pause longer than this always separates two contacts.
     merge_gap_s: float = 0.5
+    # A shorter pause separates them when the burst after the break (at least
+    # one sample without a callback) peaks at this fraction of the current
+    # contact's peak or more: a rebound of the same two bodies comes back with
+    # about the restitution coefficient times the first impulse (below 0.5
+    # between vehicles) and the persistent contact after an impact with far less.
+    new_impact_ratio: float = 0.5
+    # Supplementary evidence, never decisive alone: a weaker burst (from this
+    # fraction of the contact's peak) also starts a new contact when the
+    # recorder's own velocity jumps like an impact both at the contact's start
+    # and at the burst's, in directions more than reversal_angle_deg apart (a
+    # rebound pushes the recorder the same way again).  An impact-like jump is
+    # a mean acceleration of at least impact_acceleration_mps2 from the sample
+    # before the callback to the sample after it: twice what tyres can produce
+    # (about 1 g), so braking or steering cannot cause it.
+    reversal_impact_ratio: float = 0.25
+    impact_acceleration_mps2: float = 20.0
+    reversal_angle_deg: float = 90.0
 
 
 @dataclass
@@ -110,6 +129,10 @@ class FusionConfig:
     # Two collision reports are the same contact if their peak impulses differ
     # by at most this fraction (equal and opposite impulses).
     impulse_tolerance: float = 0.10
+    # A match also fixes the clock offset between its two graphs: a further
+    # match between graphs already linked (directly or through other matches)
+    # must imply the same offset within this (two sensor samples at 20 Hz).
+    clock_tolerance_s: float = 0.1
     # A track is continuous up to the contact if it was still observed within
     # this window before the matched collision (radars lose a target at point
     # blank range or at the edge of their field of view just before impact).

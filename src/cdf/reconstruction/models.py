@@ -281,7 +281,10 @@ class GraphClock:
     """How one local graph's clock maps to global graph time.
 
     ``t_global = t_local + offset_to_global``.  The local graph itself is never
-    changed; this object is the only place where the mapping lives.
+    changed; this object is the only place where the mapping lives.  The
+    anchor is the graph's own collision node that aligned it, and ``chain``
+    the matched collisions that link it to the reference one (one entry when
+    it reported the reference collision itself, more for multi-hop alignment).
     """
 
     graph: str
@@ -290,6 +293,7 @@ class GraphClock:
     anchor_t_local: Optional[float] = None
     offset_to_global: Optional[float] = None
     reason: str = ""
+    chain: List[str] = field(default_factory=list)
 
     def to_global(self, t_local: float) -> Optional[float]:
         if self.offset_to_global is None:
@@ -299,7 +303,7 @@ class GraphClock:
     def to_dict(self) -> Dict[str, Any]:
         return {"status": self.status, "anchor_node": self.anchor_node,
                 "anchor_t_local": self.anchor_t_local,
-                "offset_to_global": self.offset_to_global, "reason": self.reason}
+                "offset_to_global": self.offset_to_global, "chain": list(self.chain), "reason": self.reason}
 
 
 @dataclass
@@ -307,6 +311,9 @@ class Alignment:
     reference_event: Optional[str]
     graphs: Dict[str, GraphClock]
     matched_events: List[Dict[str, Any]] = field(default_factory=list)
+    # Impulse-compatible report pairs refused because their clock offset
+    # contradicts the matches already accepted.
+    rejected_matches: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         aligned = sorted(name for name, clock in self.graphs.items() if clock.status == "ALIGNED")
@@ -316,13 +323,16 @@ class Alignment:
                 if first < second:
                     # How far the second clock reads ahead of the first one.
                     relative[second + " - " + first] = round(
-                        self.graphs[second].anchor_t_local - self.graphs[first].anchor_t_local, 4)
-        return {"method": "collision_anchor",
-                "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision",
+                        self.graphs[first].offset_to_global - self.graphs[second].offset_to_global, 4)
+        return {"method": "matched_collisions",
+                "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; "
+                              "a graph is aligned through any chain of matched collisions linking it to the "
+                              "reference one",
                 "reference_event": self.reference_event,
                 "graphs": {name: self.graphs[name].to_dict() for name in sorted(self.graphs)},
                 "relative_clock_offsets_s": relative,
-                "matched_events": copy.deepcopy(self.matched_events)}
+                "matched_events": copy.deepcopy(self.matched_events),
+                "rejected_matches": copy.deepcopy(self.rejected_matches)}
 
 
 @dataclass
@@ -339,11 +349,14 @@ class Association:
     candidate: Optional[str] = None
     # The failed checks that keep the track anonymous (empty when associated).
     blocking: List[str] = field(default_factory=list)
+    # The matched collision the decision rests on (the candidate's contact).
+    collision_event: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {"local_graph": self.local_graph, "local_track": self.local_track,
                 "global_entity": self.global_entity, "status": self.status,
                 "confidence": self.confidence, "candidate": self.candidate,
+                "collision_event": self.collision_event,
                 "evidence": list(self.evidence), "blocking": list(self.blocking),
                 "source_graphs": list(self.source_graphs)}
 

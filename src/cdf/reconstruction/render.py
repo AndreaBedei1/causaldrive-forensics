@@ -135,10 +135,10 @@ def sentence(event_type: str, actor: Optional[str], subject: Optional[str],
 
 def _when(t_global: float) -> str:
     if abs(t_global) < 0.005:
-        return "At the matched collision"
+        return "At the reference collision"
     if t_global < 0:
-        return "{0:.2f} s before the matched collision".format(-t_global)
-    return "{0:.2f} s after the matched collision".format(t_global)
+        return "{0:.2f} s before the reference collision".format(-t_global)
+    return "{0:.2f} s after the reference collision".format(t_global)
 
 
 def global_sentence(node: GlobalNode) -> str:
@@ -338,7 +338,10 @@ def _alignment_lines(alignment: Alignment) -> List[str]:
         head = ("No collision was matched across recorders, so no local graph could be aligned; every "
                 "event keeps only its local time (radar-only alignment is not implemented).")
     else:
-        head = "Reference event: `{0}`; `t_global = t_local + offset_to_global`.".format(alignment.reference_event)
+        head = ("Reference event: `{0}` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did "
+                "not report it is aligned through the chain of matched collisions linking it to the reference "
+                "(multi-hop); its anchor is its own report of the last collision of that chain.".format(
+                    alignment.reference_event))
     lines = [head, "",
              "| Graph | Status | Anchor node | Anchor local time | Offset to global | Note |",
              "|-------|--------|-------------|------------------:|-----------------:|------|"]
@@ -353,6 +356,10 @@ def _alignment_lines(alignment: Alignment) -> List[str]:
             "{0} = {1:+.3f} s".format(name, value) for name, value in offsets.items())]
     for event in alignment.matched_events:
         lines += ["", "Matched `{0}`: {1}".format(event["event_id"], "; ".join(event["evidence"]))]
+    for item in alignment.rejected_matches:
+        lines += ["", "Rejected match {0}: impulses agree, but {1}".format(
+            " / ".join("{0}:{1}".format(graph, node) for graph, node in sorted(item["nodes"].items())),
+            item["reason"])]
     return lines
 
 
@@ -384,7 +391,7 @@ def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
                           context: Optional[Mapping[str, Any]] = None,
                           relations: Optional[Sequence[Dict[str, Any]]] = None) -> str:
     lines = ["# Global graph - " + title, "",
-             "Global time `t_global` is 0 at the matched reference collision. The local graphs were "
+             "Global time `t_global` is 0 at the reference collision. The local graphs were "
              "not modified: every node lists the local node(s) and local time(s) it comes from.", "",
              _context_line(context), "",
              "## Entities", "", "| Entity | Kind | Details |", "|--------|------|---------|"]
@@ -506,7 +513,7 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
                       "time": None if node.t_global is None else "{0:.4f}".format(node.t_global),
                       "label": _dot_label(node.event_type, who, when, node.attributes),
                       "merged": len(node.observations) > 1})
-    return _dot("global", "Global graph - {0} (t=0 at the matched collision)".format(title), nodes, graph.edges)
+    return _dot("global", "Global graph - {0} (t=0 at the reference collision)".format(title), nodes, graph.edges)
 
 
 # --------------------------------------------------------------------------
@@ -586,8 +593,9 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
     for name in sorted(alignment.graphs):
         if alignment.graphs[name].status != "ALIGNED":
             notes.append("{0} is UNALIGNED: {1}.".format(name, alignment.graphs[name].reason))
-    notes.append("Global time rests on one collision anchor and a constant offset per recorder; clock "
-                 "drift is not modelled, so timing uncertainty grows away from t_global = 0.")
+    notes.append("Global time rests on matched collisions (t_global = 0 at the reference one) and a constant "
+                 "offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the "
+                 "collisions that align each recorder.")
     notes.append("Radar tracks follow the visible surface of an object, not its centre, and a "
                  "straight-ahead corridor is used for 'in path'.")
     lines += ["", "## Uncertainty and limitations", ""] + ["- " + note for note in notes]

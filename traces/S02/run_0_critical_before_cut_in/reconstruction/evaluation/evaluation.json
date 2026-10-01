@@ -1,0 +1,84 @@
+{
+  "run": "S02/run_0_critical_before_cut_in",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s",
+  "privileged_assumption": "recorder raw clocks are CARLA simulator time",
+  "collisions": [
+    {
+      "participants": [
+        "A",
+        "B"
+      ],
+      "sim_time": 16.664889350533485,
+      "peak_impulse": 241.16550111436504,
+      "reconstructed_as": "g15",
+      "participants_correct": true,
+      "report_timing_error_s": 0.0
+    }
+  ],
+  "extra_collisions": [],
+  "alignment": [
+    {
+      "graph": "A",
+      "status": "ALIGNED",
+      "chain": [
+        "collision_001"
+      ],
+      "estimated_reference_t_local": 3.85,
+      "true_reference_t_local": 3.85,
+      "error_s": 0.0
+    },
+    {
+      "graph": "B",
+      "status": "ALIGNED",
+      "chain": [
+        "collision_001"
+      ],
+      "estimated_reference_t_local": 3.85,
+      "true_reference_t_local": 3.85,
+      "error_s": 0.0
+    }
+  ],
+  "relative_clock_offsets": [
+    {
+      "pair": "B - A",
+      "estimated_s": 0.0,
+      "true_s": 0.0,
+      "error_s": 0.0
+    }
+  ],
+  "event_timing": {
+    "nodes": 21,
+    "max_abs_error_s": 0.0,
+    "order_pairs": 200,
+    "order_concordant": 200
+  },
+  "tracks": [
+    {
+      "track": "A:track_001",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "true_identity": "B",
+      "median_box_distance_m": {
+        "B": 0.0
+      },
+      "verdict": "correct",
+      "samples": 36,
+      "raw_rmse_to_surface_m": 0.343,
+      "smoothed_rmse_to_surface_m": 0.477,
+      "smoothed_rmse_to_centre_m": 1.44,
+      "raw_difference_speed_rmse_mps": 3.239,
+      "speed_rmse_mps": 1.274
+    }
+  ],
+  "clock_shift_check": {
+    "shifted_recorder": "B",
+    "shift_s": 0.73,
+    "shifted_local_collision_times": [
+      4.58
+    ],
+    "global_graph_identical": true,
+    "offset_to_global_before": -3.85,
+    "offset_to_global_after": -4.58,
+    "offset_change_s": -0.73
+  }
+}

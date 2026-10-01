@@ -3,10 +3,11 @@
 This runs only after every local graph exists and the alignment is known.
 
 1. ``associate_tracks`` decides, for each anonymous local track, whether it can
-   be named after another recorder.  The matched collision names the partner;
-   the track must be its recorder's only persistent, continuous, approaching,
-   speed-consistent track at the contact (the range at the contact weighs the
-   confidence, it is no veto).  With insufficient or ambiguous evidence the
+   be named after another recorder.  Each matched collision of the recorder
+   names a partner; the track must be its recorder's only persistent,
+   continuous, approaching, speed-consistent track at that contact (the range
+   at the contact weighs the confidence, it is no veto) and compatible with no
+   other partner.  With insufficient, ambiguous or conflicting evidence the
    track keeps an anonymous global name such as ``A:track_001``: nothing is
    guessed.
 2. ``fuse_graphs`` places every local node on the global time axis, merges the
@@ -86,10 +87,9 @@ class _Evidence:
             self.blocking.append(text)
 
 
-def _evidence(track: LocalTrack, clock: GraphClock, partner: LocalReconstruction, partner_clock: GraphClock,
-              cfg: FusionConfig) -> _Evidence:
-    """Hierarchical evidence; every check but the range at the contact is required."""
-    t_contact = clock.anchor_t_local
+def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: LocalReconstruction,
+              partner_clock: GraphClock, cfg: FusionConfig) -> _Evidence:
+    """Hierarchical evidence for one contact; every check but the range at the contact is required."""
     evidence = _Evidence()
 
     seen_for = t_contact - track.first_t
@@ -140,59 +140,119 @@ def _evidence(track: LocalTrack, clock: GraphClock, partner: LocalReconstruction
     return evidence
 
 
+def _partner(event: Dict[str, Any], owner: str) -> str:
+    return next(graph for graph in event["graphs"] if graph != owner)
+
+
+def recorder_contacts(owner: str, alignment: Alignment) -> List[Dict[str, Any]]:
+    """The matched collisions of one recorder whose graphs are all aligned, in its local time order."""
+    return sorted((event for event in alignment.matched_events if owner in event["graphs"]
+                   and all(alignment.graphs[graph].status == "ALIGNED" for graph in event["graphs"])),
+                  key=lambda event: event["t_local"][owner])
+
+
 def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                      cfg: FusionConfig) -> List[Association]:
     """One decision per anonymous local track, in a fixed order.
 
-    The matched collision is the primary evidence of who the partner is.  A
-    track is that partner when it is the only one of its recorder that is
-    persistent, observed up to the contact (no TRACK_LOST before the contact
-    window), approaching, and moving at the partner's own speed; the range at
-    the contact only weighs the confidence.  Two or more such tracks are an
-    ambiguity: they all stay anonymous.  Ground truth is never used.
+    Every matched collision of a recorder names a partner: the other recorder
+    of that contact.  Per contact, a track is compatible with the partner when
+    it is persistent, observed up to the contact (no TRACK_LOST before the
+    contact window), approaching, and moving at the partner's own speed; the
+    range at the contact only weighs the confidence.  A track is named after a
+    partner when it is its recorder's only compatible track for a contact with
+    that partner and is compatible with no other partner.  Two or more
+    compatible tracks for one contact are an ambiguity, one track compatible
+    with two partners a conflict: those tracks stay anonymous.  Ground truth
+    is never used.
     """
     by_owner = {local.owner: local for local in locals_}
-    reference = next((event for event in alignment.matched_events
-                      if event["event_id"] == alignment.reference_event), None)
     associations = []
     for local in sorted(locals_, key=lambda item: item.owner):
         owner = local.owner
         clock = alignment.graphs[owner]
-        partner = None
-        if clock.status == "ALIGNED" and reference is not None:
-            others = [graph for graph in reference["graphs"] if graph != owner]
-            partner = by_owner[others[0]] if len(others) == 1 else None
-        if clock.status != "ALIGNED" or reference is None or partner is None:
+        contacts = recorder_contacts(owner, alignment)
+        if clock.status != "ALIGNED" or not contacts:
             reason = ("graph {0} is not aligned: {1}".format(owner, clock.reason) if clock.status != "ALIGNED"
-                      else "the reference collision has no single partner graph")
+                      else "no matched collision of {0} names a partner".format(owner))
             associations.extend(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
                                             [reason], [owner], blocking=[reason]) for track in local.tracks)
             continue
-        header = "{0} and {1} both reported {2} (peak impulse {3} vs {4} N*s)".format(
-            owner, partner.owner, reference["event_id"], reference["peak_impulse"][owner],
-            reference["peak_impulse"][partner.owner])
-        evidence = {track.track_id: _evidence(track, clock, partner, alignment.graphs[partner.owner], cfg)
-                    for track in local.tracks}
-        candidates = [track_id for track_id, item in evidence.items() if not item.blocking]
+        several = len(contacts) > 1
+        checks: Dict[Any, _Evidence] = {}
+        for event in contacts:
+            partner = by_owner[_partner(event, owner)]
+            for track in local.tracks:
+                checks[(event["event_id"], track.track_id)] = _evidence(
+                    track, event["t_local"][owner], clock, partner, alignment.graphs[partner.owner], cfg)
+        compatible = {event["event_id"]: [track.track_id for track in local.tracks
+                                          if not checks[(event["event_id"], track.track_id)].blocking]
+                      for event in contacts}
+
+        def header(event: Dict[str, Any]) -> str:
+            partner = _partner(event, owner)
+            return "{0} and {1} both reported {2}{3} (peak impulse {4} vs {5} N*s)".format(
+                owner, partner, event["event_id"],
+                " at {0:.2f} s".format(event["t_local"][owner]) if several else "",
+                event["peak_impulse"][owner], event["peak_impulse"][partner])
+
+        def prefixed(event: Dict[str, Any], reasons: Sequence[str]) -> List[str]:
+            if not several:
+                return list(reasons)
+            return ["{0} with {1}: {2}".format(event["event_id"], _partner(event, owner), reason)
+                    for reason in reasons]
+
         for track in local.tracks:
-            item = evidence[track.track_id]
-            lines = [header] + item.lines
-            sources = [owner, partner.owner]
-            if item.blocking:
-                associations.append(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
-                                                lines, sources, candidate=partner.owner, blocking=item.blocking))
-            elif len(candidates) > 1:
-                reason = "ambiguous: {0} persistent tracks of {1} are compatible with the contact ({2})".format(
-                    len(candidates), owner, ", ".join(candidates))
-                associations.append(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
-                                                lines + [reason], sources, candidate=partner.owner, blocking=[reason]))
+            fits = [event for event in contacts if track.track_id in compatible[event["event_id"]]]
+            partners = sorted({_partner(event, owner) for event in fits})
+            unique = [event for event in fits if compatible[event["event_id"]] == [track.track_id]]
+            # The contact the decision rests on: one where the track is the only compatible
+            # one, else a compatible one, else the contact with the fewest failed checks.
+            if unique:
+                basis = max(unique, key=lambda event: event["confidence"])
+            elif fits:
+                basis = fits[0]
+            else:
+                basis = min(contacts, key=lambda event: len(checks[(event["event_id"], track.track_id)].blocking))
+            item = checks[(basis["event_id"], track.track_id)]
+            lines = [header(basis)] + item.lines
+            # The recorder's other contacts, in one line each.
+            others = ["{0} with {1} at {2:.2f} s: {3}".format(
+                event["event_id"], _partner(event, owner), event["t_local"][owner],
+                "also compatible" if not checks[(event["event_id"], track.track_id)].blocking
+                else "not compatible (" + "; ".join(checks[(event["event_id"], track.track_id)].blocking) + ")")
+                for event in contacts if event is not basis]
+            candidate = _partner(basis, owner)
+            sources = [owner, candidate]
+            anonymous = owner + ":" + track.track_id
+            if not fits:
+                associations.append(Association(owner, track.track_id, anonymous, ANONYMOUS, None, lines + others,
+                                                sources, candidate=candidate, blocking=prefixed(basis, item.blocking),
+                                                collision_event=basis["event_id"]))
+            elif len(partners) > 1:
+                reason = "conflict: compatible with the contacts with {0}".format(" and ".join(
+                    "{0} ({1})".format(_partner(event, owner), event["event_id"]) for event in fits))
+                associations.append(Association(owner, track.track_id, anonymous, ANONYMOUS, None,
+                                                lines + others + [reason], [owner] + partners,
+                                                candidate=candidate, blocking=[reason],
+                                                collision_event=basis["event_id"]))
+            elif not unique:
+                rivals = compatible[basis["event_id"]]
+                reason = "ambiguous: {0} persistent tracks of {1} are compatible with the contact{2} ({3})".format(
+                    len(rivals), owner, " " + basis["event_id"] if several else "", ", ".join(rivals))
+                associations.append(Association(owner, track.track_id, anonymous, ANONYMOUS, None,
+                                                lines + others + [reason], sources,
+                                                candidate=candidate, blocking=[reason],
+                                                collision_event=basis["event_id"]))
             else:
                 lines.append("the only track of {0} compatible with the contact".format(owner))
                 # Confidence: collision match, reduced by speed disagreement and by a long range at the contact.
-                confidence = (reference["confidence"] * math.exp(-0.5 * (item.rmse / cfg.speed_consistency_mps) ** 2)
-                              * (_range_factor(item.range_at_contact, cfg) if item.range_at_contact is not None else 1.0))
-                associations.append(Association(owner, track.track_id, partner.owner, ASSOCIATED, round(confidence, 2),
-                                                lines, sources, candidate=partner.owner))
+                confidence = (basis["confidence"] * math.exp(-0.5 * (item.rmse / cfg.speed_consistency_mps) ** 2)
+                              * (_range_factor(item.range_at_contact, cfg) if item.range_at_contact is not None
+                                 else 1.0))
+                associations.append(Association(owner, track.track_id, candidate, ASSOCIATED, round(confidence, 2),
+                                                lines + others, sources, candidate=candidate,
+                                                collision_event=basis["event_id"]))
     return associations
 
 
@@ -287,8 +347,16 @@ def global_temporal_relations(locals_: Sequence[LocalReconstruction], alignment:
     out = []
     for local in sorted(locals_, key=lambda item: item.owner):
         clock = alignment.graphs[local.owner]
-        for item in temporal_safety_relations(local.graph):
+        # An identified track's collision is the recorder's collision with that entity.
+        with_entity: Dict[str, List[float]] = {}
+        for event in recorder_contacts(local.owner, alignment):
+            with_entity.setdefault(_partner(event, local.owner), []).append(event["t_local"][local.owner])
+        partner_collisions = {track: with_entity.get(entity, []) for (owner, track), (entity, status) in names.items()
+                              if owner == local.owner and status == ASSOCIATED}
+        for item in temporal_safety_relations(local.graph, partner_collisions):
             entity, status = names.get((local.owner, item["track"]), (local.owner + ":" + item["track"], ANONYMOUS))
+            if item["track"] in partner_collisions:
+                item["collision_with"] = entity
             times = {"cut_in": item["cut_in"]["t_local"] if item["cut_in"] else None,
                      "critical_ttc_start": item["critical_ttc_start"], "ego_path_entry": item["ego_path_entry"],
                      "collision": item["collision"]}

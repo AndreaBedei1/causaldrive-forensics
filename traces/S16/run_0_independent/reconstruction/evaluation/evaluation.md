@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: NO; associations correct: 1/1; anonymous: 4; max |t_global error| 0.0 s**
+**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 2/2; anonymous: 3; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,22 +10,30 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 18.330 | 6073.8 | - | NO | - s |
-| A + C | 27.280 | 9095.5 | g25 | yes | 0.0 s |
+| A + B | 18.330 | 6073.8 | g15 | yes | 0.0 s |
+| A + C | 27.280 | 9095.5 | g42 | yes | 0.0 s |
+
+Reconstructed COLLISION nodes that reproduce no true contact: none.
 
 ## Graph alignment accuracy
 
-| Graph | Status | Estimated anchor (local) | True contact (local) | Error |
-|-------|--------|-------------------------:|---------------------:|------:|
-| A | ALIGNED | 14.1 | 14.1 | 0.0 s |
-| B | UNALIGNED | - | 14.1 | - s |
-| C | ALIGNED | 14.1 | 14.1 | 0.0 s |
+Local time at which each graph reads t_global = 0, against the true local time of the reference contact; the chain lists the matched collisions that aligned the graph.
+
+| Graph | Status | Chain | Estimated (local) | True (local) | Error |
+|-------|--------|-------|------------------:|-------------:|------:|
+| A | ALIGNED | collision_002 | 14.1 | 14.1 | 0.0 s |
+| B | ALIGNED | collision_002 -> collision_001 | 14.1 | 14.1 | 0.0 s |
+| C | ALIGNED | collision_002 | 14.1 | 14.1 | 0.0 s |
+
+Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 Relative clock offset C - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
+Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
+
 ## Global event times
 
-32 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 482/482 pairs.
+50 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1202/1202 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
@@ -33,7 +41,7 @@ Relative clock offset C - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | A:track_001 | C | left anonymous (true identity C) | 8 | 0.237 / 0.243 m | 2.728 m | 4.224 / 0.263 m/s |
 | A:track_002 | C | C | correct | 28 | 0.18 / 0.444 m | 2.453 m | 4.683 / 0.373 m/s |
-| B:track_001 | B:track_001 | A | left anonymous (true identity A) | 141 | 0.558 / 0.561 m | 1.543 m | 1.371 / 0.231 m/s |
+| B:track_001 | A | A | correct | 141 | 0.558 / 0.561 m | 1.543 m | 1.371 / 0.231 m/s |
 | B:track_002 | B:track_002 | C | left anonymous (true identity C) | 39 | 0.339 / 0.645 m | 2.166 m | 8.315 / 0.377 m/s |
 | B:track_003 | B:track_003 | C | left anonymous (true identity C) | 6 | 0.375 / 0.385 m | 2.574 m | 4.724 / 0.454 m/s |
 
