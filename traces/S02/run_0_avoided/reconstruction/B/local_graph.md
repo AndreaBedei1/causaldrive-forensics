@@ -6,17 +6,15 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
 - Anonymous radar tracks: 0 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 5; edges: 4 (PRECEDES 4)
+- Nodes: 3; edges: 2 (PRECEDES 2)
 
 ## Nodes
 
 | Id | Local time | Type | Actor | Subject | Source | Details |
 |----|-----------:|------|-------|---------|--------|---------|
 | B:e01 | 0.00 | MOVING_START | B | - | ego | active_at_first_observation=True |
-| B:e02 | 0.35 | STRONG_THROTTLE_START | B | - | controls |  |
-| B:e03 | 1.30 | STRONG_THROTTLE_END | B | - | controls |  |
-| B:e04 | 3.15 | BRAKE_START | B | - | controls |  |
-| B:e05 | 3.60 | BRAKE_END | B | - | controls |  |
+| B:e02 | 3.15 | BRAKE_START | B | - | controls |  |
+| B:e03 | 3.60 | BRAKE_END | B | - | controls |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -25,8 +23,6 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
 ```
     B:e01 --PRECEDES--> B:e02
     B:e02 --PRECEDES--> B:e03
-    B:e03 --PRECEDES--> B:e04
-    B:e04 --PRECEDES--> B:e05
 ```
 
 ## Perceived state before each event
@@ -36,10 +32,8 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
-| 0.35 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 0.30 |
-| 1.30 | B:e03 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE | 1.20 |
-| 3.15 | B:e04 BRAKE_START | ego: MOVING | 3.10 |
-| 3.60 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
+| 3.15 | B:e02 BRAKE_START | ego: MOVING | 3.10 |
+| 3.60 | B:e03 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
 
 ## States still active when observation ended
 
@@ -48,6 +42,12 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 ## Tracks lost
 
 - no track was lost
+
+## Temporal safety relations
+
+Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
+
+- none
 
 ## Sign detection windows
 
@@ -62,7 +62,5 @@ No radar track: nothing moving stayed in B's forward radar view long enough.
 ## Plain-language reading
 
 - t = 0.00 s: B started moving (already the case when first observed).
-- t = 0.35 s: B started applying strong throttle.
-- t = 1.30 s: B stopped applying strong throttle.
 - t = 3.15 s: B started braking.
 - t = 3.60 s: B released the brake.

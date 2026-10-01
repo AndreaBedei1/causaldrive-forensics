@@ -7,7 +7,7 @@ from pathlib import Path
 
 from src.cdf.reconstruction.checks import open_states, sign_windows
 from src.cdf.reconstruction.config import ReconstructionConfig, SemanticsConfig
-from src.cdf.reconstruction.local import (build_local_graph, control_events, motion_events,
+from src.cdf.reconstruction.local import (build_local_graph, control_events, ego_control_fact, motion_events,
                                           number_events, sign_events)
 from src.cdf.reconstruction.models import SemanticEvent, TraceFrame, display_order
 from src.cdf.reconstruction.pipeline import reconstruct_run
@@ -52,7 +52,7 @@ class BrakingTests(unittest.TestCase):
 
     def test_braking_at_recording_end_has_no_invented_end(self):
         events = _pedals(brake=lambda t: 1.0 if t >= 8.0 else 0.0)
-        self.assertEqual(sorted(events), [("BRAKE_START", 8.0), ("HARD_BRAKE_START", 8.0)])
+        self.assertEqual(events, [("BRAKE_START", 8.0)])
 
     def test_brake_release_brake_gives_two_sequences(self):
         events = _pedals(brake=lambda t: 0.5 if 6.0 <= t < 6.5 or 7.5 <= t < 8.0 else 0.0)
@@ -65,19 +65,12 @@ class BrakingTests(unittest.TestCase):
             return 0.8 if 6.0 <= t < 8.0 else 0.0
         self.assertEqual(_pedals(brake=brake), [("BRAKE_START", 6.0), ("BRAKE_END", 8.0)])
 
-    def test_hard_braking_nests_inside_braking(self):
+    def test_hard_braking_is_still_one_brake_state(self):
         def brake(t):
             if 6.5 <= t < 7.5:
                 return 1.0
             return 0.3 if 6.0 <= t < 8.0 else 0.0
-        events = sorted(_pedals(brake=brake), key=lambda item: item[1])
-        self.assertEqual(events, [("BRAKE_START", 6.0), ("HARD_BRAKE_START", 6.5), ("HARD_BRAKE_END", 7.5),
-                                  ("BRAKE_END", 8.0)])
-
-    def test_releasing_a_hard_brake_at_once_ends_both_states_together(self):
-        events = _pedals(brake=lambda t: 1.0 if 6.0 <= t < 7.0 else 0.0)
-        self.assertEqual(sorted(events, key=lambda item: item[1]),
-                         [("BRAKE_START", 6.0), ("HARD_BRAKE_START", 6.0), ("BRAKE_END", 7.0), ("HARD_BRAKE_END", 7.0)])
+        self.assertEqual(_pedals(brake=brake), [("BRAKE_START", 6.0), ("BRAKE_END", 8.0)])
 
     def test_pedal_values_stay_out_of_the_events(self):
         controls = [{"timestamp": ORIGIN + t, "brake": 0.95 if t >= 6.0 else 0.0, "throttle": 0.0} for t in _grid()]
@@ -85,14 +78,11 @@ class BrakingTests(unittest.TestCase):
             self.assertEqual(event.attributes, {})
 
 
-class ThrottleTests(unittest.TestCase):
-    def test_strong_throttle_has_start_and_end(self):
-        self.assertEqual(_pedals(throttle=lambda t: 0.9 if 6.0 <= t < 7.0 else 0.4),
-                         [("STRONG_THROTTLE_START", 6.0), ("STRONG_THROTTLE_END", 7.0)])
-
-    def test_brief_throttle_noise_does_not_flicker(self):
-        self.assertEqual(_pedals(throttle=lambda t: 0.7 if t == 6.5 else 0.9 if 6.0 <= t < 7.0 else 0.4),
-                         [("STRONG_THROTTLE_START", 6.0), ("STRONG_THROTTLE_END", 7.0)])
+class ThrottleAndSteerTests(unittest.TestCase):
+    def test_throttle_gives_no_event_but_stays_a_fact(self):
+        self.assertEqual(_pedals(throttle=lambda t: 0.9 if 6.0 <= t < 7.0 else 0.4), [])
+        fact = ego_control_fact("A", {"throttle": 0.9, "brake": 0.0, "steer": -0.25}, 6.0)
+        self.assertEqual(fact.attributes, {"throttle": 0.9, "brake": 0.0, "steer": -0.25})
 
 
 class MovementTests(unittest.TestCase):
@@ -200,7 +190,7 @@ class SignTests(unittest.TestCase):
 
 class GraphTests(unittest.TestCase):
     def test_simultaneous_events_get_no_precedes_between_them(self):
-        graph = _graph([_event("BRAKE_START", 1.0), _event("HARD_BRAKE_START", 1.0), _event("COLLISION", 2.0)])
+        graph = _graph([_event("BRAKE_START", 1.0), _event("TURN_LEFT_START", 1.0), _event("COLLISION", 2.0)])
         pairs = {(edge.from_node, edge.to_node) for edge in graph.edges if edge.relation == "PRECEDES"}
         self.assertEqual(pairs, {("A:e01", "A:e03"), ("A:e02", "A:e03")})
 
@@ -235,9 +225,9 @@ class GraphTests(unittest.TestCase):
 
     def test_open_states_are_those_never_ended(self):
         graph = _graph([_event("MOVING_START", 0.0), _event("BRAKE_START", 1.0), _event("BRAKE_END", 2.0),
-                        _event("HARD_BRAKE_START", 3.0), _event("EGO_PATH_ENTRY", 3.5, "track_001")])
+                        _event("TURN_RIGHT_START", 3.0), _event("EGO_PATH_ENTRY", 3.5, "track_001")])
         self.assertEqual([(item["state"], item["subject"]) for item in open_states(graph)],
-                         [("MOVING", None), ("HARD_BRAKE", None), ("EGO_PATH", "track_001")])
+                         [("MOVING", None), ("TURN_RIGHT", None), ("EGO_PATH", "track_001")])
 
     def test_reconstructed_graph_is_sparse_and_uses_the_new_vocabulary(self):
         with tempfile.TemporaryDirectory() as tmp:

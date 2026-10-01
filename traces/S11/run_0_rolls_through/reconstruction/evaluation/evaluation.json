@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 302.1198318898678,
+      "sim_time": 187.1859813630581,
       "peak_impulse": 8859.577345218842,
-      "reconstructed_as": "g22",
+      "reconstructed_as": "g16",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -40,10 +40,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 36,
+    "nodes": 25,
     "max_abs_error_s": 0.0,
-    "order_pairs": 602,
-    "order_concordant": 602
+    "order_pairs": 287,
+    "order_concordant": 287
   },
   "tracks": [
     {
@@ -55,12 +55,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 26,
-      "raw_rmse_to_surface_m": 0.48,
-      "smoothed_rmse_to_surface_m": 0.487,
-      "smoothed_rmse_to_centre_m": 0.929,
-      "raw_difference_speed_rmse_mps": 4.763,
-      "speed_rmse_mps": 0.397
+      "samples": 25,
+      "raw_rmse_to_surface_m": 0.503,
+      "smoothed_rmse_to_surface_m": 0.486,
+      "smoothed_rmse_to_centre_m": 0.811,
+      "raw_difference_speed_rmse_mps": 5.051,
+      "speed_rmse_mps": 0.521
     },
     {
       "track": "B:track_001",
@@ -71,12 +71,12 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 120,
-      "raw_rmse_to_surface_m": 0.33,
-      "smoothed_rmse_to_surface_m": 0.353,
-      "smoothed_rmse_to_centre_m": 0.972,
-      "raw_difference_speed_rmse_mps": 1.861,
-      "speed_rmse_mps": 0.543
+      "samples": 134,
+      "raw_rmse_to_surface_m": 0.329,
+      "smoothed_rmse_to_surface_m": 0.352,
+      "smoothed_rmse_to_centre_m": 0.97,
+      "raw_difference_speed_rmse_mps": 2.766,
+      "speed_rmse_mps": 0.433
     }
   ],
   "clock_shift_check": {

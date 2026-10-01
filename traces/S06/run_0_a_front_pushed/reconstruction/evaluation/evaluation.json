@@ -1,6 +1,6 @@
 {
   "run": "S06/run_0_a_front_pushed",
-  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 2; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: NO; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 141.66189963370562,
+      "sim_time": 19.49220050126314,
       "peak_impulse": 11621.708047862681,
-      "reconstructed_as": "g29",
+      "reconstructed_as": "g20",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -19,7 +19,7 @@
         "B",
         "C"
       ],
-      "sim_time": 141.9118996374309,
+      "sim_time": 19.742200504988432,
       "peak_impulse": 9832.401687141975,
       "reconstructed_as": null,
       "participants_correct": false,
@@ -58,10 +58,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 39,
+    "nodes": 30,
     "max_abs_error_s": 0.0,
-    "order_pairs": 713,
-    "order_concordant": 713
+    "order_pairs": 413,
+    "order_concordant": 413
   },
   "tracks": [
     {
@@ -74,29 +74,12 @@
         "C": 3.4
       },
       "verdict": "correct",
-      "samples": 297,
-      "raw_rmse_to_surface_m": 0.592,
-      "smoothed_rmse_to_surface_m": 0.599,
-      "smoothed_rmse_to_centre_m": 1.514,
-      "raw_difference_speed_rmse_mps": 1.159,
+      "samples": 296,
+      "raw_rmse_to_surface_m": 0.597,
+      "smoothed_rmse_to_surface_m": 0.605,
+      "smoothed_rmse_to_centre_m": 1.506,
+      "raw_difference_speed_rmse_mps": 1.204,
       "speed_rmse_mps": 0.093
-    },
-    {
-      "track": "A:track_002",
-      "decision": "A:track_002",
-      "status": "ANONYMOUS",
-      "true_identity": "C",
-      "median_box_distance_m": {
-        "B": 13.22,
-        "C": 0.0
-      },
-      "verdict": "left anonymous (true identity C)",
-      "samples": 2,
-      "raw_rmse_to_surface_m": 0.533,
-      "smoothed_rmse_to_surface_m": 0.864,
-      "smoothed_rmse_to_centre_m": 1.439,
-      "raw_difference_speed_rmse_mps": null,
-      "speed_rmse_mps": 0.089
     },
     {
       "track": "B:track_001",
@@ -104,16 +87,16 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 34.62,
+        "A": 34.64,
         "C": 0.0
       },
       "verdict": "left anonymous (true identity C)",
       "samples": 62,
-      "raw_rmse_to_surface_m": 0.248,
-      "smoothed_rmse_to_surface_m": 0.23,
-      "smoothed_rmse_to_centre_m": 2.104,
-      "raw_difference_speed_rmse_mps": 1.448,
-      "speed_rmse_mps": 0.26
+      "raw_rmse_to_surface_m": 0.284,
+      "smoothed_rmse_to_surface_m": 0.251,
+      "smoothed_rmse_to_centre_m": 2.081,
+      "raw_difference_speed_rmse_mps": 1.689,
+      "speed_rmse_mps": 0.258
     }
   ],
   "clock_shift_check": {

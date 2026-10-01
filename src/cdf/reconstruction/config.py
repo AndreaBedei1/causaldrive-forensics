@@ -48,17 +48,36 @@ class TrackingConfig:
 class SemanticsConfig:
     # Brake level that starts braking (BRAKE_START); below it braking ends.
     brake_onset_threshold: float = 0.1
-    # Brake level of strong braking (HARD_BRAKE_START / HARD_BRAKE_END).
-    hard_brake_threshold: float = 0.9
-    # Throttle level of strong throttle (STRONG_THROTTLE_START / _END).
-    strong_throttle_threshold: float = 0.8
     # Below this speed the recorder is stopped (STOP_START); it moves again above 1 m/s.
     full_stop_speed_mps: float = 0.3
     # Hysteresis around the supplied speed limit: exceeding starts above
     # limit + this and ends at or below limit - this.
     speed_limit_hysteresis_kmh: float = 1.0
     closing_speed_threshold_mps: float = 1.0
-    critical_ttc_s: float = 2.0
+    # CRITICAL_TTC: avoiding the target by braking would need at least the
+    # available deceleration.  The recorder reacts after this time...
+    critical_reaction_time_s: float = 1.0
+    # ...then brakes at up to this deceleration (hard, non-emergency braking on
+    # a dry road; emergency braking reaches about 8-10 m/s^2)...
+    critical_deceleration_mps2: float = 6.0
+    # ...and must keep at least this distance from the target.
+    critical_standstill_margin_m: float = 1.0
+    # The state ends once the required deceleration falls below this fraction
+    # of the available one (hysteresis).
+    critical_release_ratio: float = 0.75
+    # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading: the yaw
+    # rate (over the preceding window) reaches the on threshold while moving at least
+    # the minimum speed, and the turn ends below the off threshold...
+    turn_yaw_rate_window_s: float = 0.2
+    turn_yaw_rate_on_dps: float = 10.0
+    turn_yaw_rate_off_dps: float = 5.0
+    turn_min_speed_mps: float = 1.0
+    # ...unless the yaw rate recovers within this time (debounce).  A turn lasts
+    # at least this long and changes the heading by at least this much, so lane
+    # changes and road curvature are not turns.
+    turn_release_debounce_s: float = 0.3
+    turn_min_duration_s: float = 0.5
+    turn_min_heading_change_deg: float = 15.0
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT.
     path_half_width_m: float = 1.5
     # TRACK_APPEARED_FRONT when the track's first azimuth from the radar lies
@@ -91,10 +110,17 @@ class FusionConfig:
     # Two collision reports are the same contact if their peak impulses differ
     # by at most this fraction (equal and opposite impulses).
     impulse_tolerance: float = 0.10
-    # A track "is at the contact" if it was seen within this window before the
-    # matched collision and at most this range from the recorder's radar.
+    # A track is continuous up to the contact if it was still observed within
+    # this window before the matched collision (radars lose a target at point
+    # blank range or at the edge of their field of view just before impact).
     contact_window_s: float = 0.5
+    # Range at the contact is evidence, not a veto: up to this range it counts
+    # fully; beyond it the confidence decays with this scale (radar mount,
+    # vehicle geometry and impact orientation can keep the last range high).
     contact_range_m: float = 3.5
+    contact_range_scale_m: float = 3.0
+    # The range must shrink over this last stretch of tracking before the contact.
+    approach_window_s: float = 1.0
     # Required tracking history before the contact.
     min_track_persistence_s: float = 1.0
     # Track speed versus the partner's own reported speed (frame independent).

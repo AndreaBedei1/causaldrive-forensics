@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e22",
+      "anchor_node": "A:e16",
       "anchor_t_local": 14.1,
       "offset_to_global": -14.1,
       "reason": "reported the reference collision collision_002"
@@ -19,7 +19,7 @@
     },
     "C": {
       "status": "ALIGNED",
-      "anchor_node": "C:e06",
+      "anchor_node": "C:e10",
       "anchor_t_local": 14.1,
       "offset_to_global": -14.1,
       "reason": "reported the reference collision collision_002"
@@ -36,8 +36,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e05",
-        "B": "B:e12"
+        "A": "A:e03",
+        "B": "B:e10"
       },
       "t_local": {
         "A": 5.15,
@@ -62,22 +62,22 @@
         "C"
       ],
       "nodes": {
-        "A": "A:e22",
-        "C": "C:e06"
+        "A": "A:e16",
+        "C": "C:e10"
       },
       "t_local": {
         "A": 14.1,
         "C": 14.1
       },
       "peak_impulse": {
-        "A": 9089.81,
-        "C": 9089.81
+        "A": 9095.53,
+        "C": 9095.53
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "A and C both recorded a collision",
-        "peak impulses 9089.81 vs 9089.81 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 9095.53 vs 9095.53 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance"
       ]
     }

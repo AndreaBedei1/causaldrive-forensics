@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 536.4218036159873,
+      "sim_time": 187.53253819420934,
       "peak_impulse": 6073.814538141226,
-      "reconstructed_as": "g16",
+      "reconstructed_as": "g12",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -47,10 +47,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 24,
+    "nodes": 18,
     "max_abs_error_s": 0.0,
-    "order_pairs": 263,
-    "order_concordant": 263
+    "order_pairs": 146,
+    "order_concordant": 146
   },
   "tracks": [
     {
@@ -60,15 +60,15 @@
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0,
-        "C": 7.28
+        "C": 7.25
       },
       "verdict": "correct",
       "samples": 100,
-      "raw_rmse_to_surface_m": 0.532,
-      "smoothed_rmse_to_surface_m": 0.51,
-      "smoothed_rmse_to_centre_m": 1.59,
-      "raw_difference_speed_rmse_mps": 0.77,
-      "speed_rmse_mps": 0.241
+      "raw_rmse_to_surface_m": 0.533,
+      "smoothed_rmse_to_surface_m": 0.517,
+      "smoothed_rmse_to_centre_m": 1.587,
+      "raw_difference_speed_rmse_mps": 0.87,
+      "speed_rmse_mps": 0.268
     }
   ],
   "clock_shift_check": {

@@ -1,6 +1,6 @@
 {
   "run": "S10/run_0_stops_then_proceeds",
-  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 9; max |t_global error| None s",
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 16; max |t_global error| None s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [],
   "alignment": [
@@ -36,12 +36,12 @@
         "B": 0.0
       },
       "verdict": "left anonymous (true identity B)",
-      "samples": 33,
-      "raw_rmse_to_surface_m": 0.354,
-      "smoothed_rmse_to_surface_m": 0.496,
-      "smoothed_rmse_to_centre_m": 1.178,
-      "raw_difference_speed_rmse_mps": 4.286,
-      "speed_rmse_mps": 1.143
+      "samples": 52,
+      "raw_rmse_to_surface_m": 0.382,
+      "smoothed_rmse_to_surface_m": 0.571,
+      "smoothed_rmse_to_centre_m": 1.12,
+      "raw_difference_speed_rmse_mps": 4.199,
+      "speed_rmse_mps": 0.672
     },
     {
       "track": "A:track_002",
@@ -49,7 +49,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 37.46
+        "B": 54.21
       },
       "verdict": "correctly left anonymous"
     },
@@ -59,7 +59,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 36.47
+        "B": 68.16
       },
       "verdict": "correctly left anonymous"
     },
@@ -69,7 +69,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 120.07
+        "B": 19.67
       },
       "verdict": "correctly left anonymous"
     },
@@ -79,7 +79,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 82.62
+        "B": 85.9
       },
       "verdict": "correctly left anonymous"
     },
@@ -89,7 +89,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 61.2
+        "B": 37.21
       },
       "verdict": "correctly left anonymous"
     },
@@ -99,7 +99,7 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 71.23
+        "B": 69.38
       },
       "verdict": "correctly left anonymous"
     },
@@ -109,7 +109,77 @@
       "status": "ANONYMOUS",
       "true_identity": null,
       "median_box_distance_m": {
-        "B": 91.83
+        "B": 71.51
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_009",
+      "decision": "A:track_009",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 22.61
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_010",
+      "decision": "A:track_010",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 25.03
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_011",
+      "decision": "A:track_011",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 74.01
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_012",
+      "decision": "A:track_012",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 74.82
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_013",
+      "decision": "A:track_013",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 87.81
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_014",
+      "decision": "A:track_014",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 52.8
+      },
+      "verdict": "correctly left anonymous"
+    },
+    {
+      "track": "A:track_015",
+      "decision": "A:track_015",
+      "status": "ANONYMOUS",
+      "true_identity": null,
+      "median_box_distance_m": {
+        "B": 33.19
       },
       "verdict": "correctly left anonymous"
     },
@@ -122,12 +192,12 @@
         "A": 0.0
       },
       "verdict": "left anonymous (true identity A)",
-      "samples": 29,
-      "raw_rmse_to_surface_m": 0.44,
-      "smoothed_rmse_to_surface_m": 0.519,
-      "smoothed_rmse_to_centre_m": 0.965,
-      "raw_difference_speed_rmse_mps": 9.402,
-      "speed_rmse_mps": 1.312
+      "samples": 33,
+      "raw_rmse_to_surface_m": 0.491,
+      "smoothed_rmse_to_surface_m": 0.529,
+      "smoothed_rmse_to_centre_m": 0.988,
+      "raw_difference_speed_rmse_mps": 6.254,
+      "speed_rmse_mps": 1.074
     }
   ],
   "clock_shift_check": null

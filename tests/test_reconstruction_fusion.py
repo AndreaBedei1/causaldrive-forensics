@@ -79,7 +79,7 @@ class FusionTests(unittest.TestCase):
         self.assertEqual(association.status, "ANONYMOUS")
         self.assertEqual(association.global_entity, "A:track_001")
         self.assertIsNone(association.confidence)
-        self.assertTrue(any("not at the contact" in reason for reason in association.blocking))
+        self.assertTrue(any("lost 2.00 s before the matched collision" in reason for reason in association.blocking))
         subjects = {node.subject_id for node in result.graph.nodes if node.actor_id == "A" and node.subject_id}
         self.assertEqual(subjects, {"A:track_001"})
 

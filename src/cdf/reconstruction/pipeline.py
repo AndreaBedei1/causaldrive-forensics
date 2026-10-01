@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional
 
 from .alignment import align_graphs
 from .config import ReconstructionConfig, load_config
-from .fusion import associate_tracks, fuse_graphs, global_trace
+from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .local import LocalReconstruction, reconstruct_vehicle
 from .models import Alignment, Association, GlobalGraph
 from .render import (global_graph_dot, global_graph_markdown, local_graph_dot, local_graph_markdown,
@@ -99,6 +99,7 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     associations = associate_tracks(locals_, alignment, cfg.fusion)
     graph = fuse_graphs(locals_, alignment, associations)
     trace = global_trace(graph)
+    relations = global_temporal_relations(locals_, alignment, associations)
 
     # 9. Human-readable files.
     title = run_title(run_dir)
@@ -107,12 +108,14 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     write_json(global_dir / "associations.json", [item.to_dict() for item in associations])
     write_jsonl(global_dir / "global_trace.jsonl", trace)
     write_json(global_dir / "global_graph.json", dict(graph.to_dict(), run=title, incident_context=context or None,
+                                                     temporal_safety_relations=relations,
                                                      reconstruction_config=cfg.to_dict()))
     write_text(global_dir / "global_graph.md",
-               global_graph_markdown(title, graph, alignment, associations, trace, context))
+               global_graph_markdown(title, graph, alignment, associations, trace, context, relations))
     write_text(global_dir / "global_graph.dot", global_graph_dot(title, graph))
     render_svg(global_dir / "global_graph.dot")
     write_text(output_dir / "report.md",
-               report_markdown(title, locals_, alignment, associations, graph, trace, cfg.to_dict(), context))
+               report_markdown(title, locals_, alignment, associations, graph, trace, cfg.to_dict(), context,
+                               relations))
     return RunReconstruction(run_dir=run_dir, output_dir=output_dir, locals=locals_, alignment=alignment,
                              associations=associations, graph=graph, trace=trace)

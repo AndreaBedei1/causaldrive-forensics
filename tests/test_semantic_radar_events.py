@@ -5,7 +5,7 @@ import unittest
 
 from src.cdf.reconstruction.config import SemanticsConfig
 from src.cdf.reconstruction.local import track_events
-from src.cdf.reconstruction.tracking import LocalTrack, TrackSample
+from src.cdf.reconstruction.tracking import EgoState, EgoTrajectory, LocalTrack, TrackSample
 
 CFG = SemanticsConfig()
 
@@ -26,8 +26,19 @@ def _track(profile, start=1.0, end=5.0):
     return LocalTrack(track_id="track_001", samples=samples)
 
 
-def _events(track, recording_end=10.0):
-    return [(event.type, event.t_local) for event in track_events("A", track, recording_end, CFG)]
+def _events(track, recording_end=10.0, ego=None):
+    return [(event.type, event.t_local) for event in track_events("A", track, recording_end, CFG, ego)]
+
+
+def _ego(speed, stop_at=99.0, after=0.0, end=10.0):
+    """The recorder driving straight ahead at ``speed`` until ``stop_at``, then at ``after``."""
+    states, x = [], 0.0
+    for k in range(int(round(end / 0.05)) + 1):
+        t = round(0.05 * k, 2)
+        v = speed if t < stop_at else after
+        states.append(EgoState(t_local=t, x=x, y=0.0, heading=0.0, vx=v, vy=0.0))
+        x += v * 0.05
+    return EgoTrajectory(states)
 
 
 class RadarTransitionTests(unittest.TestCase):
@@ -47,24 +58,36 @@ class RadarTransitionTests(unittest.TestCase):
         self.assertNotIn("CLOSING_START", [name for name, _ in events])
 
     def test_critical_ttc_start_and_end(self):
-        # Closing at 5 m/s from 20 m: TTC reaches 2 s at 10 m (t = 3 s); closing stops at 3.5 s.
+        # The recorder drives at 10 m/s at a standing target 40 m ahead and stops at 3.6 s.  The
+        # threshold is 1.0 + 10 / (2 * 6) + 1 / 10 = 1.93 s, reached at t = 3.07: first sample 3.10.
         def profile(t):
-            if t < 3.5:
-                return 20.0 - 5.0 * (t - 1.0), 0.0, 5.0
-            return 7.5, 0.0, 0.0
-        events = _events(_track(profile))
-        self.assertIn(("CRITICAL_TTC_START", 3.0), events)
-        self.assertIn(("CRITICAL_TTC_END", 3.5), events)
-        self.assertIn(("CLOSING_END", 3.5), events)
+            if t < 3.6:
+                return 40.0 - 10.0 * (t - 1.0), 0.0, 10.0
+            return 14.0, 0.0, 0.0
+        events = _events(_track(profile), ego=_ego(10.0, stop_at=3.6))
+        self.assertIn(("CRITICAL_TTC_START", 3.1), events)
+        self.assertIn(("CRITICAL_TTC_END", 3.6), events)
+        self.assertIn(("CLOSING_END", 3.6), events)
         self.assertIn(("CLOSING_START", 1.0), events)
 
+    def test_the_same_approach_slower_is_not_critical(self):
+        # 5 m/s at the same standing target: the threshold (1.62 s) is reached at 3.38 s, and the
+        # 0.2 s until the stop is shorter than an episode.
+        def profile(t):
+            if t < 3.6:
+                return 20.0 - 5.0 * (t - 1.0), 0.0, 5.0
+            return 7.0, 0.0, 0.0
+        names = [name for name, _ in _events(_track(profile), ego=_ego(5.0, stop_at=3.6))]
+        self.assertNotIn("CRITICAL_TTC_START", names)
+
     def test_critical_ttc_never_outlasts_closing(self):
-        # Closing slows to 0.3 m/s at 0.5 m: TTC stays below 2 s, but closing has ended.
+        # Closing slows to 0.3 m/s at 0.5 m: braking could not help any more, but closing has ended.
         def profile(t):
             if t < 3.0:
                 return 10.0 - 4.0 * (t - 1.0), 0.0, 4.0
             return 0.5, 0.0, 0.3
-        events = _events(_track(profile))
+        events = _events(_track(profile), ego=_ego(4.0, stop_at=3.0, after=0.3))
+        self.assertIn(("CRITICAL_TTC_START", 1.95), events)
         self.assertIn(("CLOSING_END", 3.0), events)
         self.assertIn(("CRITICAL_TTC_END", 3.0), events)
 

@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes; associations correct: 1/1; anonymous: 19; max |t_global error| 0.0 s**
+**collision reconstructed: yes; associations correct: 2/2; anonymous: 18; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 134.136 | 6116.3 | g13 | yes | 0.0 s |
+| A + B | 134.136 | 6116.3 | g11 | yes | 0.0 s |
 
 ## Graph alignment accuracy
 
@@ -23,14 +23,14 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-99 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 4542/4542 pairs.
+93 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 4009/4009 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | B | B | correct | 29 | 0.269 / 0.411 m | 0.774 m | 6.614 / 0.692 m/s |
-| B:track_001 | B:track_001 | A | left anonymous (true identity A) | 20 | 0.452 / 0.569 m | 1.153 m | 5.484 / 0.545 m/s |
+| B:track_001 | A | A | correct | 20 | 0.452 / 0.569 m | 1.153 m | 5.484 / 0.545 m/s |
 | B:track_002 | B:track_002 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | B:track_003 | B:track_003 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | B:track_004 | B:track_004 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |

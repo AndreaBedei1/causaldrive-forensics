@@ -36,12 +36,12 @@
         "B": 0.0
       },
       "verdict": "left anonymous (true identity B)",
-      "samples": 28,
-      "raw_rmse_to_surface_m": 0.322,
-      "smoothed_rmse_to_surface_m": 0.427,
-      "smoothed_rmse_to_centre_m": 1.054,
-      "raw_difference_speed_rmse_mps": 6.113,
-      "speed_rmse_mps": 1.591
+      "samples": 30,
+      "raw_rmse_to_surface_m": 0.496,
+      "smoothed_rmse_to_surface_m": 0.516,
+      "smoothed_rmse_to_centre_m": 0.885,
+      "raw_difference_speed_rmse_mps": 6.299,
+      "speed_rmse_mps": 1.241
     },
     {
       "track": "B:track_001",
@@ -52,12 +52,12 @@
         "A": 0.0
       },
       "verdict": "left anonymous (true identity A)",
-      "samples": 38,
-      "raw_rmse_to_surface_m": 0.349,
-      "smoothed_rmse_to_surface_m": 0.486,
-      "smoothed_rmse_to_centre_m": 1.403,
-      "raw_difference_speed_rmse_mps": 4.23,
-      "speed_rmse_mps": 1.152
+      "samples": 63,
+      "raw_rmse_to_surface_m": 0.436,
+      "smoothed_rmse_to_surface_m": 0.528,
+      "smoothed_rmse_to_centre_m": 1.391,
+      "raw_difference_speed_rmse_mps": 4.665,
+      "speed_rmse_mps": 0.682
     }
   ],
   "clock_shift_check": null

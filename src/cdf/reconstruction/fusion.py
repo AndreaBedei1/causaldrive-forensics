@@ -3,9 +3,12 @@
 This runs only after every local graph exists and the alignment is known.
 
 1. ``associate_tracks`` decides, for each anonymous local track, whether it can
-   be named after another recorder.  The evidence is taken around the matched
-   collision.  With insufficient evidence the track keeps an anonymous global
-   name such as ``A:track_001``: nothing is guessed.
+   be named after another recorder.  The matched collision names the partner;
+   the track must be its recorder's only persistent, continuous, approaching,
+   speed-consistent track at the contact (the range at the contact weighs the
+   confidence, it is no veto).  With insufficient or ambiguous evidence the
+   track keeps an anonymous global name such as ``A:track_001``: nothing is
+   guessed.
 2. ``fuse_graphs`` places every local node on the global time axis, merges the
    matched collision reports into one node and keeps the provenance (graph,
    local node, local time) of everything, including each observing recorder's
@@ -19,6 +22,7 @@ import copy
 import math
 from typing import Any, Dict, List, Optional, Sequence
 
+from .checks import temporal_safety_relations
 from .config import FusionConfig
 from .local import LocalReconstruction
 from .models import (OUTCOME, SAME_TRACK, Alignment, Association, GlobalGraph, GlobalNode,
@@ -52,108 +56,143 @@ def _speed_rmse(track: LocalTrack, clock: GraphClock, partner: LocalReconstructi
     return math.sqrt(sum(error * error for error in errors) / len(errors))
 
 
-def _range_at_contact(track: LocalTrack, t_contact: float, cfg: FusionConfig) -> Optional[float]:
-    near = [sample.range_m for sample in track.samples
-            if t_contact - cfg.contact_window_s - 1e-6 <= sample.t_local <= t_contact + 1e-6]
-    return min(near) if near else None
+def _approach(track: LocalTrack, t_contact: float, cfg: FusionConfig) -> Optional[tuple]:
+    """(range at the start, range at the end) of the last ``approach_window_s`` of tracking before the contact."""
+    end = min(track.last_t, t_contact)
+    window = [sample for sample in track.samples if end - cfg.approach_window_s - 1e-6 <= sample.t_local <= end + 1e-6]
+    if len(window) < 2:
+        return None
+    return window[0].range_m, window[-1].range_m
 
 
-def _decide(local: LocalReconstruction, track: LocalTrack, alignment: Alignment,
-            reference: Optional[Dict[str, Any]], partner: Optional[LocalReconstruction],
-            tracks_at_contact: List[str], cfg: FusionConfig) -> Association:
-    owner = local.owner
-    anonymous = owner + ":" + track.track_id
-    clock = alignment.graphs[owner]
-    if clock.status != "ALIGNED":
-        reason = "graph {0} is not aligned: {1}".format(owner, clock.reason)
-        return Association(owner, track.track_id, anonymous, ANONYMOUS, None, [reason], [owner],
-                           blocking=[reason])
-    if reference is None or partner is None:
-        reason = "the reference collision has no single partner graph"
-        return Association(owner, track.track_id, anonymous, ANONYMOUS, None, [reason], [owner],
-                           blocking=[reason])
+def _range_factor(range_m: float, cfg: FusionConfig) -> float:
+    """Confidence factor of the range at the contact: 1 up to ``contact_range_m``, then decaying."""
+    excess = max(range_m - cfg.contact_range_m, 0.0)
+    return math.exp(-0.5 * (excess / cfg.contact_range_scale_m) ** 2)
 
-    t_contact = clock.anchor_t_local
-    evidence = ["{0} and {1} both reported {2} (peak impulse {3} vs {4} N*s)".format(
-        owner, partner.owner, reference["event_id"],
-        reference["peak_impulse"][owner], reference["peak_impulse"][partner.owner])]
-    blocking: List[str] = []
 
-    def check(passed: bool, text: str) -> None:
-        evidence.append(text)
+class _Evidence:
+    """Evidence that one local track is the partner of the matched collision."""
+
+    def __init__(self) -> None:
+        self.lines: List[str] = []
+        self.blocking: List[str] = []
+        self.rmse: Optional[float] = None
+        self.range_at_contact: Optional[float] = None
+
+    def check(self, passed: bool, text: str) -> None:
+        self.lines.append(text)
         if not passed:
-            blocking.append(text)
+            self.blocking.append(text)
+
+
+def _evidence(track: LocalTrack, clock: GraphClock, partner: LocalReconstruction, partner_clock: GraphClock,
+              cfg: FusionConfig) -> _Evidence:
+    """Hierarchical evidence; every check but the range at the contact is required."""
+    t_contact = clock.anchor_t_local
+    evidence = _Evidence()
 
     seen_for = t_contact - track.first_t
-    if seen_for >= cfg.min_track_persistence_s:
-        check(True, "tracked for {0:.2f} s before the matched collision".format(seen_for))
-    else:
-        check(False, "tracked only {0:.2f} s before the matched collision (needs {1:.2f} s)".format(
-            max(seen_for, 0.0), cfg.min_track_persistence_s))
+    evidence.check(seen_for >= cfg.min_track_persistence_s,
+                   "tracked for {0:.2f} s before the matched collision{1}".format(
+                       max(seen_for, 0.0), "" if seen_for >= cfg.min_track_persistence_s
+                       else " (needs {0:.2f} s)".format(cfg.min_track_persistence_s)))
 
-    range_at_contact = _range_at_contact(track, t_contact, cfg)
-    if range_at_contact is None and track.first_t > t_contact:
-        check(False, "not at the contact: first seen {0:.2f} s after the matched collision".format(
-            track.first_t - t_contact))
-    elif range_at_contact is None:
-        check(False, "not at the contact: last seen {0:.2f} s before the matched collision "
-                     "(window {1:.2f} s)".format(t_contact - track.last_t, cfg.contact_window_s))
-    elif range_at_contact <= cfg.contact_range_m:
-        check(True, "at the contact: minimum range {0:.2f} m in the last {1:.2f} s before "
-                    "the collision".format(range_at_contact, cfg.contact_window_s))
+    if track.first_t > t_contact:
+        evidence.check(False, "first seen {0:.2f} s after the matched collision".format(track.first_t - t_contact))
     else:
-        check(False, "not at the contact: minimum range {0:.2f} m in the last {1:.2f} s "
-                     "(needs <= {2:.2f} m)".format(range_at_contact, cfg.contact_window_s, cfg.contact_range_m))
+        gap = max(t_contact - track.last_t, 0.0)
+        evidence.check(gap <= cfg.contact_window_s + 1e-6,
+                       "continuous up to the contact: last observed {0:.2f} s before it (window {1:.2f} s)".format(
+                           gap, cfg.contact_window_s) if gap <= cfg.contact_window_s + 1e-6 else
+                       "lost {0:.2f} s before the matched collision (window {1:.2f} s)".format(gap, cfg.contact_window_s))
 
-    if len(tracks_at_contact) > 1:
-        check(False, "ambiguous: {0} tracks of {1} were at the contact".format(len(tracks_at_contact), owner))
-    elif tracks_at_contact == [track.track_id]:
-        check(True, "the only track of {0} at the contact".format(owner))
+    approach = _approach(track, t_contact, cfg)
+    if approach is None:
+        evidence.check(False, "range trend before the contact not measurable")
+    else:
+        first, last = approach
+        evidence.check(last < first, "{0} before the contact: range {1:.1f} m -> {2:.1f} m over the last {3:.1f} s".format(
+            "approaching" if last < first else "not approaching", first, last, cfg.approach_window_s))
 
     start = max(track.first_t, t_contact - SPEED_WINDOW_S)
     end = min(track.last_t, t_contact)
-    rmse = None
-    if end > start:
-        rmse = _speed_rmse(track, clock, partner, alignment.graphs[partner.owner], start, end)
-    if rmse is None:
-        check(False, "speed not comparable with {0}'s own speed before the collision".format(partner.owner))
-    elif rmse <= cfg.speed_consistency_mps:
-        check(True, "track speed agrees with {0}'s own speed: RMSE {1:.2f} m/s over {2:.1f} s".format(
-            partner.owner, rmse, end - start))
+    evidence.rmse = _speed_rmse(track, clock, partner, partner_clock, start, end) if end > start else None
+    if evidence.rmse is None:
+        evidence.check(False, "speed not comparable with {0}'s own speed before the collision".format(partner.owner))
     else:
-        check(False, "track speed disagrees with {0}'s own speed: RMSE {1:.2f} m/s (> {2:.2f})".format(
-            partner.owner, rmse, cfg.speed_consistency_mps))
+        evidence.check(evidence.rmse <= cfg.speed_consistency_mps,
+                       "track speed {0} {1}'s own speed: RMSE {2:.2f} m/s over {3:.1f} s{4}".format(
+                           "agrees with" if evidence.rmse <= cfg.speed_consistency_mps else "disagrees with",
+                           partner.owner, evidence.rmse, end - start,
+                           "" if evidence.rmse <= cfg.speed_consistency_mps
+                           else " (> {0:.2f})".format(cfg.speed_consistency_mps)))
 
-    sources = [owner, partner.owner]
-    if blocking:
-        return Association(owner, track.track_id, anonymous, ANONYMOUS, None, evidence, sources,
-                           candidate=partner.owner, blocking=blocking)
-    # Confidence: collision-match confidence, reduced by any speed disagreement.
-    confidence = reference["confidence"] * math.exp(-0.5 * (rmse / cfg.speed_consistency_mps) ** 2)
-    return Association(owner, track.track_id, partner.owner, ASSOCIATED, round(confidence, 2),
-                       evidence, sources, candidate=partner.owner)
+    near = [sample.range_m for sample in track.samples
+            if t_contact - cfg.contact_window_s - 1e-6 <= sample.t_local <= t_contact + 1e-6]
+    if near:
+        evidence.range_at_contact = min(near)
+        factor = _range_factor(evidence.range_at_contact, cfg)
+        # Evidence, not a veto: radar mount, vehicle geometry and impact angle can keep it high.
+        evidence.lines.append("range at the contact {0:.2f} m{1}".format(
+            evidence.range_at_contact, "" if factor >= 0.999 else
+            " (beyond {0:.2f} m: confidence factor {1:.2f})".format(cfg.contact_range_m, factor)))
+    return evidence
 
 
 def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                      cfg: FusionConfig) -> List[Association]:
-    """One decision per anonymous local track, in a fixed order."""
+    """One decision per anonymous local track, in a fixed order.
+
+    The matched collision is the primary evidence of who the partner is.  A
+    track is that partner when it is the only one of its recorder that is
+    persistent, observed up to the contact (no TRACK_LOST before the contact
+    window), approaching, and moving at the partner's own speed; the range at
+    the contact only weighs the confidence.  Two or more such tracks are an
+    ambiguity: they all stay anonymous.  Ground truth is never used.
+    """
     by_owner = {local.owner: local for local in locals_}
     reference = next((event for event in alignment.matched_events
                       if event["event_id"] == alignment.reference_event), None)
     associations = []
     for local in sorted(locals_, key=lambda item: item.owner):
-        clock = alignment.graphs[local.owner]
+        owner = local.owner
+        clock = alignment.graphs[owner]
         partner = None
-        at_contact: List[str] = []
         if clock.status == "ALIGNED" and reference is not None:
-            others = [graph for graph in reference["graphs"] if graph != local.owner]
+            others = [graph for graph in reference["graphs"] if graph != owner]
             partner = by_owner[others[0]] if len(others) == 1 else None
-            for track in local.tracks:
-                range_at_contact = _range_at_contact(track, clock.anchor_t_local, cfg)
-                if range_at_contact is not None and range_at_contact <= cfg.contact_range_m:
-                    at_contact.append(track.track_id)
+        if clock.status != "ALIGNED" or reference is None or partner is None:
+            reason = ("graph {0} is not aligned: {1}".format(owner, clock.reason) if clock.status != "ALIGNED"
+                      else "the reference collision has no single partner graph")
+            associations.extend(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
+                                            [reason], [owner], blocking=[reason]) for track in local.tracks)
+            continue
+        header = "{0} and {1} both reported {2} (peak impulse {3} vs {4} N*s)".format(
+            owner, partner.owner, reference["event_id"], reference["peak_impulse"][owner],
+            reference["peak_impulse"][partner.owner])
+        evidence = {track.track_id: _evidence(track, clock, partner, alignment.graphs[partner.owner], cfg)
+                    for track in local.tracks}
+        candidates = [track_id for track_id, item in evidence.items() if not item.blocking]
         for track in local.tracks:
-            associations.append(_decide(local, track, alignment, reference, partner, at_contact, cfg))
+            item = evidence[track.track_id]
+            lines = [header] + item.lines
+            sources = [owner, partner.owner]
+            if item.blocking:
+                associations.append(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
+                                                lines, sources, candidate=partner.owner, blocking=item.blocking))
+            elif len(candidates) > 1:
+                reason = "ambiguous: {0} persistent tracks of {1} are compatible with the contact ({2})".format(
+                    len(candidates), owner, ", ".join(candidates))
+                associations.append(Association(owner, track.track_id, owner + ":" + track.track_id, ANONYMOUS, None,
+                                                lines + [reason], sources, candidate=partner.owner, blocking=[reason]))
+            else:
+                lines.append("the only track of {0} compatible with the contact".format(owner))
+                # Confidence: collision match, reduced by speed disagreement and by a long range at the contact.
+                confidence = (reference["confidence"] * math.exp(-0.5 * (item.rmse / cfg.speed_consistency_mps) ** 2)
+                              * (_range_factor(item.range_at_contact, cfg) if item.range_at_contact is not None else 1.0))
+                associations.append(Association(owner, track.track_id, partner.owner, ASSOCIATED, round(confidence, 2),
+                                                lines, sources, candidate=partner.owner))
     return associations
 
 
@@ -238,6 +277,25 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             entities.append({"entity_id": item.global_entity, "kind": "anonymous_track",
                              "observed_by": item.local_graph, "candidate": item.candidate})
     return GlobalGraph(entities=entities, nodes=nodes, edges=edges)
+
+
+def global_temporal_relations(locals_: Sequence[LocalReconstruction], alignment: Alignment,
+                              associations: Sequence[Association]) -> List[Dict[str, Any]]:
+    """``checks.temporal_safety_relations`` of every local graph, with the track's
+    identity decision and global times; temporal properties only, no causality."""
+    names = {(item.local_graph, item.local_track): (item.global_entity, item.status) for item in associations}
+    out = []
+    for local in sorted(locals_, key=lambda item: item.owner):
+        clock = alignment.graphs[local.owner]
+        for item in temporal_safety_relations(local.graph):
+            entity, status = names.get((local.owner, item["track"]), (local.owner + ":" + item["track"], ANONYMOUS))
+            times = {"cut_in": item["cut_in"]["t_local"] if item["cut_in"] else None,
+                     "critical_ttc_start": item["critical_ttc_start"], "ego_path_entry": item["ego_path_entry"],
+                     "collision": item["collision"]}
+            t_global = {key: clock.to_global(value) for key, value in times.items() if value is not None}
+            out.append(dict(item, recorder=local.owner, entity=entity, association=status,
+                            t_global={key: value for key, value in t_global.items() if value is not None}))
+    return out
 
 
 def short_label(node: GlobalNode) -> str:

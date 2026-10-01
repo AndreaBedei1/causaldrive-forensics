@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
-from .checks import open_states, sign_windows
+from .checks import describe_temporal_relation, open_states, sign_windows, temporal_safety_relations
 from .fusion import ASSOCIATED, short_label
 from .models import Alignment, Association, GlobalGraph, GlobalNode, GraphNode, LocalGraph
 from .world_state import TRACK_STATES, compact_state
@@ -79,10 +79,10 @@ def _object(subject: Optional[str]) -> str:
 SENTENCES = {
     "BRAKE_START": "{actor} started braking",
     "BRAKE_END": "{actor} released the brake",
-    "HARD_BRAKE_START": "{actor} started braking hard",
-    "HARD_BRAKE_END": "{actor} stopped braking hard",
-    "STRONG_THROTTLE_START": "{actor} started applying strong throttle",
-    "STRONG_THROTTLE_END": "{actor} stopped applying strong throttle",
+    "TURN_LEFT_START": "{actor} started turning left",
+    "TURN_LEFT_END": "{actor} stopped turning left",
+    "TURN_RIGHT_START": "{actor} started turning right",
+    "TURN_RIGHT_END": "{actor} stopped turning right",
     "MOVING_START": "{actor} started moving",
     "MOVING_END": "{actor} stopped moving",
     "STOP_START": "{actor} came to a stop",
@@ -302,6 +302,11 @@ def local_graph_markdown(graph: LocalGraph) -> str:
     lines += ["## Perceived state before each event", ""] + _perceived_state_lines(graph)
     lines += ["", "## States still active when observation ended", ""] + _open_state_lines(graph)
     lines += ["", "## Tracks lost", ""] + _lost_lines(graph)
+    lines += ["", "## Temporal safety relations", "",
+              "Order of each track's cut-in, critical TTC and path entry and of the collision report, in local "
+              "time. Temporal properties only, not causes.", ""]
+    relations = temporal_safety_relations(graph)
+    lines += ["- {0}: {1}".format(item["track"], describe_temporal_relation(item)) for item in relations] or ["- none"]
     lines += ["", "## Sign detection windows", ""] + _sign_window_lines(graph)
     lines += ["", "An END means this recorder stopped detecting the sign, not that its obligation ended.", ""]
     lines += ["## Anonymous radar tracks", ""]
@@ -363,9 +368,21 @@ def _association_lines(associations: Sequence[Association]) -> List[str]:
     return lines
 
 
+def _relation_lines(relations: Optional[Sequence[Dict[str, Any]]]) -> List[str]:
+    lines = []
+    for item in relations or []:
+        who = item["entity"] if item["association"] == ASSOCIATED else "unidentified " + item["entity"]
+        when = ", ".join("{0} {1:+.2f}".format(key, value) for key, value in item.get("t_global", {}).items())
+        lines.append("- {0}'s {1} ({2}): {3}{4}".format(
+            item["recorder"], item["track"], who, describe_temporal_relation(item),
+            " [local times; t_global: {0}]".format(when) if when else " [local times]"))
+    return lines or ["- none"]
+
+
 def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
                           associations: Sequence[Association], trace: Sequence[Dict[str, Any]],
-                          context: Optional[Mapping[str, Any]] = None) -> str:
+                          context: Optional[Mapping[str, Any]] = None,
+                          relations: Optional[Sequence[Dict[str, Any]]] = None) -> str:
     lines = ["# Global graph - " + title, "",
              "Global time `t_global` is 0 at the matched reference collision. The local graphs were "
              "not modified: every node lists the local node(s) and local time(s) it comes from.", "",
@@ -395,6 +412,10 @@ def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
               "| t_global | Events |", "|---------:|--------|"]
     for row in trace:
         lines.append("| {0:+.2f} | {1} |".format(row["t_global"], row["text"]))
+    lines += ["", "## Temporal safety relations", "",
+              "Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? "
+              "Is the path entry before or after it? Temporal properties only, not causes.", ""]
+    lines += _relation_lines(relations)
     lines += ["", "## Perceived state before each event, per observing recorder", "",
               "Each recorder's own belief just before its events, in its own local names (track_001, ...): "
               "fusion does not rewrite it. True states are named, unknown ones end with `?`.", "",
@@ -495,7 +516,8 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
 def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
                     associations: Sequence[Association], graph: GlobalGraph,
                     trace: Sequence[Dict[str, Any]], config: Dict[str, Any],
-                    context: Optional[Mapping[str, Any]] = None) -> str:
+                    context: Optional[Mapping[str, Any]] = None,
+                    relations: Optional[Sequence[Dict[str, Any]]] = None) -> str:
     lines = ["# Reconstruction report - " + title, "",
              "Inputs: `vehicles/{0}/` (vehicle-local files) and the supplied `incident_context.json`. "
              "`ground_truth/` and the run's `metadata.json` were not read; the privileged comparison, "
@@ -525,6 +547,10 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
     lines += ["", "### What happened, in plain language", ""]
     lines += ["- " + global_sentence(node) for node in graph.nodes] or ["- Nothing to report."]
     simultaneous = [row["text"] for row in trace if len(row["events"]) > 1]
+    lines += ["", "### Temporal safety relations", "",
+              "CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC "
+              "already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.", ""]
+    lines += _relation_lines(relations)
     lines += ["", "### Simultaneous events (order unresolved at 0.05 s)", ""]
     lines += ["- " + text for text in simultaneous] or ["- none"]
     lines += ["", "### States still active when observation ended", ""]

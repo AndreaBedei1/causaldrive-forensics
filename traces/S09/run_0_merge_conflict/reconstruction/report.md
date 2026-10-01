@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 14.95 s | 151 | 18 | 44 | 3 | A:e10 @ 1.80 s |
-| B | 14.95 s | 151 | 15 | 24 | 2 | B:e10 @ 1.80 s |
+| A | 14.95 s | 151 | 51 | 194 | 14 | A:e39 @ 1.80 s |
+| B | 14.95 s | 151 | 46 | 195 | 14 | B:e37 @ 1.80 s |
 
 ## Graph alignment
 
@@ -19,8 +19,8 @@ Reference event: `collision_001`; `t_global = t_local + offset_to_global`.
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e10 | 1.80 | -1.80 | reported the reference collision collision_001 |
-| B | ALIGNED | B:e10 | 1.80 | -1.80 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e39 | 1.80 | -1.80 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e37 | 1.80 | -1.80 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
 
@@ -30,88 +30,212 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1247.1
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.63 | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.80 s before the matched collision<br>at the contact: minimum range 1.01 m in the last 0.50 s before the collision<br>the only track of A at the contact<br>track speed agrees with B's own speed: RMSE 1.45 m/s over 1.8 s |
-| A:track_002 | A:track_002 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>not at the contact: minimum range 36.18 m in the last 0.50 s (needs <= 3.50 m)<br>track speed disagrees with B's own speed: RMSE 6.69 m/s (> 1.50) |
-| A:track_003 | A:track_003 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>not at the contact: minimum range 38.37 m in the last 0.50 s (needs <= 3.50 m)<br>track speed disagrees with B's own speed: RMSE 6.74 m/s (> 1.50) |
-| B:track_001 | B:track_001 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>at the contact: minimum range 2.22 m in the last 0.50 s before the collision<br>the only track of B at the contact<br>track speed disagrees with A's own speed: RMSE 4.97 m/s (> 1.50) |
-| B:track_002 | B:track_002 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>not at the contact: minimum range 14.50 m in the last 0.50 s (needs <= 3.50 m)<br>track speed disagrees with A's own speed: RMSE 6.98 m/s (> 1.50) |
+| A:track_001 | B | ASSOCIATED | 0.68 | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 3.3 m -> 1.2 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 1.31 m/s over 1.8 s<br>range at the contact 1.18 m<br>the only track of A compatible with the contact |
+| A:track_002 | A:track_002 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.35 s before it (window 0.50 s)<br>approaching before the contact: range 26.4 m -> 21.2 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.19 m/s over 1.2 s (> 1.50)<br>range at the contact 21.19 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_003 | A:track_003 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 17.9 m -> 13.8 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 6.56 m/s over 1.6 s (> 1.50)<br>range at the contact 13.81 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_004 | A:track_004 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 43.6 m -> 36.3 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 4.72 m/s over 1.6 s (> 1.50)<br>range at the contact 36.33 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_005 | A:track_005 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.15 s before it (window 0.50 s)<br>approaching before the contact: range 13.7 m -> 10.9 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.00 m/s over 1.4 s (> 1.50)<br>range at the contact 10.90 m (beyond 3.50 m: confidence factor 0.05) |
+| A:track_006 | A:track_006 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 41.6 m -> 35.0 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 4.86 m/s over 1.6 s (> 1.50)<br>range at the contact 34.95 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_007 | A:track_007 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.40 s before the matched collision (window 0.50 s)<br>approaching before the contact: range 69.0 m -> 67.8 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 1.43 m/s over 0.2 s |
+| A:track_008 | A:track_008 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 44.5 m -> 38.5 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 6.55 m/s over 1.6 s (> 1.50)<br>range at the contact 38.46 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_009 | A:track_009 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.25 s before it (window 0.50 s)<br>approaching before the contact: range 42.7 m -> 36.1 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.31 m/s over 1.4 s (> 1.50)<br>range at the contact 36.10 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_010 | A:track_010 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 48.6 m -> 43.2 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 6.58 m/s over 1.6 s (> 1.50)<br>range at the contact 43.21 m (beyond 3.50 m: confidence factor 0.00) |
+| A:track_011 | A:track_011 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.40 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 32.0 m -> 32.4 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.23 m/s over 0.2 s (> 1.50) |
+| A:track_012 | A:track_012 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 12.3 m -> 8.0 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.27 m/s over 1.6 s (> 1.50)<br>range at the contact 7.98 m (beyond 3.50 m: confidence factor 0.33) |
+| A:track_013 | A:track_013 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.35 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 150.9 m -> 151.3 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.89 m/s over 0.2 s (> 1.50) |
+| A:track_014 | A:track_014 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 1.20 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 20.7 m -> 21.0 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 1.43 m/s over 0.3 s |
+| B:track_001 | B:track_001 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.80 s before the matched collision<br>lost 1.55 s before the matched collision (window 0.50 s)<br>approaching before the contact: range 8.8 m -> 7.1 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 3.83 m/s over 0.2 s (> 1.50) |
+| B:track_002 | B:track_002 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.40 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 43.7 m -> 44.0 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 6.05 m/s over 0.2 s (> 1.50) |
+| B:track_003 | B:track_003 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 24.4 m -> 22.4 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 4.22 m/s over 1.6 s (> 1.50)<br>range at the contact 22.43 m (beyond 3.50 m: confidence factor 0.00) |
+| B:track_004 | B:track_004 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 15.3 m -> 11.4 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 6.90 m/s over 1.6 s (> 1.50)<br>range at the contact 11.37 m (beyond 3.50 m: confidence factor 0.03) |
+| B:track_005 | B:track_005 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 26.0 m -> 23.2 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 3.74 m/s over 1.6 s (> 1.50)<br>range at the contact 23.22 m (beyond 3.50 m: confidence factor 0.00) |
+| B:track_006 | B:track_006 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>continuous up to the contact: last observed 0.30 s before it (window 0.50 s)<br>approaching before the contact: range 12.4 m -> 9.3 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 6.66 m/s over 1.3 s (> 1.50)<br>range at the contact 9.27 m (beyond 3.50 m: confidence factor 0.16) |
+| B:track_007 | B:track_007 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.40 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 68.5 m -> 68.9 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 6.04 m/s over 0.2 s (> 1.50) |
+| B:track_008 | B:track_008 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.60 s before the matched collision<br>lost 1.35 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 64.5 m -> 64.8 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.87 m/s over 0.2 s (> 1.50) |
+| B:track_009 | B:track_009 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 0.90 s before the matched collision (window 0.50 s)<br>approaching before the contact: range 21.2 m -> 21.1 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 4.93 m/s over 0.7 s (> 1.50) |
+| B:track_010 | B:track_010 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 1.15 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 55.8 m -> 56.1 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 4.45 m/s over 0.4 s (> 1.50) |
+| B:track_011 | B:track_011 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 1.30 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 17.7 m -> 17.8 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.89 m/s over 0.2 s (> 1.50) |
+| B:track_012 | B:track_012 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 1.25 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 59.4 m -> 59.7 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.94 m/s over 0.3 s (> 1.50) |
+| B:track_013 | B:track_013 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.55 s before the matched collision<br>lost 1.20 s before the matched collision (window 0.50 s)<br>not approaching before the contact: range 28.9 m -> 29.1 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.28 m/s over 0.3 s (> 1.50) |
+| B:track_014 | B:track_014 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 1247.19 vs 1247.19 N*s)<br>tracked for 1.50 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 0.50 s)<br>approaching before the contact: range 14.5 m -> 12.9 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 2.86 m/s over 1.5 s (> 1.50)<br>range at the contact 12.91 m (beyond 3.50 m: confidence factor 0.01) |
 
 ## Global graph
 
-32 nodes, 108 edges; 1 merged node(s): g19 COLLISION(A,B) from A:e10 + B:e10.
+96 nodes, 749 edges; 1 merged node(s): g75 COLLISION(A,B) from A:e39 + B:e37.
 
 ### Event sequence (global time)
 
-- `-1.80` MOVING_START(A); MOVING_START(B); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)
-- `-1.60` TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,A:track_003); TRACK_APPEARED_RIGHT(B,B:track_001); TRACK_APPEARED_RIGHT(B,B:track_002); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001)
-- `-1.00` STRONG_THROTTLE_START(B)
-- `-0.35` EGO_PATH_ENTRY(A,B)
-- `-0.20` STRONG_THROTTLE_END(B)
-- `-0.15` TRACK_LOST(B,B:track_001)
+- `-1.80` MOVING_START(A); MOVING_START(B); TURN_LEFT_START(A); TURN_RIGHT_START(B); TRACK_APPEARED_LEFT(B,B:track_001); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CLOSING_START(B,B:track_001); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)
+- `-1.60` TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,A:track_003); TRACK_APPEARED_LEFT(A,A:track_004); TRACK_APPEARED_LEFT(A,A:track_005); TRACK_APPEARED_LEFT(A,A:track_006); TRACK_APPEARED_LEFT(A,A:track_007); TRACK_APPEARED_LEFT(A,A:track_008); TRACK_APPEARED_LEFT(A,A:track_009); TRACK_APPEARED_LEFT(A,A:track_010); TRACK_APPEARED_LEFT(A,A:track_012); TRACK_APPEARED_LEFT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_007); TRACK_APPEARED_LEFT(B,B:track_008); TRACK_APPEARED_RIGHT(A,A:track_011); TRACK_APPEARED_RIGHT(A,A:track_013); TRACK_APPEARED_RIGHT(B,B:track_003); TRACK_APPEARED_RIGHT(B,B:track_004); TRACK_APPEARED_RIGHT(B,B:track_005); TRACK_APPEARED_RIGHT(B,B:track_006); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(A,A:track_004); CLOSING_START(A,A:track_005); CLOSING_START(A,A:track_006); CLOSING_START(A,A:track_007); CLOSING_START(A,A:track_008); CLOSING_START(A,A:track_009); CLOSING_START(A,A:track_010); CLOSING_START(A,A:track_012); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_006)
+- `-1.55` TRACK_APPEARED_LEFT(B,B:track_009); TRACK_APPEARED_LEFT(B,B:track_010); TRACK_APPEARED_LEFT(B,B:track_011); TRACK_APPEARED_LEFT(B,B:track_012); TRACK_APPEARED_LEFT(B,B:track_013); TRACK_APPEARED_RIGHT(A,A:track_014); CLOSING_START(B,B:track_009); TRACK_LOST(B,B:track_001)
+- `-1.50` TRACK_APPEARED_LEFT(B,B:track_014); CLOSING_START(B,B:track_014)
+- `-1.40` TRACK_LOST(A,A:track_007); TRACK_LOST(A,A:track_011); TRACK_LOST(B,B:track_002); TRACK_LOST(B,B:track_007)
+- `-1.35` TRACK_LOST(A,A:track_013); TRACK_LOST(B,B:track_008)
+- `-1.30` TRACK_LOST(B,B:track_011)
+- `-1.25` TRACK_LOST(B,B:track_012)
+- `-1.20` TRACK_LOST(A,A:track_014); TRACK_LOST(B,B:track_013)
+- `-1.15` TRACK_LOST(B,B:track_010)
+- `-1.00` CLOSING_END(B,B:track_009)
+- `-0.90` TRACK_LOST(B,B:track_009)
+- `-0.60` TURN_RIGHT_END(B)
+- `-0.35` TRACK_LOST(A,A:track_002)
+- `-0.30` TRACK_LOST(B,B:track_006)
+- `-0.25` TRACK_LOST(A,A:track_009)
+- `-0.20` EGO_PATH_ENTRY(A,B)
+- `-0.15` CUT_IN_FROM_RIGHT_START(A,B); TRACK_LOST(A,A:track_005)
+- `-0.05` CRITICAL_TTC_END(A,B)
 - `+0.00` COLLISION(A,B)
-- `+0.05` BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)
-- `+0.10` CRITICAL_TTC_END(A,B); CLOSING_END(A,B); TRACK_LOST(B,B:track_002)
-- `+0.70` CLOSING_END(A,A:track_002); CLOSING_END(A,A:track_003); MOVING_END(A); STOP_START(A)
+- `+0.05` BRAKE_START(A); BRAKE_START(B); TURN_LEFT_START(B); TRACK_LOST(A,A:track_012); TRACK_LOST(B,B:track_003)
+- `+0.10` CLOSING_END(A,B); TRACK_LOST(B,B:track_005)
+- `+0.15` CUT_IN_FROM_RIGHT_END(A,B); TRACK_LOST(B,B:track_004)
+- `+0.35` CLOSING_END(B,B:track_014)
+- `+0.65` CLOSING_END(A,A:track_010); TURN_LEFT_END(A)
+- `+0.70` CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_008); TURN_LEFT_END(B); MOVING_END(A); STOP_START(A)
 - `+0.75` MOVING_END(B); STOP_START(B)
 
 ### What happened, in plain language
 
 - 1.80 s before the matched collision, A started moving (already the case when first observed).
 - 1.80 s before the matched collision, B started moving (already the case when first observed).
+- 1.80 s before the matched collision, A started turning left (already the case when first observed).
+- 1.80 s before the matched collision, B started turning right (already the case when first observed).
+- 1.80 s before the matched collision, B's radar started tracking unidentified object B:track_001, which appeared on its left.
 - 1.80 s before the matched collision, A's radar started tracking B, which appeared on its right.
 - 1.80 s before the matched collision, A observed B start closing in (already the case when first observed).
+- 1.80 s before the matched collision, B observed unidentified object B:track_001 start closing in (already the case when first observed).
 - 1.80 s before the matched collision, A's time-to-contact with B became critical (already the case when first observed).
+- 1.80 s before the matched collision, B's time-to-contact with unidentified object B:track_001 became critical (already the case when first observed).
 - 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_002, which appeared on its left.
 - 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_003, which appeared on its left.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_001, which appeared on its right.
-- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_002, which appeared on its right.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_004, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_005, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_006, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_007, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_008, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_009, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_010, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_012, which appeared on its left.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_002, which appeared on its left.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_007, which appeared on its left.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_008, which appeared on its left.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_011, which appeared on its right.
+- 1.60 s before the matched collision, A's radar started tracking unidentified object A:track_013, which appeared on its right.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_003, which appeared on its right.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_004, which appeared on its right.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_005, which appeared on its right.
+- 1.60 s before the matched collision, B's radar started tracking unidentified object B:track_006, which appeared on its right.
 - 1.60 s before the matched collision, A observed unidentified object A:track_002 start closing in (already the case when first observed).
 - 1.60 s before the matched collision, A observed unidentified object A:track_003 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_001 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B observed unidentified object B:track_002 start closing in (already the case when first observed).
-- 1.60 s before the matched collision, B's time-to-contact with unidentified object B:track_001 became critical (already the case when first observed).
-- 1.00 s before the matched collision, B started applying strong throttle.
-- 0.35 s before the matched collision, A observed B enter its forward path corridor.
-- 0.20 s before the matched collision, B stopped applying strong throttle.
-- 0.15 s before the matched collision, B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
+- 1.60 s before the matched collision, A observed unidentified object A:track_004 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_005 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_006 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_007 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_008 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_009 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_010 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, A observed unidentified object A:track_012 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, B observed unidentified object B:track_003 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, B observed unidentified object B:track_004 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, B observed unidentified object B:track_005 start closing in (already the case when first observed).
+- 1.60 s before the matched collision, B observed unidentified object B:track_006 start closing in (already the case when first observed).
+- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_009, which appeared on its left.
+- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_010, which appeared on its left.
+- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_011, which appeared on its left.
+- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_012, which appeared on its left.
+- 1.55 s before the matched collision, B's radar started tracking unidentified object B:track_013, which appeared on its left.
+- 1.55 s before the matched collision, A's radar started tracking unidentified object A:track_014, which appeared on its right.
+- 1.55 s before the matched collision, B observed unidentified object B:track_009 start closing in (already the case when first observed).
+- 1.55 s before the matched collision, B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
+- 1.50 s before the matched collision, B's radar started tracking unidentified object B:track_014, which appeared on its left.
+- 1.50 s before the matched collision, B observed unidentified object B:track_014 start closing in (already the case when first observed).
+- 1.40 s before the matched collision, A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the matched collision, A's radar lost unidentified object A:track_011 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the matched collision, B's radar lost unidentified object B:track_002 (its states are UNKNOWN from then on, not ended).
+- 1.40 s before the matched collision, B's radar lost unidentified object B:track_007 (its states are UNKNOWN from then on, not ended).
+- 1.35 s before the matched collision, A's radar lost unidentified object A:track_013 (its states are UNKNOWN from then on, not ended).
+- 1.35 s before the matched collision, B's radar lost unidentified object B:track_008 (its states are UNKNOWN from then on, not ended).
+- 1.30 s before the matched collision, B's radar lost unidentified object B:track_011 (its states are UNKNOWN from then on, not ended).
+- 1.25 s before the matched collision, B's radar lost unidentified object B:track_012 (its states are UNKNOWN from then on, not ended).
+- 1.20 s before the matched collision, A's radar lost unidentified object A:track_014 (its states are UNKNOWN from then on, not ended).
+- 1.20 s before the matched collision, B's radar lost unidentified object B:track_013 (its states are UNKNOWN from then on, not ended).
+- 1.15 s before the matched collision, B's radar lost unidentified object B:track_010 (its states are UNKNOWN from then on, not ended).
+- 1.00 s before the matched collision, B observed unidentified object B:track_009 stop closing in.
+- 0.90 s before the matched collision, B's radar lost unidentified object B:track_009 (its states are UNKNOWN from then on, not ended).
+- 0.60 s before the matched collision, B stopped turning right.
+- 0.35 s before the matched collision, A's radar lost unidentified object A:track_002 (its states are UNKNOWN from then on, not ended).
+- 0.30 s before the matched collision, B's radar lost unidentified object B:track_006 (its states are UNKNOWN from then on, not ended).
+- 0.25 s before the matched collision, A's radar lost unidentified object A:track_009 (its states are UNKNOWN from then on, not ended).
+- 0.20 s before the matched collision, A observed B enter its forward path corridor.
+- 0.15 s before the matched collision, A observed B cutting in from the right.
+- 0.15 s before the matched collision, A's radar lost unidentified object A:track_005 (its states are UNKNOWN from then on, not ended).
+- 0.05 s before the matched collision, A's time-to-contact with B stopped being critical.
 - At the matched collision, A and B both recorded this same collision (peak impulses A: 1247, B: 1247 N*s).
 - 0.05 s after the matched collision, A started braking.
 - 0.05 s after the matched collision, B started braking.
-- 0.05 s after the matched collision, A started braking hard.
-- 0.05 s after the matched collision, B started braking hard.
-- 0.10 s after the matched collision, A's time-to-contact with B stopped being critical.
+- 0.05 s after the matched collision, B started turning left.
+- 0.05 s after the matched collision, A's radar lost unidentified object A:track_012 (its states are UNKNOWN from then on, not ended).
+- 0.05 s after the matched collision, B's radar lost unidentified object B:track_003 (its states are UNKNOWN from then on, not ended).
 - 0.10 s after the matched collision, A observed B stop closing in.
-- 0.10 s after the matched collision, B's radar lost unidentified object B:track_002 (its states are UNKNOWN from then on, not ended).
-- 0.70 s after the matched collision, A observed unidentified object A:track_002 stop closing in.
+- 0.10 s after the matched collision, B's radar lost unidentified object B:track_005 (its states are UNKNOWN from then on, not ended).
+- 0.15 s after the matched collision, A observed B's cut-in from the right settle.
+- 0.15 s after the matched collision, B's radar lost unidentified object B:track_004 (its states are UNKNOWN from then on, not ended).
+- 0.35 s after the matched collision, B observed unidentified object B:track_014 stop closing in.
+- 0.65 s after the matched collision, A observed unidentified object A:track_010 stop closing in.
+- 0.65 s after the matched collision, A stopped turning left.
 - 0.70 s after the matched collision, A observed unidentified object A:track_003 stop closing in.
+- 0.70 s after the matched collision, A observed unidentified object A:track_004 stop closing in.
+- 0.70 s after the matched collision, A observed unidentified object A:track_006 stop closing in.
+- 0.70 s after the matched collision, A observed unidentified object A:track_008 stop closing in.
+- 0.70 s after the matched collision, B stopped turning left.
 - 0.70 s after the matched collision, A stopped moving.
 - 0.70 s after the matched collision, A came to a stop.
 - 0.75 s after the matched collision, B stopped moving.
 - 0.75 s after the matched collision, B came to a stop.
 
+### Temporal safety relations
+
+CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
+
+- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 0.00 <= CUT_IN_FROM_RIGHT_START 1.65 (+1.65 s); EGO_PATH_ENTRY 1.60 after critical TTC (+1.60 s) [local times; t_global: cut_in -0.15, critical_ttc_start -1.80, ego_path_entry -0.20, collision +0.00]
+- B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 0.00, COLLISION 1.80 (+1.80 s) [local times; t_global: critical_ttc_start -1.80, collision +0.00]
+
 ### Simultaneous events (order unresolved at 0.05 s)
 
-- MOVING_START(A); MOVING_START(B); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CRITICAL_TTC_START(A,B)
-- TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,A:track_003); TRACK_APPEARED_RIGHT(B,B:track_001); TRACK_APPEARED_RIGHT(B,B:track_002); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(B,B:track_001); CLOSING_START(B,B:track_002); CRITICAL_TTC_START(B,B:track_001)
-- BRAKE_START(A); BRAKE_START(B); HARD_BRAKE_START(A); HARD_BRAKE_START(B)
-- CRITICAL_TTC_END(A,B); CLOSING_END(A,B); TRACK_LOST(B,B:track_002)
-- CLOSING_END(A,A:track_002); CLOSING_END(A,A:track_003); MOVING_END(A); STOP_START(A)
+- MOVING_START(A); MOVING_START(B); TURN_LEFT_START(A); TURN_RIGHT_START(B); TRACK_APPEARED_LEFT(B,B:track_001); TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B); CLOSING_START(B,B:track_001); CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,B:track_001)
+- TRACK_APPEARED_LEFT(A,A:track_002); TRACK_APPEARED_LEFT(A,A:track_003); TRACK_APPEARED_LEFT(A,A:track_004); TRACK_APPEARED_LEFT(A,A:track_005); TRACK_APPEARED_LEFT(A,A:track_006); TRACK_APPEARED_LEFT(A,A:track_007); TRACK_APPEARED_LEFT(A,A:track_008); TRACK_APPEARED_LEFT(A,A:track_009); TRACK_APPEARED_LEFT(A,A:track_010); TRACK_APPEARED_LEFT(A,A:track_012); TRACK_APPEARED_LEFT(B,B:track_002); TRACK_APPEARED_LEFT(B,B:track_007); TRACK_APPEARED_LEFT(B,B:track_008); TRACK_APPEARED_RIGHT(A,A:track_011); TRACK_APPEARED_RIGHT(A,A:track_013); TRACK_APPEARED_RIGHT(B,B:track_003); TRACK_APPEARED_RIGHT(B,B:track_004); TRACK_APPEARED_RIGHT(B,B:track_005); TRACK_APPEARED_RIGHT(B,B:track_006); CLOSING_START(A,A:track_002); CLOSING_START(A,A:track_003); CLOSING_START(A,A:track_004); CLOSING_START(A,A:track_005); CLOSING_START(A,A:track_006); CLOSING_START(A,A:track_007); CLOSING_START(A,A:track_008); CLOSING_START(A,A:track_009); CLOSING_START(A,A:track_010); CLOSING_START(A,A:track_012); CLOSING_START(B,B:track_003); CLOSING_START(B,B:track_004); CLOSING_START(B,B:track_005); CLOSING_START(B,B:track_006)
+- TRACK_APPEARED_LEFT(B,B:track_009); TRACK_APPEARED_LEFT(B,B:track_010); TRACK_APPEARED_LEFT(B,B:track_011); TRACK_APPEARED_LEFT(B,B:track_012); TRACK_APPEARED_LEFT(B,B:track_013); TRACK_APPEARED_RIGHT(A,A:track_014); CLOSING_START(B,B:track_009); TRACK_LOST(B,B:track_001)
+- TRACK_APPEARED_LEFT(B,B:track_014); CLOSING_START(B,B:track_014)
+- TRACK_LOST(A,A:track_007); TRACK_LOST(A,A:track_011); TRACK_LOST(B,B:track_002); TRACK_LOST(B,B:track_007)
+- TRACK_LOST(A,A:track_013); TRACK_LOST(B,B:track_008)
+- TRACK_LOST(A,A:track_014); TRACK_LOST(B,B:track_013)
+- CUT_IN_FROM_RIGHT_START(A,B); TRACK_LOST(A,A:track_005)
+- BRAKE_START(A); BRAKE_START(B); TURN_LEFT_START(B); TRACK_LOST(A,A:track_012); TRACK_LOST(B,B:track_003)
+- CLOSING_END(A,B); TRACK_LOST(B,B:track_005)
+- CUT_IN_FROM_RIGHT_END(A,B); TRACK_LOST(B,B:track_004)
+- CLOSING_END(A,A:track_010); TURN_LEFT_END(A)
+- CLOSING_END(A,A:track_003); CLOSING_END(A,A:track_004); CLOSING_END(A,A:track_006); CLOSING_END(A,A:track_008); TURN_LEFT_END(B); MOVING_END(A); STOP_START(A)
 - MOVING_END(B); STOP_START(B)
 
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e09 (t = 1.45 s)
-- BRAKE, since A:e11 (t = 1.85 s)
-- HARD_BRAKE, since A:e12 (t = 1.85 s)
-- STOP, since A:e18 (t = 2.50 s)
+- CLOSING of track_002, since A:e18 (t = 0.20 s); the track was lost at 1.45 s
+- CLOSING of track_005, since A:e21 (t = 0.20 s); the track was lost at 1.65 s
+- CLOSING of track_007, since A:e23 (t = 0.20 s); the track was lost at 0.40 s
+- CLOSING of track_009, since A:e25 (t = 0.20 s); the track was lost at 1.55 s
+- CLOSING of track_012, since A:e27 (t = 0.20 s); the track was lost at 1.85 s
+- EGO_PATH of track_001, since A:e35 (t = 1.60 s)
+- BRAKE, since A:e40 (t = 1.85 s)
+- STOP, since A:e51 (t = 2.50 s)
 B:
-- CLOSING of track_001, since B:e04 (t = 0.20 s); the track was lost at 1.65 s
-- CLOSING of track_002, since B:e05 (t = 0.20 s); the track was lost at 1.90 s
-- CRITICAL_TTC of track_001, since B:e06 (t = 0.20 s); the track was lost at 1.65 s
-- BRAKE, since B:e11 (t = 1.85 s)
-- HARD_BRAKE, since B:e12 (t = 1.85 s)
-- STOP, since B:e15 (t = 2.55 s)
+- CLOSING of track_001, since B:e04 (t = 0.00 s); the track was lost at 0.25 s
+- CRITICAL_TTC of track_001, since B:e05 (t = 0.00 s); the track was lost at 0.25 s
+- CLOSING of track_003, since B:e13 (t = 0.20 s); the track was lost at 1.85 s
+- CLOSING of track_004, since B:e14 (t = 0.20 s); the track was lost at 1.95 s
+- CLOSING of track_005, since B:e15 (t = 0.20 s); the track was lost at 1.90 s
+- CLOSING of track_006, since B:e16 (t = 0.20 s); the track was lost at 1.50 s
+- BRAKE, since B:e38 (t = 1.85 s)
+- STOP, since B:e46 (t = 2.55 s)
 
 ### Sign detection windows
 
@@ -122,25 +246,57 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e10 at 1.80 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track_002: CLOSING; track_003: CLOSING
-- B B:e10 at 1.80 s (local): ego: MOVING; track_002: CLOSING; track lost, states UNKNOWN: track_001
+- A A:e39 at 1.80 s (local): ego: MOVING, TURN_LEFT; track_001: CLOSING, IN_EGO_PATH, CUT_IN_FROM_RIGHT; track_003: CLOSING; track_004: CLOSING; track_006: CLOSING; track_008: CLOSING; track_010: CLOSING; track_012: CLOSING; track lost, states UNKNOWN: track_002, track_005, track_007, track_009, track_011, track_013, track_014
+- B B:e37 at 1.80 s (local): ego: MOVING; track_003: CLOSING; track_004: CLOSING; track_005: CLOSING; track_014: CLOSING; track lost, states UNKNOWN: track_001, track_002, track_006, track_007, track_008, track_009, track_010, track_011, track_012, track_013
 
 ### Tracks lost while a state was active
 
 A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
 
 A:
-- no track was lost
+- track_007 at 0.40 s (A:e29): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 1.45 s (A:e33): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_009 at 1.55 s (A:e34): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_005 at 1.65 s (A:e37): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_012 at 1.85 s (A:e41): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_011, track_013, track_014
 B:
-- track_001 at 1.65 s (B:e09): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
-- track_002 at 1.90 s (B:e13): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 0.25 s (B:e23): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_006 at 1.50 s (B:e36): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_003 at 1.85 s (B:e40): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_005 at 1.90 s (B:e41): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_004 at 1.95 s (B:e42): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_002, track_007, track_008, track_011, track_012, track_013, track_010, track_009
 
 ## Uncertainty and limitations
 
-- A:track_002 stays anonymous: not at the contact: minimum range 36.18 m in the last 0.50 s (needs <= 3.50 m); track speed disagrees with B's own speed: RMSE 6.69 m/s (> 1.50).
-- A:track_003 stays anonymous: not at the contact: minimum range 38.37 m in the last 0.50 s (needs <= 3.50 m); track speed disagrees with B's own speed: RMSE 6.74 m/s (> 1.50).
-- B:track_001 stays anonymous: track speed disagrees with A's own speed: RMSE 4.97 m/s (> 1.50).
-- B:track_002 stays anonymous: not at the contact: minimum range 14.50 m in the last 0.50 s (needs <= 3.50 m); track speed disagrees with A's own speed: RMSE 6.98 m/s (> 1.50).
+- A:track_002 stays anonymous: track speed disagrees with B's own speed: RMSE 5.19 m/s over 1.2 s (> 1.50).
+- A:track_003 stays anonymous: track speed disagrees with B's own speed: RMSE 6.56 m/s over 1.6 s (> 1.50).
+- A:track_004 stays anonymous: track speed disagrees with B's own speed: RMSE 4.72 m/s over 1.6 s (> 1.50).
+- A:track_005 stays anonymous: track speed disagrees with B's own speed: RMSE 5.00 m/s over 1.4 s (> 1.50).
+- A:track_006 stays anonymous: track speed disagrees with B's own speed: RMSE 4.86 m/s over 1.6 s (> 1.50).
+- A:track_007 stays anonymous: lost 1.40 s before the matched collision (window 0.50 s).
+- A:track_008 stays anonymous: track speed disagrees with B's own speed: RMSE 6.55 m/s over 1.6 s (> 1.50).
+- A:track_009 stays anonymous: track speed disagrees with B's own speed: RMSE 5.31 m/s over 1.4 s (> 1.50).
+- A:track_010 stays anonymous: track speed disagrees with B's own speed: RMSE 6.58 m/s over 1.6 s (> 1.50).
+- A:track_011 stays anonymous: lost 1.40 s before the matched collision (window 0.50 s); not approaching before the contact: range 32.0 m -> 32.4 m over the last 1.0 s; track speed disagrees with B's own speed: RMSE 5.23 m/s over 0.2 s (> 1.50).
+- A:track_012 stays anonymous: track speed disagrees with B's own speed: RMSE 5.27 m/s over 1.6 s (> 1.50).
+- A:track_013 stays anonymous: lost 1.35 s before the matched collision (window 0.50 s); not approaching before the contact: range 150.9 m -> 151.3 m over the last 1.0 s; track speed disagrees with B's own speed: RMSE 5.89 m/s over 0.2 s (> 1.50).
+- A:track_014 stays anonymous: lost 1.20 s before the matched collision (window 0.50 s); not approaching before the contact: range 20.7 m -> 21.0 m over the last 1.0 s.
+- B:track_001 stays anonymous: lost 1.55 s before the matched collision (window 0.50 s); track speed disagrees with A's own speed: RMSE 3.83 m/s over 0.2 s (> 1.50).
+- B:track_002 stays anonymous: lost 1.40 s before the matched collision (window 0.50 s); not approaching before the contact: range 43.7 m -> 44.0 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 6.05 m/s over 0.2 s (> 1.50).
+- B:track_003 stays anonymous: track speed disagrees with A's own speed: RMSE 4.22 m/s over 1.6 s (> 1.50).
+- B:track_004 stays anonymous: track speed disagrees with A's own speed: RMSE 6.90 m/s over 1.6 s (> 1.50).
+- B:track_005 stays anonymous: track speed disagrees with A's own speed: RMSE 3.74 m/s over 1.6 s (> 1.50).
+- B:track_006 stays anonymous: track speed disagrees with A's own speed: RMSE 6.66 m/s over 1.3 s (> 1.50).
+- B:track_007 stays anonymous: lost 1.40 s before the matched collision (window 0.50 s); not approaching before the contact: range 68.5 m -> 68.9 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 6.04 m/s over 0.2 s (> 1.50).
+- B:track_008 stays anonymous: lost 1.35 s before the matched collision (window 0.50 s); not approaching before the contact: range 64.5 m -> 64.8 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.87 m/s over 0.2 s (> 1.50).
+- B:track_009 stays anonymous: lost 0.90 s before the matched collision (window 0.50 s); track speed disagrees with A's own speed: RMSE 4.93 m/s over 0.7 s (> 1.50).
+- B:track_010 stays anonymous: lost 1.15 s before the matched collision (window 0.50 s); not approaching before the contact: range 55.8 m -> 56.1 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 4.45 m/s over 0.4 s (> 1.50).
+- B:track_011 stays anonymous: lost 1.30 s before the matched collision (window 0.50 s); not approaching before the contact: range 17.7 m -> 17.8 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.89 m/s over 0.2 s (> 1.50).
+- B:track_012 stays anonymous: lost 1.25 s before the matched collision (window 0.50 s); not approaching before the contact: range 59.4 m -> 59.7 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.94 m/s over 0.3 s (> 1.50).
+- B:track_013 stays anonymous: lost 1.20 s before the matched collision (window 0.50 s); not approaching before the contact: range 28.9 m -> 29.1 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.28 m/s over 0.3 s (> 1.50).
+- B:track_014 stays anonymous: track speed disagrees with A's own speed: RMSE 2.86 m/s over 1.5 s (> 1.50).
 - Global time rests on one collision anchor and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from t_global = 0.
 - Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
 
@@ -172,12 +328,20 @@ B:
   },
   "semantics": {
     "brake_onset_threshold": 0.1,
-    "hard_brake_threshold": 0.9,
-    "strong_throttle_threshold": 0.8,
     "full_stop_speed_mps": 0.3,
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
-    "critical_ttc_s": 2.0,
+    "critical_reaction_time_s": 1.0,
+    "critical_deceleration_mps2": 6.0,
+    "critical_standstill_margin_m": 1.0,
+    "critical_release_ratio": 0.75,
+    "turn_yaw_rate_window_s": 0.2,
+    "turn_yaw_rate_on_dps": 10.0,
+    "turn_yaw_rate_off_dps": 5.0,
+    "turn_min_speed_mps": 1.0,
+    "turn_release_debounce_s": 0.3,
+    "turn_min_duration_s": 0.5,
+    "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
@@ -196,6 +360,8 @@ B:
     "impulse_tolerance": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
+    "contact_range_scale_m": 3.0,
+    "approach_window_s": 1.0,
     "min_track_persistence_s": 1.0,
     "speed_consistency_mps": 1.5
   }

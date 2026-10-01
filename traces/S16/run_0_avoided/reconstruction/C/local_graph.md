@@ -1,6 +1,6 @@
 # Local graph - vehicle C
 
-All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 531.2718035392463 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
+All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 182.38253811746836 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 101 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (9.95 s)
@@ -41,6 +41,12 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 ## Tracks lost
 
 - no track was lost
+
+## Temporal safety relations
+
+Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
+
+- none
 
 ## Sign detection windows
 

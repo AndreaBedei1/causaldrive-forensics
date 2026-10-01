@@ -9,13 +9,11 @@ digraph "local_C" {
   "C:e05" [label="STOP_END\nC\nt=5.90", fillcolor="#e5e7eb"];
   "C:e06" [label="MOVING_START\nC\nt=5.90", fillcolor="#e5e7eb"];
   "C:e07" [label="BRAKE_START\nC\nt=5.95", fillcolor="#fde68a"];
-  "C:e08" [label="HARD_BRAKE_START\nC\nt=5.95", fillcolor="#fde68a"];
-  "C:e09" [label="MOVING_END\nC\nt=6.05", fillcolor="#e5e7eb"];
-  "C:e10" [label="STOP_START\nC\nt=6.05", fillcolor="#e5e7eb"];
+  "C:e08" [label="MOVING_END\nC\nt=6.05", fillcolor="#e5e7eb"];
+  "C:e09" [label="STOP_START\nC\nt=6.05", fillcolor="#e5e7eb"];
   {rank=same; "C:e02"; "C:e03";}
   {rank=same; "C:e04"; "C:e05"; "C:e06";}
-  {rank=same; "C:e07"; "C:e08";}
-  {rank=same; "C:e09"; "C:e10";}
+  {rank=same; "C:e08"; "C:e09";}
   "C:e01" -> "C:e02" [label="PRECEDES"];
   "C:e01" -> "C:e03" [label="PRECEDES"];
   "C:e02" -> "C:e04" [label="PRECEDES"];
@@ -25,13 +23,8 @@ digraph "local_C" {
   "C:e03" -> "C:e05" [label="PRECEDES"];
   "C:e03" -> "C:e06" [label="PRECEDES"];
   "C:e04" -> "C:e07" [label="PRECEDES"];
-  "C:e04" -> "C:e08" [label="PRECEDES"];
   "C:e05" -> "C:e07" [label="PRECEDES"];
-  "C:e05" -> "C:e08" [label="PRECEDES"];
   "C:e06" -> "C:e07" [label="PRECEDES"];
-  "C:e06" -> "C:e08" [label="PRECEDES"];
+  "C:e07" -> "C:e08" [label="PRECEDES"];
   "C:e07" -> "C:e09" [label="PRECEDES"];
-  "C:e07" -> "C:e10" [label="PRECEDES"];
-  "C:e08" -> "C:e09" [label="PRECEDES"];
-  "C:e08" -> "C:e10" [label="PRECEDES"];
 }

@@ -1,11 +1,12 @@
-# Narrow field-of-view radar: longer range, much poorer lateral awareness.
-# Used to create genuine sensing-driven partial observability (scenario S07).
+# Former narrow field-of-view radar of scenario S07 (occluded variant).  Every
+# radar now has a 200 deg horizontal FOV, so this profile differs from the
+# baseline only by its longer range.
 radar:
   profile_name: "narrow_fov"
   sensors:
     - sensor_id: "front"
       blueprint: "sensor.other.radar"
-      horizontal_fov_deg: 30.0
+      horizontal_fov_deg: 200.0
       vertical_fov_deg: 10.0
       range_m: 100.0
       points_per_second: 6000

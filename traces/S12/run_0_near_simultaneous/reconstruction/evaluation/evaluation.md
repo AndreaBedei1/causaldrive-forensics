@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes; associations correct: 1/1; anonymous: 8; max |t_global error| 0.0 s**
+**collision reconstructed: yes; associations correct: 2/2; anonymous: 18; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 421.378 | 4032.5 | g44 | yes | 0.0 s |
+| A + B | 66.564 | 4032.5 | g61 | yes | 0.0 s |
 
 ## Graph alignment accuracy
 
@@ -23,13 +23,13 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-79 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 2929/2929 pairs.
+103 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 5008/5008 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | A:track_001 | B | left anonymous (true identity B) | 3 | 0.427 / 0.426 m | 1.68 m | 5.148 / 0.174 m/s |
+| A:track_001 | B | B | correct | 66 | 0.505 / 0.524 m | 1.029 m | 5.049 / 0.401 m/s |
 | A:track_002 | A:track_002 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | A:track_003 | A:track_003 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | A:track_004 | A:track_004 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
@@ -37,7 +37,18 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | A:track_006 | A:track_006 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | A:track_007 | A:track_007 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
 | A:track_008 | A:track_008 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| B:track_001 | A | A | correct | 71 | 0.258 / 0.327 m | 0.963 m | 6.168 / 1.022 m/s |
+| A:track_009 | A:track_009 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_010 | A:track_010 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_011 | A:track_011 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_012 | A:track_012 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_013 | A:track_013 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_014 | A:track_014 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_015 | A:track_015 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_016 | A:track_016 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_017 | A:track_017 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_018 | A:track_018 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| A:track_019 | A:track_019 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
+| B:track_001 | A | A | correct | 72 | 0.246 / 0.322 m | 0.911 m | 7.424 / 1.186 m/s |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 

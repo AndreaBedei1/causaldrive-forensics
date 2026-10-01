@@ -6,7 +6,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 - Trace: 132 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (13.05 s)
 - Anonymous radar tracks: 1 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 15; edges: 23 (PRECEDES 17, SAME_TRACK 6)
+- Nodes: 11; edges: 16 (PRECEDES 10, SAME_TRACK 6)
 
 ## Nodes
 
@@ -15,18 +15,14 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
 | A:e02 | 0.10 | TRACK_APPEARED_FRONT | A | track_001 | radar |  |
 | A:e03 | 0.45 | CLOSING_START | A | track_001 | radar |  |
-| A:e04 | 1.15 | STRONG_THROTTLE_START | A | - | controls |  |
-| A:e05 | 1.35 | STRONG_THROTTLE_END | A | - | controls |  |
-| A:e06 | 1.60 | CLOSING_END | A | track_001 | radar |  |
-| A:e07 | 4.25 | CLOSING_START | A | track_001 | radar |  |
-| A:e08 | 5.00 | CRITICAL_TTC_START | A | track_001 | radar |  |
-| A:e09 | 5.05 | BRAKE_START | A | - | controls |  |
-| A:e10 | 5.05 | HARD_BRAKE_START | A | - | controls |  |
-| A:e11 | 6.25 | CRITICAL_TTC_END | A | track_001 | radar |  |
-| A:e12 | 6.35 | CLOSING_END | A | track_001 | radar |  |
-| A:e13 | 6.35 | MOVING_END | A | - | ego |  |
-| A:e14 | 6.35 | STOP_START | A | - | ego |  |
-| A:e15 | 13.05 | STRONG_THROTTLE_START | A | - | controls |  |
+| A:e04 | 1.60 | CLOSING_END | A | track_001 | radar |  |
+| A:e05 | 4.25 | CLOSING_START | A | track_001 | radar |  |
+| A:e06 | 5.00 | CRITICAL_TTC_START | A | track_001 | radar |  |
+| A:e07 | 5.05 | BRAKE_START | A | - | controls |  |
+| A:e08 | 6.25 | CRITICAL_TTC_END | A | track_001 | radar |  |
+| A:e09 | 6.35 | CLOSING_END | A | track_001 | radar |  |
+| A:e10 | 6.35 | MOVING_END | A | - | ego |  |
+| A:e11 | 6.35 | STOP_START | A | - | ego |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -42,20 +38,13 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     A:e07 --PRECEDES--> A:e08
     A:e08 --PRECEDES--> A:e09
     A:e08 --PRECEDES--> A:e10
-    A:e09 --PRECEDES--> A:e11
-    A:e10 --PRECEDES--> A:e11
-    A:e11 --PRECEDES--> A:e12
-    A:e11 --PRECEDES--> A:e13
-    A:e11 --PRECEDES--> A:e14
-    A:e12 --PRECEDES--> A:e15
-    A:e13 --PRECEDES--> A:e15
-    A:e14 --PRECEDES--> A:e15
+    A:e08 --PRECEDES--> A:e11
     A:e02 --SAME_TRACK--> A:e03
+    A:e02 --SAME_TRACK--> A:e04
+    A:e02 --SAME_TRACK--> A:e05
     A:e02 --SAME_TRACK--> A:e06
-    A:e02 --SAME_TRACK--> A:e07
     A:e02 --SAME_TRACK--> A:e08
-    A:e02 --SAME_TRACK--> A:e11
-    A:e02 --SAME_TRACK--> A:e12
+    A:e02 --SAME_TRACK--> A:e09
 ```
 
 ## Perceived state before each event
@@ -67,26 +56,27 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
 | 0.10 | A:e02 TRACK_APPEARED_FRONT track_001 | ego: MOVING | 0.00 |
 | 0.45 | A:e03 CLOSING_START track_001 | ego: MOVING<br>track_001: IN_EGO_PATH | 0.40 |
-| 1.15 | A:e04 STRONG_THROTTLE_START | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH | 1.10 |
-| 1.35 | A:e05 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE<br>track_001: CLOSING, IN_EGO_PATH | 1.30 |
-| 1.60 | A:e06 CLOSING_END track_001 | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH | 1.50 |
-| 4.25 | A:e07 CLOSING_START track_001 | ego: MOVING<br>track_001: IN_EGO_PATH | 4.20 |
-| 5.00 | A:e08 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH | 4.90 |
-| 5.05 | A:e09 BRAKE_START<br>A:e10 HARD_BRAKE_START | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.00 |
-| 6.25 | A:e11 CRITICAL_TTC_END track_001 | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 6.20 |
-| 6.35 | A:e12 CLOSING_END track_001<br>A:e13 MOVING_END<br>A:e14 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: CLOSING, IN_EGO_PATH | 6.30 |
-| 13.05 | A:e15 STRONG_THROTTLE_START | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: IN_EGO_PATH | 13.00 |
+| 1.60 | A:e04 CLOSING_END track_001 | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH | 1.50 |
+| 4.25 | A:e05 CLOSING_START track_001 | ego: MOVING<br>track_001: IN_EGO_PATH | 4.20 |
+| 5.00 | A:e06 CRITICAL_TTC_START track_001 | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH | 4.90 |
+| 5.05 | A:e07 BRAKE_START | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.00 |
+| 6.25 | A:e08 CRITICAL_TTC_END track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 6.20 |
+| 6.35 | A:e09 CLOSING_END track_001<br>A:e10 MOVING_END<br>A:e11 STOP_START | ego: MOVING, BRAKE<br>track_001: CLOSING, IN_EGO_PATH | 6.30 |
 
 ## States still active when observation ended
 
-- BRAKE, since A:e09 (t = 5.05 s)
-- HARD_BRAKE, since A:e10 (t = 5.05 s)
-- STOP, since A:e14 (t = 6.35 s)
-- STRONG_THROTTLE, since A:e15 (t = 13.05 s)
+- BRAKE, since A:e07 (t = 5.05 s)
+- STOP, since A:e11 (t = 6.35 s)
 
 ## Tracks lost
 
 - no track was lost
+
+## Temporal safety relations
+
+Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
+
+- track_001: CRITICAL_TTC_START 5.00
 
 ## Sign detection windows
 
@@ -107,15 +97,11 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: A started moving (already the case when first observed).
 - t = 0.10 s: A's radar started tracking track_001, which appeared in front of it.
 - t = 0.45 s: A observed track_001 start closing in.
-- t = 1.15 s: A started applying strong throttle.
-- t = 1.35 s: A stopped applying strong throttle.
 - t = 1.60 s: A observed track_001 stop closing in.
 - t = 4.25 s: A observed track_001 start closing in.
 - t = 5.00 s: A's time-to-contact with track_001 became critical.
 - t = 5.05 s: A started braking.
-- t = 5.05 s: A started braking hard.
 - t = 6.25 s: A's time-to-contact with track_001 stopped being critical.
 - t = 6.35 s: A observed track_001 stop closing in.
 - t = 6.35 s: A stopped moving.
 - t = 6.35 s: A came to a stop.
-- t = 13.05 s: A started applying strong throttle.

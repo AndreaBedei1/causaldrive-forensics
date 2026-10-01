@@ -191,30 +191,39 @@ Rules the code follows:
   `alignment.json` stores `t_global = t_local + offset_to_global` with
   `t_global = 0` at that contact. Local graphs are never modified. Recorders
   without a matched collision stay `UNALIGNED` (no multi-hop alignment yet).
-- A local track is named after another recorder only at fusion, and only when
-  it was persistent, at contact range at the matched collision, the only such
-  track, and its speed matches that recorder's own speed. Otherwise it stays
-  anonymous (`A:track_001`) with the blocking reason in `associations.json`.
+- A local track is named after another recorder only at fusion. The matched
+  collision is the primary evidence of who the partner is; the track must then
+  be its recorder's only track that is persistent (tracked at least 1 s before
+  the contact), continuous up to the contact (still observed within 0.5 s of
+  it: no TRACK_LOST before), approaching (range shrinking over its last second)
+  and as fast as the partner says it was (speed RMSE at most 1.5 m/s). The
+  range at the contact is evidence, not a veto: radar mount, vehicle geometry
+  and impact angle can keep it above 3.5 m, so beyond that it only lowers the
+  confidence. Two or more such tracks are an ambiguity and stay anonymous
+  (`A:track_001`); every reason is in `associations.json`. Ground truth is never used.
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
 
 Three levels are kept apart. Raw and track data feed the 10 Hz FACTS of
-`local_trace.jsonl` (EGO_MOTION, EGO_CONTROL, TRACK_STATE: speeds, pedals,
-ranges, TTC, the track's own velocity `vx_mps`/`vy_mps`, its Kalman
-uncertainty, its motion relative to the recorder, the closest point of
-approach `t_cpa_s`/`d_cpa_m`, and a qualitative `motion_relation`). The graph
-holds only semantic EVENTS, which are state transitions without telemetry:
+`local_trace.jsonl` (EGO_MOTION, EGO_CONTROL with the raw brake, throttle and
+steer, TRACK_STATE: ranges, TTC, the track's own velocity `vx_mps`/`vy_mps`,
+its Kalman uncertainty, its motion relative to the recorder, the closest point
+of approach `t_cpa_s`/`d_cpa_m`, a qualitative `motion_relation`, and the
+braking need behind CRITICAL_TTC: `ego_speed_mps`,
+`target_longitudinal_speed_mps`, `closing_speed_mps`, `ttc_s`,
+`speed_to_shed_mps`, `critical_ttc_threshold_s`, `required_deceleration_mps2`,
+`braking_margin_mps2`, `unavoidable_by_braking`). The graph holds only semantic
+EVENTS, which are state transitions without telemetry:
 
 | Events | Meaning |
 |--------|---------|
 | BRAKE_START / BRAKE_END | brake at or above 0.1; releases shorter than 0.2 s do not split it |
-| HARD_BRAKE_START / _END | brake at or above 0.9 (nested inside BRAKE) |
-| STRONG_THROTTLE_START / _END | throttle at or above 0.8 |
+| TURN_LEFT / TURN_RIGHT_START / _END | the recorder's own yaw motion from its unwrapped heading: yaw rate at least 10 deg/s while moving, ends below 5 deg/s (0.3 s debounce), at least 0.5 s and 15 deg |
 | MOVING_START / _END, STOP_START / _END | stop below 0.3 m/s, moving again above 1 m/s |
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
 | TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radar field: its azimuth at the first detection within 5 deg of the recorder's heading (FRONT), else its sign (negative = LEFT) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
-| CRITICAL_TTC_START / _END | range / closing speed at most 2 s while closing; ends at the latest with CLOSING |
+| CRITICAL_TTC_START / _END | while closing, avoiding the target by braking would need at least the available deceleration (below); ends below 75 % of it, at the latest with CLOSING |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
@@ -225,6 +234,53 @@ carries `active_at_first_observation`; an EGO_PATH_ENTRY that was never seen is
 not invented; a state still active when observation ends has no END. A sign
 END means this recorder stopped detecting the sign, not that its obligation
 ended; `checks.sign_windows` lists the STOP_START events inside each window.
+
+CRITICAL_TTC comes from a braking-avoidability margin, not from a fixed TTC.
+The TTC itself stays physical and local: `TTC = range / closing_speed`, the
+closing speed along the line of sight from the recorder's own odometry and the
+track's estimated velocity (never ground truth, never another recorder's log).
+To avoid the target by braking the recorder must lose
+
+```text
+v_shed = v_ego - min(max(v_target_long, 0), v_ego)
+a_req  = v_shed^2 / (2 * (v_shed * (TTC - t_r) - d0))      (infinite if the bracket <= 0)
+critical  <=>  closing >= 1 m/s  and  a_req >= a
+          <=>  TTC <= critical_ttc_threshold_s = t_r + v_shed / (2 a) + d0 / v_shed
+```
+
+where `v_target_long` is the target's speed along the recorder's heading (down
+to it for a car ahead in the same direction; to a standstill for a standing,
+crossing or oncoming target). `t_r = 1.0 s` (reaction time; driver brake
+reaction times of roughly 0.7-1.5 s are reported), `a = 6 m/s^2` (hard,
+non-emergency braking on a dry road; emergency braking reaches about 8-10) and
+`d0 = 1 m` are global assumptions in `configs/reconstruction.yaml`, not a norm:
+test protocols use fixed TTC values (Euro NCAP CCFhol 1.5 s, UNECE R152 AEBS
+tests from TTC >= 4 s), and no single speed-dependent legal threshold exists.
+The threshold therefore grows with the speed to shed: a target at the
+recorder's own speed is never critical, a standing target is critical earlier
+for a fast recorder. The state ends once `a_req` falls below 75 % of `a`
+(hysteresis, 0.2 s debounce) and at the latest with CLOSING.
+Limitation: TTC ignores the lateral offset, so oncoming traffic in the next
+lane can be briefly critical.
+
+TURN_LEFT / TURN_RIGHT describe the motion the recorder really performed, from
+its own odometry (`ego.jsonl`): the unwrapped heading, its rate over the
+preceding 0.2 s (so a spin that starts at an impact is never reported before
+it), a minimum speed of 1 m/s, hysteresis (10 / 5 deg/s), a 0.3 s debounce, at
+least 0.5 s and 15 deg of heading change counted from the turn's onset (lane
+changes stay below about 10 deg). In CARLA the yaw grows clockwise seen from
+above, so a left turn has a negative yaw rate; this was checked on the
+recordings, where the yaw change, the side the vehicle moved to and the steer
+sign agree in every driven turn. The steer command itself stays a fact. A
+spin after an impact is real yaw motion and is reported as a turn.
+
+Temporal safety relations (`checks.temporal_safety_relations`, also in
+`global_graph.json`, `global_graph.md` and `report.md`) state, per track, in the
+recorder's own clock: whether a CUT_IN started before the critical TTC
+(`CUT_IN_* < CRITICAL_TTC_START < COLLISION` when all three hold) or the
+critical TTC was already active at the cut-in (`CRITICAL_TTC_START <=
+CUT_IN_*_START`), whether EGO_PATH_ENTRY came before or after the critical TTC,
+and the deltas in seconds. They are temporal properties only, not causes.
 
 The appearance side is local evidence only: the track's own azimuth from the
 radar at its first detection (`track_appeared_front_deg`), never ground truth.
@@ -254,7 +310,7 @@ identical state; their transitions are applied together, after it. Each
 transitions):
 
 ```text
-ego:      MOVING, STOP, BRAKE, HARD_BRAKE, STRONG_THROTTLE, SPEED_LIMIT_EXCEEDED
+ego:      MOVING, STOP, BRAKE, TURN_LEFT, TURN_RIGHT, SPEED_LIMIT_EXCEEDED
 external: track_NNN -> CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT, CUT_IN_FROM_RIGHT
 signs:    sign-N    -> class, known, relevant_to_ego_path
 ```

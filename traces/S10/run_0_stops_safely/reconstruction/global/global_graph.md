@@ -34,44 +34,38 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | Id | Global time | Type | Actor | Subject / participants | Observed by (local node @ local time) | Details |
 |----|------------:|------|-------|------------------------|----------------------------------------|---------|
 | g01 | - | MOVING_START | A | - | A:e01 @ 0.00 | active_at_first_observation=True |
-| g02 | - | STOP_SIGN_DETECTED_START | A | A:sign-0 | A:e02 @ 1.90 | relevant_to_ego_path=False |
+| g02 | - | STOP_SIGN_DETECTED_START | A | A:sign-0 | A:e02 @ 1.85 | relevant_to_ego_path=False |
 | g03 | - | STOP_SIGN_DETECTED_END | A | A:sign-0 | A:e03 @ 2.15 |  |
-| g04 | - | BRAKE_START | A | - | A:e04 @ 2.55 |  |
-| g05 | - | HARD_BRAKE_START | A | - | A:e05 @ 2.55 |  |
-| g06 | - | MOVING_END | A | - | A:e06 @ 3.35 |  |
-| g07 | - | STOP_START | A | - | A:e07 @ 3.35 |  |
-| g08 | - | TRACK_APPEARED_LEFT | A | A:track_001 | A:e08 @ 3.70 |  |
-| g09 | - | CLOSING_START | A | A:track_001 | A:e09 @ 3.70 | active_at_first_observation=True |
-| g10 | - | CRITICAL_TTC_START | A | A:track_001 | A:e10 @ 4.25 |  |
-| g11 | - | EGO_PATH_ENTRY | A | A:track_001 | A:e11 @ 5.80 |  |
-| g12 | - | CRITICAL_TTC_END | A | A:track_001 | A:e12 @ 5.95 |  |
-| g13 | - | CLOSING_END | A | A:track_001 | A:e13 @ 6.10 |  |
-| g14 | - | EGO_PATH_EXIT | A | A:track_001 | A:e14 @ 6.25 |  |
-| g15 | - | TRACK_LOST | A | A:track_001 | A:e15 @ 7.00 |  |
-| g16 | - | STRONG_THROTTLE_START | A | - | A:e16 @ 9.55 |  |
-| g17 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
-| g18 | - | STRONG_THROTTLE_START | B | - | B:e02 @ 1.20 |  |
-| g19 | - | STRONG_THROTTLE_END | B | - | B:e03 @ 1.80 |  |
-| g20 | - | TRACK_APPEARED_RIGHT | B | B:track_001 | B:e04 @ 2.55 |  |
-| g21 | - | CLOSING_START | B | B:track_001 | B:e05 @ 2.55 | active_at_first_observation=True |
-| g22 | - | CRITICAL_TTC_START | B | B:track_001 | B:e06 @ 4.30 |  |
-| g23 | - | TRACK_LOST | B | B:track_001 | B:e07 @ 5.50 |  |
-| g24 | - | STOP_SIGN_DETECTED_START | B | B:sign-1 | B:e08 @ 7.55 | relevant_to_ego_path=False |
-| g25 | - | STOP_SIGN_DETECTED_END | B | B:sign-1 | B:e09 @ 7.75 |  |
+| g04 | - | TRACK_APPEARED_LEFT | A | A:track_001 | A:e04 @ 2.40 |  |
+| g05 | - | CLOSING_START | A | A:track_001 | A:e05 @ 2.40 | active_at_first_observation=True |
+| g06 | - | BRAKE_START | A | - | A:e06 @ 2.55 |  |
+| g07 | - | MOVING_END | A | - | A:e07 @ 3.35 |  |
+| g08 | - | STOP_START | A | - | A:e08 @ 3.35 |  |
+| g09 | - | EGO_PATH_ENTRY | A | A:track_001 | A:e09 @ 5.80 |  |
+| g10 | - | CLOSING_END | A | A:track_001 | A:e10 @ 6.10 |  |
+| g11 | - | EGO_PATH_EXIT | A | A:track_001 | A:e11 @ 6.25 |  |
+| g12 | - | TRACK_LOST | A | A:track_001 | A:e12 @ 7.90 |  |
+| g13 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
+| g14 | - | TRACK_APPEARED_RIGHT | B | B:track_001 | B:e02 @ 2.60 |  |
+| g15 | - | CLOSING_START | B | B:track_001 | B:e03 @ 2.60 | active_at_first_observation=True |
+| g16 | - | CRITICAL_TTC_START | B | B:track_001 | B:e04 @ 4.40 |  |
+| g17 | - | CRITICAL_TTC_END | B | B:track_001 | B:e05 @ 5.60 |  |
+| g18 | - | TRACK_LOST | B | B:track_001 | B:e06 @ 5.85 |  |
+| g19 | - | STOP_SIGN_DETECTED_START | B | B:sign-1 | B:e07 @ 7.70 | relevant_to_ego_path=False |
+| g20 | - | STOP_SIGN_DETECTED_END | B | B:sign-1 | B:e08 @ 7.80 |  |
 
 ## Edges
 
 ```
-    g08 --SAME_TRACK--> g09
-    g08 --SAME_TRACK--> g10
-    g08 --SAME_TRACK--> g11
-    g08 --SAME_TRACK--> g12
-    g08 --SAME_TRACK--> g13
-    g08 --SAME_TRACK--> g14
-    g08 --SAME_TRACK--> g15
-    g20 --SAME_TRACK--> g21
-    g20 --SAME_TRACK--> g22
-    g20 --SAME_TRACK--> g23
+    g04 --SAME_TRACK--> g05
+    g04 --SAME_TRACK--> g09
+    g04 --SAME_TRACK--> g10
+    g04 --SAME_TRACK--> g11
+    g04 --SAME_TRACK--> g12
+    g14 --SAME_TRACK--> g15
+    g14 --SAME_TRACK--> g16
+    g14 --SAME_TRACK--> g17
+    g14 --SAME_TRACK--> g18
 ```
 
 ## Global trace
@@ -80,6 +74,13 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 | t_global | Events |
 |---------:|--------|
+
+## Temporal safety relations
+
+Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
+
+- A's track_001 (unidentified A:track_001): EGO_PATH_ENTRY 5.80, no critical TTC [local times]
+- B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 4.40 [local times]
 
 ## Perceived state before each event, per observing recorder
 
@@ -90,49 +91,40 @@ Each recorder's own belief just before its events, in its own local names (track
 | - | A | g01 MOVING_START(A) (A:e01) | ego: not yet observed |
 | - | A | g02 STOP_SIGN_DETECTED_START(A,A:sign-0) (A:e02) | ego: MOVING |
 | - | A | g03 STOP_SIGN_DETECTED_END(A,A:sign-0) (A:e03) | ego: MOVING<br>sign-0: STOP sign known |
-| - | A | g04 BRAKE_START(A) (A:e04)<br>g05 HARD_BRAKE_START(A) (A:e05) | ego: MOVING<br>sign-0: STOP sign known |
-| - | A | g06 MOVING_END(A) (A:e06)<br>g07 STOP_START(A) (A:e07) | ego: MOVING, BRAKE, HARD_BRAKE<br>sign-0: STOP sign known |
-| - | A | g08 TRACK_APPEARED_LEFT(A,A:track_001) (A:e08)<br>g09 CLOSING_START(A,A:track_001) (A:e09) | ego: STOP, BRAKE, HARD_BRAKE<br>sign-0: STOP sign known |
-| - | A | g10 CRITICAL_TTC_START(A,A:track_001) (A:e10) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known |
-| - | A | g11 EGO_PATH_ENTRY(A,A:track_001) (A:e11) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known |
-| - | A | g12 CRITICAL_TTC_END(A,A:track_001) (A:e12) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known |
-| - | A | g13 CLOSING_END(A,A:track_001) (A:e13) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known |
-| - | A | g14 EGO_PATH_EXIT(A,A:track_001) (A:e14) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: IN_EGO_PATH<br>sign-0: STOP sign known |
-| - | A | g15 TRACK_LOST(A,A:track_001) (A:e15) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: no active state<br>sign-0: STOP sign known |
-| - | A | g16 STRONG_THROTTLE_START(A) (A:e16) | ego: STOP, BRAKE, HARD_BRAKE<br>track lost, states UNKNOWN: track_001<br>sign-0: STOP sign known |
-| - | B | g17 MOVING_START(B) (B:e01) | ego: not yet observed |
-| - | B | g18 STRONG_THROTTLE_START(B) (B:e02) | ego: MOVING |
-| - | B | g19 STRONG_THROTTLE_END(B) (B:e03) | ego: MOVING, STRONG_THROTTLE |
-| - | B | g20 TRACK_APPEARED_RIGHT(B,B:track_001) (B:e04)<br>g21 CLOSING_START(B,B:track_001) (B:e05) | ego: MOVING |
-| - | B | g22 CRITICAL_TTC_START(B,B:track_001) (B:e06) | ego: MOVING<br>track_001: CLOSING |
-| - | B | g23 TRACK_LOST(B,B:track_001) (B:e07) | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC |
-| - | B | g24 STOP_SIGN_DETECTED_START(B,B:sign-1) (B:e08) | ego: MOVING<br>track lost, states UNKNOWN: track_001 |
-| - | B | g25 STOP_SIGN_DETECTED_END(B,B:sign-1) (B:e09) | ego: MOVING<br>track lost, states UNKNOWN: track_001<br>sign-1: STOP sign known |
+| - | A | g04 TRACK_APPEARED_LEFT(A,A:track_001) (A:e04)<br>g05 CLOSING_START(A,A:track_001) (A:e05) | ego: MOVING<br>sign-0: STOP sign known |
+| - | A | g06 BRAKE_START(A) (A:e06) | ego: MOVING<br>track_001: CLOSING<br>sign-0: STOP sign known |
+| - | A | g07 MOVING_END(A) (A:e07)<br>g08 STOP_START(A) (A:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known |
+| - | A | g09 EGO_PATH_ENTRY(A,A:track_001) (A:e09) | ego: STOP, BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known |
+| - | A | g10 CLOSING_END(A,A:track_001) (A:e10) | ego: STOP, BRAKE<br>track_001: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known |
+| - | A | g11 EGO_PATH_EXIT(A,A:track_001) (A:e11) | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH<br>sign-0: STOP sign known |
+| - | A | g12 TRACK_LOST(A,A:track_001) (A:e12) | ego: STOP, BRAKE<br>track_001: no active state<br>sign-0: STOP sign known |
+| - | B | g13 MOVING_START(B) (B:e01) | ego: not yet observed |
+| - | B | g14 TRACK_APPEARED_RIGHT(B,B:track_001) (B:e02)<br>g15 CLOSING_START(B,B:track_001) (B:e03) | ego: MOVING |
+| - | B | g16 CRITICAL_TTC_START(B,B:track_001) (B:e04) | ego: MOVING<br>track_001: CLOSING |
+| - | B | g17 CRITICAL_TTC_END(B,B:track_001) (B:e05) | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC |
+| - | B | g18 TRACK_LOST(B,B:track_001) (B:e06) | ego: MOVING<br>track_001: CLOSING |
+| - | B | g19 STOP_SIGN_DETECTED_START(B,B:sign-1) (B:e07) | ego: MOVING<br>track lost, states UNKNOWN: track_001 |
+| - | B | g20 STOP_SIGN_DETECTED_END(B,B:sign-1) (B:e08) | ego: MOVING<br>track lost, states UNKNOWN: track_001<br>sign-1: STOP sign known |
 
 ## Plain-language reading
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 1.90 s) A's camera established a STOP sign detection (unidentified object A:sign-0) (the detector judged it not relevant to its path).
+- (unaligned, A local time 1.85 s) A's camera established a STOP sign detection (unidentified object A:sign-0) (the detector judged it not relevant to its path).
 - (unaligned, A local time 2.15 s) A's camera stopped detecting STOP sign unidentified object A:sign-0.
+- (unaligned, A local time 2.40 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
+- (unaligned, A local time 2.40 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 2.55 s) A started braking.
-- (unaligned, A local time 2.55 s) A started braking hard.
 - (unaligned, A local time 3.35 s) A stopped moving.
 - (unaligned, A local time 3.35 s) A came to a stop.
-- (unaligned, A local time 3.70 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
-- (unaligned, A local time 3.70 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
-- (unaligned, A local time 4.25 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 5.80 s) A observed unidentified object A:track_001 enter its forward path corridor.
-- (unaligned, A local time 5.95 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
 - (unaligned, A local time 6.10 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 6.25 s) A observed unidentified object A:track_001 leave its forward path corridor.
-- (unaligned, A local time 7.00 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 9.55 s) A started applying strong throttle.
+- (unaligned, A local time 7.90 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
-- (unaligned, B local time 1.20 s) B started applying strong throttle.
-- (unaligned, B local time 1.80 s) B stopped applying strong throttle.
-- (unaligned, B local time 2.55 s) B's radar started tracking unidentified object B:track_001, which appeared on its right.
-- (unaligned, B local time 2.55 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
-- (unaligned, B local time 4.30 s) B's time-to-contact with unidentified object B:track_001 became critical.
-- (unaligned, B local time 5.50 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
-- (unaligned, B local time 7.55 s) B's camera established a STOP sign detection (unidentified object B:sign-1) (the detector judged it not relevant to its path).
-- (unaligned, B local time 7.75 s) B's camera stopped detecting STOP sign unidentified object B:sign-1.
+- (unaligned, B local time 2.60 s) B's radar started tracking unidentified object B:track_001, which appeared on its right.
+- (unaligned, B local time 2.60 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
+- (unaligned, B local time 4.40 s) B's time-to-contact with unidentified object B:track_001 became critical.
+- (unaligned, B local time 5.60 s) B's time-to-contact with unidentified object B:track_001 stopped being critical.
+- (unaligned, B local time 5.85 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
+- (unaligned, B local time 7.70 s) B's camera established a STOP sign detection (unidentified object B:sign-1) (the detector judged it not relevant to its path).
+- (unaligned, B local time 7.80 s) B's camera stopped detecting STOP sign unidentified object B:sign-1.

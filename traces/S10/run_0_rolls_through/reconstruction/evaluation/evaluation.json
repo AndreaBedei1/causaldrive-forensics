@@ -1,6 +1,6 @@
 {
   "run": "S10/run_0_rolls_through",
-  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 250.38908004015684,
+      "sim_time": 131.2548762075603,
       "peak_impulse": 12489.76592698024,
-      "reconstructed_as": "g20",
+      "reconstructed_as": "g15",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -40,27 +40,27 @@
     }
   ],
   "event_timing": {
-    "nodes": 34,
+    "nodes": 26,
     "max_abs_error_s": 0.0,
-    "order_pairs": 526,
-    "order_concordant": 526
+    "order_pairs": 309,
+    "order_concordant": 309
   },
   "tracks": [
     {
       "track": "A:track_001",
-      "decision": "B",
-      "status": "ASSOCIATED",
+      "decision": "A:track_001",
+      "status": "ANONYMOUS",
       "true_identity": "B",
       "median_box_distance_m": {
         "B": 0.0
       },
-      "verdict": "correct",
-      "samples": 15,
-      "raw_rmse_to_surface_m": 0.744,
-      "smoothed_rmse_to_surface_m": 0.801,
-      "smoothed_rmse_to_centre_m": 1.218,
-      "raw_difference_speed_rmse_mps": 3.7,
-      "speed_rmse_mps": 0.451
+      "verdict": "left anonymous (true identity B)",
+      "samples": 28,
+      "raw_rmse_to_surface_m": 0.682,
+      "smoothed_rmse_to_surface_m": 0.711,
+      "smoothed_rmse_to_centre_m": 1.293,
+      "raw_difference_speed_rmse_mps": 4.597,
+      "speed_rmse_mps": 0.378
     },
     {
       "track": "B:track_001",
@@ -71,12 +71,12 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 133,
-      "raw_rmse_to_surface_m": 0.722,
-      "smoothed_rmse_to_surface_m": 0.72,
-      "smoothed_rmse_to_centre_m": 1.27,
-      "raw_difference_speed_rmse_mps": 2.674,
-      "speed_rmse_mps": 0.33
+      "samples": 132,
+      "raw_rmse_to_surface_m": 0.642,
+      "smoothed_rmse_to_surface_m": 0.644,
+      "smoothed_rmse_to_centre_m": 1.264,
+      "raw_difference_speed_rmse_mps": 2.219,
+      "speed_rmse_mps": 0.375
     }
   ],
   "clock_shift_check": {

@@ -21,12 +21,23 @@ reconstruction:
 
   semantics:
     brake_onset_threshold: 0.1        # BRAKE_START at or above, BRAKE_END below (0.2 s release debounce)
-    hard_brake_threshold: 0.9         # HARD_BRAKE_START / HARD_BRAKE_END
-    strong_throttle_threshold: 0.8    # STRONG_THROTTLE_START / STRONG_THROTTLE_END
     full_stop_speed_mps: 0.3          # STOP_START below; moving again above 1 m/s
     speed_limit_hysteresis_kmh: 1.0   # exceeding: above limit + 1 km/h, ends at or below limit - 1 km/h
     closing_speed_threshold_mps: 1.0  # CLOSING_START at or above, CLOSING_END below half of it
-    critical_ttc_s: 2.0               # CRITICAL_TTC_START at or below (while closing)
+    # CRITICAL_TTC (while closing): avoiding the target by braking needs at least the available
+    # deceleration, i.e. TTC <= reaction + v_shed / (2 a) + margin / v_shed (see README).
+    critical_reaction_time_s: 1.0     # the recorder reacts after this time (driver brake reaction ~0.7-1.5 s)...
+    critical_deceleration_mps2: 6.0   # ...then brakes at up to this (hard, non-emergency; emergency ~8-10)...
+    critical_standstill_margin_m: 1.0 # ...keeping at least this distance to the target
+    critical_release_ratio: 0.75      # CRITICAL_TTC_END once the required deceleration < 75 % of the available
+    # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading (never from the steer command)
+    turn_yaw_rate_window_s: 0.2       # yaw rate = heading change over this preceding window (causal)
+    turn_yaw_rate_on_dps: 10.0        # TURN_*_START at or above (lane changes peak below ~9 deg/s)...
+    turn_yaw_rate_off_dps: 5.0        # ...TURN_*_END below this (hysteresis)
+    turn_min_speed_mps: 1.0           # no turn while slower than this
+    turn_release_debounce_s: 0.3      # a dip below the off threshold shorter than this does not end the turn
+    turn_min_duration_s: 0.5          # a turn lasts at least this long...
+    turn_min_heading_change_deg: 15.0 # ...and changes the heading by at least this (lane changes <= ~10 deg)
     path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EGO_PATH_EXIT
     track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first azimuth, else _LEFT / _RIGHT
     max_position_std_m: 1.0           # track estimates more uncertain than these (Kalman std)...
@@ -43,7 +54,9 @@ reconstruction:
 
   fusion:
     impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %
-    contact_window_s: 0.5             # a track must be seen this close to the collision...
-    contact_range_m: 3.5              # ...at this range or less, to be the collision partner
-    min_track_persistence_s: 1.0      # and tracked at least this long before it
+    contact_window_s: 0.5             # a partner track is still observed within this window before the contact
+    contact_range_m: 3.5              # range at the contact counts fully up to this (evidence, not a veto)...
+    contact_range_scale_m: 3.0        # ...and lowers the confidence beyond it with this scale
+    approach_window_s: 1.0            # the range must shrink over this last stretch before the contact
+    min_track_persistence_s: 1.0      # tracked at least this long before the contact
     speed_consistency_mps: 1.5        # track speed vs partner's own speed (RMSE)

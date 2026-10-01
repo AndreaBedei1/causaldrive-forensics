@@ -85,3 +85,107 @@ def sign_windows(graph: LocalGraph, sign: str = "STOP_SIGN_DETECTED") -> List[Di
                         "stop_starts_inside": [stop.node_id for stop in inside],
                         "already_stopped_at_start": _stopped_at(graph, start.t_local)})
     return windows
+
+
+CUT_IN_STARTS = ("CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START")
+
+
+def _round(value: Optional[float]) -> Optional[float]:
+    return None if value is None else round(value, 3)
+
+
+def temporal_safety_relations(graph: LocalGraph) -> List[Dict[str, Any]]:
+    """Order of a track's cut-in, critical TTC and path entry, and the recorder's collision.
+
+    One entry per local track with a CUT_IN_*_START, CRITICAL_TTC_START or
+    EGO_PATH_ENTRY, in the recorder's own clock.  These are temporal properties
+    only, not causal claims.  The cut-in is compared with the critical-TTC
+    episode active at its start: ``CRITICAL_TTC_ALREADY_ACTIVE`` when that
+    episode started at or before the cut-in (CRITICAL_TTC_START <= CUT_IN_START),
+    otherwise ``CUT_IN_BEFORE_CRITICAL_TTC`` with the next CRITICAL_TTC_START, or
+    ``NO_CRITICAL_TTC_AFTER_CUT_IN``.  ``chain`` states
+    ``CUT_IN_* < CRITICAL_TTC_START < COLLISION`` when all three hold in that order.
+    """
+    collision = next((node.t_local for node in graph.nodes if node.event_type == "COLLISION"), None)
+    subjects: Dict[str, List[GraphNode]] = {}
+    for node in graph.nodes:
+        if node.subject_id and node.subject_id.startswith("track_"):
+            subjects.setdefault(node.subject_id, []).append(node)
+    out = []
+    for subject in sorted(subjects):
+        nodes = subjects[subject]
+        cut_in = next((node for node in nodes if node.event_type in CUT_IN_STARTS), None)
+        entry = next((node.t_local for node in nodes if node.event_type == "EGO_PATH_ENTRY"), None)
+        episodes: List[Tuple[float, Optional[float]]] = []
+        for node in nodes:
+            if node.event_type == "CRITICAL_TTC_START":
+                episodes.append((node.t_local, None))
+            elif node.event_type == "CRITICAL_TTC_END" and episodes and episodes[-1][1] is None:
+                episodes[-1] = (episodes[-1][0], node.t_local)
+        if cut_in is None and not episodes and entry is None:
+            continue
+        item: Dict[str, Any] = {
+            "track": subject, "cut_in": None if cut_in is None else {"type": cut_in.event_type, "t_local": cut_in.t_local},
+            "critical_ttc_start": episodes[0][0] if episodes else None, "ego_path_entry": entry, "collision": collision,
+            "cut_in_vs_critical_ttc": None, "chain": None, "ego_path_entry_vs_critical_ttc": None, "deltas_s": {}}
+        critical = episodes[0][0] if episodes else None
+        if cut_in is not None:
+            t_cut = cut_in.t_local
+            active = next((start for start, end in episodes if start <= t_cut + 1e-6 and (end is None or end > t_cut + 1e-6)),
+                          None)
+            later = next((start for start, _ in episodes if start > t_cut + 1e-6), None)
+            if active is not None:
+                critical = active
+                item["cut_in_vs_critical_ttc"] = "CRITICAL_TTC_ALREADY_ACTIVE"
+                item["deltas_s"]["cut_in_minus_critical_ttc_start"] = _round(t_cut - active)
+            elif later is not None:
+                critical = later
+                item["cut_in_vs_critical_ttc"] = "CUT_IN_BEFORE_CRITICAL_TTC"
+                item["deltas_s"]["critical_ttc_start_minus_cut_in"] = _round(later - t_cut)
+                if collision is not None and collision > later + 1e-6:
+                    item["chain"] = "{0} < CRITICAL_TTC_START < COLLISION".format(cut_in.event_type)
+                    item["deltas_s"]["collision_minus_critical_ttc_start"] = _round(collision - later)
+            else:
+                item["cut_in_vs_critical_ttc"] = "NO_CRITICAL_TTC_AFTER_CUT_IN"
+        item["critical_ttc_start"] = critical
+        if entry is not None and critical is not None:
+            delta = entry - critical
+            item["ego_path_entry_vs_critical_ttc"] = ("SAME_TIME" if abs(delta) < 1e-6
+                                                      else "BEFORE" if delta < 0 else "AFTER")
+            item["deltas_s"]["ego_path_entry_minus_critical_ttc_start"] = _round(delta)
+        if collision is not None and critical is not None and "collision_minus_critical_ttc_start" not in item["deltas_s"]:
+            item["deltas_s"]["collision_minus_critical_ttc_start"] = _round(collision - critical)
+        out.append(item)
+    return out
+
+
+def describe_temporal_relation(item: Dict[str, Any]) -> str:
+    """One compact line, e.g. 'CUT_IN_FROM_LEFT_START 3.90 < CRITICAL_TTC_START 4.20 (+0.30 s) < COLLISION 5.25 (+1.05 s)'."""
+    parts = []
+    deltas = item["deltas_s"]
+    cut_in, critical, collision = item["cut_in"], item["critical_ttc_start"], item["collision"]
+    relation = item["cut_in_vs_critical_ttc"]
+    if relation == "CRITICAL_TTC_ALREADY_ACTIVE":
+        parts.append("critical TTC already active before the cut-in: CRITICAL_TTC_START {0:.2f} <= {1} {2:.2f} "
+                     "(+{3:.2f} s)".format(critical, cut_in["type"], cut_in["t_local"],
+                                           deltas["cut_in_minus_critical_ttc_start"]))
+    elif relation == "CUT_IN_BEFORE_CRITICAL_TTC":
+        text = "cut-in started before critical TTC: {0} {1:.2f} < CRITICAL_TTC_START {2:.2f} (+{3:.2f} s)".format(
+            cut_in["type"], cut_in["t_local"], critical, deltas["critical_ttc_start_minus_cut_in"])
+        if item["chain"]:
+            text += " < COLLISION {0:.2f} (+{1:.2f} s)".format(collision, deltas["collision_minus_critical_ttc_start"])
+        parts.append(text)
+    elif relation == "NO_CRITICAL_TTC_AFTER_CUT_IN":
+        parts.append("{0} {1:.2f}, no critical TTC after it".format(cut_in["type"], cut_in["t_local"]))
+    elif critical is not None:
+        parts.append("CRITICAL_TTC_START {0:.2f}{1}".format(
+            critical, "" if collision is None or "collision_minus_critical_ttc_start" not in deltas
+            else ", COLLISION {0:.2f} (+{1:.2f} s)".format(collision, deltas["collision_minus_critical_ttc_start"])))
+    entry = item["ego_path_entry_vs_critical_ttc"]
+    if entry is not None:
+        parts.append("EGO_PATH_ENTRY {0:.2f} {1} critical TTC ({2:+.2f} s)".format(
+            item["ego_path_entry"], {"BEFORE": "before", "AFTER": "after", "SAME_TIME": "together with"}[entry],
+            deltas["ego_path_entry_minus_critical_ttc_start"]))
+    elif item["ego_path_entry"] is not None:
+        parts.append("EGO_PATH_ENTRY {0:.2f}, no critical TTC".format(item["ego_path_entry"]))
+    return "; ".join(parts)

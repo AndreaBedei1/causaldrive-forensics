@@ -32,7 +32,7 @@ from ..recording.compact_observations import load_observation_stream
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
-from .tracking import (EgoState, EgoTrajectory, LocalTrack, RadarMount, TrackSample,
+from .tracking import (MIN_CLOSING_FOR_TTC_MPS, EgoState, EgoTrajectory, LocalTrack, RadarMount, TrackSample,
                        build_local_tracks, ego_trajectory)
 from .world_state import UNKNOWN, PerceivedWorld, span_values
 
@@ -43,6 +43,8 @@ MOVING_SPEED_MPS = 1.0
 # Track states (closing, critical TTC) shorter than this are flicker, unless
 # they are still active when the track ends.
 MIN_EPISODE_S = 0.3
+# A critical TTC must clear for this long before it ends.
+CRITICAL_RELEASE_DEBOUNCE_S = 0.2
 # A track must leave the path corridor by this margin before EGO_PATH_EXIT.
 PATH_HYSTERESIS_M = 0.5
 # The camera sign tracker ends a track after this gap without a detection
@@ -161,27 +163,83 @@ def _lasting(spans: Sequence[Span], times: Sequence[float]) -> List[Span]:
 
 def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
                    cfg: SemanticsConfig, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
-    """BRAKE, HARD_BRAKE and STRONG_THROTTLE states from the recorder's own pedals.
+    """The BRAKE state from the recorder's own brake pedal.
 
-    HARD_BRAKE nests inside BRAKE because its threshold is higher.  Pedal values
-    stay in the EGO_CONTROL facts.
+    Pedal and steering values (brake, throttle, steer) stay in the EGO_CONTROL
+    facts; only braking is a semantic state.
     """
     if not controls:
         return []
     times = [_local_time(record, clock_origin) for record in controls]
     brake = [float(record["brake"]) for record in controls]
-    throttle = [float(record["throttle"]) for record in controls]
+    level = cfg.brake_onset_threshold
+    spans = active_intervals(times, brake, lambda value: value >= level, lambda value: value < level,
+                             PEDAL_RELEASE_DEBOUNCE_S)
+    if world is not None:
+        world.add_ego_state("BRAKE", times, spans)
+    return state_events(owner, None, "BRAKE_START", "BRAKE_END", ACTION, "controls", times, spans)
 
-    def pedal_state(name: str, values: List[float], level: float) -> List[SemanticEvent]:
-        spans = active_intervals(times, values, lambda value: value >= level, lambda value: value < level,
-                                 PEDAL_RELEASE_DEBOUNCE_S)
+
+def yaw_rates(ego: EgoTrajectory, window_s: float) -> List[float]:
+    """Yaw rate [deg/s] at each ego sample: change of the unwrapped heading over
+    the preceding ``window_s``, so a turn is never reported before its evidence
+    (a spin starting at an impact does not appear before the impact).  Within
+    the first window of the recording, that first window is used."""
+    rates = []
+    for state in ego.states:
+        t0, t1 = state.t_local - window_s, state.t_local
+        if t0 < ego.start:
+            t0, t1 = ego.start, min(ego.start + window_s, ego.end)
+        rates.append(0.0 if t1 - t0 < 1e-6 else math.degrees(ego.at(t1).heading - ego.at(t0).heading) / (t1 - t0))
+    return rates
+
+
+def turn_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
+                world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
+    """TURN_LEFT and TURN_RIGHT states: the yaw motion the recorder really
+    performed, from its own odometry (never from the steer command).
+
+    A turn starts when the yaw rate reaches ``turn_yaw_rate_on_dps`` while the
+    recorder moves at ``turn_min_speed_mps`` or more, and ends when it stays
+    below ``turn_yaw_rate_off_dps`` longer than ``turn_release_debounce_s``.  It
+    must last ``turn_min_duration_s`` and change the heading by
+    ``turn_min_heading_change_deg``, so lane changes and road curvature are not
+    turns.  CARLA's yaw grows clockwise seen from above (x forward, y right): a
+    left turn has a negative yaw rate.  This was checked on the recordings: in
+    every driven turn the sign of the yaw change, the side the vehicle moved to
+    and the sign of the steer command agree.  A spin after an impact is real yaw
+    motion too and is reported as such.
+    """
+    times = [state.t_local for state in ego.states]
+    headings = [state.heading for state in ego.states]
+    speeds = [state.speed for state in ego.states]
+    rates = yaw_rates(ego, cfg.turn_yaw_rate_window_s)
+    events: List[SemanticEvent] = []
+    for name, sign in (("TURN_LEFT", -1.0), ("TURN_RIGHT", 1.0)):
+        def turns_on(index: int, sign: float = sign) -> bool:
+            return speeds[index] >= cfg.turn_min_speed_mps and sign * rates[index] >= cfg.turn_yaw_rate_on_dps
+
+        def turns_off(index: int, sign: float = sign) -> bool:
+            return speeds[index] < cfg.turn_min_speed_mps or sign * rates[index] < cfg.turn_yaw_rate_off_dps
+
+        kept = []
+        for start, end in active_intervals(times, list(range(len(times))), turns_on, turns_off,
+                                           cfg.turn_release_debounce_s):
+            last = len(times) - 1 if end is None else end
+            # The heading change counts from the turn's onset: back over the ramp where the yaw
+            # rate already exceeded the off threshold, and the window that measured it.
+            onset = start
+            while onset > 0 and not turns_off(onset - 1):
+                onset -= 1
+            before = ego.at(max(times[onset] - cfg.turn_yaw_rate_window_s, ego.start)).heading
+            change = sign * math.degrees(headings[last] - before)
+            if (times[last] - times[start] >= cfg.turn_min_duration_s - 1e-6
+                    and change >= cfg.turn_min_heading_change_deg):
+                kept.append((start, end))
         if world is not None:
-            world.add_ego_state(name, times, spans)
-        return state_events(owner, None, name + "_START", name + "_END", ACTION, "controls", times, spans)
-
-    return (pedal_state("BRAKE", brake, cfg.brake_onset_threshold)
-            + pedal_state("HARD_BRAKE", brake, cfg.hard_brake_threshold)
-            + pedal_state("STRONG_THROTTLE", throttle, cfg.strong_throttle_threshold))
+            world.add_ego_state(name, times, kept)
+        events += state_events(owner, None, name + "_START", name + "_END", FACT, "ego", times, kept)
+    return events
 
 
 def motion_events(owner: str, ego: EgoTrajectory, cfg: SemanticsConfig,
@@ -389,6 +447,81 @@ def appearance_side(bearing_deg: float, cfg: SemanticsConfig) -> str:
     return "LEFT" if bearing_deg < 0 else "RIGHT"
 
 
+@dataclass
+class CriticalTtcAssessment:
+    """How hard the recorder would have to brake to avoid a target it closes on."""
+
+    ego_speed_mps: float
+    target_longitudinal_speed_mps: float  # target ground velocity along the recorder's heading
+    closing_speed_mps: float  # along the line of sight, + = range shrinking
+    range_m: float
+    ttc_s: Optional[float]  # range / closing speed; None without real closing
+    speed_to_shed_mps: float  # longitudinal speed the recorder must lose to stop closing in
+    threshold_s: Optional[float]  # TTC at which braking at the available deceleration just suffices
+    required_deceleration_mps2: Optional[float]  # None: nothing to avoid; inf: not even an instant stop helps
+    available_deceleration_mps2: float
+    critical: bool
+
+    @property
+    def braking_margin_mps2(self) -> Optional[float]:
+        """Available minus required deceleration (negative when critical)."""
+        if self.required_deceleration_mps2 is None or math.isinf(self.required_deceleration_mps2):
+            return None
+        return self.available_deceleration_mps2 - self.required_deceleration_mps2
+
+
+def critical_ttc_assessment(ego_speed_mps: float, target_longitudinal_speed_mps: float, closing_speed_mps: float,
+                            range_m: float, cfg: SemanticsConfig) -> CriticalTtcAssessment:
+    """Braking avoidability of a target, from local quantities only.
+
+    TTC = range / closing speed (line of sight; the recorder's own odometry and
+    the radar track's estimated velocity).  To avoid the target by braking the
+    recorder must lose the longitudinal speed
+
+        v_shed = v_ego - min(max(v_target_long, 0), v_ego)
+
+    (down to the target's forward speed when it drives ahead in the same
+    direction, to a standstill when it stands, crosses or comes towards it).
+    At constant velocities that speed can be lost over v_shed * TTC; after the
+    reaction time t_r and keeping the margin d0 it takes
+
+        a_req = v_shed^2 / (2 (v_shed (TTC - t_r) - d0))   (infinite if the bracket <= 0)
+
+    The target is critical while closing at ``closing_speed_threshold_mps`` or
+    more and a_req >= a (``critical_deceleration_mps2``), which is the same as
+
+        TTC <= t_r + v_shed / (2 a) + d0 / v_shed = critical_ttc_threshold_s
+
+    so the threshold grows with the speed to shed.  The parameters are global
+    assumptions, documented in ``configs/reconstruction.yaml``; they are not a
+    norm.  A target the recorder cannot catch up (v_shed = 0) is never critical.
+    """
+    t_r, a_avail, d0 = cfg.critical_reaction_time_s, cfg.critical_deceleration_mps2, cfg.critical_standstill_margin_m
+    ego = max(float(ego_speed_mps), 0.0)
+    shed = ego - min(max(float(target_longitudinal_speed_mps), 0.0), ego)
+    ttc = range_m / closing_speed_mps if closing_speed_mps > MIN_CLOSING_FOR_TTC_MPS else None
+    threshold = required = None
+    if shed > 1e-3:
+        threshold = t_r + shed / (2.0 * a_avail) + d0 / shed
+        if ttc is not None:
+            available = shed * (ttc - t_r) - d0
+            required = shed * shed / (2.0 * available) if available > 0.0 else math.inf
+    critical = (required is not None and closing_speed_mps >= cfg.closing_speed_threshold_mps
+                and required >= a_avail)
+    return CriticalTtcAssessment(ego, float(target_longitudinal_speed_mps), float(closing_speed_mps), float(range_m),
+                                 ttc, shed, threshold, required, a_avail, critical)
+
+
+def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory,
+                          cfg: SemanticsConfig) -> List[CriticalTtcAssessment]:
+    out = []
+    for sample in samples:
+        own = ego.at(sample.t_local)
+        along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
+        out.append(critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.range_m, cfg))
+    return out
+
+
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
                  cfg: SemanticsConfig) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
@@ -455,8 +588,9 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     CRITICAL_TTC and CUT_IN states of a track.
 
     The appearance side comes from the track's azimuth at its first detection
-    (``appearance_side``).  Ranges, speeds, TTC and the relative motion stay in
-    the TRACK_STATE facts.
+    (``appearance_side``); CRITICAL_TTC from ``critical_ttc_assessment``.
+    Ranges, speeds, TTC, braking needs and the relative motion stay in the
+    TRACK_STATE facts.
     ``ego`` is the recorder's own trajectory (relative motion needs its
     velocity); without it the recorder is taken as standing still.
     """
@@ -486,12 +620,18 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
                            times, closing_spans)
 
-    # A critical TTC needs closing: it ends at the latest with CLOSING (at very
-    # short range a slow residual closing speed would otherwise keep TTC low).
-    critical = cfg.critical_ttc_s
-    spans = active_intervals(times, samples,
-                             lambda s: s.ttc_s is not None and s.ttc_s <= critical and s.closing_speed_mps >= closing,
-                             lambda s: s.ttc_s is None or s.ttc_s > critical or s.closing_speed_mps < closing / 2.0)
+    # A critical TTC: braking would need at least the available deceleration
+    # (``critical_ttc_assessment``).  It needs closing, so it ends at the latest
+    # with CLOSING, and once the required deceleration drops below
+    # ``critical_release_ratio`` of the available one (hysteresis, debounced).
+    assessments = _critical_assessments(samples, ego, cfg)
+    release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
+
+    def critical_off(a: CriticalTtcAssessment) -> bool:
+        return (a.closing_speed_mps < closing / 2.0 or a.required_deceleration_mps2 is None
+                or a.required_deceleration_mps2 < release)
+
+    spans = active_intervals(times, assessments, lambda a: a.critical, critical_off, CRITICAL_RELEASE_DEBOUNCE_S)
     critical_spans = _lasting(spans, times)
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, critical_spans)
@@ -563,10 +703,11 @@ def _rounded(value: Optional[float], digits: int) -> Optional[float]:
 
 
 def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: float,
-                     motion: Optional[RelativeMotion] = None,
-                     cfg: Optional[SemanticsConfig] = None) -> SemanticEvent:
+                     motion: Optional[RelativeMotion] = None, cfg: Optional[SemanticsConfig] = None,
+                     critical: Optional[CriticalTtcAssessment] = None) -> SemanticEvent:
     """Quantitative state of a track: geometry, its own velocity in the local
-    frame (vx/vy), uncertainty, and the motion relative to the recorder."""
+    frame (vx/vy), uncertainty, the motion relative to the recorder and the
+    braking need behind CRITICAL_TTC."""
     attributes = dict(_where(sample), longitudinal_m=round(sample.longitudinal_m, 2),
                       ttc_s=None if sample.ttc_s is None else round(sample.ttc_s, 2),
                       speed_mps=round(sample.speed_mps, 2),
@@ -581,6 +722,16 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
             relative_motion_angle_deg=_rounded(motion.heading_deg, 1),
             motion_relation=motion_relation(sample, motion, cfg or SemanticsConfig()),
             t_cpa_s=_rounded(motion.t_cpa_s, 2), d_cpa_m=_rounded(motion.d_cpa_m, 2))
+    if critical is not None:
+        required = critical.required_deceleration_mps2
+        attributes.update(
+            ego_speed_mps=round(critical.ego_speed_mps, 2),
+            target_longitudinal_speed_mps=round(critical.target_longitudinal_speed_mps, 2),
+            speed_to_shed_mps=round(critical.speed_to_shed_mps, 2),
+            critical_ttc_threshold_s=_rounded(critical.threshold_s, 2),
+            required_deceleration_mps2=None if required is None or math.isinf(required) else round(required, 2),
+            braking_margin_mps2=_rounded(critical.braking_margin_mps2, 2),
+            unavoidable_by_braking=required is not None and math.isinf(required))
     return SemanticEvent(type="TRACK_STATE", kind=FACT, actor_id=owner, subject_id=track_id,
                          t_local=t_local, source="radar", attributes=attributes)
 
@@ -622,8 +773,12 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
             if track.first_t - 1e-6 <= t_local <= track.last_t + 1e-6:
                 sample = track.sample_near(t_local)
                 if sample is not None:
-                    motion = relative_motion(sample, ego.at(sample.t_local), semantics)
-                    facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics))
+                    own = ego.at(sample.t_local)
+                    motion = relative_motion(sample, own, semantics)
+                    along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
+                    critical = critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.range_m,
+                                                       semantics)
+                    facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics, critical))
         frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
                                  perceived_state=None if world is None else world.snapshot(t_local, before=False)))
     return frames
@@ -705,6 +860,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     events: List[SemanticEvent] = []
     events += control_events(owner, controls, clock_origin, semantics, world)
     events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"), world)
+    events += turn_events(owner, ego, semantics, world)
     events += collision_events(owner, collisions, clock_origin, cfg.collision)
     events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
     for track in tracks:

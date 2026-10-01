@@ -70,13 +70,13 @@ class LocalClockTests(unittest.TestCase):
                                  for k in range(int(round(end / 0.05)) + 1)])
             events = [SemanticEvent(type=name, kind="ACTION", actor_id="A", t_local=t, event_id="A:e%02d" % k)
                       for k, (name, t) in enumerate([("BRAKE_START", 0.0), ("BRAKE_END", 0.95),
-                                                     ("STRONG_THROTTLE_START", end)], 1)]
+                                                     ("TURN_LEFT_START", end)], 1)]
             return build_trace("A", ego, [], [], events, clock_origin=0.0, trace_hz=10.0)
 
         frames = trace(1.05)
         self.assertEqual([frame.t_local for frame in frames][-3:], [0.9, 1.0, 1.05])
         self.assertEqual({frame.t_local: [e.type for e in frame.events] for frame in frames if frame.events},
-                         {0.0: ["BRAKE_START"], 1.0: ["BRAKE_END"], 1.05: ["STRONG_THROTTLE_START"]})
+                         {0.0: ["BRAKE_START"], 1.0: ["BRAKE_END"], 1.05: ["TURN_LEFT_START"]})
         self.assertEqual(frames[-1].facts[0].attributes["speed_mps"], 5.0)
         self.assertEqual([frame.t_local for frame in trace(1.0)][-2:], [0.9, 1.0])  # on the grid: no extra frame
 

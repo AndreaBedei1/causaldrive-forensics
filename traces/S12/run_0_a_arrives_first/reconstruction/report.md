@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 16.45 s | 166 | 49 | 123 | 12 | none |
-| B | 16.45 s | 166 | 23 | 45 | 1 | none |
+| A | 16.45 s | 166 | 66 | 171 | 18 | none |
+| B | 16.45 s | 166 | 16 | 26 | 1 | none |
 
 ## Graph alignment
 
@@ -38,11 +38,17 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | A:track_010 | A:track_010 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
 | A:track_011 | A:track_011 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
 | A:track_012 | A:track_012 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_013 | A:track_013 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_014 | A:track_014 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_015 | A:track_015 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_016 | A:track_016 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_017 | A:track_017 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| A:track_018 | A:track_018 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
 | B:track_001 | B:track_001 | ANONYMOUS | - | graph B is not aligned: it recorded no collision to anchor on |
 
 ## Global graph
 
-72 nodes, 31 edges; 0 merged node(s): none.
+82 nodes, 43 edges; 0 merged node(s): none.
 
 ### Event sequence (global time)
 
@@ -54,74 +60,93 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 0.65 s) A's camera established a STOP sign detection (unidentified object A:sign-0).
 - (unaligned, A local time 2.25 s) A's camera stopped detecting STOP sign unidentified object A:sign-0.
 - (unaligned, A local time 2.65 s) A started braking.
-- (unaligned, A local time 2.65 s) A started braking hard.
+- (unaligned, A local time 2.95 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
+- (unaligned, A local time 2.95 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
 - (unaligned, A local time 3.40 s) A stopped moving.
 - (unaligned, A local time 3.40 s) A came to a stop.
-- (unaligned, A local time 6.45 s) A stopped braking hard.
+- (unaligned, A local time 4.70 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 6.45 s) A released the brake.
-- (unaligned, A local time 6.45 s) A started applying strong throttle.
 - (unaligned, A local time 6.80 s) A left its stop.
 - (unaligned, A local time 6.80 s) A started moving.
-- (unaligned, A local time 7.80 s) A stopped applying strong throttle.
-- (unaligned, A local time 8.85 s) A's radar started tracking unidentified object A:track_001, which appeared on its left.
-- (unaligned, A local time 8.85 s) A's radar started tracking unidentified object A:track_002, which appeared on its left.
-- (unaligned, A local time 8.85 s) A observed unidentified object A:track_001 start closing in (already the case when first observed).
-- (unaligned, A local time 8.85 s) A observed unidentified object A:track_002 start closing in (already the case when first observed).
-- (unaligned, A local time 8.95 s) A's radar started tracking unidentified object A:track_003, which appeared on its left.
-- (unaligned, A local time 8.95 s) A observed unidentified object A:track_003 start closing in (already the case when first observed).
-- (unaligned, A local time 9.00 s) A's radar started tracking unidentified object A:track_004, which appeared on its right.
-- (unaligned, A local time 9.00 s) A observed unidentified object A:track_004 start closing in (already the case when first observed).
-- (unaligned, A local time 9.05 s) A's radar started tracking unidentified object A:track_005, which appeared on its left.
-- (unaligned, A local time 9.05 s) A's radar started tracking unidentified object A:track_007, which appeared on its left.
-- (unaligned, A local time 9.05 s) A observed unidentified object A:track_005 start closing in (already the case when first observed).
-- (unaligned, A local time 9.05 s) A observed unidentified object A:track_007 start closing in (already the case when first observed).
-- (unaligned, A local time 9.10 s) A's radar started tracking unidentified object A:track_006, which appeared on its left.
-- (unaligned, A local time 9.10 s) A's radar started tracking unidentified object A:track_008, which appeared on its left.
-- (unaligned, A local time 9.10 s) A observed unidentified object A:track_006 start closing in (already the case when first observed).
-- (unaligned, A local time 9.10 s) A observed unidentified object A:track_008 start closing in (already the case when first observed).
-- (unaligned, A local time 9.15 s) A's radar started tracking unidentified object A:track_009, which appeared on its left.
-- (unaligned, A local time 9.15 s) A observed unidentified object A:track_009 start closing in (already the case when first observed).
-- (unaligned, A local time 9.20 s) A's radar started tracking unidentified object A:track_010, which appeared on its left.
-- (unaligned, A local time 9.20 s) A's radar started tracking unidentified object A:track_011, which appeared on its left.
-- (unaligned, A local time 9.20 s) A observed unidentified object A:track_010 start closing in (already the case when first observed).
-- (unaligned, A local time 9.20 s) A observed unidentified object A:track_011 start closing in (already the case when first observed).
-- (unaligned, A local time 9.25 s) A's radar started tracking unidentified object A:track_012, which appeared on its left.
-- (unaligned, A local time 9.25 s) A observed unidentified object A:track_012 start closing in (already the case when first observed).
-- (unaligned, A local time 9.45 s) A's time-to-contact with unidentified object A:track_009 became critical.
-- (unaligned, A local time 10.05 s) A's time-to-contact with unidentified object A:track_004 became critical.
-- (unaligned, A local time 10.25 s) A's radar lost unidentified object A:track_004 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 10.70 s) A's radar lost unidentified object A:track_009 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 12.00 s) A observed unidentified object A:track_001 enter its forward path corridor.
-- (unaligned, A local time 12.25 s) A's radar lost unidentified object A:track_012 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 12.75 s) A's radar lost unidentified object A:track_011 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 13.35 s) A's radar lost unidentified object A:track_006 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 14.50 s) A's radar lost unidentified object A:track_008 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 14.65 s) A's radar lost unidentified object A:track_010 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 15.75 s) A's radar lost unidentified object A:track_005 (its states are UNKNOWN from then on, not ended).
-- (unaligned, A local time 16.30 s) A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 7.15 s) A observed unidentified object A:track_001 start closing in.
+- (unaligned, A local time 7.80 s) A started turning left.
+- (unaligned, A local time 8.25 s) A's radar started tracking unidentified object A:track_002, which appeared on its left.
+- (unaligned, A local time 8.25 s) A's radar started tracking unidentified object A:track_003, which appeared on its left.
+- (unaligned, A local time 8.25 s) A's radar started tracking unidentified object A:track_005, which appeared on its left.
+- (unaligned, A local time 8.25 s) A's radar started tracking unidentified object A:track_008, which appeared on its left.
+- (unaligned, A local time 8.25 s) A observed unidentified object A:track_002 start closing in (already the case when first observed).
+- (unaligned, A local time 8.25 s) A observed unidentified object A:track_003 start closing in (already the case when first observed).
+- (unaligned, A local time 8.25 s) A observed unidentified object A:track_005 start closing in (already the case when first observed).
+- (unaligned, A local time 8.25 s) A observed unidentified object A:track_008 start closing in (already the case when first observed).
+- (unaligned, A local time 8.30 s) A's radar started tracking unidentified object A:track_004, which appeared on its left.
+- (unaligned, A local time 8.30 s) A observed unidentified object A:track_004 start closing in (already the case when first observed).
+- (unaligned, A local time 8.80 s) A's radar started tracking unidentified object A:track_006, which appeared on its left.
+- (unaligned, A local time 8.80 s) A's radar started tracking unidentified object A:track_007, which appeared on its right.
+- (unaligned, A local time 8.80 s) A observed unidentified object A:track_006 start closing in (already the case when first observed).
+- (unaligned, A local time 8.85 s) A's radar started tracking unidentified object A:track_010, which appeared on its left.
+- (unaligned, A local time 8.85 s) A's radar started tracking unidentified object A:track_011, which appeared on its left.
+- (unaligned, A local time 8.85 s) A's radar started tracking unidentified object A:track_009, which appeared on its right.
+- (unaligned, A local time 8.85 s) A observed unidentified object A:track_010 start closing in (already the case when first observed).
+- (unaligned, A local time 8.85 s) A observed unidentified object A:track_011 start closing in (already the case when first observed).
+- (unaligned, A local time 8.90 s) A's radar started tracking unidentified object A:track_012, which appeared on its left.
+- (unaligned, A local time 8.90 s) A's radar started tracking unidentified object A:track_017, which appeared on its left.
+- (unaligned, A local time 8.90 s) A observed unidentified object A:track_012 start closing in (already the case when first observed).
+- (unaligned, A local time 8.90 s) A observed unidentified object A:track_017 start closing in (already the case when first observed).
+- (unaligned, A local time 9.00 s) A's radar started tracking unidentified object A:track_014, which appeared on its left.
+- (unaligned, A local time 9.00 s) A's radar started tracking unidentified object A:track_013, which appeared on its right.
+- (unaligned, A local time 9.00 s) A observed unidentified object A:track_014 start closing in (already the case when first observed).
+- (unaligned, A local time 9.00 s) A's radar lost unidentified object A:track_007 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 9.05 s) A's radar started tracking unidentified object A:track_015, which appeared on its left.
+- (unaligned, A local time 9.05 s) A observed unidentified object A:track_015 start closing in (already the case when first observed).
+- (unaligned, A local time 9.10 s) A's radar started tracking unidentified object A:track_016, which appeared on its right.
+- (unaligned, A local time 9.10 s) A observed unidentified object A:track_016 start closing in (already the case when first observed).
+- (unaligned, A local time 9.20 s) A's radar lost unidentified object A:track_009 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 9.25 s) A's radar started tracking unidentified object A:track_018, which appeared on its right.
+- (unaligned, A local time 9.25 s) A observed unidentified object A:track_018 start closing in (already the case when first observed).
+- (unaligned, A local time 9.40 s) A observed unidentified object A:track_016 stop closing in.
+- (unaligned, A local time 9.60 s) A observed unidentified object A:track_016 start closing in.
+- (unaligned, A local time 9.75 s) A's time-to-contact with unidentified object A:track_001 became critical.
+- (unaligned, A local time 9.80 s) A observed unidentified object A:track_013 start closing in.
+- (unaligned, A local time 10.10 s) A's radar lost unidentified object A:track_018 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 10.40 s) A's radar lost unidentified object A:track_016 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 10.45 s) A's radar lost unidentified object A:track_015 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 10.60 s) A observed unidentified object A:track_014 enter its forward path corridor.
+- (unaligned, A local time 10.65 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
+- (unaligned, A local time 10.70 s) A's radar lost unidentified object A:track_010 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 11.00 s) A's radar lost unidentified object A:track_001 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 11.05 s) A stopped turning left.
+- (unaligned, A local time 11.20 s) A observed unidentified object A:track_014 leave its forward path corridor.
+- (unaligned, A local time 11.90 s) A observed unidentified object A:track_008 enter its forward path corridor.
+- (unaligned, A local time 12.30 s) A's radar lost unidentified object A:track_006 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 13.50 s) A's radar lost unidentified object A:track_013 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 14.30 s) A's radar lost unidentified object A:track_017 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 14.35 s) A's radar lost unidentified object A:track_012 (its states are UNKNOWN from then on, not ended).
+- (unaligned, A local time 14.50 s) A's radar lost unidentified object A:track_004 (its states are UNKNOWN from then on, not ended).
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
-- (unaligned, B local time 1.65 s) B started applying strong throttle.
-- (unaligned, B local time 2.10 s) B stopped applying strong throttle.
 - (unaligned, B local time 2.10 s) B's camera established a STOP sign detection (unidentified object B:sign-0) (the detector judged it not relevant to its path).
-- (unaligned, B local time 3.00 s) B's radar started tracking unidentified object B:track_001, which appeared on its right.
-- (unaligned, B local time 3.00 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
 - (unaligned, B local time 4.00 s) B's camera stopped detecting STOP sign unidentified object B:sign-0.
 - (unaligned, B local time 4.35 s) B started braking.
-- (unaligned, B local time 4.35 s) B started braking hard.
-- (unaligned, B local time 4.70 s) B observed unidentified object B:track_001 stop closing in.
 - (unaligned, B local time 4.70 s) B stopped moving.
 - (unaligned, B local time 4.70 s) B came to a stop.
-- (unaligned, B local time 6.95 s) B observed unidentified object B:track_001 start closing in.
+- (unaligned, B local time 6.90 s) B's radar started tracking unidentified object B:track_001, which appeared on its right.
+- (unaligned, B local time 6.90 s) B observed unidentified object B:track_001 start closing in (already the case when first observed).
 - (unaligned, B local time 8.50 s) B observed unidentified object B:track_001 enter its forward path corridor.
 - (unaligned, B local time 9.05 s) B observed unidentified object B:track_001 leave its forward path corridor.
-- (unaligned, B local time 9.55 s) B's time-to-contact with unidentified object B:track_001 became critical.
-- (unaligned, B local time 10.45 s) B stopped braking hard.
 - (unaligned, B local time 10.45 s) B released the brake.
-- (unaligned, B local time 10.45 s) B started applying strong throttle.
+- (unaligned, B local time 10.55 s) B's time-to-contact with unidentified object B:track_001 became critical.
+- (unaligned, B local time 10.85 s) B's time-to-contact with unidentified object B:track_001 stopped being critical.
 - (unaligned, B local time 10.85 s) B left its stop.
 - (unaligned, B local time 10.85 s) B started moving.
-- (unaligned, B local time 10.85 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
-- (unaligned, B local time 11.95 s) B stopped applying strong throttle.
+- (unaligned, B local time 11.15 s) B's radar lost unidentified object B:track_001 (its states are UNKNOWN from then on, not ended).
+
+### Temporal safety relations
+
+CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
+
+- A's track_001 (unidentified A:track_001): CRITICAL_TTC_START 9.75 [local times]
+- A's track_008 (unidentified A:track_008): EGO_PATH_ENTRY 11.90, no critical TTC [local times]
+- A's track_014 (unidentified A:track_014): EGO_PATH_ENTRY 10.60, no critical TTC [local times]
+- B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 10.55; EGO_PATH_ENTRY 8.50 before critical TTC (-2.05 s) [local times]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -131,25 +156,26 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 A:
 - MOVING, since A:e12 (t = 6.80 s)
-- CLOSING of track_001, since A:e16 (t = 8.85 s)
-- CLOSING of track_002, since A:e17 (t = 8.85 s)
-- CLOSING of track_003, since A:e19 (t = 8.95 s)
-- CLOSING of track_004, since A:e21 (t = 9.00 s); the track was lost at 10.25 s
-- CLOSING of track_005, since A:e24 (t = 9.05 s); the track was lost at 15.75 s
-- CLOSING of track_007, since A:e25 (t = 9.05 s); the track was lost at 16.30 s
-- CLOSING of track_006, since A:e28 (t = 9.10 s); the track was lost at 13.35 s
-- CLOSING of track_008, since A:e29 (t = 9.10 s); the track was lost at 14.50 s
-- CLOSING of track_009, since A:e31 (t = 9.15 s); the track was lost at 10.70 s
-- CLOSING of track_010, since A:e34 (t = 9.20 s); the track was lost at 14.65 s
-- CLOSING of track_011, since A:e35 (t = 9.20 s); the track was lost at 12.75 s
-- CLOSING of track_012, since A:e37 (t = 9.25 s); the track was lost at 12.25 s
-- CRITICAL_TTC of track_009, since A:e38 (t = 9.45 s); the track was lost at 10.70 s
-- CRITICAL_TTC of track_004, since A:e39 (t = 10.05 s); the track was lost at 10.25 s
-- EGO_PATH of track_001, since A:e42 (t = 12.00 s)
+- CLOSING of track_001, since A:e13 (t = 7.15 s); the track was lost at 11.00 s
+- CLOSING of track_002, since A:e19 (t = 8.25 s)
+- CLOSING of track_003, since A:e20 (t = 8.25 s)
+- CLOSING of track_005, since A:e21 (t = 8.25 s)
+- CLOSING of track_008, since A:e22 (t = 8.25 s)
+- CLOSING of track_004, since A:e24 (t = 8.30 s); the track was lost at 14.50 s
+- CLOSING of track_006, since A:e27 (t = 8.80 s); the track was lost at 12.30 s
+- CLOSING of track_010, since A:e31 (t = 8.85 s); the track was lost at 10.70 s
+- CLOSING of track_011, since A:e32 (t = 8.85 s)
+- CLOSING of track_012, since A:e35 (t = 8.90 s); the track was lost at 14.35 s
+- CLOSING of track_017, since A:e36 (t = 8.90 s); the track was lost at 14.30 s
+- CLOSING of track_014, since A:e39 (t = 9.00 s)
+- CLOSING of track_015, since A:e42 (t = 9.05 s); the track was lost at 10.45 s
+- CLOSING of track_018, since A:e47 (t = 9.25 s); the track was lost at 10.10 s
+- CLOSING of track_016, since A:e49 (t = 9.60 s); the track was lost at 10.40 s
+- CLOSING of track_013, since A:e51 (t = 9.80 s); the track was lost at 13.50 s
+- EGO_PATH of track_008, since A:e61 (t = 11.90 s)
 B:
-- CLOSING of track_001, since B:e13 (t = 6.95 s); the track was lost at 10.85 s
-- CRITICAL_TTC of track_001, since B:e16 (t = 9.55 s); the track was lost at 10.85 s
-- MOVING, since B:e21 (t = 10.85 s)
+- CLOSING of track_001, since B:e08 (t = 6.90 s); the track was lost at 11.15 s
+- MOVING, since B:e15 (t = 10.85 s)
 
 ### Sign detection windows
 
@@ -167,17 +193,19 @@ B:
 A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
 
 A:
-- track_004 at 10.25 s (A:e40): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
-- track_009 at 10.70 s (A:e41): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
-- track_012 at 12.25 s (A:e43): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_011 at 12.75 s (A:e44): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_006 at 13.35 s (A:e45): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_008 at 14.50 s (A:e46): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_010 at 14.65 s (A:e47): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_005 at 15.75 s (A:e48): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_007 at 16.30 s (A:e49): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_018 at 10.10 s (A:e52): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_016 at 10.40 s (A:e53): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_015 at 10.45 s (A:e54): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_010 at 10.70 s (A:e57): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 11.00 s (A:e58): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_006 at 12.30 s (A:e62): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_013 at 13.50 s (A:e63): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_017 at 14.30 s (A:e64): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_012 at 14.35 s (A:e65): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_004 at 14.50 s (A:e66): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_007, track_009
 B:
-- track_001 at 10.85 s (B:e22): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 11.15 s (B:e16): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Uncertainty and limitations
 
@@ -193,6 +221,12 @@ B:
 - A:track_010 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
 - A:track_011 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
 - A:track_012 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_013 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_014 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_015 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_016 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_017 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- A:track_018 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
 - B:track_001 stays anonymous: graph B is not aligned: it recorded no collision to anchor on.
 - A is UNALIGNED: it recorded no collision to anchor on.
 - B is UNALIGNED: it recorded no collision to anchor on.
@@ -227,12 +261,20 @@ B:
   },
   "semantics": {
     "brake_onset_threshold": 0.1,
-    "hard_brake_threshold": 0.9,
-    "strong_throttle_threshold": 0.8,
     "full_stop_speed_mps": 0.3,
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
-    "critical_ttc_s": 2.0,
+    "critical_reaction_time_s": 1.0,
+    "critical_deceleration_mps2": 6.0,
+    "critical_standstill_margin_m": 1.0,
+    "critical_release_ratio": 0.75,
+    "turn_yaw_rate_window_s": 0.2,
+    "turn_yaw_rate_on_dps": 10.0,
+    "turn_yaw_rate_off_dps": 5.0,
+    "turn_min_speed_mps": 1.0,
+    "turn_release_debounce_s": 0.3,
+    "turn_min_duration_s": 0.5,
+    "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
@@ -251,6 +293,8 @@ B:
     "impulse_tolerance": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
+    "contact_range_scale_m": 3.0,
+    "approach_window_s": 1.0,
     "min_track_persistence_s": 1.0,
     "speed_consistency_mps": 1.5
   }

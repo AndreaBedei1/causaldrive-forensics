@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "C",
     "clock": {
-      "origin_source_timestamp": 544.6900767125189,
+      "origin_source_timestamp": 196.7230779863894,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -45,8 +45,8 @@
           "MOVING": "UNKNOWN",
           "STOP": "UNKNOWN",
           "BRAKE": "UNKNOWN",
-          "HARD_BRAKE": "UNKNOWN",
-          "STRONG_THROTTLE": "UNKNOWN",
+          "TURN_LEFT": "UNKNOWN",
+          "TURN_RIGHT": "UNKNOWN",
           "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
         },
         "external": {},
@@ -69,8 +69,8 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -93,8 +93,8 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -119,8 +119,8 @@
           "MOVING": false,
           "STOP": true,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -143,8 +143,8 @@
           "MOVING": false,
           "STOP": true,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -167,8 +167,8 @@
           "MOVING": false,
           "STOP": true,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -191,8 +191,8 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -202,30 +202,6 @@
     },
     {
       "node_id": "C:e08",
-      "event_type": "HARD_BRAKE_START",
-      "kind": "ACTION",
-      "actor_id": "C",
-      "subject_id": null,
-      "t_local": 5.95,
-      "attributes": {},
-      "source": "controls",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "HARD_BRAKE": false,
-          "STRONG_THROTTLE": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {},
-        "signs": {},
-        "facts_t_local": 5.9
-      }
-    },
-    {
-      "node_id": "C:e09",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "C",
@@ -239,8 +215,8 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": true,
-          "HARD_BRAKE": true,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -249,7 +225,7 @@
       }
     },
     {
-      "node_id": "C:e10",
+      "node_id": "C:e09",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "C",
@@ -263,8 +239,8 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": true,
-          "HARD_BRAKE": true,
-          "STRONG_THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -320,18 +296,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e04",
-      "to": "C:e08",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "C:e05",
       "to": "C:e07",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e05",
-      "to": "C:e08",
       "relation": "PRECEDES"
     },
     {
@@ -340,28 +306,13 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e06",
+      "from": "C:e07",
       "to": "C:e08",
       "relation": "PRECEDES"
     },
     {
       "from": "C:e07",
       "to": "C:e09",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e07",
-      "to": "C:e10",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e08",
-      "to": "C:e09",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "C:e08",
-      "to": "C:e10",
       "relation": "PRECEDES"
     }
   ],

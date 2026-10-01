@@ -28,7 +28,7 @@ from bisect import bisect_left, bisect_right
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 UNKNOWN = "UNKNOWN"
-EGO_STATES = ("MOVING", "STOP", "BRAKE", "HARD_BRAKE", "STRONG_THROTTLE", "SPEED_LIMIT_EXCEEDED")
+EGO_STATES = ("MOVING", "STOP", "BRAKE", "TURN_LEFT", "TURN_RIGHT", "SPEED_LIMIT_EXCEEDED")
 TRACK_STATES = ("CLOSING", "CRITICAL_TTC", "IN_EGO_PATH", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 _EPS = 1e-6
 

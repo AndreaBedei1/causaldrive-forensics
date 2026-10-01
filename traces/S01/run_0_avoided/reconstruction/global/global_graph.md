@@ -34,40 +34,31 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | g01 | - | MOVING_START | A | - | A:e01 @ 0.00 | active_at_first_observation=True |
 | g02 | - | TRACK_APPEARED_FRONT | A | A:track_001 | A:e02 @ 0.10 |  |
 | g03 | - | CLOSING_START | A | A:track_001 | A:e03 @ 0.45 |  |
-| g04 | - | STRONG_THROTTLE_START | A | - | A:e04 @ 1.15 |  |
-| g05 | - | STRONG_THROTTLE_END | A | - | A:e05 @ 1.35 |  |
-| g06 | - | CLOSING_END | A | A:track_001 | A:e06 @ 1.60 |  |
-| g07 | - | CLOSING_START | A | A:track_001 | A:e07 @ 4.25 |  |
-| g08 | - | CRITICAL_TTC_START | A | A:track_001 | A:e08 @ 5.00 |  |
-| g09 | - | BRAKE_START | A | - | A:e09 @ 5.05 |  |
-| g10 | - | HARD_BRAKE_START | A | - | A:e10 @ 5.05 |  |
-| g11 | - | CRITICAL_TTC_END | A | A:track_001 | A:e11 @ 6.25 |  |
-| g12 | - | CLOSING_END | A | A:track_001 | A:e12 @ 6.35 |  |
-| g13 | - | MOVING_END | A | - | A:e13 @ 6.35 |  |
-| g14 | - | STOP_START | A | - | A:e14 @ 6.35 |  |
-| g15 | - | STRONG_THROTTLE_START | A | - | A:e15 @ 13.05 |  |
-| g16 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
-| g17 | - | STRONG_THROTTLE_START | B | - | B:e02 @ 0.40 |  |
-| g18 | - | STRONG_THROTTLE_END | B | - | B:e03 @ 1.75 |  |
-| g19 | - | BRAKE_START | B | - | B:e04 @ 3.95 |  |
-| g20 | - | HARD_BRAKE_START | B | - | B:e05 @ 3.95 |  |
-| g21 | - | MOVING_END | B | - | B:e06 @ 5.15 |  |
-| g22 | - | STOP_START | B | - | B:e07 @ 5.15 |  |
-| g23 | - | HARD_BRAKE_END | B | - | B:e08 @ 11.95 |  |
-| g24 | - | BRAKE_END | B | - | B:e09 @ 11.95 |  |
-| g25 | - | STRONG_THROTTLE_START | B | - | B:e10 @ 11.95 |  |
-| g26 | - | STOP_END | B | - | B:e11 @ 12.35 |  |
-| g27 | - | MOVING_START | B | - | B:e12 @ 12.35 |  |
+| g04 | - | CLOSING_END | A | A:track_001 | A:e04 @ 1.60 |  |
+| g05 | - | CLOSING_START | A | A:track_001 | A:e05 @ 4.25 |  |
+| g06 | - | CRITICAL_TTC_START | A | A:track_001 | A:e06 @ 5.00 |  |
+| g07 | - | BRAKE_START | A | - | A:e07 @ 5.05 |  |
+| g08 | - | CRITICAL_TTC_END | A | A:track_001 | A:e08 @ 6.25 |  |
+| g09 | - | CLOSING_END | A | A:track_001 | A:e09 @ 6.35 |  |
+| g10 | - | MOVING_END | A | - | A:e10 @ 6.35 |  |
+| g11 | - | STOP_START | A | - | A:e11 @ 6.35 |  |
+| g12 | - | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
+| g13 | - | BRAKE_START | B | - | B:e02 @ 3.95 |  |
+| g14 | - | MOVING_END | B | - | B:e03 @ 5.15 |  |
+| g15 | - | STOP_START | B | - | B:e04 @ 5.15 |  |
+| g16 | - | BRAKE_END | B | - | B:e05 @ 11.95 |  |
+| g17 | - | STOP_END | B | - | B:e06 @ 12.35 |  |
+| g18 | - | MOVING_START | B | - | B:e07 @ 12.35 |  |
 
 ## Edges
 
 ```
     g02 --SAME_TRACK--> g03
+    g02 --SAME_TRACK--> g04
+    g02 --SAME_TRACK--> g05
     g02 --SAME_TRACK--> g06
-    g02 --SAME_TRACK--> g07
     g02 --SAME_TRACK--> g08
-    g02 --SAME_TRACK--> g11
-    g02 --SAME_TRACK--> g12
+    g02 --SAME_TRACK--> g09
 ```
 
 ## Global trace
@@ -76,6 +67,12 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 | t_global | Events |
 |---------:|--------|
+
+## Temporal safety relations
+
+Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
+
+- A's track_001 (unidentified A:track_001): CRITICAL_TTC_START 5.00 [local times]
 
 ## Perceived state before each event, per observing recorder
 
@@ -86,49 +83,35 @@ Each recorder's own belief just before its events, in its own local names (track
 | - | A | g01 MOVING_START(A) (A:e01) | ego: not yet observed |
 | - | A | g02 TRACK_APPEARED_FRONT(A,A:track_001) (A:e02) | ego: MOVING |
 | - | A | g03 CLOSING_START(A,A:track_001) (A:e03) | ego: MOVING<br>track_001: IN_EGO_PATH |
-| - | A | g04 STRONG_THROTTLE_START(A) (A:e04) | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH |
-| - | A | g05 STRONG_THROTTLE_END(A) (A:e05) | ego: MOVING, STRONG_THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
-| - | A | g06 CLOSING_END(A,A:track_001) (A:e06) | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH |
-| - | A | g07 CLOSING_START(A,A:track_001) (A:e07) | ego: MOVING<br>track_001: IN_EGO_PATH |
-| - | A | g08 CRITICAL_TTC_START(A,A:track_001) (A:e08) | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH |
-| - | A | g09 BRAKE_START(A) (A:e09)<br>g10 HARD_BRAKE_START(A) (A:e10) | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| - | A | g11 CRITICAL_TTC_END(A,A:track_001) (A:e11) | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| - | A | g12 CLOSING_END(A,A:track_001) (A:e12)<br>g13 MOVING_END(A) (A:e13)<br>g14 STOP_START(A) (A:e14) | ego: MOVING, BRAKE, HARD_BRAKE<br>track_001: CLOSING, IN_EGO_PATH |
-| - | A | g15 STRONG_THROTTLE_START(A) (A:e15) | ego: STOP, BRAKE, HARD_BRAKE<br>track_001: IN_EGO_PATH |
-| - | B | g16 MOVING_START(B) (B:e01) | ego: not yet observed |
-| - | B | g17 STRONG_THROTTLE_START(B) (B:e02) | ego: MOVING |
-| - | B | g18 STRONG_THROTTLE_END(B) (B:e03) | ego: MOVING, STRONG_THROTTLE |
-| - | B | g19 BRAKE_START(B) (B:e04)<br>g20 HARD_BRAKE_START(B) (B:e05) | ego: MOVING |
-| - | B | g21 MOVING_END(B) (B:e06)<br>g22 STOP_START(B) (B:e07) | ego: MOVING, BRAKE, HARD_BRAKE |
-| - | B | g23 HARD_BRAKE_END(B) (B:e08)<br>g24 BRAKE_END(B) (B:e09)<br>g25 STRONG_THROTTLE_START(B) (B:e10) | ego: STOP, BRAKE, HARD_BRAKE |
-| - | B | g26 STOP_END(B) (B:e11)<br>g27 MOVING_START(B) (B:e12) | ego: STOP, STRONG_THROTTLE |
+| - | A | g04 CLOSING_END(A,A:track_001) (A:e04) | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH |
+| - | A | g05 CLOSING_START(A,A:track_001) (A:e05) | ego: MOVING<br>track_001: IN_EGO_PATH |
+| - | A | g06 CRITICAL_TTC_START(A,A:track_001) (A:e06) | ego: MOVING<br>track_001: CLOSING, IN_EGO_PATH |
+| - | A | g07 BRAKE_START(A) (A:e07) | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| - | A | g08 CRITICAL_TTC_END(A,A:track_001) (A:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| - | A | g09 CLOSING_END(A,A:track_001) (A:e09)<br>g10 MOVING_END(A) (A:e10)<br>g11 STOP_START(A) (A:e11) | ego: MOVING, BRAKE<br>track_001: CLOSING, IN_EGO_PATH |
+| - | B | g12 MOVING_START(B) (B:e01) | ego: not yet observed |
+| - | B | g13 BRAKE_START(B) (B:e02) | ego: MOVING |
+| - | B | g14 MOVING_END(B) (B:e03)<br>g15 STOP_START(B) (B:e04) | ego: MOVING, BRAKE |
+| - | B | g16 BRAKE_END(B) (B:e05) | ego: STOP, BRAKE |
+| - | B | g17 STOP_END(B) (B:e06)<br>g18 MOVING_START(B) (B:e07) | ego: STOP |
 
 ## Plain-language reading
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
 - (unaligned, A local time 0.10 s) A's radar started tracking unidentified object A:track_001, which appeared in front of it.
 - (unaligned, A local time 0.45 s) A observed unidentified object A:track_001 start closing in.
-- (unaligned, A local time 1.15 s) A started applying strong throttle.
-- (unaligned, A local time 1.35 s) A stopped applying strong throttle.
 - (unaligned, A local time 1.60 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 4.25 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 5.00 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 5.05 s) A started braking.
-- (unaligned, A local time 5.05 s) A started braking hard.
 - (unaligned, A local time 6.25 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
 - (unaligned, A local time 6.35 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 6.35 s) A stopped moving.
 - (unaligned, A local time 6.35 s) A came to a stop.
-- (unaligned, A local time 13.05 s) A started applying strong throttle.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
-- (unaligned, B local time 0.40 s) B started applying strong throttle.
-- (unaligned, B local time 1.75 s) B stopped applying strong throttle.
 - (unaligned, B local time 3.95 s) B started braking.
-- (unaligned, B local time 3.95 s) B started braking hard.
 - (unaligned, B local time 5.15 s) B stopped moving.
 - (unaligned, B local time 5.15 s) B came to a stop.
-- (unaligned, B local time 11.95 s) B stopped braking hard.
 - (unaligned, B local time 11.95 s) B released the brake.
-- (unaligned, B local time 11.95 s) B started applying strong throttle.
 - (unaligned, B local time 12.35 s) B left its stop.
 - (unaligned, B local time 12.35 s) B started moving.

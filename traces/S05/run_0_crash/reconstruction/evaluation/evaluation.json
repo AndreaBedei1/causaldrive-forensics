@@ -1,6 +1,6 @@
 {
   "run": "S05/run_0_crash",
-  "headline": "collision reconstructed: yes; associations correct: 1/1; anonymous: 19; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes; associations correct: 2/2; anonymous: 18; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 134.13641058281064,
       "peak_impulse": 6116.261344285613,
-      "reconstructed_as": "g13",
+      "reconstructed_as": "g11",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -40,10 +40,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 99,
+    "nodes": 93,
     "max_abs_error_s": 0.0,
-    "order_pairs": 4542,
-    "order_concordant": 4542
+    "order_pairs": 4009,
+    "order_concordant": 4009
   },
   "tracks": [
     {
@@ -64,13 +64,13 @@
     },
     {
       "track": "B:track_001",
-      "decision": "B:track_001",
-      "status": "ANONYMOUS",
+      "decision": "A",
+      "status": "ASSOCIATED",
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0
       },
-      "verdict": "left anonymous (true identity A)",
+      "verdict": "correct",
       "samples": 20,
       "raw_rmse_to_surface_m": 0.452,
       "smoothed_rmse_to_surface_m": 0.569,

@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 213.24118796736002,
+      "sim_time": 93.5236803330481,
       "peak_impulse": 31406.82185785314,
-      "reconstructed_as": "g23",
+      "reconstructed_as": "g18",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -47,10 +47,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 31,
+    "nodes": 23,
     "max_abs_error_s": 0.0,
-    "order_pairs": 443,
-    "order_concordant": 443
+    "order_pairs": 242,
+    "order_concordant": 242
   },
   "tracks": [
     {
@@ -60,15 +60,15 @@
       "true_identity": "B",
       "median_box_distance_m": {
         "B": 0.0,
-        "C": 14.19
+        "C": 14.18
       },
       "verdict": "correct",
-      "samples": 142,
-      "raw_rmse_to_surface_m": 0.527,
-      "smoothed_rmse_to_surface_m": 0.516,
-      "smoothed_rmse_to_centre_m": 1.584,
-      "raw_difference_speed_rmse_mps": 0.567,
-      "speed_rmse_mps": 0.147
+      "samples": 141,
+      "raw_rmse_to_surface_m": 0.556,
+      "smoothed_rmse_to_surface_m": 0.554,
+      "smoothed_rmse_to_centre_m": 1.542,
+      "raw_difference_speed_rmse_mps": 1.189,
+      "speed_rmse_mps": 0.145
     },
     {
       "track": "B:track_001",
@@ -76,16 +76,16 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 15.43,
+        "A": 15.42,
         "C": 0.0
       },
       "verdict": "left anonymous (true identity C)",
       "samples": 142,
-      "raw_rmse_to_surface_m": 0.448,
-      "smoothed_rmse_to_surface_m": 0.438,
-      "smoothed_rmse_to_centre_m": 1.867,
-      "raw_difference_speed_rmse_mps": 1.399,
-      "speed_rmse_mps": 0.108
+      "raw_rmse_to_surface_m": 0.446,
+      "smoothed_rmse_to_surface_m": 0.428,
+      "smoothed_rmse_to_centre_m": 1.877,
+      "raw_difference_speed_rmse_mps": 2.285,
+      "speed_rmse_mps": 0.114
     }
   ],
   "clock_shift_check": {

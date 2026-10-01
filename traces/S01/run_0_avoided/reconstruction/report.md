@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 13.05 s | 132 | 15 | 23 | 1 | none |
-| B | 13.05 s | 132 | 12 | 20 | 0 | none |
+| A | 13.05 s | 132 | 11 | 16 | 1 | none |
+| B | 13.05 s | 132 | 7 | 7 | 0 | none |
 
 ## Graph alignment
 
@@ -30,7 +30,7 @@ No collision was matched across recorders, so no local graph could be aligned; e
 
 ## Global graph
 
-27 nodes, 6 edges; 0 merged node(s): none.
+18 nodes, 6 edges; 0 merged node(s): none.
 
 ### Event sequence (global time)
 
@@ -41,30 +41,27 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
 - (unaligned, A local time 0.10 s) A's radar started tracking unidentified object A:track_001, which appeared in front of it.
 - (unaligned, A local time 0.45 s) A observed unidentified object A:track_001 start closing in.
-- (unaligned, A local time 1.15 s) A started applying strong throttle.
-- (unaligned, A local time 1.35 s) A stopped applying strong throttle.
 - (unaligned, A local time 1.60 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 4.25 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 5.00 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 5.05 s) A started braking.
-- (unaligned, A local time 5.05 s) A started braking hard.
 - (unaligned, A local time 6.25 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
 - (unaligned, A local time 6.35 s) A observed unidentified object A:track_001 stop closing in.
 - (unaligned, A local time 6.35 s) A stopped moving.
 - (unaligned, A local time 6.35 s) A came to a stop.
-- (unaligned, A local time 13.05 s) A started applying strong throttle.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
-- (unaligned, B local time 0.40 s) B started applying strong throttle.
-- (unaligned, B local time 1.75 s) B stopped applying strong throttle.
 - (unaligned, B local time 3.95 s) B started braking.
-- (unaligned, B local time 3.95 s) B started braking hard.
 - (unaligned, B local time 5.15 s) B stopped moving.
 - (unaligned, B local time 5.15 s) B came to a stop.
-- (unaligned, B local time 11.95 s) B stopped braking hard.
 - (unaligned, B local time 11.95 s) B released the brake.
-- (unaligned, B local time 11.95 s) B started applying strong throttle.
 - (unaligned, B local time 12.35 s) B left its stop.
 - (unaligned, B local time 12.35 s) B started moving.
+
+### Temporal safety relations
+
+CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
+
+- A's track_001 (unidentified A:track_001): CRITICAL_TTC_START 5.00 [local times]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -73,13 +70,10 @@ No collision was matched across recorders, so no local graph could be aligned; e
 ### States still active when observation ended
 
 A:
-- BRAKE, since A:e09 (t = 5.05 s)
-- HARD_BRAKE, since A:e10 (t = 5.05 s)
-- STOP, since A:e14 (t = 6.35 s)
-- STRONG_THROTTLE, since A:e15 (t = 13.05 s)
+- BRAKE, since A:e07 (t = 5.05 s)
+- STOP, since A:e11 (t = 6.35 s)
 B:
-- STRONG_THROTTLE, since B:e10 (t = 11.95 s)
-- MOVING, since B:e12 (t = 12.35 s)
+- MOVING, since B:e07 (t = 12.35 s)
 
 ### Sign detection windows
 
@@ -138,12 +132,20 @@ B:
   },
   "semantics": {
     "brake_onset_threshold": 0.1,
-    "hard_brake_threshold": 0.9,
-    "strong_throttle_threshold": 0.8,
     "full_stop_speed_mps": 0.3,
     "speed_limit_hysteresis_kmh": 1.0,
     "closing_speed_threshold_mps": 1.0,
-    "critical_ttc_s": 2.0,
+    "critical_reaction_time_s": 1.0,
+    "critical_deceleration_mps2": 6.0,
+    "critical_standstill_margin_m": 1.0,
+    "critical_release_ratio": 0.75,
+    "turn_yaw_rate_window_s": 0.2,
+    "turn_yaw_rate_on_dps": 10.0,
+    "turn_yaw_rate_off_dps": 5.0,
+    "turn_min_speed_mps": 1.0,
+    "turn_release_debounce_s": 0.3,
+    "turn_min_duration_s": 0.5,
+    "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
@@ -162,6 +164,8 @@ B:
     "impulse_tolerance": 0.1,
     "contact_window_s": 0.5,
     "contact_range_m": 3.5,
+    "contact_range_scale_m": 3.0,
+    "approach_window_s": 1.0,
     "min_track_persistence_s": 1.0,
     "speed_consistency_mps": 1.5
   }

@@ -6,22 +6,19 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
 - Anonymous radar tracks: 0 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 10; edges: 13 (PRECEDES 13)
+- Nodes: 7; edges: 8 (PRECEDES 8)
 
 ## Nodes
 
 | Id | Local time | Type | Actor | Subject | Source | Details |
 |----|-----------:|------|-------|---------|--------|---------|
 | B:e01 | 0.00 | MOVING_START | B | - | ego | active_at_first_observation=True |
-| B:e02 | 0.35 | STRONG_THROTTLE_START | B | - | controls |  |
-| B:e03 | 1.30 | STRONG_THROTTLE_END | B | - | controls |  |
-| B:e04 | 3.15 | BRAKE_START | B | - | controls |  |
-| B:e05 | 3.60 | BRAKE_END | B | - | controls |  |
-| B:e06 | 4.25 | COLLISION | B | - | collision_sensor | peak_impulse=5953.86 |
-| B:e07 | 4.25 | BRAKE_START | B | - | controls |  |
-| B:e08 | 4.25 | HARD_BRAKE_START | B | - | controls |  |
-| B:e09 | 5.00 | MOVING_END | B | - | ego |  |
-| B:e10 | 5.00 | STOP_START | B | - | ego |  |
+| B:e02 | 3.15 | BRAKE_START | B | - | controls |  |
+| B:e03 | 3.60 | BRAKE_END | B | - | controls |  |
+| B:e04 | 4.25 | COLLISION | B | - | collision_sensor | peak_impulse=5953.86 |
+| B:e05 | 4.25 | BRAKE_START | B | - | controls |  |
+| B:e06 | 5.00 | MOVING_END | B | - | ego |  |
+| B:e07 | 5.00 | STOP_START | B | - | ego |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -31,16 +28,11 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e01 --PRECEDES--> B:e02
     B:e02 --PRECEDES--> B:e03
     B:e03 --PRECEDES--> B:e04
-    B:e04 --PRECEDES--> B:e05
+    B:e03 --PRECEDES--> B:e05
+    B:e04 --PRECEDES--> B:e06
+    B:e04 --PRECEDES--> B:e07
     B:e05 --PRECEDES--> B:e06
     B:e05 --PRECEDES--> B:e07
-    B:e05 --PRECEDES--> B:e08
-    B:e06 --PRECEDES--> B:e09
-    B:e06 --PRECEDES--> B:e10
-    B:e07 --PRECEDES--> B:e09
-    B:e07 --PRECEDES--> B:e10
-    B:e08 --PRECEDES--> B:e09
-    B:e08 --PRECEDES--> B:e10
 ```
 
 ## Perceived state before each event
@@ -50,22 +42,25 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START | ego: not yet observed | - |
-| 0.35 | B:e02 STRONG_THROTTLE_START | ego: MOVING | 0.30 |
-| 1.30 | B:e03 STRONG_THROTTLE_END | ego: MOVING, STRONG_THROTTLE | 1.20 |
-| 3.15 | B:e04 BRAKE_START | ego: MOVING | 3.10 |
-| 3.60 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
-| 4.25 | B:e06 COLLISION<br>B:e07 BRAKE_START<br>B:e08 HARD_BRAKE_START | ego: MOVING | 4.20 |
-| 5.00 | B:e09 MOVING_END<br>B:e10 STOP_START | ego: MOVING, BRAKE, HARD_BRAKE | 4.90 |
+| 3.15 | B:e02 BRAKE_START | ego: MOVING | 3.10 |
+| 3.60 | B:e03 BRAKE_END | ego: MOVING, BRAKE | 3.50 |
+| 4.25 | B:e04 COLLISION<br>B:e05 BRAKE_START | ego: MOVING | 4.20 |
+| 5.00 | B:e06 MOVING_END<br>B:e07 STOP_START | ego: MOVING, BRAKE | 4.90 |
 
 ## States still active when observation ended
 
-- BRAKE, since B:e07 (t = 4.25 s)
-- HARD_BRAKE, since B:e08 (t = 4.25 s)
-- STOP, since B:e10 (t = 5.00 s)
+- BRAKE, since B:e05 (t = 4.25 s)
+- STOP, since B:e07 (t = 5.00 s)
 
 ## Tracks lost
 
 - no track was lost
+
+## Temporal safety relations
+
+Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
+
+- none
 
 ## Sign detection windows
 
@@ -80,12 +75,9 @@ No radar track: nothing moving stayed in B's forward radar view long enough.
 ## Plain-language reading
 
 - t = 0.00 s: B started moving (already the case when first observed).
-- t = 0.35 s: B started applying strong throttle.
-- t = 1.30 s: B stopped applying strong throttle.
 - t = 3.15 s: B started braking.
 - t = 3.60 s: B released the brake.
 - t = 4.25 s: B's collision sensor recorded a contact (peak impulse 5954 N*s).
 - t = 4.25 s: B started braking.
-- t = 4.25 s: B started braking hard.
 - t = 5.00 s: B stopped moving.
 - t = 5.00 s: B came to a stop.
