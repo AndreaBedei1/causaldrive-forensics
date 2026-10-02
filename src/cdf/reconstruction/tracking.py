@@ -1,7 +1,7 @@
 """Anonymous local radar tracks: association, Kalman filter and RTS smoother.
 
-raw radar detections
-  -> returns placed in the recorder's own local odometric frame
+raw detections of every radar of the recorder (front, left, right)
+  -> each return placed in the recorder's own local odometric frame from ITS radar's mount
   -> each active track claims the returns inside its gate (gated association)
   -> left-over *moving* returns are clustered and start tentative tracks
   -> a tentative track that keeps receiving moving returns is confirmed and
@@ -10,7 +10,12 @@ raw radar detections
      smoothed backward (Rauch-Tung-Striebel) into a local trajectory.
 
 A confirmed track keeps claiming returns even when they look static, so a
-vehicle that stops (a braking lead car) is not dropped.
+vehicle that stops (a braking lead car) is not dropped.  A target that stops
+abruptly (it crashes) changes its Doppler speed beyond the gate in one sweep:
+a confirmed track whose surroundings were free of foreign returns may then
+take the returns around it whose speed lies between standstill and the
+predicted one (see ``_slowdown_gate``), and follows the target through the
+crash.
 
 Local odometric frame: origin at the recorder's first ego position, x along
 its first heading, y to its right (CARLA's convention).  Every recorder has its
@@ -20,26 +25,25 @@ Radar velocity convention, verified on the recordings: the CARLA detection
 velocity is the range rate, negative while the range shrinks (static scenery
 ahead of a recorder at speed v returns about -v*cos(azimuth)).
 
-Geometry.  The radar sits at its mount (the logical surround sensor: centred
-over the vehicle, above its roof), so a range is measured from there, not from
-the recorder's skin.  With the recorder's own footprint (its bounding box,
-``EgoFootprint``) every return and track also gets a CLEARANCE: the free
-distance along the line of sight from the edge of the footprint to the
-observed surface,
-
-    clearance = max(0, planar range - extent of the footprint along the bearing)
-
-and returns from inside the footprint (the recorder's own body, seen from the
-roof) are dropped.  A track's clearance is that of its NEAR surface: its
-returns are spread over the target's visible body (from a roof, often its roof
-and rear window), so the median point that the Kalman filter follows lies
-deeper than the bumper that will touch first.
+Geometry.  The recorder carries several radars at different places on its
+body (``RadarMount``: position and orientation in the vehicle frame, read from
+each radar's own metadata).  A return is placed from the position of the radar
+that produced it, along that radar's line of sight, and its Doppler speed is
+corrected by that radar's own velocity: the displacement of its mount point over
+the last sweep, which carries the lever arm of a turning, pitching body.  Nothing
+assumes a common origin for the returns of different radars.  The CLEARANCE of a
+return is its distance to the recorder's own footprint (its bounding box,
+``EgoFootprint``, vehicle frame); returns inside the footprint are the
+recorder's own body and are dropped.  A track's clearance is that of its NEAR
+surface: its returns are spread over the target's visible body, so the median
+point that the Kalman filter follows lies deeper than the surface that will
+touch first.
 """
 
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
@@ -51,7 +55,7 @@ INITIAL_VELOCITY_STD_MPS = 10.0
 # Below this closing speed a time-to-contact is not meaningful.
 MIN_CLOSING_FOR_TTC_MPS = 0.1
 # Returns whose ground point lies at least this far inside the recorder's own
-# footprint come from its own body (a roof radar's downward rays) and are dropped.
+# footprint come from its own body and are dropped.
 OWN_BODY_MARGIN_M = 0.05
 # A track's near surface in one sweep: this percentile of its returns' clearances
 # (robust to one stray return, about the nearest one for few returns).
@@ -59,6 +63,9 @@ NEAR_SURFACE_PERCENTILE = 10.0
 # The depth of the median point behind the near surface is smoothed over this
 # many measured sweeps on each side (running median).
 SURFACE_OFFSET_HALF_WINDOW = 2
+# A target's acceleration along its own velocity: central difference of the
+# smoothed velocity over this half window (s).
+ACCELERATION_HALF_WINDOW_S = 0.15
 
 
 # --------------------------------------------------------------------------
@@ -133,21 +140,50 @@ def ego_trajectory(ego_records: Sequence[Mapping[str, Any]], clock_origin: float
     return EgoTrajectory(states)
 
 
+# --------------------------------------------------------------------------
+# Radars on the body, the recorder's own footprint
+# --------------------------------------------------------------------------
+
 @dataclass
 class RadarMount:
-    """Radar position on the vehicle (x forward, y right, z up; metres)."""
+    """One radar on the vehicle: position (x forward, y right, z up from the vehicle
+    origin on the ground; metres) and orientation (radians: yaw + = to the right,
+    pitch + = nose up), as recorded in the radar's own metadata."""
 
-    x: float = 2.2
+    x: float = 0.0
     y: float = 0.0
-    z: float = 1.0
-    yaw: float = 0.0  # radians
+    z: float = 0.6
+    yaw: float = 0.0
+    pitch: float = 0.0
+    sensor_id: str = "radar"
 
     @classmethod
     def from_metadata(cls, metadata: Mapping[str, Any]) -> "RadarMount":
         transform = metadata.get("sensor_transform") or {}
-        return cls(x=float(transform.get("x", 2.2)), y=float(transform.get("y", 0.0)),
-                   z=float(transform.get("z", 1.0)),
-                   yaw=math.radians(float(transform.get("yaw_deg", 0.0))))
+        return cls(x=float(transform.get("x", 0.0)), y=float(transform.get("y", 0.0)),
+                   z=float(transform.get("z", 0.6)), yaw=math.radians(float(transform.get("yaw_deg", 0.0))),
+                   pitch=math.radians(float(transform.get("pitch_deg", 0.0))),
+                   sensor_id=str(metadata.get("sensor_id", "radar")))
+
+    def directions(self, azimuth: np.ndarray, altitude: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Unit lines of sight of detections (sensor azimuth/altitude) in the vehicle frame."""
+        x, y, z = np.cos(altitude) * np.cos(azimuth), np.cos(altitude) * np.sin(azimuth), np.sin(altitude)
+        cp, sp = math.cos(self.pitch), math.sin(self.pitch)
+        x, z = x * cp - z * sp, x * sp + z * cp
+        cy, sy = math.cos(self.yaw), math.sin(self.yaw)
+        return x * cy - y * sy, x * sy + y * cy, z
+
+
+@dataclass
+class RadarStream:
+    """The raw sweeps of one radar (compact observations) and where it sits on the body."""
+
+    mount: RadarMount
+    observations: Any
+
+    @property
+    def sensor_id(self) -> str:
+        return self.mount.sensor_id
 
 
 def sensor_position(ego: EgoState, mount: RadarMount) -> np.ndarray:
@@ -159,8 +195,9 @@ def sensor_velocity(ego: EgoState, mount: RadarMount) -> Tuple[float, float]:
     """The radar's instantaneous velocity in the vehicle frame (forward, right).
 
     The vehicle's velocity plus its rotation about the vehicle origin: a mount
-    at (x, y) moves at yaw_rate * (-y, x) more.  Zero extra for a centred radar;
-    for a bumper radar 2.2 m ahead turning at 20 deg/s, 0.77 m/s sideways.
+    at (x, y) moves at yaw_rate * (-y, x) more (a front radar 2.4 m ahead turning
+    at 20 deg/s moves 0.84 m/s sideways; a side radar 1.1 m out moves 0.38 m/s
+    along the heading).
     """
     c, s = math.cos(ego.heading), math.sin(ego.heading)
     forward = c * ego.vx + s * ego.vy - ego.yaw_rate * mount.y
@@ -181,12 +218,12 @@ def sensor_point(ego: EgoState, mount: RadarMount) -> np.ndarray:
 
 
 def radar_velocity(ego: EgoTrajectory, mount: RadarMount, t_local: float, t_previous: float) -> np.ndarray:
-    """The radar's own velocity over the last sweep interval: its displacement / time (local frame, 3-D).
+    """One radar's own velocity over the last sweep interval: its displacement / time (local frame, 3-D).
 
     This is how CARLA's radar measures its own motion (current minus previous
-    location over the tick), so the range rates it reports for static scenery
-    are exactly cancelled.  It includes the rotation about the vehicle origin
-    (lever arm) and, for a roof radar, the swing of the roof when the vehicle
+    location of THAT radar over the tick), so the range rates it reports for
+    static scenery are exactly cancelled.  It includes the rotation about the
+    vehicle origin (lever arm) and the swing of the mount when the vehicle
     pitches and rolls (braking, impact).  The instantaneous velocity of the
     vehicle differs from it whenever the speed changes within a tick: by about
     3 m/s at an impact.
@@ -201,47 +238,86 @@ def radar_velocity(ego: EgoTrajectory, mount: RadarMount, t_local: float, t_prev
 
 @dataclass(frozen=True)
 class EgoFootprint:
-    """The recorder's own rectangle seen from its radar (radar frame: x forward, y right; metres).
+    """The recorder's own rectangle in its vehicle frame (x forward, y right, origin = vehicle origin; metres)."""
 
-    ``back < 0 < front`` and ``left < 0 < right`` when the radar lies inside it.
-    """
-
-    back: float
-    front: float
-    left: float
-    right: float
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
 
     @classmethod
-    def from_metadata(cls, footprint: Optional[Mapping[str, Any]], mount: RadarMount) -> Optional["EgoFootprint"]:
-        """From the vehicle metadata's ``ego_footprint`` (vehicle frame); None if absent."""
+    def from_metadata(cls, footprint: Optional[Mapping[str, Any]]) -> Optional["EgoFootprint"]:
+        """From the vehicle metadata's ``ego_footprint``; None if absent."""
         if not footprint:
             return None
         try:
-            return cls(back=float(footprint["x_min_m"]) - mount.x, front=float(footprint["x_max_m"]) - mount.x,
-                       left=float(footprint["y_min_m"]) - mount.y, right=float(footprint["y_max_m"]) - mount.y)
+            return cls(x_min=float(footprint["x_min_m"]), x_max=float(footprint["x_max_m"]),
+                       y_min=float(footprint["y_min_m"]), y_max=float(footprint["y_max_m"]))
         except (KeyError, TypeError, ValueError):
             return None
 
-    def extent(self, bearing: float) -> float:
-        """Distance from the radar along ``bearing`` (radians; 0 ahead, + right) to the footprint edge.
+    @property
+    def centre(self) -> Tuple[float, float]:
+        return (self.x_min + self.x_max) / 2.0, (self.y_min + self.y_max) / 2.0
 
-        The exit of the ray from the rectangle.  With the radar at the centre of
-        an L x W footprint: min((L/2) / |cos(bearing)|, (W/2) / |sin(bearing)|); a
-        cosine or sine of zero leaves only the other side.
-        """
-        return float(self.extents(np.array([bearing], dtype=float))[0])
+    def nearest(self, x: Any, y: Any) -> Tuple[Any, Any]:
+        """The footprint point nearest to each point (the point itself inside)."""
+        return np.clip(x, self.x_min, self.x_max), np.clip(y, self.y_min, self.y_max)
 
-    def extents(self, bearings: np.ndarray) -> np.ndarray:
-        c, s = np.cos(bearings), np.sin(bearings)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            tx = np.where(c > 1e-9, self.front / c, np.where(c < -1e-9, self.back / c, np.inf))
-            ty = np.where(s > 1e-9, self.right / s, np.where(s < -1e-9, self.left / s, np.inf))
-        return np.maximum(np.minimum(tx, ty), 0.0)
+    def distance(self, x: Any, y: Any) -> Any:
+        """Distance of points (vehicle frame) to the footprint: the clearance of a surface point (0 inside)."""
+        qx, qy = self.nearest(x, y)
+        return np.hypot(np.asarray(x) - qx, np.asarray(y) - qy)
 
     def contains(self, x: np.ndarray, y: np.ndarray, margin: float = 0.0) -> np.ndarray:
-        """Points (radar frame) at least ``margin`` inside the rectangle."""
-        return ((x > self.back + margin) & (x < self.front - margin)
-                & (y > self.left + margin) & (y < self.right - margin))
+        """Points (vehicle frame) at least ``margin`` inside the rectangle."""
+        return ((x > self.x_min + margin) & (x < self.x_max - margin)
+                & (y > self.y_min + margin) & (y < self.y_max - margin))
+
+    def outward(self, x: float, y: float) -> Tuple[float, float]:
+        """Unit direction from the nearest footprint point to (x, y); from the centre for a point inside."""
+        qx, qy = self.nearest(x, y)
+        dx, dy = x - float(qx), y - float(qy)
+        norm = math.hypot(dx, dy)
+        if norm < 1e-6:
+            cx, cy = self.centre
+            dx, dy = x - cx, y - cy
+            norm = max(math.hypot(dx, dy), 1e-6)
+        return dx / norm, dy / norm
+
+    def segment_distance(self, p0: Tuple[float, float], p1: Tuple[float, float]) -> Tuple[float, float]:
+        """(minimum distance, fraction along the segment where it occurs) from the segment p0-p1 to the footprint."""
+        x0, y0 = p0
+        x1, y1 = p1
+        dx, dy = x1 - x0, y1 - y0
+        # Clipped parametric intersection with the rectangle (Liang-Barsky).
+        lo, hi = 0.0, 1.0
+        inside = True
+        for p, q in ((-dx, x0 - self.x_min), (dx, self.x_max - x0), (-dy, y0 - self.y_min), (dy, self.y_max - y0)):
+            if abs(p) < 1e-12:
+                if q < 0:
+                    inside = False
+                    break
+                continue
+            r = q / p
+            if p < 0:
+                lo = max(lo, r)
+            else:
+                hi = min(hi, r)
+            if lo > hi:
+                inside = False
+                break
+        if inside:
+            return 0.0, lo
+        # No intersection: the minimum lies at an endpoint or at the projection of a corner.
+        candidates = [0.0, 1.0]
+        length2 = dx * dx + dy * dy
+        if length2 > 1e-12:
+            for cx in (self.x_min, self.x_max):
+                for cy in (self.y_min, self.y_max):
+                    candidates.append(min(max(((cx - x0) * dx + (cy - y0) * dy) / length2, 0.0), 1.0))
+        best = min(candidates, key=lambda f: float(self.distance(x0 + f * dx, y0 + f * dy)))
+        return float(self.distance(x0 + best * dx, y0 + best * dy)), best
 
 
 # --------------------------------------------------------------------------
@@ -250,72 +326,99 @@ class EgoFootprint:
 
 @dataclass
 class RadarSweep:
-    """Object-height returns of one radar sweep, in the local frame."""
+    """Object-height returns of all radars at one instant, in the local frame."""
 
     t_local: float
-    sensor_xy: np.ndarray  # (2,)
     points: np.ndarray  # (N, 2)
+    origins: np.ndarray  # (N, 2) position of the radar that produced each return
+    radar: np.ndarray  # (N,) index of that radar in the stream list
     radial_speed: np.ndarray  # (N,) the target's own horizontal speed along the line of sight, + = away
-    clearance: Optional[np.ndarray] = None  # (N,) free distance from the recorder's footprint edge
+    clearance: np.ndarray  # (N,) distance from the recorder's footprint (planar range without footprint)
+    depth: np.ndarray  # (N,) raw range from that radar
     own_body: int = 0  # returns dropped because they lie inside the recorder's own footprint
+    radars: Tuple[str, ...] = ()  # sensor ids by index
 
 
-def radar_sweeps(observations: Any, ego: EgoTrajectory, mount: RadarMount,
-                 clock_origin: float, cfg: TrackingConfig, footprint: Optional[EgoFootprint] = None) -> List[RadarSweep]:
-    """Place every radar return in the local frame and remove the recorder's own motion.
+def _stream_times(stream: RadarStream, clock_origin: float) -> List[float]:
+    return [round(float(timestamp) - clock_origin, 4) for timestamp in stream.observations.timestamps]
 
-    The radar's own motion is its displacement over the last sweep interval
-    (``radar_velocity``, as CARLA measures it), so scenery stays static in a
-    turn, under braking and through an impact.  The Doppler speed is projected
-    onto the horizontal plane (targets move horizontally; a roof radar sees
-    close ones from above).  Returns from inside the recorder's own footprint
-    are its own body and are dropped; the others carry their clearance.
+
+def radar_sweeps(streams: Sequence[RadarStream], ego: EgoTrajectory, clock_origin: float, cfg: TrackingConfig,
+                 footprint: Optional[EgoFootprint] = None) -> List[RadarSweep]:
+    """Place every return of every radar in the local frame and remove that radar's own motion.
+
+    All radars tick together; the returns of one instant form one sweep.  Each
+    radar's own motion is the displacement of ITS mount over its last sweep
+    interval (``radar_velocity``, as CARLA measures it), so scenery stays
+    static in a turn, under braking and through an impact.  The Doppler speed
+    is projected onto the horizontal plane (targets move horizontally).
+    Returns from inside the recorder's own footprint are its own body and are
+    dropped; the others carry their clearance.
     """
+    names = tuple(stream.sensor_id for stream in streams)
+    times = [_stream_times(stream, clock_origin) for stream in streams]
+    lookup = [{t: index for index, t in enumerate(stream_times)} for stream_times in times]
+    instants = sorted(set().union(*times)) if times else []
+    interval = float(np.median(np.diff(instants))) if len(instants) > 1 else 0.0
     sweeps = []
-    times = [round(float(timestamp) - clock_origin, 4) for timestamp in observations.timestamps]
-    interval = float(np.median(np.diff(times))) if len(times) > 1 else 0.0
-    for index, timestamp in enumerate(observations.timestamps):
-        t_local = times[index]
+    for t_local in instants:
         pose = ego.at(t_local)
-        rows = np.asarray(observations.frame_detections(index), dtype=float).reshape(-1, 4)
-        depth, altitude, range_rate = rows[:, 0], rows[:, 2], rows[:, 3]
-        azimuth = rows[:, 1] + mount.yaw
-        # Height in the sensor frame on purpose: a vehicle ahead shares the road
-        # grade (S01 climbs a 7 degree slope), so world pitch would mislead.
-        height = mount.z + depth * np.sin(altitude)
-        valid = (np.isfinite(rows).all(axis=1) & (depth > 0.0)
-                 & (height >= cfg.min_height_m) & (height <= cfg.max_height_m))
-        # Unit line of sight in the vehicle frame.
-        forward = np.cos(altitude) * np.cos(azimuth)
-        right = np.cos(altitude) * np.sin(azimuth)
-        previous = times[index - 1] if index > 0 else t_local - interval
-        if previous < ego.start - 1e-6:  # no earlier pose: the next interval instead
-            velocity = radar_velocity(ego, mount, min(t_local + interval, ego.end), t_local)
-        else:
-            velocity = radar_velocity(ego, mount, t_local, previous)
         c, s = math.cos(pose.heading), math.sin(pose.heading)
-        own_forward, own_right = c * velocity[0] + s * velocity[1], -s * velocity[0] + c * velocity[1]
-        # range_rate = (target velocity - radar velocity) . line of sight, so adding
-        # the radar's velocity leaves the target's own speed along the line of sight.
-        radial_speed = ((range_rate + own_forward * forward + own_right * right + velocity[2] * np.sin(altitude))
-                        / np.maximum(np.cos(altitude), 0.2))
-        radar_x, radar_y = depth * forward, depth * right
-        planar = np.hypot(radar_x, radar_y)
+        parts: Dict[str, List[np.ndarray]] = {key: [] for key in
+                                              ("points", "origins", "radar", "radial", "clearance", "depth")}
         own_body = 0
-        if footprint is not None:
-            inside = valid & footprint.contains(radar_x, radar_y, OWN_BODY_MARGIN_M)
-            own_body = int(inside.sum())
-            valid &= ~inside
-            clearance = planar - footprint.extents(np.arctan2(radar_y, radar_x))
-        else:
-            clearance = planar
-        vehicle_x = mount.x + radar_x
-        vehicle_y = mount.y + radar_y
-        points = np.column_stack([pose.x + c * vehicle_x - s * vehicle_y,
-                                  pose.y + s * vehicle_x + c * vehicle_y])
-        sweeps.append(RadarSweep(t_local=t_local, sensor_xy=sensor_position(pose, mount),
-                                 points=points[valid], radial_speed=radial_speed[valid],
-                                 clearance=np.maximum(clearance[valid], 0.0), own_body=own_body))
+        for k, stream in enumerate(streams):
+            index = lookup[k].get(t_local)
+            if index is None:
+                continue
+            mount = stream.mount
+            rows = np.asarray(stream.observations.frame_detections(index), dtype=float).reshape(-1, 4)
+            depth, azimuth, altitude, range_rate = rows[:, 0], rows[:, 1], rows[:, 2], rows[:, 3]
+            ux, uy, uz = mount.directions(azimuth, altitude)
+            vehicle_x, vehicle_y = mount.x + depth * ux, mount.y + depth * uy
+            # Height in the vehicle frame on purpose: a vehicle ahead shares the road
+            # grade (S01 climbs a 7 degree slope), so world pitch would mislead.
+            height = mount.z + depth * uz
+            valid = (np.isfinite(rows).all(axis=1) & (depth > 0.0)
+                     & (height >= cfg.min_height_m) & (height <= cfg.max_height_m))
+            previous = times[k][index - 1] if index > 0 else t_local - interval
+            if previous < ego.start - 1e-6:  # no earlier pose: the next interval instead
+                velocity = radar_velocity(ego, mount, min(t_local + interval, ego.end), t_local)
+            else:
+                velocity = radar_velocity(ego, mount, t_local, previous)
+            # Line of sight in the local frame (the vehicle's heading; its small pitch and
+            # roll only matter for the radar's own displacement, already in ``velocity``).
+            line_x, line_y = c * ux - s * uy, s * ux + c * uy
+            # range_rate = (target velocity - radar velocity) . line of sight, so adding
+            # the radar's velocity leaves the target's own speed along the line of sight.
+            horizontal = np.maximum(np.hypot(ux, uy), 0.2)
+            radial_speed = (range_rate + velocity[0] * line_x + velocity[1] * line_y + velocity[2] * uz) / horizontal
+            if footprint is not None:
+                inside = valid & footprint.contains(vehicle_x, vehicle_y, OWN_BODY_MARGIN_M)
+                own_body += int(inside.sum())
+                valid &= ~inside
+                clearance = footprint.distance(vehicle_x, vehicle_y)
+            else:
+                clearance = np.hypot(vehicle_x, vehicle_y)
+            origin = sensor_position(pose, mount)
+            points = np.column_stack([pose.x + c * vehicle_x - s * vehicle_y, pose.y + s * vehicle_x + c * vehicle_y])
+            count = int(valid.sum())
+            parts["points"].append(points[valid])
+            parts["origins"].append(np.tile(origin, (count, 1)))
+            parts["radar"].append(np.full(count, k, dtype=int))
+            parts["radial"].append(radial_speed[valid])
+            parts["clearance"].append(np.asarray(clearance)[valid])
+            parts["depth"].append(depth[valid])
+
+        def joined(key: str, width: Optional[int] = None) -> np.ndarray:
+            if parts[key]:
+                return np.concatenate(parts[key])
+            return np.empty((0, width)) if width else np.empty(0, dtype=int if key == "radar" else float)
+
+        sweeps.append(RadarSweep(t_local=t_local, points=joined("points", 2), origins=joined("origins", 2),
+                                 radar=joined("radar"), radial_speed=joined("radial"),
+                                 clearance=np.maximum(joined("clearance"), 0.0), depth=joined("depth"),
+                                 own_body=own_body, radars=names))
     return sweeps
 
 
@@ -344,16 +447,21 @@ def cluster_points(points: np.ndarray, max_gap_m: float) -> List[List[int]]:
 
 @dataclass
 class TrackMeasurement:
-    """What a track received in one sweep (``xy`` is None for a missed sweep)."""
+    """What a track received in one sweep (``xy`` is None for a missed sweep).
+
+    ``dopplers`` holds one (unit line of sight from that radar to its returns,
+    median radial speed) per radar that saw the track in this sweep: radars at
+    different places see the target along different lines of sight.
+    """
 
     t_local: float
-    sensor_xy: np.ndarray
     xy: Optional[np.ndarray] = None
-    radial_speed: Optional[float] = None
-    line_of_sight: Optional[np.ndarray] = None
+    dopplers: List[Tuple[np.ndarray, float]] = field(default_factory=list)
     n_returns: int = 0
     near_clearance: Optional[float] = None  # clearance of the track's near surface in this sweep
     surface_offset: Optional[float] = None  # median clearance of its returns minus the near one
+    radar: Optional[str] = None  # the radar with most of the track's returns in this sweep
+    radars: Tuple[str, ...] = ()  # every radar that saw it in this sweep
 
 
 def _transition(dt: float) -> np.ndarray:
@@ -379,21 +487,22 @@ def kf_update(x: np.ndarray, P: np.ndarray, z: np.ndarray, H: np.ndarray, R: np.
 
 
 def _measurement_model(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Position rows, plus a Doppler row: radial speed = line_of_sight . velocity."""
-    position_var = cfg.measurement_std_m ** 2
-    if measurement.radial_speed is None or measurement.line_of_sight is None:
-        H = np.array([[1.0, 0, 0, 0], [0, 1.0, 0, 0]])
-        return H, measurement.xy, np.eye(2) * position_var
-    ux, uy = measurement.line_of_sight
-    H = np.array([[1.0, 0, 0, 0], [0, 1.0, 0, 0], [0, 0, ux, uy]])
-    z = np.array([measurement.xy[0], measurement.xy[1], measurement.radial_speed])
-    return H, z, np.diag([position_var, position_var, cfg.radial_speed_std_mps ** 2])
+    """Position rows, plus one Doppler row per radar: radial speed = line_of_sight . velocity."""
+    rows = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]]
+    values = [measurement.xy[0], measurement.xy[1]]
+    variances = [cfg.measurement_std_m ** 2] * 2
+    for line, radial in measurement.dopplers:
+        rows.append([0.0, 0.0, float(line[0]), float(line[1])])
+        values.append(radial)
+        variances.append(cfg.radial_speed_std_mps ** 2)
+    return np.array(rows), np.array(values, dtype=float), np.diag(variances)
 
 
 def _initial_state(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray]:
     velocity = np.zeros(2)
-    if measurement.radial_speed is not None and measurement.line_of_sight is not None:
-        velocity = measurement.radial_speed * measurement.line_of_sight
+    if measurement.dopplers:
+        line, radial = measurement.dopplers[0]
+        velocity = radial * np.asarray(line, dtype=float)
     x = np.array([measurement.xy[0], measurement.xy[1], velocity[0], velocity[1]])
     P = np.diag([cfg.measurement_std_m ** 2] * 2 + [INITIAL_VELOCITY_STD_MPS ** 2] * 2)
     return x, P
@@ -437,6 +546,8 @@ class _ActiveTrack:
     def __init__(self, birth_order: int, first: TrackMeasurement, cfg: TrackingConfig) -> None:
         self.birth_order = birth_order
         self.track_id: Optional[str] = None
+        # Its last sweep had returns of its own and no foreign return around it.
+        self.clean = False
         self.x, self.P = _initial_state(first, cfg)
         self.t_local = first.t_local
         self.measurements = [first]
@@ -455,40 +566,76 @@ class _ActiveTrack:
         self.last_update_t = measurement.t_local
 
     def miss(self, sweep: RadarSweep) -> None:
-        self.measurements.append(TrackMeasurement(t_local=sweep.t_local, sensor_xy=sweep.sensor_xy))
+        self.measurements.append(TrackMeasurement(t_local=sweep.t_local))
+
+
+def _unit_lines(points: np.ndarray, origins: np.ndarray) -> np.ndarray:
+    lines = points - origins
+    return lines / np.maximum(np.hypot(lines[:, 0], lines[:, 1]), 1e-6)[:, None]
 
 
 def _measurement_from_returns(sweep: RadarSweep, mask: np.ndarray) -> TrackMeasurement:
-    """Median position and median line-of-sight speed of the claimed returns."""
+    """Median position of the claimed returns, and per radar the median line-of-sight speed."""
     xy = np.median(sweep.points[mask], axis=0)
-    line_of_sight = xy - sweep.sensor_xy
-    line_of_sight = line_of_sight / max(float(np.linalg.norm(line_of_sight)), 1e-6)
-    near = offset = None
-    if sweep.clearance is not None:
-        clearances = sweep.clearance[mask]
-        near = float(np.percentile(clearances, NEAR_SURFACE_PERCENTILE))
-        offset = max(float(np.median(clearances)) - near, 0.0)
-    return TrackMeasurement(t_local=sweep.t_local, sensor_xy=sweep.sensor_xy, xy=xy,
-                            radial_speed=float(np.median(sweep.radial_speed[mask])),
-                            line_of_sight=line_of_sight, n_returns=int(mask.sum()),
-                            near_clearance=near, surface_offset=offset)
+    dopplers = []
+    counts = []
+    for k in sorted(set(sweep.radar[mask].tolist())):
+        own = mask & (sweep.radar == k)
+        line = np.median(sweep.points[own], axis=0) - sweep.origins[own][0]
+        line = line / max(float(np.linalg.norm(line)), 1e-6)
+        counts.append((int(own.sum()), k))
+        dopplers.append((int(own.sum()), line, float(np.median(sweep.radial_speed[own]))))
+    dopplers.sort(key=lambda item: -item[0])  # the radar with most returns first
+    clearances = sweep.clearance[mask]
+    near = float(np.percentile(clearances, NEAR_SURFACE_PERCENTILE))
+    offset = max(float(np.median(clearances)) - near, 0.0)
+    main = max(counts)[1]
+    return TrackMeasurement(t_local=sweep.t_local, xy=xy, dopplers=[(line, radial) for _, line, radial in dopplers],
+                            n_returns=int(mask.sum()), near_clearance=near, surface_offset=offset,
+                            radar=sweep.radars[main] if sweep.radars else str(main),
+                            radars=tuple(sorted(sweep.radars[k] if sweep.radars else str(k) for _, k in counts)))
 
 
 def _gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, cfg: TrackingConfig) -> np.ndarray:
-    """Free returns near the predicted position with a consistent Doppler speed."""
+    """Free returns near the predicted position with a consistent Doppler speed (each along its own radar's line of sight)."""
     if not len(sweep.points):
         return np.zeros(0, dtype=bool)
     offsets = sweep.points - track.x[:2]
     distance = np.hypot(offsets[:, 0], offsets[:, 1])
-    lines = sweep.points - sweep.sensor_xy
-    lines = lines / np.maximum(np.hypot(lines[:, 0], lines[:, 1]), 1e-6)[:, None]
-    predicted_radial = lines @ track.x[2:]
+    predicted_radial = _unit_lines(sweep.points, sweep.origins) @ track.x[2:]
     mask = (free & (distance <= cfg.max_association_distance_m)
             & (np.abs(sweep.radial_speed - predicted_radial) <= cfg.max_velocity_mismatch_mps))
     if track.track_id is None:
         # Tentative tracks may only grow on moving returns (never on scenery).
         mask &= np.abs(sweep.radial_speed) >= cfg.moving_speed_mps
     return mask
+
+
+def _slowdown_gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, own: np.ndarray,
+                   cfg: TrackingConfig) -> np.ndarray:
+    """A confirmed track's returns after an abrupt slowdown of its target (a crash).
+
+    Only when the ordinary gate gave it nothing in this sweep and its previous
+    sweep was clean (its own returns, no foreign one around it: a road crest or
+    a guardrail next to the target is foreign clutter in every sweep, so it never
+    qualifies): the free returns within the position gate whose line-of-sight
+    speed lies between standstill and the predicted one (Doppler gate width at
+    both ends), at least ``min_slowdown_returns`` of them.
+    """
+    offsets = sweep.points - track.x[:2]
+    near = free & (np.hypot(offsets[:, 0], offsets[:, 1]) <= cfg.max_association_distance_m)
+    was_clean = track.clean
+    track.clean = bool(own.any()) and not (near & ~own).any()
+    if track.track_id is None or own.any() or not was_clean:
+        return own
+    predicted = _unit_lines(sweep.points, sweep.origins) @ track.x[2:]
+    tolerance = cfg.max_velocity_mismatch_mps
+    slowed = (near & (sweep.radial_speed >= np.minimum(predicted, 0.0) - tolerance)
+              & (sweep.radial_speed <= np.maximum(predicted, 0.0) + tolerance))
+    if int(slowed.sum()) < cfg.min_slowdown_returns:
+        return own
+    track.clean = True
+    return slowed
 
 
 def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig) -> List[_ActiveTrack]:
@@ -502,7 +649,7 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig) -> List
         # 1. Existing tracks claim returns: confirmed tracks first, older first.
         for track in sorted(active, key=lambda item: (item.track_id is None, item.birth_order)):
             track.predict(sweep.t_local, cfg)
-            mask = _gate(track, sweep, free, cfg)
+            mask = _slowdown_gate(track, sweep, free, _gate(track, sweep, free, cfg), cfg)
             if mask.any():
                 track.update(_measurement_from_returns(sweep, mask), cfg)
                 free &= ~mask
@@ -544,7 +691,12 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig) -> List
 
 @dataclass
 class TrackSample:
-    """One smoothed track state, plus its geometry relative to the recorder."""
+    """One smoothed track state, plus its geometry relative to the recorder.
+
+    Relative geometry is in the recorder's vehicle frame at that instant
+    (origin = vehicle origin, x forward, y right), independent of where the
+    radars sit.
+    """
 
     t_local: float
     x_m: float
@@ -554,24 +706,27 @@ class TrackSample:
     speed_mps: float
     pos_std_m: float
     vel_std_mps: float
-    range_m: float  # raw: from the radar to the tracked (median) point, horizontal
-    bearing_deg: float  # positive = to the recorder's right
-    longitudinal_m: float  # ahead of the radar along the current heading
+    range_m: float  # raw: from the radar that observed it to the tracked (median) point, horizontal
+    bearing_deg: float  # from the vehicle origin, positive = to the recorder's right
+    longitudinal_m: float  # of the tracked point, along the current heading from the vehicle origin
     lateral_m: float  # positive = to the right of the current heading
-    closing_speed_mps: float  # positive = range shrinking
-    ttc_s: Optional[float]  # clearance / closing speed
+    closing_speed_mps: float  # rate at which the clearance shrinks (+ = approaching the footprint)
+    closing_ttc_s: Optional[float]  # clearance / closing speed (line-of-sight time to contact)
     measured: bool
     n_returns: int
     meas_x_m: Optional[float] = None
     meas_y_m: Optional[float] = None
-    # Free distance from the recorder's footprint edge to the target's near
-    # surface along the line of sight (the range when the footprint is unknown).
+    # Free distance from the recorder's footprint to the target's near surface
+    # (the distance from the vehicle origin when the footprint is unknown).
     clearance_m: Optional[float] = None
-    ego_extent_m: float = 0.0  # the recorder's own extent from the radar along the bearing
     # How far the tracked point lies ahead of the recorder's front edge (the
     # longitudinal distance when the footprint is unknown).
     ahead_m: Optional[float] = None
     surface_offset_m: float = 0.0  # depth of the tracked point behind the near surface
+    radar: Optional[str] = None  # the radar that observed the track (latest measured sweep)
+    acceleration_mps2: float = 0.0  # the target's own acceleration along its velocity (smoothed)
+    relative_vx_mps: float = 0.0  # target minus recorder velocity, along the recorder's heading
+    relative_vy_mps: float = 0.0  # ... and to its right (non-rotating)
 
     def __post_init__(self) -> None:
         if self.clearance_m is None:
@@ -612,6 +767,7 @@ class LocalTrack:
                 "duration_s": round(self.last_t - self.first_t, 3),
                 "measured_sweeps": len(measured),
                 "radar_returns": sum(sample.n_returns for sample in self.samples),
+                "radars": sorted({sample.radar for sample in measured if sample.radar}),
                 "min_range_m": round(closest.range_m, 2),
                 "min_range_t_local": closest.t_local,
                 "min_clearance_m": round(nearest.clearance_m, 2),
@@ -624,36 +780,48 @@ class LocalTrack:
 
 
 def _relative_sample(t_local: float, state: np.ndarray, covariance: np.ndarray,
-                     measurement: TrackMeasurement, ego: EgoTrajectory, mount: RadarMount,
-                     footprint: Optional[EgoFootprint] = None, surface_offset: float = 0.0) -> TrackSample:
+                     measurement: TrackMeasurement, ego: EgoTrajectory, radar_mount: Optional[RadarMount],
+                     footprint: Optional[EgoFootprint] = None, surface_offset: float = 0.0,
+                     acceleration: float = 0.0) -> TrackSample:
     own = ego.at(t_local)
-    relative = state[:2] - sensor_position(own, mount)
-    relative_velocity = state[2:] - np.array([own.vx, own.vy])
-    range_m = float(np.hypot(*relative))
     c, s = math.cos(own.heading), math.sin(own.heading)
-    longitudinal = c * relative[0] + s * relative[1]
-    lateral = -s * relative[0] + c * relative[1]
-    bearing = math.atan2(lateral, longitudinal)
-    closing = -float(relative @ relative_velocity) / max(range_m, 1e-6)
-    extent = footprint.extent(bearing) if footprint is not None else 0.0
-    clearance = max(range_m - extent - surface_offset, 0.0)
-    # TTC: time until the clearance is gone at the current closing speed (the
-    # line-of-sight range rate; the footprint extent varies little meanwhile).
+    dx, dy = float(state[0]) - own.x, float(state[1]) - own.y
+    x_v, y_v = c * dx + s * dy, -s * dx + c * dy
+    dvx, dvy = float(state[2]) - own.vx, float(state[3]) - own.vy
+    rel_x, rel_y = c * dvx + s * dvy, -s * dvx + c * dvy
+    # Apparent velocity in the recorder's rotating frame: a turning recorder sweeps its
+    # footprint past still objects (yaw rate + = turning right).
+    frame_vx, frame_vy = rel_x + own.yaw_rate * y_v, rel_y - own.yaw_rate * x_v
+    if footprint is not None:
+        distance = float(footprint.distance(x_v, y_v))
+        nx, ny = footprint.outward(x_v, y_v)
+        ahead = x_v - footprint.x_max
+    else:
+        distance = math.hypot(x_v, y_v)
+        nx, ny = x_v / max(distance, 1e-6), y_v / max(distance, 1e-6)
+        ahead = x_v
+    closing = -(nx * frame_vx + ny * frame_vy)
+    clearance = max(distance - surface_offset, 0.0)
     ttc = clearance / closing if closing > MIN_CLOSING_FOR_TTC_MPS else None
+    if radar_mount is not None:
+        origin = sensor_position(own, radar_mount)
+        range_m = float(np.hypot(float(state[0]) - origin[0], float(state[1]) - origin[1]))
+    else:
+        range_m = math.hypot(x_v, y_v)
     return TrackSample(
         t_local=t_local, x_m=float(state[0]), y_m=float(state[1]),
         vx_mps=float(state[2]), vy_mps=float(state[3]), speed_mps=float(np.hypot(*state[2:])),
         pos_std_m=float(math.sqrt(max(covariance[0, 0] + covariance[1, 1], 0.0) / 2.0)),
         vel_std_mps=float(math.sqrt(max(covariance[2, 2] + covariance[3, 3], 0.0) / 2.0)),
-        range_m=range_m, bearing_deg=math.degrees(bearing),
-        longitudinal_m=longitudinal, lateral_m=lateral, closing_speed_mps=closing,
-        ttc_s=None if ttc is None else round(ttc, 3),
+        range_m=range_m, bearing_deg=math.degrees(math.atan2(y_v, x_v)),
+        longitudinal_m=x_v, lateral_m=y_v, closing_speed_mps=closing,
+        closing_ttc_s=None if ttc is None else round(ttc, 3),
         measured=measurement.xy is not None, n_returns=measurement.n_returns,
         meas_x_m=None if measurement.xy is None else round(float(measurement.xy[0]), 3),
         meas_y_m=None if measurement.xy is None else round(float(measurement.xy[1]), 3),
-        clearance_m=clearance, ego_extent_m=extent,
-        ahead_m=longitudinal - footprint.front if footprint is not None else longitudinal,
-        surface_offset_m=surface_offset)
+        clearance_m=clearance, ahead_m=ahead, surface_offset_m=surface_offset,
+        radar=None if radar_mount is None else radar_mount.sensor_id, acceleration_mps2=acceleration,
+        relative_vx_mps=rel_x, relative_vy_mps=rel_y)
 
 
 def surface_offsets(measurements: Sequence[TrackMeasurement]) -> List[float]:
@@ -675,16 +843,58 @@ def surface_offsets(measurements: Sequence[TrackMeasurement]) -> List[float]:
     return out
 
 
-def build_local_tracks(observations: Any, ego: EgoTrajectory, mount: RadarMount,
-                       clock_origin: float, cfg: TrackingConfig, footprint: Optional[EgoFootprint] = None,
-                       stats: Optional[Dict[str, Any]] = None) -> List[LocalTrack]:
-    """Raw radar observations of one recorder -> smoothed anonymous tracks.
+def _along_velocity(times: np.ndarray, states: np.ndarray, index: int, lo: int, hi: int) -> float:
+    """Velocity change from ``lo`` to ``hi`` per second, along the velocity at ``index``."""
+    velocity = states[index, 2:]
+    speed = float(np.linalg.norm(velocity))
+    if speed < 0.5:
+        # Below walking pace the direction is unreliable: the change of speed.
+        return float((np.linalg.norm(states[hi, 2:]) - np.linalg.norm(states[lo, 2:])) / (times[hi] - times[lo]))
+    return float((states[hi, 2:] - states[lo, 2:]) @ (velocity / speed) / (times[hi] - times[lo]))
 
-    ``footprint`` (the recorder's own bounding box seen from the radar) turns
-    ranges into clearances and drops returns from the recorder's own body;
+
+def accelerations(times: Sequence[float], states: np.ndarray, filtered: Optional[np.ndarray] = None) -> List[float]:
+    """The target's acceleration along its own velocity at each smoothed state (central difference).
+
+    With the forward-filtered states, the estimate claims no more than the
+    evidence up to that instant shows (the backward difference of the filtered
+    velocity over the same span): the smoother spreads an abrupt stop, a crash,
+    up to 0.2 s into the past, where it would announce a braking target before
+    it braked.  Of the two the one closer to zero is kept, zero if they disagree.
+    """
+    times = np.asarray(times, dtype=float)
+    out = []
+    for index, t in enumerate(times):
+        lo = int(np.searchsorted(times, t - ACCELERATION_HALF_WINDOW_S - 1e-6))
+        hi = int(np.searchsorted(times, t + ACCELERATION_HALF_WINDOW_S + 1e-6)) - 1
+        if hi <= lo or times[hi] - times[lo] < 1e-6:
+            out.append(0.0)
+            continue
+        smoothed = _along_velocity(times, states, index, lo, hi)
+        if filtered is None:
+            out.append(smoothed)
+            continue
+        past = int(np.searchsorted(times, t - 2.0 * ACCELERATION_HALF_WINDOW_S - 1e-6))
+        if index <= past or times[index] - times[past] < 1e-6:
+            out.append(0.0)
+            continue
+        causal = _along_velocity(times, filtered, index, past, index)
+        out.append(0.0 if smoothed * causal <= 0.0 else
+                   (smoothed if abs(smoothed) < abs(causal) else causal))
+    return out
+
+
+def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock_origin: float,
+                       cfg: TrackingConfig, footprint: Optional[EgoFootprint] = None,
+                       stats: Optional[Dict[str, Any]] = None) -> List[LocalTrack]:
+    """Raw radar observations of one recorder (every radar) -> smoothed anonymous tracks.
+
+    ``footprint`` (the recorder's own bounding box, vehicle frame) turns
+    positions into clearances and drops returns from the recorder's own body;
     ``stats`` (optional) receives how many such returns were dropped.
     """
-    sweeps = radar_sweeps(observations, ego, mount, clock_origin, cfg, footprint)
+    mounts = {stream.sensor_id: stream.mount for stream in streams}
+    sweeps = radar_sweeps(streams, ego, clock_origin, cfg, footprint)
     if stats is not None:
         stats["own_body_returns_dropped"] = sum(sweep.own_body for sweep in sweeps)
     tracks = []
@@ -692,9 +902,14 @@ def build_local_tracks(observations: Any, ego: EgoTrajectory, mount: RadarMount,
         measurements = list(raw.measurements)
         while measurements[-1].xy is None:  # drop the prediction-only tail
             measurements.pop()
-        states, covariances, _ = filter_and_smooth(measurements, cfg)
+        states, covariances, filtered = filter_and_smooth(measurements, cfg)
         offsets = surface_offsets(measurements) if footprint is not None else [0.0] * len(measurements)
-        samples = [_relative_sample(m.t_local, state, covariance, m, ego, mount, footprint, offset)
-                   for m, state, covariance, offset in zip(measurements, states, covariances, offsets)]
+        acceleration = accelerations([m.t_local for m in measurements], states, filtered)
+        samples = []
+        radar = None
+        for m, state, covariance, offset, accel in zip(measurements, states, covariances, offsets, acceleration):
+            radar = m.radar or radar
+            samples.append(_relative_sample(m.t_local, state, covariance, m, ego, mounts.get(radar), footprint,
+                                            offset, accel))
         tracks.append(LocalTrack(track_id=raw.track_id, samples=samples))
     return tracks

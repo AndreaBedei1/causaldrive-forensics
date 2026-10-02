@@ -5,9 +5,9 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e07",
-      "anchor_t_local": 1.8,
-      "offset_to_global": -1.8,
+      "anchor_node": "A:e10",
+      "anchor_t_local": 10.25,
+      "offset_to_global": -10.25,
       "chain": [
         "collision_001"
       ],
@@ -15,9 +15,9 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e09",
-      "anchor_t_local": 1.8,
-      "offset_to_global": -1.8,
+      "anchor_node": "B:e08",
+      "anchor_t_local": 10.25,
+      "offset_to_global": -10.25,
       "chain": [
         "collision_001"
       ],
@@ -35,22 +35,22 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e07",
-        "B": "B:e09"
+        "A": "A:e10",
+        "B": "B:e08"
       },
       "t_local": {
-        "A": 1.8,
-        "B": 1.8
+        "A": 10.25,
+        "B": 10.25
       },
       "peak_impulse": {
-        "A": 1247.19,
-        "B": 1247.19
+        "A": 1904.84,
+        "B": 1904.84
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
-        "peak impulses 1247.19 vs 1247.19 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 1904.84 vs 1904.84 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance"
       ]
     }

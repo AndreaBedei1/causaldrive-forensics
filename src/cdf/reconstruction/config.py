@@ -25,6 +25,11 @@ class CollisionConfig:
     new_impact_ratio: float = 0.75
     # Below this fraction the burst continues the contact (persistent contact).
     min_impact_ratio: float = 0.25
+    # A burst weaker than this (N*s) never starts a new contact within merge_gap_s,
+    # whatever its ratio: bodies scraping or pushing along each other (S16: a 2 s
+    # scrape of 35-320 N*s bursts).  1000 N*s changes a 1.2-2.5 t vehicle's speed by
+    # 0.4-0.8 m/s; every distinct impact measured in the campaign was stronger.
+    min_new_impact_impulse: float = 1000.0
     # In between, the recorder's own velocity jumps decide when both, at the
     # contact's start and at the burst's, are impact-like (a mean acceleration
     # of at least impact_acceleration_mps2 across the callback: about twice what
@@ -62,29 +67,57 @@ class TrackingConfig:
     measurement_std_m: float = 0.5
     radial_speed_std_mps: float = 0.3
     acceleration_std_mps2: float = 6.0
+    # A confirmed track whose target stops abruptly (a crash: tens of m/s^2, the
+    # Doppler speed leaves the gate in one sweep) may take this many returns or
+    # more whose speed lies between standstill and the predicted one, when its
+    # previous sweep was free of foreign returns (tracking._slowdown_gate).
+    min_slowdown_returns: int = 3
 
 
 @dataclass
 class SemanticsConfig:
     # Brake level that starts braking (BRAKE_START); below it braking ends.
     brake_onset_threshold: float = 0.1
+    # Accelerator pedal (THROTTLE_START / THROTTLE_END): on at or above this level, off at or
+    # below the release level (hysteresis), and a release shorter than the debounce does not end
+    # it.  The recorded throttle is 0 (coasting, braking) or 0.15-1.0 (cruise, acceleration);
+    # only about 0.5 % of the samples lie between 0.02 and 0.10.
+    throttle_on_threshold: float = 0.10
+    throttle_off_threshold: float = 0.05
+    throttle_release_debounce_s: float = 0.2
     # Below this speed the recorder is stopped (STOP_START); it moves again above 1 m/s.
     full_stop_speed_mps: float = 0.3
     # Hysteresis around the supplied speed limit: exceeding starts above
     # limit + this and ends at or below limit - this.
     speed_limit_hysteresis_kmh: float = 1.0
     closing_speed_threshold_mps: float = 1.0
-    # CRITICAL_TTC: avoiding the target by braking would need at least the
-    # available deceleration.  The recorder reacts after this time...
+    # CRITICAL_TTC (reconstruction/conflict.py): a predicted collision course
+    # (the recorder's safety envelope and the target's box overlap within the
+    # horizon, both moving as now) that braking cannot avoid with the available
+    # deceleration.  The braking vehicle reacts after this time...
     critical_reaction_time_s: float = 1.0
     # ...then brakes at up to this deceleration (hard, non-emergency braking on
     # a dry road; emergency braking reaches about 8-10 m/s^2)...
     critical_deceleration_mps2: float = 6.0
-    # ...and must keep at least this distance from the target.
+    # ...and must keep at least this distance ahead / behind (the envelope)...
     critical_standstill_margin_m: float = 1.0
+    # ...and this much at the sides.
+    critical_lateral_margin_m: float = 0.3
     # The state ends once the required deceleration falls below this fraction
-    # of the available one (hysteresis).
+    # of the available one, or no collision course remains (hysteresis).
     critical_release_ratio: float = 0.75
+    # Prediction horizon and step of the collision-course test.
+    prediction_horizon_s: float = 6.0
+    prediction_time_step_s: float = 0.05
+    # The radar measures no size: a target is a box of this nominal size (a
+    # passenger car) behind its observed near surface...
+    target_length_m: float = 4.6
+    target_width_m: float = 1.9
+    # ...that keeps its measured deceleration until it stops when it brakes at
+    # least this hard (otherwise its velocity is held constant).
+    target_braking_min_mps2: float = 1.0
+    # No CRITICAL_TTC claim (either way) on a track younger than this.
+    critical_min_track_age_s: float = 0.5
     # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading: the yaw
     # rate (over the preceding window) reaches the on threshold while moving at least
     # the minimum speed, and the turn ends below the off threshold...
@@ -101,13 +134,11 @@ class SemanticsConfig:
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT;
     # the corridor starts at the recorder's front edge (its own footprint).
     path_half_width_m: float = 1.5
-    # TRACK_APPEARED_FRONT when the track's first azimuth from the radar lies
-    # within this angle of the recorder's heading (about its own lane at 20 m),
-    # TRACK_APPEARED_REAR within this angle of the opposite direction (the 360
-    # degree radar sees behind); otherwise TRACK_APPEARED_LEFT (negative
-    # azimuth) or _RIGHT.
+    # TRACK_APPEARED_FRONT when the track's first bearing from the vehicle
+    # origin lies within this angle of the recorder's heading (about its own
+    # lane at 20 m); otherwise TRACK_APPEARED_LEFT (negative bearing) or _RIGHT.
+    # There is no rear radar, so nothing appears straight behind.
     track_appeared_front_deg: float = 5.0
-    track_appeared_rear_deg: float = 5.0
     # Track estimates more uncertain than this (Kalman standard deviations)
     # support no CUT_IN claim: it stays UNKNOWN.
     max_position_std_m: float = 1.0
@@ -156,6 +187,13 @@ class FusionConfig:
     min_track_persistence_s: float = 1.0
     # Track speed versus the partner's own reported speed (frame independent).
     speed_consistency_mps: float = 1.5
+    # Several compatible tracks for one contact are ambiguous, unless exactly one
+    # of them touches the recorder: observed within one sample of the contact,
+    # its near surface at most touching_clearance_m from the recorder's body,
+    # while every rival is at least rival_clearance_m away (a long vehicle seen
+    # as two tracks, S16's van: the one at its touching end is the partner).
+    touching_clearance_m: float = 1.0
+    rival_clearance_m: float = 2.0
 
 
 @dataclass

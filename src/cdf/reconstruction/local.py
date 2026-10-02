@@ -29,11 +29,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
-from ..recording.compact_observations import load_observation_stream
+from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
+from .conflict import ConflictAssessment, assess_conflict
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
-from .tracking import (MIN_CLOSING_FOR_TTC_MPS, EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount,
+from .tracking import (EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount, RadarStream,
                        TrackSample, build_local_tracks, ego_trajectory)
 from .world_state import UNKNOWN, PerceivedWorld, span_values
 
@@ -164,10 +165,13 @@ def _lasting(spans: Sequence[Span], times: Sequence[float]) -> List[Span]:
 
 def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_origin: float,
                    cfg: SemanticsConfig, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
-    """The BRAKE state from the recorder's own brake pedal.
+    """The BRAKE and THROTTLE states from the recorder's own pedals.
 
-    Pedal and steering values (brake, throttle, steer) stay in the EGO_CONTROL
-    facts; only braking is a semantic state.
+    BRAKE: at or above ``brake_onset_threshold``, ending below it.  THROTTLE:
+    at or above ``throttle_on_threshold``, ending at or below
+    ``throttle_off_threshold`` (hysteresis).  A release shorter than the
+    debounce does not end either state.  The raw pedal and steering values
+    (brake, throttle, steer) stay in the EGO_CONTROL facts.
     """
     if not controls:
         return []
@@ -176,9 +180,15 @@ def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_orig
     level = cfg.brake_onset_threshold
     spans = active_intervals(times, brake, lambda value: value >= level, lambda value: value < level,
                              PEDAL_RELEASE_DEBOUNCE_S)
+    throttle = [float(record["throttle"]) for record in controls]
+    on, off = cfg.throttle_on_threshold, cfg.throttle_off_threshold
+    throttle_spans = active_intervals(times, throttle, lambda value: value >= on, lambda value: value <= off,
+                                      cfg.throttle_release_debounce_s)
     if world is not None:
         world.add_ego_state("BRAKE", times, spans)
-    return state_events(owner, None, "BRAKE_START", "BRAKE_END", ACTION, "controls", times, spans)
+        world.add_ego_state("THROTTLE", times, throttle_spans)
+    return (state_events(owner, None, "BRAKE_START", "BRAKE_END", ACTION, "controls", times, spans)
+            + state_events(owner, None, "THROTTLE_START", "THROTTLE_END", ACTION, "controls", times, throttle_spans))
 
 
 def yaw_rates(ego: EgoTrajectory, window_s: float) -> List[float]:
@@ -319,6 +329,8 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
     (at least one sample without a callback) is judged by its peak relative to
     the current contact's peak:
 
+    - weaker than ``min_new_impact_impulse``: the same contact (scraping or
+      pushing along each other), whatever the ratio;
     - at least ``new_impact_ratio``: a new contact (a new impact);
     - below ``min_impact_ratio``: the same contact (persistent contact);
     - in between, the recorder's own velocity jumps decide when both, at the
@@ -330,7 +342,10 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
     The COLLISION is at the contact's first callback and keeps its peak
     impulse, which graph alignment needs to recognise the same contact in
     another recorder; a contact started within ``merge_gap_s`` of the previous
-    one also states why.  Every callback stays in the raw log.
+    one also states why.  A contact that absorbed later bursts lists them
+    (``merged_bursts``: local time, peak impulse): another recorder may have
+    reported one of them as a contact of its own (struck again by a third body
+    within the same contact, as B in S06).  Every callback stays in the raw log.
     """
     period = sample_period(ego)
     bursts: List[Dict[str, Any]] = []
@@ -350,7 +365,9 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
         if current is not None and burst["first"] - current["last"] <= cfg.merge_gap_s:
             ratio = burst["peak"] / current["peak"] if current["peak"] > 0 else math.inf
             angle = None
-            if ratio >= cfg.new_impact_ratio:
+            if burst["peak"] < cfg.min_new_impact_impulse:
+                new, evidence = False, None
+            elif ratio >= cfg.new_impact_ratio:
                 new, evidence = True, "peak"
             elif ratio < cfg.min_impact_ratio:
                 new, evidence = False, None
@@ -363,15 +380,21 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
             if not new:
                 current["last"] = burst["last"]
                 current["peak"] = max(current["peak"], burst["peak"])
+                current["merged"].append(burst)
                 continue
             attributes["new_contact"] = {"break_s": round(burst["first"] - current["last"], 2),
                                          "peak_ratio": round(ratio, 2), "evidence": evidence}
             if angle is not None:
                 attributes["new_contact"]["reversal_deg"] = round(angle)
-        contacts.append(dict(burst, attributes=attributes))
-    return [SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
-                          attributes=dict({"peak_impulse": round(contact["peak"], 2)}, **contact["attributes"]),
-                          source="collision_sensor", confidence=1.0) for contact in contacts]
+        contacts.append(dict(burst, attributes=attributes, merged=[]))
+    events = []
+    for contact in contacts:
+        attributes = dict({"peak_impulse": round(contact["peak"], 2)}, **contact["attributes"])
+        if contact["merged"]:
+            attributes["merged_bursts"] = [[round(b["first"], 3), round(b["peak"], 2)] for b in contact["merged"]]
+        events.append(SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
+                                    attributes=attributes, source="collision_sensor", confidence=1.0))
+    return events
 
 
 SIGN_STATES = {"STOP": "STOP_SIGN_DETECTED", "YIELD": "YIELD_SIGN_DETECTED"}
@@ -473,21 +496,22 @@ class RelativeMotion:
     lateral_speed_mps: float  # + = to the recorder's right
     heading_deg: Optional[float]  # target's direction of motion minus the recorder's heading
     t_cpa_s: Optional[float]  # time of closest approach of the relative motion (None: no relative motion)
-    d_cpa_m: Optional[float]  # predicted miss distance at that time, from the radar
+    d_cpa_m: Optional[float]  # predicted miss distance at that time, from the recorder's vehicle origin
     known: bool  # the estimate is precise enough for semantic claims
-    d_cpa_clearance_m: Optional[float] = None  # that miss distance as a clearance (near surface to footprint edge)
+    d_cpa_clearance_m: Optional[float] = None  # smallest predicted clearance (near surface to footprint)
 
 
 def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig,
                     footprint: Optional[EgoFootprint] = None) -> RelativeMotion:
-    """Constant-velocity closest point of approach of the target relative to the radar.
+    """Constant-velocity closest point of approach of the target relative to the recorder.
 
-    r = (longitudinal, lateral) of the tracked point from the radar and v =
-    target velocity - recorder velocity, both in the recorder's frame:
-    t_CPA = -(r . v) / |v|^2 and d_CPA = |r + v t_CPA| (relative coordinates:
-    unchanged by the mount).  ``d_cpa_clearance_m`` is that miss distance seen
-    from the recorder's footprint edge, less the depth of the tracked point
-    behind the target's near surface.
+    r = (longitudinal, lateral) of the tracked point from the recorder's vehicle
+    origin and v = target velocity - recorder velocity, both in the recorder's
+    frame (non-rotating): t_CPA = -(r . v) / |v|^2 and d_CPA = |r + v t_CPA|.
+    ``d_cpa_clearance_m`` is the smallest distance between the recorder's
+    footprint and the target's near surface along that straight relative path
+    over the conflict horizon (0 when the path enters the footprint).  Relative
+    coordinates: unchanged by where the radars sit.
     """
     c, s = math.cos(own.heading), math.sin(own.heading)
     dvx, dvy = sample.vx_mps - own.vx, sample.vy_mps - own.vy
@@ -501,8 +525,15 @@ def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig,
         t_cpa = -(sample.longitudinal_m * v_long + sample.lateral_m * v_lat) / speed2
         cpa_long, cpa_lat = sample.longitudinal_m + v_long * t_cpa, sample.lateral_m + v_lat * t_cpa
         d_cpa = math.hypot(cpa_long, cpa_lat)
-        extent = footprint.extent(math.atan2(cpa_lat, cpa_long)) if footprint is not None else 0.0
-        d_cpa_clearance = max(d_cpa - extent - sample.surface_offset_m, 0.0)
+        horizon = cfg.prediction_horizon_s
+        start = (sample.longitudinal_m, sample.lateral_m)
+        end = (sample.longitudinal_m + v_long * horizon, sample.lateral_m + v_lat * horizon)
+        if footprint is not None:
+            miss, _ = footprint.segment_distance(start, end)
+        else:
+            fraction = min(max(t_cpa / horizon, 0.0), 1.0)
+            miss = math.hypot(start[0] + fraction * (end[0] - start[0]), start[1] + fraction * (end[1] - start[1]))
+        d_cpa_clearance = max(miss - sample.surface_offset_m, 0.0)
     known = sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
     return RelativeMotion(v_long, v_lat, heading, t_cpa, d_cpa, known, d_cpa_clearance)
 
@@ -522,95 +553,24 @@ def motion_relation(sample: TrackSample, motion: RelativeMotion, cfg: SemanticsC
 
 
 def appearance_side(bearing_deg: float, cfg: SemanticsConfig) -> str:
-    """FRONT, REAR, LEFT or RIGHT: where a track entered the recorder's radar field.
+    """FRONT, LEFT or RIGHT: where a track entered the recorder's radar field.
 
-    From the track's own azimuth at its first detection, seen from the radar
-    (negative = left, +-180 = behind): within ``track_appeared_front_deg`` of the
-    recorder's heading it appeared in front, within ``track_appeared_rear_deg``
-    of the opposite direction behind, otherwise on that side.
+    From the track's own bearing at its first detection, seen from the
+    recorder's vehicle origin (negative = left): within
+    ``track_appeared_front_deg`` of the heading it appeared in front, otherwise
+    on that side.  There is no rear radar: directly behind lies a blind zone, and
+    a track first seen in a rear quarter appeared on that side.
     """
     if abs(bearing_deg) <= cfg.track_appeared_front_deg:
         return "FRONT"
-    if abs(bearing_deg) >= 180.0 - cfg.track_appeared_rear_deg:
-        return "REAR"
     return "LEFT" if bearing_deg < 0 else "RIGHT"
 
 
-@dataclass
-class CriticalTtcAssessment:
-    """How hard the recorder would have to brake to avoid a target it closes on."""
-
-    ego_speed_mps: float
-    target_longitudinal_speed_mps: float  # target ground velocity along the recorder's heading
-    closing_speed_mps: float  # along the line of sight, + = range shrinking
-    range_m: float
-    ttc_s: Optional[float]  # range / closing speed; None without real closing
-    speed_to_shed_mps: float  # longitudinal speed the recorder must lose to stop closing in
-    threshold_s: Optional[float]  # TTC at which braking at the available deceleration just suffices
-    required_deceleration_mps2: Optional[float]  # None: nothing to avoid; inf: not even an instant stop helps
-    available_deceleration_mps2: float
-    critical: bool
-
-    @property
-    def braking_margin_mps2(self) -> Optional[float]:
-        """Available minus required deceleration (negative when critical)."""
-        if self.required_deceleration_mps2 is None or math.isinf(self.required_deceleration_mps2):
-            return None
-        return self.available_deceleration_mps2 - self.required_deceleration_mps2
-
-
-def critical_ttc_assessment(ego_speed_mps: float, target_longitudinal_speed_mps: float, closing_speed_mps: float,
-                            range_m: float, cfg: SemanticsConfig) -> CriticalTtcAssessment:
-    """Braking avoidability of a target, from local quantities only.
-
-    TTC = clearance / closing speed (the free distance from the recorder's
-    footprint edge to the target's near surface, and the line-of-sight range
-    rate from the recorder's own odometry and the radar track's estimated
-    velocity).  ``range_m`` is that clearance.  To avoid the target by braking the
-    recorder must lose the longitudinal speed
-
-        v_shed = v_ego - min(max(v_target_long, 0), v_ego)
-
-    (down to the target's forward speed when it drives ahead in the same
-    direction, to a standstill when it stands, crosses or comes towards it).
-    At constant velocities that speed can be lost over v_shed * TTC; after the
-    reaction time t_r and keeping the margin d0 it takes
-
-        a_req = v_shed^2 / (2 (v_shed (TTC - t_r) - d0))   (infinite if the bracket <= 0)
-
-    The target is critical while closing at ``closing_speed_threshold_mps`` or
-    more and a_req >= a (``critical_deceleration_mps2``), which is the same as
-
-        TTC <= t_r + v_shed / (2 a) + d0 / v_shed = critical_ttc_threshold_s
-
-    so the threshold grows with the speed to shed.  The parameters are global
-    assumptions, documented in ``configs/reconstruction.yaml``; they are not a
-    norm.  A target the recorder cannot catch up (v_shed = 0) is never critical.
-    """
-    t_r, a_avail, d0 = cfg.critical_reaction_time_s, cfg.critical_deceleration_mps2, cfg.critical_standstill_margin_m
-    ego = max(float(ego_speed_mps), 0.0)
-    shed = ego - min(max(float(target_longitudinal_speed_mps), 0.0), ego)
-    ttc = range_m / closing_speed_mps if closing_speed_mps > MIN_CLOSING_FOR_TTC_MPS else None
-    threshold = required = None
-    if shed > 1e-3:
-        threshold = t_r + shed / (2.0 * a_avail) + d0 / shed
-        if ttc is not None:
-            available = shed * (ttc - t_r) - d0
-            required = shed * shed / (2.0 * available) if available > 0.0 else math.inf
-    critical = (required is not None and closing_speed_mps >= cfg.closing_speed_threshold_mps
-                and required >= a_avail)
-    return CriticalTtcAssessment(ego, float(target_longitudinal_speed_mps), float(closing_speed_mps), float(range_m),
-                                 ttc, shed, threshold, required, a_avail, critical)
-
-
-def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory,
-                          cfg: SemanticsConfig) -> List[CriticalTtcAssessment]:
-    out = []
-    for sample in samples:
-        own = ego.at(sample.t_local)
-        along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
-        out.append(critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.clearance_m, cfg))
-    return out
+def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cfg: SemanticsConfig,
+                          footprint: Optional[EgoFootprint] = None) -> List[ConflictAssessment]:
+    first = samples[0].t_local if samples else 0.0
+    return [assess_conflict(sample, ego.at(sample.t_local), footprint, cfg, sample.t_local - first)
+            for sample in samples]
 
 
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
@@ -676,11 +636,11 @@ def _stationary_ego() -> EgoTrajectory:
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
                  ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None,
                  footprint: Optional[EgoFootprint] = None) -> List[SemanticEvent]:
-    """TRACK_APPEARED_FRONT/REAR/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
+    """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
-    The appearance side comes from the track's azimuth at its first detection
-    (``appearance_side``); CRITICAL_TTC from ``critical_ttc_assessment``.
+    The appearance side comes from the track's bearing at its first detection
+    (``appearance_side``); CRITICAL_TTC from ``conflict.assess_conflict``.
     Ranges, speeds, TTC, braking needs and the relative motion stay in the
     TRACK_STATE facts.
     ``ego`` is the recorder's own trajectory (relative motion needs its
@@ -713,19 +673,21 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
                            times, closing_spans)
 
-    # A critical TTC: braking would need at least the available deceleration
-    # (``critical_ttc_assessment``).  It needs closing, so it ends at the latest
-    # with CLOSING, and once the required deceleration drops below
+    # A critical TTC: a predicted collision course that braking cannot avoid with
+    # the available deceleration (``conflict.assess_conflict``).  It ends once no
+    # collision course remains or the required deceleration drops below
     # ``critical_release_ratio`` of the available one (hysteresis, debounced).
-    assessments = _critical_assessments(samples, ego, cfg)
+    assessments = _critical_assessments(samples, ego, cfg, footprint)
     release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
 
-    def critical_off(a: CriticalTtcAssessment) -> bool:
-        return (a.closing_speed_mps < closing / 2.0 or a.required_deceleration_mps2 is None
-                or a.required_deceleration_mps2 < release)
+    def critical_off(a: ConflictAssessment) -> bool:
+        # An uncertain estimate is no evidence either way: it neither starts nor ends the state.
+        return a.known and (not a.collision_course or a.required_deceleration_mps2 is None
+                            or a.required_deceleration_mps2 < release)
 
     spans = active_intervals(times, assessments, lambda a: a.critical, critical_off, CRITICAL_RELEASE_DEBOUNCE_S)
     critical_spans = _lasting(spans, times)
+    first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, critical_spans)
 
@@ -745,7 +707,7 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
         count = len(times)
         world.add_track(subject, times, {
             "CLOSING": span_values(count, closing_spans),
-            "CRITICAL_TTC": span_values(count, critical_spans),
+            "CRITICAL_TTC": span_values(count, critical_spans, first_known_critical),
             "IN_EGO_PATH": span_values(count, path),
             "CUT_IN_FROM_LEFT": span_values(count, from_left, first_known),
             "CUT_IN_FROM_RIGHT": span_values(count, from_right, first_known),
@@ -767,7 +729,7 @@ def number_events(owner: str, events: List[SemanticEvent]) -> List[SemanticEvent
 # --------------------------------------------------------------------------
 
 def _where(sample: TrackSample) -> Dict[str, Any]:
-    return {"range_m": round(sample.range_m, 2), "clearance_m": round(sample.clearance_m, 2),
+    return {"range_m": round(sample.range_m, 2), "radar": sample.radar, "clearance_m": round(sample.clearance_m, 2),
             "bearing_deg": round(sample.bearing_deg, 1),
             "lateral_m": round(sample.lateral_m, 2), "closing_speed_mps": round(sample.closing_speed_mps, 2)}
 
@@ -798,15 +760,15 @@ def _rounded(value: Optional[float], digits: int) -> Optional[float]:
 
 def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: float,
                      motion: Optional[RelativeMotion] = None, cfg: Optional[SemanticsConfig] = None,
-                     critical: Optional[CriticalTtcAssessment] = None) -> SemanticEvent:
-    """Quantitative state of a track: geometry, its own velocity in the local
-    frame (vx/vy), uncertainty, the motion relative to the recorder and the
-    braking need behind CRITICAL_TTC."""
+                     conflict: Optional[ConflictAssessment] = None) -> SemanticEvent:
+    """Quantitative state of a track: geometry (raw range from the radar that
+    observed it, clearance from the recorder's footprint), its own velocity and
+    acceleration in the local frame, uncertainty, the motion relative to the
+    recorder and the collision-course prediction behind CRITICAL_TTC."""
     attributes = dict(_where(sample), longitudinal_m=round(sample.longitudinal_m, 2),
-                      ahead_of_front_m=round(sample.ahead_m, 2), ego_extent_m=round(sample.ego_extent_m, 2),
-                      surface_offset_m=round(sample.surface_offset_m, 2),
-                      ttc_s=None if sample.ttc_s is None else round(sample.ttc_s, 2),
-                      speed_mps=round(sample.speed_mps, 2),
+                      ahead_of_front_m=round(sample.ahead_m, 2), surface_offset_m=round(sample.surface_offset_m, 2),
+                      closing_ttc_s=_rounded(sample.closing_ttc_s, 2),
+                      speed_mps=round(sample.speed_mps, 2), acceleration_mps2=round(sample.acceleration_mps2, 2),
                       x_m=round(sample.x_m, 2), y_m=round(sample.y_m, 2),
                       vx_mps=round(sample.vx_mps, 2), vy_mps=round(sample.vy_mps, 2),
                       pos_std_m=round(sample.pos_std_m, 2), vel_std_mps=round(sample.vel_std_mps, 2),
@@ -819,16 +781,18 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
             motion_relation=motion_relation(sample, motion, cfg or SemanticsConfig()),
             t_cpa_s=_rounded(motion.t_cpa_s, 2), d_cpa_m=_rounded(motion.d_cpa_m, 2),
             d_cpa_clearance_m=_rounded(motion.d_cpa_clearance_m, 2))
-    if critical is not None:
-        required = critical.required_deceleration_mps2
+    if conflict is not None:
+        required = conflict.required_deceleration_mps2
         attributes.update(
-            ego_speed_mps=round(critical.ego_speed_mps, 2),
-            target_longitudinal_speed_mps=round(critical.target_longitudinal_speed_mps, 2),
-            speed_to_shed_mps=round(critical.speed_to_shed_mps, 2),
-            critical_ttc_threshold_s=_rounded(critical.threshold_s, 2),
+            ego_speed_mps=round(conflict.ego_speed_mps, 2), encounter=conflict.encounter,
+            collision_course=conflict.collision_course, ttc_s=conflict.ttc_s,
+            predicted_overlap_s=None if conflict.overlap_s is None else list(conflict.overlap_s),
+            target_acceleration_used_mps2=round(conflict.target_acceleration_mps2, 2),
             required_deceleration_mps2=None if required is None or math.isinf(required) else round(required, 2),
-            braking_margin_mps2=_rounded(critical.braking_margin_mps2, 2),
-            unavoidable_by_braking=required is not None and math.isinf(required))
+            avoidance_by=conflict.avoidance_by,
+            braking_margin_mps2=_rounded(conflict.braking_margin_mps2, 2),
+            unavoidable_by_braking=required is not None and math.isinf(required),
+            estimate_known=conflict.known, critical=conflict.critical)
     return SemanticEvent(type="TRACK_STATE", kind=FACT, actor_id=owner, subject_id=track_id,
                          t_local=t_local, source="radar", attributes=attributes)
 
@@ -872,10 +836,8 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
                 if sample is not None:
                     own = ego.at(sample.t_local)
                     motion = relative_motion(sample, own, semantics, footprint)
-                    along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
-                    critical = critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.clearance_m,
-                                                       semantics)
-                    facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics, critical))
+                    conflict = assess_conflict(sample, own, footprint, semantics, sample.t_local - track.first_t)
+                    facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics, conflict))
         frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
                                  perceived_state=None if world is None else world.snapshot(t_local, before=False)))
     return frames
@@ -954,15 +916,16 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
 
     tracks: List[LocalTrack] = []
     # The recorder's own shape (its bounding box, recorded with its metadata):
-    # radar ranges become clearances from its skin.
+    # radar returns get clearances from its skin.
     footprint_record = vehicle_metadata(vehicle_dir).get("ego_footprint")
-    footprint = mount = None
+    footprint = EgoFootprint.from_metadata(footprint_record)
+    streams: List[RadarStream] = []
     radar_stats: Dict[str, Any] = {}
     if (vehicle_dir / "radar").exists():
-        radar = load_observation_stream(vehicle_dir, source="radar")
-        mount = RadarMount.from_metadata(radar.metadata)
-        footprint = EgoFootprint.from_metadata(footprint_record, mount)
-        tracks = build_local_tracks(radar, ego, mount, clock_origin, cfg.tracking, footprint, radar_stats)
+        # Every radar with its own mount: returns are placed from where they were measured.
+        streams = [RadarStream(RadarMount.from_metadata(observations.metadata), observations)
+                   for observations in load_radar_observations(vehicle_dir)]
+        tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats)
 
     semantics = cfg.semantics
     world = PerceivedWorld()
@@ -1000,12 +963,16 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         "inputs": sorted(name for name in ("ego.jsonl", "controls.jsonl", "collisions.jsonl",
                                            "traffic_signs.jsonl", "radar")
                          if (vehicle_dir / name).exists()),
-        "radar": None if mount is None else {
-            "mount": {"x": mount.x, "y": mount.y, "z": round(mount.z, 4), "yaw_deg": round(math.degrees(mount.yaw), 3)},
+        "radar": None if not streams else {
+            "radars": [{"sensor_id": stream.sensor_id,
+                        "mount": {"x": round(stream.mount.x, 4), "y": round(stream.mount.y, 4),
+                                  "z": round(stream.mount.z, 4), "yaw_deg": round(math.degrees(stream.mount.yaw), 3),
+                                  "pitch_deg": round(math.degrees(stream.mount.pitch), 3)}} for stream in streams],
             "ego_footprint": footprint_record,
-            "clearance": ("clearance = max(0, planar range - extent of the own footprint along the bearing); "
-                          "range when the footprint is unknown") if footprint is not None
-            else "own footprint unknown: clearance = range from the radar",
+            "geometry": ("every return placed from its own radar's mount; its Doppler speed corrected by that "
+                         "radar's own displacement; clearance = distance from the recorder's footprint to the "
+                         "return (a track: to its near surface)") if footprint is not None
+            else "own footprint unknown: clearance = distance from the vehicle origin",
             "own_body_returns_dropped": radar_stats.get("own_body_returns_dropped", 0)},
     }
     graph = build_local_graph(owner, trace, tracks, recorder)

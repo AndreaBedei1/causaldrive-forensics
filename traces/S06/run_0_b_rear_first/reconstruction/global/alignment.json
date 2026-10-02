@@ -5,9 +5,9 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e11",
-      "anchor_t_local": 6.0,
-      "offset_to_global": -6.0,
+      "anchor_node": "A:e08",
+      "anchor_t_local": 6.25,
+      "offset_to_global": -6.25,
       "chain": [
         "collision_001"
       ],
@@ -15,9 +15,9 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e18",
-      "anchor_t_local": 6.0,
-      "offset_to_global": -6.0,
+      "anchor_node": "B:e13",
+      "anchor_t_local": 6.25,
+      "offset_to_global": -6.25,
       "chain": [
         "collision_001"
       ],
@@ -25,9 +25,9 @@
     },
     "C": {
       "status": "ALIGNED",
-      "anchor_node": "C:e16",
-      "anchor_t_local": 4.6,
-      "offset_to_global": -6.0,
+      "anchor_node": "C:e07",
+      "anchor_t_local": 4.7,
+      "offset_to_global": -6.25,
       "chain": [
         "collision_001",
         "collision_002"
@@ -48,22 +48,22 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e11",
-        "B": "B:e18"
+        "A": "A:e08",
+        "B": "B:e13"
       },
       "t_local": {
-        "A": 6.0,
-        "B": 6.0
+        "A": 6.25,
+        "B": 6.25
       },
       "peak_impulse": {
-        "A": 31488.29,
-        "B": 31488.29
+        "A": 31706.27,
+        "B": 31706.27
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
-        "peak impulses 31488.29 vs 31488.29 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 31706.27 vs 31706.27 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance"
       ]
     },
@@ -74,22 +74,22 @@
         "C"
       ],
       "nodes": {
-        "B": "B:e10",
-        "C": "C:e16"
+        "B": "B:e06",
+        "C": "C:e07"
       },
       "t_local": {
-        "B": 4.6,
-        "C": 4.6
+        "B": 4.7,
+        "C": 4.7
       },
       "peak_impulse": {
-        "B": 21812.15,
-        "C": 21812.15
+        "B": 21842.46,
+        "C": 21842.46
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "B and C both recorded a collision",
-        "peak impulses 21812.15 vs 21812.15 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 21842.46 vs 21842.46 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance"
       ]
     }

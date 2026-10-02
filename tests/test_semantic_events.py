@@ -78,9 +78,47 @@ class BrakingTests(unittest.TestCase):
             self.assertEqual(event.attributes, {})
 
 
-class ThrottleAndSteerTests(unittest.TestCase):
-    def test_throttle_gives_no_event_but_stays_a_fact(self):
-        self.assertEqual(_pedals(throttle=lambda t: 0.9 if 6.0 <= t < 7.0 else 0.4), [])
+class ThrottleTests(unittest.TestCase):
+    def test_pressing_and_releasing_the_accelerator_is_one_start_and_one_end(self):
+        self.assertEqual(_pedals(throttle=lambda t: 0.4 if 6.0 <= t < 7.0 else 0.0),
+                         [("THROTTLE_START", 6.0), ("THROTTLE_END", 7.0)])
+
+    def test_hysteresis_band_neither_starts_nor_ends(self):
+        # 0.07 lies between the off (0.05) and on (0.10) levels.
+        self.assertEqual(_pedals(throttle=lambda t: 0.07), [])
+        self.assertEqual(_pedals(throttle=lambda t: 0.4 if 6.0 <= t < 7.0 else (0.07 if t >= 7.0 else 0.0)),
+                         [("THROTTLE_START", 6.0)])
+
+    def test_short_release_does_not_split_the_throttle(self):
+        def throttle(t):
+            if t in (6.5, 7.0, 7.05, 7.1):  # a one-sample and a 0.15 s release
+                return 0.0
+            return 0.5 if 6.0 <= t < 8.0 else 0.0
+        self.assertEqual(_pedals(throttle=throttle), [("THROTTLE_START", 6.0), ("THROTTLE_END", 8.0)])
+
+    def test_a_release_longer_than_the_debounce_ends_it(self):
+        events = _pedals(throttle=lambda t: 0.5 if 6.0 <= t < 6.5 or 6.8 <= t < 7.5 else 0.0)
+        self.assertEqual(events, [("THROTTLE_START", 6.0), ("THROTTLE_END", 6.5),
+                                  ("THROTTLE_START", 6.8), ("THROTTLE_END", 7.5)])
+
+    def test_throttle_already_pressed_at_the_first_sample(self):
+        controls = [{"timestamp": ORIGIN + t, "brake": 0.0, "throttle": 0.3} for t in _grid()]
+        events = control_events("A", controls, ORIGIN, CFG)
+        self.assertEqual([(e.type, e.t_local) for e in events], [("THROTTLE_START", 5.0)])
+        self.assertEqual(events[0].attributes, {"active_at_first_observation": True})
+        self.assertEqual(events[0].kind, "ACTION")
+
+    def test_full_throttle_is_still_one_throttle_state_and_no_strong_throttle(self):
+        events = _pedals(throttle=lambda t: (1.0 if 6.5 <= t < 7.0 else 0.3) if 6.0 <= t < 8.0 else 0.0)
+        self.assertEqual(events, [("THROTTLE_START", 6.0), ("THROTTLE_END", 8.0)])
+        for name in ("STRONG_THROTTLE", "HARD_THROTTLE"):
+            self.assertFalse(any(name in event for event, _ in events))
+
+    def test_braking_and_throttle_are_separate_states(self):
+        events = _pedals(throttle=lambda t: 0.4 if t < 6.0 else 0.0, brake=lambda t: 0.8 if t >= 6.2 else 0.0)
+        self.assertEqual(sorted(events), [("BRAKE_START", 6.2), ("THROTTLE_END", 6.0), ("THROTTLE_START", 5.0)])
+
+    def test_raw_pedals_stay_a_fact(self):
         fact = ego_control_fact("A", {"throttle": 0.9, "brake": 0.0, "steer": -0.25}, 6.0)
         self.assertEqual(fact.attributes, {"throttle": 0.9, "brake": 0.0, "steer": -0.25})
 

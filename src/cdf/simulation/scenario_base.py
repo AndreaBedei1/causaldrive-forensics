@@ -122,8 +122,8 @@ class ParticipantSpec:
     acceleration run-up."""
     target_speed: float = 12.0
     sensor_profile: Optional[str] = None
-    """Per-participant radar profile override. This is how scenario S07 creates
-    genuine partial observability through sensing rather than by deleting data."""
+    """Per-participant radar profile override (``configs/sensors/<name>.yaml``).
+    No campaign scenario uses one: every vehicle carries the baseline radars."""
     actions: List[ScriptedAction] = field(default_factory=list)
     post_impact_stop: bool = True
     post_impact_mode: str = ""

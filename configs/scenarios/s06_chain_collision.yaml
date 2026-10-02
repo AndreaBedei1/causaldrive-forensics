@@ -2,7 +2,10 @@ scenario:
   scenario_id: S06
   name: chain_collision
   description: 'Three vehicles in a single lane: C leads, B follows, A is last. C
-    brakes hard. Which pair collides first depends on how B responds.
+    brakes hard. Which pair collides first depends on how B responds.  a_front_pushed:
+    B brakes hard enough to stop short of C, but A, following B far too closely, runs
+    into it while it is still slowing and pushes it into C.  b_rear_first: B does not
+    react, runs into C, and A then runs into B.
 
     '
   map: Town05
@@ -61,19 +64,25 @@ scenario:
     a_front_pushed:
       participant_overrides:
         B:
-          post_impact_stop: false
+          # B stops short of C (about 3 m) and holds its brake.  Struck while still
+          # slowing, its pedals are released (coast, gearbox in neutral) and A's impact
+          # carries it into C.  A stationary braked car cannot be pushed in CARLA (it
+          # stops the striking car dead), so A has to reach B before B stops.
+          post_impact_mode: coast
           actions:
           - action_id: B_reaction_brake
             kind: brake
             t_start: 3.75
-            duration: 2.0
+            duration: 10.0
             params:
               intensity: 1.0
         A:
+          spawn:
+            forward_m: 17.0  # 4.5 m behind B's rear bumper at 14 m/s
           actions:
-          - action_id: A_very_late_brake
+          - action_id: A_late_brake
             kind: brake
-            t_start: 5.6
+            t_start: 4.6
             duration: 8.0
             params:
               intensity: 0.5

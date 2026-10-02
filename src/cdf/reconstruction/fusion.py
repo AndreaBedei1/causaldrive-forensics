@@ -37,6 +37,10 @@ SPEED_WINDOW_S = 3.0
 SPEED_STEP_S = 0.1
 
 
+# A track touches the recorder at a contact when observed this close to it in time.
+TOUCH_WINDOW_S = 0.06
+
+
 def _speed_rmse(track: LocalTrack, clock: GraphClock, partner: LocalReconstruction,
                 partner_clock: GraphClock, start: float, end: float) -> Optional[float]:
     """Track speed versus the partner's own speed at the same global instants.
@@ -84,6 +88,7 @@ class _Evidence:
         self.blocking: List[str] = []
         self.rmse: Optional[float] = None
         self.range_at_contact: Optional[float] = None
+        self.clearance_at_contact: Optional[float] = None  # observed within one sample of the contact
 
     def check(self, passed: bool, text: str) -> None:
         self.lines.append(text)
@@ -132,6 +137,9 @@ def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: L
                            "" if evidence.rmse <= cfg.speed_consistency_mps
                            else " (> {0:.2f})".format(cfg.speed_consistency_mps)))
 
+    at_contact = [sample.clearance_m for sample in track.samples
+                  if t_contact - TOUCH_WINDOW_S - 1e-6 <= sample.t_local <= t_contact + 1e-6 and sample.measured]
+    evidence.clearance_at_contact = min(at_contact) if at_contact else None
     near = [sample.clearance_m for sample in track.samples
             if t_contact - cfg.contact_window_s - 1e-6 <= sample.t_local <= t_contact + 1e-6]
     if near:
@@ -142,6 +150,20 @@ def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: L
             evidence.range_at_contact, "" if factor >= 0.999 else
             " (beyond {0:.2f} m: confidence factor {1:.2f})".format(cfg.contact_range_m, factor)))
     return evidence
+
+
+def _touching(event_id: str, rivals: Sequence[str], checks: Dict[Any, "_Evidence"],
+              cfg: FusionConfig) -> Optional[str]:
+    """The only compatible track touching the recorder at the contact, all rivals clearly apart; else None."""
+    def clearance(track_id: str) -> Optional[float]:
+        return checks[(event_id, track_id)].clearance_at_contact
+    touching = [t for t in rivals if clearance(t) is not None and clearance(t) <= cfg.touching_clearance_m]
+    if len(touching) != 1:
+        return None
+    others = [t for t in rivals if t != touching[0]]
+    if all(clearance(t) is not None and clearance(t) >= cfg.rival_clearance_m for t in others):
+        return touching[0]
+    return None
 
 
 def _partner(event: Dict[str, Any], owner: str) -> str:
@@ -166,9 +188,12 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
     clearance at the contact only weighs the confidence.  A track is named after a
     partner when it is its recorder's only compatible track for a contact with
     that partner and is compatible with no other partner.  Two or more
-    compatible tracks for one contact are an ambiguity, one track compatible
-    with two partners a conflict: those tracks stay anonymous.  Ground truth
-    is never used.
+    compatible tracks for one contact are an ambiguity, unless exactly one of
+    them touches the recorder at the contact (observed within one sample of it,
+    within ``touching_clearance_m``) while every rival is at least
+    ``rival_clearance_m`` away: a body in contact is at the recorder's skin.  One
+    track compatible with two partners is a conflict.  Ambiguous and conflicting
+    tracks stay anonymous.  Ground truth is never used.
     """
     by_owner = {local.owner: local for local in locals_}
     associations = []
@@ -192,6 +217,8 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
         compatible = {event["event_id"]: [track.track_id for track in local.tracks
                                           if not checks[(event["event_id"], track.track_id)].blocking]
                       for event in contacts}
+        touching = {event_id: _touching(event_id, rivals, checks, cfg)
+                    for event_id, rivals in compatible.items() if len(rivals) > 1}
 
         def header(event: Dict[str, Any]) -> str:
             partner = _partner(event, owner)
@@ -209,7 +236,8 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
         for track in local.tracks:
             fits = [event for event in contacts if track.track_id in compatible[event["event_id"]]]
             partners = sorted({_partner(event, owner) for event in fits})
-            unique = [event for event in fits if compatible[event["event_id"]] == [track.track_id]]
+            unique = [event for event in fits if compatible[event["event_id"]] == [track.track_id]
+                      or touching.get(event["event_id"]) == track.track_id]
             # The contact the decision rests on: one where the track is the only compatible
             # one, else a compatible one, else the contact with the fewest failed checks.
             if unique:
@@ -249,7 +277,14 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
                                                 candidate=candidate, blocking=[reason],
                                                 collision_event=basis["event_id"]))
             else:
-                lines.append("the only track of {0} compatible with the contact".format(owner))
+                rivals = [t for t in compatible[basis["event_id"]] if t != track.track_id]
+                if rivals:
+                    lines.append("the only compatible track of {0} touching it at the contact (clearance {1:.2f} m; "
+                                 "{2} at {3})".format(owner, item.clearance_at_contact, ", ".join(rivals), ", ".join(
+                                     "{0:.2f} m".format(checks[(basis["event_id"], t)].clearance_at_contact)
+                                     for t in rivals)))
+                else:
+                    lines.append("the only track of {0} compatible with the contact".format(owner))
                 # Confidence: collision match, reduced by speed disagreement and by a long clearance at the contact.
                 confidence = (basis["confidence"] * math.exp(-0.5 * (item.rmse / cfg.speed_consistency_mps) ** 2)
                               * (_range_factor(item.range_at_contact, cfg) if item.range_at_contact is not None

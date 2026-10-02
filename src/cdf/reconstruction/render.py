@@ -79,6 +79,8 @@ def _object(subject: Optional[str]) -> str:
 SENTENCES = {
     "BRAKE_START": "{actor} started braking",
     "BRAKE_END": "{actor} released the brake",
+    "THROTTLE_START": "{actor} pressed the accelerator",
+    "THROTTLE_END": "{actor} released the accelerator",
     "TURN_LEFT_START": "{actor} started turning left",
     "TURN_LEFT_END": "{actor} stopped turning left",
     "TURN_RIGHT_START": "{actor} started turning right",
@@ -90,7 +92,6 @@ SENTENCES = {
     "SPEED_LIMIT_EXCEEDED_START": "{actor} began exceeding the speed limit",
     "SPEED_LIMIT_EXCEEDED_END": "{actor} returned within the speed limit",
     "TRACK_APPEARED_FRONT": "{actor}'s radar started tracking {subject}, which appeared in front of it",
-    "TRACK_APPEARED_REAR": "{actor}'s radar started tracking {subject}, which appeared behind it",
     "TRACK_APPEARED_LEFT": "{actor}'s radar started tracking {subject}, which appeared on its left",
     "TRACK_APPEARED_RIGHT": "{actor}'s radar started tracking {subject}, which appeared on its right",
     "TRACK_LOST": "{actor}'s radar lost {subject} (its states are UNKNOWN from then on, not ended)",

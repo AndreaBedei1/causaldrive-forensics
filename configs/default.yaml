@@ -12,6 +12,17 @@ simulation:
   map_switch_settle_s: 60.0
   spawn_z_offset: 0.3
   warmup_ticks: 20
+  # After the warm-up, a moving vehicle is given its scripted initial velocity for
+  # launch_ticks ticks in the gear its automatic gearbox would hold at that speed,
+  # at launch_throttle (a nominal cruising throttle: 0.40-0.58 measured at 9-14 m/s
+  # for the campaign blueprints), and its speed controller starts from that
+  # throttle.  Without it, CARLA engages first gear at speed after the recording
+  # starts: 10-20 m/s^2 of engine braking under full throttle for ~0.5 s.  With 4
+  # ticks the car still lost 0.4-0.9 m/s when released, from 12 on <= 0.45 m/s^2.
+  # The vehicle is spawned launch_ticks x dt x its speed back along its lane: the
+  # recording starts with it at its scenario spawn point.
+  launch_ticks: 12
+  launch_throttle: 0.5
   min_spawn_gap_m: 5.0
   max_duration_s: 45.0
   gpu: auto
@@ -31,13 +42,22 @@ sensors:
     enabled: true
     sensor_id: "front_rgb"
     blueprint: "sensor.camera.rgb"
-    width: 800
-    height: 600
-    fov_deg: 90.0
+    width: 1280
+    height: 720
+    fov_deg: 110.0
     sensor_tick_s: 0.10
-    mount_x: 1.4
+    # Behind the windscreen at its top centre, in front of the interior mirror, per
+    # blueprint (x forward, z above the ground, vehicle frame).  Checked visually on
+    # every campaign blueprint with physics on: no body part above the dashboard / hood
+    # (a mount further back sees the windscreen header across the horizon).
+    mounts:
+      vehicle.tesla.model3: {x: 0.50, y: 0.0, z: 1.30}
+      vehicle.audi.tt: {x: 0.40, y: 0.0, z: 1.18}
+      vehicle.nissan.patrol: {x: 0.60, y: 0.0, z: 1.62}
+      vehicle.mercedes.sprinter: {x: 1.80, y: 0.0, z: 2.10}
+    mount_x: 0.5          # any other blueprint
     mount_y: 0.0
-    mount_z: 1.4
+    mount_z: 1.3
     mount_pitch_deg: 0.0
     mount_yaw_deg: 0.0
     mount_roll_deg: 0.0
@@ -63,19 +83,36 @@ depth_observations:
   altitude_bin_deg: 2.0
   suppress_ground: true
   min_relative_height_m: -0.9
+# STOP / YIELD detector (src/cdf/perception/traffic_signs.py), calibrated on CARLA frames of
+# the camera above (Town05 STOP plates; the Town10HD YIELD sign; red boards, brick facades,
+# tail lights and red cars as negatives).
 traffic_signs:
-  min_area_px: 240
-  min_fill_ratio: 0.80
-  min_redness: 0.28
-  min_confidence: 0.45
-  approx_epsilon: 0.025
-  min_saturation: 90
+  min_area_px: 100            # red contour area; a 1.25 m plate is about 11 px wide at 50 m
+  min_saturation: 90          # red mask: hue 0-12 or 168-179, saturation and value at least...
   min_value: 50
-  close_kernel_px: 9
-  max_centre_row_fraction: 0.62
-  max_centre_gap_px: 60.0
+  close_kernel_px: 5
+  border_margin_px: 2         # a contour this close to the image border is truncated: rejected
+  max_centre_row_fraction: 0.56  # plates stand above the road: centre at most this low in the image
+  approx_epsilon: 0.03        # polygon approximation of the hull, fraction of its perimeter
+  stop_aspect: [0.70, 1.15]   # width / height (a plate seen from aside looks narrower)
+  stop_min_compactness: 0.85  # 4 pi A / P^2 of the hull (regular octagon 0.948)
+  stop_min_vertices: 6        # one fewer below stop_small_px
+  stop_small_px: 24
+  stop_red_fraction: [0.55, 0.88]  # red share inside the contour (plates 0.67-0.80: letters)
+  stop_min_letters: 0.30      # white share of the central band (plates p1 0.33; red blobs ~0)
+  yield_aspect: [0.80, 1.40]
+  yield_box_fill: [0.38, 0.62]  # a triangle fills half its box
+  yield_min_solidity: 0.80
+  yield_red_fraction: [0.30, 0.78]  # red border, white interior
+  yield_min_white: 0.30
+  yield_top_bottom_ratio: 1.6   # apex down: the top edge much wider than the bottom
+  min_confidence: 0.0
+  max_centre_gap_fraction: 0.08  # tracking: centre gap between frames, fraction of the image width
+  max_size_ratio: 1.8         # ...size change between consecutive detections
   max_time_gap_s: 0.6
   min_detections_per_track: 3
+  max_aspect_spread: 0.35     # shape stability over the track (trimmed aspect range)
+  relevance_bearing_deg: 30.0 # relevant to the path: came within this angle of the camera axis and grew
 depth_radial_velocity:
   enabled: true
   max_dt_s: 0.20

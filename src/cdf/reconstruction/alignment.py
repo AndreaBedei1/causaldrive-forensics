@@ -12,6 +12,12 @@ must agree in time: a match between two graphs that earlier matches already
 link (directly or through a third graph) must imply the same clock offset,
 within ``clock_tolerance_s``, or it is rejected.
 
+A report left unmatched may correspond to a burst that another recorder's
+collision sensor merged into one of its own contacts (a body struck again
+within that contact, by a third body: its sensor reports magnitudes only).
+Such a burst carries the same impulse; it is matched only between graphs that
+earlier matches already link, at their clock offset, and fixes no clock.
+
 The strongest matched contact is the reference event and only defines
 t_global = 0.  Every matched contact can align a graph: one that shares a
 contact with an aligned graph is aligned through it (multi-hop: A-B by one
@@ -134,11 +140,54 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[L
                         "t_local": {first_owner: first.t_local, second_owner: second.t_local},
                         "peak_impulse": peaks, "impulse_similarity": similarity,
                         "confidence": similarity, "evidence": evidence})
+    matched += _match_merged_bursts(reports, used, clocks, cfg)
     # Numbering needs no common clock: order by first graph, then its local time.
     matched.sort(key=lambda event: (event["graphs"][0], event["t_local"][event["graphs"][0]]))
     for number, event in enumerate(matched, 1):
         event["event_id"] = "collision_{0:03d}".format(number)
     return matched, rejected
+
+
+def _match_merged_bursts(reports, used, clocks: "_Clocks", cfg: FusionConfig) -> List[Dict[str, Any]]:
+    """Unmatched reports against the bursts other recorders merged into their contacts (see module docstring)."""
+    matched = []
+    taken = set()
+    for owner, node in reports:
+        if node.node_id in used:
+            continue
+        peak = float(node.attributes["peak_impulse"])
+        best = None
+        for other_owner, other in reports:
+            if other_owner == owner or not clocks.linked(owner, other_owner):
+                continue
+            for t_burst, burst_peak in other.attributes.get("merged_bursts", []):
+                if (other.node_id, t_burst) in taken:
+                    continue
+                similarity = 1.0 - abs(peak - burst_peak) / max(peak, burst_peak, 1e-9)
+                residual = clocks.residual(owner, node.t_local, other_owner, t_burst)
+                if similarity >= 1.0 - cfg.impulse_tolerance and abs(residual) <= cfg.clock_tolerance_s + 1e-9:
+                    if best is None or similarity > best[0]:
+                        best = (similarity, other_owner, other, t_burst, burst_peak, residual)
+        if best is None:
+            continue
+        similarity, other_owner, other, t_burst, burst_peak, residual = best
+        taken.add((other.node_id, t_burst))
+        used.add(node.node_id)
+        graphs = sorted([owner, other_owner])
+        matched.append({"event_id": None, "graphs": graphs, "nodes": {owner: node.node_id, other_owner: other.node_id},
+                        "t_local": {owner: node.t_local, other_owner: t_burst},
+                        "peak_impulse": {owner: node.attributes["peak_impulse"], other_owner: burst_peak},
+                        "impulse_similarity": round(similarity, 4), "confidence": round(similarity, 4),
+                        "merged_burst_of": other_owner,
+                        "evidence": ["{0} recorded a collision; {1} recorded the same impulse as a burst within its "
+                                     "contact {2}, merged there by its own sensor".format(owner, other_owner,
+                                                                                         other.node_id),
+                                     "peak impulses {0} vs {1} N*s (similarity {2:.3f}, tolerance {3:.2f})".format(
+                                         node.attributes["peak_impulse"], burst_peak, similarity, cfg.impulse_tolerance),
+                                     "consistent with the clock offset between {0} and {1} that earlier matches fix "
+                                     "({2:+.3f} s, tolerance {3:.2f} s)".format(owner, other_owner, residual,
+                                                                                cfg.clock_tolerance_s)]})
+    return matched
 
 
 def _strength(event: Dict[str, Any]) -> float:

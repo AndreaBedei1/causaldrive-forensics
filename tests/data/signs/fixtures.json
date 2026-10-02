@@ -1,0 +1,146 @@
+[
+ {
+  "name": "stop_approach",
+  "source": "fov_S10_run_0_rolls_through / f110_A",
+  "image_size": [
+   1280,
+   720
+  ],
+  "offset": [
+   720,
+   220
+  ],
+  "frames": [
+   {
+    "file": "stop_approach_00.png",
+    "t": 1.2
+   },
+   {
+    "file": "stop_approach_01.png",
+    "t": 1.3
+   },
+   {
+    "file": "stop_approach_02.png",
+    "t": 1.4
+   },
+   {
+    "file": "stop_approach_03.png",
+    "t": 1.5
+   },
+   {
+    "file": "stop_approach_04.png",
+    "t": 1.6
+   },
+   {
+    "file": "stop_approach_05.png",
+    "t": 1.7
+   },
+   {
+    "file": "stop_approach_06.png",
+    "t": 1.8
+   },
+   {
+    "file": "stop_approach_07.png",
+    "t": 1.9
+   },
+   {
+    "file": "stop_approach_08.png",
+    "t": 2.0
+   },
+   {
+    "file": "stop_approach_09.png",
+    "t": 2.1
+   }
+  ],
+  "expect": "STOP",
+  "note": "Town05 STOP plate on the right of S10's approach, 24 m -> 10 m"
+ },
+ {
+  "name": "yield_approach",
+  "source": "yield_Town10HD / f110",
+  "image_size": [
+   1280,
+   720
+  ],
+  "offset": [
+   880,
+   200
+  ],
+  "frames": [
+   {
+    "file": "yield_approach_00.png",
+    "t": 6.1
+   },
+   {
+    "file": "yield_approach_01.png",
+    "t": 6.2
+   },
+   {
+    "file": "yield_approach_02.png",
+    "t": 6.3
+   },
+   {
+    "file": "yield_approach_03.png",
+    "t": 6.4
+   },
+   {
+    "file": "yield_approach_04.png",
+    "t": 6.5
+   }
+  ],
+  "expect": "YIELD",
+  "note": "Town10HD YIELD sign, 16 m -> 8 m"
+ },
+ {
+  "name": "s15_board_at_border",
+  "source": "s15_falsestop / old_A",
+  "image_size": [
+   800,
+   600
+  ],
+  "offset": [
+   680,
+   180
+  ],
+  "frames": [
+   {
+    "file": "s15_board_at_border_00.png",
+    "t": 6.6
+   },
+   {
+    "file": "s15_board_at_border_01.png",
+    "t": 7.6
+   }
+  ],
+  "expect": null,
+  "note": "S15 deflected_into_c, A after its first collision: a red board truncated by the image border"
+ },
+ {
+  "name": "brick_facade",
+  "source": "fov_S10_run_0_rolls_through / f110_A",
+  "image_size": [
+   1280,
+   720
+  ],
+  "offset": [
+   1040,
+   340
+  ],
+  "frames": [
+   {
+    "file": "brick_facade_00.png",
+    "t": 5.6
+   },
+   {
+    "file": "brick_facade_01.png",
+    "t": 5.7
+   },
+   {
+    "file": "brick_facade_02.png",
+    "t": 5.8
+   }
+  ],
+  "expect": null,
+  "note": "Town05 brick facade and steps behind the S10 junction"
+ }
+]

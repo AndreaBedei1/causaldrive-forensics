@@ -8,9 +8,9 @@ from pathlib import Path
 
 import numpy as np
 
-from src.cdf.recording.compact_observations import load_observation_stream
+from src.cdf.recording.compact_observations import load_radar_observations
 from src.cdf.reconstruction.config import TrackingConfig
-from src.cdf.reconstruction.tracking import (RadarMount, TrackMeasurement, build_local_tracks,
+from src.cdf.reconstruction.tracking import (RadarMount, RadarStream, TrackMeasurement, build_local_tracks,
                                              ego_trajectory, filter_and_smooth)
 
 from synthetic_run import CONTACT_T, V_B, make_run
@@ -21,17 +21,18 @@ class RadarTrackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             vehicle = make_run(Path(tmp)) / "vehicles" / "A"
             records = [json.loads(line) for line in (vehicle / "ego.jsonl").read_text().splitlines()]
-            radar = load_observation_stream(vehicle, "radar")
+            streams = [RadarStream(RadarMount.from_metadata(radar.metadata), radar)
+                       for radar in load_radar_observations(vehicle)]
             ego = ego_trajectory(records, records[0]["timestamp"])
-            tracks = build_local_tracks(radar, ego, RadarMount.from_metadata(radar.metadata),
-                                        records[0]["timestamp"], TrackingConfig())
+            tracks = build_local_tracks(streams, ego, records[0]["timestamp"], TrackingConfig())
 
         # The static poles never become tracks; the car ahead is one anonymous track
         # that survives its stop at the collision.
         self.assertEqual([track.track_id for track in tracks], ["track_001"])
         track = tracks[0]
         self.assertLessEqual(track.first_t, 0.05)
-        self.assertGreater(track.last_t, CONTACT_T + 1.0)
+        # A bumper radar loses the car ahead at the contact (its rear is then behind the radar).
+        self.assertGreater(track.last_t, CONTACT_T - 0.1)
         # The synthetic stop is instantaneous; a smoother spreads such a step over
         # a few tenths of a second, so speed is checked away from it.
         moving = [s for s in track.samples if 0.5 < s.t_local < CONTACT_T - 0.5]
@@ -50,7 +51,7 @@ class SmootherTests(unittest.TestCase):
         y = 0.3 * np.sin(times / 2.0)
         truth = np.column_stack([x, y])
         noisy = truth + rng.normal(0.0, 0.5, truth.shape)
-        measurements = [TrackMeasurement(t_local=float(t), sensor_xy=np.zeros(2), xy=noisy[k], n_returns=1)
+        measurements = [TrackMeasurement(t_local=float(t), xy=noisy[k], n_returns=1)
                         for k, t in enumerate(times)]
         smoothed, covariances, filtered = filter_and_smooth(measurements, cfg)
 

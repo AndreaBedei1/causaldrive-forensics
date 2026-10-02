@@ -2,8 +2,7 @@ scenario:
   scenario_id: S01
   name: rear_end
   description: 'B travels ahead of A in the same lane and brakes hard. A reacts late
-    and strikes B. The avoided variant keeps the geometry but gives A a timely response,
-    which turns the outcome into a near miss.
+    and strikes B.
 
     '
   map: Town05
@@ -53,13 +52,3 @@ scenario:
         intensity: 1.0
   variants:
     crash: {}
-    avoided:
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_late_brake
-            kind: brake
-            t_start: 5.1
-            duration: 8.0
-            params:
-              intensity: 1.0

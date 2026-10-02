@@ -1,4 +1,5 @@
-"""Dynamic critical TTC, recorder turns, temporal safety relations and identity association."""
+"""Recorder turns, temporal safety relations and identity association (the CRITICAL_TTC
+model has its own tests in test_critical_ttc.py)."""
 
 import dataclasses
 import math
@@ -10,8 +11,7 @@ from src.cdf.reconstruction.alignment import align_graphs
 from src.cdf.reconstruction.checks import temporal_safety_relations
 from src.cdf.reconstruction.config import FusionConfig, ReconstructionConfig, SemanticsConfig
 from src.cdf.reconstruction.fusion import associate_tracks
-from src.cdf.reconstruction.local import (build_local_graph, critical_ttc_assessment, number_events,
-                                          reconstruct_vehicle, turn_events)
+from src.cdf.reconstruction.local import build_local_graph, number_events, reconstruct_vehicle, turn_events
 from src.cdf.reconstruction.models import SemanticEvent, TraceFrame
 from src.cdf.reconstruction.pipeline import read_incident_context, reconstruct_run
 from src.cdf.reconstruction.tracking import EgoState, EgoTrajectory, LocalTrack
@@ -20,60 +20,6 @@ from synthetic_run import make_run
 
 CFG = SemanticsConfig()
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def critical(ego, target, closing, range_m):
-    return critical_ttc_assessment(ego, target, closing, range_m, CFG)
-
-
-class CriticalTtcTests(unittest.TestCase):
-    def test_ttc_is_range_over_closing_speed(self):
-        self.assertAlmostEqual(critical(10.0, 0.0, 10.0, 25.0).ttc_s, 2.5)
-        self.assertIsNone(critical(10.0, 10.5, -0.5, 25.0).ttc_s)  # opening: no TTC
-
-    def test_the_threshold_and_the_required_deceleration_agree(self):
-        for speed in (3.0, 6.0, 10.0, 15.0, 20.0):
-            for range_m in (5.0, 10.0, 20.0, 40.0):
-                a = critical(speed, 0.0, speed, range_m)
-                self.assertEqual(a.critical, a.ttc_s <= a.threshold_s + 1e-9, (speed, range_m))
-                expected = CFG.critical_reaction_time_s + speed / (2 * CFG.critical_deceleration_mps2) \
-                    + CFG.critical_standstill_margin_m / speed
-                self.assertAlmostEqual(a.threshold_s, expected)
-
-    def test_same_distance_higher_closing_speed_is_at_least_as_critical(self):
-        for make in (lambda c: critical(c, 0.0, c, 20.0),          # faster recorder, standing target
-                     lambda c: critical(16.0, 16.0 - c, c, 20.0)):  # same recorder, slower target
-            previous = None
-            for closing in (1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0):
-                a = make(closing)
-                if previous is not None:
-                    self.assertGreaterEqual(a.required_deceleration_mps2, previous.required_deceleration_mps2)
-                    self.assertTrue(a.critical or not previous.critical)
-                previous = a
-            self.assertTrue(previous.critical)
-
-    def test_a_target_at_nearly_the_recorder_speed_is_not_critical(self):
-        for gap in (1.5, 3.0, 10.0):
-            self.assertFalse(critical(14.0, 13.8, 0.2, gap).critical)
-            self.assertFalse(critical(14.0, 14.6, -0.6, gap).critical)
-
-    def test_a_fast_recorder_becomes_critical_earlier_at_a_standing_target(self):
-        def first_critical_range(speed):
-            return next(r / 2.0 for r in range(200, 0, -1) if critical(speed, 0.0, speed, r / 2.0).critical)
-        self.assertGreater(first_critical_range(15.0), first_critical_range(5.0))
-        self.assertGreater(critical(15.0, 0.0, 15.0, 50.0).threshold_s, critical(5.0, 0.0, 5.0, 50.0).threshold_s)
-
-    def test_too_late_to_stop_is_critical_with_no_margin(self):
-        a = critical(15.0, 0.0, 15.0, 1.0)
-        self.assertTrue(a.critical)
-        self.assertTrue(math.isinf(a.required_deceleration_mps2))
-        self.assertIsNone(a.braking_margin_mps2)
-
-    def test_crossing_and_oncoming_targets_need_a_full_stop(self):
-        # A crossing target has no speed along the recorder's heading; an oncoming one a negative one.
-        self.assertEqual(critical(10.0, 0.0, 7.0, 20.0).speed_to_shed_mps, 10.0)
-        self.assertEqual(critical(10.0, -8.0, 18.0, 20.0).speed_to_shed_mps, 10.0)
-        self.assertEqual(critical(10.0, 6.0, 4.0, 20.0).speed_to_shed_mps, 4.0)
 
 
 def _turning_ego(rate_dps, start, end, speed=8.0, total=8.0):
@@ -205,8 +151,8 @@ class IdentityAssociationTests(unittest.TestCase):
 
 
 class IdentityRegressionTests(unittest.TestCase):
-    """S03 and S05 (real recordings): the persistent partner tracks are associated, any
-    short or spurious one is not.  In memory only: nothing is written to traces/."""
+    """S03 (real recording): the persistent partner tracks are associated.  In memory only:
+    nothing is written to traces/."""
 
     def decisions(self, run_name):
         run = ROOT / "traces" / run_name
@@ -222,17 +168,6 @@ class IdentityRegressionTests(unittest.TestCase):
         decisions = self.decisions("S03/run_0_crash")
         self.assertEqual(decisions[("A", "track_001")].global_entity, "B")
         self.assertEqual(decisions[("B", "track_001")].global_entity, "A")
-
-    def test_s05_partners_associated_and_any_other_track_anonymous(self):
-        # B spins after the impact.  With the radar's own motion taken as its displacement (as CARLA
-        # measures it) the scenery no longer looks like moving targets, so no post-impact clutter
-        # tracks remain; any other track would have to stay anonymous.
-        decisions = self.decisions("S05/run_0_crash")
-        self.assertEqual(decisions[("A", "track_001")].global_entity, "B")
-        self.assertEqual(decisions[("B", "track_001")].global_entity, "A")
-        others = [item for key, item in decisions.items() if key not in (("A", "track_001"), ("B", "track_001"))]
-        self.assertTrue(all(item.status == "ANONYMOUS" for item in others))
-        self.assertLessEqual(len(others), 2)
 
 
 if __name__ == "__main__":

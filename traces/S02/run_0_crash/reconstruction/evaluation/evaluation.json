@@ -1,6 +1,6 @@
 {
   "run": "S02/run_0_crash",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 75.3623116388917,
-      "peak_impulse": 5953.863999096932,
-      "reconstructed_as": "g13",
+      "sim_time": 35.291471753269434,
+      "peak_impulse": 2900.2340186474003,
+      "reconstructed_as": "g16",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -23,8 +23,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 4.25,
-      "true_reference_t_local": 4.25,
+      "estimated_reference_t_local": 4.65,
+      "true_reference_t_local": 4.65,
       "error_s": 0.0
     },
     {
@@ -33,8 +33,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 4.25,
-      "true_reference_t_local": 4.25,
+      "estimated_reference_t_local": 4.65,
+      "true_reference_t_local": 4.65,
       "error_s": 0.0
     }
   ],
@@ -47,10 +47,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 22,
+    "nodes": 25,
     "max_abs_error_s": 0.0,
-    "order_pairs": 210,
-    "order_concordant": 210
+    "order_pairs": 273,
+    "order_concordant": 273
   },
   "tracks": [
     {
@@ -62,28 +62,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 151,
-      "raw_rmse_to_surface_m": 0.681,
-      "smoothed_rmse_to_surface_m": 0.754,
-      "smoothed_rmse_to_centre_m": 1.286,
-      "raw_difference_speed_rmse_mps": 4.469,
-      "speed_rmse_mps": 0.127
-    },
-    {
-      "track": "B:track_001",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "true_identity": "A",
-      "median_box_distance_m": {
-        "A": 0.0
-      },
-      "verdict": "correct",
       "samples": 150,
-      "raw_rmse_to_surface_m": 0.874,
-      "smoothed_rmse_to_surface_m": 1.001,
-      "smoothed_rmse_to_centre_m": 1.101,
-      "raw_difference_speed_rmse_mps": 5.255,
-      "speed_rmse_mps": 0.126
+      "raw_rmse_to_surface_m": 0.204,
+      "smoothed_rmse_to_surface_m": 0.217,
+      "smoothed_rmse_to_centre_m": 1.935,
+      "raw_difference_speed_rmse_mps": 1.741,
+      "speed_rmse_mps": 0.136
     }
   ],
   "contact_clearances": [
@@ -93,34 +77,28 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": -0.05,
-      "clearance_m": 0.324,
+      "clearance_m": 0.204,
       "true_gap_m": 0.0,
-      "error_m": 0.324,
-      "range_m": 3.1,
-      "ttc_s": 1.33
+      "error_m": 0.204,
+      "range_m": 0.234,
+      "ttc_s": null
     },
     {
       "contact": "A + B",
       "recorder": "B",
       "partner": "A",
-      "track": "B:track_001",
-      "seen_s_before_contact": -0.05,
-      "clearance_m": 0.809,
-      "true_gap_m": 0.0,
-      "error_m": 0.809,
-      "range_m": 3.462,
-      "ttc_s": null
+      "track": null
     }
   ],
   "clock_shift_check": {
     "shifted_recorder": "B",
     "shift_s": 0.73,
     "shifted_local_collision_times": [
-      4.98
+      5.38
     ],
     "global_graph_identical": true,
-    "offset_to_global_before": -4.25,
-    "offset_to_global_after": -4.98,
+    "offset_to_global_before": -4.65,
+    "offset_to_global_after": -5.38,
     "offset_change_s": -0.73
   }
 }

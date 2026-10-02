@@ -23,21 +23,21 @@ class RenderTests(unittest.TestCase):
 
         self.assertIn("Speed limit 30 km/h, supplied as incident context", local_md)
         self.assertIn("Speed limit 30 km/h, supplied as incident context", report)
-        self.assertIn("- BRAKE, since A:e06", local_md)  # still braking when the recording ends
+        self.assertIn("- BRAKE, since A:e08", local_md)  # still braking when the recording ends
         self.assertIn("A began exceeding the speed limit (already the case when first observed)", local_md)
         # Simultaneous events share a DOT column and are listed as unresolved in the report.
-        self.assertIn('{rank=same; "A:e07"; "A:e08"; "A:e09"; "A:e10"; "A:e11";}', local_dot)
-        self.assertIn("COLLISION(A,B); CRITICAL_TTC_END(A,B); SPEED_LIMIT_EXCEEDED_END(A)", report)
+        self.assertIn('{rank=same; "A:e10"; "A:e11"; "A:e12"; "A:e13";}', local_dot)
+        self.assertIn("COLLISION(A,B); SPEED_LIMIT_EXCEEDED_END(A); MOVING_END(A); MOVING_END(B)", report)
         self.assertIn("simultaneous at 0.05 s resolution", global_md)
         # DOT labels stay minimal: type, who, time.
-        self.assertIn('"A:e06" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
+        self.assertIn('"A:e08" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
         # The perceived state is rendered compactly, once per timestamp, never as JSON in the node table.
         self.assertIn("## Perceived state before each event", local_md)
-        self.assertIn("| 3.00 | A:e06 BRAKE_START | ego: MOVING, SPEED_LIMIT_EXCEEDED<br>track_001: "
-                      "CLOSING, CRITICAL_TTC, IN_EGO_PATH | 2.90 |", local_md)
+        self.assertIn("| 3.00 | A:e07 THROTTLE_END<br>A:e08 BRAKE_START | ego: MOVING, THROTTLE, SPEED_LIMIT_EXCEEDED"
+                      "<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 2.90 |", local_md)
         self.assertNotIn('{"ego"', local_md)
         # The appearance side is part of the event and of the plain-language reading.
-        self.assertIn("| A:e03 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 |", local_md)
+        self.assertIn("| A:e04 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 |", local_md)
         self.assertIn("A's radar started tracking track_001, which appeared in front of it", local_md)
         for gone in ("VISIBLE", "visible", "PATH_CONFLICT"):
             self.assertNotIn(gone, local_md.replace("visible surface", ""))

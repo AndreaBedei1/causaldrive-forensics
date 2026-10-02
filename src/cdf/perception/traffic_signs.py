@@ -1,11 +1,36 @@
 """Deterministic STOP/YIELD perception from transient RGB frames.
 
-This is the small historical colour-and-shape detector, moved into the current
-recording pipeline.  It uses no CARLA labels, actor IDs, maps, or ground truth.
+A colour-and-shape detector with frame-to-frame tracking.  It uses no CARLA
+labels, actor IDs, maps or ground truth: only the pixels of one camera.
+
+Candidates are the external contours of the red mask (HSV, two hue bands,
+opened and closed).  A contour touching the image border is rejected: its
+shape is truncated and cannot be verified (the S15 false STOP was a red
+advertising board cut by the image border).  The remaining ones are classified
+by their geometry:
+
+  STOP   a regular convex octagon: hull compactness (4 pi A / P^2; 0.948 for a
+         regular octagon) at least ``stop_min_compactness``, at least
+         ``stop_min_vertices`` corners once the plate is large enough to show
+         them, a nearly square box (perspective narrows a plate seen from the
+         side, hence ``stop_aspect``), a red fraction typical of a plate with
+         letters (``stop_red_fraction``) and white letters inside it
+         (``stop_min_letters``: low-saturation bright pixels in the central band),
+         which no brick wall, tail light or red car shows;
+  YIELD  an inverted triangle: 3-4 corners (5 when small), box fill about 0.5,
+         the top edge much wider than the bottom (apex down), a red border with
+         a white interior.
+
+Detections are tracked between frames by class, centre distance (relative to
+the image width), size consistency and time gap; a track is confirmed after
+``min_detections_per_track`` detections with a stable shape.  Thresholds were
+calibrated on CARLA frames (Town05 STOP plates, the Town10HD YIELD sign; S15's
+red board and Town05's brick facades as negatives), see the README.
 """
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -43,6 +68,13 @@ def _get(cfg: Any, key: str, default: Any) -> Any:
     return default
 
 
+def _value(cfg: Any, name: str, default: Any) -> Any:
+    got = _get(cfg, "traffic_signs." + name, None)
+    if got is None:
+        got = _get(cfg, name, None)
+    return default if got is None else got
+
+
 @dataclass
 class SignDetection:
     frame: int
@@ -51,12 +83,24 @@ class SignDetection:
     confidence: float
     bbox: Tuple[int, int, int, int]
     n_vertices: int = 0
-    fill_ratio: float = 0.0
-    redness: float = 0.0
+    fill_ratio: float = 0.0  # contour area / bounding box area
+    redness: float = 0.0  # red fraction inside the contour
+    compactness: float = 0.0
+    letters: float = 0.0  # white fraction in the central band
+    image_width: int = 0
+    bearing_deg: float = 0.0  # horizontal angle of the box centre from the camera axis (+ = right)
 
     @property
     def area(self) -> int:
         return int(self.bbox[2] * self.bbox[3])
+
+    @property
+    def size(self) -> int:
+        return int(max(self.bbox[2], self.bbox[3]))
+
+    @property
+    def aspect(self) -> float:
+        return float(self.bbox[2]) / float(max(self.bbox[3], 1))
 
     @property
     def centre(self) -> Tuple[float, float]:
@@ -67,7 +111,8 @@ class SignDetection:
         return {"frame": self.frame, "t_local": round(self.t, 4), "class": self.sign_class,
                 "confidence": round(self.confidence, 4), "bbox": list(self.bbox),
                 "n_vertices": self.n_vertices, "fill_ratio": round(self.fill_ratio, 4),
-                "redness": round(self.redness, 4)}
+                "redness": round(self.redness, 4), "compactness": round(self.compactness, 4),
+                "letters": round(self.letters, 4), "bearing_deg": round(self.bearing_deg, 2)}
 
 
 @dataclass
@@ -75,6 +120,7 @@ class SignTrack:
     track_id: str
     sign_class: str
     detections: List[SignDetection] = field(default_factory=list)
+    relevance_bearing_deg: float = 30.0
 
     @property
     def t_first(self) -> float: return self.detections[0].t
@@ -104,11 +150,19 @@ class SignTrack:
         x, _ = self.best.centre
         return float(max(0.0, 1.0 - abs(x - image_width / 2.0) / (image_width / 2.0)))
 
+    @property
+    def min_bearing_deg(self) -> float:
+        return min(abs(d.bearing_deg) for d in self.detections)
+
     def relevance(self, image_width: int) -> Dict[str, Any]:
-        centred = self.centredness(image_width)
-        return {"relevant_to_ego_path": bool(centred >= 0.35 and self.growing),
-                "centredness": round(centred, 4), "growing": self.growing,
-                "basis": "image geometry only: how centred the sign was and whether it grew as the vehicle approached. No map is consulted"}
+        """Image-only judgement whether the sign governs the camera's own path: it came
+        within ``relevance_bearing_deg`` of the camera axis and grew as the vehicle approached."""
+        near_axis = self.min_bearing_deg <= self.relevance_bearing_deg
+        return {"relevant_to_ego_path": bool(near_axis and self.growing),
+                "centredness": round(self.centredness(image_width), 4), "growing": self.growing,
+                "min_bearing_deg": round(self.min_bearing_deg, 1),
+                "basis": "image geometry only: how close to the camera axis the sign came and whether it grew "
+                         "as the vehicle approached. No map is consulted"}
 
     def as_dict(self, image_width: int = 0) -> Dict[str, Any]:
         return {"sign_track_id": self.track_id, "class": self.sign_class,
@@ -121,121 +175,180 @@ class SignTrack:
                 "detections": [d.as_dict() for d in self.detections]}
 
 
+def _clip01(value: float) -> float:
+    return max(0.0, min(1.0, value))
+
+
 class SignDetector:
     def __init__(self, cfg: Optional[Any] = None) -> None:
-        # Accept the current traffic_signs namespace and the historical nested
-        # perception.signs namespace for compatibility with old unit tests.
-        def val(name: str, old: str, default: Any) -> Any:
-            got = _get(cfg, "traffic_signs." + name, None)
-            if got is None:
-                got = _get(cfg, name, None)
-            if got is None:
-                got = _get(cfg, "perception.signs." + old, default)
-            return got
-        self.min_area_px = int(val("min_area_px", "min_area_px", 240))
-        self.min_fill_ratio = float(val("min_fill_ratio", "min_fill_ratio", 0.80))
-        self.min_redness = float(val("min_redness", "min_redness", 0.28))
-        self.min_confidence = float(val("min_confidence", "min_confidence", 0.45))
-        self.approx_epsilon = float(val("approx_epsilon", "approx_epsilon", 0.025))
-        self.min_saturation = int(val("min_saturation", "min_saturation", 90))
-        self.min_value = int(val("min_value", "min_value", 50))
-        self.close_kernel_px = int(val("close_kernel_px", "close_kernel_px", 9))
-        self.max_centre_row_fraction = float(val("max_centre_row_fraction", "max_centre_row_fraction", 0.62))
+        val = lambda name, default: _value(cfg, name, default)  # noqa: E731
+        self.min_area_px = int(val("min_area_px", 100))
+        self.min_saturation = int(val("min_saturation", 90))
+        self.min_value = int(val("min_value", 50))
+        self.close_kernel_px = int(val("close_kernel_px", 5))
+        self.border_margin_px = int(val("border_margin_px", 2))
+        self.max_centre_row_fraction = float(val("max_centre_row_fraction", 0.56))
+        self.approx_epsilon = float(val("approx_epsilon", 0.03))
+        self.horizontal_fov_deg = float(val("camera_fov_deg", 110.0))
+        self.stop_aspect = tuple(float(v) for v in val("stop_aspect", (0.70, 1.15)))
+        self.stop_min_compactness = float(val("stop_min_compactness", 0.85))
+        self.stop_min_vertices = int(val("stop_min_vertices", 6))
+        self.stop_small_px = int(val("stop_small_px", 24))
+        self.stop_red_fraction = tuple(float(v) for v in val("stop_red_fraction", (0.55, 0.88)))
+        self.stop_min_letters = float(val("stop_min_letters", 0.30))
+        self.yield_aspect = tuple(float(v) for v in val("yield_aspect", (0.80, 1.40)))
+        self.yield_box_fill = tuple(float(v) for v in val("yield_box_fill", (0.38, 0.62)))
+        self.yield_min_solidity = float(val("yield_min_solidity", 0.80))
+        self.yield_red_fraction = tuple(float(v) for v in val("yield_red_fraction", (0.30, 0.78)))
+        self.yield_min_white = float(val("yield_min_white", 0.30))
+        self.yield_top_bottom_ratio = float(val("yield_top_bottom_ratio", 1.6))
+        self.min_confidence = float(val("min_confidence", 0.0))
 
-    def red_mask(self, image: Any) -> Any:
+    def red_mask(self, image: Any) -> Tuple[Any, Any, Any]:
+        """(closed red mask, raw red mask, HSV image)."""
         cv2 = _cv2()
         import numpy as np
         hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        mask = None
+        raw = None
         for lo, hi in ((0, 12), (168, 179)):
             band = cv2.inRange(hsv, np.array([lo, self.min_saturation, self.min_value], np.uint8),
                                np.array([hi, 255, 255], np.uint8))
-            mask = band if mask is None else cv2.bitwise_or(mask, band)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+            raw = band if raw is None else cv2.bitwise_or(raw, band)
+        mask = cv2.morphologyEx(raw, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
         k = max(1, self.close_kernel_px)
-        return cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((k, k), np.uint8))
+        return cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((k, k), np.uint8)), raw, hsv
 
-    def detect(self, image: Any, frame: int = 0, t: float = 0.0) -> List[SignDetection]:
-        cv2 = _cv2(); mask = self.red_mask(image)
+    def _bearing(self, centre_x: float, width: int) -> float:
+        focal = width / (2.0 * math.tan(math.radians(self.horizontal_fov_deg) / 2.0))
+        return math.degrees(math.atan((centre_x - width / 2.0) / focal))
+
+    def candidates(self, image: Any) -> List[Dict[str, Any]]:
+        """Measured shape and colour features of every red contour (also used for calibration)."""
+        cv2 = _cv2()
+        import numpy as np
+        mask, raw, hsv = self.red_mask(image)
+        height, width = mask.shape
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        out: List[SignDetection] = []
+        white = (hsv[..., 1] < 90) & (hsv[..., 2] > 100)
+        out = []
         for contour in contours:
             area = float(cv2.contourArea(contour))
             if area < self.min_area_px:
                 continue
-            hull_area = float(cv2.contourArea(cv2.convexHull(contour)))
-            if hull_area <= 0 or area / hull_area < self.min_fill_ratio:
+            x, y, w, h = (int(v) for v in cv2.boundingRect(contour))
+            margin = self.border_margin_px
+            touches = x <= margin or y <= margin or x + w >= width - margin or y + h >= height - margin
+            hull = cv2.convexHull(contour)
+            hull_area = float(cv2.contourArea(hull))
+            perimeter = float(cv2.arcLength(hull, True))
+            if hull_area <= 0.0 or perimeter <= 0.0:
                 continue
-            perimeter = float(cv2.arcLength(contour, True))
-            approx = cv2.approxPolyDP(contour, self.approx_epsilon * perimeter, True)
-            n_vertices = int(len(approx)); x, y, w, h = (int(v) for v in cv2.boundingRect(contour))
-            if w <= 0 or h <= 0 or (y + h / 2.0) > self.max_centre_row_fraction * int(image.shape[0]):
-                continue
-            fill_ratio = area / hull_area
-            redness = float(mask[y:y + h, x:x + w].mean() / 255.0)
-            if redness < self.min_redness:
-                continue
-            sign_class, confidence = self._classify(approx, n_vertices, area, w, h, fill_ratio, redness)
-            if sign_class and confidence >= self.min_confidence:
-                out.append(SignDetection(int(frame), float(t), sign_class, confidence, (x, y, w, h),
-                                         n_vertices, fill_ratio, redness))
-        return sorted(out, key=lambda d: (-d.confidence, d.bbox))
+            approx = cv2.approxPolyDP(hull, self.approx_epsilon * perimeter, True)
+            filled = np.zeros_like(mask)
+            cv2.drawContours(filled, [contour], -1, 255, -1)
+            inside = filled > 0
+            red_fraction = float((raw[inside] > 0).mean()) if inside.any() else 0.0
+            band = np.zeros_like(mask)
+            cx, cy = x + w / 2.0, y + h / 2.0
+            cv2.rectangle(band, (int(cx - 0.3 * w), int(cy - 0.22 * h)), (int(cx + 0.3 * w), int(cy + 0.22 * h)), 255, -1)
+            band = (band > 0) & inside
+            letters = float(white[band].mean()) if band.any() else 0.0
+            points = approx.reshape(-1, 2)
+            mean_y = points[:, 1].mean()
+            top, bottom = points[points[:, 1] < mean_y], points[points[:, 1] >= mean_y]
+            top_span = float(top[:, 0].max() - top[:, 0].min()) if len(top) else 0.0
+            bottom_span = float(bottom[:, 0].max() - bottom[:, 0].min()) if len(bottom) else 0.0
+            out.append({"bbox": (x, y, w, h), "area": area, "touches_border": touches,
+                        "solidity": area / hull_area, "fill_ratio": area / float(w * h), "aspect": w / float(h),
+                        "compactness": 4.0 * math.pi * hull_area / (perimeter * perimeter),
+                        "vertices": int(len(approx)), "red_fraction": red_fraction, "letters": letters,
+                        "top_span": top_span, "bottom_span": bottom_span,
+                        "centre_row": (y + h / 2.0) / float(height), "size": max(w, h),
+                        "bearing_deg": self._bearing(cx, width), "image_width": width})
+        return out
 
-    def _classify(self, approx: Any, n_vertices: int, area: float, w: int, h: int,
-                  fill_ratio: float, redness: float) -> Tuple[Optional[str], float]:
-        aspect = float(w) / float(h)
-        if not 0.6 <= aspect <= 1.7:
+    def classify(self, c: Mapping[str, Any]) -> Tuple[Optional[str], float]:
+        """(class, confidence) of one candidate, or (None, 0)."""
+        if c["touches_border"] or c["centre_row"] > self.max_centre_row_fraction:
             return None, 0.0
-        box_fill = area / float(w * h)
-        points = approx.reshape(-1, 2)
-        mean_y = points[:, 1].mean()
-        top = points[points[:, 1] < mean_y]; bottom = points[points[:, 1] >= mean_y]
-        top_span = float(top[:, 0].max() - top[:, 0].min()) if len(top) else 0.0
-        bottom_span = float(bottom[:, 0].max() - bottom[:, 0].min()) if len(bottom) else 0.0
-        if 0.70 <= box_fill <= 0.95 and 5 <= n_vertices <= 12 and 0.75 <= aspect <= 1.3:
-            score = max(0.0, 1.0 - abs(box_fill - 0.828) / 0.15)
-            return STOP, float(min(1.0, 0.55 * score + 0.45 * redness))
-        if 0.35 <= box_fill <= 0.68 and n_vertices <= 6 and top_span > bottom_span * 1.6:
-            score = max(0.0, 1.0 - abs(box_fill - 0.50) / 0.18)
-            return YIELD, float(min(1.0, 0.55 * score + 0.45 * redness))
+        aspect, small = c["aspect"], c["size"] < self.stop_small_px
+        if (self.stop_aspect[0] <= aspect <= self.stop_aspect[1]
+                and c["compactness"] >= self.stop_min_compactness
+                and c["vertices"] >= (self.stop_min_vertices - 1 if small else self.stop_min_vertices)
+                and self.stop_red_fraction[0] <= c["red_fraction"] <= self.stop_red_fraction[1]
+                and c["letters"] >= self.stop_min_letters):
+            score = (0.4 * _clip01((c["compactness"] - self.stop_min_compactness) / (0.948 - self.stop_min_compactness))
+                     + 0.3 * _clip01((c["letters"] - self.stop_min_letters) / 0.2)
+                     + 0.3 * _clip01(1.0 - abs(aspect - 1.0) / 0.3))
+            return STOP, round(0.5 + 0.5 * score, 4)
+        if (self.yield_aspect[0] <= aspect <= self.yield_aspect[1]
+                and 3 <= c["vertices"] <= (5 if small else 4)
+                and self.yield_box_fill[0] <= c["fill_ratio"] <= self.yield_box_fill[1]
+                and c["solidity"] >= self.yield_min_solidity
+                and self.yield_red_fraction[0] <= c["red_fraction"] <= self.yield_red_fraction[1]
+                and c["letters"] >= self.yield_min_white
+                and c["top_span"] >= self.yield_top_bottom_ratio * max(c["bottom_span"], 1.0)):
+            score = (0.5 * _clip01(1.0 - abs(c["fill_ratio"] - 0.5) / 0.12)
+                     + 0.5 * _clip01((c["letters"] - self.yield_min_white) / 0.3))
+            return YIELD, round(0.5 + 0.5 * score, 4)
         return None, 0.0
+
+    def detect(self, image: Any, frame: int = 0, t: float = 0.0) -> List[SignDetection]:
+        out: List[SignDetection] = []
+        for c in self.candidates(image):
+            sign_class, confidence = self.classify(c)
+            if sign_class and confidence >= self.min_confidence:
+                out.append(SignDetection(int(frame), float(t), sign_class, confidence, c["bbox"], c["vertices"],
+                                         c["fill_ratio"], c["red_fraction"], c["compactness"], c["letters"],
+                                         c["image_width"], c["bearing_deg"]))
+        return sorted(out, key=lambda d: (-d.confidence, d.bbox))
 
 
 class SignTracker:
     def __init__(self, cfg: Optional[Any] = None) -> None:
-        def val(name: str, default: Any) -> Any:
-            got = _get(cfg, "traffic_signs." + name, None)
-            if got is None:
-                got = _get(cfg, name, None)
-            if got is None:
-                old = {"max_centre_gap_px": "max_centre_gap_px", "max_time_gap_s": "max_time_gap_s",
-                       "min_detections_per_track": "min_detections_per_track"}[name]
-                got = _get(cfg, "perception.signs." + old, None)
-            return default if got is None else got
-        self.max_centre_gap_px = float(val("max_centre_gap_px", 60.0))
+        val = lambda name, default: _value(cfg, name, default)  # noqa: E731
+        self.max_centre_gap_fraction = float(val("max_centre_gap_fraction", 0.08))
         self.max_time_gap_s = float(val("max_time_gap_s", 0.6))
+        self.max_size_ratio = float(val("max_size_ratio", 1.8))
         self.min_detections = int(val("min_detections_per_track", 3))
+        # A plate seen from further aside looks narrower: the aspect changes along the approach.
+        self.max_aspect_spread = float(val("max_aspect_spread", 0.35))
+        self.relevance_bearing_deg = float(val("relevance_bearing_deg", 30.0))
         self._tracks: List[SignTrack] = []; self._next_id = 0
 
     def update(self, detections: Sequence[SignDetection]) -> None:
         for detection in detections:
-            best, best_gap = None, self.max_centre_gap_px
+            gap_px = self.max_centre_gap_fraction * max(detection.image_width, 1)
+            best, best_gap = None, gap_px
             for track in self._tracks:
+                last = track.detections[-1]
                 if track.sign_class != detection.sign_class or detection.t - track.t_last > self.max_time_gap_s:
                     continue
-                cx, cy = track.detections[-1].centre; dx, dy = detection.centre
+                ratio = max(detection.size, last.size) / float(max(min(detection.size, last.size), 1))
+                if ratio > self.max_size_ratio:
+                    continue
+                cx, cy = last.centre; dx, dy = detection.centre
                 gap = ((cx - dx) ** 2 + (cy - dy) ** 2) ** 0.5
                 if gap < best_gap:
                     best, best_gap = track, gap
             if best is None:
-                best = SignTrack("sign-{0}".format(self._next_id), detection.sign_class, [detection])
+                best = SignTrack("sign-{0}".format(self._next_id), detection.sign_class, [detection],
+                                 self.relevance_bearing_deg)
                 self._next_id += 1; self._tracks.append(best)
             else:
                 best.detections.append(detection)
 
+    def stable(self, track: SignTrack) -> bool:
+        """Enough detections whose shape stays consistent (aspect spread) from frame to frame."""
+        if len(track.detections) < self.min_detections:
+            return False
+        aspects = sorted(d.aspect for d in track.detections)
+        trimmed = aspects[len(aspects) // 10: len(aspects) - len(aspects) // 10] or aspects
+        return trimmed[-1] - trimmed[0] <= self.max_aspect_spread
+
     def tracks(self, confirmed_only: bool = True) -> List[SignTrack]:
-        return sorted([t for t in self._tracks if not confirmed_only or len(t.detections) >= self.min_detections],
-                       key=lambda t: (t.t_first, t.track_id))
+        return sorted([t for t in self._tracks if not confirmed_only or self.stable(t)],
+                      key=lambda t: (t.t_first, t.track_id))
 
     @property
     def n_detections(self) -> int:
@@ -243,7 +356,7 @@ class SignTracker:
 
     @property
     def rejected_short_tracks(self) -> int:
-        return sum(len(t.detections) < self.min_detections for t in self._tracks)
+        return sum(not self.stable(t) for t in self._tracks)
 
 
 def detect_signs(frames: Sequence[Tuple[float, int, Any]], cfg: Optional[Any] = None,
@@ -258,9 +371,9 @@ def detect_signs(frames: Sequence[Tuple[float, int, Any]], cfg: Optional[Any] = 
         all_detections.extend(detections); tracker.update(detections)
     confirmed = tracker.tracks(True)
     provisional = tracker.tracks(False)
-    method = ("colour-and-shape detection in HSV followed by polygon classification, "
-              "then association across frames. Deterministic, no training data, "
-              "no learned weights, no privileged sign labels")
+    method = ("colour-and-shape detection in HSV (octagon / inverted triangle with white letters or interior), "
+              "border-truncated shapes rejected, then association across frames with a shape-stability "
+              "check. Deterministic, no training data, no learned weights, no privileged sign labels")
     return {"method": method, "image_width": width, "n_frames": len(frames),
             "n_detections": len(all_detections), "n_tracks": len(confirmed),
             "min_detections_per_track": tracker.min_detections,

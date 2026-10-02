@@ -5,9 +5,9 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e13",
-      "anchor_t_local": 5.9,
-      "offset_to_global": -5.9,
+      "anchor_node": "A:e08",
+      "anchor_t_local": 4.8,
+      "offset_to_global": -4.8,
       "chain": [
         "collision_001"
       ],
@@ -15,9 +15,9 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e18",
-      "anchor_t_local": 5.9,
-      "offset_to_global": -5.9,
+      "anchor_node": "B:e08",
+      "anchor_t_local": 4.8,
+      "offset_to_global": -4.8,
       "chain": [
         "collision_001"
       ],
@@ -25,14 +25,14 @@
     },
     "C": {
       "status": "ALIGNED",
-      "anchor_node": "C:e19",
-      "anchor_t_local": 6.05,
-      "offset_to_global": -5.9,
+      "anchor_node": "C:e07",
+      "anchor_t_local": 5.3,
+      "offset_to_global": -4.8,
       "chain": [
         "collision_001",
-        "collision_002"
+        "collision_003"
       ],
-      "reason": "shares collision_002 with B, aligned through collision_001 -> collision_002"
+      "reason": "shares collision_003 with B, aligned through collision_001 -> collision_003"
     }
   },
   "relative_clock_offsets_s": {
@@ -48,49 +48,76 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e13",
-        "B": "B:e18"
+        "A": "A:e08",
+        "B": "B:e08"
       },
       "t_local": {
-        "A": 5.9,
-        "B": 5.9
+        "A": 4.8,
+        "B": 4.8
       },
       "peak_impulse": {
-        "A": 11621.71,
-        "B": 11621.71
+        "A": 10281.41,
+        "B": 10281.41
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
-        "peak impulses 11621.71 vs 11621.71 N*s (similarity 1.000, tolerance 0.10)",
-        "2 competing report(s) within tolerance; best match kept"
+        "peak impulses 10281.41 vs 10281.41 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
       ]
     },
     {
       "event_id": "collision_002",
       "graphs": [
+        "A",
+        "B"
+      ],
+      "nodes": {
+        "A": "A:e13",
+        "B": "B:e10"
+      },
+      "t_local": {
+        "A": 5.45,
+        "B": 5.45
+      },
+      "peak_impulse": {
+        "A": 1509.76,
+        "B": 1509.76
+      },
+      "impulse_similarity": 1.0,
+      "confidence": 1.0,
+      "merged_burst_of": "B",
+      "evidence": [
+        "A recorded a collision; B recorded the same impulse as a burst within its contact B:e10, merged there by its own sensor",
+        "peak impulses 1509.76 vs 1509.76 N*s (similarity 1.000, tolerance 0.10)",
+        "consistent with the clock offset between A and B that earlier matches fix (+0.000 s, tolerance 0.10 s)"
+      ]
+    },
+    {
+      "event_id": "collision_003",
+      "graphs": [
         "B",
         "C"
       ],
       "nodes": {
-        "B": "B:e21",
-        "C": "C:e19"
+        "B": "B:e10",
+        "C": "C:e07"
       },
       "t_local": {
-        "B": 6.05,
-        "C": 6.05
+        "B": 5.3,
+        "C": 5.3
       },
       "peak_impulse": {
-        "B": 10857.64,
-        "C": 10857.64
+        "B": 8788.05,
+        "C": 8788.05
       },
       "impulse_similarity": 1.0,
       "confidence": 1.0,
       "evidence": [
         "B and C both recorded a collision",
-        "peak impulses 10857.64 vs 10857.64 N*s (similarity 1.000, tolerance 0.10)",
-        "2 competing report(s) within tolerance; best match kept"
+        "peak impulses 8788.05 vs 8788.05 N*s (similarity 1.000, tolerance 0.10)",
+        "no competing report within tolerance"
       ]
     }
   ],

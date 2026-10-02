@@ -1,9 +1,12 @@
 scenario:
   scenario_id: S16
   name: secondary_collision
-  description: 'A brakes and B runs into the back of it. What becomes of A -- knocked
-    into the next lane and into C, driving into C later of its own accord, or stopping
-    clear -- is what the variants change.
+  description: 'Three lanes, one direction.  C, a van, drives in the left lane at 9 m/s.
+    A, in the middle lane, moves over into the left lane behind C and slows to its
+    speed.  B, following A too closely, reacts late and runs into the back of A while
+    A is still angled across the lane line; the shunt carries A (coasting, no pedals)
+    on into the back of C.  Two collisions, A-B then A-C; the second one is physics
+    only.  Without B, A''s merge ends about 2 m behind C without contact (checked).
 
     '
   map: Town05
@@ -11,97 +14,71 @@ scenario:
     road_environment: urban road, multiple lanes
     speed_limit_kmh: 50
   default_variant: consequential
-  max_duration_s: 10.0
+  max_duration_s: 12.0
+  # Why not "knocked sideways into the next lane": CARLA does not carry a struck car
+  # sideways.  Measured on this road: a rear impact on A's corner (B offset up to
+  # 0.6 m) turned A by at most 7 deg and moved it at most 0.8 m sideways; a
+  # sideswipe by B changing lanes moved it 0.3 m.  A forward shunt does carry: A
+  # gains 3 m/s here, along the heading it has in the middle of its lane change.
   participants:
   - id: A
     blueprint: vehicle.audi.tt
     spawn:
       anchor: spawn_index
       index: 265
-      forward_m: 7.0
+      forward_m: 20.0
       lane_offset: 0
     route:
       length_m: 200.0
       step_m: 2.0
-    initial_speed: 13.0
-    target_speed: 13.0
+    initial_speed: 12.0
+    target_speed: 12.0
+    # Once hit, no pedals and no steering, gearbox in neutral: the physics carries it.
+    post_impact_mode: coast
     actions:
-    - action_id: A_emergency_brake
-      kind: brake
+    - action_id: A_lane_change_left
+      kind: lane_shift
       t_start: 4.0
-      duration: 7.0
+      duration: 3.0
       params:
-        intensity: 0.45
+        lateral_m: -3.5
+    - action_id: A_match_speed
+      kind: set_speed
+      t_start: 4.0
+      duration: 8.0
+      params:
+        target_speed: 9.0
   - id: B
     blueprint: vehicle.nissan.patrol
     spawn:
       anchor: spawn_index
       index: 265
-      forward_m: 0.0
+      forward_m: 8.0
       lane_offset: 0
     route:
       length_m: 200.0
       step_m: 2.0
-    initial_speed: 13.0
-    target_speed: 13.0
+    initial_speed: 12.5
+    target_speed: 12.5
     actions:
     - action_id: B_late_brake
       kind: brake
-      t_start: 4.8
-      duration: 1.5
+      t_start: 5.45
+      duration: 3.0
       params:
-        intensity: 0.4
+        intensity: 0.15
   - id: C
     blueprint: vehicle.mercedes.sprinter
     spawn:
       anchor: spawn_index
       index: 265
-      forward_m: 73.5
+      forward_m: 39.0
       lane_offset: -1
     route:
-      length_m: 70.0
+      length_m: 200.0
       step_m: 2.0
-    initial_speed: 1.0
-    target_speed: 1.0
+    initial_speed: 9.0
+    target_speed: 9.0
     actions: []
   variants:
-    consequential:
-      participant_overrides:
-        A:
-          post_impact_mode: deflect
-          post_impact_lateral_m: -9.0
-          post_impact_deflect_s: 0.3
-    independent:
-      max_duration_s: 18.0
-      participant_overrides:
-        A:
-          post_impact_mode: drive
-          actions:
-          - action_id: A_emergency_brake
-            kind: brake
-            t_start: 4.0
-            duration: 7.0
-            params:
-              intensity: 0.45
-          - action_id: A_pulls_away
-            kind: set_speed
-            t_start: 10.5
-            duration: 12.0
-            params:
-              target_speed: 9.0
-          - action_id: A_changes_lane
-            kind: lane_shift
-            t_start: 11.0
-            duration: 2.5
-            params:
-              lateral_m: -4.2
-        C:
-          spawn:
-            anchor: spawn_index
-            index: 265
-            forward_m: 84.0
-            lane_offset: -1
-    avoided:
-      participant_overrides:
-        A:
-          post_impact_mode: stop
+    consequential: {}

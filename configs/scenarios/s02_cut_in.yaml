@@ -58,16 +58,6 @@ scenario:
         target_speed: 6.5
   variants:
     crash: {}
-    avoided:
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_slow_after_cut_in
-            kind: set_speed
-            t_start: 2.9
-            duration: 9.0
-            params:
-              target_speed: 6.0
     critical_before_cut_in:
       description: 'B drives much slower in the lane to A''s left. A closes on it so fast that
         its time-to-contact with B is already critical before B starts moving into A''s

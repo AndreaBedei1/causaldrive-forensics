@@ -1,43 +1,59 @@
-# Baseline radar of every vehicle: the logical surround sensor.
+# Baseline radars of every vehicle: a front radar and two side radars on the body, no
+# rear radar, so a blind zone lies directly behind the vehicle (measured in CARLA with a
+# car-sized probe: invisible within about +-14 deg of straight behind at 10-40 m, +-12 deg
+# at 5 m; single points within the side radars' +-20 deg cones).
+#
+# Mounts are resolved from each vehicle's OWN bounding box when it is spawned: just outside
+# the box (gap_m), at bumper / door height (z above the ground).  Checked on model3, audi.tt,
+# nissan.patrol and mercedes.sprinter: no radar ever returns from its own vehicle.
+#
+# CARLA's radar fills a cone of half-width tan(fov/2) x range: a horizontal FOV must stay
+# below 180 deg.  Off its axis a ray reaches beyond range_m: returns beyond it are dropped.
+# Front and side cover each other between +-24 and +-72 deg (no gap at the transition).
+#
+# Returns per car per sweep (all three radars, a model3 at the given bearing and range,
+# 12000 pps each, vertical FOV 20 deg): ahead 76 / 19 / 11 / 7 at 10 / 25 / 40 / 60 m,
+# beside 112 / 42 / 24 / 16, rear quarter (140 deg) 91 / 14 / 5 / 2.5.  At 6000 pps the rear
+# quarter at 60 m drops below one return per sweep.
 radar:
   profile_name: "baseline"
   sensors:
-    # One LOGICAL 360-degree radar centred over the vehicle: the aggregate
-    # coverage of the radars distributed around a car.  CARLA's radar cannot
-    # cover 180 degrees or more (its rays fill a cone of half-width
-    # tan(fov/2) x range: measured 200 -> +-80 deg, 360 -> a slice at 0 deg), so
-    # six co-located CARLA radars of 90 deg at yaws 0, 60, ..., 300 deg (15 deg
-    # overlap each side) are merged into this one sensor frame at recording time;
-    # the reconstruction sees only the logical sensor.
-    - sensor_id: "surround"
+    - sensor_id: "front"
       blueprint: "sensor.other.radar"
-      horizontal_fov_deg: 360.0
-      physical_radars: 6
-      physical_horizontal_fov_deg: 90.0
-      # 30 deg: from the roof the sensor must look down onto close, lower cars (an
-      # audi.tt 0.3 m beside a model3: seen in every sweep at +-15 deg, 0-80 % at +-10).
-      vertical_fov_deg: 30.0
-      range_m: 90.0            # radial: returns beyond it are dropped
-      # Total over the six radars.
-      # 2 x 10800 (= 6000 x 360/200): the vertical FOV grew from 10 to 30 deg, and at
-      # 10800 a car 25-40 m away got 3-4x fewer returns than from the former 200 deg
-      # radar (measured in CARLA); 21600 gives 0.5-1.3x the former returns at 25-60 m.
-      points_per_second: 21600
+      horizontal_fov_deg: 150.0      # +-75 deg
+      vertical_fov_deg: 20.0         # +-10 deg: a low radar sees vehicle bodies edge-on
+      range_m: 90.0                  # radial; 6 s at the 50 km/h limit is 83 m
+      points_per_second: 12000
       sensor_tick_s: 0.05
       mount:
-        x: 0.0                    # centred over the vehicle origin
-        y: 0.0
-        # Fixed clearance above the vehicle's OWN roof (top of its bounding box):
-        # model3 1.78 m, audi.tt 1.69 m, nissan.patrol 2.16 m, sprinter 2.87 m.
-        # A single absolute height cannot serve the campaign's 1.39-2.57 m roofs
-        # (at 2.8 m a sedan does not see a car within 2-8 m of it).
-        z_above_roof_m: 0.30
+        anchor: front                # centre line, just ahead of the front face of the box
+        gap_m: 0.05
+        z: 0.6                       # bumper height
         yaw_deg: 0.0
         pitch_deg: 0.0
-  degradation:
-    enabled: false
-    dropout_prob: 0.0           # probability an entire frame is discarded
-    point_dropout_prob: 0.0     # probability an individual return is discarded
-    range_noise_sigma_m: 0.0
-    azimuth_noise_sigma_rad: 0.0
-    velocity_noise_sigma_mps: 0.0
+    - sensor_id: "left"
+      blueprint: "sensor.other.radar"
+      horizontal_fov_deg: 140.0      # bearings -160 .. -20 deg
+      vertical_fov_deg: 20.0
+      range_m: 90.0
+      points_per_second: 12000
+      sensor_tick_s: 0.05
+      mount:
+        anchor: left                 # middle of the left side, just outside the box
+        gap_m: 0.05
+        z: 0.6
+        yaw_deg: -90.0
+        pitch_deg: 0.0
+    - sensor_id: "right"
+      blueprint: "sensor.other.radar"
+      horizontal_fov_deg: 140.0      # bearings 20 .. 160 deg
+      vertical_fov_deg: 20.0
+      range_m: 90.0
+      points_per_second: 12000
+      sensor_tick_s: 0.05
+      mount:
+        anchor: right
+        gap_m: 0.05
+        z: 0.6
+        yaw_deg: 90.0
+        pitch_deg: 0.0

@@ -71,6 +71,17 @@ class FusionTests(unittest.TestCase):
                           association.status), ("A", "track_001", "B", "ASSOCIATED"))
         self.assertGreater(association.confidence, 0.5)
 
+    def test_a_track_lost_shortly_before_the_contact_is_still_associated(self):
+        # Lost 0.8 s before the contact: within contact_window_s (1 s), every other check holds.
+        with tempfile.TemporaryDirectory() as tmp:
+            run = make_run(Path(tmp), a_sees_b_until=CONTACT_T - 0.8)
+            result = reconstruct_run(run, ReconstructionConfig())
+        association = result.associations[0]
+        self.assertEqual((association.status, association.global_entity), ("ASSOCIATED", "B"))
+        line = next(line for line in association.evidence if line.startswith("continuous up to the contact"))
+        gap = float(line.split("last observed ")[1].split(" s")[0])
+        self.assertTrue(0.75 <= gap <= 1.0, line)  # the last sweep before the cut, 0.8-0.85 s before contact
+
     def test_track_stays_anonymous_when_evidence_is_weak(self):
         with tempfile.TemporaryDirectory() as tmp:
             run = make_run(Path(tmp), a_sees_b_until=CONTACT_T - 2.0)

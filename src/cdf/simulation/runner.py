@@ -104,10 +104,23 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     fixed_delta_seconds = None
     try:
         with ScenarioWorld(client, cfg, spec.map_name, seed=seed) as sworld:
+            # A moving vehicle is launched (below) over launch_ticks ticks before the recording
+            # starts; it is spawned that far back along its lane, so that the recording starts with
+            # it at its scenario spawn point.
+            launch_ticks = int(cfg.get("simulation.launch_ticks", 12))
+            launch_s = launch_ticks * float(cfg.get("simulation.fixed_delta_seconds", 0.05))
             placements = []
             for pspec in spec.participants:
                 wp = resolve_spawn_waypoint(sworld.map, sworld.spawn_points(), pspec.spawn)
-                placements.append((pspec, wp, build_route(sworld.map, wp, pspec.route)))
+                start = wp
+                back = float(pspec.initial_speed) * launch_s
+                if back > 0.01:
+                    previous = wp.previous(back)
+                    if not previous:
+                        raise ValueError("no lane {0:.1f} m behind the spawn point of {1} for its launch".format(
+                            back, pspec.participant_id))
+                    start = previous[0]
+                placements.append((pspec, start, build_route(sworld.map, wp, pspec.route)))
             for i, (_, wp, _) in enumerate(placements):
                 for _, prior, _ in placements[:i]:
                     if distance(wp.transform.location.x, wp.transform.location.y, prior.transform.location.x, prior.transform.location.y) < float(cfg.get("simulation.min_spawn_gap_m", 5.0)):
@@ -118,12 +131,22 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                 agent = RawVehicleAgent(sworld, cfg, pspec, make_controller(pspec, route), transform, run_root)
                 agents.append(agent)
             sworld.warmup()
-            for agent in agents:
-                speed = float(agent.spec.initial_speed)
-                if speed:
-                    yaw = math.radians(agent.vehicle.get_transform().rotation.yaw)
-                    agent.vehicle.set_target_velocity(carla.Vector3D(x=math.cos(yaw) * speed, y=math.sin(yaw) * speed, z=0))
-            for _ in range(4): sworld.tick()
+            # Launch: the scripted initial velocity is held for launch_ticks ticks in each vehicle's
+            # cruising gear, at a nominal cruising throttle, steered along its route; its speed
+            # controller then starts from that throttle.  The recording starts in a steady cruise
+            # instead of CARLA's start-up transient (neutral -> first gear at speed: 10-20 m/s^2 of
+            # engine braking under full throttle; with fewer than ~10 ticks the drivetrain has not
+            # caught up with the imposed speed and the car loses up to 1 m/s once released).
+            launch_throttle = float(cfg.get("simulation.launch_throttle", 0.5))
+            moving = [agent for agent in agents if float(agent.spec.initial_speed)]
+            for k in range(launch_ticks):
+                for agent in moving:
+                    agent.hold_initial_velocity(float(agent.spec.initial_speed), launch_throttle,
+                                                t=-(launch_ticks - k) * sworld.delta_seconds,
+                                                dt=sworld.delta_seconds)
+                sworld.tick()
+            for agent in moving:
+                agent.controller.preload_cruise(launch_throttle)
             # CARLA's elapsed clock is not reset when the requested map is
             # already loaded. The scripted timeline begins after physics has
             # settled and the configured initial velocity has taken effect,

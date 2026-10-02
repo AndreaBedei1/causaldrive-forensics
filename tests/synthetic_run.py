@@ -3,8 +3,10 @@
 A drives along +x at 10 m/s; B starts 20 m ahead at 6 m/s; A's front meets
 B's rear at physical time 3.9 s and both stop.  Each recorder has its OWN raw
 clock (A reads 100 + t, B reads 250 + t) and B starts recording ``b_late_start_s``
-later, so the two local clocks disagree.  A's forward radar sees B's rear face
-(until ``a_sees_b_until``) plus static poles; B's radar sees only poles.
+later, so the two local clocks disagree.  Each vehicle carries a front radar on its
+bumper (5 cm ahead of its bounding box, 0.6 m high), as in the campaign.  A's radar
+sees B's rear face (until ``a_sees_b_until``) plus static poles; B's radar sees only
+poles.
 """
 
 from __future__ import annotations
@@ -20,7 +22,12 @@ V_A, V_B, GAP_M = 10.0, 6.0, 20.0
 CONTACT_T = (GAP_M - 2.0 - 2.4) / (V_A - V_B)  # B's rear at x-2.0, A's front at x+2.4
 DURATION_S = 6.0
 IMPULSE = 5000.0
-RADAR_MOUNT = {"x": 2.2, "y": 0.0, "z": 1.0, "yaw_deg": 0.0, "pitch_deg": 0.0}
+HALF_LENGTH = {"A": 2.4, "B": 2.0}  # A's front at x + 2.4, B's rear at x - 2.0 (see CONTACT_T)
+
+
+def radar_mount(owner: str) -> dict:
+    """The front radar: on the centre line 5 cm ahead of the vehicle's own box, bumper height."""
+    return {"x": HALF_LENGTH[owner] + 0.05, "y": 0.0, "z": 0.6, "yaw_deg": 0.0, "pitch_deg": 0.0}
 
 
 def _x_a(t: float) -> float:
@@ -36,7 +43,10 @@ def _speed(t: float, v: float) -> float:
 
 
 def _detection(sensor, point, sensor_velocity, point_velocity):
+    """One return of a front radar (horizontal FOV +-75 deg), or None outside its field of view."""
     dx, dy, dz = (point[i] - sensor[i] for i in range(3))
+    if dx <= 0.0 or abs(math.degrees(math.atan2(dy, dx))) > 75.0:
+        return None
     depth = math.sqrt(dx * dx + dy * dy + dz * dz)
     unit = (dx / depth, dy / depth, dz / depth)
     range_rate = sum((point_velocity[i] - sensor_velocity[i]) * unit[i] for i in range(3))
@@ -52,14 +62,14 @@ def _write_jsonl(path: Path, rows) -> None:
     path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
 
 
-def _write_radar(folder: Path, times, detections) -> None:
+def _write_radar(folder: Path, times, detections, mount: dict, sensor_id: str = "front") -> None:
     offsets = np.cumsum([0] + [len(rows) for rows in detections]).astype(np.int64)
     rows = np.asarray([row for frame in detections for row in frame], dtype=np.float32).reshape(-1, 4)
     folder.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(folder / "observations.npz", frames=np.arange(len(times), dtype=np.int64),
                         timestamps=np.asarray(times, dtype=np.float64), offsets=offsets, detections=rows)
-    (folder / "metadata.json").write_text(json.dumps({"source": "radar", "sensor_transform": RADAR_MOUNT}),
-                                          encoding="utf-8")
+    (folder / "metadata.json").write_text(json.dumps({"source": "radar", "sensor_id": sensor_id,
+                                                      "sensor_transform": mount}), encoding="utf-8")
 
 
 def make_run(root: Path, b_late_start_s: float = 0.5, a_sees_b_until: Optional[float] = None,
@@ -83,28 +93,32 @@ def make_run(root: Path, b_late_start_s: float = 0.5, a_sees_b_until: Optional[f
             braking = owner == "A" and t >= 3.0
             controls.append({"frame": 0, "timestamp": stamp, "throttle": 0.0 if braking else 0.4,
                              "brake": 0.8 if braking else 0.0, "steer": 0.0, "hand_brake": False, "reverse": False})
-            sensor = (x + 2.2, 0.0, 1.0)
+            mount = radar_mount(owner)
+            sensor = (x + mount["x"], 0.0, mount["z"])
             own_velocity = (v, 0.0, 0.0)
             frame = []
             for pole in _poles():
                 if pole[0] > sensor[0] + 1.0 and pole[0] - sensor[0] < 90.0:
                     frame.append(_detection(sensor, pole, own_velocity, (0.0, 0.0, 0.0)))
+            frame = [row for row in frame if row is not None]
             visible = a_sees_b_until is None or t <= a_sees_b_until
             if owner == "A" and visible:
                 rear = _x_b(t) - 2.0
                 for lateral in (-0.7, -0.2, 0.3, 0.8):
                     for height in (0.6, 1.1):
                         point = (rear + rng.normal(0, 0.05), lateral + rng.normal(0, 0.05), height)
-                        frame.append(_detection(sensor, point, own_velocity, (_speed(t, V_B), 0.0, 0.0)))
+                        row = _detection(sensor, point, own_velocity, (_speed(t, V_B), 0.0, 0.0))
+                        if row is not None:
+                            frame.append(row)
             radar_times.append(stamp)
             radar_rows.append(frame)
         _write_jsonl(folder / "ego.jsonl", ego)
         _write_jsonl(folder / "controls.jsonl", controls)
         _write_jsonl(folder / "collisions.jsonl", [{"frame": 0, "timestamp": clock_zero + CONTACT_T, "impulse": IMPULSE}])
         _write_jsonl(folder / "traffic_signs.jsonl", [])
-        _write_radar(folder / "radar", radar_times, radar_rows)
+        _write_radar(folder / "radar" / "front", radar_times, radar_rows, radar_mount(owner))
         # The vehicle's own bounding box: A's front at x + 2.4, B's rear at x - 2.0 (see CONTACT_T).
-        half = 2.4 if owner == "A" else 2.0
+        half = HALF_LENGTH[owner]
         (folder / "metadata.json").write_text(json.dumps({"ego_footprint": {
             "x_min_m": -half, "x_max_m": half, "y_min_m": -1.0, "y_max_m": 1.0,
             "length_m": 2 * half, "width_m": 2.0}}), encoding="utf-8")

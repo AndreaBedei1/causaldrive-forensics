@@ -5,7 +5,9 @@ scenario:
   name: roundabout
   description: 'A is already circulating inside the roundabout on the outer circulating
     lane. B approaches from the south entry, fails to give way, and collides with
-    A while entering the circulating area.
+    A while entering the circulating area.  Both start about 8 s (67 m) further back
+    along their routes than the conflict needs, so the run records a normal approach
+    before the first critical situation.
 
     '
   map: Town03_Opt
@@ -21,8 +23,11 @@ scenario:
       anchor: location
       x: 3.0
       y: -23.0
+      # 66.9 m of route earlier (8.4 s at 8 m/s), still on the circulating lane;
+      # the route from there contains the original one unchanged.
+      forward_m: -62.0
     route:
-      length_m: 120.0
+      length_m: 190.0
       step_m: 2.0
       turns:
       - straight
@@ -38,8 +43,9 @@ scenario:
       junction_y: 0.0
       bearing_deg: 90.0
       back_m: 35.0
+      forward_m: -68.0  # 67.8 m of route earlier, the same 8.4 s as A
     route:
-      length_m: 120.0
+      length_m: 190.0
       step_m: 2.0
       turns:
       - straight
@@ -49,7 +55,7 @@ scenario:
     actions:
     - action_id: B_fail_to_give_way
       kind: set_speed
-      t_start: 1.0
+      t_start: 9.4
       duration: 14.0
       params:
         target_speed: 9.5

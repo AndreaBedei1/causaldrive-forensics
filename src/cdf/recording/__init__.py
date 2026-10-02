@@ -13,6 +13,7 @@ from .compact_observations import (
     closing_speed,
     load_observation_stream,
     load_observations,
+    load_radar_observations,
 )
 from .depth_velocity import (
     ALGORITHM_VERSION,
@@ -23,6 +24,6 @@ from .depth_velocity import (
 
 __all__ = [
     "CLOSING_SPEED_SIGN", "CompactObservationWriter", "CompactObservations", "closing_speed",
-    "load_observations", "load_observation_stream", "ALGORITHM_VERSION", "DepthAssociationStats",
+    "load_observations", "load_observation_stream", "load_radar_observations", "ALGORITHM_VERSION", "DepthAssociationStats",
     "DepthRadialVelocityConfig", "DepthRadialVelocityEstimator",
 ]

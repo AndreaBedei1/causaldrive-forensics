@@ -1,49 +1,18 @@
 [
  {
   "scenario": "S01",
-  "variant": "avoided",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 34.6
-   }
-  ]
- },
- {
-  "scenario": "S01",
   "variant": "crash",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 23.1
-   }
-  ]
- },
- {
-  "scenario": "S02",
-  "variant": "avoided",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 29.8
+    "wall_s": 32.0
    }
   ]
  },
@@ -52,14 +21,15 @@
   "variant": "crash",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 30.1
+    "wall_s": 27.4
    }
   ]
  },
@@ -68,14 +38,15 @@
   "variant": "critical_before_cut_in",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 26.6
+    "wall_s": 25.0
    }
   ]
  },
@@ -84,30 +55,15 @@
   "variant": "crash",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 32.4
-   }
-  ]
- },
- {
-  "scenario": "S05",
-  "variant": "crash",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 29.2
+    "wall_s": 32.0
    }
   ]
  },
@@ -116,14 +72,15 @@
   "variant": "a_front_pushed",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 72.8
+    "wall_s": 34.1
    }
   ]
  },
@@ -132,46 +89,32 @@
   "variant": "b_rear_first",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 40.6
+    "wall_s": 36.5
    }
   ]
  },
  {
   "scenario": "S07",
-  "variant": "full_view",
+  "variant": "crash",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 41.0
-   }
-  ]
- },
- {
-  "scenario": "S07",
-  "variant": "occluded",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 41.0
+    "wall_s": 34.1
    }
   ]
  },
@@ -180,14 +123,15 @@
   "variant": "crash",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 52.9
+    "wall_s": 50.1
    }
   ]
  },
@@ -196,14 +140,15 @@
   "variant": "merge_conflict",
   "map": "Town03_Opt",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 49.9
+    "wall_s": 48.0
    }
   ]
  },
@@ -212,148 +157,15 @@
   "variant": "rolls_through",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 31.9
-   }
-  ]
- },
- {
-  "scenario": "S10",
-  "variant": "stops_safely",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 23.1
-   }
-  ]
- },
- {
-  "scenario": "S10",
-  "variant": "stops_then_proceeds",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 28.9
-   }
-  ]
- },
- {
-  "scenario": "S11",
-  "variant": "rolls_through",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 32.0
-   }
-  ]
- },
- {
-  "scenario": "S11",
-  "variant": "stops_safely",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 1,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 23.1
-   },
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 41.0
-   }
-  ]
- },
- {
-  "scenario": "S11",
-  "variant": "stops_then_proceeds",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 29.0
-   }
-  ]
- },
- {
-  "scenario": "S12",
-  "variant": "a_arrives_first",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 32.1
-   }
-  ]
- },
- {
-  "scenario": "S12",
-  "variant": "b_arrives_first",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 32.0
-   }
-  ]
- },
- {
-  "scenario": "S12",
-  "variant": "b_fails_to_stop",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 32.2
+    "wall_s": 34.3
    }
   ]
  },
@@ -362,78 +174,15 @@
   "variant": "near_simultaneous",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 29.3
-   }
-  ]
- },
- {
-  "scenario": "S13",
-  "variant": "accelerates_into_gap",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 23.3
-   }
-  ]
- },
- {
-  "scenario": "S13",
-  "variant": "cut_in",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 23.4
-   }
-  ]
- },
- {
-  "scenario": "S13",
-  "variant": "safe_lane_change",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 23.4
-   }
-  ]
- },
- {
-  "scenario": "S15",
-  "variant": "b_stops",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 41.3
+    "wall_s": 29.6
    }
   ]
  },
@@ -442,46 +191,15 @@
   "variant": "deflected_into_c",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 52.7
-   }
-  ]
- },
- {
-  "scenario": "S15",
-  "variant": "single_impact",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 49.5
-   }
-  ]
- },
- {
-  "scenario": "S16",
-  "variant": "avoided",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 34.9
+    "wall_s": 45.5
    }
   ]
  },
@@ -490,30 +208,15 @@
   "variant": "consequential",
   "map": "Town05",
   "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-03",
   "attempts": [
    {
     "exit": 0,
     "engine_crash": false,
     "note": "",
-    "wall_s": 34.7
-   }
-  ]
- },
- {
-  "scenario": "S16",
-  "variant": "independent",
-  "map": "Town05",
-  "status": "recorded",
-  "radar": "360 deg logical surround (6 x 90 deg CARLA radars), 30 deg, 21600 pps, 0.30 m above the roof",
-  "recorded_on": "2026-10-02",
-  "attempts": [
-   {
-    "exit": 0,
-    "engine_crash": false,
-    "note": "",
-    "wall_s": 55.6
+    "wall_s": 34.2
    }
   ]
  }

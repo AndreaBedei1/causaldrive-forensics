@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
+import math
 import time
 from typing import Any
 
@@ -18,6 +19,24 @@ from .sensors import (CameraSensor, CollisionSensor, RadarSensor,
                       depth_observations_from_bgra, radar_specs_from_config)
 from ..recording.depth_velocity import DepthRadialVelocityEstimator
 
+
+
+def cruise_gear(physics_control: Any, speed: float, margin: float = 0.85) -> int:
+    """The lowest forward gear whose engine speed at ``speed`` stays below ``margin`` x its up-shift point.
+
+    CARLA spawns a vehicle in neutral.  Given its scripted initial velocity directly, the automatic
+    gearbox then engages first gear at cruising speed, and the over-revving engine brakes the car at
+    10-20 m/s^2 for about half a second under full throttle (measured on audi.tt, nissan.patrol and
+    mercedes.sprinter; the single-gear model3 is not affected).  Starting in the gear the gearbox would
+    hold at that speed removes the artefact.
+    """
+    gears = list(physics_control.forward_gears)
+    wheel_rpm = float(speed) / (float(physics_control.wheels[0].radius) / 100.0) * 60.0 / (2.0 * math.pi)
+    for index, gear in enumerate(gears, start=1):
+        engine_rpm = wheel_rpm * float(gear.ratio) * float(physics_control.final_ratio)
+        if engine_rpm <= margin * float(gear.up_ratio) * float(physics_control.max_rpm):
+            return index
+    return max(len(gears), 1)
 
 
 def ego_footprint(vehicle: Any) -> dict:
@@ -45,7 +64,7 @@ class RawVehicleAgent:
             profile = load_yaml(profile_path)
             sensor_cfg = cfg.with_overrides({"radar": profile.get("radar", {}), "sensors": {"profile": str(spec.sensor_profile)}})
         self.radar = [RadarSensor(scenario_world, self.vehicle, rs) for rs in radar_specs_from_config(sensor_cfg)]
-        camera_spec = camera_spec_from_config(cfg)
+        camera_spec = camera_spec_from_config(cfg, spec.blueprint)
         depth_camera_spec = depth_camera_spec_from_config(cfg)
         self.depth_observation_spec = depth_observation_spec_from_config(cfg)
         self._depth_executor = ThreadPoolExecutor(max_workers=1) if depth_camera_spec else None
@@ -76,6 +95,21 @@ class RawVehicleAgent:
                 "roll_deg": float(tf.rotation.roll), "pitch_deg": float(tf.rotation.pitch), "yaw_deg": float(tf.rotation.yaw),
                 "velocity": {"x": float(v.x), "y": float(v.y), "z": float(v.z)}, "acceleration": {"x": float(a.x), "y": float(a.y), "z": float(a.z)},
                 "angular_velocity": {"x": float(ang.x), "y": float(ang.y), "z": float(ang.z)}}
+
+    def hold_initial_velocity(self, speed: float, throttle: float, t: float = 0.0, dt: float = 0.05) -> None:
+        """One launch tick before the recording: the scripted initial velocity along the vehicle's
+        heading, in its cruising gear (:func:`cruise_gear`) at a nominal cruising throttle, steered
+        by its own controller along its route (``t`` < 0: no scripted action is active yet)."""
+        carla = import_carla()
+        if not hasattr(self, "_launch_gear"):
+            self._launch_gear = cruise_gear(self.vehicle.get_physics_control(), speed)
+        tf, v = self.vehicle.get_transform(), self.vehicle.get_velocity()
+        steer = self.controller.step(VehicleState(t=float(t), x=tf.location.x, y=tf.location.y, yaw=tf.rotation.yaw,
+                                                  speed=speed, vx=v.x, vy=v.y), dt).clamped().steer
+        self.vehicle.apply_control(carla.VehicleControl(throttle=float(throttle), steer=float(steer),
+                                                        manual_gear_shift=True, gear=int(self._launch_gear)))
+        yaw = math.radians(tf.rotation.yaw)
+        self.vehicle.set_target_velocity(carla.Vector3D(x=math.cos(yaw) * speed, y=math.sin(yaw) * speed, z=0))
 
     def set_sensor_start_frame(self, frame: int) -> None:
         """Exclude warm-up callbacks while retaining later delayed images."""
@@ -122,10 +156,11 @@ class RawVehicleAgent:
         command = self.controller.step(state, dt)
         clamped = command.clamped()
         carla = import_carla()
-        self.vehicle.apply_control(carla.VehicleControl(
-            throttle=clamped.throttle, brake=clamped.brake, steer=clamped.steer,
-            hand_brake=clamped.hand_brake, reverse=clamped.reverse,
-        ))
+        control = carla.VehicleControl(throttle=clamped.throttle, brake=clamped.brake, steer=clamped.steer,
+                                       hand_brake=clamped.hand_brake, reverse=clamped.reverse)
+        if clamped.neutral:
+            control.manual_gear_shift, control.gear = True, 0
+        self.vehicle.apply_control(control)
         self.logger.log_state(record)
         self.logger.log_control({"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                                  "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse})

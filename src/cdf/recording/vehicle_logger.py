@@ -66,25 +66,21 @@ class VehicleLogger:
                     "sensor_id": sensor_id,
                     "schema_version": 1,
                     "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
-                    "sensor_transform": {
-                        "x": float(radar.get("mount_x", 0.0)),
-                        "y": float(radar.get("mount_y", 0.0)),
-                        "z": float(radar.get("mount_z", 0.0)),
-                        "yaw_deg": float(radar.get("mount_yaw_deg", 0.0)),
-                        "pitch_deg": float(radar.get("mount_pitch_deg", 0.0)),
-                    },
-                    "mount_z_above_roof_m": radar.get("mount_z_above_roof_m"),
+                    # Where this radar sits on the body (vehicle frame: x forward, y right,
+                    # z up from the vehicle origin on the ground), resolved from the
+                    # vehicle's own bounding box: every return is measured from here.
+                    "sensor_transform": dict(radar.get("sensor_transform") or {
+                        "x": float(radar.get("mount_x", 0.0)), "y": float(radar.get("mount_y", 0.0)),
+                        "z": float(radar.get("mount_z", 0.0)), "yaw_deg": float(radar.get("mount_yaw_deg", 0.0)),
+                        "pitch_deg": float(radar.get("mount_pitch_deg", 0.0))}),
+                    "mount": {"anchor": radar.get("anchor"), "gap_m": radar.get("gap_m")},
                     "sensor_tick_s": float(radar.get("sensor_tick_s", 0.05)),
-                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 360.0)),
-                    "vertical_fov_deg": float(radar.get("vertical_fov_deg", 30.0)),
+                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 150.0)),
+                    "vertical_fov_deg": float(radar.get("vertical_fov_deg", 20.0)),
                     "range_m": float(radar.get("range_m", 90.0)),
                     "points_per_second": int(radar.get("points_per_second", 0)),
-                    "logical_sensor": {
-                        "physical_radars": list(radar.get("physical_layout") or []),
-                        "fusion": "co-located CARLA radars at the same mount; each sweep's azimuths rotated by the "
-                                  "radar's yaw into this sensor frame and merged; returns beyond range_m (radial) "
-                                  "dropped. Depth and radial velocity lie along the line of sight and are unchanged.",
-                    },
+                    "frame": "azimuth and altitude in this radar's own frame; returns beyond range_m (radial) "
+                             "dropped",
                     "radial_velocity_status": "measured",
                     # CARLA's native value is the range rate: negative while the
                     # target approaches (compact_observations.closing_speed).
@@ -104,7 +100,9 @@ class VehicleLogger:
             "images_persisted": False,
         }
         (self.root / "camera" / "metadata.json").write_text(_json(self._camera_metadata), encoding="utf-8")
-        sign_cfg = metadata.get("traffic_signs") or {}
+        sign_cfg = dict(metadata.get("traffic_signs") or {})
+        # Bearings of detections need the camera's own horizontal FOV.
+        sign_cfg.setdefault("camera_fov_deg", (metadata.get("camera") or {}).get("fov_deg", 110.0))
         self._sign_detector = SignDetector(sign_cfg)
         self._sign_tracker = SignTracker(sign_cfg)
         self._camera_width = int((metadata.get("camera") or {}).get("width") or 0)
@@ -199,6 +197,7 @@ class VehicleLogger:
                 "relevant_to_ego_path": relevance["relevant_to_ego_path"],
                 "centredness": relevance["centredness"],
                 "growing": relevance["growing"],
+                "min_bearing_deg": relevance["min_bearing_deg"],
             })
         self._camera_stats.update({
             "candidate_sign_detections": self._sign_tracker.n_detections,

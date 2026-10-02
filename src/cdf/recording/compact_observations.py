@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, Mapping, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional
 
 import numpy as np
 
@@ -153,16 +153,44 @@ def _filter_common_region(observations: CompactObservations) -> CompactObservati
     )
 
 
-def load_observation_stream(vehicle_dir: Path, source: str = "radar", common_region: bool = False) -> CompactObservations:
+def load_radar_observations(vehicle_dir: Path) -> List[CompactObservations]:
+    """Every radar of a vehicle, each with its own metadata (sensor id, mount), sorted by sensor id.
+
+    A vehicle with several radars stores them under ``radar/<sensor_id>/``; a
+    single one directly under ``radar/``.  The sensor id defaults to the folder
+    name when the metadata does not state it.
+    """
+    root = Path(vehicle_dir) / "radar"
+    out = []
+    if (root / "observations.npz").exists():
+        out.append(load_observations(root / "observations.npz"))
+    for path in sorted(root.glob("*/observations.npz")):
+        observations = load_observations(path)
+        metadata = dict(observations.metadata)
+        metadata.setdefault("sensor_id", path.parent.name)
+        out.append(CompactObservations(frames=observations.frames, timestamps=observations.timestamps,
+                                       offsets=observations.offsets, detections=observations.detections,
+                                       metadata=metadata))
+    if not out:
+        raise FileNotFoundError("no radar observations found under " + str(root))
+    return sorted(out, key=lambda item: str(item.metadata.get("sensor_id", "")))
+
+
+def load_observation_stream(vehicle_dir: Path, source: str = "radar", common_region: bool = False,
+                            sensor_id: Optional[str] = None) -> CompactObservations:
     """Load either native radar or depth through one source-agnostic API.
 
     ``common_region=True`` filters only the returned view; native NPZ files are
     never modified, so radar observations outside the overlap remain available.
+    A vehicle with several radars (``radar/<sensor_id>/``) needs ``sensor_id``
+    (``load_radar_observations`` returns them all).
     """
     root = Path(vehicle_dir)
     source_name = str(source).lower()
     if source_name == "depth":
         path = root / "depth" / "observations.npz"
+    elif source_name == "radar" and sensor_id is not None:
+        path = root / "radar" / str(sensor_id) / "observations.npz"
     elif source_name == "radar":
         path = root / "radar" / "observations.npz"
         if not path.exists():

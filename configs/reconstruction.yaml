@@ -10,6 +10,7 @@ reconstruction:
     merge_gap_s: 0.5                  # a longer pause always separates two contacts
     new_impact_ratio: 0.75            # >= this: a new impact (rebounds measured <= 0.52, second bodies 0.85-0.93)
     min_impact_ratio: 0.25            # < this: the same contact (persistent contact <= 0.25)
+    min_new_impact_impulse: 1000.0    # a weaker burst within merge_gap_s continues the contact (scraping, pushing)
     # In between: the recorder's own velocity jumps at the contact's start and at the burst, when both
     # are impact-like, decide: > reversal_angle_deg apart = struck from the other side (new),
     # otherwise a rebound (same). Without that evidence: new from undirected_impact_ratio.
@@ -29,18 +30,37 @@ reconstruction:
     measurement_std_m: 0.5            # Kalman: median-return position noise
     radial_speed_std_mps: 0.3         # Kalman: median Doppler speed noise
     acceleration_std_mps2: 6.0        # Kalman: unmodelled acceleration (emergency braking)
+    min_slowdown_returns: 3           # a target that stops abruptly (crash) is followed on this many slowed returns
 
   semantics:
     brake_onset_threshold: 0.1        # BRAKE_START at or above, BRAKE_END below (0.2 s release debounce)
+    # THROTTLE_START at or above the on level, THROTTLE_END at or below the off level (hysteresis);
+    # the recorded throttle is 0 or 0.15-1.0, only ~0.5 % of the samples lie in 0.02-0.10.
+    throttle_on_threshold: 0.10
+    throttle_off_threshold: 0.05
+    throttle_release_debounce_s: 0.2  # a shorter release does not end THROTTLE
     full_stop_speed_mps: 0.3          # STOP_START below; moving again above 1 m/s
     speed_limit_hysteresis_kmh: 1.0   # exceeding: above limit + 1 km/h, ends at or below limit - 1 km/h
     closing_speed_threshold_mps: 1.0  # CLOSING_START at or above, CLOSING_END below half of it
-    # CRITICAL_TTC (while closing): avoiding the target by braking needs at least the available
-    # deceleration, i.e. TTC <= reaction + v_shed / (2 a) + margin / v_shed (see README).
-    critical_reaction_time_s: 1.0     # the recorder reacts after this time (driver brake reaction ~0.7-1.5 s)...
-    critical_deceleration_mps2: 6.0   # ...then brakes at up to this (hard, non-emergency; emergency ~8-10)...
-    critical_standstill_margin_m: 1.0 # ...keeping at least this distance to the target
+    # CRITICAL_TTC (src/cdf/reconstruction/conflict.py, README "CRITICAL_TTC"): the recorder's
+    # envelope and the target's nominal box are predicted over the horizon (recorder: constant
+    # speed and yaw rate; target: its velocity, its measured deceleration when braking).  A
+    # collision course is an overlap; it is CRITICAL when avoiding it by braking (after the
+    # reaction time, to a stop, keeping the margins) needs at least the available deceleration.
+    # The braking vehicle is the recorder, or the target when no braking of the recorder helps
+    # (a car closing in from behind).  Modelling assumptions, not a norm: the stopping-distance
+    # idea of art. 149 CdS (safe distance = room to stop if the car ahead brakes) in 2-D.
+    critical_reaction_time_s: 1.0     # reaction before braking (driver brake reaction ~0.7-1.5 s)...
+    critical_deceleration_mps2: 6.0   # ...then braking at up to this (hard, non-emergency; emergency ~8-10)...
+    critical_standstill_margin_m: 1.0 # ...stopping at least this far ahead of / behind the target (envelope)
+    critical_lateral_margin_m: 0.3    # envelope beyond the recorder's sides (a car passing closer is a threat)
     critical_release_ratio: 0.75      # CRITICAL_TTC_END once the required deceleration < 75 % of the available
+    prediction_horizon_s: 6.0         # how far ahead overlaps are searched (TTC beyond it: no course)
+    prediction_time_step_s: 0.05      # prediction step (the radar sweep period)
+    target_length_m: 4.6              # nominal target box behind its observed near surface (the radar
+    target_width_m: 1.9               # measures no size; a mid-size car, campaign cars 4.2-5.9 x 1.8-2.2)
+    target_braking_min_mps2: 1.0      # a target decelerating at least this is predicted to keep braking to a stop
+    critical_min_track_age_s: 0.5     # no CRITICAL_TTC claim either way on a younger track (its velocity is not yet known)
     # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading (never from the steer command)
     turn_yaw_rate_window_s: 0.2       # yaw rate = heading change over this preceding window (causal)
     turn_yaw_rate_on_dps: 10.0        # TURN_*_START at or above (lane changes peak below ~9 deg/s)...
@@ -50,10 +70,9 @@ reconstruction:
     turn_min_duration_s: 0.5          # a turn lasts at least this long...
     turn_min_heading_change_deg: 15.0 # ...and changes the heading by at least this (lane changes <= ~10 deg)
     path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EXIT (from the front edge)
-    track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first azimuth...
-    track_appeared_rear_deg: 5.0      # ...TRACK_APPEARED_REAR within this of straight behind, else _LEFT / _RIGHT
+    track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first bearing, else _LEFT / _RIGHT (no rear radar)
     max_position_std_m: 1.0           # track estimates more uncertain than these (Kalman std)...
-    max_velocity_std_mps: 1.0         # ...leave CUT_IN UNKNOWN
+    max_velocity_std_mps: 1.0         # ...leave CUT_IN and CRITICAL_TTC UNKNOWN (no claim either way)
     cut_in_max_heading_deg: 25.0      # CUT_IN: target moves within this angle of the recorder's heading
     cut_in_min_target_speed_mps: 2.0  # ...at least this fast (a slow or standing object does not cut in)
     cut_in_lateral_speed_mps: 0.3     # ...approaching the corridor laterally at least this fast
@@ -73,3 +92,5 @@ reconstruction:
     approach_window_s: 1.0            # the range must shrink over this last stretch before the contact
     min_track_persistence_s: 1.0      # tracked at least this long before the contact
     speed_consistency_mps: 1.5        # track speed vs partner's own speed (RMSE)
+    touching_clearance_m: 1.0         # several compatible tracks: the only one touching the body at the contact...
+    rival_clearance_m: 2.0            # ...while every rival is at least this far, is the partner

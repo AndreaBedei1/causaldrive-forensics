@@ -22,9 +22,19 @@ sys.path.insert(0, str(ROOT / "src"))
 from cdf.recording.compact_observations import CompactObservations, closing_speed, load_observation_stream  # noqa: E402
 
 
+# The depth camera looks forward: radar is compared through the front radar of the
+# three body radars (vehicles/X/radar/front/).
+RADAR_SENSOR = "front"
+
+
+def _radar_sensor(vehicle_dir: Path) -> Optional[str]:
+    return RADAR_SENSOR if (Path(vehicle_dir) / "radar" / RADAR_SENSOR).exists() else None
+
+
 def source_switch_demo(vehicle_dir: Path, source: str = "radar") -> Dict[str, float]:
     """Run the same tiny consumer against either source selection."""
-    stream = load_observation_stream(vehicle_dir, source=source)
+    stream = load_observation_stream(vehicle_dir, source=source,
+                                     sensor_id=_radar_sensor(vehicle_dir) if source == "radar" else None)
     total = finite_velocity = 0
     for observation_frame in stream:
         detections = observation_frame["detections"]
@@ -59,7 +69,8 @@ def radar_depth_metrics(vehicle_dir: Path, timestamp_tolerance_s: float = 0.03,
     Radar (range rate) and depth (closing speed) store opposite signs, so both
     are compared as closing speed: positive = approaching.
     """
-    radar = load_observation_stream(vehicle_dir, source="radar", common_region=True)
+    radar = load_observation_stream(vehicle_dir, source="radar", common_region=True,
+                                    sensor_id=_radar_sensor(vehicle_dir))
     depth = load_observation_stream(vehicle_dir, source="depth", common_region=True)
     pairs: List[Tuple[float, float]] = []
     azimuth_tolerance = math.radians(azimuth_tolerance_deg)

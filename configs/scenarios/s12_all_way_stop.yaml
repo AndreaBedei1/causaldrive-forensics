@@ -1,15 +1,16 @@
 scenario:
   scenario_id: S12
   name: all_way_stop
-  description: 'Both A and B face stop signs. Variants differ in who stops first,
-    whether the two arrivals are distinguishable at all, and whether one vehicle stops.
+  description: 'Both A and B face stop signs and arrive almost together.  Each comes to
+    a complete stop at its stop line for about 1.5 s; both then pull away almost at the
+    same moment, A turning left across B''s path, and they collide in the junction.
 
     '
   map: Town05
   context:
     road_environment: urban all-way-stop junction
     speed_limit_kmh: 50
-  default_variant: a_arrives_first
+  default_variant: near_simultaneous
   max_duration_s: 18.0
   participants:
   - id: A
@@ -48,83 +49,19 @@ scenario:
     target_speed: 9.0
     actions: []
   variants:
-    a_arrives_first:
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_stop
-            kind: brake
-            t_start: 2.7
-            duration: 3.8
-            params:
-              intensity: 0.9
-          - action_id: A_proceed
-            kind: set_speed
-            t_start: 6.5
-            duration: 8.0
-            params:
-              target_speed: 8.0
-        B:
-          initial_speed: 6.0
-          target_speed: 6.0
-          actions:
-          - action_id: B_stop
-            kind: brake
-            t_start: 4.4
-            duration: 6.1
-            params:
-              intensity: 0.9
-          - action_id: B_proceed
-            kind: set_speed
-            t_start: 10.5
-            duration: 6.0
-            params:
-              target_speed: 8.0
-    b_arrives_first:
-      participant_overrides:
-        A:
-          initial_speed: 6.0
-          target_speed: 6.0
-          actions:
-          - action_id: A_stop
-            kind: brake
-            t_start: 4.4
-            duration: 6.1
-            params:
-              intensity: 0.9
-          - action_id: A_proceed
-            kind: set_speed
-            t_start: 10.5
-            duration: 6.0
-            params:
-              target_speed: 8.0
-        B:
-          actions:
-          - action_id: B_stop
-            kind: brake
-            t_start: 2.7
-            duration: 3.8
-            params:
-              intensity: 0.9
-          - action_id: B_proceed
-            kind: set_speed
-            t_start: 6.5
-            duration: 8.0
-            params:
-              target_speed: 8.0
     near_simultaneous:
       participant_overrides:
         A:
           actions:
           - action_id: A_stop
             kind: brake
-            t_start: 2.7
-            duration: 4.3
+            t_start: 2.42
+            duration: 2.45
             params:
-              intensity: 0.95
+              intensity: 0.3
           - action_id: A_proceed
             kind: set_speed
-            t_start: 7.0
+            t_start: 4.87
             duration: 8.0
             params:
               target_speed: 8.0
@@ -132,43 +69,13 @@ scenario:
           actions:
           - action_id: B_stop
             kind: brake
-            t_start: 2.8
-            duration: 4.2
+            t_start: 2.53
+            duration: 2.2
             params:
-              intensity: 0.95
+              intensity: 0.3
           - action_id: B_proceed
             kind: set_speed
-            t_start: 7.0
+            t_start: 4.73
             duration: 8.0
             params:
               target_speed: 9.5
-    b_fails_to_stop:
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_stop
-            kind: brake
-            t_start: 2.7
-            duration: 5.1
-            params:
-              intensity: 0.9
-          - action_id: A_proceed
-            kind: set_speed
-            t_start: 7.8
-            duration: 8.0
-            params:
-              target_speed: 8.0
-        B:
-          spawn:
-            anchor: junction_approach
-            junction_x: -283.42
-            junction_y: 1.23
-            bearing_deg: -90.0
-            back_m: 80.0
-          actions:
-          - action_id: B_roll_through
-            kind: set_speed
-            t_start: 2.0
-            duration: 14.0
-            params:
-              target_speed: 5.0

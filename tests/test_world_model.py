@@ -43,7 +43,7 @@ def _target(motion, start=1.0, end=8.0, vel_std=0.1, track_id="track_001"):
             t_local=t, x_m=longitudinal, y_m=lateral, vx_mps=vx, vy_mps=vy, speed_mps=math.hypot(vx, vy),
             pos_std_m=0.1, vel_std_mps=vel_std, range_m=distance,
             bearing_deg=math.degrees(math.atan2(lateral, longitudinal)), longitudinal_m=longitudinal,
-            lateral_m=lateral, closing_speed_mps=0.0, ttc_s=None, measured=True, n_returns=4))
+            lateral_m=lateral, closing_speed_mps=0.0, closing_ttc_s=None, measured=True, n_returns=4))
     return LocalTrack(track_id=track_id, samples=samples)
 
 

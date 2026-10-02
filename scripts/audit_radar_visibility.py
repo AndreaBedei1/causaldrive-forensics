@@ -11,11 +11,12 @@ imports this script, and nothing it computes is fed back.
 Per recorder R and per other true vehicle V, all times in R's own local clock
 (seconds since R's first ego sample):
 
-  in range       first sweep with any part of V's body within the radar range,
-                 whatever the field of view (what a 360-degree radar could have seen)
-  inside FOV     first sweep with part of V's body inside R's configured horizontal
-                 and vertical field of view and range (radar/metadata.json; for the
-                 360 deg surround sensor only the vertical FOV and the range limit)
+  in range       first sweep with any part of V's body within the range of one of
+                 R's radars, whatever the field of view
+  inside FOV     first sweep with part of V's body inside the horizontal and vertical
+                 field of view and range of at least one of R's radars (front, left,
+                 right: each from its own mount, radar/<id>/metadata.json); directly
+                 behind R lies the blind zone between the side radars' fields
   raw return     first sweep with a radar return on V's body (box + 0.5 m)
   usable return  first such return passing the tracker's own height filter and
                  moving-speed test (the only returns that can start a track)
@@ -53,7 +54,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cdf.recording.compact_observations import load_observation_stream  # noqa: E402
+from cdf.recording.compact_observations import load_radar_observations  # noqa: E402
 from cdf.reconstruction.config import load_config  # noqa: E402
 from cdf.reconstruction.local import read_jsonl, reconstruct_vehicle  # noqa: E402
 from cdf.replay.model import Pose, local_to_world, rotation_axes  # noqa: E402
@@ -128,15 +129,19 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
         vehicle_dir = run_dir / "vehicles" / owner
         if not (vehicle_dir / "radar").exists():
             continue
-        radar = load_observation_stream(vehicle_dir, source="radar")
-        meta = radar.metadata
-        mount = meta.get("sensor_transform") or {}
-        mount_pos = np.array([mount.get("x", 0.0), mount.get("y", 0.0), mount.get("z", 1.8)])
-        mount_rot = _rotation(mount.get("yaw_deg", 0.0), mount.get("pitch_deg", 0.0), 0.0)
-        # The logical surround sensor: 360 deg (every azimuth is inside), +-15 deg vertically.
-        half_h = math.radians(float(meta.get("horizontal_fov_deg", 360.0))) / 2.0
-        half_v = math.radians(float(meta.get("vertical_fov_deg", 30.0))) / 2.0
-        max_range = float(meta.get("range_m", 90.0))
+        radars = []
+        for observations in load_radar_observations(vehicle_dir):
+            meta = observations.metadata
+            mount = meta.get("sensor_transform") or {}
+            radars.append({"id": str(meta.get("sensor_id", "radar")), "obs": observations,
+                           "pos": np.array([mount.get("x", 0.0), mount.get("y", 0.0), mount.get("z", 0.6)]),
+                           "rot": _rotation(mount.get("yaw_deg", 0.0), mount.get("pitch_deg", 0.0), 0.0),
+                           "half_h": math.radians(float(meta.get("horizontal_fov_deg", 150.0))) / 2.0,
+                           "half_v": math.radians(float(meta.get("vertical_fov_deg", 20.0))) / 2.0,
+                           "range": float(meta.get("range_m", 90.0)),
+                           "index": {int(frame): i for i, frame in enumerate(observations.frames)},
+                           "previous": None})
+        fov_label = ", ".join("{0} {1:.0f}".format(r["id"], math.degrees(2 * r["half_h"])) for r in radars)
         rec = reconstruct_vehicle(vehicle_dir, cfg)  # the recorder's own reconstruction (local data only)
         origin = rec.clock_origin
         first_ego = read_jsonl(vehicle_dir / "ego.jsonl")[0]
@@ -144,26 +149,43 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
         collisions = [n.t_local for n in rec.graph.nodes if n.event_type == "COLLISION"]
 
         per_target: Dict[str, Dict[str, List[Any]]] = {}
-        for index, frame in enumerate(radar.frames):
+        frames = sorted(set().union(*[set(r["index"]) for r in radars])) if radars else []
+        for frame in frames:
             world = by_frame.get(int(frame), {})
             own = world.get(owner)
             if own is None:
                 continue
-            t = round(float(radar.timestamps[index]) - origin, 4)
             tf = own["transform"]
             own_rot = _rotation(tf["yaw_deg"], tf["pitch_deg"], tf["roll_deg"])
-            sensor = np.array([tf["x"], tf["y"], tf["z"]]) + own_rot @ mount_pos
-            sensor_rot = own_rot @ mount_rot
-            rows4 = np.asarray(radar.frame_detections(index), dtype=float).reshape(-1, 4)
-            depth, azimuth, altitude, range_rate = rows4.T
-            los = np.column_stack([np.cos(altitude) * np.cos(azimuth), np.cos(altitude) * np.sin(azimuth),
-                                   np.sin(altitude)])
-            points = sensor + (los * depth[:, None]) @ sensor_rot.T
-            velocity = np.array([own["velocity"]["x"], own["velocity"]["y"], own["velocity"]["z"]]) @ own_rot
-            radial_speed = range_rate + los[:, 0] * velocity[0] + los[:, 1] * velocity[1]
-            height = mount_pos[2] + depth * np.sin(altitude)
-            usable = ((height >= cfg.tracking.min_height_m) & (height <= cfg.tracking.max_height_m)
-                      & (np.abs(radial_speed) >= cfg.tracking.moving_speed_mps))
+            own_pos = np.array([tf["x"], tf["y"], tf["z"]])
+            seen, all_points, all_usable, timestamp = [], [], [], None
+            for r in radars:
+                sensor = own_pos + own_rot @ r["pos"]
+                sensor_rot = own_rot @ r["rot"]
+                # The radar's own velocity, as CARLA measures it: its displacement over the tick.
+                velocity = ((sensor - r["previous"]) / 0.05 if r["previous"] is not None else
+                            np.array([own["velocity"]["x"], own["velocity"]["y"], own["velocity"]["z"]]))
+                r["previous"] = sensor
+                index = r["index"].get(int(frame))
+                if index is None:
+                    continue
+                timestamp = float(r["obs"].timestamps[index])
+                rows4 = np.asarray(r["obs"].frame_detections(index), dtype=float).reshape(-1, 4)
+                depth, azimuth, altitude, range_rate = rows4.T
+                los = np.column_stack([np.cos(altitude) * np.cos(azimuth), np.cos(altitude) * np.sin(azimuth),
+                                       np.sin(altitude)]) @ sensor_rot.T
+                points = sensor + los * depth[:, None]
+                radial_speed = range_rate + los @ velocity
+                height = r["pos"][2] + depth * np.sin(altitude)
+                all_points.append(points)
+                all_usable.append((height >= cfg.tracking.min_height_m) & (height <= cfg.tracking.max_height_m)
+                                  & (np.abs(radial_speed) >= cfg.tracking.moving_speed_mps))
+                seen.append((r, sensor, sensor_rot, azimuth, altitude, depth))
+            if timestamp is None:
+                continue
+            t = round(timestamp - origin, 4)
+            points = np.concatenate(all_points) if all_points else np.empty((0, 3))
+            usable = np.concatenate(all_usable) if all_usable else np.empty(0, dtype=bool)
             boxes = {pid: Box(state) for pid, state in world.items()}
             for target, box in boxes.items():
                 if target == owner:
@@ -171,20 +193,31 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
                 entry = per_target.setdefault(target, {k: [] for k in
                                                        ("t", "range", "fov", "raw", "usable", "occluded", "why",
                                                         "speed")})
-                local = (box.surface_points() - sensor) @ sensor_rot
-                dist = np.linalg.norm(local, axis=1)
-                az = np.arctan2(local[:, 1], local[:, 0])
-                el = np.arctan2(local[:, 2], np.hypot(local[:, 0], local[:, 1]))
-                in_range = dist <= max_range
-                inside = in_range & (np.abs(az) <= half_h) & (np.abs(el) <= half_v)
+                in_range_any, inside_any, occluded_all, best = False, False, True, None
+                for r, sensor, sensor_rot, rays_az, rays_el, depth in seen:
+                    local = (box.surface_points() - sensor) @ sensor_rot
+                    dist = np.linalg.norm(local, axis=1)
+                    az = np.arctan2(local[:, 1], local[:, 0])
+                    el = np.arctan2(local[:, 2], np.hypot(local[:, 0], local[:, 1]))
+                    in_range = dist <= r["range"]
+                    inside = in_range & (np.abs(az) <= r["half_h"]) & (np.abs(el) <= r["half_v"])
+                    in_range_any |= bool(in_range.any())
+                    if not inside.any():
+                        continue
+                    inside_any = True
+                    blocked = any(other.blocks(sensor, box.centre) for pid, other in boxes.items()
+                                  if pid not in (owner, target))
+                    occluded_all &= blocked
+                    share = float(inside.mean())
+                    if best is None or share > best[0]:
+                        best = (share, r, az, el, dist, rays_az, rays_el, depth, blocked)
+                occluded = inside_any and occluded_all
                 on_target = box.contains(points, BOX_MARGIN_M) if len(points) else np.zeros(0, bool)
-                occluded = any(other.blocks(sensor, box.centre) for pid, other in boxes.items()
-                               if pid not in (owner, target))
                 why = ""
-                if inside.any() and not on_target.any():
-                    az_in = np.clip(az, -half_h, half_h)
+                if inside_any and not on_target.any():
+                    _, r, az, el, dist, rays_az, rays_el, depth, blocked = best
+                    az_in = np.clip(az, -r["half_h"], r["half_h"])
                     inside_share = (az_in.max() - az_in.min()) / max(az.max() - az.min(), 1e-6)
-                    rays_az, rays_el = azimuth, altitude
                     span = ((rays_az >= az.min()) & (rays_az <= az.max())
                             & (rays_el >= el.min()) & (rays_el <= el.max()))
                     closer = span & (depth < dist.min() - 1.0)
@@ -192,8 +225,8 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
                            "static" if closer.any() and closer.sum() >= 0.5 * span.sum() else
                            "edge" if inside_share < 0.25 else "sparse")
                 entry["t"].append(t)
-                entry["range"].append(bool(in_range.any()))
-                entry["fov"].append(bool(inside.any()))
+                entry["range"].append(in_range_any)
+                entry["fov"].append(inside_any)
                 entry["raw"].append(int(on_target.sum()))
                 entry["usable"].append(int((on_target & usable).sum()))
                 entry["occluded"].append(occluded)
@@ -226,7 +259,7 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
             t = entry["t"]
             tracks = sorted(on_vehicle.get(target, []), key=lambda item: item[1])
             row = {"run": run_dir.parent.name + "/" + run_dir.name, "recorder": owner, "target": target,
-                   "fov_deg": math.degrees(2 * half_h),
+                   "fov_deg": fov_label,
                    "in_range": _first(t, entry["range"]), "inside_fov": _first(t, entry["fov"]),
                    "raw_return": _first(t, [n > 0 for n in entry["raw"]]),
                    "usable_return": _first(t, [n > 0 for n in entry["usable"]]),
@@ -313,18 +346,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     all_rows = []
     print("PRIVILEGED EVALUATION: uses ground_truth/ to explain radar coverage; never used by reconstruction.")
     print("times in the recorder's local clock [s]; '-' = never")
-    header = "{0:28s} {1:3s} {2:3s} {3:>4s} {4:>6s} {5:>6s} {6:>6s} {7:>6s} {8:>6s} {9:>6s} {10:>6s}  {11}".format(
-        "run", "rec", "veh", "fov", "range", "FOV", "raw", "usable", "born", "conf", "coll", "first-detection delay / tracks")
+    header = "{0:28s} {1:3s} {2:3s} {3:>6s} {4:>6s} {5:>6s} {6:>6s} {7:>6s} {8:>6s} {9:>6s}  {10}".format(
+        "run", "rec", "veh", "range", "FOV", "raw", "usable", "born", "conf", "coll", "first-detection delay / tracks")
     print(header)
     for run in args.runs:
         rows = audit_run(Path(run))
         all_rows.extend(rows)
+        if rows:
+            print("{0}: radars (horizontal FOV, deg) {1}".format(rows[0]["run"], rows[0]["fov_deg"]))
         for row in rows:
             tracks = "; ".join("{0} {1:.2f}-{2:.2f}{3}".format(t["track"], t["born"], t["lost"],
                                                             " (" + t["after_loss"] + ")" if "after_loss" in t else "")
                                for t in row["tracks"])
-            print("{0:28s} {1:3s} {2:3s} {3:4.0f} {4} {5} {6} {7} {8} {9} {10}  {11} | {12}{13}".format(
-                row["run"], row["recorder"], row["target"], row["fov_deg"], _fmt(row["in_range"]), _fmt(row["inside_fov"]),
+            print("{0:28s} {1:3s} {2:3s} {4} {5} {6} {7} {8} {9} {10}  {11} | {12}{13}".format(
+                row["run"], row["recorder"], row["target"], None, _fmt(row["in_range"]), _fmt(row["inside_fov"]),
                 _fmt(row["raw_return"]), _fmt(row["usable_return"]), _fmt(row["track_born"]), _fmt(row["confirmed"]),
                 _fmt(row["collision"]), row["delay_cause"], tracks or "no track",
                 "  | in FOV w/o return before 1st: " + ", ".join("{0} {1:.2f}s".format(k, v) for k, v in

@@ -44,6 +44,7 @@ class ControlCommand:
     steer: float = 0.0
     hand_brake: bool = False
     reverse: bool = False
+    neutral: bool = False  # gearbox in neutral (no engine braking)
 
     def clamped(self) -> "ControlCommand":
         """Clamp every channel into its physical range."""
@@ -53,6 +54,7 @@ class ControlCommand:
             steer=min(1.0, max(-1.0, float(self.steer))),
             hand_brake=bool(self.hand_brake),
             reverse=bool(self.reverse),
+            neutral=bool(self.neutral),
         )
 
 
@@ -211,6 +213,11 @@ class ScriptedAction:
 # ---------------------------------------------------------------------------
 
 
+# A coasting vehicle (post_impact_mode "coast") that has come to rest is held by its brake.
+COAST_REST_SPEED_MPS = 0.3
+COAST_MIN_S = 0.5
+
+
 class PIDLongitudinal:
     """A small PI speed controller with anti-windup.
 
@@ -227,6 +234,10 @@ class PIDLongitudinal:
 
     def reset(self) -> None:
         self._integral = 0.0
+
+    def preload(self, throttle: float) -> None:
+        """Start as if already cruising: the integral term alone gives ``throttle`` (within its limit)."""
+        self._integral = max(-self.integral_limit, min(self.integral_limit, float(throttle) / self.ki))
 
     def step(self, target_speed: float, current_speed: float, dt: float) -> Tuple[float, float]:
         """Return ``(throttle, brake)`` for the given speed error."""
@@ -290,7 +301,14 @@ class ScriptedController:
         #:            that has just been shunted actually does, and without it
         #:            the speed controller sees it below target and *accelerates*
         #:            into the car in front, so a pushed vehicle looks as though
-        #:            it drove into the collision under its own power.
+        #:            it drove into the collision under its own power.  The
+        #:            gearbox goes to neutral: with the clutch engaged and no
+        #:            throttle, CARLA's engine braking decelerates a car at
+        #:            4-7 m/s^2 (measured on the campaign blueprints), several
+        #:            times what a real car loses rolling off the pedals.  Once
+        #:            the vehicle has come to rest (at least COAST_MIN_S after
+        #:            the impact) its brake holds it: in neutral it would
+        #:            otherwise roll away down the road's slope.
         #: ``deflect`` coast, and at the same time be carried off line by
         #:            ``post_impact_lateral_m`` over ``post_impact_deflect_s``.
         #:            This is a scenario-generation response to contact, not a
@@ -319,6 +337,7 @@ class ScriptedController:
         self._lateral_offset = 0.0
         self._current_target_speed = float(target_speed)
         self._impacted = False
+        self._coast_held = False
 
     # -- state ------------------------------------------------------------
 
@@ -330,6 +349,12 @@ class ScriptedController:
         self._lateral_offset = 0.0
         self._current_target_speed = self.base_target_speed
         self._impacted = False
+        self._impact_t = None
+        self._coast_held = False
+
+    def preload_cruise(self, throttle: float) -> None:
+        """The vehicle starts the recording already cruising (see ``RawVehicleAgent.hold_initial_velocity``)."""
+        self._pid.preload(throttle)
 
     def notify_impact(self) -> None:
         """Tell the controller its vehicle was hit.
@@ -372,7 +397,12 @@ class ScriptedController:
             if self.post_impact_mode == "stop":
                 return ControlCommand(throttle=0.0, brake=1.0, steer=0.0).clamped()
             if self.post_impact_mode == "coast":
-                return ControlCommand(throttle=0.0, brake=0.0, steer=0.0).clamped()
+                if (not self._coast_held and state.speed < COAST_REST_SPEED_MPS
+                        and float(state.t) - self._impact_t >= COAST_MIN_S):
+                    self._coast_held = True
+                if self._coast_held:
+                    return ControlCommand(throttle=0.0, brake=1.0, steer=0.0).clamped()
+                return ControlCommand(throttle=0.0, brake=0.0, steer=0.0, neutral=True).clamped()
             if self.post_impact_mode == "deflect":
                 # Coasting, and steered off line by however far the scenario
                 # says the impact carried it. The offset ramps in with the same

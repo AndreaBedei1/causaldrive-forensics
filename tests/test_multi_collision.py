@@ -57,14 +57,28 @@ class SegmentationTests(unittest.TestCase):
         found = contacts(records, ego_with_jumps([]))
         self.assertEqual([t for t, _ in found], [1.0, 1.25])
         self.assertEqual(found[0][1], {"peak_impulse": 11622.0})
+        # The second contact lists the burst it absorbed (persistent contact after a one-sample break).
         self.assertEqual(found[1][1], {"peak_impulse": 9832.0, "new_contact": {"break_s": 0.25, "peak_ratio": 0.85,
-                                                                               "evidence": "peak"}})
+                                                                               "evidence": "peak"},
+                                       "merged_bursts": [[1.35, 1157.0]]})
 
     def test_rebounds_and_persistent_contact_stay_one_collision(self):
         # The S16 pattern: a rebound at 43 % of the first impulse, then weaker bursts.
         records = callbacks((1.0, [9096.0]), (1.35, [3883.0]), (1.45, [1407.0] * 4), (1.75, [204.0] * 60))
         jumps = [(1.05, (-6.6, 0.0)), (1.4, (-2.0, 0.0))]  # both push the recorder backwards
-        self.assertEqual(contacts(records, ego_with_jumps(jumps)), [(1.0, {"peak_impulse": 9096.0})])
+        self.assertEqual(contacts(records, ego_with_jumps(jumps)),
+                         [(1.0, {"peak_impulse": 9096.0,
+                                 "merged_bursts": [[1.35, 3883.0], [1.45, 1407.0], [1.75, 204.0]]})])
+
+    def test_a_scrape_of_weak_bursts_stays_one_collision(self):
+        # The S16 A-C pattern: two bodies scraping along each other for 2 s, bursts of 140-320 N*s
+        # after one-sample breaks.  Peaks above new_impact_ratio of the contact's peak, but each
+        # weaker than min_new_impact_impulse: one collision.
+        records = callbacks((1.0, [141.0]), (1.25, [322.0, 158.0, 92.0]), (1.55, [235.0, 173.0]), (2.0, [240.0] * 20))
+        found = contacts(records, ego_with_jumps([]))
+        self.assertEqual([t for t, _ in found], [1.0])
+        self.assertEqual(found[0][1]["peak_impulse"], 322.0)
+        self.assertEqual(len(found[0][1]["merged_bursts"]), 3)
 
     def test_a_strong_rebound_pushing_the_same_way_stays_one_collision(self):
         # The 360-degree S06 A pattern: struck again 0.2 s later with 52 % of the first impulse, and
@@ -204,13 +218,16 @@ class CampaignCollisionTests(unittest.TestCase):
             with self.subTest(run=run.parent.name + "/" + run.name):
                 graphs, origins = collision_graphs(run, cfg)
                 truth = truth_contacts(run)
-                # Per recorder: as many COLLISIONs as true contacts, each at its true time.
+                # Per recorder: every COLLISION is a true contact at its true time; every true contact is a
+                # COLLISION or a burst that the recorder's sensor merged into one (struck again within it).
                 for graph in graphs:
-                    reported = [node.t_local + origins[graph.owner] for node in graph.nodes]
-                    expected = [contact["sim_time"] for contact in truth if graph.owner in contact["participants"]]
-                    self.assertEqual(len(reported), len(expected), graph.owner)
-                    for got, want in zip(reported, sorted(expected)):
-                        self.assertAlmostEqual(got, want, places=3)
+                    reported = [round(node.t_local + origins[graph.owner], 3) for node in graph.nodes]
+                    merged = [round(t + origins[graph.owner], 3) for node in graph.nodes
+                              for t, _ in node.attributes.get("merged_bursts", [])]
+                    expected = sorted(round(contact["sim_time"], 3) for contact in truth
+                                      if graph.owner in contact["participants"])
+                    self.assertTrue(set(reported) <= set(expected), (graph.owner, reported, expected))
+                    self.assertTrue(set(expected) <= set(reported) | set(merged), (graph.owner, reported, expected))
                 # Every vehicle-vehicle contact is one matched event of the right pair, nothing else is.
                 alignment = align_graphs(graphs, cfg.fusion)
                 matched = sorted((sorted(event["graphs"]), round(event["t_local"][event["graphs"][0]]
@@ -226,8 +243,8 @@ class CampaignCollisionTests(unittest.TestCase):
 
 
 class S06FrontPushedTests(unittest.TestCase):
-    """traces/S06/run_0_a_front_pushed (360-degree recording): A strikes B, rebounds into it 0.2 s later,
-    and B is pushed into C 0.15 s after the first impact."""
+    """traces/S06/run_0_a_front_pushed: A, following too closely, strikes B while B is still slowing
+    behind C (4.80 s), pushes it into C (5.30 s) and strikes it again 0.15 s later (5.45 s)."""
 
     RUN = ROOT / "traces" / "S06" / "run_0_a_front_pushed"
 
@@ -248,29 +265,34 @@ class S06FrontPushedTests(unittest.TestCase):
     def collisions(self, owner):
         return [node for node in self.locals[owner].graph.nodes if node.event_type == "COLLISION"]
 
-    def test_b_reports_two_distinct_collisions(self):
+    def test_each_recorder_reports_its_own_contacts(self):
         b = self.collisions("B")
-        self.assertEqual([node.t_local for node in b], [5.9, 6.05])
-        self.assertEqual([node.attributes["peak_impulse"] for node in b], [11621.71, 10857.64])
-        self.assertEqual(b[1].attributes["new_contact"], {"break_s": 0.15, "peak_ratio": 0.93, "evidence": "peak"})
-        self.assertEqual([node.t_local for node in self.collisions("A")], [5.9])
-        self.assertEqual([node.t_local for node in self.collisions("C")], [6.05])
+        self.assertEqual([node.t_local for node in b], [4.8, 5.3])
+        self.assertEqual([node.attributes["peak_impulse"] for node in b], [10281.41, 8788.05])
+        self.assertEqual(b[1].attributes["new_contact"], {"break_s": 0.5, "peak_ratio": 0.85, "evidence": "peak"})
+        # A's second strike reaches B 0.15 s after B's own impact on C, at 0.17 of its peak: B's
+        # sensor (magnitudes only) cannot tell it from that contact and merges it.
+        self.assertEqual(b[1].attributes["merged_bursts"], [[5.45, 1509.76]])
+        self.assertEqual([node.t_local for node in self.collisions("A")], [4.8, 5.45])
+        self.assertEqual([node.t_local for node in self.collisions("C")], [5.3])
 
-    def test_rebound_and_persistent_contact_add_no_collision(self):
+    def test_pushing_contact_adds_no_collision(self):
         raw = {name: len(read_jsonl(self.RUN / "vehicles" / name / "collisions.jsonl")) for name in "ABC"}
-        self.assertGreater(raw["B"], 400)  # B stays in contact with C for about 24 s
-        self.assertGreater(raw["A"], 100)  # A rebounds into B (0.52 of its first impulse), then stays on it
-        self.assertEqual([len(self.collisions(name)) for name in "ABC"], [1, 2, 1])
+        self.assertGreater(raw["A"], 5)  # A stays on B after its second strike
+        self.assertEqual([len(self.collisions(name)) for name in "ABC"], [2, 2, 1])
         types = {node.event_type for local in self.locals.values() for node in local.graph.nodes}
         self.assertFalse(types & {"IMPACT", "CONTACT", "CONTINUED_CONTACT"})
 
-    def test_global_graph_has_collision_ab_then_collision_bc(self):
+    def test_global_graph_has_ab_bc_then_ab_again(self):
         collisions = [node for node in self.graph.nodes if node.event_type == "COLLISION"]
         self.assertEqual([(node.participants, node.t_global) for node in collisions],
-                         [(["A", "B"], 0.0), (["B", "C"], 0.15)])
+                         [(["A", "B"], 0.0), (["B", "C"], 0.5), (["A", "B"], 0.65)])
         self.assertTrue(collisions[0].attributes["reference_event"])
-        self.assertFalse(collisions[1].attributes["reference_event"])
         self.assertEqual({obs.graph for obs in collisions[1].observations}, {"B", "C"})
+        # The second A-B contact: A's own report, matched to the burst B merged into its B-C contact.
+        merged = next(event for event in self.alignment.matched_events if event.get("merged_burst_of") == "B")
+        self.assertEqual(merged["t_local"], {"A": 5.45, "B": 5.45})
+        self.assertEqual({obs.graph for obs in collisions[2].observations}, {"A", "B"})
 
     def test_c_is_aligned_through_b(self):
         clocks = self.alignment.graphs
@@ -286,17 +308,18 @@ class S06FrontPushedTests(unittest.TestCase):
             second, first = pair.split(" - ")
             self.assertAlmostEqual(estimated, origins[first] - origins[second], places=3)
 
-    def test_b_identifies_both_partners(self):
+    def test_partners_identified_and_no_rear_view(self):
         decisions = {(item.local_graph, item.local_track): item for item in self.associations}
+        a_b = next(event for event in self.alignment.matched_events if event["event_id"] == "collision_001")
         b_c = next(event for event in self.alignment.matched_events if sorted(event["graphs"]) == ["B", "C"])
-        a_b = next(event for event in self.alignment.matched_events if sorted(event["graphs"]) == ["A", "B"])
         item = decisions[("B", "track_001")]  # ahead of B
         self.assertEqual((item.status, item.global_entity, item.collision_event), ("ASSOCIATED", "C", b_c["event_id"]))
-        item = decisions[("B", "track_002")]  # behind B: seen thanks to the 360-degree radar
-        self.assertEqual((item.status, item.global_entity, item.collision_event), ("ASSOCIATED", "A", a_b["event_id"]))
-        self.assertEqual(decisions[("A", "track_001")].global_entity, "B")
+        item = decisions[("A", "track_001")]
+        self.assertEqual((item.status, item.global_entity, item.collision_event), ("ASSOCIATED", "B", a_b["event_id"]))
+        # A strikes B from directly behind: in B's rear blind zone, B never tracks it.
+        self.assertEqual([track.track_id for track in self.locals["B"].tracks], ["track_001"])
         relation = next(item for item in self.relations if item["recorder"] == "B" and item["track"] == "track_001")
-        self.assertEqual((relation["collision"], relation["collision_with"]), (6.05, "C"))
+        self.assertEqual((relation["collision"], relation["collision_with"]), (5.3, "C"))
 
     def test_the_global_graph_does_not_depend_on_cs_clock_origin(self):
         context = read_incident_context(self.RUN)

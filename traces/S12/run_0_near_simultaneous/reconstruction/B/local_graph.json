@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 119.71085980534554,
+      "origin_source_timestamp": 185.61600741744041,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -16,9 +16,9 @@
       "speed_limit_kmh": 50
     },
     "start_t_local": 0.0,
-    "end_t_local": 14.95,
+    "end_t_local": 12.85,
     "trace_hz": 10.0,
-    "trace_frames": 151,
+    "trace_frames": 130,
     "inputs": [
       "collisions.jsonl",
       "controls.jsonl",
@@ -27,12 +27,38 @@
       "traffic_signs.jsonl"
     ],
     "radar": {
-      "mount": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 1.6853,
-        "yaw_deg": 0.0
-      },
+      "radars": [
+        {
+          "sensor_id": "front",
+          "mount": {
+            "x": 2.1402,
+            "y": -0.0,
+            "z": 0.6,
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0
+          }
+        },
+        {
+          "sensor_id": "left",
+          "mount": {
+            "x": -0.0004,
+            "y": -1.0471,
+            "z": 0.6,
+            "yaw_deg": -90.0,
+            "pitch_deg": 0.0
+          }
+        },
+        {
+          "sensor_id": "right",
+          "mount": {
+            "x": -0.0004,
+            "y": 1.0471,
+            "z": 0.6,
+            "yaw_deg": 90.0,
+            "pitch_deg": 0.0
+          }
+        }
+      ],
       "ego_footprint": {
         "height_m": 1.3853,
         "length_m": 4.1812,
@@ -44,7 +70,7 @@
         "y_max_m": 0.9971,
         "y_min_m": -0.9971
       },
-      "clearance": "clearance = max(0, planar range - extent of the own footprint along the bearing); range when the footprint is unknown",
+      "geometry": "every return placed from its own radar's mount; its Doppler speed corrected by that radar's own displacement; clearance = distance from the recorder's footprint to the return (a track: to its near surface)",
       "own_body_returns_dropped": 0
     }
   },
@@ -66,6 +92,7 @@
           "MOVING": "UNKNOWN",
           "STOP": "UNKNOWN",
           "BRAKE": "UNKNOWN",
+          "THROTTLE": "UNKNOWN",
           "TURN_LEFT": "UNKNOWN",
           "TURN_RIGHT": "UNKNOWN",
           "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
@@ -77,67 +104,65 @@
     },
     {
       "node_id": "B:e02",
+      "event_type": "THROTTLE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 0.0,
+      "attributes": {
+        "active_at_first_observation": true
+      },
+      "source": "controls",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": "UNKNOWN",
+          "STOP": "UNKNOWN",
+          "BRAKE": "UNKNOWN",
+          "THROTTLE": "UNKNOWN",
+          "TURN_LEFT": "UNKNOWN",
+          "TURN_RIGHT": "UNKNOWN",
+          "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+        },
+        "external": {},
+        "signs": {},
+        "facts_t_local": null
+      }
+    },
+    {
+      "node_id": "B:e03",
       "event_type": "STOP_SIGN_DETECTED_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "sign-0",
-      "t_local": 1.8,
+      "t_local": 0.7,
       "attributes": {
         "relevant_to_ego_path": true
       },
       "source": "camera",
-      "confidence": 0.833,
+      "confidence": 0.969,
       "perceived_state_before": {
         "ego": {
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 1.7
-      }
-    },
-    {
-      "node_id": "B:e03",
-      "event_type": "STOP_SIGN_DETECTED_END",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "sign-0",
-      "t_local": 2.6,
-      "attributes": {},
-      "source": "camera",
-      "confidence": 0.833,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {},
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 2.5
+        "facts_t_local": 0.6
       }
     },
     {
       "node_id": "B:e04",
-      "event_type": "BRAKE_START",
+      "event_type": "THROTTLE_END",
       "kind": "ACTION",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 2.75,
+      "t_local": 2.5,
       "attributes": {},
       "source": "controls",
       "confidence": null,
@@ -146,6 +171,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -158,16 +184,47 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 2.7
+        "facts_t_local": 2.4
       }
     },
     {
       "node_id": "B:e05",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 2.5,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {},
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 2.4
+      }
+    },
+    {
+      "node_id": "B:e06",
       "event_type": "TRACK_APPEARED_RIGHT",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 2.8,
+      "t_local": 2.5,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -175,7 +232,8 @@
         "ego": {
           "MOVING": true,
           "STOP": false,
-          "BRAKE": true,
+          "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -188,16 +246,16 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 2.7
+        "facts_t_local": 2.4
       }
     },
     {
-      "node_id": "B:e06",
+      "node_id": "B:e07",
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 2.8,
+      "t_local": 2.5,
       "attributes": {
         "active_at_first_observation": true
       },
@@ -207,7 +265,8 @@
         "ego": {
           "MOVING": true,
           "STOP": false,
-          "BRAKE": true,
+          "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -220,24 +279,64 @@
             "relevant_to_ego_path": true
           }
         },
+        "facts_t_local": 2.4
+      }
+    },
+    {
+      "node_id": "B:e08",
+      "event_type": "STOP_SIGN_DETECTED_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "sign-0",
+      "t_local": 2.8,
+      "attributes": {},
+      "source": "camera",
+      "confidence": 0.969,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": true,
+          "THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": "UNKNOWN",
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
         "facts_t_local": 2.7
       }
     },
     {
-      "node_id": "B:e07",
-      "event_type": "CLOSING_END",
-      "kind": "PERCEPTION",
+      "node_id": "B:e09",
+      "event_type": "MOVING_END",
+      "kind": "FACT",
       "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 3.45,
+      "subject_id": null,
+      "t_local": 3.6,
       "attributes": {},
-      "source": "radar",
+      "source": "ego",
       "confidence": null,
       "perceived_state_before": {
         "ego": {
           "MOVING": true,
           "STOP": false,
           "BRAKE": true,
+          "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -258,92 +357,94 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 3.4
-      }
-    },
-    {
-      "node_id": "B:e08",
-      "event_type": "MOVING_END",
-      "kind": "FACT",
-      "actor_id": "B",
-      "subject_id": null,
-      "t_local": 3.5,
-      "attributes": {},
-      "source": "ego",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": true,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 3.4
-      }
-    },
-    {
-      "node_id": "B:e09",
-      "event_type": "STOP_START",
-      "kind": "FACT",
-      "actor_id": "B",
-      "subject_id": null,
-      "t_local": 3.5,
-      "attributes": {},
-      "source": "ego",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": true,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 3.4
+        "facts_t_local": 3.5
       }
     },
     {
       "node_id": "B:e10",
+      "event_type": "STOP_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 3.6,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": true,
+          "THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 3.5
+      }
+    },
+    {
+      "node_id": "B:e11",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 3.7,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": true,
+          "THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 3.6
+      }
+    },
+    {
+      "node_id": "B:e12",
       "event_type": "BRAKE_END",
       "kind": "ACTION",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 6.95,
+      "t_local": 4.7,
       "attributes": {},
       "source": "controls",
       "confidence": null,
@@ -352,6 +453,7 @@
           "MOVING": false,
           "STOP": true,
           "BRAKE": true,
+          "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -372,92 +474,94 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 6.9
-      }
-    },
-    {
-      "node_id": "B:e11",
-      "event_type": "CLOSING_START",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 7.3,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": false,
-          "STOP": true,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 7.2
-      }
-    },
-    {
-      "node_id": "B:e12",
-      "event_type": "STOP_END",
-      "kind": "FACT",
-      "actor_id": "B",
-      "subject_id": null,
-      "t_local": 7.35,
-      "attributes": {},
-      "source": "ego",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": false,
-          "STOP": true,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 7.3
+        "facts_t_local": 4.6
       }
     },
     {
       "node_id": "B:e13",
-      "event_type": "MOVING_START",
+      "event_type": "THROTTLE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 4.7,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": true,
+          "THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 4.6
+      }
+    },
+    {
+      "node_id": "B:e14",
+      "event_type": "CLOSING_START",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 5.1,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 5.0
+      }
+    },
+    {
+      "node_id": "B:e15",
+      "event_type": "STOP_END",
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 7.35,
+      "t_local": 5.15,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -466,6 +570,7 @@
           "MOVING": false,
           "STOP": true,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -486,16 +591,55 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 7.3
+        "facts_t_local": 5.1
       }
     },
     {
-      "node_id": "B:e14",
+      "node_id": "B:e16",
+      "event_type": "MOVING_START",
+      "kind": "FACT",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 5.15,
+      "attributes": {},
+      "source": "ego",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 5.1
+      }
+    },
+    {
+      "node_id": "B:e17",
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 8.3,
+      "t_local": 6.05,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -504,6 +648,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -524,16 +669,16 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 8.2
+        "facts_t_local": 6.0
       }
     },
     {
-      "node_id": "B:e15",
+      "node_id": "B:e18",
       "event_type": "EGO_PATH_ENTRY",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 8.95,
+      "t_local": 6.75,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -542,6 +687,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -562,18 +708,18 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 8.9
+        "facts_t_local": 6.7
       }
     },
     {
-      "node_id": "B:e16",
+      "node_id": "B:e19",
       "event_type": "COLLISION",
       "kind": "OUTCOME",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 9.5,
+      "t_local": 7.15,
       "attributes": {
-        "peak_impulse": 4032.49
+        "peak_impulse": 7661.46
       },
       "source": "collision_sensor",
       "confidence": 1.0,
@@ -582,6 +728,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -602,130 +749,94 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 9.4
-      }
-    },
-    {
-      "node_id": "B:e17",
-      "event_type": "EGO_PATH_EXIT",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 9.5,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": true,
-            "IN_EGO_PATH": true,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 9.4
-      }
-    },
-    {
-      "node_id": "B:e18",
-      "event_type": "CRITICAL_TTC_END",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 9.55,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": true,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 9.5
-      }
-    },
-    {
-      "node_id": "B:e19",
-      "event_type": "CLOSING_END",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 9.55,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": true,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {
-          "sign-0": {
-            "class": "STOP",
-            "known": true,
-            "relevant_to_ego_path": true
-          }
-        },
-        "facts_t_local": 9.5
+        "facts_t_local": 7.1
       }
     },
     {
       "node_id": "B:e20",
-      "event_type": "BRAKE_START",
+      "event_type": "CRITICAL_TTC_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 7.15,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": true,
+            "IN_EGO_PATH": true,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 7.1
+      }
+    },
+    {
+      "node_id": "B:e21",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "B",
+      "subject_id": "track_001",
+      "t_local": 7.15,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": true,
+            "IN_EGO_PATH": true,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 7.1
+      }
+    },
+    {
+      "node_id": "B:e22",
+      "event_type": "THROTTLE_END",
       "kind": "ACTION",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 9.55,
+      "t_local": 7.2,
       "attributes": {},
       "source": "controls",
       "confidence": null,
@@ -734,15 +845,16 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": false,
+          "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
           "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": true,
-            "IN_EGO_PATH": false,
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -754,16 +866,55 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 9.5
+        "facts_t_local": 7.1
       }
     },
     {
-      "node_id": "B:e21",
+      "node_id": "B:e23",
+      "event_type": "BRAKE_START",
+      "kind": "ACTION",
+      "actor_id": "B",
+      "subject_id": null,
+      "t_local": 7.2,
+      "attributes": {},
+      "source": "controls",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": true,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {
+          "sign-0": {
+            "class": "STOP",
+            "known": true,
+            "relevant_to_ego_path": true
+          }
+        },
+        "facts_t_local": 7.1
+      }
+    },
+    {
+      "node_id": "B:e24",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 9.95,
+      "t_local": 7.45,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -772,6 +923,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": true,
+          "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -780,7 +932,7 @@
           "track_001": {
             "CLOSING": false,
             "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
+            "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -792,16 +944,16 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 9.9
+        "facts_t_local": 7.4
       }
     },
     {
-      "node_id": "B:e22",
+      "node_id": "B:e25",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 9.95,
+      "t_local": 7.45,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -810,6 +962,7 @@
           "MOVING": true,
           "STOP": false,
           "BRAKE": true,
+          "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
@@ -818,7 +971,7 @@
           "track_001": {
             "CLOSING": false,
             "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
+            "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -830,14 +983,14 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 9.9
+        "facts_t_local": 7.4
       }
     }
   ],
   "edges": [
     {
       "from": "B:e01",
-      "to": "B:e02",
+      "to": "B:e03",
       "relation": "PRECEDES"
     },
     {
@@ -851,23 +1004,33 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e04",
+      "from": "B:e03",
       "to": "B:e05",
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e04",
+      "from": "B:e03",
       "to": "B:e06",
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e05",
+      "from": "B:e03",
       "to": "B:e07",
       "relation": "PRECEDES"
     },
     {
+      "from": "B:e04",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e05",
+      "to": "B:e08",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "B:e06",
-      "to": "B:e07",
+      "to": "B:e08",
       "relation": "PRECEDES"
     },
     {
@@ -876,7 +1039,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e07",
+      "from": "B:e08",
       "to": "B:e09",
       "relation": "PRECEDES"
     },
@@ -887,7 +1050,7 @@
     },
     {
       "from": "B:e09",
-      "to": "B:e10",
+      "to": "B:e11",
       "relation": "PRECEDES"
     },
     {
@@ -921,7 +1084,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e15",
+      "from": "B:e14",
       "to": "B:e16",
       "relation": "PRECEDES"
     },
@@ -932,17 +1095,7 @@
     },
     {
       "from": "B:e16",
-      "to": "B:e18",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e16",
-      "to": "B:e19",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e16",
-      "to": "B:e20",
+      "to": "B:e17",
       "relation": "PRECEDES"
     },
     {
@@ -951,12 +1104,12 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e17",
+      "from": "B:e18",
       "to": "B:e19",
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e17",
+      "from": "B:e18",
       "to": "B:e20",
       "relation": "PRECEDES"
     },
@@ -966,23 +1119,13 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e18",
-      "to": "B:e22",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e19",
-      "to": "B:e21",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "B:e19",
       "to": "B:e22",
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e20",
-      "to": "B:e21",
+      "from": "B:e19",
+      "to": "B:e23",
       "relation": "PRECEDES"
     },
     {
@@ -991,63 +1134,98 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e05",
-      "to": "B:e06",
-      "relation": "SAME_TRACK"
+      "from": "B:e20",
+      "to": "B:e23",
+      "relation": "PRECEDES"
     },
     {
-      "from": "B:e05",
+      "from": "B:e21",
+      "to": "B:e22",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e21",
+      "to": "B:e23",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e22",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e22",
+      "to": "B:e25",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e24",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e23",
+      "to": "B:e25",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e06",
       "to": "B:e07",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "B:e05",
+      "from": "B:e06",
       "to": "B:e11",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "B:e05",
+      "from": "B:e06",
       "to": "B:e14",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "B:e05",
-      "to": "B:e15",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "B:e05",
+      "from": "B:e06",
       "to": "B:e17",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "B:e05",
+      "from": "B:e06",
       "to": "B:e18",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "B:e05",
-      "to": "B:e19",
+      "from": "B:e06",
+      "to": "B:e20",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "B:e06",
+      "to": "B:e21",
       "relation": "SAME_TRACK"
     }
   ],
   "tracks": [
     {
       "track_id": "track_001",
-      "first_seen_t_local": 2.8,
-      "last_seen_t_local": 14.95,
-      "duration_s": 12.15,
-      "measured_sweeps": 244,
-      "radar_returns": 4730,
-      "min_range_m": 2.14,
-      "min_range_t_local": 9.5,
-      "min_clearance_m": 0.07,
-      "min_clearance_t_local": 9.4,
-      "max_speed_mps": 8.14,
-      "first_range_m": 26.44,
-      "first_bearing_deg": 32.5,
-      "last_range_m": 3.27,
-      "last_bearing_deg": -84.0
+      "first_seen_t_local": 2.5,
+      "last_seen_t_local": 12.85,
+      "duration_s": 10.35,
+      "measured_sweeps": 208,
+      "radar_returns": 54580,
+      "radars": [
+        "front",
+        "left",
+        "right"
+      ],
+      "min_range_m": 0.79,
+      "min_range_t_local": 7.05,
+      "min_clearance_m": 0.0,
+      "min_clearance_t_local": 7.1,
+      "max_speed_mps": 8.95,
+      "first_range_m": 28.03,
+      "first_bearing_deg": 33.3,
+      "last_range_m": 1.6,
+      "last_bearing_deg": -29.6
     }
   ]
 }

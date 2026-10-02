@@ -1,9 +1,8 @@
 scenario:
   scenario_id: S10
   name: single_stop_a
-  description: 'A faces a stop sign on its approach; B does not. The variants
-    differ only in what A does about the sign: stop properly, roll through it,
-    or stop and then pull out correctly.
+  description: 'A faces a stop sign on its approach; B does not. A slows down but
+    rolls through the stop line without stopping and is struck by B.
 
     '
   map: Town05
@@ -58,30 +57,3 @@ scenario:
             duration: 14.0
             params:
               target_speed: 5.5
-    stops_safely:
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_full_stop
-            kind: brake
-            t_start: 2.6
-            duration: 7.0
-            params:
-              intensity: 0.9
-    stops_then_proceeds:
-      max_duration_s: 16.0
-      participant_overrides:
-        A:
-          actions:
-          - action_id: A_full_stop
-            kind: brake
-            t_start: 2.6
-            duration: 4.2
-            params:
-              intensity: 0.9
-          - action_id: A_pull_away
-            kind: set_speed
-            t_start: 7.4
-            duration: 6.0
-            params:
-              target_speed: 9.0
