@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 13.179586462676525,
+      "origin_source_timestamp": 267.8788150437176,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -25,7 +25,28 @@
       "ego.jsonl",
       "radar",
       "traffic_signs.jsonl"
-    ]
+    ],
+    "radar": {
+      "mount": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 2.1625,
+        "yaw_deg": 0.0
+      },
+      "ego_footprint": {
+        "height_m": 1.8548,
+        "length_m": 4.6045,
+        "roof_z_m": 1.8625,
+        "source": "the vehicle's own bounding box (vehicle frame: x forward, y right, z up, origin at the vehicle origin on the ground)",
+        "width_m": 1.9316,
+        "x_max_m": 2.2449,
+        "x_min_m": -2.3596,
+        "y_max_m": 0.966,
+        "y_min_m": -0.9656
+      },
+      "clearance": "clearance = max(0, planar range - extent of the own footprint along the bearing); range when the footprint is unknown",
+      "own_body_returns_dropped": 1606
+    }
   },
   "nodes": [
     {
@@ -84,7 +105,7 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 0.7,
+      "t_local": 0.65,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -212,7 +233,7 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 4.25,
+      "t_local": 4.2,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -235,7 +256,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 4.2
+        "facts_t_local": 4.1
       }
     },
     {
@@ -244,7 +265,7 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 4.45,
+      "t_local": 4.4,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -267,7 +288,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 4.4
+        "facts_t_local": 4.3
       }
     },
     {
@@ -466,11 +487,11 @@
     },
     {
       "node_id": "B:e15",
-      "event_type": "EGO_PATH_EXIT",
+      "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "track_001",
-      "t_local": 13.45,
+      "subject_id": "track_002",
+      "t_local": 11.95,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -493,16 +514,16 @@
           }
         },
         "signs": {},
-        "facts_t_local": 13.4
+        "facts_t_local": 11.9
       }
     },
     {
       "node_id": "B:e16",
-      "event_type": "TRACK_APPEARED_LEFT",
+      "event_type": "EGO_PATH_EXIT",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "track_002",
-      "t_local": 13.55,
+      "subject_id": "track_001",
+      "t_local": 13.4,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -519,54 +540,29 @@
           "track_001": {
             "CLOSING": false,
             "CRITICAL_TTC": false,
+            "IN_EGO_PATH": true,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          },
+          "track_002": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
             "IN_EGO_PATH": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
         },
         "signs": {},
-        "facts_t_local": 13.5
+        "facts_t_local": 13.3
       }
     },
     {
       "node_id": "B:e17",
-      "event_type": "TRACK_APPEARED_LEFT",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_003",
-      "t_local": 13.55,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": false,
-          "STOP": true,
-          "BRAKE": true,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {},
-        "facts_t_local": 13.5
-      }
-    },
-    {
-      "node_id": "B:e18",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 14.0,
+      "t_local": 14.05,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -593,63 +589,10 @@
             "IN_EGO_PATH": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
-          },
-          "track_003": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
           }
         },
         "signs": {},
-        "facts_t_local": 13.9
-      }
-    },
-    {
-      "node_id": "B:e19",
-      "event_type": "TRACK_LOST",
-      "kind": "PERCEPTION",
-      "actor_id": "B",
-      "subject_id": "track_003",
-      "t_local": 14.5,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": false,
-          "STOP": true,
-          "BRAKE": true,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": "UNKNOWN",
-            "CRITICAL_TTC": "UNKNOWN",
-            "IN_EGO_PATH": "UNKNOWN",
-            "CUT_IN_FROM_LEFT": "UNKNOWN",
-            "CUT_IN_FROM_RIGHT": "UNKNOWN"
-          },
-          "track_002": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          },
-          "track_003": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {},
-        "facts_t_local": 14.4
+        "facts_t_local": 14.0
       }
     }
   ],
@@ -750,23 +693,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e15",
-      "to": "B:e17",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "B:e16",
-      "to": "B:e18",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e17",
-      "to": "B:e18",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e18",
-      "to": "B:e19",
+      "to": "B:e17",
       "relation": "PRECEDES"
     },
     {
@@ -811,17 +739,12 @@
     },
     {
       "from": "B:e02",
-      "to": "B:e15",
+      "to": "B:e16",
       "relation": "SAME_TRACK"
     },
     {
       "from": "B:e02",
-      "to": "B:e18",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "B:e17",
-      "to": "B:e19",
+      "to": "B:e17",
       "relation": "SAME_TRACK"
     }
   ],
@@ -829,47 +752,36 @@
     {
       "track_id": "track_001",
       "first_seen_t_local": 0.0,
-      "last_seen_t_local": 14.0,
-      "duration_s": 14.0,
-      "measured_sweeps": 281,
-      "radar_returns": 12385,
-      "min_range_m": 0.52,
+      "last_seen_t_local": 14.05,
+      "duration_s": 14.05,
+      "measured_sweeps": 272,
+      "radar_returns": 1404,
+      "min_range_m": 3.05,
       "min_range_t_local": 5.2,
-      "max_speed_mps": 13.45,
-      "first_range_m": 3.13,
-      "first_bearing_deg": 0.2,
-      "last_range_m": 19.08,
-      "last_bearing_deg": -8.9
+      "min_clearance_m": 0.65,
+      "min_clearance_t_local": 5.2,
+      "max_speed_mps": 12.92,
+      "first_range_m": 6.1,
+      "first_bearing_deg": 0.6,
+      "last_range_m": 21.76,
+      "last_bearing_deg": -8.7
     },
     {
       "track_id": "track_002",
-      "first_seen_t_local": 13.55,
+      "first_seen_t_local": 11.95,
       "last_seen_t_local": 17.95,
-      "duration_s": 4.4,
-      "measured_sweeps": 80,
-      "radar_returns": 282,
-      "min_range_m": 23.94,
-      "min_range_t_local": 13.55,
-      "max_speed_mps": 3.17,
-      "first_range_m": 23.94,
-      "first_bearing_deg": -5.4,
-      "last_range_m": 25.04,
-      "last_bearing_deg": -7.5
-    },
-    {
-      "track_id": "track_003",
-      "first_seen_t_local": 13.55,
-      "last_seen_t_local": 14.5,
-      "duration_s": 0.95,
-      "measured_sweeps": 15,
-      "radar_returns": 43,
-      "min_range_m": 22.96,
-      "min_range_t_local": 13.55,
-      "max_speed_mps": 3.52,
-      "first_range_m": 22.96,
-      "first_bearing_deg": -8.9,
-      "last_range_m": 24.77,
-      "last_bearing_deg": -8.5
+      "duration_s": 6.0,
+      "measured_sweeps": 94,
+      "radar_returns": 215,
+      "min_range_m": 24.1,
+      "min_range_t_local": 11.95,
+      "min_clearance_m": 21.72,
+      "min_clearance_t_local": 11.95,
+      "max_speed_mps": 3.46,
+      "first_range_m": 24.1,
+      "first_bearing_deg": -6.5,
+      "last_range_m": 27.13,
+      "last_bearing_deg": -7.0
     }
   ]
 }

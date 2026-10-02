@@ -185,7 +185,8 @@ class IdentityAssociationTests(unittest.TestCase):
     def test_range_at_the_contact_is_evidence_not_a_veto(self):
         def farther(a):
             track = a.tracks[0]
-            a.tracks[0] = LocalTrack(track.track_id, [dataclasses.replace(s, range_m=s.range_m + 4.0)
+            a.tracks[0] = LocalTrack(track.track_id, [dataclasses.replace(s, range_m=s.range_m + 4.0,
+                                                                          clearance_m=s.clearance_m + 4.0)
                                                       for s in track.samples])
         far = self._associate(farther)[("A", "track_001")]
         near = self._associate(lambda a: None)[("A", "track_001")]
@@ -204,8 +205,8 @@ class IdentityAssociationTests(unittest.TestCase):
 
 
 class IdentityRegressionTests(unittest.TestCase):
-    """S03 and S05 (real recordings): the persistent partner tracks are associated, the
-    short and spurious ones are not.  In memory only: nothing is written to traces/."""
+    """S03 and S05 (real recordings): the persistent partner tracks are associated, any
+    short or spurious one is not.  In memory only: nothing is written to traces/."""
 
     def decisions(self, run_name):
         run = ROOT / "traces" / run_name
@@ -222,13 +223,16 @@ class IdentityRegressionTests(unittest.TestCase):
         self.assertEqual(decisions[("A", "track_001")].global_entity, "B")
         self.assertEqual(decisions[("B", "track_001")].global_entity, "A")
 
-    def test_s05_partners_associated_and_post_impact_tracks_anonymous(self):
+    def test_s05_partners_associated_and_any_other_track_anonymous(self):
+        # B spins after the impact.  With the radar's own motion taken as its displacement (as CARLA
+        # measures it) the scenery no longer looks like moving targets, so no post-impact clutter
+        # tracks remain; any other track would have to stay anonymous.
         decisions = self.decisions("S05/run_0_crash")
         self.assertEqual(decisions[("A", "track_001")].global_entity, "B")
         self.assertEqual(decisions[("B", "track_001")].global_entity, "A")
         others = [item for key, item in decisions.items() if key not in (("A", "track_001"), ("B", "track_001"))]
-        self.assertTrue(others)
         self.assertTrue(all(item.status == "ANONYMOUS" for item in others))
+        self.assertLessEqual(len(others), 2)
 
 
 if __name__ == "__main__":

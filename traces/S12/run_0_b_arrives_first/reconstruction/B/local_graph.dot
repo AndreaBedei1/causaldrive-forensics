@@ -6,16 +6,17 @@ digraph "local_B" {
   "B:e02" [label="STOP_SIGN_DETECTED_START\nB -> sign-0\nt=1.80", fillcolor="#bfdbfe"];
   "B:e03" [label="STOP_SIGN_DETECTED_END\nB -> sign-0\nt=2.60", fillcolor="#bfdbfe"];
   "B:e04" [label="BRAKE_START\nB\nt=2.65", fillcolor="#fde68a"];
-  "B:e05" [label="TRACK_APPEARED_RIGHT\nB -> track_001\nt=3.05", fillcolor="#bfdbfe"];
-  "B:e06" [label="CLOSING_START\nB -> track_001\nt=3.05", fillcolor="#bfdbfe"];
+  "B:e05" [label="TRACK_APPEARED_RIGHT\nB -> track_001\nt=3.35", fillcolor="#bfdbfe"];
+  "B:e06" [label="CLOSING_START\nB -> track_001\nt=3.35", fillcolor="#bfdbfe"];
   "B:e07" [label="MOVING_END\nB\nt=3.40", fillcolor="#e5e7eb"];
   "B:e08" [label="STOP_START\nB\nt=3.40", fillcolor="#e5e7eb"];
   "B:e09" [label="CLOSING_END\nB -> track_001\nt=4.70", fillcolor="#bfdbfe"];
   "B:e10" [label="BRAKE_END\nB\nt=6.45", fillcolor="#fde68a"];
   "B:e11" [label="STOP_END\nB\nt=6.85", fillcolor="#e5e7eb"];
   "B:e12" [label="MOVING_START\nB\nt=6.85", fillcolor="#e5e7eb"];
-  "B:e13" [label="CLOSING_START\nB -> track_001\nt=7.00", fillcolor="#bfdbfe"];
-  "B:e14" [label="TRACK_LOST\nB -> track_001\nt=9.45", fillcolor="#bfdbfe"];
+  "B:e13" [label="CLOSING_START\nB -> track_001\nt=6.90", fillcolor="#bfdbfe"];
+  "B:e14" [label="CLOSING_END\nB -> track_001\nt=9.85", fillcolor="#bfdbfe"];
+  "B:e15" [label="TRACK_LOST\nB -> track_001\nt=15.85", fillcolor="#bfdbfe"];
   {rank=same; "B:e05"; "B:e06";}
   {rank=same; "B:e07"; "B:e08";}
   {rank=same; "B:e11"; "B:e12";}
@@ -36,8 +37,10 @@ digraph "local_B" {
   "B:e11" -> "B:e13" [label="PRECEDES"];
   "B:e12" -> "B:e13" [label="PRECEDES"];
   "B:e13" -> "B:e14" [label="PRECEDES"];
+  "B:e14" -> "B:e15" [label="PRECEDES"];
   "B:e05" -> "B:e06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e05" -> "B:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e05" -> "B:e13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e05" -> "B:e14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e05" -> "B:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

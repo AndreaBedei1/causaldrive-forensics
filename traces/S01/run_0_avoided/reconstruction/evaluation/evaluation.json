@@ -1,6 +1,6 @@
 {
   "run": "S01/run_0_avoided",
-  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 1; max |t_global error| None s",
+  "headline": "collision reconstructed: no vehicle-vehicle collision in ground truth; associations correct: 0/0; anonymous: 2; max |t_global error| None s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [],
   "extra_collisions": [],
@@ -39,13 +39,30 @@
         "B": 0.0
       },
       "verdict": "left anonymous (true identity B)",
-      "samples": 124,
-      "raw_rmse_to_surface_m": 0.794,
-      "smoothed_rmse_to_surface_m": 0.87,
-      "smoothed_rmse_to_centre_m": 1.238,
-      "raw_difference_speed_rmse_mps": 2.467,
-      "speed_rmse_mps": 0.104
+      "samples": 126,
+      "raw_rmse_to_surface_m": 0.548,
+      "smoothed_rmse_to_surface_m": 0.547,
+      "smoothed_rmse_to_centre_m": 1.549,
+      "raw_difference_speed_rmse_mps": 5.323,
+      "speed_rmse_mps": 0.119
+    },
+    {
+      "track": "B:track_001",
+      "decision": "B:track_001",
+      "status": "ANONYMOUS",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0
+      },
+      "verdict": "left anonymous (true identity A)",
+      "samples": 123,
+      "raw_rmse_to_surface_m": 0.81,
+      "smoothed_rmse_to_surface_m": 1.027,
+      "smoothed_rmse_to_centre_m": 1.219,
+      "raw_difference_speed_rmse_mps": 6.915,
+      "speed_rmse_mps": 0.114
     }
   ],
+  "contact_clearances": [],
   "clock_shift_check": null
 }

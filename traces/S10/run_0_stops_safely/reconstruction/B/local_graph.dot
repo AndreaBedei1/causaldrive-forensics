@@ -5,11 +5,11 @@ digraph "local_B" {
   "B:e01" [label="MOVING_START\nB\nt=0.00", fillcolor="#e5e7eb"];
   "B:e02" [label="TRACK_APPEARED_RIGHT\nB -> track_001\nt=2.60", fillcolor="#bfdbfe"];
   "B:e03" [label="CLOSING_START\nB -> track_001\nt=2.60", fillcolor="#bfdbfe"];
-  "B:e04" [label="CRITICAL_TTC_START\nB -> track_001\nt=4.40", fillcolor="#bfdbfe"];
-  "B:e05" [label="CRITICAL_TTC_END\nB -> track_001\nt=5.60", fillcolor="#bfdbfe"];
-  "B:e06" [label="TRACK_LOST\nB -> track_001\nt=5.85", fillcolor="#bfdbfe"];
-  "B:e07" [label="STOP_SIGN_DETECTED_START\nB -> sign-1\nt=7.70", fillcolor="#bfdbfe"];
-  "B:e08" [label="STOP_SIGN_DETECTED_END\nB -> sign-1\nt=7.80", fillcolor="#bfdbfe"];
+  "B:e04" [label="CRITICAL_TTC_START\nB -> track_001\nt=4.25", fillcolor="#bfdbfe"];
+  "B:e05" [label="CRITICAL_TTC_END\nB -> track_001\nt=5.95", fillcolor="#bfdbfe"];
+  "B:e06" [label="CLOSING_END\nB -> track_001\nt=6.15", fillcolor="#bfdbfe"];
+  "B:e07" [label="STOP_SIGN_DETECTED_START\nB -> sign-0\nt=7.60", fillcolor="#bfdbfe"];
+  "B:e08" [label="STOP_SIGN_DETECTED_END\nB -> sign-0\nt=7.80", fillcolor="#bfdbfe"];
   {rank=same; "B:e02"; "B:e03";}
   "B:e01" -> "B:e02" [label="PRECEDES"];
   "B:e01" -> "B:e03" [label="PRECEDES"];

@@ -14,7 +14,8 @@ Per recorder R and per other true vehicle V, all times in R's own local clock
   in range       first sweep with any part of V's body within the radar range,
                  whatever the field of view (what a 360-degree radar could have seen)
   inside FOV     first sweep with part of V's body inside R's configured horizontal
-                 and vertical field of view and range (radar/metadata.json)
+                 and vertical field of view and range (radar/metadata.json; for the
+                 360 deg surround sensor only the vertical FOV and the range limit)
   raw return     first sweep with a radar return on V's body (box + 0.5 m)
   usable return  first such return passing the tracker's own height filter and
                  moving-speed test (the only returns that can start a track)
@@ -130,10 +131,11 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
         radar = load_observation_stream(vehicle_dir, source="radar")
         meta = radar.metadata
         mount = meta.get("sensor_transform") or {}
-        mount_pos = np.array([mount.get("x", 2.2), mount.get("y", 0.0), mount.get("z", 1.0)])
+        mount_pos = np.array([mount.get("x", 0.0), mount.get("y", 0.0), mount.get("z", 1.8)])
         mount_rot = _rotation(mount.get("yaw_deg", 0.0), mount.get("pitch_deg", 0.0), 0.0)
-        half_h = math.radians(float(meta.get("horizontal_fov_deg", 120.0))) / 2.0
-        half_v = math.radians(float(meta.get("vertical_fov_deg", 10.0))) / 2.0
+        # The logical surround sensor: 360 deg (every azimuth is inside), +-15 deg vertically.
+        half_h = math.radians(float(meta.get("horizontal_fov_deg", 360.0))) / 2.0
+        half_v = math.radians(float(meta.get("vertical_fov_deg", 30.0))) / 2.0
         max_range = float(meta.get("range_m", 90.0))
         rec = reconstruct_vehicle(vehicle_dir, cfg)  # the recorder's own reconstruction (local data only)
         origin = rec.clock_origin

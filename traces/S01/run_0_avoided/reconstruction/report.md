@@ -11,7 +11,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
 | A | 13.05 s | 132 | 11 | 16 | 1 | none |
-| B | 13.05 s | 132 | 7 | 7 | 0 | none |
+| B | 13.05 s | 132 | 12 | 16 | 1 | none |
 
 ## Graph alignment
 
@@ -27,10 +27,11 @@ No collision was matched across recorders, so no local graph could be aligned; e
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
 | A:track_001 | A:track_001 | ANONYMOUS | - | graph A is not aligned: it recorded no collision to anchor on |
+| B:track_001 | B:track_001 | ANONYMOUS | - | graph B is not aligned: it recorded no collision to anchor on |
 
 ## Global graph
 
-18 nodes, 6 edges; 0 merged node(s): none.
+23 nodes, 10 edges; 0 merged node(s): none.
 
 ### Event sequence (global time)
 
@@ -39,10 +40,10 @@ No collision was matched across recorders, so no local graph could be aligned; e
 ### What happened, in plain language
 
 - (unaligned, A local time 0.00 s) A started moving (already the case when first observed).
-- (unaligned, A local time 0.10 s) A's radar started tracking unidentified object A:track_001, which appeared in front of it.
+- (unaligned, A local time 0.00 s) A's radar started tracking unidentified object A:track_001, which appeared in front of it.
 - (unaligned, A local time 0.45 s) A observed unidentified object A:track_001 start closing in.
-- (unaligned, A local time 1.60 s) A observed unidentified object A:track_001 stop closing in.
-- (unaligned, A local time 4.25 s) A observed unidentified object A:track_001 start closing in.
+- (unaligned, A local time 1.65 s) A observed unidentified object A:track_001 stop closing in.
+- (unaligned, A local time 4.20 s) A observed unidentified object A:track_001 start closing in.
 - (unaligned, A local time 5.00 s) A's time-to-contact with unidentified object A:track_001 became critical.
 - (unaligned, A local time 5.05 s) A started braking.
 - (unaligned, A local time 6.25 s) A's time-to-contact with unidentified object A:track_001 stopped being critical.
@@ -50,9 +51,14 @@ No collision was matched across recorders, so no local graph could be aligned; e
 - (unaligned, A local time 6.35 s) A stopped moving.
 - (unaligned, A local time 6.35 s) A came to a stop.
 - (unaligned, B local time 0.00 s) B started moving (already the case when first observed).
+- (unaligned, B local time 0.00 s) B's radar started tracking unidentified object B:track_001, which appeared behind it.
+- (unaligned, B local time 0.50 s) B observed unidentified object B:track_001 start closing in.
+- (unaligned, B local time 1.65 s) B observed unidentified object B:track_001 stop closing in.
 - (unaligned, B local time 3.95 s) B started braking.
+- (unaligned, B local time 4.25 s) B observed unidentified object B:track_001 start closing in.
 - (unaligned, B local time 5.15 s) B stopped moving.
 - (unaligned, B local time 5.15 s) B came to a stop.
+- (unaligned, B local time 6.40 s) B observed unidentified object B:track_001 stop closing in.
 - (unaligned, B local time 11.95 s) B released the brake.
 - (unaligned, B local time 12.35 s) B left its stop.
 - (unaligned, B local time 12.35 s) B started moving.
@@ -73,7 +79,7 @@ A:
 - BRAKE, since A:e07 (t = 5.05 s)
 - STOP, since A:e11 (t = 6.35 s)
 B:
-- MOVING, since B:e07 (t = 12.35 s)
+- MOVING, since B:e12 (t = 12.35 s)
 
 ### Sign detection windows
 
@@ -97,8 +103,8 @@ B:
 
 ## Uncertainty and limitations
 
-- B built no radar track: nothing moving stayed in its forward radar view long enough, so B has no perception of the others.
 - A:track_001 stays anonymous: graph A is not aligned: it recorded no collision to anchor on.
+- B:track_001 stays anonymous: graph B is not aligned: it recorded no collision to anchor on.
 - A is UNALIGNED: it recorded no collision to anchor on.
 - B is UNALIGNED: it recorded no collision to anchor on.
 - Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
@@ -116,10 +122,11 @@ B:
   "trace_hz": 10.0,
   "collision": {
     "merge_gap_s": 0.5,
-    "new_impact_ratio": 0.5,
-    "reversal_impact_ratio": 0.25,
+    "new_impact_ratio": 0.75,
+    "min_impact_ratio": 0.25,
     "impact_acceleration_mps2": 20.0,
-    "reversal_angle_deg": 90.0
+    "reversal_angle_deg": 90.0,
+    "undirected_impact_ratio": 0.5
   },
   "tracking": {
     "min_height_m": 0.3,
@@ -152,6 +159,7 @@ B:
     "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "track_appeared_front_deg": 5.0,
+    "track_appeared_rear_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
     "cut_in_max_heading_deg": 25.0,
@@ -167,7 +175,7 @@ B:
   "fusion": {
     "impulse_tolerance": 0.1,
     "clock_tolerance_s": 0.1,
-    "contact_window_s": 0.5,
+    "contact_window_s": 1.0,
     "contact_range_m": 3.5,
     "contact_range_scale_m": 3.0,
     "approach_window_s": 1.0,

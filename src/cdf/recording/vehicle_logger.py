@@ -67,16 +67,24 @@ class VehicleLogger:
                     "schema_version": 1,
                     "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
                     "sensor_transform": {
-                        "x": float(radar.get("mount_x", 2.2)),
+                        "x": float(radar.get("mount_x", 0.0)),
                         "y": float(radar.get("mount_y", 0.0)),
-                        "z": float(radar.get("mount_z", 1.0)),
+                        "z": float(radar.get("mount_z", 0.0)),
                         "yaw_deg": float(radar.get("mount_yaw_deg", 0.0)),
                         "pitch_deg": float(radar.get("mount_pitch_deg", 0.0)),
                     },
+                    "mount_z_above_roof_m": radar.get("mount_z_above_roof_m"),
                     "sensor_tick_s": float(radar.get("sensor_tick_s", 0.05)),
-                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 200.0)),
-                    "vertical_fov_deg": float(radar.get("vertical_fov_deg", 10.0)),
+                    "horizontal_fov_deg": float(radar.get("horizontal_fov_deg", 360.0)),
+                    "vertical_fov_deg": float(radar.get("vertical_fov_deg", 30.0)),
                     "range_m": float(radar.get("range_m", 90.0)),
+                    "points_per_second": int(radar.get("points_per_second", 0)),
+                    "logical_sensor": {
+                        "physical_radars": list(radar.get("physical_layout") or []),
+                        "fusion": "co-located CARLA radars at the same mount; each sweep's azimuths rotated by the "
+                                  "radar's yaw into this sensor frame and merged; returns beyond range_m (radial) "
+                                  "dropped. Depth and radial velocity lie along the line of sight and are unchanged.",
+                    },
                     "radial_velocity_status": "measured",
                     # CARLA's native value is the range rate: negative while the
                     # target approaches (compact_observations.closing_speed).

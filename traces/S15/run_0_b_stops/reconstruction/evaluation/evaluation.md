@@ -31,11 +31,18 @@ Local time at which each graph reads t_global = 0, against the true local time o
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | A:track_001 | C | left anonymous (true identity C) | 41 | 0.605 / 0.843 m | 1.147 m | 5.103 / 0.579 m/s |
-| A:track_002 | A:track_002 | B | left anonymous (true identity B) | 21 | 0.541 / 0.539 m | 0.912 m | 4.377 / 1.286 m/s |
-| B:track_001 | B:track_001 | C | left anonymous (true identity C) | 87 | 0.349 / 0.402 m | 1.153 m | 5.071 / 0.426 m/s |
-| B:track_002 | B:track_002 | A | left anonymous (true identity A) | 33 | 0.327 / 0.427 m | 1.255 m | 4.579 / 1.299 m/s |
-| C:track_001 | C:track_001 | B | left anonymous (true identity B) | 44 | 0.392 / 0.417 m | 0.833 m | 7.199 / 0.817 m/s |
-| C:track_002 | C:track_002 | A | left anonymous (true identity A) | 42 | 0.684 / 0.896 m | 1.378 m | 4.944 / 0.675 m/s |
+| A:track_001 | A:track_001 | C | left anonymous (true identity C) | 74 | 0.501 / 0.714 m | 1.287 m | 6.794 / 0.679 m/s |
+| A:track_002 | A:track_002 | B | left anonymous (true identity B) | 71 | 0.39 / 0.382 m | 0.923 m | 11.125 / 0.744 m/s |
+| B:track_001 | B:track_001 | C | left anonymous (true identity C) | 81 | 0.357 / 0.43 m | 1.053 m | 5.118 / 0.364 m/s |
+| B:track_002 | B:track_002 | A | left anonymous (true identity A) | 65 | 0.393 / 0.556 m | 1.533 m | 5.787 / 0.789 m/s |
+| C:track_001 | C:track_001 | A | left anonymous (true identity A) | 77 | 0.524 / 0.73 m | 1.587 m | 6.439 / 0.917 m/s |
+| C:track_002 | C:track_002 | B | left anonymous (true identity B) | 94 | 0.475 / 0.536 m | 0.905 m | 9.065 / 0.54 m/s |
+
+## Clearance at the true contacts
+
+Per recorder, its track lying on the partner at the last 10 Hz sample at or before the contact: clearance (free distance from the recorder's footprint to the track's near surface), the true gap between the two vehicles' boxes at that instant, and the raw range from the radar.
+
+| Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
+|---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).

@@ -1,6 +1,6 @@
 {
   "run": "S07/run_0_occluded",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 5; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 93.5236803330481,
+      "sim_time": 233.3195748217404,
       "peak_impulse": 31406.82185785314,
-      "reconstructed_as": "g18",
+      "reconstructed_as": "g28",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -55,10 +55,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 23,
+    "nodes": 35,
     "max_abs_error_s": 0.0,
-    "order_pairs": 242,
-    "order_concordant": 242
+    "order_pairs": 574,
+    "order_concordant": 574
   },
   "tracks": [
     {
@@ -68,15 +68,49 @@
       "true_identity": "B",
       "median_box_distance_m": {
         "B": 0.0,
-        "C": 14.18
+        "C": 13.9
       },
       "verdict": "correct",
-      "samples": 141,
-      "raw_rmse_to_surface_m": 0.556,
-      "smoothed_rmse_to_surface_m": 0.554,
-      "smoothed_rmse_to_centre_m": 1.542,
-      "raw_difference_speed_rmse_mps": 1.189,
-      "speed_rmse_mps": 0.145
+      "samples": 142,
+      "raw_rmse_to_surface_m": 0.739,
+      "smoothed_rmse_to_surface_m": 0.83,
+      "smoothed_rmse_to_centre_m": 1.266,
+      "raw_difference_speed_rmse_mps": 3.69,
+      "speed_rmse_mps": 0.109
+    },
+    {
+      "track": "A:track_002",
+      "decision": "A:track_002",
+      "status": "ANONYMOUS",
+      "true_identity": "C",
+      "median_box_distance_m": {
+        "B": 21.14,
+        "C": 0.0
+      },
+      "verdict": "left anonymous (true identity C)",
+      "samples": 21,
+      "raw_rmse_to_surface_m": 0.746,
+      "smoothed_rmse_to_surface_m": 0.791,
+      "smoothed_rmse_to_centre_m": 1.499,
+      "raw_difference_speed_rmse_mps": 3.903,
+      "speed_rmse_mps": 0.109
+    },
+    {
+      "track": "A:track_003",
+      "decision": "A:track_003",
+      "status": "ANONYMOUS",
+      "true_identity": "C",
+      "median_box_distance_m": {
+        "B": 11.34,
+        "C": 0.0
+      },
+      "verdict": "left anonymous (true identity C)",
+      "samples": 4,
+      "raw_rmse_to_surface_m": 0.315,
+      "smoothed_rmse_to_surface_m": 0.346,
+      "smoothed_rmse_to_centre_m": 1.958,
+      "raw_difference_speed_rmse_mps": 2.696,
+      "speed_rmse_mps": 0.194
     },
     {
       "track": "B:track_001",
@@ -84,16 +118,93 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 15.42,
+        "A": 15.43,
         "C": 0.0
       },
       "verdict": "left anonymous (true identity C)",
-      "samples": 142,
-      "raw_rmse_to_surface_m": 0.446,
-      "smoothed_rmse_to_surface_m": 0.428,
-      "smoothed_rmse_to_centre_m": 1.877,
-      "raw_difference_speed_rmse_mps": 2.285,
-      "speed_rmse_mps": 0.114
+      "samples": 141,
+      "raw_rmse_to_surface_m": 0.507,
+      "smoothed_rmse_to_surface_m": 0.494,
+      "smoothed_rmse_to_centre_m": 1.82,
+      "raw_difference_speed_rmse_mps": 3.875,
+      "speed_rmse_mps": 0.1
+    },
+    {
+      "track": "B:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0,
+        "C": 41.81
+      },
+      "verdict": "correct",
+      "samples": 57,
+      "raw_rmse_to_surface_m": 0.816,
+      "smoothed_rmse_to_surface_m": 1.046,
+      "smoothed_rmse_to_centre_m": 1.144,
+      "raw_difference_speed_rmse_mps": 6.338,
+      "speed_rmse_mps": 0.1
+    },
+    {
+      "track": "C:track_001",
+      "decision": "C:track_001",
+      "status": "ANONYMOUS",
+      "true_identity": "A",
+      "median_box_distance_m": {
+        "A": 0.0,
+        "B": 18.02
+      },
+      "verdict": "left anonymous (true identity A)",
+      "samples": 21,
+      "raw_rmse_to_surface_m": 0.895,
+      "smoothed_rmse_to_surface_m": 1.019,
+      "smoothed_rmse_to_centre_m": 0.641,
+      "raw_difference_speed_rmse_mps": 3.978,
+      "speed_rmse_mps": 0.123
+    },
+    {
+      "track": "C:track_002",
+      "decision": "C:track_002",
+      "status": "ANONYMOUS",
+      "true_identity": "B",
+      "median_box_distance_m": {
+        "A": 19.23,
+        "B": 0.0
+      },
+      "verdict": "left anonymous (true identity B)",
+      "samples": 25,
+      "raw_rmse_to_surface_m": 0.68,
+      "smoothed_rmse_to_surface_m": 0.945,
+      "smoothed_rmse_to_centre_m": 0.844,
+      "raw_difference_speed_rmse_mps": 8.175,
+      "speed_rmse_mps": 0.103
+    }
+  ],
+  "contact_clearances": [
+    {
+      "contact": "A + B",
+      "recorder": "A",
+      "partner": "B",
+      "track": "A:track_001",
+      "seen_s_before_contact": 0.0,
+      "clearance_m": 0.2,
+      "true_gap_m": 0.008,
+      "error_m": 0.192,
+      "range_m": 3.083,
+      "ttc_s": null
+    },
+    {
+      "contact": "A + B",
+      "recorder": "B",
+      "partner": "A",
+      "track": "B:track_002",
+      "seen_s_before_contact": 0.1,
+      "clearance_m": 1.103,
+      "true_gap_m": 0.672,
+      "error_m": 0.431,
+      "range_m": 3.903,
+      "ttc_s": 0.081
     }
   ],
   "clock_shift_check": {

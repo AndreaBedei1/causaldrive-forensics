@@ -17,23 +17,24 @@ class CollisionConfig:
     # the impulse magnitude only.  Callbacks without a missing sample between
     # them form a burst.  A pause longer than this always separates two contacts.
     merge_gap_s: float = 0.5
-    # A shorter pause separates them when the burst after the break (at least
-    # one sample without a callback) peaks at this fraction of the current
-    # contact's peak or more: a rebound of the same two bodies comes back with
-    # about the restitution coefficient times the first impulse (below 0.5
-    # between vehicles) and the persistent contact after an impact with far less.
-    new_impact_ratio: float = 0.5
-    # Supplementary evidence, never decisive alone: a weaker burst (from this
-    # fraction of the contact's peak) also starts a new contact when the
-    # recorder's own velocity jumps like an impact both at the contact's start
-    # and at the burst's, in directions more than reversal_angle_deg apart (a
-    # rebound pushes the recorder the same way again).  An impact-like jump is
-    # a mean acceleration of at least impact_acceleration_mps2 from the sample
-    # before the callback to the sample after it: twice what tyres can produce
-    # (about 1 g), so braking or steering cannot cause it.
-    reversal_impact_ratio: float = 0.25
+    # After a shorter break (at least one sample without a callback) a burst
+    # peaking at this fraction of the current contact's peak or more is a new
+    # impact: the strongest rebound of the same two bodies measured in CARLA
+    # came back with 0.52 of the first impulse (0.43 in the earlier recordings),
+    # persistent contact with 0.25 or less, a second body with 0.85-0.93.
+    new_impact_ratio: float = 0.75
+    # Below this fraction the burst continues the contact (persistent contact).
+    min_impact_ratio: float = 0.25
+    # In between, the recorder's own velocity jumps decide when both, at the
+    # contact's start and at the burst's, are impact-like (a mean acceleration
+    # of at least impact_acceleration_mps2 across the callback: about twice what
+    # tyres can produce, so neither braking nor steering): directions more than
+    # reversal_angle_deg apart are a new impact from the other side, closer
+    # ones a rebound (it pushes the recorder the same way again).  Without that
+    # evidence the burst is a new impact from undirected_impact_ratio.
     impact_acceleration_mps2: float = 20.0
     reversal_angle_deg: float = 90.0
+    undirected_impact_ratio: float = 0.5
 
 
 @dataclass
@@ -97,12 +98,16 @@ class SemanticsConfig:
     turn_release_debounce_s: float = 0.3
     turn_min_duration_s: float = 0.5
     turn_min_heading_change_deg: float = 15.0
-    # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT.
+    # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT;
+    # the corridor starts at the recorder's front edge (its own footprint).
     path_half_width_m: float = 1.5
     # TRACK_APPEARED_FRONT when the track's first azimuth from the radar lies
-    # within this angle of the recorder's heading (about its own lane at 20 m);
-    # otherwise TRACK_APPEARED_LEFT (negative azimuth) or _RIGHT.
+    # within this angle of the recorder's heading (about its own lane at 20 m),
+    # TRACK_APPEARED_REAR within this angle of the opposite direction (the 360
+    # degree radar sees behind); otherwise TRACK_APPEARED_LEFT (negative
+    # azimuth) or _RIGHT.
     track_appeared_front_deg: float = 5.0
+    track_appeared_rear_deg: float = 5.0
     # Track estimates more uncertain than this (Kalman standard deviations)
     # support no CUT_IN claim: it stays UNKNOWN.
     max_position_std_m: float = 1.0
@@ -134,12 +139,15 @@ class FusionConfig:
     # must imply the same offset within this (two sensor samples at 20 Hz).
     clock_tolerance_s: float = 0.1
     # A track is continuous up to the contact if it was still observed within
-    # this window before the matched collision (radars lose a target at point
-    # blank range or at the edge of their field of view just before impact).
-    contact_window_s: float = 0.5
-    # Range at the contact is evidence, not a veto: up to this range it counts
-    # fully; beyond it the confidence decays with this scale (radar mount,
-    # vehicle geometry and impact orientation can keep the last range high).
+    # this window before the matched collision: a radar can lose a target just
+    # before impact (point blank, seen from the roof, or tracked through the
+    # crash).  Identity association only: the tracker itself still ends a
+    # silent track after tracking.max_track_gap_s (TRACK_LOST), and every other
+    # check (persistence, approach, speed, matched collision, uniqueness) holds.
+    contact_window_s: float = 1.0
+    # Clearance at the contact is evidence, not a veto: up to this distance it
+    # counts fully; beyond it the confidence decays with this scale (vehicle
+    # geometry, impact orientation and a roof radar's view can keep it high).
     contact_range_m: float = 3.5
     contact_range_scale_m: float = 3.0
     # The range must shrink over this last stretch of tracking before the contact.

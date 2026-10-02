@@ -4,22 +4,45 @@
     "local_track": "track_001",
     "global_entity": "B",
     "status": "ASSOCIATED",
-    "confidence": 0.99,
+    "confidence": 1.0,
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)",
-      "tracked for 6.40 s before the matched collision",
-      "continuous up to the contact: last observed 0.00 s before it (window 0.50 s)",
-      "approaching before the contact: range 11.5 m -> 0.8 m over the last 1.0 s",
-      "track speed agrees with B's own speed: RMSE 0.24 m/s over 3.0 s",
-      "range at the contact 0.77 m",
+      "tracked for 6.50 s before the matched collision",
+      "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
+      "approaching before the contact: clearance 11.1 m -> 0.3 m over the last 1.0 s",
+      "track speed agrees with B's own speed: RMSE 0.15 m/s over 3.0 s",
+      "clearance at the contact 0.32 m",
       "the only track of A compatible with the contact"
     ],
     "blocking": [],
     "source_graphs": [
       "A",
       "B"
+    ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "A",
+    "status": "ASSOCIATED",
+    "confidence": 1.0,
+    "candidate": "A",
+    "collision_event": "collision_001",
+    "evidence": [
+      "B and A both reported collision_001 (peak impulse 17663.06 vs 17663.06 N*s)",
+      "tracked for 6.50 s before the matched collision",
+      "continuous up to the contact: last observed 0.05 s before it (window 1.00 s)",
+      "approaching before the contact: clearance 11.7 m -> 0.6 m over the last 1.0 s",
+      "track speed agrees with A's own speed: RMSE 0.13 m/s over 3.0 s",
+      "clearance at the contact 0.58 m",
+      "the only track of B compatible with the contact"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "B",
+      "A"
     ]
   }
 ]

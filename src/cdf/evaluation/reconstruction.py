@@ -83,6 +83,24 @@ def _in_box_frame(point: Tuple[float, float], state: Dict[str, Any]) -> Tuple[fl
     return math.cos(yaw) * dx + math.sin(yaw) * dy, -math.sin(yaw) * dx + math.cos(yaw) * dy, extent
 
 
+def _outline(state: Dict[str, Any], step: float = 0.1) -> List[Tuple[float, float]]:
+    """Points every ``step`` metres along a vehicle box's 2-D outline (world frame)."""
+    transform = state["transform"]
+    extent = state.get("bbox_extent") or {"x": 2.4, "y": 1.0}
+    yaw = math.radians(transform["yaw_deg"])
+    c, s = math.cos(yaw), math.sin(yaw)
+    ex, ey = extent["x"], extent["y"]
+    local = [(x, side * ey) for x in np.arange(-ex, ex + 1e-9, step) for side in (-1.0, 1.0)]
+    local += [(side * ex, y) for y in np.arange(-ey, ey + 1e-9, step) for side in (-1.0, 1.0)]
+    return [(transform["x"] + c * x - s * y, transform["y"] + s * x + c * y) for x, y in local]
+
+
+def box_gap(first: Dict[str, Any], second: Dict[str, Any]) -> float:
+    """2-D distance between two vehicles' boxes (0 when they touch or overlap), to about 0.05 m."""
+    return min(min(_box_distance(point, first) for point in _outline(second)),
+               min(_box_distance(point, second) for point in _outline(first)))
+
+
 def _speed(state: Dict[str, Any]) -> float:
     return math.hypot(state["velocity"]["x"], state["velocity"]["y"])
 
@@ -291,6 +309,48 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
                         "raw_difference_speed_rmse_mps": _rmse(raw_speed), "speed_rmse_mps": _rmse(speed)})
         track_rows.append(row)
 
+    # 6. Clearance at each true vehicle contact: per recorder, its track lying on the partner
+    #    (tracked point within IDENTITY_MAX_BOX_DISTANCE_M of the partner's box) at the last 10 Hz
+    #    sample at or before the contact, against the true gap between the two boxes then.
+    samples_of: Dict[str, List[Dict[str, Any]]] = {}
+    for name in recorders:
+        for sample in _read_jsonl(rec / name / "local_tracks.jsonl"):
+            samples_of.setdefault(name + ":" + sample["track_id"], []).append(sample)
+    contact_clearances = []
+    for contact in contacts:
+        if "static/unrecorded" in contact["participants"]:
+            continue
+        for owner in contact["participants"]:
+            partner = next(name for name in contact["participants"] if name != owner)
+            t_contact = contact["sim_time"] - origins[owner]
+            best = None
+            for key, samples in samples_of.items():
+                if not key.startswith(owner + ":"):
+                    continue
+                before = [s for s in samples if s["t_local"] <= t_contact + 0.051]
+                if not before or t_contact - before[-1]["t_local"] > 1.0:
+                    continue
+                sample = before[-1]
+                state = truth[partner].at(sample["t_local"] + origins[owner]) if partner in truth else None
+                point = _to_world(first_poses[owner], sample["x_m"], sample["y_m"])
+                if state is None or _box_distance(point, state) > IDENTITY_MAX_BOX_DISTANCE_M:
+                    continue
+                if best is None or (sample["t_local"], -sample["clearance_m"]) > (best[1]["t_local"], -best[1]["clearance_m"]):
+                    best = (key, sample)
+            row = {"contact": " + ".join(contact["participants"]), "recorder": owner, "partner": partner,
+                   "track": None if best is None else best[0]}
+            if best is not None:
+                sample = best[1]
+                sim = sample["t_local"] + origins[owner]
+                own_state, partner_state = truth[owner].at(sim), truth[partner].at(sim)
+                gap = None if own_state is None or partner_state is None else round(box_gap(own_state, partner_state), 3)
+                row.update(seen_s_before_contact=round(t_contact - sample["t_local"], 3),
+                           clearance_m=sample.get("clearance_m"), true_gap_m=gap,
+                           error_m=None if gap is None or sample.get("clearance_m") is None
+                           else round(sample["clearance_m"] - gap, 3),
+                           range_m=sample.get("range_m"), ttc_s=sample.get("ttc_s"))
+            contact_clearances.append(row)
+
     robustness = None
     if clock_shift_check and alignment["reference_event"] is not None:
         config = config_from_mapping(graph.get("reconstruction_config"))
@@ -319,7 +379,7 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
               "event_timing": {"nodes": len(timed),
                                "max_abs_error_s": None if not time_errors else round(max(abs(e) for e in time_errors), 4),
                                "order_pairs": total, "order_concordant": concordant},
-              "tracks": track_rows, "clock_shift_check": robustness}
+              "tracks": track_rows, "contact_clearances": contact_clearances, "clock_shift_check": robustness}
     write_json(rec / "evaluation" / "evaluation.json", result)
     write_text(rec / "evaluation" / "evaluation.md", evaluation_markdown(result))
     return result
@@ -372,6 +432,17 @@ def evaluation_markdown(result: Dict[str, Any]) -> str:
             cell(row.get("raw_rmse_to_surface_m")), cell(row.get("smoothed_rmse_to_surface_m")),
             cell(row.get("smoothed_rmse_to_centre_m")), cell(row.get("raw_difference_speed_rmse_mps")),
             cell(row.get("speed_rmse_mps"))))
+    lines += ["", "## Clearance at the true contacts", "",
+              "Per recorder, its track lying on the partner at the last 10 Hz sample at or before the contact: "
+              "clearance (free distance from the recorder's footprint to the track's near surface), the true gap "
+              "between the two vehicles' boxes at that instant, and the raw range from the radar.", "",
+              "| Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |",
+              "|---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|"]
+    for row in result.get("contact_clearances") or []:
+        lines.append("| {0} | {1} | {2} | {3} | {4} s | {5} m | {6} m | {7} m | {8} m |".format(
+            row["contact"], row["recorder"], row["partner"], cell(row["track"]), cell(row.get("seen_s_before_contact")),
+            cell(row.get("clearance_m")), cell(row.get("true_gap_m")), cell(row.get("error_m")),
+            cell(row.get("range_m"))))
     lines += ["", "Surface distance = distance from a track point to the outline of the true vehicle's "
               "bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; "
               "smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on "

@@ -245,64 +245,6 @@
   "new_nodes": 26
  },
  {
-  "run": "S04/run_0_yield",
-  "same": {
-   "collision_nodes": true,
-   "alignment": true,
-   "associations": true,
-   "tracks": true
-  },
-  "vocabulary": {
-   "BRAKE_EPISODE->BRAKE_START": [
-    2,
-    2,
-    2
-   ],
-   "THROTTLE_ONSET->STRONG_THROTTLE_START": [
-    2,
-    2,
-    2
-   ],
-   "FULL_STOP->STOP_START": [
-    1,
-    1,
-    1
-   ],
-   "CLOSING->CLOSING_START": [
-    4,
-    4,
-    0
-   ],
-   "CRITICAL_TTC->CRITICAL_TTC_START": [
-    2,
-    2,
-    1
-   ],
-   "ENTERED_EGO_PATH->EGO_PATH_ENTRY": [
-    1,
-    1,
-    1
-   ],
-   "STOP_SIGN_DETECTED->STOP_SIGN_DETECTED_START": [
-    1,
-    1,
-    1
-   ],
-   "TRACK_APPEARED->TRACK_APPEARED": [
-    4,
-    4,
-    4
-   ],
-   "TRACK_LOST->TRACK_LOST": [
-    3,
-    3,
-    3
-   ]
-  },
-  "old_nodes": 20,
-  "new_nodes": 35
- },
- {
   "run": "S05/run_0_crash",
   "same": {
    "collision_nodes": true,

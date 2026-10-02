@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 18; max |t_global error| 0.0 s**
+**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 66.564 | 4032.5 | g61 | yes | 0.0 s |
+| A + B | 129.211 | 4032.5 | g31 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -27,32 +27,23 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-103 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 5008/5008 pairs.
+44 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 912/912 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | B | B | correct | 66 | 0.505 / 0.524 m | 1.029 m | 5.049 / 0.401 m/s |
-| A:track_002 | A:track_002 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_003 | A:track_003 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_004 | A:track_004 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_005 | A:track_005 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_006 | A:track_006 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_007 | A:track_007 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_008 | A:track_008 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_009 | A:track_009 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_010 | A:track_010 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_011 | A:track_011 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_012 | A:track_012 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_013 | A:track_013 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_014 | A:track_014 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_015 | A:track_015 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_016 | A:track_016 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_017 | A:track_017 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_018 | A:track_018 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| A:track_019 | A:track_019 | - | correctly left anonymous | - | - / - m | - m | - / - m/s |
-| B:track_001 | A | A | correct | 72 | 0.246 / 0.322 m | 0.911 m | 7.424 / 1.186 m/s |
+| A:track_001 | B | B | correct | 123 | 0.482 / 0.531 m | 0.818 m | 6.93 / 0.478 m/s |
+| B:track_001 | A | A | correct | 122 | 0.379 / 0.383 m | 0.915 m | 6.341 / 0.597 m/s |
+
+## Clearance at the true contacts
+
+Per recorder, its track lying on the partner at the last 10 Hz sample at or before the contact: clearance (free distance from the recorder's footprint to the track's near surface), the true gap between the two vehicles' boxes at that instant, and the raw range from the radar.
+
+| Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
+|---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
+| A + B | A | B | A:track_001 | 0.0 s | 1.001 m | 0.0 m | 1.001 m | 2.498 m |
+| A + B | B | A | B:track_001 | 0.0 s | 0.162 m | 0.0 m | 0.162 m | 2.139 m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 

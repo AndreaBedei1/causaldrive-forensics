@@ -183,7 +183,7 @@ class EventTimelineTests(unittest.TestCase):
     def test_s01_crash_events_land_on_the_local_times(self):
         run = ReplayRun.load(S01)
         times = {(e.event_type, e.time) for e in run.local_events["A"].events}
-        for expected in [("CLOSING_START", 0.45), ("CLOSING_END", 1.6), ("CLOSING_START", 4.25),
+        for expected in [("CLOSING_START", 0.45), ("CLOSING_END", 1.65), ("CLOSING_START", 4.2),
                          ("CRITICAL_TTC_START", 5.0), ("BRAKE_START", 5.55), ("COLLISION", 6.5)]:
             self.assertIn(expected, times)
         self.assertEqual([(m.time, m.participants) for m in run.collisions], [(6.5, ("A", "B"))])

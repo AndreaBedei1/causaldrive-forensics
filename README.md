@@ -17,6 +17,57 @@ Useful options are `--seed`, `--output`, `--sensor-profile`, and
 `--override key=value`. The runner executes one fixed scenario variant and
 cleans up its CARLA actors.
 
+## Radar sensor: one logical 360-degree surround radar
+
+Every vehicle carries ONE logical radar, `surround` (`configs/sensors/radar_*.yaml`):
+the aggregate coverage of the radars distributed around a car, as a single
+sensor centred over the vehicle and above its roof.
+
+| Property | Value |
+|----------|-------|
+| Mount | x = 0, y = 0, yaw = 0, pitch = 0 (vehicle frame: x forward, y right, origin at the vehicle origin on the ground) |
+| Height | 0.30 m above the top of the vehicle's own bounding box: model3 1.78 m, audi.tt 1.69 m, nissan.patrol 2.16 m, mercedes.sprinter 2.87 m |
+| Horizontal FOV | 360 deg |
+| Vertical FOV | 30 deg (+-15 deg) |
+| Points per second | 21600 in total |
+| Range | 90 m, radial |
+| Tick | 0.05 s (every simulation step) |
+
+CARLA 0.9.15's `sensor.other.radar` cannot cover 180 degrees or more: it
+traces its rays inside a cone around its x axis of lateral half-width
+`tan(horizontal_fov / 2) * range`, so wider settings fold back. Measured on our
+build: 200 -> +-80 deg, 270 -> +-45 deg, 359 -> +-0.5 deg, 360 -> a vertical
+slice at 0 deg, 180 -> no return. The surround sensor is therefore six
+co-located CARLA radars of 90 deg at yaws 0, 60, ..., 300 deg (15 deg overlap
+each side, 3600 points per second each). `RadarSensor` merges them at
+recording time: each sweep's azimuths are rotated by the radar's yaw into the
+logical frame and wrapped to (-180, 180]; depth and radial velocity lie along
+the line of sight and are unchanged. A CARLA radar's range bounds only the
+forward component of a ray, so returns beyond 90 m radial are dropped. One
+logical frame is written per tick: `vehicles/X/radar/observations.npz` with
+`metadata.json` (logical mount, `physical_radars`, `incomplete_frames`,
+`queue_drops`). Reconstruction and tracking see only the logical sensor.
+
+Why these values (CARLA tests in an empty map, then on Town05):
+
+- Height: a single absolute height cannot serve the campaign's roofs of
+  1.39-2.57 m. At 2.8 m, just above the Sprinter's roof, a model3 sees nothing
+  of a car within 2-4 m ahead or behind, or within 4-8 m beside it. At 0.30 m
+  above its own roof, a car 0.3 m away is seen in every direction.
+- Vertical FOV: from the roof the sensor looks down onto close, lower cars. An
+  audi.tt 0.3 m beside a model3 was seen in 0-80 % of the sweeps at +-10 deg,
+  depending on the mount height, and in every sweep at +-15 deg. The nearest
+  return then lies 0.1-0.7 m from the true surface, ahead, beside or behind.
+- Points per second: 10800 (= 6000 x 360/200, the former horizontal density)
+  spread over 360 x 30 deg gave a car 25-40 m away 3-4x fewer returns than
+  the former 200-degree radar. 21600 restores 0.5-1.3x of them at 25-60 m.
+  The engine cost stays at about 12 ms per tick for three vehicles, and no
+  callback was lost.
+
+The vehicle's own bounding box is recorded as `ego_footprint` in
+`vehicles/X/metadata.json` (vehicle frame). The reconstruction needs it to
+turn ranges, measured from the centre, into clearances from the vehicle's skin.
+
 ## Stored streams
 
 Each vehicle has independent compact radar and depth streams:
@@ -54,9 +105,9 @@ For the same approaching object radar is negative and depth positive. Use
 before comparing or mixing the two. Metadata says `radial_velocity_sign:
 positive_away_from_sensor` with `radial_velocity_definition: carla_range_rate`
 for radar, and `positive_towards_sensor` with `closing_speed` for depth. Radar
-metadata written before this correction (including the S01-S03 and S15 runs in
-`traces/`) says `positive_towards_sensor`; that label is wrong for the stored
-radar values, which are unchanged.
+metadata written before this correction said `positive_towards_sensor`, a label
+that was wrong for the stored values; every run now in `traces/` was recorded
+after it.
 
 The estimator version is `temporal_geometric_association_v1`. It uses only
 depth range, azimuth, altitude, and actual CARLA sensor timestamps. It never
@@ -189,24 +240,28 @@ Rules the code follows:
 - One COLLISION per contact, from the recorder's own collision sensor, which
   calls back once per sample (0.05 s) while the bodies touch and reports only
   the impulse magnitude. Callbacks without a missing sample between them form
-  a burst; a burst starts a new contact when (1) the pause since the previous
-  callback exceeds `merge_gap_s` = 0.5 s, or (2) it follows a real break (at
-  least one sample without a callback) and peaks at `new_impact_ratio` = 0.5 x
-  the current contact's peak or more: a rebound of the same two bodies comes
-  back with about the restitution coefficient times the first impulse (below
-  0.5 between vehicles; 0.43 is the largest in the campaign) and persistent
-  contact with far less (2-25 %). (3) Supplementary evidence, never decisive
-  alone: a burst from `reversal_impact_ratio` = 0.25 x the peak also starts a
-  new contact when the recorder's own velocity jumps like an impact (mean
-  acceleration of at least 20 m/s^2, twice what tyres can produce, over the
-  samples around the callback) both at the contact's start and at the burst's,
-  in directions more than 90 deg apart: a rebound pushes the recorder the same
-  way again, a second body from the other side does not. Every other burst
-  continues the contact. A contact opened within 0.5 s of the previous one
-  carries `new_contact` (`break_s`, `peak_ratio`, `reversal_deg`). In S06
-  `a_front_pushed`, B is struck by A (11622 N*s) and 0.25 s later meets C
-  (9832 N*s = 0.85 x): two COLLISIONs; the ~470 small callbacks of B's
-  persistent contact with C add none.
+  a burst. A burst after a pause of more than `merge_gap_s` = 0.5 s starts a
+  new contact. A burst after a shorter, real break (at least one sample
+  without a callback) is judged by its peak relative to the current contact's
+  peak:
+  - from `new_impact_ratio` = 0.75 it is a new impact;
+  - below `min_impact_ratio` = 0.25 it is persistent contact (same contact);
+  - in between, the recorder's own velocity jumps decide when both are
+    impact-like, one at the contact's start and one at the burst's. An
+    impact-like jump is a mean acceleration of at least 20 m/s^2 over the
+    samples around the callback, twice what tyres can produce. Directions more
+    than 90 deg apart mean struck from the other side (new contact); closer
+    ones mean a rebound (same contact), which pushes the same way again.
+    Without that evidence, a new contact from `undirected_impact_ratio` = 0.5.
+
+  Measured in CARLA, persistent contact peaks at 0.25 x or less, rebounds of
+  the same two bodies at up to 0.43-0.52 x, and a second body at 0.85-0.93 x.
+  A contact opened within 0.5 s of the previous one carries `new_contact`
+  (`break_s`, `peak_ratio`, `evidence`, `reversal_deg`). In S06
+  `a_front_pushed`, B is struck by A and about 0.2 s later meets C: two
+  COLLISIONs. A's 0.52 x rebound into B, pushing A backwards again, stays one
+  contact, and the hundreds of small callbacks of B's persistent contact with
+  C add none.
 - No log is synchronised. Two COLLISION nodes of different graphs are the same
   contact when their peak impulses agree (equal and opposite impulses). A match
   also fixes the clock offset between its two graphs, so matches must agree in
@@ -223,16 +278,58 @@ Rules the code follows:
   collision of the recorder names a partner; for that contact the track must
   be its recorder's only track that is persistent (tracked at least 1 s before
   the contact), continuous up to the contact (still observed within 0.5 s of
-  it: no TRACK_LOST before), approaching (range shrinking over its last second)
+  it: TRACK_LOST at most 1.0 s before), approaching (clearance shrinking over its last second)
   and as fast as the partner says it was (speed RMSE at most 1.5 m/s). The
-  range at the contact is evidence, not a veto: radar mount, vehicle geometry
-  and impact angle can keep it above 3.5 m, so beyond that it only lowers the
-  confidence. Two or more such tracks for one contact are an ambiguity, a
+  1.0 s contact window (`fusion.contact_window_s`) is for association only.
+  The tracker still ends a silent track after 0.5 s and reports TRACK_LOST.
+  The clearance at the contact is evidence, not a veto: vehicle geometry,
+  impact angle and a roof radar's view can keep it above 3.5 m, so beyond that
+  it only lowers the confidence. Two or more such tracks for one contact are an ambiguity, a
   track compatible with two partners a conflict: both stay anonymous
   (`A:track_001`); every reason, and the collision the decision rests on, is
   in `associations.json`. Ground truth is never used.
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
+- Geometry of the centred radar. A range is measured from the radar, at the
+  vehicle centre, not from the vehicle's skin. With the recorded footprint
+  (bounding box, half-length L/2 and half-width W/2 around the radar), every
+  return and track also gets a clearance:
+
+  ```text
+  ego_extent(theta) = min((L/2) / |cos(theta)|, (W/2) / |sin(theta)|)   (a zero cosine or sine leaves the other side)
+  clearance_m       = max(0, planar_range_m - ego_extent(theta))
+  ```
+
+  This is the free distance from the vehicle's edge to the observed surface
+  along the bearing theta; the code takes the exit of the ray from the
+  rectangle, which also covers an off-centre radar. A track's clearance
+  belongs to its near surface. Its returns spread over the target's visible
+  body, which from a roof is often the roof and rear window, so the tracked
+  median point lies deeper than the bumper that touches first. Per sweep the
+  near surface is the 10th percentile of the returns' clearances; its depth
+  behind the median point is smoothed over five sweeps. The raw `range_m`
+  stays in TRACK_STATE.
+  - TTC is `clearance / closing speed`, and CRITICAL_TTC works on the
+    clearance.
+  - EGO_PATH and CUT_IN count a target as "ahead" when it is beyond the
+    vehicle's front edge (`ahead_of_front_m`), not merely ahead of the radar.
+  - Identity association uses the clearance for the approach trend and at the
+    contact.
+  - The closest point of approach (relative position and velocity) is
+    unchanged, plus `d_cpa_clearance_m`.
+  - Returns from inside the footprint come from the vehicle's own body and are
+    dropped (`own_body_returns_dropped`).
+- Ego motion: the radar's own velocity is its displacement over the last
+  sweep, computed from the recorder's own poses (position, heading, pitch,
+  roll), because CARLA's radar measures its own motion the same way. This
+  includes the rotation about the vehicle origin and the roof's swing when the
+  vehicle pitches or rolls. Static scenery therefore stays static in turns,
+  under braking and through an impact. The instantaneous vehicle velocity
+  differs by up to about 3 m/s at an impact: with it, 2.2 % of S05 B's static
+  returns looked like moving targets after the crash. Doppler speeds are
+  projected onto the horizontal plane, because a roof radar sees close targets
+  from above. Points are clustered in the local Cartesian frame, so an azimuth
+  crossing +-180 deg splits nothing.
 
 Three levels are kept apart. Raw and track data feed the 10 Hz FACTS of
 `local_trace.jsonl` (EGO_MOTION, EGO_CONTROL with the raw brake, throttle and
@@ -251,10 +348,10 @@ EVENTS, which are state transitions without telemetry:
 | TURN_LEFT / TURN_RIGHT_START / _END | the recorder's own yaw motion from its unwrapped heading: yaw rate at least 10 deg/s while moving, ends below 5 deg/s (0.3 s debounce), at least 0.5 s and 15 deg |
 | MOVING_START / _END, STOP_START / _END | stop below 0.3 m/s, moving again above 1 m/s |
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
-| TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radar field: its azimuth at the first detection within 5 deg of the recorder's heading (FRONT), else its sign (negative = LEFT) |
+| TRACK_APPEARED_FRONT / _REAR / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the 360-degree radar field: its azimuth at the first detection within 5 deg of the recorder's heading (FRONT) or of the opposite direction (REAR), else its sign (negative = LEFT) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
 | CRITICAL_TTC_START / _END | while closing, avoiding the target by braking would need at least the available deceleration (below); ends below 75 % of it, at the latest with CLOSING |
-| EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor (not a lane change) |
+| EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor beyond the recorder's front edge (not a lane change) |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
 | COLLISION | one per contact (see the segmentation rule above); keeps its peak impulse for alignment |
@@ -266,7 +363,7 @@ END means this recorder stopped detecting the sign, not that its obligation
 ended; `checks.sign_windows` lists the STOP_START events inside each window.
 
 CRITICAL_TTC comes from a braking-avoidability margin, not from a fixed TTC.
-The TTC itself stays physical and local: `TTC = range / closing_speed`, the
+The TTC itself stays physical and local: `TTC = clearance / closing_speed`, the
 closing speed along the line of sight from the recorder's own odometry and the
 track's estimated velocity (never ground truth, never another recorder's log).
 To avoid the target by braking the recorder must lose
@@ -317,10 +414,11 @@ is identified, its first such collision with that entity (`collision_with`).
 They are temporal properties only, not causes.
 
 The appearance side is local evidence only: the track's own azimuth from the
-radar at its first detection (`track_appeared_front_deg`), never ground truth.
-A lead car in the recorder's lane appears FRONT, crossing traffic emerging on
-the right appears RIGHT; a target present from the start appears where it was
-first seen.
+radar at its first detection (`track_appeared_front_deg`,
+`track_appeared_rear_deg`), never ground truth. A lead car in the recorder's
+lane appears FRONT, a follower in its lane REAR (the 360-degree radar sees
+behind), and crossing traffic emerging on the right appears RIGHT. A target
+present from the start appears where it was first seen.
 
 CUT_IN is a kinematic observation, not a normative judgement. The closest point
 of approach of the relative motion stays a quantitative fact (`t_CPA =

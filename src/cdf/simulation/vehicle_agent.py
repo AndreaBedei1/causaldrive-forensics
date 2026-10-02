@@ -20,6 +20,20 @@ from ..recording.depth_velocity import DepthRadialVelocityEstimator
 
 
 
+def ego_footprint(vehicle: Any) -> dict:
+    """The vehicle's own bounding box in its own frame (x forward, y right, origin = vehicle origin at
+    ground level): the shape the reconstruction needs to turn radar ranges into clearances."""
+    box = vehicle.bounding_box
+    cx, cy, cz = float(box.location.x), float(box.location.y), float(box.location.z)
+    ex, ey, ez = float(box.extent.x), float(box.extent.y), float(box.extent.z)
+    return {"length_m": round(2 * ex, 4), "width_m": round(2 * ey, 4), "height_m": round(2 * ez, 4),
+            "x_min_m": round(cx - ex, 4), "x_max_m": round(cx + ex, 4),
+            "y_min_m": round(cy - ey, 4), "y_max_m": round(cy + ey, 4),
+            "roof_z_m": round(cz + ez, 4),
+            "source": "the vehicle's own bounding box (vehicle frame: x forward, y right, z up, origin at the "
+                      "vehicle origin on the ground)"}
+
+
 class RawVehicleAgent:
     def __init__(self, scenario_world: Any, cfg: Config, spec: Any, controller: ScriptedController,
                  spawn_transform: Any, output_root: Any) -> None:
@@ -46,7 +60,8 @@ class RawVehicleAgent:
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,
             "sensor_profile": str(spec.sensor_profile or cfg.get("sensors.profile", "")),
-            "radar": [r.spec.__dict__ for r in self.radar],
+            "radar": [r.metadata() for r in self.radar],
+            "ego_footprint": ego_footprint(self.vehicle),
             "camera": camera_spec.__dict__ if camera_spec else None,
             "depth_camera": depth_camera_spec.__dict__ if depth_camera_spec else None,
             "depth_observations": self.depth_observation_spec.__dict__,

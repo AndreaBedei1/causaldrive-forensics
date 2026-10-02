@@ -16,5 +16,23 @@
     "source_graphs": [
       "A"
     ]
+  },
+  {
+    "local_graph": "B",
+    "local_track": "track_001",
+    "global_entity": "B:track_001",
+    "status": "ANONYMOUS",
+    "confidence": null,
+    "candidate": null,
+    "collision_event": null,
+    "evidence": [
+      "graph B is not aligned: it recorded no collision to anchor on"
+    ],
+    "blocking": [
+      "graph B is not aligned: it recorded no collision to anchor on"
+    ],
+    "source_graphs": [
+      "B"
+    ]
   }
 ]

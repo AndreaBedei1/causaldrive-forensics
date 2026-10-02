@@ -103,6 +103,11 @@ def make_run(root: Path, b_late_start_s: float = 0.5, a_sees_b_until: Optional[f
         _write_jsonl(folder / "collisions.jsonl", [{"frame": 0, "timestamp": clock_zero + CONTACT_T, "impulse": IMPULSE}])
         _write_jsonl(folder / "traffic_signs.jsonl", [])
         _write_radar(folder / "radar", radar_times, radar_rows)
+        # The vehicle's own bounding box: A's front at x + 2.4, B's rear at x - 2.0 (see CONTACT_T).
+        half = 2.4 if owner == "A" else 2.0
+        (folder / "metadata.json").write_text(json.dumps({"ego_footprint": {
+            "x_min_m": -half, "x_max_m": half, "y_min_m": -1.0, "y_max_m": 1.0,
+            "length_m": 2 * half, "width_m": 2.0}}), encoding="utf-8")
     if speed_limit_kmh is not None:
         (root / "incident_context.json").write_text(json.dumps({"speed_limit_kmh": speed_limit_kmh}),
                                                     encoding="utf-8")

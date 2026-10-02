@@ -5,8 +5,8 @@ This runs only after every local graph exists and the alignment is known.
 1. ``associate_tracks`` decides, for each anonymous local track, whether it can
    be named after another recorder.  Each matched collision of the recorder
    names a partner; the track must be its recorder's only persistent,
-   continuous, approaching, speed-consistent track at that contact (the range
-   at the contact weighs the confidence, it is no veto) and compatible with no
+   continuous, approaching, speed-consistent track at that contact (the
+   clearance at the contact weighs the confidence, it is no veto) and compatible with no
    other partner.  With insufficient, ambiguous or conflicting evidence the
    track keeps an anonymous global name such as ``A:track_001``: nothing is
    guessed.
@@ -58,16 +58,20 @@ def _speed_rmse(track: LocalTrack, clock: GraphClock, partner: LocalReconstructi
 
 
 def _approach(track: LocalTrack, t_contact: float, cfg: FusionConfig) -> Optional[tuple]:
-    """(range at the start, range at the end) of the last ``approach_window_s`` of tracking before the contact."""
+    """(clearance at the start, clearance at the end) of the last ``approach_window_s`` of tracking before the contact.
+
+    The clearance (free distance from the recorder's own footprint to the
+    target's near surface) rather than the range from the radar, which sits at
+    the centre of the vehicle."""
     end = min(track.last_t, t_contact)
     window = [sample for sample in track.samples if end - cfg.approach_window_s - 1e-6 <= sample.t_local <= end + 1e-6]
     if len(window) < 2:
         return None
-    return window[0].range_m, window[-1].range_m
+    return window[0].clearance_m, window[-1].clearance_m
 
 
 def _range_factor(range_m: float, cfg: FusionConfig) -> float:
-    """Confidence factor of the range at the contact: 1 up to ``contact_range_m``, then decaying."""
+    """Confidence factor of the clearance at the contact: 1 up to ``contact_range_m``, then decaying."""
     excess = max(range_m - cfg.contact_range_m, 0.0)
     return math.exp(-0.5 * (excess / cfg.contact_range_scale_m) ** 2)
 
@@ -89,7 +93,7 @@ class _Evidence:
 
 def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: LocalReconstruction,
               partner_clock: GraphClock, cfg: FusionConfig) -> _Evidence:
-    """Hierarchical evidence for one contact; every check but the range at the contact is required."""
+    """Hierarchical evidence for one contact; every check but the clearance at the contact is required."""
     evidence = _Evidence()
 
     seen_for = t_contact - track.first_t
@@ -112,7 +116,7 @@ def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: L
         evidence.check(False, "range trend before the contact not measurable")
     else:
         first, last = approach
-        evidence.check(last < first, "{0} before the contact: range {1:.1f} m -> {2:.1f} m over the last {3:.1f} s".format(
+        evidence.check(last < first, "{0} before the contact: clearance {1:.1f} m -> {2:.1f} m over the last {3:.1f} s".format(
             "approaching" if last < first else "not approaching", first, last, cfg.approach_window_s))
 
     start = max(track.first_t, t_contact - SPEED_WINDOW_S)
@@ -128,13 +132,13 @@ def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: L
                            "" if evidence.rmse <= cfg.speed_consistency_mps
                            else " (> {0:.2f})".format(cfg.speed_consistency_mps)))
 
-    near = [sample.range_m for sample in track.samples
+    near = [sample.clearance_m for sample in track.samples
             if t_contact - cfg.contact_window_s - 1e-6 <= sample.t_local <= t_contact + 1e-6]
     if near:
         evidence.range_at_contact = min(near)
         factor = _range_factor(evidence.range_at_contact, cfg)
-        # Evidence, not a veto: radar mount, vehicle geometry and impact angle can keep it high.
-        evidence.lines.append("range at the contact {0:.2f} m{1}".format(
+        # Evidence, not a veto: vehicle geometry, impact angle and a roof radar's view can keep it high.
+        evidence.lines.append("clearance at the contact {0:.2f} m{1}".format(
             evidence.range_at_contact, "" if factor >= 0.999 else
             " (beyond {0:.2f} m: confidence factor {1:.2f})".format(cfg.contact_range_m, factor)))
     return evidence
@@ -159,7 +163,7 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
     of that contact.  Per contact, a track is compatible with the partner when
     it is persistent, observed up to the contact (no TRACK_LOST before the
     contact window), approaching, and moving at the partner's own speed; the
-    range at the contact only weighs the confidence.  A track is named after a
+    clearance at the contact only weighs the confidence.  A track is named after a
     partner when it is its recorder's only compatible track for a contact with
     that partner and is compatible with no other partner.  Two or more
     compatible tracks for one contact are an ambiguity, one track compatible
@@ -246,7 +250,7 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
                                                 collision_event=basis["event_id"]))
             else:
                 lines.append("the only track of {0} compatible with the contact".format(owner))
-                # Confidence: collision match, reduced by speed disagreement and by a long range at the contact.
+                # Confidence: collision match, reduced by speed disagreement and by a long clearance at the contact.
                 confidence = (basis["confidence"] * math.exp(-0.5 * (item.rmse / cfg.speed_consistency_mps) ** 2)
                               * (_range_factor(item.range_at_contact, cfg) if item.range_at_contact is not None
                                  else 1.0))

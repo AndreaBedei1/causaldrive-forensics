@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e07",
+      "anchor_node": "A:e12",
       "anchor_t_local": 5.7,
       "offset_to_global": -5.7,
       "chain": [
@@ -15,7 +15,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e12",
+      "anchor_node": "B:e17",
       "anchor_t_local": 5.7,
       "offset_to_global": -5.7,
       "chain": [
@@ -43,8 +43,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e07",
-        "B": "B:e12"
+        "A": "A:e12",
+        "B": "B:e17"
       },
       "t_local": {
         "A": 5.7,

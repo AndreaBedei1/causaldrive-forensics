@@ -1,32 +1,48 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 182.38253811746836 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 239.17912420257926 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 101 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (9.95 s)
-- Anonymous radar tracks: 0 (10 Hz samples in `local_tracks.jsonl`)
+- Anonymous radar tracks: 1 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 5; edges: 4 (PRECEDES 4)
+- Nodes: 10; edges: 15 (PRECEDES 11, SAME_TRACK 4)
 
 ## Nodes
 
 | Id | Local time | Type | Actor | Subject | Source | Details |
 |----|-----------:|------|-------|---------|--------|---------|
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
-| A:e02 | 3.95 | BRAKE_START | A | - | controls |  |
-| A:e03 | 5.15 | COLLISION | A | - | collision_sensor | peak_impulse=6073.81 |
-| A:e04 | 5.75 | MOVING_END | A | - | ego |  |
-| A:e05 | 5.75 | STOP_START | A | - | ego |  |
+| A:e02 | 0.00 | TRACK_APPEARED_REAR | A | track_001 | radar |  |
+| A:e03 | 0.70 | CLOSING_START | A | track_001 | radar |  |
+| A:e04 | 1.40 | CLOSING_END | A | track_001 | radar |  |
+| A:e05 | 3.95 | BRAKE_START | A | - | controls |  |
+| A:e06 | 4.20 | CLOSING_START | A | track_001 | radar |  |
+| A:e07 | 5.15 | COLLISION | A | - | collision_sensor | peak_impulse=6073.81 |
+| A:e08 | 5.15 | CLOSING_END | A | track_001 | radar |  |
+| A:e09 | 5.75 | MOVING_END | A | - | ego |  |
+| A:e10 | 5.75 | STOP_START | A | - | ego |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
 ## Edges
 
 ```
-    A:e01 --PRECEDES--> A:e02
+    A:e01 --PRECEDES--> A:e03
     A:e02 --PRECEDES--> A:e03
     A:e03 --PRECEDES--> A:e04
-    A:e03 --PRECEDES--> A:e05
+    A:e04 --PRECEDES--> A:e05
+    A:e05 --PRECEDES--> A:e06
+    A:e06 --PRECEDES--> A:e07
+    A:e06 --PRECEDES--> A:e08
+    A:e07 --PRECEDES--> A:e09
+    A:e07 --PRECEDES--> A:e10
+    A:e08 --PRECEDES--> A:e09
+    A:e08 --PRECEDES--> A:e10
+    A:e02 --SAME_TRACK--> A:e03
+    A:e02 --SAME_TRACK--> A:e04
+    A:e02 --SAME_TRACK--> A:e06
+    A:e02 --SAME_TRACK--> A:e08
 ```
 
 ## Perceived state before each event
@@ -35,15 +51,18 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
-| 0.00 | A:e01 MOVING_START | ego: not yet observed | - |
-| 3.95 | A:e02 BRAKE_START | ego: MOVING | 3.90 |
-| 5.15 | A:e03 COLLISION | ego: MOVING, BRAKE | 5.10 |
-| 5.75 | A:e04 MOVING_END<br>A:e05 STOP_START | ego: MOVING, BRAKE | 5.70 |
+| 0.00 | A:e01 MOVING_START<br>A:e02 TRACK_APPEARED_REAR track_001 | ego: not yet observed | - |
+| 0.70 | A:e03 CLOSING_START track_001 | ego: MOVING<br>track_001: no active state | 0.60 |
+| 1.40 | A:e04 CLOSING_END track_001 | ego: MOVING<br>track_001: CLOSING | 1.30 |
+| 3.95 | A:e05 BRAKE_START | ego: MOVING<br>track_001: no active state | 3.90 |
+| 4.20 | A:e06 CLOSING_START track_001 | ego: MOVING, BRAKE<br>track_001: no active state | 4.10 |
+| 5.15 | A:e07 COLLISION<br>A:e08 CLOSING_END track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING | 5.10 |
+| 5.75 | A:e09 MOVING_END<br>A:e10 STOP_START | ego: MOVING, BRAKE<br>track_001: no active state | 5.70 |
 
 ## States still active when observation ended
 
-- BRAKE, since A:e02 (t = 3.95 s)
-- STOP, since A:e05 (t = 5.75 s)
+- BRAKE, since A:e05 (t = 3.95 s)
+- STOP, since A:e10 (t = 5.75 s)
 
 ## Tracks lost
 
@@ -63,12 +82,21 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 ## Anonymous radar tracks
 
-No radar track: nothing moving stayed in A's forward radar view long enough.
+| Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
+|-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
+| track_001 | 0.00 | 9.95 | 200 | 6.2 m / -180 deg | 3.74 m (5.15) | 4.9 m / -180 deg | 13.3 m/s |
+
+Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
 ## Plain-language reading
 
 - t = 0.00 s: A started moving (already the case when first observed).
+- t = 0.00 s: A's radar started tracking track_001, which appeared behind it.
+- t = 0.70 s: A observed track_001 start closing in.
+- t = 1.40 s: A observed track_001 stop closing in.
 - t = 3.95 s: A started braking.
+- t = 4.20 s: A observed track_001 start closing in.
 - t = 5.15 s: A's collision sensor recorded a contact (peak impulse 6074 N*s).
+- t = 5.15 s: A observed track_001 stop closing in.
 - t = 5.75 s: A stopped moving.
 - t = 5.75 s: A came to a stop.

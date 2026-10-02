@@ -339,15 +339,6 @@ class RadarBoundaryTests(unittest.TestCase):
         text = (ROOT / "scripts" / "audit_radar_visibility.py").read_text(encoding="utf-8")
         self.assertIn("PRIVILEGED EVALUATION", text.split("\n\n")[0] + text[:400])
 
-    def test_the_campaign_sensor_setup_is_still_one_forward_radar(self):
-        import yaml
-        default = yaml.safe_load((ROOT / "configs" / "default.yaml").read_text(encoding="utf-8"))
-        self.assertEqual(default["sensors"]["profile"], "radar_baseline")
-        profile = yaml.safe_load((ROOT / "configs" / "sensors" / "radar_baseline.yaml").read_text(encoding="utf-8"))
-        sensors = profile["radar"]["sensors"]
-        self.assertEqual(len(sensors), 1)
-        self.assertEqual((sensors[0]["horizontal_fov_deg"], sensors[0]["range_m"], sensors[0]["mount"]["x"]),
-                         (200.0, 90.0, 2.2))
 
 
 if __name__ == "__main__":

@@ -1,20 +1,37 @@
-# Baseline automotive front radar.
-# Values chosen to match a typical mid-range automotive radar and verified to
-# deliver ~79 frames per 80 synchronous ticks on the tested CARLA build.
+# Baseline radar of every vehicle: the logical surround sensor.
 radar:
   profile_name: "baseline"
   sensors:
-    - sensor_id: "front"
+    # One LOGICAL 360-degree radar centred over the vehicle: the aggregate
+    # coverage of the radars distributed around a car.  CARLA's radar cannot
+    # cover 180 degrees or more (its rays fill a cone of half-width
+    # tan(fov/2) x range: measured 200 -> +-80 deg, 360 -> a slice at 0 deg), so
+    # six co-located CARLA radars of 90 deg at yaws 0, 60, ..., 300 deg (15 deg
+    # overlap each side) are merged into this one sensor frame at recording time;
+    # the reconstruction sees only the logical sensor.
+    - sensor_id: "surround"
       blueprint: "sensor.other.radar"
-      horizontal_fov_deg: 200.0
-      vertical_fov_deg: 10.0
-      range_m: 90.0
-      points_per_second: 6000
+      horizontal_fov_deg: 360.0
+      physical_radars: 6
+      physical_horizontal_fov_deg: 90.0
+      # 30 deg: from the roof the sensor must look down onto close, lower cars (an
+      # audi.tt 0.3 m beside a model3: seen in every sweep at +-15 deg, 0-80 % at +-10).
+      vertical_fov_deg: 30.0
+      range_m: 90.0            # radial: returns beyond it are dropped
+      # Total over the six radars.
+      # 2 x 10800 (= 6000 x 360/200): the vertical FOV grew from 10 to 30 deg, and at
+      # 10800 a car 25-40 m away got 3-4x fewer returns than from the former 200 deg
+      # radar (measured in CARLA); 21600 gives 0.5-1.3x the former returns at 25-60 m.
+      points_per_second: 21600
       sensor_tick_s: 0.05
       mount:
-        x: 2.2      # metres forward of the vehicle origin
+        x: 0.0                    # centred over the vehicle origin
         y: 0.0
-        z: 1.0
+        # Fixed clearance above the vehicle's OWN roof (top of its bounding box):
+        # model3 1.78 m, audi.tt 1.69 m, nissan.patrol 2.16 m, sprinter 2.87 m.
+        # A single absolute height cannot serve the campaign's 1.39-2.57 m roofs
+        # (at 2.8 m a sedan does not see a car within 2-8 m of it).
+        z_above_roof_m: 0.30
         yaw_deg: 0.0
         pitch_deg: 0.0
   degradation:

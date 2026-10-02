@@ -33,8 +33,8 @@ from ..recording.compact_observations import load_observation_stream
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
-from .tracking import (MIN_CLOSING_FOR_TTC_MPS, EgoState, EgoTrajectory, LocalTrack, RadarMount, TrackSample,
-                       build_local_tracks, ego_trajectory)
+from .tracking import (MIN_CLOSING_FOR_TTC_MPS, EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount,
+                       TrackSample, build_local_tracks, ego_trajectory)
 from .world_state import UNKNOWN, PerceivedWorld, span_values
 
 # A pedal release shorter than this is a noisy dip, not the end of the action.
@@ -293,16 +293,19 @@ def velocity_jump(ego: EgoTrajectory, t_local: float, period: float) -> Tuple[fl
     return math.hypot(dvx, dvy) / (2.0 * period), math.atan2(dvy, dvx)
 
 
-def _reversed_impact(ego: EgoTrajectory, contact_t: float, burst_t: float, period: float,
-                     cfg: CollisionConfig) -> Optional[float]:
-    """Angle (deg) between two impact-like velocity jumps more than ``reversal_angle_deg`` apart, else None."""
+def impact_direction_angle(ego: EgoTrajectory, contact_t: float, burst_t: float, period: float,
+                           cfg: CollisionConfig) -> Optional[float]:
+    """Angle (deg) between the recorder's own velocity jumps at a contact's start and at a later burst.
+
+    None unless both are impact-like (mean acceleration of at least
+    ``impact_acceleration_mps2`` across the callback: no tyre can do that).
+    """
     if period <= 0.0:
         return None
     first, second = velocity_jump(ego, contact_t, period), velocity_jump(ego, burst_t, period)
     if min(first[0], second[0]) < cfg.impact_acceleration_mps2:
         return None
-    angle = abs(math.degrees(math.remainder(second[1] - first[1], 2.0 * math.pi)))
-    return angle if angle > cfg.reversal_angle_deg else None
+    return abs(math.degrees(math.remainder(second[1] - first[1], 2.0 * math.pi)))
 
 
 def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
@@ -311,19 +314,21 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
 
     The sensor calls back once per sample while the bodies touch and reports
     the impulse magnitude only (no partner).  Callbacks without a missing
-    sample between them form a burst.  A burst starts a new contact when
+    sample between them form a burst.  A burst more than ``merge_gap_s`` after
+    the previous callback starts a new contact.  A burst after a shorter break
+    (at least one sample without a callback) is judged by its peak relative to
+    the current contact's peak:
 
-    1. more than ``merge_gap_s`` passed since the previous callback; or
-    2. it follows a break (at least one sample without a callback) and peaks
-       at ``new_impact_ratio`` x the current contact's peak or more; or
-    3. supplementary evidence: it follows a break, peaks at
-       ``reversal_impact_ratio`` x the contact's peak or more, and the
-       recorder's own velocity jumps like an impact both at the contact's start
-       and at the burst's, in directions more than ``reversal_angle_deg`` apart.
+    - at least ``new_impact_ratio``: a new contact (a new impact);
+    - below ``min_impact_ratio``: the same contact (persistent contact);
+    - in between, the recorder's own velocity jumps decide when both, at the
+      contact's start and at the burst's, are impact-like: in directions more
+      than ``reversal_angle_deg`` apart a new contact (struck from the other
+      side), otherwise the same one (a rebound pushes the same way again);
+      without such evidence a new contact from ``undirected_impact_ratio``.
 
-    Any other burst continues the current contact (rebound, persistent
-    contact).  The COLLISION is at the contact's first callback and keeps its
-    peak impulse, which graph alignment needs to recognise the same contact in
+    The COLLISION is at the contact's first callback and keeps its peak
+    impulse, which graph alignment needs to recognise the same contact in
     another recorder; a contact started within ``merge_gap_s`` of the previous
     one also states why.  Every callback stays in the raw log.
     """
@@ -344,17 +349,25 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
         attributes: Dict[str, Any] = {}
         if current is not None and burst["first"] - current["last"] <= cfg.merge_gap_s:
             ratio = burst["peak"] / current["peak"] if current["peak"] > 0 else math.inf
-            reversal = None
-            if cfg.reversal_impact_ratio <= ratio < cfg.new_impact_ratio:
-                reversal = _reversed_impact(ego, current["first"], burst["first"], period, cfg)
-            if ratio < cfg.new_impact_ratio and reversal is None:
+            angle = None
+            if ratio >= cfg.new_impact_ratio:
+                new, evidence = True, "peak"
+            elif ratio < cfg.min_impact_ratio:
+                new, evidence = False, None
+            else:
+                angle = impact_direction_angle(ego, current["first"], burst["first"], period, cfg)
+                if angle is not None:
+                    new, evidence = angle > cfg.reversal_angle_deg, "reversed velocity jump"
+                else:
+                    new, evidence = ratio >= cfg.undirected_impact_ratio, "peak without direction evidence"
+            if not new:
                 current["last"] = burst["last"]
                 current["peak"] = max(current["peak"], burst["peak"])
                 continue
             attributes["new_contact"] = {"break_s": round(burst["first"] - current["last"], 2),
-                                         "peak_ratio": round(ratio, 2)}
-            if reversal is not None:
-                attributes["new_contact"]["reversal_deg"] = round(reversal)
+                                         "peak_ratio": round(ratio, 2), "evidence": evidence}
+            if angle is not None:
+                attributes["new_contact"]["reversal_deg"] = round(angle)
         contacts.append(dict(burst, attributes=attributes))
     return [SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
                           attributes=dict({"peak_impulse": round(contact["peak"], 2)}, **contact["attributes"]),
@@ -460,16 +473,21 @@ class RelativeMotion:
     lateral_speed_mps: float  # + = to the recorder's right
     heading_deg: Optional[float]  # target's direction of motion minus the recorder's heading
     t_cpa_s: Optional[float]  # time of closest approach of the relative motion (None: no relative motion)
-    d_cpa_m: Optional[float]  # predicted miss distance at that time
+    d_cpa_m: Optional[float]  # predicted miss distance at that time, from the radar
     known: bool  # the estimate is precise enough for semantic claims
+    d_cpa_clearance_m: Optional[float] = None  # that miss distance as a clearance (near surface to footprint edge)
 
 
-def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig) -> RelativeMotion:
+def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig,
+                    footprint: Optional[EgoFootprint] = None) -> RelativeMotion:
     """Constant-velocity closest point of approach of the target relative to the radar.
 
-    r = (longitudinal, lateral) of the target's surface from the radar and v =
+    r = (longitudinal, lateral) of the tracked point from the radar and v =
     target velocity - recorder velocity, both in the recorder's frame:
-    t_CPA = -(r . v) / |v|^2 and d_CPA = |r + v t_CPA|.
+    t_CPA = -(r . v) / |v|^2 and d_CPA = |r + v t_CPA| (relative coordinates:
+    unchanged by the mount).  ``d_cpa_clearance_m`` is that miss distance seen
+    from the recorder's footprint edge, less the depth of the tracked point
+    behind the target's near surface.
     """
     c, s = math.cos(own.heading), math.sin(own.heading)
     dvx, dvy = sample.vx_mps - own.vx, sample.vy_mps - own.vy
@@ -478,12 +496,15 @@ def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig) ->
     if sample.speed_mps >= 1.0:
         heading = (math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - own.heading) + 180.0) % 360.0 - 180.0
     speed2 = v_long * v_long + v_lat * v_lat
-    t_cpa = d_cpa = None
+    t_cpa = d_cpa = d_cpa_clearance = None
     if speed2 >= MIN_RELATIVE_SPEED_MPS ** 2:
         t_cpa = -(sample.longitudinal_m * v_long + sample.lateral_m * v_lat) / speed2
-        d_cpa = math.hypot(sample.longitudinal_m + v_long * t_cpa, sample.lateral_m + v_lat * t_cpa)
+        cpa_long, cpa_lat = sample.longitudinal_m + v_long * t_cpa, sample.lateral_m + v_lat * t_cpa
+        d_cpa = math.hypot(cpa_long, cpa_lat)
+        extent = footprint.extent(math.atan2(cpa_lat, cpa_long)) if footprint is not None else 0.0
+        d_cpa_clearance = max(d_cpa - extent - sample.surface_offset_m, 0.0)
     known = sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
-    return RelativeMotion(v_long, v_lat, heading, t_cpa, d_cpa, known)
+    return RelativeMotion(v_long, v_lat, heading, t_cpa, d_cpa, known, d_cpa_clearance)
 
 
 def motion_relation(sample: TrackSample, motion: RelativeMotion, cfg: SemanticsConfig) -> str:
@@ -501,14 +522,17 @@ def motion_relation(sample: TrackSample, motion: RelativeMotion, cfg: SemanticsC
 
 
 def appearance_side(bearing_deg: float, cfg: SemanticsConfig) -> str:
-    """FRONT, LEFT or RIGHT: where a track entered the recorder's radar field.
+    """FRONT, REAR, LEFT or RIGHT: where a track entered the recorder's radar field.
 
     From the track's own azimuth at its first detection, seen from the radar
-    (negative = left): within ``track_appeared_front_deg`` of the recorder's
-    heading it appeared in front, otherwise on that side.
+    (negative = left, +-180 = behind): within ``track_appeared_front_deg`` of the
+    recorder's heading it appeared in front, within ``track_appeared_rear_deg``
+    of the opposite direction behind, otherwise on that side.
     """
     if abs(bearing_deg) <= cfg.track_appeared_front_deg:
         return "FRONT"
+    if abs(bearing_deg) >= 180.0 - cfg.track_appeared_rear_deg:
+        return "REAR"
     return "LEFT" if bearing_deg < 0 else "RIGHT"
 
 
@@ -539,8 +563,10 @@ def critical_ttc_assessment(ego_speed_mps: float, target_longitudinal_speed_mps:
                             range_m: float, cfg: SemanticsConfig) -> CriticalTtcAssessment:
     """Braking avoidability of a target, from local quantities only.
 
-    TTC = range / closing speed (line of sight; the recorder's own odometry and
-    the radar track's estimated velocity).  To avoid the target by braking the
+    TTC = clearance / closing speed (the free distance from the recorder's
+    footprint edge to the target's near surface, and the line-of-sight range
+    rate from the recorder's own odometry and the radar track's estimated
+    velocity).  ``range_m`` is that clearance.  To avoid the target by braking the
     recorder must lose the longitudinal speed
 
         v_shed = v_ego - min(max(v_target_long, 0), v_ego)
@@ -583,7 +609,7 @@ def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory,
     for sample in samples:
         own = ego.at(sample.t_local)
         along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
-        out.append(critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.range_m, cfg))
+        out.append(critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.clearance_m, cfg))
     return out
 
 
@@ -591,7 +617,7 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
                  cfg: SemanticsConfig) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
 
-    Kinematic only: a target ahead, moving within ``cut_in_max_heading_deg`` of
+    Kinematic only: a target ahead of the recorder's front edge, moving within ``cut_in_max_heading_deg`` of
     the recorder's heading (so not crossing traffic), approaches the corridor
     laterally at ``cut_in_lateral_speed_mps`` or more without interruption.
     The cut-in STARTS once that run has lasted ``cut_in_persistence_s``,
@@ -627,7 +653,7 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
         toward = -side * motion.lateral_speed_mps
         parallel = (motion.heading_deg is not None and abs(motion.heading_deg) <= cfg.cut_in_max_heading_deg
                     and sample.speed_mps >= cfg.cut_in_min_target_speed_mps)
-        if not (sample.longitudinal_m > 0 and parallel and toward >= cfg.cut_in_lateral_speed_mps):
+        if not (sample.ahead_m > 0 and parallel and toward >= cfg.cut_in_lateral_speed_mps):
             run = None
             continue
         if run is None or run[1] != side:
@@ -648,8 +674,9 @@ def _stationary_ego() -> EgoTrajectory:
 
 
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
-                 ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
-    """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
+                 ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None,
+                 footprint: Optional[EgoFootprint] = None) -> List[SemanticEvent]:
+    """TRACK_APPEARED_FRONT/REAR/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
     The appearance side comes from the track's azimuth at its first detection
@@ -662,17 +689,18 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     ego = ego or _stationary_ego()
     samples = track.samples
     times = [round(sample.t_local, 4) for sample in samples]
-    motions = [relative_motion(sample, ego.at(sample.t_local), cfg) for sample in samples]
+    motions = [relative_motion(sample, ego.at(sample.t_local), cfg, footprint) for sample in samples]
     subject = track.track_id
     events = [SemanticEvent(type="TRACK_APPEARED_" + appearance_side(samples[0].bearing_deg, cfg), kind=PERCEPTION,
                             actor_id=owner, subject_id=subject, t_local=times[0], source="radar")]
 
-    # Inside: ahead and within the corridor.  Out again only when clearly beside
-    # or behind the radar (at contact the target sits right at the radar plane).
+    # Inside: ahead of the recorder's front edge and within the corridor.  Out
+    # again only when clearly beside or behind that edge (at contact the target
+    # sits right at it).
     corridor = cfg.path_half_width_m
     path = active_intervals(times, samples,
-                            lambda s: s.longitudinal_m > 0 and abs(s.lateral_m) <= corridor,
-                            lambda s: (s.longitudinal_m < -PATH_HYSTERESIS_M
+                            lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
+                            lambda s: (s.ahead_m < -PATH_HYSTERESIS_M
                                        or abs(s.lateral_m) > corridor + PATH_HYSTERESIS_M))
     # A track first seen inside the corridor has no observed entry.
     events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
@@ -739,7 +767,8 @@ def number_events(owner: str, events: List[SemanticEvent]) -> List[SemanticEvent
 # --------------------------------------------------------------------------
 
 def _where(sample: TrackSample) -> Dict[str, Any]:
-    return {"range_m": round(sample.range_m, 2), "bearing_deg": round(sample.bearing_deg, 1),
+    return {"range_m": round(sample.range_m, 2), "clearance_m": round(sample.clearance_m, 2),
+            "bearing_deg": round(sample.bearing_deg, 1),
             "lateral_m": round(sample.lateral_m, 2), "closing_speed_mps": round(sample.closing_speed_mps, 2)}
 
 
@@ -774,6 +803,8 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
     frame (vx/vy), uncertainty, the motion relative to the recorder and the
     braking need behind CRITICAL_TTC."""
     attributes = dict(_where(sample), longitudinal_m=round(sample.longitudinal_m, 2),
+                      ahead_of_front_m=round(sample.ahead_m, 2), ego_extent_m=round(sample.ego_extent_m, 2),
+                      surface_offset_m=round(sample.surface_offset_m, 2),
                       ttc_s=None if sample.ttc_s is None else round(sample.ttc_s, 2),
                       speed_mps=round(sample.speed_mps, 2),
                       x_m=round(sample.x_m, 2), y_m=round(sample.y_m, 2),
@@ -786,7 +817,8 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
             relative_lateral_speed_mps=round(motion.lateral_speed_mps, 2),
             relative_motion_angle_deg=_rounded(motion.heading_deg, 1),
             motion_relation=motion_relation(sample, motion, cfg or SemanticsConfig()),
-            t_cpa_s=_rounded(motion.t_cpa_s, 2), d_cpa_m=_rounded(motion.d_cpa_m, 2))
+            t_cpa_s=_rounded(motion.t_cpa_s, 2), d_cpa_m=_rounded(motion.d_cpa_m, 2),
+            d_cpa_clearance_m=_rounded(motion.d_cpa_clearance_m, 2))
     if critical is not None:
         required = critical.required_deceleration_mps2
         attributes.update(
@@ -804,7 +836,7 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
 def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, Any]],
                 tracks: Sequence[LocalTrack], events: Sequence[SemanticEvent],
                 clock_origin: float, trace_hz: float, semantics: Optional[SemanticsConfig] = None,
-                world: Optional[PerceivedWorld] = None) -> List[TraceFrame]:
+                world: Optional[PerceivedWorld] = None, footprint: Optional[EgoFootprint] = None) -> List[TraceFrame]:
     """Sample what the recorder knows every 1/trace_hz seconds of its own clock.
 
     When the recording ends between two grid instants, one last frame is added
@@ -839,9 +871,9 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
                 sample = track.sample_near(t_local)
                 if sample is not None:
                     own = ego.at(sample.t_local)
-                    motion = relative_motion(sample, own, semantics)
+                    motion = relative_motion(sample, own, semantics, footprint)
                     along = math.cos(own.heading) * sample.vx_mps + math.sin(own.heading) * sample.vy_mps
-                    critical = critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.range_m,
+                    critical = critical_ttc_assessment(own.speed, along, sample.closing_speed_mps, sample.clearance_m,
                                                        semantics)
                     facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics, critical))
         frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
@@ -882,6 +914,12 @@ class LocalReconstruction:
     graph: LocalGraph
 
 
+def vehicle_metadata(vehicle_dir: Path) -> Dict[str, Any]:
+    """The vehicle's own metadata.json ({} if absent)."""
+    path = Path(vehicle_dir) / "metadata.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
 def _sign_track_gap(vehicle_dir: Path) -> float:
     """The camera sign tracker's gap, as recorded in the vehicle's own metadata."""
     path = vehicle_dir / "metadata.json"
@@ -915,10 +953,16 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     ego = ego_trajectory(ego_records, clock_origin)
 
     tracks: List[LocalTrack] = []
+    # The recorder's own shape (its bounding box, recorded with its metadata):
+    # radar ranges become clearances from its skin.
+    footprint_record = vehicle_metadata(vehicle_dir).get("ego_footprint")
+    footprint = mount = None
+    radar_stats: Dict[str, Any] = {}
     if (vehicle_dir / "radar").exists():
         radar = load_observation_stream(vehicle_dir, source="radar")
-        tracks = build_local_tracks(radar, ego, RadarMount.from_metadata(radar.metadata),
-                                    clock_origin, cfg.tracking)
+        mount = RadarMount.from_metadata(radar.metadata)
+        footprint = EgoFootprint.from_metadata(footprint_record, mount)
+        tracks = build_local_tracks(radar, ego, mount, clock_origin, cfg.tracking, footprint, radar_stats)
 
     semantics = cfg.semantics
     world = PerceivedWorld()
@@ -929,10 +973,11 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     events += collision_events(owner, collisions, clock_origin, cfg.collision, ego)
     events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
     for track in tracks:
-        events += track_events(owner, track, ego.end, semantics, ego, world)
+        events += track_events(owner, track, ego.end, semantics, ego, world, footprint)
     events = number_events(owner, events)
 
-    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world)
+    trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world,
+                        footprint)
     frame_times = [frame.t_local for frame in trace]
     for event in events:
         # The state just before the event: all events at one timestamp share it.
@@ -955,6 +1000,13 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         "inputs": sorted(name for name in ("ego.jsonl", "controls.jsonl", "collisions.jsonl",
                                            "traffic_signs.jsonl", "radar")
                          if (vehicle_dir / name).exists()),
+        "radar": None if mount is None else {
+            "mount": {"x": mount.x, "y": mount.y, "z": round(mount.z, 4), "yaw_deg": round(math.degrees(mount.yaw), 3)},
+            "ego_footprint": footprint_record,
+            "clearance": ("clearance = max(0, planar range - extent of the own footprint along the bearing); "
+                          "range when the footprint is unknown") if footprint is not None
+            else "own footprint unknown: clearance = range from the radar",
+            "own_body_returns_dropped": radar_stats.get("own_body_returns_dropped", 0)},
     }
     graph = build_local_graph(owner, trace, tracks, recorder)
     return LocalReconstruction(owner=owner, clock_origin=clock_origin, ego=ego,

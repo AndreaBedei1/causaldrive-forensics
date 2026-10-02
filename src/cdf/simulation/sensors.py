@@ -20,23 +20,58 @@ from .carla_client import import_carla
 
 @dataclass
 class RadarSpec:
-    sensor_id: str = "front"
+    """One LOGICAL radar of a vehicle.
+
+    CARLA's ``sensor.other.radar`` traces its rays inside a cone around its x
+    axis whose lateral half-width is ``tan(horizontal_fov / 2) x range``: a
+    horizontal FOV of 180 degrees or more folds back (measured on 0.9.15: 200 ->
+    +-80 deg, 270 -> +-45 deg, 360 -> a vertical slice at 0 deg, 180 -> no
+    return).  A wider logical sensor is therefore made of ``physical_radars``
+    co-located CARLA radars at yaws ``360 k / N`` (each
+    ``physical_horizontal_fov_deg`` wide, ``points_per_second / N`` rays) whose
+    returns are merged into this one sensor frame (``LogicalRadar``).  The
+    mount height is absolute (``mount_z``) or, with ``mount_z_above_roof_m``,
+    that much above the top of the vehicle's own bounding box.
+    """
+
+    sensor_id: str = "surround"
     blueprint: str = "sensor.other.radar"
-    horizontal_fov_deg: float = 200.0
-    vertical_fov_deg: float = 10.0
+    horizontal_fov_deg: float = 360.0
+    vertical_fov_deg: float = 30.0
     range_m: float = 90.0
-    points_per_second: int = 6000
+    points_per_second: int = 21600
     sensor_tick_s: float = 0.05
-    mount_x: float = 2.2
+    mount_x: float = 0.0
     mount_y: float = 0.0
-    mount_z: float = 1.0
+    mount_z: float = 0.0
+    mount_z_above_roof_m: Optional[float] = None
     mount_yaw_deg: float = 0.0
     mount_pitch_deg: float = 0.0
+    physical_radars: int = 1
+    physical_horizontal_fov_deg: Optional[float] = None
 
-    def attributes(self) -> Dict[str, Any]:
-        return {"horizontal_fov": self.horizontal_fov_deg, "vertical_fov": self.vertical_fov_deg,
-                "range": self.range_m, "points_per_second": self.points_per_second,
-                "sensor_tick": self.sensor_tick_s}
+    def physical_layout(self) -> List[Dict[str, float]]:
+        """Yaw (relative to the logical sensor), horizontal FOV and ray rate of each physical radar."""
+        count = int(self.physical_radars)
+        if count < 1:
+            raise ValueError("a radar needs at least one physical sensor")
+        each_fov = float(self.physical_horizontal_fov_deg or self.horizontal_fov_deg)
+        if each_fov >= 180.0:
+            raise ValueError("CARLA radars cannot exceed a 180 degree horizontal FOV ({0} requested); use "
+                             "physical_radars with physical_horizontal_fov_deg < 180".format(each_fov))
+        if count > 1 and count * each_fov < self.horizontal_fov_deg - 1e-6:
+            raise ValueError("{0} physical radars of {1} deg cannot cover {2} deg".format(
+                count, each_fov, self.horizontal_fov_deg))
+        if count > 1 and self.horizontal_fov_deg < 360.0 - 1e-6:
+            raise ValueError("several physical radars are spread over 360 degrees only")
+        return [{"yaw_deg": 360.0 * k / count if count > 1 else 0.0, "horizontal_fov_deg": each_fov,
+                 "points_per_second": int(round(self.points_per_second / count))} for k in range(count)]
+
+    def mount_height(self, vehicle: Any = None) -> float:
+        if self.mount_z_above_roof_m is None:
+            return float(self.mount_z)
+        box = vehicle.bounding_box
+        return float(box.location.z + box.extent.z + self.mount_z_above_roof_m)
 
 
 def radar_specs_from_config(cfg: Config) -> List[RadarSpec]:
@@ -46,46 +81,167 @@ def radar_specs_from_config(cfg: Config) -> List[RadarSpec]:
     out = []
     for e in entries:
         m = e.get("mount", {}) or {}
-        out.append(RadarSpec(sensor_id=str(e.get("sensor_id", "front")), blueprint=str(e.get("blueprint", "sensor.other.radar")),
-            horizontal_fov_deg=float(e.get("horizontal_fov_deg", 200)), vertical_fov_deg=float(e.get("vertical_fov_deg", 10)),
-            range_m=float(e.get("range_m", 90)), points_per_second=int(e.get("points_per_second", 6000)),
-            sensor_tick_s=float(e.get("sensor_tick_s", 0.05)), mount_x=float(m.get("x", 2.2)), mount_y=float(m.get("y", 0)),
-            mount_z=float(m.get("z", 1)), mount_yaw_deg=float(m.get("yaw_deg", 0)), mount_pitch_deg=float(m.get("pitch_deg", 0))))
+        above_roof = m.get("z_above_roof_m")
+        spec = RadarSpec(sensor_id=str(e.get("sensor_id", "surround")), blueprint=str(e.get("blueprint", "sensor.other.radar")),
+            horizontal_fov_deg=float(e.get("horizontal_fov_deg", 360)), vertical_fov_deg=float(e.get("vertical_fov_deg", 30)),
+            range_m=float(e.get("range_m", 90)), points_per_second=int(e.get("points_per_second", 21600)),
+            sensor_tick_s=float(e.get("sensor_tick_s", 0.05)), mount_x=float(m.get("x", 0.0)), mount_y=float(m.get("y", 0)),
+            mount_z=float(m.get("z", 0.0)), mount_z_above_roof_m=None if above_roof is None else float(above_roof),
+            mount_yaw_deg=float(m.get("yaw_deg", 0)), mount_pitch_deg=float(m.get("pitch_deg", 0)),
+            physical_radars=int(e.get("physical_radars", 1)),
+            physical_horizontal_fov_deg=None if e.get("physical_horizontal_fov_deg") is None
+            else float(e["physical_horizontal_fov_deg"]))
+        spec.physical_layout()  # validate before anything is spawned
+        out.append(spec)
     return out
 
 
-class RadarSensor:
-    def __init__(self, scenario_world: Any, vehicle: Any, spec: RadarSpec, max_queue: int = 64) -> None:
-        carla = import_carla(); self.spec = spec; self._queue = queue.Queue(maxsize=max_queue); self._dropped = 0; self._received = 0; self._delivered = 0
-        transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=spec.mount_z), carla.Rotation(pitch=spec.mount_pitch_deg, yaw=spec.mount_yaw_deg, roll=0))
-        self.sensor = scenario_world.spawn_sensor(spec.blueprint, transform, attach_to=vehicle, attributes=spec.attributes())
+def rotate_detections(rows: np.ndarray, yaw_deg: float, pitch_deg: float = 0.0) -> np.ndarray:
+    """Express detections of a physical radar (yaw, pitch relative to the logical sensor) in the logical frame.
+
+    ``rows`` are [depth, azimuth, altitude, radial velocity] (CARLA: x forward,
+    y right, z up; azimuth positive to the right).  Depth and the radial velocity
+    lie along the line of sight and do not change; only its direction does.
+    """
+    if not len(rows) or (abs(yaw_deg) < 1e-12 and abs(pitch_deg) < 1e-12):
+        return rows
+    out = np.array(rows, dtype=np.float64, copy=True)
+    az, alt = out[:, 1], out[:, 2]
+    x, y, z = np.cos(alt) * np.cos(az), np.cos(alt) * np.sin(az), np.sin(alt)
+    p, q = math.radians(pitch_deg), math.radians(yaw_deg)
+    x, z = x * math.cos(p) - z * math.sin(p), x * math.sin(p) + z * math.cos(p)  # nose-up pitch
+    x, y = x * math.cos(q) - y * math.sin(q), x * math.sin(q) + y * math.cos(q)  # yaw toward +y (right)
+    out[:, 1] = np.arctan2(y, x)
+    out[:, 2] = np.arcsin(np.clip(z, -1.0, 1.0))
+    return out
+
+
+class _PhysicalRadar:
+    """One CARLA radar actor with its frame-matched queue."""
+
+    def __init__(self, scenario_world: Any, vehicle: Any, spec: RadarSpec, layout: Dict[str, float], mount_z: float,
+                 max_queue: int) -> None:
+        carla = import_carla()
+        self.layout = layout
+        self._queue = queue.Queue(maxsize=max_queue)
+        self._pending: Optional[Any] = None  # a measurement of a later frame, kept for its own poll
+        self.dropped = self.received = self.delivered = 0
+        transform = carla.Transform(carla.Location(x=spec.mount_x, y=spec.mount_y, z=mount_z),
+                                    carla.Rotation(pitch=spec.mount_pitch_deg,
+                                                   yaw=spec.mount_yaw_deg + layout["yaw_deg"], roll=0))
+        attributes = {"horizontal_fov": layout["horizontal_fov_deg"], "vertical_fov": spec.vertical_fov_deg,
+                      "range": spec.range_m, "points_per_second": layout["points_per_second"],
+                      "sensor_tick": spec.sensor_tick_s}
+        self.sensor = scenario_world.spawn_sensor(spec.blueprint, transform, attach_to=vehicle, attributes=attributes)
         self.sensor.listen(self._on_measurement)
+
     def _on_measurement(self, measurement: Any) -> None:
-        self._received += 1
-        try: self._queue.put_nowait(measurement)
-        except queue.Full: self._dropped += 1
-    @property
-    def dropped(self) -> int: return self._dropped
-    def poll(self, frame: int, timeout_s: float = 2.0) -> Optional[Dict[str, Any]]:
+        self.received += 1
+        try:
+            self._queue.put_nowait(measurement)
+        except queue.Full:
+            self.dropped += 1
+
+    def take(self, frame: int, timeout_s: float) -> Optional[Any]:
+        """This radar's measurement of exactly ``frame`` (None if it has none)."""
+        if self._pending is not None:
+            if int(self._pending.frame) > int(frame):
+                return None
+            m, self._pending = self._pending, None
+            if int(m.frame) == int(frame):
+                self.delivered += 1
+                return m
         for _ in range(256):
-            try: m = self._queue.get(timeout=timeout_s)
-            except queue.Empty: return None
-            if int(m.frame) < int(frame): continue
-            self._delivered += 1
-            # d.velocity is kept native: the range rate, negative while the target approaches.
-            return {"frame": int(m.frame), "timestamp": float(m.timestamp), "sensor_id": self.spec.sensor_id,
-                    "source": "radar",
-                    "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": self.spec.mount_z,
-                                          "yaw_deg": self.spec.mount_yaw_deg, "pitch_deg": self.spec.mount_pitch_deg},
-                    "detections": [{"depth": float(d.depth), "azimuth": float(d.azimuth), "altitude": float(d.altitude), "radial_velocity": float(d.velocity)} for d in m]}
+            try:
+                m = self._queue.get(timeout=timeout_s)
+            except queue.Empty:
+                return None
+            if int(m.frame) < int(frame):
+                continue
+            if int(m.frame) > int(frame):
+                self._pending = m
+                return None
+            self.delivered += 1
+            return m
         return None
-    @property
-    def stats(self) -> Dict[str, Any]:
-        return {"callbacks_received": self._received, "queue_drops": self._dropped, "frames_delivered": self._delivered}
+
     def stop(self) -> None:
         try:
-            if self.sensor.is_listening: self.sensor.stop()
-        except RuntimeError: pass
+            if self.sensor.is_listening:
+                self.sensor.stop()
+        except RuntimeError:
+            pass
+
+
+def measurement_rows(measurement: Any) -> np.ndarray:
+    """CARLA radar measurement -> float array [depth, azimuth, altitude, radial velocity].
+
+    The raw buffer holds four float32 per detection: velocity, azimuth,
+    altitude, depth.  The velocity is kept native: the range rate, negative
+    while the target approaches.
+    """
+    raw = np.frombuffer(measurement.raw_data, dtype=np.float32).reshape(-1, 4)
+    return raw[:, [3, 1, 2, 0]].astype(np.float64)
+
+
+class RadarSensor:
+    """One logical radar: its physical CARLA radars merged into one sensor frame per tick."""
+
+    def __init__(self, scenario_world: Any, vehicle: Any, spec: RadarSpec, max_queue: int = 64) -> None:
+        self.spec = spec
+        self.mount_z = spec.mount_height(vehicle)
+        self.layout = spec.physical_layout()
+        self.physical = [_PhysicalRadar(scenario_world, vehicle, spec, layout, self.mount_z, max_queue)
+                         for layout in self.layout]
+        self._delivered = self._incomplete = self._beyond_range = 0
+
+    @property
+    def dropped(self) -> int:
+        return sum(radar.dropped for radar in self.physical)
+
+    def metadata(self) -> Dict[str, Any]:
+        """What the vehicle logger records about this sensor (logical frame, physical make-up)."""
+        out = dict(self.spec.__dict__)
+        out.update(mount_z=round(self.mount_z, 4), physical_layout=[dict(item) for item in self.layout])
+        return out
+
+    def poll(self, frame: int, timeout_s: float = 2.0) -> Optional[Dict[str, Any]]:
+        parts, timestamp = [], None
+        for radar in self.physical:
+            m = radar.take(frame, timeout_s)
+            if m is None:
+                continue
+            timestamp = float(m.timestamp) if timestamp is None else timestamp
+            rows = rotate_detections(measurement_rows(m), radar.layout["yaw_deg"])
+            parts.append((int(m.frame), rows))
+        if not parts:
+            return None
+        if len(parts) < len(self.physical):
+            self._incomplete += 1
+        rows = np.concatenate([r for _, r in parts]) if parts else np.empty((0, 4))
+        # Off its axis a CARLA radar reaches beyond its range (the range bounds the
+        # forward component only): the logical sensor keeps a radial range.
+        keep = rows[:, 0] <= self.spec.range_m
+        self._beyond_range += int((~keep).sum())
+        self._delivered += 1
+        return {"frame": parts[0][0], "timestamp": timestamp, "sensor_id": self.spec.sensor_id, "source": "radar",
+                "sensor_transform": {"x": self.spec.mount_x, "y": self.spec.mount_y, "z": round(self.mount_z, 4),
+                                     "yaw_deg": self.spec.mount_yaw_deg, "pitch_deg": self.spec.mount_pitch_deg},
+                "detections": rows[keep].astype(np.float32)}
+
+    @property
+    def stats(self) -> Dict[str, Any]:
+        return {"callbacks_received": sum(r.received for r in self.physical),
+                "queue_drops": self.dropped,
+                "frames_delivered": self._delivered,
+                "incomplete_frames": self._incomplete,
+                "returns_beyond_range_dropped": self._beyond_range,
+                "physical": [{"yaw_deg": r.layout["yaw_deg"], "callbacks_received": r.received,
+                              "queue_drops": r.dropped, "frames_delivered": r.delivered} for r in self.physical]}
+
+    def stop(self) -> None:
+        for radar in self.physical:
+            radar.stop()
 
 
 @dataclass

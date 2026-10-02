@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 98.80838467180729,
+      "sim_time": 115.33191868290305,
       "peak_impulse": 12077.216271677447,
-      "reconstructed_as": "g11",
+      "reconstructed_as": "g10",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -47,10 +47,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 20,
+    "nodes": 19,
     "max_abs_error_s": 0.0,
-    "order_pairs": 183,
-    "order_concordant": 183
+    "order_pairs": 163,
+    "order_concordant": 163
   },
   "tracks": [
     {
@@ -62,12 +62,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 21,
-      "raw_rmse_to_surface_m": 0.421,
-      "smoothed_rmse_to_surface_m": 0.504,
-      "smoothed_rmse_to_centre_m": 0.964,
-      "raw_difference_speed_rmse_mps": 4.85,
-      "speed_rmse_mps": 0.376
+      "samples": 24,
+      "raw_rmse_to_surface_m": 0.531,
+      "smoothed_rmse_to_surface_m": 0.548,
+      "smoothed_rmse_to_centre_m": 0.736,
+      "raw_difference_speed_rmse_mps": 9.083,
+      "speed_rmse_mps": 0.419
     },
     {
       "track": "B:track_001",
@@ -78,12 +78,38 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 129,
-      "raw_rmse_to_surface_m": 0.186,
-      "smoothed_rmse_to_surface_m": 0.369,
-      "smoothed_rmse_to_centre_m": 1.052,
-      "raw_difference_speed_rmse_mps": 3.397,
-      "speed_rmse_mps": 0.531
+      "samples": 131,
+      "raw_rmse_to_surface_m": 0.396,
+      "smoothed_rmse_to_surface_m": 0.4,
+      "smoothed_rmse_to_centre_m": 0.919,
+      "raw_difference_speed_rmse_mps": 3.692,
+      "speed_rmse_mps": 0.376
+    }
+  ],
+  "contact_clearances": [
+    {
+      "contact": "A + B",
+      "recorder": "A",
+      "partner": "B",
+      "track": "A:track_001",
+      "seen_s_before_contact": 0.05,
+      "clearance_m": 1.458,
+      "true_gap_m": 0.234,
+      "error_m": 1.224,
+      "range_m": 3.046,
+      "ttc_s": 0.096
+    },
+    {
+      "contact": "A + B",
+      "recorder": "B",
+      "partner": "A",
+      "track": "B:track_001",
+      "seen_s_before_contact": -0.05,
+      "clearance_m": 0.0,
+      "true_gap_m": 0.0,
+      "error_m": 0.0,
+      "range_m": 2.485,
+      "ttc_s": 0.0
     }
   ],
   "clock_shift_check": {

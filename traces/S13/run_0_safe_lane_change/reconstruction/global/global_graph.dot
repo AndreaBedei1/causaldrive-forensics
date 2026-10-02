@@ -12,10 +12,17 @@ digraph "global" {
   "g08" [label="EGO_PATH_ENTRY\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g09" [label="CUT_IN_FROM_LEFT_END\nA -> A:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g10" [label="MOVING_START\nB\nunaligned", fillcolor="#e5e7eb"];
+  "g11" [label="TRACK_APPEARED_RIGHT\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g12" [label="CLOSING_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g13" [label="CLOSING_END\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
+  "g14" [label="CLOSING_START\nB -> B:track_001\nunaligned", fillcolor="#bfdbfe"];
   "g02" -> "g03" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g02" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g11" -> "g12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g11" -> "g13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g11" -> "g14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

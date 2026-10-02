@@ -90,6 +90,7 @@ SENTENCES = {
     "SPEED_LIMIT_EXCEEDED_START": "{actor} began exceeding the speed limit",
     "SPEED_LIMIT_EXCEEDED_END": "{actor} returned within the speed limit",
     "TRACK_APPEARED_FRONT": "{actor}'s radar started tracking {subject}, which appeared in front of it",
+    "TRACK_APPEARED_REAR": "{actor}'s radar started tracking {subject}, which appeared behind it",
     "TRACK_APPEARED_LEFT": "{actor}'s radar started tracking {subject}, which appeared on its left",
     "TRACK_APPEARED_RIGHT": "{actor}'s radar started tracking {subject}, which appeared on its right",
     "TRACK_LOST": "{actor}'s radar lost {subject} (its states are UNKNOWN from then on, not ended)",
@@ -323,7 +324,7 @@ def local_graph_markdown(graph: LocalGraph) -> str:
         lines.append("Bearing: positive = to {0}'s right. Ranges are measured from the radar "
                      "to the visible surface of the object.".format(owner))
     else:
-        lines.append("No radar track: nothing moving stayed in {0}'s forward radar view long enough.".format(owner))
+        lines.append("No radar track: nothing moving stayed in {0}'s radar view long enough.".format(owner))
     lines += ["", "## Plain-language reading", ""]
     for node in graph.nodes:
         lines.append("- t = {0:.2f} s: {1}.".format(
@@ -584,7 +585,7 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
     notes = []
     for local in locals_:
         if not local.tracks:
-            notes.append("{0} built no radar track: nothing moving stayed in its forward radar view "
+            notes.append("{0} built no radar track: nothing moving stayed in its radar view "
                          "long enough, so {0} has no perception of the others.".format(local.owner))
     for item in associations:
         if item.status != ASSOCIATED:

@@ -190,18 +190,23 @@ class CompactObservationWriter:
         self._frames = []
         self._timestamps = []
         self._offsets = [0]
-        self._detections = []
+        self._detections = []  # one (n, 4) float32 block per frame with returns
+        self._count = 0
         self._closed = False
 
     def append(self, frame: int, timestamp: float, detections: Iterable[Any]) -> None:
         if self._closed:
             raise RuntimeError("cannot append after writer close")
-        rows = [_detection_row(detection) for detection in detections]
+        if isinstance(detections, np.ndarray):
+            rows = np.asarray(detections, dtype=np.float32).reshape(-1, 4)
+        else:
+            rows = [_detection_row(detection) for detection in detections]
         self._frames.append(int(frame))
         self._timestamps.append(float(timestamp))
-        if rows:
-            self._detections.extend(rows)
-        self._offsets.append(len(self._detections))
+        if len(rows):
+            self._detections.append(np.asarray(rows, dtype=np.float32).reshape(-1, 4))
+            self._count += len(rows)
+        self._offsets.append(self._count)
 
     @property
     def frames_written(self) -> int:
@@ -224,11 +229,8 @@ class CompactObservationWriter:
     def close(self, metadata_updates: Optional[Mapping[str, Any]] = None) -> None:
         if self._closed:
             return
-        detections = np.asarray(self._detections, dtype=np.float32)
-        if detections.size == 0:
-            detections = np.empty((0, 4), dtype=np.float32)
-        else:
-            detections = detections.reshape((-1, 4))
+        detections = (np.concatenate(self._detections).astype(np.float32) if self._detections
+                      else np.empty((0, 4), dtype=np.float32))
         np.savez_compressed(
             self.path,
             frames=np.asarray(self._frames, dtype=np.int64),

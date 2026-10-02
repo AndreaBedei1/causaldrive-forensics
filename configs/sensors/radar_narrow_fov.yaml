@@ -1,26 +1,42 @@
-# Former narrow field-of-view radar of scenario S07 (occluded variant).  Every
-# radar now has a 200 deg horizontal FOV, so this profile differs from the
-# baseline only by its longer range.
+# Former narrow field-of-view radar of scenario S07 (occluded variant).  Every radar now has
+# the 360 deg surround coverage, so this profile differs from the baseline only by its range.
 radar:
   profile_name: "narrow_fov"
   sensors:
-    - sensor_id: "front"
+    # One LOGICAL 360-degree radar centred over the vehicle: the aggregate
+    # coverage of the radars distributed around a car.  CARLA's radar cannot
+    # cover 180 degrees or more (its rays fill a cone of half-width
+    # tan(fov/2) x range: measured 200 -> +-80 deg, 360 -> a slice at 0 deg), so
+    # six co-located CARLA radars of 90 deg at yaws 0, 60, ..., 300 deg (15 deg
+    # overlap each side) are merged into this one sensor frame at recording time;
+    # the reconstruction sees only the logical sensor.
+    - sensor_id: "surround"
       blueprint: "sensor.other.radar"
-      horizontal_fov_deg: 200.0
-      vertical_fov_deg: 10.0
-      range_m: 100.0
-      points_per_second: 6000
+      horizontal_fov_deg: 360.0
+      physical_radars: 6
+      physical_horizontal_fov_deg: 90.0
+      # 30 deg: from the roof the sensor must look down onto close, lower cars (an
+      # audi.tt 0.3 m beside a model3: seen in every sweep at +-15 deg, 0-80 % at +-10).
+      vertical_fov_deg: 30.0
+      range_m: 100.0            # radial: returns beyond it are dropped
+      # Total over the six radars.
+      # As the baseline.
+      points_per_second: 21600
       sensor_tick_s: 0.05
       mount:
-        x: 2.2
+        x: 0.0                    # centred over the vehicle origin
         y: 0.0
-        z: 1.0
+        # Fixed clearance above the vehicle's OWN roof (top of its bounding box):
+        # model3 1.78 m, audi.tt 1.69 m, nissan.patrol 2.16 m, sprinter 2.87 m.
+        # A single absolute height cannot serve the campaign's 1.39-2.57 m roofs
+        # (at 2.8 m a sedan does not see a car within 2-8 m of it).
+        z_above_roof_m: 0.30
         yaw_deg: 0.0
         pitch_deg: 0.0
   degradation:
     enabled: false
-    dropout_prob: 0.0
-    point_dropout_prob: 0.0
+    dropout_prob: 0.0           # probability an entire frame is discarded
+    point_dropout_prob: 0.0     # probability an individual return is discarded
     range_noise_sigma_m: 0.0
     azimuth_noise_sigma_rad: 0.0
     velocity_noise_sigma_mps: 0.0

@@ -5,16 +5,17 @@ reconstruction:
 
   collision:
     # One COLLISION per contact. Callbacks without a missing sample between them form a burst;
-    # a burst starts a new contact after a pause > merge_gap_s, or after a break (>= 1 sample
-    # without callback) when it peaks at >= new_impact_ratio x the current contact's peak.
+    # a burst after a pause > merge_gap_s starts a new contact; after a shorter break (>= 1 sample
+    # without callback) its peak relative to the current contact's peak decides.
     merge_gap_s: 0.5                  # a longer pause always separates two contacts
-    new_impact_ratio: 0.5             # rebound ~ restitution (< 0.5) x first impulse; persistent contact far less
-    # Supplementary evidence only: a weaker burst (>= reversal_impact_ratio x peak) also starts a
-    # new contact when the recorder's own velocity jumps like an impact at the contact's start and
-    # at the burst's, in directions > reversal_angle_deg apart (a rebound pushes the same way again).
-    reversal_impact_ratio: 0.25
+    new_impact_ratio: 0.75            # >= this: a new impact (rebounds measured <= 0.52, second bodies 0.85-0.93)
+    min_impact_ratio: 0.25            # < this: the same contact (persistent contact <= 0.25)
+    # In between: the recorder's own velocity jumps at the contact's start and at the burst, when both
+    # are impact-like, decide: > reversal_angle_deg apart = struck from the other side (new),
+    # otherwise a rebound (same). Without that evidence: new from undirected_impact_ratio.
     impact_acceleration_mps2: 20.0    # impact-like jump: mean |dv|/dt over the samples around the callback (~2 g)
     reversal_angle_deg: 90.0
+    undirected_impact_ratio: 0.5
 
   tracking:
     min_height_m: 0.3                 # returns below: road surface
@@ -48,8 +49,9 @@ reconstruction:
     turn_release_debounce_s: 0.3      # a dip below the off threshold shorter than this does not end the turn
     turn_min_duration_s: 0.5          # a turn lasts at least this long...
     turn_min_heading_change_deg: 15.0 # ...and changes the heading by at least this (lane changes <= ~10 deg)
-    path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EGO_PATH_EXIT
-    track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first azimuth, else _LEFT / _RIGHT
+    path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EXIT (from the front edge)
+    track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first azimuth...
+    track_appeared_rear_deg: 5.0      # ...TRACK_APPEARED_REAR within this of straight behind, else _LEFT / _RIGHT
     max_position_std_m: 1.0           # track estimates more uncertain than these (Kalman std)...
     max_velocity_std_mps: 1.0         # ...leave CUT_IN UNKNOWN
     cut_in_max_heading_deg: 25.0      # CUT_IN: target moves within this angle of the recorder's heading
@@ -65,8 +67,8 @@ reconstruction:
   fusion:
     impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %
     clock_tolerance_s: 0.1            # matches between graphs already linked must agree on the clock offset
-    contact_window_s: 0.5             # a partner track is still observed within this window before the contact
-    contact_range_m: 3.5              # range at the contact counts fully up to this (evidence, not a veto)...
+    contact_window_s: 1.0             # a partner track may be lost up to this long before the contact (association only)
+    contact_range_m: 3.5              # clearance at the contact counts fully up to this (evidence, not a veto)...
     contact_range_scale_m: 3.0        # ...and lowers the confidence beyond it with this scale
     approach_window_s: 1.0            # the range must shrink over this last stretch before the contact
     min_track_persistence_s: 1.0      # tracked at least this long before the contact

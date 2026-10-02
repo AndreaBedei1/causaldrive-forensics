@@ -8,7 +8,7 @@
         "A",
         "B"
       ],
-      "sim_time": 187.1859813630581,
+      "sim_time": 329.77001455053687,
       "peak_impulse": 8859.577345218842,
       "reconstructed_as": "g16",
       "participants_correct": true,
@@ -49,8 +49,8 @@
   "event_timing": {
     "nodes": 25,
     "max_abs_error_s": 0.0,
-    "order_pairs": 287,
-    "order_concordant": 287
+    "order_pairs": 292,
+    "order_concordant": 292
   },
   "tracks": [
     {
@@ -62,12 +62,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 25,
-      "raw_rmse_to_surface_m": 0.503,
-      "smoothed_rmse_to_surface_m": 0.486,
-      "smoothed_rmse_to_centre_m": 0.811,
-      "raw_difference_speed_rmse_mps": 5.051,
-      "speed_rmse_mps": 0.521
+      "samples": 23,
+      "raw_rmse_to_surface_m": 0.496,
+      "smoothed_rmse_to_surface_m": 0.422,
+      "smoothed_rmse_to_centre_m": 0.807,
+      "raw_difference_speed_rmse_mps": 4.564,
+      "speed_rmse_mps": 0.28
     },
     {
       "track": "B:track_001",
@@ -78,12 +78,38 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 134,
-      "raw_rmse_to_surface_m": 0.329,
-      "smoothed_rmse_to_surface_m": 0.352,
-      "smoothed_rmse_to_centre_m": 0.97,
-      "raw_difference_speed_rmse_mps": 2.766,
-      "speed_rmse_mps": 0.433
+      "samples": 130,
+      "raw_rmse_to_surface_m": 0.428,
+      "smoothed_rmse_to_surface_m": 0.462,
+      "smoothed_rmse_to_centre_m": 0.857,
+      "raw_difference_speed_rmse_mps": 3.883,
+      "speed_rmse_mps": 0.401
+    }
+  ],
+  "contact_clearances": [
+    {
+      "contact": "A + B",
+      "recorder": "A",
+      "partner": "B",
+      "track": "A:track_001",
+      "seen_s_before_contact": 0.1,
+      "clearance_m": 1.549,
+      "true_gap_m": 0.08,
+      "error_m": 1.469,
+      "range_m": 3.775,
+      "ttc_s": 0.123
+    },
+    {
+      "contact": "A + B",
+      "recorder": "B",
+      "partner": "A",
+      "track": "B:track_001",
+      "seen_s_before_contact": 0.0,
+      "clearance_m": 0.549,
+      "true_gap_m": 0.0,
+      "error_m": 0.549,
+      "range_m": 3.129,
+      "ttc_s": 0.326
     }
   ],
   "clock_shift_check": {
