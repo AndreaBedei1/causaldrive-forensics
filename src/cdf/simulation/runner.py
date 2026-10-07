@@ -16,6 +16,7 @@ from ..common.geometry import distance
 from ..recording.ground_truth_logger import GroundTruthLogger
 from .carla_client import import_carla
 from .scenario_base import ScenarioSpec, build_route, make_controller, resolve_spawn_waypoint
+from .triggers import Pose, fire_due_triggers
 from .vehicle_agent import RawVehicleAgent
 from .world import ScenarioWorld
 
@@ -72,6 +73,21 @@ def _position_spectator(world: Any, vehicles: List[Any], carla: Any) -> None:
     )
 
 
+def _pose(actor: Any) -> Pose:
+    """True planar pose and box of an actor, for privileged triggers only."""
+    tf = actor.get_transform()
+    extent = actor.bounding_box.extent
+    return Pose(x=float(tf.location.x), y=float(tf.location.y), yaw_deg=float(tf.rotation.yaw),
+                half_length=float(extent.x), half_width=float(extent.y))
+
+
+def _scheduled_end(spec: ScenarioSpec) -> float:
+    """When every declared manoeuvre is over (an armed triggered action: if it fired
+    at the end of its window).  Capture control only."""
+    return max([action.latest_end() for participant in spec.participants for action in participant.actions
+                if action.enabled or action.trigger is None], default=0.0)
+
+
 def write_incident_context(run_root: Path, context: Dict[str, Any]) -> None:
     """Copy the scenario's supplied incident context into the run.
 
@@ -97,7 +113,11 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     run_root = Path(output_root) / spec.scenario_id / run_name
     run_root.mkdir(parents=True, exist_ok=True)
     write_incident_context(run_root, spec.context)
-    gt = GroundTruthLogger(run_root, {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "map": spec.map_name})
+    # Privileged: every physical participant, recorder or not.
+    gt = GroundTruthLogger(run_root, {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed),
+                                      "map": spec.map_name,
+                                      "participants": [{"participant_id": p.participant_id, "record": bool(p.record)}
+                                                       for p in spec.participants]})
     agents: List[RawVehicleAgent] = []
     simulation_start_timestamp = None
     simulation_end_timestamp = None
@@ -159,11 +179,9 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             for agent in agents:
                 agent.set_sensor_start_frame(sworld.frame + 1)
             limit = min(float(spec.max_duration_s), float(cfg.get("simulation.max_duration_s", spec.max_duration_s)))
-            scheduled_end = max(
-                [float(action.t_start) + float(action.duration)
-                 for participant in spec.participants for action in participant.actions],
-                default=0.0,
-            )
+            scheduled_end = _scheduled_end(spec)
+            armed = [(agent.spec.participant_id, action) for agent in agents for action in agent.controller.actions
+                     if action.armed]
             last_collision_t = None
             wall_clock_start = time.monotonic()
             while sworld.elapsed_seconds - simulation_start <= limit + 1e-9:
@@ -171,6 +189,15 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                 simulation_end_timestamp = timestamp
                 scenario_timestamp = timestamp - simulation_start
                 _position_spectator(sworld.world, [agent.vehicle for agent in agents], carla)
+                if armed:
+                    # Privileged scenario construction: true poses of the actors in this run.
+                    poses = {agent.spec.participant_id: _pose(agent.vehicle) for agent in agents}
+                    for record in fire_due_triggers(scenario_timestamp, poses, armed):
+                        gt.trigger(dict(record, frame=frame, timestamp=timestamp))
+                        LOGGER.info("trigger fired: %s %s at %.2f s", record["participant_id"],
+                                    record["action_id"], scenario_timestamp)
+                    armed = [(owner, action) for owner, action in armed if action.armed]
+                    scheduled_end = _scheduled_end(spec)
                 controls = {
                     agent.spec.participant_id: agent.step(
                         scenario_timestamp, frame, dt, recorded_timestamp=timestamp
@@ -204,7 +231,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     finally:
         for agent in agents: agent.close()
         gt.close()
-    metadata = {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "participants": [p.participant_id for p in spec.participants], "python": sys.version, "platform": platform.platform(), "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    # Recorders only: a participant with record: false is not revealed by the run's metadata.
+    metadata = {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed), "participants": spec.recorder_ids, "python": sys.version, "platform": platform.platform(), "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
     if simulation_start_timestamp is not None:
         metadata["simulation_start_timestamp"] = simulation_start_timestamp
     if fixed_delta_seconds is not None:

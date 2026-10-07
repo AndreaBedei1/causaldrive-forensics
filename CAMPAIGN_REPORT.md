@@ -1,10 +1,10 @@
-# Three-radar campaign (2026-10-03)
+# Campaign report: three body radars (2026-10-03) and S17 partial observability (2026-10-07)
 
-Front, left and right radars on each vehicle's body instead of the 360-degree roof sensor; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC; 13 runs re-recorded and every output regenerated.  Ground truth is read only by the evaluation and the audits.
+Front, left and right radars on each vehicle's body; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC (13 runs recorded 2026-10-03).  Added 2026-10-07: S17, a causally relevant vehicle that records nothing (record: false), and the LLM forensic pipeline (admissible facts -> explanation -> formulas -> verification), sections 8-9.  Ground truth is read only by the evaluation, the audits and the counterfactual summary.
 
 ## 1. Campaign
 
-Thirteen runs, every one re-recorded on a private CARLA 0.9.15 (port 3000; the user's port-2000 server was never used) with the sensors of section 2; no raw trace of the 360-degree campaign was reused.  Reconstruction, evaluation, audits and this report were regenerated from scratch.
+Fourteen runs on a private CARLA 0.9.15 (port 3000; the user's port-2000 server was never used) with the sensors of section 2: the thirteen runs of the three-radar campaign (recorded 2026-10-03, unchanged) and S17 unobserved_causal_vehicle (recorded 2026-10-07, section 8).  The 13 earlier runs were not re-recorded; their reconstruction, evaluation and audits regenerate identically.  A vehicle marked 'not recorded' is a physical participant with record: false (no sensors, nothing under vehicles/).
 
 | run | vehicles | s | true contacts (pair, time) | reconstructed | associations correct | anonymous tracks |
 |---|---|---|---|---|---|---|
@@ -21,6 +21,7 @@ Thirteen runs, every one re-recorded on a private CARLA 0.9.15 (port 3000; the u
 | S12/run_0_near_simultaneous | A model3, B tt | 12.9 | A-B 7.15 s | yes (1/1 vehicle contacts) | 2/2 | 0 |
 | S15/run_0_deflected_into_c | A model3, B tt, C tt | 14.0 | A-B 3.80 s; A-C 4.70 s | yes (2/2 vehicle contacts) | 4/4 | 2 |
 | S16/run_0_consequential | A tt, B patrol, C sprinter | 12.0 | A-B 5.55 s; A-C 6.60 s | yes (2/2 vehicle contacts) | 3/3 | 4 |
+| S17/run_0_crash | A tt, B patrol, C model3 (not recorded) | 11.6 | A-B 5.75 s | yes (1/1 vehicle contacts) | 2/2 | 2 |
 
 Deleted on request (runs, directories under traces/ and their configuration): S01 avoided; S02 avoided; S05 (whole scenario); S07 full_view and occluded (replaced by S07 crash); S10 stops_safely and stops_then_proceeds; S11 (whole scenario); S12 a_arrives_first, b_arrives_first, b_fails_to_stop; S13 (whole scenario); S15 b_stops and single_impact; S16 avoided and independent.  Scenario numbers were kept.  The radar_degraded / dropout / narrow_fov / noisy sensor profiles were deleted (no run used them; their degradation block was never implemented).
 
@@ -116,7 +117,8 @@ FOV chosen 110 deg (tested 100 / 110 / 120 on GT replays of the campaign with th
 - S12 near_simultaneous: braking 0.3 instead of 0.95, started earlier so that both stop at their stop lines; brake released at 4.87 / 4.73 s.  Stops (STOP_START -> STOP_END) 1.50 s (A) and 1.55 s (B); both pull away within 0.05 s; collision at 7.15 s.
 - S16 consequential (rebuilt): three lanes; C, a van, drives in the left lane at 9 m/s; A moves over into the left lane behind C and slows to its speed; B follows A too closely, reacts late and runs into A at 5.55 s while A is angled across the lane line; the shunt (A from 8.2 to 11.3 m/s, coasting in neutral) carries A into the back of C at 6.60 s.  No scripted deflection; without B, A's merge ends 2.0 m behind C (checked).  A sideways knock is not used because CARLA does not carry a struck car sideways (measured: a rear-corner impact turned A by at most 7 deg and moved it 0.8 m; a sideswipe 0.3 m).
 - S15 deflected_into_c keeps its scripted post-impact deflection (unchanged on request; documented in section 7).
-- The two reference links were studied for geometry: their patterns (rear-end chains, junction crossings, roundabout merge, cut-in, multi-vehicle pile-up) are covered by S01-S16; the remaining elements (a lane-change dispute, removed with S13 on request; hit-and-run; weather) are not new geometries.  No scenario was added.
+- The two reference links were studied for geometry: their patterns (rear-end chains, junction crossings, roundabout merge, cut-in, multi-vehicle pile-up) are covered by S01-S16; the remaining elements (a lane-change dispute, removed with S13 on request; hit-and-run; weather) are not new geometries.  No scenario was added in the three-radar campaign.
+- S17 unobserved_causal_vehicle (2026-10-07, section 8): a cut-in by a vehicle that records nothing (record: false) makes A swerve into B; A's swerve is a reactive action fired by C entering A's corridor (privileged trigger, ground_truth/triggers.jsonl only).
 
 ## 4. Reconstruction
 
@@ -180,6 +182,7 @@ S15 false STOP (360-degree campaign, A after its first collision): a red adverti
 | S12/run_0_near_simultaneous | A->B 5.90; B->A 6.05 | A:track_001=B, B:track_001=A | - |
 | S15/run_0_deflected_into_c | A->B 2.55; A->C 3.75; B->A 2.50; B->A 3.95; C->A 3.75 | A:track_001=C, A:track_002=B, B:track_002=A, C:track_001=A | B:track_001 (is A), C:track_002 (is B) |
 | S16/run_0_consequential | A->C 5.55; B->A 4.15; C->A 5.60 | A:track_001=C, B:track_001=A, C:track_001=A | A:track_002 (is C), B:track_002 (is C), B:track_003 (is C), B:track_004 (is C) |
+| S17/run_0_crash | A->C 4.15; A->B 4.40; B->A 4.95 | A:track_002=B, B:track_001=A | A:track_001 (is C), B:track_002 (is C) |
 
 Every true vehicle contact is reconstructed, every association is correct, no extra collision node.  Tracks lost before their contact but associated: S16 C:track_001 -> A (last observed 0.15 s before the contact); synthetic regression: lost 0.85 s before (window 1.0 s).
 
@@ -216,6 +219,7 @@ Both on a collision course in 2-D (the predicted boxes overlap 1.65-1.7 s ahead)
 - S12: STOP_START -> STOP_END 3.70 -> 5.20 s (A, 1.50 s) and 3.60 -> 5.15 s (B, 1.55 s); THROTTLE_START at the restart of each; collision at 7.15 s.
 - S16: C at 8.6-9.2 m/s until the second collision; A-B at 5.55 s, A-C at 6.60 s; no deflection.
 - S10: A's STOP window opens at 1.15 s with the sign 17.4 m ahead (camera) and lasts to 2.75 s.
+- S17: C's cut-in starts at 2.5 s; C enters A's corridor at 3.75 s; A's swerve starts at 4.15 s; A-B contact at 5.75 s; C closest to A 2.57 m (5.00 s).
 
 ### 5.4 Signs
 
@@ -234,7 +238,7 @@ Both on a collision course in 2-D (the predicted boxes overlap 1.65-1.7 s ahead)
 | S15/run_0_deflected_into_c | B | sign-0 1.10-2.25 s | stop#27, stop#63 | [4.0] |
 | S15/run_0_deflected_into_c | C | - | stop#62 | [5.0] |
 
-Over the campaign: 89 STOP candidates in 4640 camera frames, 4 confirmed STOP tracks, all on real signs (S10 A 19 detections, S12 A 29, S12 B 24, S15 B 15); 2 single-frame candidates rejected by the tracker (S08 B, S15 B); 0 YIELD candidates (no YIELD sign on these routes; the YIELD detector is validated on the Town10HD yield sign: every frame of the approach).  S15 A: no sign at all (the phantom STOP is gone).  S03 / S08 junction 'STOP' is a road marking: never a sign.
+Over the campaign: 89 STOP candidates in 4640 camera frames, 4 confirmed STOP tracks, all on real signs (S10 A 19 detections, S12 A 29, S12 B 24, S15 B 15); 2 single-frame candidates rejected by the tracker (S08 B, S15 B); 0 YIELD candidates (no YIELD sign on these routes; the YIELD detector is validated on the Town10HD yield sign: every frame of the approach).  S15 A: no sign at all (the phantom STOP is gone).  S03 / S08 junction 'STOP' is a road marking: never a sign.  S17 (2 x 116 frames, same road as S01 / S02 / S16): no sign track and no sign trigger volume on its path (the audit, re-run on the 14 runs with the sign actors extracted again, adds no row).
 
 ### 5.5 Radar visibility (privileged audit, traces/radar_visibility_audit.json)
 
@@ -254,7 +258,7 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 
 ### 5.7 Tests
 
-212 tests pass on Python 3.8 (CARLA environment) and 3.14, among them tests/test_three_radars.py (layout, mounts, coverage, rear blind zone, front -> side continuity, per-mount Doppler for a stopped / straight / turning / accelerating / braking recorder, static and moving targets ahead, at the side and in a rear quarter), tests/test_critical_ttc.py (following, stopped target, same speed, crossing ahead / behind, collision course near and far, oncoming traffic, a car from behind, S08 regression), tests/test_semantic_events.py (THROTTLE), tests/test_traffic_signs.py, tests/test_multi_collision.py, tests/test_campaign_perception.py (recorded campaign: radar layout, S07 occlusion, signs, S09 / S12 / S16 timing).
+280 tests pass on Python 3.8 (CARLA environment) and 3.14, among them tests/test_llm_pipeline.py and tests/test_unrecorded_vehicle.py (section 9), tests/test_three_radars.py (layout, mounts, coverage, rear blind zone, front -> side continuity, per-mount Doppler for a stopped / straight / turning / accelerating / braking recorder, static and moving targets ahead, at the side and in a rear quarter), tests/test_critical_ttc.py (following, stopped target, same speed, crossing ahead / behind, collision course near and far, oncoming traffic, a car from behind, S08 regression), tests/test_semantic_events.py (THROTTLE), tests/test_traffic_signs.py, tests/test_multi_collision.py, tests/test_campaign_perception.py (recorded campaign: radar layout, S07 occlusion, signs, S09 / S12 / S16 timing).
 
 ## 6. Compared with the 360-degree campaign
 
@@ -273,6 +277,7 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 | S12/run_0_near_simultaneous | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
 | S15/run_0_deflected_into_c | yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2 | 6 | yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2 | 5 |
 | S16/run_0_consequential | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 1 | 2 | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4 | 3 |
+| S17/run_0_crash | new run (2026-10-07) | - | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 2 | 3 |
 
 - Fewer associations where the struck vehicle cannot see its follower (rear blind zone): S01, S02, S10 (2 -> 1).  The identity of the striking car still comes from its own track of the struck one.
 - CRITICAL_TTC concentrates on the colliding pairs (S08 8 -> 2) and starts causally (after the event that creates the danger: S06 b_rear_first A on B exactly at B's crash).
@@ -289,8 +294,126 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 - S16: A sees the van C as two tracks; B sees C as up to four short tracks (never in contact with it: anonymous).
 - A stationary braked vehicle is immovable when struck in CARLA; chain scenarios rely on the struck car still rolling (S06 a_front_pushed).
 - The depth camera (unused) misses frames on the second and third vehicle (section 2.4).
+- S17: the reconstruction cannot know that A:track_001 and B:track_002 are the same road user (C): identities are anchored on collisions and C collides with nobody.  The A-B sideswipe peaks at 916 N*s, below the 1000 N*s that starts a new contact, so its 32 callbacks over 0.75 s are one collision.  A's swerve is precautionary: with the swerve disabled C, accelerating away from 4.5 s, stays 2.6 m ahead of A (section 8.4).
+- A record: false participant is not replayed by scripts/replay_run.py (no ego.jsonl; ground truth is never read there): S17's C appears only as the recorders' track markers.
 
-## 8. Global event sequences
+## 8. S17 unobserved_causal_vehicle: partial observability
+
+Research question: *how does partial observability of a causally relevant but non-colliding road user affect accident explanation and attribution?*  Recorded 2026-10-07 (one attempt, 33.9 s wall time), Town05, spawn point 265 (three same-direction lanes, 3.5 m wide), speed limit 50 km/h (supplied).
+
+### 8.1 Dynamics
+
+- A (audi.tt, recorder) drives the middle lane at 12 m/s; B (nissan.patrol, recorder) drives the left lane at 12.5 m/s, starting 4.4 m behind A and slowly drawing alongside; C (tesla.model3, record: false) drives the right lane at 12.5 m/s, 11.7 m ahead of A.
+- 2.5 s: C cuts into A's lane (lane shift -3.5 m over 1.4 s) and slows towards 10 m/s (8.7 m/s at its slowest), about 5 m in front of A (closing at ~3 m/s).
+- 3.75 s: C's box enters A's corridor (12 m ahead of A's front face, A's width + 0.2 m a side): privileged trigger, logged only in ground_truth/triggers.jsonl.  4.15 s: A swerves left (lane shift -3.5 m over 1.6 s, reaction 0.4 s) into B's lane.
+- 4.5 s: C accelerates to 16 m/s and drives away in the middle lane.
+- 5.75 s: A-B sideswipe (A's left side against B's right front; peak impulse 916 N*s, contact until 6.50 s); both brake to a stop side by side.  C touches nobody: closest 2.57 m to A, 4.88 m to B.
+
+### 8.2 Scene
+
+```
+          direction of travel ------------------------------------------------------>
+ left   | B==>   B keeps its lane (12.5 m/s) .................... [A][B] contact 5.75 s
+ middle |   A==> A swerves left from 4.15 s ................../
+        |                   C==> in A's lane from ~3.5 s, ~5 m ahead, slowing ... C==> 16 m/s, away
+ right  |        C==> cuts left at 2.5 s ____/
+```
+
+True positions (ground truth; forward / right of A's first pose, metres; centre of each vehicle):
+
+| t s | moment | A forward / right @ m/s | B | C |
+|---|---|---|---|---|
+| 0.00 | start | -0.0 / +0.0 @ 11.9 | -4.4 / -3.5 @ 12.4 | 11.7 / +3.5 @ 12.1 |
+| 2.50 | C starts its cut-in | 29.5 / +0.0 @ 11.8 | 26.4 / -3.5 @ 12.3 | 42.3 / +3.5 @ 12.2 |
+| 3.75 | C enters A's corridor | 44.3 / +0.0 @ 11.8 | 41.7 / -3.5 @ 12.3 | 54.3 / +2.5 @ 9.1 |
+| 4.15 | A starts swerving | 49.0 / +0.0 @ 11.8 | 46.7 / -3.5 @ 12.3 | 57.9 / +1.8 @ 9.1 |
+| 5.00 | C closest to A | 59.0 / -0.3 @ 11.8 | 57.1 / -3.5 @ 12.3 | 66.2 / +0.8 @ 11.7 |
+| 5.75 | A-B contact | 67.8 / -1.6 @ 12.2 | 66.3 / -3.5 @ 12.2 | 76.7 / +0.3 @ 16.1 |
+| 7.00 | after | 77.0 / -2.5 @ 0.0 | 74.3 / -4.1 @ 0.0 | 96.6 / +0.1 @ 15.9 |
+
+### 8.3 Recorders and the non-recorder
+
+| participant | role | data |
+|---|---|---|
+| A | recorder | vehicles/A: 3 radars, camera, ego, controls, collisions, signs |
+| B | recorder | vehicles/B: same |
+| C | record: false | no vehicles/C; the run's metadata.json lists A, B only; C is in ground_truth/ (states, controls, its collision sensor: no contact) and in ground_truth/metadata.json with record: false |
+
+Radar visibility of C (privileged audit): A first raw return 0.00, track track_001 0.00-7.65 s; B first raw return 0.00, track track_002 0.00-7.15 s.  B's view of C is partly behind A; both see it from the first sweep.
+
+### 8.4 Privileged counterfactuals (ground_truth/counterfactuals.json)
+
+Same configuration on the same private engine, cameras on, into a scratch directory; only the ground-truth summary is kept in the run.  Never read by the reconstruction, never given to a model.
+
+| run | collisions | min gap A-B m | min gap A-C m | A's swerve | A's max left departure m |
+|---|---|---|---|---|---|
+| factual (S17 as recorded) | A-B 5.75 s (916 N*s) | 0.0 | 2.57 | A_evasive_swerve_left at 3.75 s | 2.51 |
+| without C (--without-participant C) | none | 1.53 | - | none | 0.0 |
+| C present, swerve disabled (--disable-action) | none | 1.53 | 2.58 | none | 0.0 |
+
+Without C there is no swerve and no collision: C's presence is causally relevant although C touches nobody.  With C but no swerve there is no collision either (C accelerates away from 4.5 s): A's evasion answered an imminent conflict (closing ~3 m/s at ~5 m, CRITICAL_TTC in A's own reconstruction) that, in hindsight, would have resolved itself.
+
+### 8.5 What the reconstruction knows
+
+| local track | status | global entity |
+|---|---|---|
+| A:track_001 | ANONYMOUS | A:track_001 |
+| A:track_002 | ASSOCIATED | B |
+| B:track_001 | ASSOCIATED | A |
+| B:track_002 | ANONYMOUS | B:track_002 |
+
+Events about the anonymous tracks (global time, s):
+
+| t_global | event | actor | subject |
+|---|---|---|---|
+| -5.75 | TRACK_APPEARED_RIGHT | A | A:track_001 |
+| -5.75 | TRACK_APPEARED_RIGHT | B | B:track_002 |
+| -3.05 | CLOSING_START | B | B:track_002 |
+| -2.95 | CLOSING_START | A | A:track_001 |
+| -2.30 | CUT_IN_FROM_RIGHT_START | A | A:track_001 |
+| -2.10 | CUT_IN_FROM_RIGHT_START | B | B:track_002 |
+| -1.60 | CRITICAL_TTC_START | A | A:track_001 |
+| -1.50 | EGO_PATH_ENTRY | A | A:track_001 |
+| -1.05 | CRITICAL_TTC_END | A | A:track_001 |
+| -0.85 | CUT_IN_FROM_RIGHT_END | A | A:track_001 |
+| -0.75 | CLOSING_END | A | A:track_001 |
+| -0.65 | CLOSING_END | B | B:track_002 |
+| -0.30 | EGO_PATH_EXIT | A | A:track_001 |
+| -0.10 | CUT_IN_FROM_RIGHT_END | B | B:track_002 |
+| 0.00 | COLLISION | - | A, B |
+| 1.40 | TRACK_LOST | B | B:track_002 |
+| 1.90 | TRACK_LOST | A | A:track_001 |
+
+Privileged evaluation: A:track_001 is C (correctly left anonymous), B:track_002 is C (correctly left anonymous); associations 2/2 correct.  No entity C exists anywhere in reconstruction/ outside evaluation/.
+
+### 8.6 What an LLM receives
+
+reconstruction/llm/forensic_packet.json, run_id case-c1396225195dd0ac, packet SHA-256 03003fd7283581c9: 846 facts (COLLISION_OBSERVATION 1, EGO_CONTROL 232, EGO_MOTION 232, TRACK_STATE 381).  Entities: A (recorder), B (recorder), A:track_001 (radar_track, anonymous -> A:track_001), A:track_002 (radar_track, associated -> B), B:track_001 (radar_track, associated -> A), B:track_002 (radar_track, anonymous -> B:track_002).  Neither the letter C nor any semantic event, perceived state, scenario name or ground truth appears in it (tests/test_llm_pipeline.py: S17PacketTests).
+
+## 9. LLM abductive forensics (infrastructure)
+
+FACTS -> abductive explanation (Stage 1) -> semantic hypotheses -> temporal formulas (Stage 2, a separate call) -> deterministic three-valued verification on the semantic trace, loaded only after both answers are saved.  Description, diagram and caveats: docs/llm_abductive_forensics.md.  No API key was available: no model was called; providers, schemas, guard, verifier and scoring are tested with mock transports; dry-run prompts for S17 are in traces/S17/run_0_crash/reconstruction/llm/runs/*_dryrun/.
+
+Forensic packets exported for every run (reconstruction/llm/; the leak guard passed for all):
+
+| run | run_id | facts | TRACK_STATE | SIGN | COLLISION | anonymous tracks | packet KiB | SHA-256 |
+|---|---|---|---|---|---|---|---|---|
+| S01/run_0_crash | case-b93d9e03f59ecdc2 | 606 | 121 | 0 | 1 | 0 | 109 | 628e75d3dc15 |
+| S02/run_0_crash | case-f26f0bed62fd8a5b | 764 | 151 | 0 | 1 | 0 | 135 | 811a21c99609 |
+| S02/run_0_critical_before_cut_in | case-893f647b9cb36a63 | 673 | 208 | 0 | 1 | 0 | 139 | 5986753e2239 |
+| S03/run_0_crash | case-3ff854c61d8e8a08 | 877 | 264 | 0 | 1 | 0 | 177 | 50ed73829956 |
+| S06/run_0_a_front_pushed | case-43c5a5788d1a9a19 | 1107 | 276 | 0 | 3 | 0 | 207 | b6b29b309ee2 |
+| S06/run_0_b_rear_first | case-7202c5a4933604c5 | 1146 | 286 | 0 | 2 | 0 | 215 | efdde8eed675 |
+| S07/run_0_crash | case-a5478bd50abe12db | 1105 | 276 | 0 | 1 | 1 | 208 | 71118072466a |
+| S08/run_0_crash | case-59f4c77fe3da70f8 | 1659 | 740 | 0 | 1 | 4 | 398 | b5f734c686d6 |
+| S09/run_0_merge_conflict | case-3302772030bd0a80 | 1357 | 416 | 0 | 1 | 0 | 275 | 4ebf53931b02 |
+| S10/run_0_rolls_through | case-7f400bb834f48527 | 915 | 269 | 1 | 1 | 1 | 184 | de948f555ed1 |
+| S12/run_0_near_simultaneous | case-891ca9b5821d62c6 | 733 | 210 | 2 | 1 | 0 | 149 | b907f1269e31 |
+| S15/run_0_deflected_into_c | case-0f891d8e43b20f3a | 1550 | 701 | 1 | 2 | 2 | 374 | 64db22a4f0a4 |
+| S16/run_0_consequential | case-16dc7a2c76943785 | 1240 | 512 | 0 | 2 | 4 | 290 | 7ca298f6c691 |
+| S17/run_0_crash | case-c1396225195dd0ac | 846 | 381 | 0 | 1 | 2 | 208 | 03003fd72835 |
+
+## 10. Global event sequences
 
 ### S01/run_0_crash
 
@@ -567,5 +690,33 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 +1.55 TRACK_LOST(B,B:track_004)
 +1.70 EGO_PATH_EXIT(B,A)
 +1.90 MOVING_END(A); MOVING_END(C); STOP_START(A); STOP_START(C); BRAKE_START(A)
+```
+
+### S17/run_0_crash
+
+```
+-5.75 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,A:track_001); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,B:track_002)
+-3.05 CLOSING_START(B,B:track_002)
+-2.95 CLOSING_START(A,A:track_001)
+-2.30 CUT_IN_FROM_RIGHT_START(A,A:track_001)
+-2.10 CUT_IN_FROM_RIGHT_START(B,B:track_002)
+-1.60 CRITICAL_TTC_START(A,A:track_001)
+-1.50 EGO_PATH_ENTRY(A,A:track_001)
+-1.35 CRITICAL_TTC_START(A,B)
+-1.05 CRITICAL_TTC_END(A,A:track_001)
+-0.85 CUT_IN_FROM_RIGHT_END(A,A:track_001)
+-0.80 CRITICAL_TTC_START(B,A)
+-0.75 CLOSING_END(A,A:track_001); CLOSING_START(A,B)
+-0.65 CLOSING_END(B,B:track_002)
+-0.60 CLOSING_START(B,A)
+-0.30 EGO_PATH_EXIT(A,A:track_001)
+-0.10 CUT_IN_FROM_RIGHT_END(B,B:track_002)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
++0.05 CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
++0.10 CLOSING_END(B,A)
++0.95 MOVING_END(B); STOP_START(B)
++1.10 MOVING_END(A); STOP_START(A)
++1.40 TRACK_LOST(B,B:track_002)
++1.90 TRACK_LOST(A,A:track_001)
 ```
 

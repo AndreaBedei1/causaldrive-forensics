@@ -58,6 +58,16 @@ class RawVehicleAgent:
                  spawn_transform: Any, output_root: Any) -> None:
         self.world = scenario_world; self.cfg = cfg; self.spec = spec; self.controller = controller
         self.vehicle = scenario_world.spawn_vehicle(spec.blueprint, spawn_transform)
+        self.record = bool(getattr(spec, "record", True))
+        if not self.record:
+            # A physical vehicle that is not a recorder: no radar, no camera, nothing under
+            # vehicles/.  Its contacts still reach the privileged ground truth (and its own
+            # post-impact behaviour) through the collision sensor.
+            self.radar, self.camera, self.depth_camera = [], None, None
+            self._depth_executor, self._depth_futures = None, deque()
+            self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
+            self.logger = None
+            return
         sensor_cfg = cfg
         if spec.sensor_profile:
             profile_path = configs_dir() / "sensors" / (str(spec.sensor_profile) + ".yaml")
@@ -161,9 +171,11 @@ class RawVehicleAgent:
         if clamped.neutral:
             control.manual_gear_shift, control.gear = True, 0
         self.vehicle.apply_control(control)
-        self.logger.log_state(record)
-        self.logger.log_control({"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
-                                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse})
+        if self.logger is not None:
+            self.logger.log_state(record)
+            self.logger.log_control({"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle,
+                                     "brake": command.brake, "steer": command.steer,
+                                     "hand_brake": command.hand_brake, "reverse": command.reverse})
         for radar in self.radar:
             item = radar.poll(frame)
             if item is not None: self.logger.log_radar(item)
@@ -177,13 +189,16 @@ class RawVehicleAgent:
                 self._submit_depth(item)
             self._drain_depth_futures()
         for collision in self.collision_sensor.drain_vehicle():
-            self.logger.log_collision(collision)
+            if self.logger is not None:
+                self.logger.log_collision(collision)
             self.controller.notify_impact()
         return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
 
     def flush_sensor_queues(self, timeout_s: float = 2.0) -> None:
         """Process already-delivered callbacks without advancing the world."""
+        if self.logger is None:
+            return
         deadline = time.monotonic() + float(timeout_s)
         while time.monotonic() < deadline:
             drained = False
@@ -209,6 +224,8 @@ class RawVehicleAgent:
     def close(self) -> None:
         if self._depth_executor is not None:
             self._depth_executor.shutdown(wait=True)
+        if self.logger is None:
+            return
         if self.camera is not None:
             self.logger.set_camera_stats(self.camera.stats)
         if self.depth_camera is not None:

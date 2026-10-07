@@ -1,0 +1,98 @@
+scenario:
+  scenario_id: S17
+  name: unobserved_causal_vehicle
+  description: 'Three lanes, one direction.  A drives in the middle lane, B alongside
+    and slightly behind in the left lane.  C, in the right lane a little ahead of A,
+    cuts suddenly into A''s lane close in front of it and slows down.  A swerves left
+    to avoid C, into B''s path, and A and B collide.  C touches nobody, speeds up
+    and drives away.  C is a physical vehicle but not a recorder (record: false):
+    no data of its own, so in the reconstruction it can only be one of A''s anonymous
+    radar tracks.  A''s swerve is triggered by C entering the corridor ahead of A
+    (privileged simulator state, scenario construction only, logged to ground_truth/
+    only): without C it never happens, and A and B do not touch.
+
+    '
+  research_question: How does partial observability of a causally relevant but non-colliding
+    road user affect accident explanation and attribution?
+  map: Town05
+  context:
+    road_environment: urban road, multiple lanes
+    speed_limit_kmh: 50
+  default_variant: crash
+  max_duration_s: 14.0
+  participants:
+  - id: A
+    blueprint: vehicle.audi.tt
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 20.0
+      lane_offset: 0
+    route:
+      length_m: 200.0
+      step_m: 2.0
+    initial_speed: 12.0
+    target_speed: 12.0
+    actions:
+    # Evasive swerve to the left, played only if C enters the corridor ahead of A:
+    # 12 m beyond A's front face, A's width plus 0.2 m each side; 0.4 s reaction.
+    - action_id: A_evasive_swerve_left
+      kind: lane_shift
+      duration: 1.6
+      params:
+        lateral_m: -3.5
+      trigger:
+        kind: envelope_entry
+        target: C
+        ahead_m: 12.0
+        lateral_margin_m: 0.2
+        reaction_s: 0.4
+        window_s: [0.0, 8.0]
+  - id: B
+    blueprint: vehicle.nissan.patrol
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 15.5
+      lane_offset: -1
+    route:
+      length_m: 200.0
+      step_m: 2.0
+    initial_speed: 12.5
+    target_speed: 12.5
+    actions: []
+  - id: C
+    blueprint: vehicle.tesla.model3
+    record: false
+    spawn:
+      anchor: spawn_index
+      index: 265
+      forward_m: 32.0
+      lane_offset: 1
+    route:
+      length_m: 220.0
+      step_m: 2.0
+    initial_speed: 12.5
+    target_speed: 12.5
+    post_impact_mode: drive
+    actions:
+    - action_id: C_cut_in_left
+      kind: lane_shift
+      t_start: 2.5
+      duration: 1.4
+      params:
+        lateral_m: -3.5
+    - action_id: C_slows_in_front_of_A
+      kind: set_speed
+      t_start: 2.5
+      duration: 2.0
+      params:
+        target_speed: 10.0
+    - action_id: C_drives_away
+      kind: set_speed
+      t_start: 4.5
+      duration: 5.5
+      params:
+        target_speed: 16.0
+  variants:
+    crash: {}

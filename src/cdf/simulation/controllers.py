@@ -175,6 +175,11 @@ class ScriptedAction:
                      progressively over ``duration``
     ``hold``         params: ``target_speed``; simply maintains a speed
     ``stop``         full brake and hand brake
+
+    An action with a ``trigger`` (:class:`cdf.simulation.triggers.ActionTrigger`)
+    has no start time of its own: it stays armed (``t_start`` infinite) until
+    the runner fires it, then starts ``trigger.reaction_s`` later.  One whose
+    trigger never fires never plays.
     """
 
     action_id: str
@@ -183,6 +188,30 @@ class ScriptedAction:
     duration: float = 1.0
     params: Dict[str, float] = field(default_factory=dict)
     enabled: bool = True
+    trigger: Optional[Any] = None
+    fired_at: Optional[float] = None
+
+    def __post_init__(self) -> None:
+        if self.trigger is not None and self.fired_at is None:
+            self.t_start = math.inf
+
+    @property
+    def armed(self) -> bool:
+        """Waiting for its trigger."""
+        return self.enabled and self.trigger is not None and self.fired_at is None
+
+    def fire(self, t: float) -> None:
+        """The trigger's condition became true at ``t``: start after the reaction delay."""
+        if self.fired_at is None:
+            self.fired_at = float(t)
+            self.t_start = float(t) + float(self.trigger.reaction_s)
+
+    def latest_end(self) -> float:
+        """When the action is over at the latest: for an armed one, if it fired at
+        the end of its trigger window."""
+        if self.armed:
+            return float(self.trigger.window_end_s) + float(self.trigger.reaction_s) + float(self.duration)
+        return float(self.t_start) + float(self.duration)
 
     def active_at(self, t: float) -> bool:
         return self.enabled and (self.t_start <= float(t) < self.t_start + self.duration)
@@ -198,14 +227,18 @@ class ScriptedAction:
 
     def describe(self) -> Dict[str, Any]:
         """Serialisable description for the run manifest."""
-        return {
+        out = {
             "action_id": self.action_id,
             "kind": self.kind,
-            "t_start": self.t_start,
+            "t_start": None if math.isinf(self.t_start) else self.t_start,
             "duration": self.duration,
             "params": dict(self.params),
             "enabled": self.enabled,
         }
+        if self.trigger is not None:
+            out["trigger"] = self.trigger.describe()
+            out["fired_at"] = self.fired_at
+        return out
 
 
 # ---------------------------------------------------------------------------

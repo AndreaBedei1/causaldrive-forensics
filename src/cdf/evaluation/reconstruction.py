@@ -117,7 +117,11 @@ def _to_world(first_pose: Dict[str, Any], x: float, y: float) -> Tuple[float, fl
 
 
 def _truth_contacts(collisions: Sequence[Dict[str, Any]], actor_to_participant: Dict[int, str]) -> List[Dict[str, Any]]:
-    """Ground-truth contacts between recorded participants, first callback per pair and episode."""
+    """Ground-truth contacts between participants, first callback per pair and episode.
+
+    ``actor_to_participant`` may include participants that are not recorders
+    (``record: false``); their contacts can only be reported by the recorder
+    involved."""
     contacts: List[Dict[str, Any]] = []
     for record in sorted(collisions, key=lambda item: item["timestamp"]):
         other = actor_to_participant.get(record.get("other_actor_id"))
@@ -207,8 +211,9 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     collision_rows = []
     used = set()
     for contact in contacts:
-        # A contact with a static or unrecorded object has one report: a single-recorder node.
-        expected = [contact["participants"][0]] if "static/unrecorded" in contact["participants"] else contact["participants"]
+        # A contact with a static object or a vehicle that is not a recorder is reported by the
+        # recorders involved only: a single-recorder node.
+        expected = sorted(name for name in contact["participants"] if name in recorders)
         options = [node for node in collision_nodes if sorted(node["participants"]) == expected
                    and node["node_id"] not in used and report_error(node, contact) <= TRUTH_CONTACT_GAP_S]
         match = min(options, key=lambda node: report_error(node, contact)) if options else None
@@ -321,6 +326,8 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         if "static/unrecorded" in contact["participants"]:
             continue
         for owner in contact["participants"]:
+            if owner not in recorders:
+                continue  # a vehicle that records nothing has no tracks
             partner = next(name for name in contact["participants"] if name != owner)
             t_contact = contact["sim_time"] - origins[owner]
             best = None
@@ -356,7 +363,7 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         config = config_from_mapping(graph.get("reconstruction_config"))
         robustness = _clock_shift_check(run_dir, graph, alignment, config)
 
-    between = [row for row in collision_rows if "static/unrecorded" not in row["participants"]]
+    between = [row for row in collision_rows if all(name in recorders for name in row["participants"])]
     merged = [node for node in collision_nodes if node["actor_id"] is None]
     if between:
         collision_text = "{0} ({1}/{2} vehicle contacts{3})".format(

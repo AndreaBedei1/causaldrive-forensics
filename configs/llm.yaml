@@ -1,0 +1,35 @@
+# LLM forensic analysis (scripts/run_llm_analysis.py).  Models can be overridden with --model.
+# API keys are NOT here: OPENAI_API_KEY / GEMINI_API_KEY come from the environment or from
+# the repository's .env file (ignored by git; see .env.example).
+llm:
+  env_file: .env
+  providers:
+    openai:
+      model: gpt-5.6-sol
+      api_key_env: OPENAI_API_KEY
+      endpoint: https://api.openai.com/v1/responses
+      temperature: 0.0          # sent; if the model rejects it the request is repeated without it
+      reasoning_effort: null    # e.g. medium for a reasoning model; null = not sent
+      max_output_tokens: 32000
+      timeout_s: 600
+      max_retries: 3
+    gemini:
+      model: gemini-3.7-flash
+      api_key_env: GEMINI_API_KEY
+      endpoint: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
+      temperature: 0.0
+      seed: 20261007            # fixed seed: more repeatable, not guaranteed identical
+      max_output_tokens: 32000
+      timeout_s: 600
+      max_retries: 3
+  prompts:
+    explanation: accident_abduction_v1
+    formalize: formalize_hypothesis_v1
+  verification:
+    time_step_s: 0.05           # evaluation grid of the temporal formulas
+    evaluate_at_t_global: 0.0   # formulas are anchored at the time-origin collision
+  evaluation:
+    time_tolerance_s: 0.5       # a semantic hypothesis matches an event within this time
+    exclude_active_at_first_observation: true
+    reference_event_types: null # null = every event type of the trace
+    reference_window_s: null    # [start, end] in t_global, or null for the whole trace

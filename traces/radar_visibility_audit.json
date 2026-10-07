@@ -1471,5 +1471,139 @@
    "vehicle": 0.95
   },
   "delay_cause": "OCCLUSION(vehicle) (no return while in FOV)"
+ },
+ {
+  "run": "S17/run_0_crash",
+  "recorder": "A",
+  "target": "B",
+  "fov_deg": "front 150, left 140, right 140",
+  "in_range": 0.0,
+  "inside_fov": 0.0,
+  "raw_return": 0.0,
+  "usable_return": 0.0,
+  "track_born": 0.0,
+  "confirmed": 0.2,
+  "tracks": [
+   {
+    "track": "track_002",
+    "born": 0.0,
+    "confirmed": 0.2,
+    "lost": 11.5
+   }
+  ],
+  "collision": 5.75,
+  "fov_s": 11.55,
+  "no_return_in_fov_before_first_return": {},
+  "tracker_input": {
+   "usable_sweeps": 5,
+   "sweeps": 5,
+   "longest_usable_run": 5,
+   "target_speed_mps": [
+    12.4,
+    12.42
+   ]
+  },
+  "delay_cause": "none (prompt)"
+ },
+ {
+  "run": "S17/run_0_crash",
+  "recorder": "A",
+  "target": "C",
+  "fov_deg": "front 150, left 140, right 140",
+  "in_range": 0.0,
+  "inside_fov": 0.0,
+  "raw_return": 0.0,
+  "usable_return": 0.0,
+  "track_born": 0.0,
+  "confirmed": 0.2,
+  "tracks": [
+   {
+    "track": "track_001",
+    "born": 0.0,
+    "confirmed": 0.2,
+    "lost": 7.65,
+    "after_loss": "in FOV, returns only static/filtered"
+   }
+  ],
+  "collision": 5.75,
+  "fov_s": 11.55,
+  "no_return_in_fov_before_first_return": {},
+  "tracker_input": {
+   "usable_sweeps": 5,
+   "sweeps": 5,
+   "longest_usable_run": 5,
+   "target_speed_mps": [
+    12.09,
+    12.14
+   ]
+  },
+  "delay_cause": "none (prompt)"
+ },
+ {
+  "run": "S17/run_0_crash",
+  "recorder": "B",
+  "target": "A",
+  "fov_deg": "front 150, left 140, right 140",
+  "in_range": 0.0,
+  "inside_fov": 0.0,
+  "raw_return": 0.0,
+  "usable_return": 0.0,
+  "track_born": 0.0,
+  "confirmed": 0.2,
+  "tracks": [
+   {
+    "track": "track_001",
+    "born": 0.0,
+    "confirmed": 0.2,
+    "lost": 11.5
+   }
+  ],
+  "collision": 5.75,
+  "fov_s": 11.55,
+  "no_return_in_fov_before_first_return": {},
+  "tracker_input": {
+   "usable_sweeps": 5,
+   "sweeps": 5,
+   "longest_usable_run": 5,
+   "target_speed_mps": [
+    11.83,
+    11.86
+   ]
+  },
+  "delay_cause": "none (prompt)"
+ },
+ {
+  "run": "S17/run_0_crash",
+  "recorder": "B",
+  "target": "C",
+  "fov_deg": "front 150, left 140, right 140",
+  "in_range": 0.0,
+  "inside_fov": 0.0,
+  "raw_return": 0.0,
+  "usable_return": 0.0,
+  "track_born": 0.0,
+  "confirmed": 0.2,
+  "tracks": [
+   {
+    "track": "track_002",
+    "born": 0.0,
+    "confirmed": 0.2,
+    "lost": 7.15,
+    "after_loss": "in FOV, returns only static/filtered"
+   }
+  ],
+  "collision": 5.75,
+  "fov_s": 11.55,
+  "no_return_in_fov_before_first_return": {},
+  "tracker_input": {
+   "usable_sweeps": 5,
+   "sweeps": 5,
+   "longest_usable_run": 5,
+   "target_speed_mps": [
+    12.09,
+    12.14
+   ]
+  },
+  "delay_cause": "none (prompt)"
  }
 ]

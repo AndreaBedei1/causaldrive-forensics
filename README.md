@@ -82,6 +82,43 @@ memory and never written; the STOP / YIELD detector runs on board (below).
   stops the striking car dead), so a chain push needs the struck car still rolling; a rear
   impact on a corner turns the struck car by a few degrees at most, a forward shunt carries it.
 
+## Participants that do not record; reactive actions
+
+- `record: false` on a participant makes it a physical vehicle that is not a recorder: it is
+  spawned, drives its script, is seen by the others' radars and cameras and is in
+  `ground_truth/` (states, controls, collisions; `ground_truth/metadata.json` lists every
+  participant with its `record` flag), but it carries no sensor and writes nothing under
+  `vehicles/`.  The run's `metadata.json` lists the recorders only.  The reconstruction can
+  therefore know it only as an anonymous radar track of a recorder.
+- A scripted action may have a `trigger` instead of a `t_start`: it stays armed until a
+  condition on the simulator's true state holds, then starts `reaction_s` later.  The only kind
+  so far is `envelope_entry`: the target participant's box enters a corridor `ahead_m` long
+  ahead of the owner's front face, as wide as the owner plus `lateral_margin_m` a side, within
+  `window_s`.  This is scenario construction with privileged information: firings go to
+  `ground_truth/triggers.jsonl` only, never to `vehicles/`.  A trigger whose target is not in
+  the run never fires.
+- Privileged counterfactuals of a scenario (into a scratch `--output`, never into the campaign):
+  `--without-participant C` removes a participant, `--disable-action <action_id>` never plays an
+  action.
+
+```text
+python scripts/run_scenario.py --scenario S17 --variant crash --output <scratch> --without-participant C
+python scripts/run_scenario.py --scenario S17 --variant crash --output <scratch> --disable-action A_evasive_swerve_left
+```
+
+S17 `unobserved_causal_vehicle` (crash) uses both.  Three lanes, one direction: A (audi.tt,
+12 m/s) in the middle lane, B (nissan.patrol, 12.5 m/s) in the left lane slightly behind, C
+(model3, `record: false`) in the right lane 12 m ahead.  At 2.5 s C cuts into A's lane and slows
+to about 9 m/s about 5 m in front of A; C's box enters A's corridor at 3.75 s and A swerves left
+from 4.15 s (lane shift -3.5 m over 1.6 s) into B: A-B sideswipe at 5.75 s (peak impulse
+916 N*s).  C touches nobody (closest 2.6 m to A, 4.9 m to B), speeds up to 16 m/s and drives
+away.  Without C (or with the swerve disabled) A and B never touch (closest 1.5 m):
+`ground_truth/counterfactuals.json`, privileged.  In the reconstruction C is `A:track_001`
+(anonymous, CUT_IN_FROM_RIGHT, EGO_PATH_ENTRY and CRITICAL_TTC before the collision) and,
+separately, `B:track_002`; no entity C exists.  Research question: how does partial
+observability of a causally relevant but non-colliding road user affect accident explanation
+and attribution?
+
 ## Stored streams
 
 Each vehicle has independent compact streams, one per radar and one for depth:
@@ -618,4 +655,39 @@ The viewer starts CARLA if none is running (`--no-autostart` to only connect)
 and stops a server it started on exit (`--keep-server` to leave it running).
 It renders through its own camera into a pygame window, runs the world in
 synchronous mode while open, and on exit destroys its actors and restores the
-world settings.
+world settings.  A participant with `record: false` (S17's C) has no
+`ego.jsonl` and is not replayed; it appears only as the recorders' track dots.
+
+## LLM abductive forensics
+
+FACTS -> abductive explanation -> semantic hypotheses -> temporal formulas ->
+deterministic verification on the reconstructed semantic trace.  Details,
+diagram and caveats: [docs/llm_abductive_forensics.md](docs/llm_abductive_forensics.md).
+
+```text
+python scripts/export_forensic_facts.py traces/S17/run_0_crash
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage explanation
+python scripts/verify_llm_analysis.py traces/S17/run_0_crash/reconstruction/llm/runs/<analysis>
+```
+
+- The model sees only `reconstruction/llm/forensic_packet.json`: measured ego
+  motion and controls, radar tracks through an allowlist (no conflict-model or
+  semantic field), sign detections, collision reports, the supplied context,
+  under a neutral `run_id`.  An anonymous track stays anonymous.  A leak guard
+  refuses any packet or prompt that names events, perceived states, ground
+  truth, the scenario or its variant; nothing is sent then.
+- Stage 1 (explanation, causal chain, responsibility as causal attribution,
+  semantic hypotheses with the vocabulary of `configs/semantic_vocabulary.yaml`)
+  and Stage 2 (the testable claims as formulas of a small bounded temporal logic,
+  text + AST) are separate calls, prompts versioned in `prompts/`.
+- Only after both answers are saved does `cdf.llm.formal.verifier` read the
+  semantic trace: TRUE / FALSE / UNKNOWN per formula (formal consistency of the
+  hypothesis with the trace, not proof of causation); `cdf.llm.evaluation`
+  scores the semantic hypotheses (TP / FP / FN, F1, hallucination rates).
+- Providers: OpenAI (Responses API, strict JSON schema) and Gemini
+  (`responseJsonSchema`), models in `configs/llm.yaml`.  Keys go in `.env`
+  (ignored by git; copy `.env.example`); a provider without its key is reported
+  unavailable.  `--oracle-identities` (privileged, evaluation only) writes under
+  `reconstruction/evaluation/llm_oracle/`.

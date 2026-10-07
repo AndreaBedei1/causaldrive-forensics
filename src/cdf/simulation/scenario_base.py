@@ -11,6 +11,7 @@ from ..common.config import Config
 from ..common.geometry import angle_diff_deg, distance
 from .carla_client import import_carla
 from .controllers import RoutePlan, ScriptedAction, ScriptedController
+from .triggers import ActionTrigger
 
 LOGGER = logging.getLogger(__name__)
 
@@ -134,11 +135,19 @@ class ParticipantSpec:
     to the right of travel. Ignored in every other mode."""
     post_impact_deflect_s: float = 1.5
     """How long that displacement takes to come in."""
+    record: bool = True
+    """``false``: a physical vehicle that is not a recorder.  It is spawned, drives,
+    is seen by the others' sensors and is in ``ground_truth/``, but carries no
+    sensors and writes nothing under ``vehicles/``; the run's ``metadata.json``
+    lists recorders only."""
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ParticipantSpec":
         actions = []
         for a in d.get("actions", []) or []:
+            trigger = a.get("trigger")
+            if trigger is not None and "t_start" in a:
+                raise ValueError("action {0!r} has both a trigger and a t_start".format(a["action_id"]))
             actions.append(
                 ScriptedAction(
                     action_id=a["action_id"],
@@ -147,6 +156,7 @@ class ParticipantSpec:
                     duration=float(a.get("duration", 1.0)),
                     params={k: float(v) for k, v in (a.get("params", {}) or {}).items()},
                     enabled=bool(a.get("enabled", True)),
+                    trigger=None if trigger is None else ActionTrigger.from_dict(trigger),
                 )
             )
         return ParticipantSpec(
@@ -162,6 +172,7 @@ class ParticipantSpec:
             post_impact_mode=str(d.get("post_impact_mode", "") or ""),
             post_impact_lateral_m=float(d.get("post_impact_lateral_m", 0.0)),
             post_impact_deflect_s=float(d.get("post_impact_deflect_s", 1.5)),
+            record=bool(d.get("record", True)),
         )
 
 
@@ -191,6 +202,22 @@ class ScenarioSpec:
     @property
     def participant_ids(self) -> List[str]:
         return [p.participant_id for p in self.participants]
+
+    @property
+    def recorder_ids(self) -> List[str]:
+        """Participants that write ``vehicles/<id>/`` (``record`` true)."""
+        return [p.participant_id for p in self.participants if p.record]
+
+    def without(self, participant_ids: Sequence[str]) -> "ScenarioSpec":
+        """The same scenario with some participants removed (a privileged
+        counterfactual).  A trigger aimed at a removed participant never fires."""
+        unknown = sorted(set(participant_ids) - set(self.participant_ids))
+        if unknown:
+            raise KeyError("no participant(s) {0} in scenario {1}".format(unknown, self.scenario_id))
+        kept = [p for p in self.participants if p.participant_id not in set(participant_ids)]
+        return ScenarioSpec(scenario_id=self.scenario_id, name=self.name, description=self.description,
+                            map_name=self.map_name, variant=self.variant, participants=kept,
+                            max_duration_s=self.max_duration_s, context=dict(self.context))
 
     @staticmethod
     def from_config(cfg: Config, variant: Optional[str] = None) -> "ScenarioSpec":
@@ -237,6 +264,16 @@ class ScenarioSpec:
             max_duration_s=float(merged.get("max_duration_s", 30.0)),
             context=dict(merged.get("context") or {}),
         )
+        ids = spec.participant_ids
+        if len(set(ids)) != len(ids):
+            raise ValueError("scenario {0}: duplicate participant ids {1}".format(spec.scenario_id, ids))
+        if spec.participants and not spec.recorder_ids:
+            raise ValueError("scenario {0}: no participant records".format(spec.scenario_id))
+        for participant in spec.participants:
+            for action in participant.actions:
+                if action.trigger is not None and action.trigger.target not in ids:
+                    raise ValueError("scenario {0}: {1} triggers on unknown participant {2!r}".format(
+                        spec.scenario_id, action.action_id, action.trigger.target))
         return spec
 
 

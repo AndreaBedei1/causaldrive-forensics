@@ -219,5 +219,25 @@
     "wall_s": 34.2
    }
   ]
+ },
+ {
+  "scenario": "S17",
+  "variant": "crash",
+  "map": "Town05",
+  "status": "recorded",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-07",
+  "attempts": [
+   {
+    "exit": 0,
+    "engine_crash": false,
+    "note": "",
+    "wall_s": 33.9
+   }
+  ],
+  "not_recorders": {
+   "C": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)"
+  }
  }
 ]

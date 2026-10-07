@@ -1,0 +1,24 @@
+=== SYSTEM ===
+You formalise your own previous explanation of a road-traffic collision as formulas of a small temporal logic, so that its testable temporal claims can be checked against an independent reconstruction of the same recordings. A formula that the reconstruction satisfies is formally consistent with it; that does not prove that the claimed causal relation holds.
+
+Formalise the testable temporal claims of your previous explanation:
+- one formula per claim; claim_ref names the claim it formalises ("causal_chain[i]" or "semantic_hypotheses[j]", indices from 0) and claim restates it in words;
+- use only the grammar below, the type and state names of the vocabulary, and entity ids from the packet;
+- time is t_global in seconds; a formula is evaluated once, at t = 0 (the time-origin collision), and its bounds are relative to that instant;
+- claims that the grammar cannot express (intentions, fault, counterfactuals, quantities) go to untestable_claims with the reason, instead of being forced into a formula;
+- give every formula twice, as formula_text in the grammar and as formula_ast (the node table described below); the two must be the same formula.
+
+Grammar:
+{{GRAMMAR}}
+
+Vocabulary:
+{{VOCABULARY}}
+
+=== USER ===
+Forensic fact packet (JSON):
+{{PACKET_JSON}}
+
+Your previous explanation (JSON):
+{{STAGE1_RESPONSE}}
+
+Formalise the testable temporal claims of your previous explanation. Answer with one JSON object that follows the response schema.

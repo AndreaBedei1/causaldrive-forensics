@@ -6,3 +6,5 @@ __pycache__/
 venv/
 .pytest_cache/
 *.log
+# Local secrets (API keys for the LLM providers): never committed; see .env.example.
+.env
