@@ -1488,19 +1488,19 @@
     "track": "track_002",
     "born": 0.0,
     "confirmed": 0.2,
-    "lost": 11.5
+    "lost": 10.95
    }
   ],
-  "collision": 5.75,
-  "fov_s": 11.55,
+  "collision": 4.95,
+  "fov_s": 11.0,
   "no_return_in_fov_before_first_return": {},
   "tracker_input": {
    "usable_sweeps": 5,
    "sweeps": 5,
    "longest_usable_run": 5,
    "target_speed_mps": [
-    12.4,
-    12.42
+    12.93,
+    12.96
    ]
   },
   "delay_cause": "none (prompt)"
@@ -1521,20 +1521,20 @@
     "track": "track_001",
     "born": 0.0,
     "confirmed": 0.2,
-    "lost": 7.65,
+    "lost": 7.45,
     "after_loss": "in FOV, returns only static/filtered"
    }
   ],
-  "collision": 5.75,
-  "fov_s": 11.55,
+  "collision": 4.95,
+  "fov_s": 11.0,
   "no_return_in_fov_before_first_return": {},
   "tracker_input": {
    "usable_sweeps": 5,
    "sweeps": 5,
    "longest_usable_run": 5,
    "target_speed_mps": [
-    12.09,
-    12.14
+    10.67,
+    10.73
    ]
   },
   "delay_cause": "none (prompt)"
@@ -1555,11 +1555,11 @@
     "track": "track_001",
     "born": 0.0,
     "confirmed": 0.2,
-    "lost": 11.5
+    "lost": 10.95
    }
   ],
-  "collision": 5.75,
-  "fov_s": 11.55,
+  "collision": 4.95,
+  "fov_s": 11.0,
   "no_return_in_fov_before_first_return": {},
   "tracker_input": {
    "usable_sweeps": 5,
@@ -1588,20 +1588,27 @@
     "track": "track_002",
     "born": 0.0,
     "confirmed": 0.2,
-    "lost": 7.15,
+    "lost": 5.7,
+    "after_loss": "in FOV, returns only static/filtered"
+   },
+   {
+    "track": "track_003",
+    "born": 6.4,
+    "confirmed": 6.65,
+    "lost": 7.0,
     "after_loss": "in FOV, returns only static/filtered"
    }
   ],
-  "collision": 5.75,
-  "fov_s": 11.55,
+  "collision": 4.95,
+  "fov_s": 11.0,
   "no_return_in_fov_before_first_return": {},
   "tracker_input": {
    "usable_sweeps": 5,
    "sweeps": 5,
    "longest_usable_run": 5,
    "target_speed_mps": [
-    12.09,
-    12.14
+    10.67,
+    10.73
    ]
   },
   "delay_cause": "none (prompt)"

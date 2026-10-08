@@ -1,31 +1,39 @@
 {
   "_notice": "PRIVILEGED - NOT ADMISSIBLE INPUT. Simulator ground truth of offline counterfactual runs; never read by the reconstruction, never given to an LLM.",
   "counterfactuals": {
-    "trigger_never_fired": {
-      "A_max_left_departure_m": 0.0,
-      "A_max_right_departure_m": 0.0,
+    "swerve_disabled": {
+      "A_C_closing_speed_before_contact_mps": 0.96,
+      "A_max_left_departure_m": 0.01,
+      "A_max_right_departure_m": 0.01,
+      "C_ahead_of_A_at_start_m": 10.36,
       "box_gaps": {
         "A-B": {
-          "at_s": 9.95,
-          "min_box_gap_m": 1.53
+          "at_s": 7.0,
+          "min_box_gap_m": 1.51
         },
         "A-C": {
-          "at_s": 5.0,
-          "min_box_gap_m": 2.58
+          "at_s": 5.75,
+          "min_box_gap_m": 0.0
         },
         "B-C": {
-          "at_s": 5.15,
-          "min_box_gap_m": 4.85
+          "at_s": 8.2,
+          "min_box_gap_m": 1.46
         }
       },
-      "collisions": {},
+      "collisions": {
+        "A-C": {
+          "first_s": 5.95,
+          "last_s": 6.1,
+          "peak_impulse_Ns": 477.8
+        }
+      },
       "command": "python scripts/run_scenario.py --scenario S17 --variant crash --seed 0 --output <scratch directory> --no-autostart --override simulation.port=3000 --override simulation.traffic_manager_port=8100 --disable-action A_evasive_swerve_left",
       "participants": [
         "A",
         "B",
         "C"
       ],
-      "recorded_duration_s": 9.95,
+      "recorded_duration_s": 11.1,
       "triggers_fired": [],
       "vehicles_written": [
         "A",
@@ -37,8 +45,8 @@
       "A_max_right_departure_m": 0.01,
       "box_gaps": {
         "A-B": {
-          "at_s": 0.35,
-          "min_box_gap_m": 1.53
+          "at_s": 8.5,
+          "min_box_gap_m": 1.54
         }
       },
       "collisions": {},
@@ -47,7 +55,7 @@
         "A",
         "B"
       ],
-      "recorded_duration_s": 9.95,
+      "recorded_duration_s": 9.3,
       "triggers_fired": [],
       "vehicles_written": [
         "A",
@@ -56,27 +64,28 @@
     }
   },
   "factual": {
-    "A_max_left_departure_m": 2.51,
+    "A_max_left_departure_m": 2.71,
     "A_max_right_departure_m": 0.0,
+    "C_ahead_of_A_at_start_m": 10.41,
     "box_gaps": {
       "A-B": {
-        "at_s": 5.65,
+        "at_s": 4.9,
         "min_box_gap_m": 0.0
       },
       "A-C": {
-        "at_s": 5.0,
-        "min_box_gap_m": 2.57
+        "at_s": 5.2,
+        "min_box_gap_m": 0.59
       },
       "B-C": {
-        "at_s": 5.15,
-        "min_box_gap_m": 4.88
+        "at_s": 5.2,
+        "min_box_gap_m": 3.13
       }
     },
     "collisions": {
       "A-B": {
-        "first_s": 5.75,
-        "last_s": 6.5,
-        "peak_impulse_Ns": 916.0
+        "first_s": 4.95,
+        "last_s": 5.75,
+        "peak_impulse_Ns": 1576.9
       }
     },
     "participants": [
@@ -84,13 +93,16 @@
       "B",
       "C"
     ],
-    "recorded_duration_s": 11.5,
+    "recorded_duration_s": 10.95,
     "triggers_fired": [
       {
         "action_id": "A_evasive_swerve_left",
-        "action_t_start": 4.15,
+        "action_t_start": 3.65,
+        "measured": {
+          "front_clearance_m": 2.476
+        },
         "participant_id": "A",
-        "t_scenario": 3.75
+        "t_scenario": 3.3
       }
     ]
   },

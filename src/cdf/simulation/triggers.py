@@ -13,12 +13,22 @@ legitimate for building a scenario and for nothing else: firings are written to
 reconstruction never sees them.  A trigger whose target is not in the run (a
 counterfactual without that vehicle) can never fire.
 
-Only one kind exists so far:
+Kinds:
 
 ``envelope_entry``
     Fires the first time any part of the target's true bounding box lies in a
     corridor ahead of the owner's front face: ``ahead_m`` long, as wide as the
     owner plus ``lateral_margin_m`` on each side, in the owner's own frame.
+
+``corridor_clearance``
+    Fires the first time the target's true bounding box is inside the owner's
+    lateral corridor (as wide as the owner plus ``lateral_margin_m`` on each
+    side) with some of it ahead of the owner's front face, and the clearance
+    from that face to the nearest part of the box inside the corridor is at
+    most ``clearance_m``: a vehicle that cuts in close, measured box to box
+    (exact geometry, any orientation; negative when the part inside the
+    corridor reaches back beside the owner).  The firing record carries the
+    measured clearance.
 """
 
 from __future__ import annotations
@@ -27,9 +37,9 @@ import math
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-__all__ = ["ActionTrigger", "Pose", "TRIGGER_KINDS", "envelope_entry", "box_outline"]
+__all__ = ["ActionTrigger", "Pose", "TRIGGER_KINDS", "envelope_entry", "box_outline", "corridor_front_clearance"]
 
-TRIGGER_KINDS = ("envelope_entry",)
+TRIGGER_KINDS = ("envelope_entry", "corridor_clearance")
 
 
 @dataclass(frozen=True)
@@ -54,13 +64,14 @@ class ActionTrigger:
     reaction_s: float = 0.5
     window_start_s: float = 0.0
     window_end_s: float = math.inf
+    clearance_m: float = 3.0
 
     def __post_init__(self) -> None:
         if self.kind not in TRIGGER_KINDS:
             raise ValueError("unknown trigger kind {0!r} (known: {1})".format(self.kind, ", ".join(TRIGGER_KINDS)))
         if not self.target:
             raise ValueError("a trigger needs a target participant")
-        if self.ahead_m <= 0.0 or self.reaction_s < 0.0 or self.lateral_margin_m < 0.0:
+        if self.ahead_m <= 0.0 or self.reaction_s < 0.0 or self.lateral_margin_m < 0.0 or self.clearance_m < 0.0:
             raise ValueError("trigger distances and delays must be non-negative (ahead_m > 0)")
         if self.window_end_s < self.window_start_s:
             raise ValueError("trigger window ends before it starts")
@@ -76,6 +87,7 @@ class ActionTrigger:
             reaction_s=float(d.get("reaction_s", 0.5)),
             window_start_s=float(window[0]),
             window_end_s=float(window[1]),
+            clearance_m=float(d.get("clearance_m", 3.0)),
         )
 
     def in_window(self, t: float) -> bool:
@@ -84,12 +96,27 @@ class ActionTrigger:
     def condition(self, owner: Pose, target: Pose) -> bool:
         if self.kind == "envelope_entry":
             return envelope_entry(owner, target, self.ahead_m, self.lateral_margin_m)
+        if self.kind == "corridor_clearance":
+            clearance = corridor_front_clearance(owner, target, self.lateral_margin_m)
+            return clearance is not None and clearance <= self.clearance_m
         raise ValueError(self.kind)
 
+    def measure(self, owner: Pose, target: Pose) -> Dict[str, float]:
+        """What the condition measured (for the privileged firing record)."""
+        if self.kind == "corridor_clearance":
+            clearance = corridor_front_clearance(owner, target, self.lateral_margin_m)
+            return {} if clearance is None else {"front_clearance_m": round(clearance, 3)}
+        return {}
+
     def describe(self) -> Dict[str, Any]:
-        return {"kind": self.kind, "target": self.target, "ahead_m": self.ahead_m,
-                "lateral_margin_m": self.lateral_margin_m, "reaction_s": self.reaction_s,
-                "window_s": [self.window_start_s, None if math.isinf(self.window_end_s) else self.window_end_s]}
+        out: Dict[str, Any] = {"kind": self.kind, "target": self.target}
+        if self.kind == "corridor_clearance":
+            out["clearance_m"] = self.clearance_m
+        else:
+            out["ahead_m"] = self.ahead_m
+        out.update({"lateral_margin_m": self.lateral_margin_m, "reaction_s": self.reaction_s,
+                    "window_s": [self.window_start_s, None if math.isinf(self.window_end_s) else self.window_end_s]})
+        return out
 
 
 def box_outline(pose: Pose, step: float = 0.25) -> List[Tuple[float, float]]:
@@ -125,6 +152,56 @@ def envelope_entry(owner: Pose, target: Pose, ahead_m: float, lateral_margin_m: 
     return False
 
 
+def _in_owner_frame(owner: Pose, pose: Pose) -> List[Tuple[float, float]]:
+    """The corners of ``pose``'s box in ``owner``'s frame (x forward, y right)."""
+    c, s = math.cos(math.radians(owner.yaw_deg)), math.sin(math.radians(owner.yaw_deg))
+    tc, ts = math.cos(math.radians(pose.yaw_deg)), math.sin(math.radians(pose.yaw_deg))
+    corners = []
+    for lx, ly in ((pose.half_length, -pose.half_width), (pose.half_length, pose.half_width),
+                   (-pose.half_length, pose.half_width), (-pose.half_length, -pose.half_width)):
+        dx = pose.x + tc * lx - ts * ly - owner.x
+        dy = pose.y + ts * lx + tc * ly - owner.y
+        corners.append((c * dx + s * dy, -s * dx + c * dy))
+    return corners
+
+
+def _clip(polygon: List[Tuple[float, float]], inside: Any, cut: Any) -> List[Tuple[float, float]]:
+    """One Sutherland-Hodgman step: keep the part of a convex polygon where ``inside(point)``."""
+    out: List[Tuple[float, float]] = []
+    for i, current in enumerate(polygon):
+        previous = polygon[i - 1]
+        if inside(current):
+            if not inside(previous):
+                out.append(cut(previous, current))
+            out.append(current)
+        elif inside(previous):
+            out.append(cut(previous, current))
+    return out
+
+
+def corridor_front_clearance(owner: Pose, target: Pose, lateral_margin_m: float) -> Optional[float]:
+    """Clearance from ``owner``'s front face to the part of ``target``'s box inside its corridor.
+
+    The corridor is ``|y| <= half_width + lateral_margin_m`` in the owner's frame
+    (x forward, y right).  None when no part of the target's box is inside it
+    ahead of the front face; negative when the part inside reaches back beside
+    the owner.  Exact box geometry, any relative orientation.
+    """
+    half = owner.half_width + lateral_margin_m
+
+    def cut_at(y_limit: float) -> Any:
+        def cut(p: Tuple[float, float], q: Tuple[float, float]) -> Tuple[float, float]:
+            f = (y_limit - p[1]) / (q[1] - p[1])
+            return p[0] + f * (q[0] - p[0]), y_limit
+        return cut
+
+    polygon = _clip(_in_owner_frame(owner, target), lambda p: p[1] <= half, cut_at(half))
+    polygon = _clip(polygon, lambda p: p[1] >= -half, cut_at(-half))
+    if not polygon or max(x for x, _ in polygon) <= owner.half_length:
+        return None
+    return min(x for x, _ in polygon) - owner.half_length
+
+
 def fire_due_triggers(t: float, poses: Dict[str, Pose], armed: Iterable[Tuple[str, Any]]) -> List[Dict[str, Any]]:
     """Fire every armed action whose condition holds at scenario time ``t``.
 
@@ -142,7 +219,11 @@ def fire_due_triggers(t: float, poses: Dict[str, Pose], armed: Iterable[Tuple[st
             continue  # the target is not in this run: the action can never fire
         if trigger.condition(owner, target):
             action.fire(t)
-            fired.append({"t_scenario": round(float(t), 4), "participant_id": owner_id,
-                          "action_id": action.action_id, "trigger": trigger.describe(),
-                          "action_t_start": round(float(action.t_start), 4)})
+            record = {"t_scenario": round(float(t), 4), "participant_id": owner_id,
+                      "action_id": action.action_id, "trigger": trigger.describe(),
+                      "action_t_start": round(float(action.t_start), 4)}
+            measured = trigger.measure(owner, target)
+            if measured:
+                record["measured"] = measured
+            fired.append(record)
     return fired

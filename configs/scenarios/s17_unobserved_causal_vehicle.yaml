@@ -1,15 +1,16 @@
 scenario:
   scenario_id: S17
   name: unobserved_causal_vehicle
-  description: 'Three lanes, one direction.  A drives in the middle lane, B alongside
-    and slightly behind in the left lane.  C, in the right lane a little ahead of A,
-    cuts suddenly into A''s lane close in front of it and slows down.  A swerves left
-    to avoid C, into B''s path, and A and B collide.  C touches nobody, speeds up
-    and drives away.  C is a physical vehicle but not a recorder (record: false):
-    no data of its own, so in the reconstruction it can only be one of A''s anonymous
-    radar tracks.  A''s swerve is triggered by C entering the corridor ahead of A
-    (privileged simulator state, scenario construction only, logged to ground_truth/
-    only): without C it never happens, and A and B do not touch.
+  description: 'Three lanes, one direction.  A drives in the middle lane, B in the left
+    lane slightly behind it and catching up, C in the right lane a few metres ahead of A
+    and 1 m/s slower.  C cuts suddenly into A''s lane just in front of it: about 2 m of
+    clearance when A reacts.  A swerves left to avoid C, into B''s path, and A and B
+    collide.  C touches nobody, then speeds up and drives away; without the swerve A
+    would have run into C.  C is a physical vehicle but not a recorder (record: false):
+    no data of its own, so in the reconstruction it can only be one of the recorders''
+    anonymous radar tracks.  A''s swerve is triggered by C entering A''s corridor within
+    3 m of its front (privileged simulator state, scenario construction only, logged to
+    ground_truth/ only): without C it never happens, and A and B do not touch.
 
     '
   research_question: How does partial observability of a causally relevant but non-colliding
@@ -34,32 +35,34 @@ scenario:
     initial_speed: 12.0
     target_speed: 12.0
     actions:
-    # Evasive swerve to the left, played only if C enters the corridor ahead of A:
-    # 12 m beyond A's front face, A's width plus 0.2 m each side; 0.4 s reaction.
+    # Evasive swerve to the left, played only if C cuts in close: C's box inside A's
+    # corridor (A's width plus 0.3 m each side) within 3 m of A's front face, box to
+    # box; 0.35 s reaction.
     - action_id: A_evasive_swerve_left
       kind: lane_shift
-      duration: 1.6
+      duration: 1.0
       params:
         lateral_m: -3.5
       trigger:
-        kind: envelope_entry
+        kind: corridor_clearance
         target: C
-        ahead_m: 12.0
-        lateral_margin_m: 0.2
-        reaction_s: 0.4
+        clearance_m: 3.0
+        lateral_margin_m: 0.3
+        reaction_s: 0.35
         window_s: [0.0, 8.0]
   - id: B
     blueprint: vehicle.nissan.patrol
     spawn:
       anchor: spawn_index
       index: 265
-      forward_m: 15.5
+      forward_m: 12.5
       lane_offset: -1
     route:
       length_m: 200.0
       step_m: 2.0
-    initial_speed: 12.5
-    target_speed: 12.5
+    # Catching up with A from behind in the left lane: level with A's rear when A swerves.
+    initial_speed: 13.0
+    target_speed: 13.0
     actions: []
   - id: C
     blueprint: vehicle.tesla.model3
@@ -67,31 +70,26 @@ scenario:
     spawn:
       anchor: spawn_index
       index: 265
-      forward_m: 32.0
+      forward_m: 30.75
       lane_offset: 1
     route:
       length_m: 220.0
       step_m: 2.0
-    initial_speed: 12.5
-    target_speed: 12.5
+    # 1 m/s slower than A: A is about to pass it when it cuts in.
+    initial_speed: 11.0
+    target_speed: 11.0
     post_impact_mode: drive
     actions:
     - action_id: C_cut_in_left
       kind: lane_shift
-      t_start: 2.5
-      duration: 1.4
+      t_start: 2.0
+      duration: 1.0
       params:
         lateral_m: -3.5
-    - action_id: C_slows_in_front_of_A
-      kind: set_speed
-      t_start: 2.5
-      duration: 2.0
-      params:
-        target_speed: 10.0
     - action_id: C_drives_away
       kind: set_speed
-      t_start: 4.5
-      duration: 5.5
+      t_start: 7.0
+      duration: 4.0
       params:
         target_speed: 16.0
   variants:

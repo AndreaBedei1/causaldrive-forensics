@@ -298,14 +298,17 @@ class S17GhostTests(unittest.TestCase):
         cls.replay = ReplayRun.load(S17)
         cls.tracks = {track.name: track for track in cls.replay.all_tracks()}
 
-    def test_the_four_tracks_are_shown_as_the_fusion_decided(self):
+    def test_the_tracks_are_shown_as_the_fusion_decided(self):
         self.assertEqual({name: (t.status, t.entity, t.ghost) for name, t in self.tracks.items()},
                          {"A:track_001": (ANONYMOUS, None, True), "A:track_002": (ASSOCIATED, "B", False),
-                          "B:track_001": (ASSOCIATED, "A", False), "B:track_002": (ANONYMOUS, None, True)})
+                          "B:track_001": (ASSOCIATED, "A", False), "B:track_002": (ANONYMOUS, None, True),
+                          "B:track_003": (ANONYMOUS, None, True)})
         # An associated track is the associated recorder's replayed vehicle: no duplicate ghost.
-        self.assertEqual([track.name for track in self.replay.ghost_tracks()], ["A:track_001", "B:track_002"])
+        self.assertEqual([track.name for track in self.replay.ghost_tracks()],
+                         ["A:track_001", "B:track_002", "B:track_003"])
         self.assertEqual([self.tracks[name].label for name in sorted(self.tracks)],
-                         ["A:track_001 / ANONYMOUS", "A:track_002 → B", "B:track_001 → A", "B:track_002 / ANONYMOUS"])
+                         ["A:track_001 / ANONYMOUS", "A:track_002 → B", "B:track_001 → A", "B:track_002 / ANONYMOUS",
+                          "B:track_003 / ANONYMOUS"])
 
     def test_only_the_recorders_are_replayed_and_nothing_is_named_c(self):
         self.assertEqual([p.participant_id for p in self.replay.participants], ["A", "B"])
@@ -321,7 +324,7 @@ class S17GhostTests(unittest.TestCase):
 
     def test_ghosts_are_renderable_while_tracked_and_gone_at_track_lost(self):
         size = self.replay.geometry
-        for name in ("A:track_001", "B:track_002"):
+        for name in ("A:track_001", "B:track_002", "B:track_003"):
             track = self.tracks[name]
             lost = [e.time for e in self.replay.local_events[track.recorder].events
                     if e.event_type == "TRACK_LOST" and e.subject == track.track_id]
@@ -350,17 +353,19 @@ class S17GhostTests(unittest.TestCase):
         self.assertTrue(predicted)
         self.assertFalse(track.state_at(predicted[0].time).measured)
 
-    def test_the_two_anonymous_tracks_stay_separate_each_in_its_observers_frame(self):
-        a1, b2 = self.tracks["A:track_001"], self.tracks["B:track_002"]
-        self.assertIsNot(a1, b2)
-        self.assertEqual((a1.recorder, b2.recorder), ("A", "B"))
-        # Each went through its own observer's recorded pose; they land on the same road user
-        # without ever being compared or merged.
-        common = [t for t in a1.times if b2.start <= t <= b2.end]
-        self.assertGreater(len(common), 50)
-        distances = [math.hypot(a1.state_at(t).centre[0] - b2.state_at(t).centre[0],
-                                a1.state_at(t).centre[1] - b2.state_at(t).centre[1]) for t in common]
-        self.assertLess(max(distances), 1.5)
+    def test_the_anonymous_tracks_stay_separate_each_in_its_observers_frame(self):
+        a1 = self.tracks["A:track_001"]
+        for other in (self.tracks["B:track_002"], self.tracks["B:track_003"]):
+            self.assertIsNot(a1, other)
+            self.assertEqual((a1.recorder, other.recorder), ("A", "B"))
+            # Each went through its own observer's recorded pose and its own view of the road user (A
+            # sees its rear, B partly behind A its left side): the two nominal boxes land on the same
+            # road user, overlapping, without ever being compared or merged.
+            common = [t for t in a1.times if other.start <= t <= other.end]
+            self.assertTrue(common)
+            distances = [math.hypot(a1.state_at(t).centre[0] - other.state_at(t).centre[0],
+                                    a1.state_at(t).centre[1] - other.state_at(t).centre[1]) for t in common]
+            self.assertLess(max(distances), self.replay.geometry.length)
 
 
 # --------------------------------------------------------------------------

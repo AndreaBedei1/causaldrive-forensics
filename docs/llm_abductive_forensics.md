@@ -166,11 +166,11 @@ python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --or
 - No model has been called yet (no keys): providers, schemas and the pipeline are tested with mock transports
   that reproduce the documented response formats; the configured model names are the ones requested and are
   not verified against the providers' catalogues.
-- The packet is large (S17: ~95 k characters, all facts at 10 Hz); no subsampling is applied.
+- The packet is large (S17: ~92 k characters, all facts at 10 Hz); no subsampling is applied.
 - Recorder frames are not related to each other (no map frame): the model cannot overlay positions of
   different recorders directly; relative geometry comes from each recorder's own tracks.
 - The same physical road user seen by two recorders is two anonymous ids unless the reconstruction associated
-  them (S17: `A:track_001` and `B:track_002` are both C).
+  them (S17: `A:track_001`, `B:track_002` and `B:track_003` are all C).
 - Formulas can only be as precise as the trace: event times are quantised to 0.05 s, states to the 10 Hz
   perceived-state frames refined by the event times; a hypothesis about an unobserved interval is UNKNOWN.
 - The evaluation's recall is against the complete reconstructed trace (including events no explanation would

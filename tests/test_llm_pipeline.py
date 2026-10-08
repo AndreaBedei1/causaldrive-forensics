@@ -291,7 +291,7 @@ class S17PacketTests(unittest.TestCase):
 
     def test_c_is_not_revealed(self):
         ids = {entity["entity_id"] for entity in self.packet["entities"]}
-        self.assertEqual(ids, {"A", "B", "A:track_001", "A:track_002", "B:track_001", "B:track_002"})
+        self.assertEqual(ids, {"A", "B", "A:track_001", "A:track_002", "B:track_001", "B:track_002", "B:track_003"})
         self.assertEqual([r["recorder_id"] for r in self.packet["known_recorders"]], ["A", "B"])
         self.assertNotIn('"C"', self.text)
         self.assertNotIn("C:", self.text)
@@ -309,6 +309,8 @@ class S17PacketTests(unittest.TestCase):
                          ("ASSOCIATED", "B"))
         self.assertEqual((entities["B:track_001"]["identity_status"], entities["B:track_001"]["observed_subject"]),
                          ("ASSOCIATED", "A"))
+        self.assertEqual((entities["B:track_003"]["identity_status"], entities["B:track_003"]["observed_subject"]),
+                         ("ANONYMOUS", "B:track_003"))
         for item in iter_packet_facts(self.packet):
             if item["type"] == "TRACK_STATE":
                 expected_subject = entities[item["local_track_id"]]["observed_subject"]
@@ -316,7 +318,7 @@ class S17PacketTests(unittest.TestCase):
 
     def test_a_tracked_the_cut_in_road_user_for_seconds(self):
         track = next(e for e in self.packet["entities"] if e["entity_id"] == "A:track_001")
-        self.assertLessEqual(track["first_t_global_s"], -5.0)
+        self.assertLessEqual(track["first_t_global_s"], -4.5)  # from the start of the recording
         self.assertGreaterEqual(track["last_t_global_s"], 0.0)
         self.assertGreater(track["samples"], 50)
 
@@ -879,9 +881,9 @@ class S17EndToEndTests(unittest.TestCase):
             return trace.evaluate(parse_formula(text), at=0.0)["result"]
         self.assertEqual(result("F[-3,0] event(CUT_IN_FROM_RIGHT_START, A, A:track_001)"), "TRUE")
         self.assertEqual(result("BEFORE(event(EGO_PATH_ENTRY, A, A:track_001), event(COLLISION, A, B))"), "TRUE")
-        self.assertEqual(result("F[-5,0] event(BRAKE_START, A)"), "FALSE")
+        self.assertEqual(result("F[-4,0] event(BRAKE_START, A)"), "FALSE")  # A braked only after the contact
         self.assertEqual(result("F[-5,0] event(CUT_IN_FROM_RIGHT_START, A, C)"), "UNKNOWN")
-        self.assertEqual(result("F[3,4] state(CLOSING, A, A:track_001)"), "UNKNOWN")  # lost at +1.9 s
+        self.assertEqual(result("F[3,4] state(CLOSING, A, A:track_001)"), "UNKNOWN")  # lost at +2.5 s
         self.assertEqual(result("F[-5,0] state(CLOSING, A, B)"), "TRUE")
 
 

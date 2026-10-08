@@ -91,10 +91,13 @@ memory and never written; the STOP / YIELD detector runs on board (below).
   `vehicles/`.  The run's `metadata.json` lists the recorders only.  The reconstruction can
   therefore know it only as an anonymous radar track of a recorder.
 - A scripted action may have a `trigger` instead of a `t_start`: it stays armed until a
-  condition on the simulator's true state holds, then starts `reaction_s` later.  The only kind
-  so far is `envelope_entry`: the target participant's box enters a corridor `ahead_m` long
-  ahead of the owner's front face, as wide as the owner plus `lateral_margin_m` a side, within
-  `window_s`.  This is scenario construction with privileged information: firings go to
+  condition on the simulator's true state holds (within `window_s`), then starts `reaction_s`
+  later.  Kinds: `envelope_entry`, the target participant's box enters a corridor `ahead_m` long
+  ahead of the owner's front face, as wide as the owner plus `lateral_margin_m` a side;
+  `corridor_clearance`, the target's box is inside that corridor (any length) within
+  `clearance_m` of the owner's front face, measured exactly box to box on the part inside the
+  corridor (a close cut-in; the firing record carries the measured clearance).  This is
+  scenario construction with privileged information: firings go to
   `ground_truth/triggers.jsonl` only, never to `vehicles/`.  A trigger whose target is not in
   the run never fires.
 - Privileged counterfactuals of a scenario (into a scratch `--output`, never into the campaign):
@@ -107,17 +110,19 @@ python scripts/run_scenario.py --scenario S17 --variant crash --output <scratch>
 ```
 
 S17 `unobserved_causal_vehicle` (crash) uses both.  Three lanes, one direction: A (audi.tt,
-12 m/s) in the middle lane, B (nissan.patrol, 12.5 m/s) in the left lane slightly behind, C
-(model3, `record: false`) in the right lane 12 m ahead.  At 2.5 s C cuts into A's lane and slows
-to about 9 m/s about 5 m in front of A; C's box enters A's corridor at 3.75 s and A swerves left
-from 4.15 s (lane shift -3.5 m over 1.6 s) into B: A-B sideswipe at 5.75 s (peak impulse
-916 N*s).  C touches nobody (closest 2.6 m to A, 4.9 m to B), speeds up to 16 m/s and drives
-away.  Without C (or with the swerve disabled) A and B never touch (closest 1.5 m):
-`ground_truth/counterfactuals.json`, privileged.  In the reconstruction C is `A:track_001`
-(anonymous, CUT_IN_FROM_RIGHT, EGO_PATH_ENTRY and CRITICAL_TTC before the collision) and,
-separately, `B:track_002`; no entity C exists.  Research question: how does partial
-observability of a causally relevant but non-colliding road user affect accident explanation
-and attribution?
+12 m/s) in the middle lane, B (nissan.patrol, 13 m/s) in the left lane 7 m behind and catching
+up, C (model3, `record: false`) in the right lane 10 m ahead of A and 1 m/s slower.  At 2.0 s C
+cuts into A's lane without braking (lane shift -3.5 m over 1.0 s, its left side in A's lane at
+2.85 s); at 3.30 s C's box is inside A's corridor 2.3 m ahead box to box (`corridor_clearance`,
+3 m) and after a 0.35 s reaction A swerves left (lane shift -3.5 m over 1.0 s; 2.0 m of
+clearance when it starts) into B: A-B collision at 4.95 s (peak impulse 1577 N*s).  C touches
+nobody (closest 0.59 m to A, 3.1 m to B) and speeds up to 16 m/s from 7.0 s.  Without C A
+never swerves and A and B never touch (closest 1.5 m); with C but the swerve disabled A runs
+into the back of C at 5.95 s and never touches B: `ground_truth/counterfactuals.json`,
+privileged.  In the reconstruction C is `A:track_001` (anonymous, CLOSING, CUT_IN_FROM_RIGHT,
+EGO_PATH_ENTRY and CRITICAL_TTC before the collision) and, separately, `B:track_002` and
+`B:track_003`; no entity C exists.  Research question: how does partial observability of a
+causally relevant but non-colliding road user affect accident explanation and attribution?
 
 ## Stored streams
 
