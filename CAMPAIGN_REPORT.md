@@ -295,7 +295,7 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 - A stationary braked vehicle is immovable when struck in CARLA; chain scenarios rely on the struck car still rolling (S06 a_front_pushed).
 - The depth camera (unused) misses frames on the second and third vehicle (section 2.4).
 - S17: the reconstruction cannot know that A:track_001 and B:track_002 are the same road user (C): identities are anchored on collisions and C collides with nobody.  The A-B sideswipe peaks at 916 N*s, below the 1000 N*s that starts a new contact, so its 32 callbacks over 0.75 s are one collision.  A's swerve is precautionary: with the swerve disabled C, accelerating away from 4.5 s, stays 2.6 m ahead of A (section 8.4).
-- A record: false participant is not replayed by scripts/replay_run.py (no ego.jsonl; ground truth is never read there): S17's C appears only as the recorders' track markers.
+- A record: false participant is not replayed by scripts/replay_run.py (no ego.jsonl; ground truth, the run metadata and the scenario configuration are never read there): S17's C appears only as two anonymous ghost tracks, A:track_001 and B:track_002 (nominal boxes from each observer's own track, never merged, never named).
 
 ## 8. S17 unobserved_causal_vehicle: partial observability
 

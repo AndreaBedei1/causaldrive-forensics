@@ -11,6 +11,16 @@ where ``run_start`` is the earliest recorded ego sample.  A reconstructed event
 of recorder X is shown at ``X's clock origin + t_local - run_start``.  This
 mapping exists for display only: it is not the graph-level alignment, and
 nothing is ever written back to a trace or a graph.
+
+Inputs.  The viewer shows what the reconstruction knows, not what the
+simulator knew.  It reads the recorders' own files (``vehicles/<id>/ego.jsonl``,
+``vehicles/<id>/metadata.json``: blueprint and own footprint), the
+reconstruction outputs (``reconstruction/<id>/``, ``reconstruction/global/``
+graph and associations) and the global reconstruction parameters
+(``configs/reconstruction.yaml``).  It never reads ground truth, the run's own
+``metadata.json``, the scenario configuration or the privileged evaluation: a
+road user that recorded nothing exists here only as the anonymous radar tracks
+of the recorders that saw it, each drawn separately in its observer's frame.
 """
 
 from __future__ import annotations
@@ -22,7 +32,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
+from ..reconstruction.config import ReconstructionConfig, load_config
+from ..reconstruction.conflict import HEADING_MIN_SPEED_MPS, OBLIQUE_VIEW_DEG
 from ..reconstruction.models import transition_of
+from ..reconstruction.tracking import EgoFootprint
 from ..reconstruction.world_state import compact_state
 
 FALLBACK_BLUEPRINT = "vehicle.tesla.model3"
@@ -45,6 +58,11 @@ def lerp(a: float, b: float, f: float) -> float:
 def lerp_angle_deg(a: float, b: float, f: float) -> float:
     """Interpolate from ``a`` to ``b`` (degrees) the shorter way round."""
     return a + ((b - a + 180.0) % 360.0 - 180.0) * f
+
+
+def wrap_deg(angle: float) -> float:
+    """``angle`` in [-180, 180)."""
+    return (angle + 180.0) % 360.0 - 180.0
 
 
 # --------------------------------------------------------------------------
@@ -309,15 +327,29 @@ def load_collisions(path: Path, origins: Mapping[str, float], run_start: float) 
     return sorted(marks, key=lambda mark: mark.time)
 
 
-def load_identities(path: Path) -> Dict[Tuple[str, str], str]:
-    """(recorder, local track) -> entity, for the fusion's ASSOCIATED decisions only."""
-    return {(str(item["local_graph"]), str(item["local_track"])): str(item["global_entity"])
-            for item in _read_json(path) if item.get("status") == "ASSOCIATED"}
+ASSOCIATED = "ASSOCIATED"  # the fusion identified the track with a recorder: that recorder's replayed vehicle
+ANONYMOUS = "ANONYMOUS"  # no recorder identified with it: a road user known only through this track
+
+
+def load_track_statuses(path: Path) -> Dict[Tuple[str, str], Tuple[str, Optional[str]]]:
+    """(recorder, local track) -> (fusion status, associated recorder or None), from associations.json."""
+    statuses: Dict[Tuple[str, str], Tuple[str, Optional[str]]] = {}
+    for item in _read_json(path):
+        status = str(item.get("status") or ANONYMOUS)
+        entity = str(item["global_entity"]) if status == ASSOCIATED else None
+        statuses[(str(item["local_graph"]), str(item["local_track"]))] = (status, entity)
+    return statuses
 
 
 # --------------------------------------------------------------------------
-# Reconstructed anonymous tracks
+# Reconstructed tracks: what each recorder's radar knows about other road users
 # --------------------------------------------------------------------------
+
+GHOST_HEIGHT_M = 1.5  # drawing only: the radar measures no size
+# The CRITICAL_TTC model's own footprint for a recorder that recorded none (conflict._Prediction).
+DEFAULT_FOOTPRINT = EgoFootprint(-2.3, 2.3, -0.95, 0.95)
+HEADING_FROM_VELOCITY, HEADING_HELD, HEADING_UNKNOWN = "velocity", "held", "unknown"
+
 
 def local_to_world(origin: Pose, x_local: float, y_local: float) -> Tuple[float, float]:
     """Inverse of the reconstruction's local frame (origin = first ego pose, x forward, y right)."""
@@ -325,59 +357,223 @@ def local_to_world(origin: Pose, x_local: float, y_local: float) -> Tuple[float,
     return origin.x + c0 * x_local - s0 * y_local, origin.y + s0 * x_local + c0 * y_local
 
 
+def rotate(x: float, y: float, yaw_deg: float) -> Tuple[float, float]:
+    """A vector given in the axes of a vehicle at ``yaw_deg`` (x forward, y right), in world axes."""
+    c, s = math.cos(math.radians(yaw_deg)), math.sin(math.radians(yaw_deg))
+    return c * x - s * y, s * x + c * y
+
+
+@dataclass(frozen=True)
+class GhostGeometry:
+    """The reconstruction's nominal target box and tracking gap (``configs/reconstruction.yaml``).
+
+    A radar measures no size: the box is the reconstruction's hypothesis, not a measured body.
+    """
+
+    length: float = 4.6  # semantics.target_length_m
+    width: float = 1.9  # semantics.target_width_m
+    height: float = GHOST_HEIGHT_M
+    max_gap: float = 0.5  # tracking.max_track_gap_s: never interpolate across a longer silence
+
+    @classmethod
+    def from_config(cls, config: ReconstructionConfig) -> "GhostGeometry":
+        return cls(length=float(config.semantics.target_length_m), width=float(config.semantics.target_width_m),
+                   max_gap=float(config.tracking.max_track_gap_s))
+
+
+def track_heading(vx: float, vy: float, vel_std: float) -> Optional[float]:
+    """Direction of motion ``atan2(vy, vx)`` [deg] of a track velocity, in the frame it is given in.
+
+    None when the speed does not fix a direction: below the reconstruction's
+    HEADING_MIN_SPEED_MPS, or within twice the estimate's own uncertainty.
+    """
+    if math.hypot(vx, vy) < max(HEADING_MIN_SPEED_MPS, 2.0 * max(vel_std, 0.0)):
+        return None
+    return math.degrees(math.atan2(vy, vx))
+
+
+def nominal_box_centre(longitudinal: float, lateral: float, surface_offset: float, heading_deg: float,
+                       footprint: EgoFootprint, length: float, width: float) -> Tuple[float, float]:
+    """Centre, in the recorder's vehicle frame, of the nominal box of one track sample.
+
+    The placement of the CRITICAL_TTC model (``conflict._Prediction``), repeated
+    for drawing: the tracked point moved back by its surface offset towards the
+    recorder is the target's near surface (the corner towards the recorder when
+    seen obliquely, the middle of the facing side when seen along one of its
+    axes); the box lies behind it, in each of its axes by a weight growing from
+    0 (looking along that face) to 1 at OBLIQUE_VIEW_DEG and beyond.
+    ``heading_deg`` is the box heading relative to the recorder.
+    """
+    ux, uy = math.cos(math.radians(heading_deg)), math.sin(math.radians(heading_deg))
+    nx, ny = footprint.outward(longitudinal, lateral)
+    near_x, near_y = longitudinal - surface_offset * nx, lateral - surface_offset * ny
+    gx, gy = -nx, -ny  # from the target towards the recorder
+    along, across = gx * ux + gy * uy, -gx * uy + gy * ux  # in the target's axes (across = its right)
+    oblique = math.sin(math.radians(OBLIQUE_VIEW_DEG))
+    back = math.copysign(length / 2.0 * min(abs(along) / oblique, 1.0), along)
+    side = math.copysign(width / 2.0 * min(abs(across) / oblique, 1.0), across)
+    return near_x - back * ux + side * uy, near_y - back * uy - side * ux
+
+
+@dataclass(frozen=True)
+class TrackPoint:
+    """One track sample (or an instant between two) on the replay timeline, in world coordinates."""
+
+    time: float
+    position: Tuple[float, float]  # the track estimate, as the reconstruction wrote it
+    centre: Tuple[float, float]  # the nominal box behind the observed near surface
+    yaw: float  # box heading [deg]: the estimated motion, else the last reliable one, else the recorder's
+    heading: str  # HEADING_FROM_VELOCITY, HEADING_HELD or HEADING_UNKNOWN (no direction to show)
+    measured: bool  # False: predicted by the tracker without a radar return
+
+
 @dataclass
 class TrackPath:
-    """One anonymous radar track of a recorder, in world coordinates on the replay timeline."""
+    """One radar track of one recorder on the replay timeline.
+
+    Shown only between its first and last sample (its TRACK_LOST): interpolated
+    between consecutive samples of this track at most ``max_gap`` apart, never
+    extrapolated and never continued by anything else.  Tracks are never merged:
+    two recorders seeing the same road user give two tracks.
+    """
 
     recorder: str
     track_id: str
-    times: List[float]
-    points: List[Tuple[float, float]]
-    measured: List[Optional[Tuple[float, float]]]
-    ranges: List[Optional[float]] = field(default_factory=list)  # TRACK_STATE facts, as recorded
-    closing_speeds: List[Optional[float]] = field(default_factory=list)
+    samples: List[TrackPoint]
+    status: str = ANONYMOUS
+    entity: Optional[str] = None  # the associated recorder (ASSOCIATED only)
+    max_gap: float = 0.5
+    times: List[float] = field(init=False, repr=False)
 
-    def position_at(self, t: float) -> Optional[Tuple[float, float]]:
-        """Interpolated track position, or None outside the tracked span."""
-        if not self.times or t < self.times[0] - _EPS or t > self.times[-1] + _EPS:
+    def __post_init__(self) -> None:
+        self.samples = sorted(self.samples, key=lambda sample: sample.time)
+        self.times = [sample.time for sample in self.samples]
+
+    @property
+    def name(self) -> str:
+        """``A:track_001``: the recorder and its local track id (the only name the reconstruction gives it)."""
+        return "{0}:{1}".format(self.recorder, self.track_id)
+
+    @property
+    def ghost(self) -> bool:
+        """Drawn as a body of its own: no recorder was identified with it.  An associated
+        track is the associated recorder's replayed vehicle and gets no second body."""
+        return self.status != ASSOCIATED
+
+    @property
+    def label(self) -> str:
+        if self.ghost:
+            return "{0} / {1}".format(self.name, ANONYMOUS)
+        return "{0} → {1}".format(self.name, self.entity)
+
+    @property
+    def start(self) -> float:
+        return self.times[0]
+
+    @property
+    def end(self) -> float:
+        return self.times[-1]
+
+    def state_at(self, t: float) -> Optional[TrackPoint]:
+        """The track at ``t``: a sample, or between two consecutive samples of this track; None outside."""
+        if not self.samples or t < self.times[0] - _EPS or t > self.times[-1] + _EPS:
             return None
-        index = max(0, min(bisect_right(self.times, t) - 1, len(self.times) - 1))
-        if index == len(self.times) - 1:
-            return self.points[index]
-        f = (t - self.times[index]) / (self.times[index + 1] - self.times[index])
-        (x0, y0), (x1, y1) = self.points[index], self.points[index + 1]
-        return lerp(x0, x1, f), lerp(y0, y1, f)
-
-    def _latest(self, t: float) -> Optional[int]:
-        if not self.times or t < self.times[0] - _EPS or t > self.times[-1] + _EPS:
-            return None
-        return max(0, bisect_right(self.times, t + _EPS) - 1)
-
-    def measurement_at(self, t: float) -> Optional[Tuple[float, float]]:
-        """The radar measurement of the latest sample at or before ``t`` (None if unmeasured)."""
-        index = self._latest(t)
-        return None if index is None else self.measured[index]
-
-    def facts_at(self, t: float) -> Tuple[Optional[float], Optional[float]]:
-        """(range, closing speed) of the latest sample at or before ``t``, as the reconstruction wrote them."""
-        index = self._latest(t)
-        if index is None or not self.ranges:
-            return None, None
-        return self.ranges[index], self.closing_speeds[index]
+        index = max(0, bisect_right(self.times, t + _EPS) - 1)
+        a = self.samples[index]
+        if index == len(self.samples) - 1 or t <= a.time + _EPS:
+            return a
+        b = self.samples[index + 1]
+        if b.time - a.time > self.max_gap + _EPS:
+            return None  # a silence the tracker does not bridge: nothing is known in between
+        f = (t - a.time) / (b.time - a.time)
+        yaw = a.yaw
+        if (a.heading == HEADING_UNKNOWN) == (b.heading == HEADING_UNKNOWN):
+            yaw = lerp_angle_deg(a.yaw, b.yaw, f)
+        return TrackPoint(t, (lerp(a.position[0], b.position[0], f), lerp(a.position[1], b.position[1], f)),
+                          (lerp(a.centre[0], b.centre[0], f), lerp(a.centre[1], b.centre[1], f)),
+                          yaw, a.heading, a.measured)
 
 
-def load_tracks(path: Path, recorder: str, frame_origin: Pose, clock_origin: float, run_start: float) -> List[TrackPath]:
-    grouped: Dict[str, TrackPath] = {}
+def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin: Pose, clock_origin: float,
+                run_start: float, footprint: Optional[EgoFootprint] = None, geometry: Optional[GhostGeometry] = None,
+                statuses: Optional[Mapping[Tuple[str, str], Tuple[str, Optional[str]]]] = None) -> List[TrackPath]:
+    """A recorder's tracks from its ``local_tracks.jsonl``, each sample through the recorder's own frame.
+
+    The estimate (``x_m``, ``y_m``) is in the recorder's local frame (origin =
+    its first recorded pose); its vehicle-frame offsets (``longitudinal_m``,
+    ``lateral_m``) turn with the recorder's recorded yaw at the sample.  The box
+    heading is ``atan2(vy, vx)`` of the estimated velocity when the speed fixes
+    it (``track_heading``), else the track's last reliable heading, else unknown
+    (the box is then drawn parallel to the recorder, as the CRITICAL_TTC model
+    takes it, with no direction).  Tracks of different recorders are never
+    compared or merged.
+    """
+    footprint = footprint or DEFAULT_FOOTPRINT
+    geometry = geometry or GhostGeometry()
+    rows: Dict[str, List[Dict[str, Any]]] = {}
     for row in _read_jsonl(path):
-        track = grouped.setdefault(row["track_id"], TrackPath(recorder, row["track_id"], [], [], []))
-        track.times.append(round(clock_origin + float(row["t_local"]) - run_start, 6))
-        track.points.append(local_to_world(frame_origin, float(row["x_m"]), float(row["y_m"])))
-        measured = row.get("measured") and row.get("meas_x_m") is not None
-        track.measured.append(local_to_world(frame_origin, float(row["meas_x_m"]), float(row["meas_y_m"]))
-                              if measured else None)
-        track.ranges.append(row.get("range_m"))
-        track.closing_speeds.append(row.get("closing_speed_mps"))
-    return [grouped[key] for key in sorted(grouped)]
+        rows.setdefault(str(row["track_id"]), []).append(row)
+    tracks = []
+    for track_id in sorted(rows):
+        samples, held = [], None
+        for row in sorted(rows[track_id], key=lambda item: float(item["t_local"])):
+            source_time = clock_origin + float(row["t_local"])
+            observer = trajectory.pose_at(source_time)  # the recorder's own recorded pose at the sample
+            position = local_to_world(frame_origin, float(row["x_m"]), float(row["y_m"]))
+            motion = track_heading(float(row.get("vx_mps") or 0.0), float(row.get("vy_mps") or 0.0),
+                                   float(row.get("vel_std_mps") or 0.0))
+            if motion is not None:
+                yaw, heading = wrap_deg(frame_origin.yaw + motion), HEADING_FROM_VELOCITY
+                held = yaw
+            elif held is not None:
+                yaw, heading = held, HEADING_HELD
+            else:
+                yaw, heading = observer.yaw, HEADING_UNKNOWN
+            centre = position
+            if row.get("longitudinal_m") is not None and row.get("lateral_m") is not None:
+                lon, lat = float(row["longitudinal_m"]), float(row["lateral_m"])
+                cx, cy = nominal_box_centre(lon, lat, float(row.get("surface_offset_m") or 0.0), yaw - observer.yaw,
+                                            footprint, geometry.length, geometry.width)
+                dx, dy = rotate(cx - lon, cy - lat, observer.yaw)
+                centre = (position[0] + dx, position[1] + dy)
+            samples.append(TrackPoint(round(source_time - run_start, 6), position, centre, yaw, heading,
+                                      bool(row.get("measured", True))))
+        status, entity = (statuses or {}).get((recorder, track_id), (ANONYMOUS, None))
+        tracks.append(TrackPath(recorder, track_id, samples, status, entity, geometry.max_gap))
+    return tracks
+
+
+# --------------------------------------------------------------------------
+# The map a run was recorded on
+# --------------------------------------------------------------------------
+
+MAP_MIN_FIT = 0.98  # share of the recorded ego positions that must lie in a driving lane of the map
+MAP_MARGIN = 0.05  # ...by this much more than in any other road network
+
+
+def choose_map(fits: Mapping[str, float], networks: Mapping[str, str], current: Optional[str] = None) -> Optional[str]:
+    """The map whose driving lanes carry the recorders' own recorded positions.
+
+    ``fits``: map -> share of the recorded ego positions inside one of its
+    driving lanes; ``networks``: map -> its road network (equal OpenDRIVE, e.g.
+    Town05 and Town05_Opt).  None when no map fits, or when a different road
+    network fits almost as well (pass the map explicitly then).  Among the maps
+    of the winning road network the server's current map is preferred (no
+    reload), then the plain name over a variant.
+    """
+    if not fits:
+        return None
+    best = max(fits.values())
+    if best < MAP_MIN_FIT:
+        return None
+    winners = {networks.get(name, name) for name, fit in fits.items() if fit >= best - 1e-9}
+    if len(winners) > 1:
+        return None
+    network = winners.pop()
+    if any(fit > best - MAP_MARGIN for name, fit in fits.items() if networks.get(name, name) != network):
+        return None
+    same = [name for name in fits if networks.get(name, name) == network]
+    return sorted(same, key=lambda name: (name != current, name.endswith("_Opt"), len(name), name))[0]
 
 
 # --------------------------------------------------------------------------
@@ -386,28 +582,20 @@ def load_tracks(path: Path, recorder: str, frame_origin: Pose, clock_origin: flo
 
 @dataclass
 class Participant:
+    """A recorder: a vehicle with its own recorded ``ego.jsonl`` (the only vehicles replayed)."""
+
     participant_id: str
     blueprint: str
-    blueprint_source: str  # "recorded", "scenario" or "fallback"
+    blueprint_source: str  # "recorded" or "fallback"
     trajectory: Trajectory
     frame_origin: Pose  # first ego record in file order: the reconstruction's local frame
-
-
-def scenario_setup(scenario_id: str, variant: Optional[str]) -> Tuple[str, Dict[str, str]]:
-    """(map name, participant blueprints) from the scenario configuration."""
-    from ..common.config import load_run_config
-    from ..simulation.scenario_base import ScenarioSpec
-
-    spec = ScenarioSpec.from_config(load_run_config(scenario_id), variant=variant)
-    return spec.map_name, {p.participant_id: p.blueprint for p in spec.participants}
+    footprint: Optional[EgoFootprint] = None  # its own recorded footprint (vehicle frame)
 
 
 @dataclass
 class ReplayRun:
     run_dir: Path
     name: str
-    scenario_id: Optional[str]
-    variant: Optional[str]
     participants: List[Participant]
     start: float  # source timestamp of replay time 0
     duration: float
@@ -417,50 +605,51 @@ class ReplayRun:
     tracks: Dict[str, List[TrackPath]] = field(default_factory=dict)
     perceived: Dict[str, PerceivedStates] = field(default_factory=dict)
     notes: List[str] = field(default_factory=list)
+    geometry: GhostGeometry = field(default_factory=GhostGeometry)
 
     @classmethod
-    def load(cls, run_dir: Path, scenario_blueprints: Optional[Mapping[str, str]] = None) -> "ReplayRun":
+    def load(cls, run_dir: Path, geometry: Optional[GhostGeometry] = None) -> "ReplayRun":
+        """Read a run: the recorders' own files and the reconstruction outputs only (module docstring)."""
         run_dir = Path(run_dir)
         notes: List[str] = []
-        meta: Dict[str, Any] = {}
-        try:
-            meta = _read_json(run_dir / "metadata.json")
-        except (OSError, ValueError):
-            notes.append("run metadata.json missing or unreadable")
         vehicles_dir = run_dir / "vehicles"
-        present = sorted(p.name for p in vehicles_dir.iterdir() if (p / "ego.jsonl").exists())
-        ids = [str(pid) for pid in meta.get("participants", []) if str(pid) in present] or present
+        ids = sorted(p.name for p in vehicles_dir.iterdir()
+                     if (p / "ego.jsonl").exists()) if vehicles_dir.is_dir() else []
         if not ids:
             raise ValueError("no vehicles/<id>/ego.jsonl under " + str(run_dir))
 
         participants = []
         for pid in ids:
             records = _read_jsonl(vehicles_dir / pid / "ego.jsonl")
-            blueprint, source = None, "fallback"
+            meta: Dict[str, Any] = {}
             try:
-                blueprint = _read_json(vehicles_dir / pid / "metadata.json").get("blueprint")
-                source = "recorded" if blueprint else source
+                meta = _read_json(vehicles_dir / pid / "metadata.json")
             except (OSError, ValueError):
                 pass
-            if not blueprint and scenario_blueprints and scenario_blueprints.get(pid):
-                blueprint, source = scenario_blueprints[pid], "scenario"
+            blueprint, source = meta.get("blueprint"), "recorded"
             if not blueprint:
-                blueprint = FALLBACK_BLUEPRINT
+                blueprint, source = FALLBACK_BLUEPRINT, "fallback"
                 notes.append("{0}: no recorded blueprint; using {1}".format(pid, FALLBACK_BLUEPRINT))
             first = records[0]
             participants.append(Participant(pid, str(blueprint), source, Trajectory.from_records(records),
                                             Pose(float(first["x"]), float(first["y"]), float(first["z"]),
-                                                 float(first["yaw_deg"]))))
+                                                 float(first["yaw_deg"])),
+                                            EgoFootprint.from_metadata(meta.get("ego_footprint"))))
         start = min(p.trajectory.start for p in participants)
         end = max(p.trajectory.end for p in participants)
         run = cls(run_dir=run_dir, name="{0} / {1}".format(run_dir.parent.name, run_dir.name),
-                  scenario_id=meta.get("scenario_id"), variant=meta.get("variant"), participants=participants,
-                  start=start, duration=round(end - start, 6), notes=notes)
+                  participants=participants, start=start, duration=round(end - start, 6), notes=notes,
+                  geometry=geometry or GhostGeometry.from_config(load_config()))
         run._load_reconstruction()
         return run
 
     def _load_reconstruction(self) -> None:
         rec = self.run_dir / "reconstruction"
+        statuses: Dict[Tuple[str, str], Tuple[str, Optional[str]]] = {}
+        if (rec / "global" / "associations.json").exists():
+            statuses = load_track_statuses(rec / "global" / "associations.json")
+        self.identities = {key: entity for key, (status, entity) in statuses.items()
+                           if status == ASSOCIATED and entity is not None}
         for participant in self.participants:
             pid = participant.participant_id
             graph = rec / pid / "local_graph.json"
@@ -471,7 +660,9 @@ class ReplayRun:
             self.local_events[pid] = local
             tracks = rec / pid / "local_tracks.jsonl"
             if tracks.exists():
-                self.tracks[pid] = load_tracks(tracks, pid, participant.frame_origin, local.origin, self.start)
+                self.tracks[pid] = load_tracks(tracks, pid, participant.trajectory, participant.frame_origin,
+                                               local.origin, self.start, participant.footprint, self.geometry,
+                                               statuses)
             trace = rec / pid / "local_trace.jsonl"
             perceived = load_perceived_states(trace, local.origin, self.start) if trace.exists() else None
             if perceived is not None:
@@ -479,8 +670,6 @@ class ReplayRun:
         origins = {pid: local.origin for pid, local in self.local_events.items()}
         if (rec / "global" / "global_graph.json").exists():
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
-        if (rec / "global" / "associations.json").exists():
-            self.identities = load_identities(rec / "global" / "associations.json")
 
     # -- queries --------------------------------------------------------------
 
@@ -531,6 +720,27 @@ class ReplayRun:
         entity = self.identities.get((actor, subject))
         return subject if entity is None else "{0} ({1})".format(subject, entity)
 
+    def all_tracks(self) -> List[TrackPath]:
+        """Every track of every recorder, recorder by recorder (never merged across recorders)."""
+        return [track for participant in self.participants for track in self.tracks.get(participant.participant_id, [])]
+
+    def ghost_tracks(self) -> List[TrackPath]:
+        """The anonymous tracks: road users no recorder was identified with, drawn as ghost boxes."""
+        return [track for track in self.all_tracks() if track.ghost]
+
+    def anonymous_at(self, recorder: str, t: float) -> List[Tuple[TrackPath, TrackPoint]]:
+        """The recorder's anonymous tracks alive at ``t``, with their state."""
+        alive = []
+        for track in self.tracks.get(recorder, []):
+            state = track.state_at(t) if track.ghost else None
+            if state is not None:
+                alive.append((track, state))
+        return alive
+
+    def map_samples(self) -> List[Vector]:
+        """The recorders' own recorded positions (only to recognise the map they drove on)."""
+        return [(pose.x, pose.y, pose.z) for participant in self.participants for pose in participant.trajectory.poses]
+
 
 # --------------------------------------------------------------------------
 # Camera geometry (CARLA / Unreal conventions: x forward, y right, z up)
@@ -550,17 +760,53 @@ def rotation_axes(yaw: float, pitch: float, roll: float = 0.0) -> Tuple[Vector, 
     return forward, right, up
 
 
+NEAR_PLANE_M = 0.1
+
+
 def project(point: Vector, camera: Pose, fov_deg: float, width: int, height: int) -> Optional[Tuple[float, float]]:
     """Pixel of a world point in a pinhole camera (horizontal FOV), None if behind it."""
     forward, right, up = rotation_axes(camera.yaw, camera.pitch, camera.roll)
     d = (point[0] - camera.x, point[1] - camera.y, point[2] - camera.z)
     depth = sum(a * b for a, b in zip(d, forward))
-    if depth < 0.1:
+    if depth < NEAR_PLANE_M:
         return None
     focal = width / (2.0 * math.tan(math.radians(fov_deg) / 2.0))
     across = sum(a * b for a, b in zip(d, right))
     upward = sum(a * b for a, b in zip(d, up))
     return width / 2.0 + focal * across / depth, height / 2.0 - focal * upward / depth
+
+
+def project_segment(a: Vector, b: Vector, camera: Pose, fov_deg: float, width: int,
+                    height: int) -> Optional[Tuple[Tuple[float, float], Tuple[float, float]]]:
+    """Pixels of the part of a world segment in front of the camera (clipped at the near plane)."""
+    forward, _, _ = rotation_axes(camera.yaw, camera.pitch, camera.roll)
+    eye = (camera.x, camera.y, camera.z)
+    da = sum((p - e) * f for p, e, f in zip(a, eye, forward))
+    db = sum((p - e) * f for p, e, f in zip(b, eye, forward))
+    near = NEAR_PLANE_M + 1e-3
+    if da < near and db < near:
+        return None
+    if da < near or db < near:
+        f = (near - da) / (db - da)
+        cut = tuple(lerp(pa, pb, f) for pa, pb in zip(a, b))
+        a, b = (cut, b) if da < near else (a, cut)
+    pa, pb = project(a, camera, fov_deg, width, height), project(b, camera, fov_deg, width, height)
+    return None if pa is None or pb is None else (pa, pb)
+
+
+# Bottom face, top face, then the vertical edges of box_corners().
+BOX_EDGES = ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7))
+
+
+def box_corners(centre: Tuple[float, float], yaw: float, length: float, width: float, z: float,
+                height: float) -> List[Vector]:
+    """An upright box: bottom front-left, front-right, rear-right, rear-left, then the same on top."""
+    base = []
+    for ox, oy in ((length / 2.0, -width / 2.0), (length / 2.0, width / 2.0),
+                   (-length / 2.0, width / 2.0), (-length / 2.0, -width / 2.0)):
+        dx, dy = rotate(ox, oy, yaw)
+        base.append((centre[0] + dx, centre[1] + dy))
+    return [(x, y, z) for x, y in base] + [(x, y, z + height) for x, y in base]
 
 
 def look_at(eye: Vector, target: Vector) -> Tuple[float, float]:

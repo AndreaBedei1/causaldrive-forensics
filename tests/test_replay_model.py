@@ -33,7 +33,8 @@ def _node(node_id, t_local, event_type, subject=None):
 def _make_run(root, blueprint_a="vehicle.tesla.model3", b_offset=0.5):
     """A at x = 10 t from source time 100.0, B 30 m ahead from 100.0 + b_offset; A's graph and a collision."""
     run = root / "S99" / "run_0_test"
-    _write(run / "metadata.json", {"scenario_id": "S99", "variant": "test", "participants": ["A", "B"]})
+    # The run's own metadata names the scenario and its participants: the viewer must ignore it.
+    _write(run / "metadata.json", {"scenario_id": "S99", "variant": "test", "participants": ["A", "B", "C"]})
     _write(run / "vehicles" / "A" / "ego.jsonl", [_record(100.0 + 0.05 * k, 0.5 * k, 0.0, 0.0) for k in range(161)], True)
     _write(run / "vehicles" / "B" / "ego.jsonl",
            [_record(100.0 + b_offset + 0.05 * k, 30.0, 0.0, 180.0, 0.0) for k in range(141)], True)
@@ -169,15 +170,20 @@ class EventTimelineTests(unittest.TestCase):
         self.assertFalse(intervals[("EGO_PATH", "t1")].active_at(3.0))
         self.assertTrue(intervals[("BRAKE", None)].active_at(100.0))  # still active when observation ended
 
-    def test_blueprint_comes_from_the_recording_then_the_scenario_then_a_fallback(self):
+    def test_blueprint_comes_from_the_recording_else_a_fallback(self):
         with tempfile.TemporaryDirectory() as tmp:
-            run = ReplayRun.load(_make_run(Path(tmp)), {"A": "vehicle.audi.tt", "B": "vehicle.nissan.patrol"})
+            run = ReplayRun.load(_make_run(Path(tmp)))
             self.assertEqual([(p.blueprint, p.blueprint_source) for p in run.participants],
-                             [("vehicle.tesla.model3", "recorded"), ("vehicle.nissan.patrol", "scenario")])
+                             [("vehicle.tesla.model3", "recorded"), (FALLBACK_BLUEPRINT, "fallback")])
         with tempfile.TemporaryDirectory() as tmp:
             run = ReplayRun.load(_make_run(Path(tmp), blueprint_a=None))
             self.assertEqual(run.participants[0].blueprint, FALLBACK_BLUEPRINT)
             self.assertEqual(run.participants[0].blueprint_source, "fallback")
+
+    def test_only_vehicles_with_their_own_recording_are_replayed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run = ReplayRun.load(_make_run(Path(tmp)))  # its metadata.json also lists a "C"
+        self.assertEqual([p.participant_id for p in run.participants], ["A", "B"])
 
     @unittest.skipUnless((S01 / "reconstruction").exists(), "canonical S01 trace not present")
     def test_s01_crash_events_land_on_the_local_times(self):

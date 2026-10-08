@@ -607,6 +607,7 @@ python scripts/audit_radar_visibility.py traces/S15/run_0_deflected_into_c --jso
 ```
 python scripts/replay_run.py traces/S01/run_0_crash
 python scripts/replay_run.py traces/S01/run_0_crash --speed 0.25 --start 0.45 --paused --follow A
+python scripts/replay_run.py traces/S17/run_0_crash --camera follow --follow A
 ```
 
 This is an offline visualization of recorded trajectories. It does not rerun
@@ -617,12 +618,23 @@ physics-less CARLA actor, so 0.25x, 0.5x (default), 1x and 2x all show exactly
 the recorded trajectories. The replay timeline is the recorded simulator time
 (0 s = the earliest ego sample); reconstructed events are placed on it through
 each local graph's own clock origin, for display only (this is not the
-graph-level alignment). The viewer only reads the run: `ego.jsonl`, the
-recorded blueprint in `vehicles/<id>/metadata.json`, and, when present,
-`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl`, `local_trace.jsonl` and
-`reconstruction/global/` (COLLISION participants, track identities). The map
-comes from the scenario configuration of the run's `scenario_id`/`variant`;
-`ground_truth/` is never read.
+graph-level alignment). The viewer shows what the reconstruction knows, not
+the simulator's ground truth. It reads only the recorders' own files
+(`vehicles/<id>/ego.jsonl`, the recorded blueprint and footprint in
+`vehicles/<id>/metadata.json`), the reconstruction outputs when present
+(`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl`, `local_trace.jsonl`,
+`reconstruction/global/global_graph.json` and `associations.json`) and the global
+`configs/reconstruction.yaml` (nominal target size, tracking gap). It never reads
+`ground_truth/`, the run's own `metadata.json`, the scenario configuration or
+`reconstruction/evaluation/`; only vehicles with their own `ego.jsonl` are
+replayed. The map is recognised from the recorders' recorded positions: every
+OpenDRIVE map shipped with the local CARLA installation is parsed client-side
+and the one whose driving lanes hold all of them (at least 98%, 5 points ahead
+of any other road network) is loaded, preferring the server's current map
+between identical road networks (Town05 / Town05_Opt). Without a local
+installation only the server's current map is checked; `--map` overrides the
+choice (tests/test_replay_ghosts.py checks all of this with an audit hook on
+every file opened).
 
 | Key | Action |
 |-----|--------|
@@ -631,9 +643,10 @@ comes from the scenario configuration of the run's `scenario_id`/`variant`;
 | LEFT / RIGHT | seek -/+0.5 s (SHIFT: 0.05 s, one recorded sample) |
 | N / P | jump to the next / previous reconstructed event (pauses) |
 | 1 / 2 / 3 / 4 | 0.25x / 0.5x / 1.0x / 2.0x |
-| C | camera: overview, follow selected vehicle, free |
-| TAB | next vehicle (follow camera) |
-| T | hide / show the perceived-track markers of every recorder (`--hide-tracks` starts hidden) |
+| C | camera: overview, follow selected recorder, free |
+| TAB | next recorder (follow camera; SHIFT+TAB previous); ghosts are never selectable |
+| T | hide / show the radar tracks of every recorder (`--hide-tracks` starts hidden) |
+| G | anonymous tracks as ghost boxes or as dots (`--track-dots` starts with dots) |
 | H | hide / show the key help |
 | ESC | exit |
 
@@ -644,19 +657,40 @@ its recorded speed, its perceived state as the reconstruction wrote it in
 `local_trace.jsonl` (its tracks with CLOSING, CRITICAL_TTC, IN_EGO_PATH,
 CUT_IN..., lost tracks greyed with their states UNKNOWN, known signs; older
 outputs without it show the open START..END pairs) and the events of the last
-second, such as TRACK_APPEARED_LEFT. A reconstructed COLLISION shows its
-participants from the global graph. What each recorder perceives is drawn in
-the scene: for every track it is tracking, a dot in the recorder's colour at
-the track's estimated position, labelled with the local id (`track_001`); a
-lost track's dot disappears. Dots are drawn at road height because tracks are
-planar.
+second, such as TRACK_APPEARED_LEFT, and the recorder's anonymous tracks alive
+at that instant. A reconstructed COLLISION shows its participants from the
+global graph. What each recorder's radar tracks is drawn in the scene in the
+recorder's colour, each track from its own samples through its own observer's
+recorded pose (tracks of different recorders are never compared or merged):
+
+- an ANONYMOUS track (the fusion identified no recorder with it) is a ghost:
+  a wireframe box of the reconstruction's nominal target size (4.6 x 1.9 m,
+  drawn 1.5 m high; the radar measures no size, so it is not a measured body)
+  placed behind the observed near surface as the CRITICAL_TTC model places
+  it, with an arrow along `atan2(vy, vx)` of the estimated velocity. When the
+  speed does not fix a direction (below 1 m/s or within twice its
+  uncertainty) the last reliable heading is held, or the box is drawn
+  parallel to the recorder without an arrow; a heading is never invented. It
+  is labelled `A:track_001 / ANONYMOUS [seen by A]`, solid while measured,
+  dashed and `PREDICTED` while the tracker only predicts it;
+- a track ASSOCIATED with a recorder is that recorder's replayed vehicle and
+  gets no second body: a radar dot at the track estimate, a thin line from its
+  observer and `A:track_002 → B`.
+
+A track is interpolated at the render rate only between consecutive samples
+of the same track at most `tracking.max_track_gap_s` apart, is never
+extrapolated and disappears at its last sample (its TRACK_LOST). Ghosts and
+dots are drawn at road height because tracks are planar; overlays are drawn
+over the image without occlusion.
 
 The viewer starts CARLA if none is running (`--no-autostart` to only connect)
 and stops a server it started on exit (`--keep-server` to leave it running).
 It renders through its own camera into a pygame window, runs the world in
 synchronous mode while open, and on exit destroys its actors and restores the
-world settings.  A participant with `record: false` (S17's C) has no
-`ego.jsonl` and is not replayed; it appears only as the recorders' track dots.
+world settings.  A participant with `record: false` (S17's third vehicle) has
+no `ego.jsonl` and is not replayed or named: it appears only as the anonymous
+tracks the recorders formed of it, A:track_001 and B:track_002, two separate
+ghosts that overlap where both radars see it.
 
 ## LLM abductive forensics
 

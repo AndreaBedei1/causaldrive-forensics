@@ -10,36 +10,49 @@ every playback speed shows exactly the recorded trajectories.  Reconstructed
 events (local graphs, global collisions, track associations) and each
 recorder's perceived state (``local_trace.jsonl``: its tracks with CLOSING,
 CRITICAL_TTC, CUT_IN, ..., lost tracks, known signs) are only read and
-displayed, never derived here; nothing is written anywhere.  What each
-recorder perceives is drawn in the scene: a dot in the recorder's colour at
-every tracked target's estimated position, labelled with the local track id.
+displayed, never derived here; nothing is written anywhere.
+
+The viewer shows what the reconstruction knows, not the simulator's ground
+truth: only the recorders (vehicles with their own ego.jsonl) are replayed as
+vehicles, and the map is recognised from their recorded positions and the
+public OpenDRIVE files (``--map`` overrides it).  What each recorder's radar
+tracks is drawn in its colour: an ANONYMOUS track (no recorder identified with
+it) as a ghost, a wireframe box of the reconstruction's nominal target size
+(not a measured body) with an arrow along its estimated motion, solid while
+measured, dashed while only PREDICTED, gone at its TRACK_LOST; a track
+associated with a recorder as a radar dot, a line from its observer and
+``A:track_002 → B``, never a second body.  Tracks of different recorders are
+never merged.
 
 Controls: SPACE play/pause, R restart, LEFT/RIGHT seek 0.5 s (with SHIFT
 0.05 s), N/P next/previous reconstructed event, 1-4 speed 0.25/0.5/1/2x,
-C camera mode, TAB next vehicle, T perceived tracks, H help, ESC exit.  In the free
-camera: W/A/S/D/Q/E move (SHIFT faster); drag with the mouse to look or orbit,
-wheel to zoom.
+C camera mode, TAB next recorder, T tracks, G ghost boxes or dots, H help, ESC
+exit.  In the free camera: W/A/S/D/Q/E move (SHIFT faster); drag with the
+mouse to look or orbit, wheel to zoom.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
+import hashlib
 import logging
 import math
 import queue
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.common.config import load_run_config  # noqa: E402
-from cdf.replay.model import (SPEEDS, FreeCamera, PlaybackClock, Pose, ReplayRun,  # noqa: E402
-                              follow_camera, overview_camera, project, scenario_setup)
-from cdf.simulation.carla_client import import_carla, session_from_config  # noqa: E402
+from cdf.replay.model import (BOX_EDGES, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT, SPEEDS,  # noqa: E402
+                              FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath, TrackPoint, Vector,
+                              box_corners, choose_map, follow_camera, overview_camera, project, project_segment,
+                              rotate)
+from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
+                                         session_from_config)
 
 LOGGER = logging.getLogger("replay")
 ROLE_PREFIX = "replay_"
@@ -50,8 +63,12 @@ SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
 COLLISION_WINDOW_S = 1.5
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
+TRACK_DOT_HEIGHT_M = 0.8  # radar dots above the road (tracks are planar)
+OPENDRIVE_DIR = Path("CarlaUE4") / "Content" / "Carla" / "Maps" / "OpenDrive"
 HELP = ("SPACE play/pause   R restart   ←/→ ±0.5 s (SHIFT ±0.05 s)   N/P next/prev event   "
-        "1-4 speed   C camera   TAB vehicle   T perceived tracks   H help   ESC exit")
+        "1-4 speed   C camera   TAB recorder   T tracks   G ghost boxes/dots   H help   ESC exit")
+LEGEND = ("ghost box = ANONYMOUS radar track (nominal {0:.1f} x {1:.1f} x {2:.1f} m, not a measured body): "
+          "solid measured, dashed PREDICTED   dot + line = track associated with a recorder")
 FREE_HELP = "free camera: W/A/S/D/Q/E move (SHIFT faster), drag to look, wheel to move"
 
 
@@ -62,14 +79,17 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--start", type=float, default=0.0, help="start at this replay time [s]")
     parser.add_argument("--paused", action="store_true", help="start paused")
     parser.add_argument("--camera", choices=CAMERA_MODES, default="overview")
-    parser.add_argument("--follow", default=None, help="vehicle selected for the follow camera")
+    parser.add_argument("--follow", default=None, help="recorder selected for the follow camera")
     parser.add_argument("--hide-tracks", action="store_true",
-                        help="start with the perceived-track markers hidden (toggle with T)")
+                        help="start with the radar-track overlay hidden (toggle with T)")
     parser.add_argument("--show-tracks", action="store_true", help=argparse.SUPPRESS)  # markers are on by default
+    parser.add_argument("--track-dots", action="store_true",
+                        help="start with anonymous tracks as dots instead of ghost boxes (toggle with G)")
     parser.add_argument("--res", default="1280x720", help="window size WxH")
     parser.add_argument("--fov", type=float, default=90.0)
     parser.add_argument("--fps", type=float, default=30.0, help="render rate (CARLA ticks per wall second)")
-    parser.add_argument("--map", default=None, help="override the map resolved from the scenario configuration")
+    parser.add_argument("--map", default=None,
+                        help="CARLA map; default: recognised from the recorders' recorded positions")
     parser.add_argument("--no-autostart", action="store_true", help="do not start a local CARLA process")
     parser.add_argument("--keep-server", action="store_true", help="leave a CARLA server this viewer started running")
     parser.add_argument("--exit-after", type=float, default=None, help=argparse.SUPPRESS)  # smoke tests
@@ -81,12 +101,55 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return args
 
 
-def read_run_identity(run_dir: Path) -> Tuple[Optional[str], Optional[str]]:
-    try:
-        meta = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
-        return meta.get("scenario_id"), meta.get("variant")
-    except (OSError, ValueError):
-        return None, None
+def opendrive_sources(carla_root: Optional[Path]) -> Dict[str, str]:
+    """Map name -> OpenDRIVE text of the maps shipped with a local CARLA installation (public files)."""
+    if carla_root is None:
+        return {}
+    return {path.stem: path.read_text(encoding="utf-8", errors="replace")
+            for path in sorted((Path(carla_root) / OPENDRIVE_DIR).glob("*.xodr"))}
+
+
+def lane_share(lane_map: Any, samples: Sequence[Vector]) -> float:
+    """Share of the positions inside a driving lane of ``lane_map`` (a carla.Map)."""
+    carla = import_carla()
+    inside = sum(1 for x, y, z in samples
+                 if lane_map.get_waypoint(carla.Location(x=x, y=y, z=z), project_to_road=False,
+                                          lane_type=carla.LaneType.Driving) is not None)
+    return inside / float(len(samples)) if samples else 0.0
+
+
+def resolve_map(run: ReplayRun, carla_root: Optional[Path], current: Optional[str],
+                current_map: Any = None) -> Optional[str]:
+    """The map the recorders drove on, from their own recorded positions only.
+
+    Every OpenDRIVE map of the local CARLA installation is parsed client-side
+    and scored by the share of recorded ego positions inside its driving lanes
+    (``choose_map``).  Without a local installation only the server's current
+    map (``current_map``) can be checked.  No scenario configuration, run
+    metadata or ground truth is read.
+    """
+    carla = import_carla()
+    samples = run.map_samples()
+    sources = opendrive_sources(carla_root)
+    if not sources:
+        if current_map is None:
+            return None
+        share = lane_share(current_map, samples)
+        LOGGER.warning("no local OpenDRIVE files: only the server's map %s was checked (%.0f%% of the recorded "
+                       "positions in its driving lanes)", current, 100.0 * share)
+        return current if share >= MAP_MIN_FIT else None
+    fits: Dict[str, float] = {}
+    networks: Dict[str, str] = {}
+    scored: Dict[str, float] = {}
+    for name, text in sources.items():
+        network = hashlib.sha1(text.encode("utf-8")).hexdigest()  # Town05 and Town05_Opt share one
+        if network not in scored:
+            scored[network] = lane_share(carla.Map(name, text), samples)
+        fits[name], networks[name] = scored[network], network
+    ranked = sorted(fits.items(), key=lambda item: (-item[1], item[0]))
+    LOGGER.info("recorded positions in the driving lanes of: %s",
+                ", ".join("{0} {1:.0%}".format(name, fit) for name, fit in ranked[:4]))
+    return choose_map(fits, networks, current)
 
 
 class ReplayApp:
@@ -96,7 +159,7 @@ class ReplayApp:
         self.carla = import_carla()
         self.run, self.map_name, self.client, self.world, self.args = run, map_name, client, world, args
         self.width, self.height = args.res
-        self.ids = [p.participant_id for p in run.participants]
+        self.ids = [p.participant_id for p in run.participants]  # the recorders: TAB cycles these only
         self.colors = {pid: PALETTE[i % len(PALETTE)] for i, pid in enumerate(self.ids)}
         self.clock = PlaybackClock(run.duration, speed=args.speed, start=args.start, playing=not args.paused)
         self.events = run.all_events()
@@ -108,6 +171,7 @@ class ReplayApp:
         self.follow_orbit, self.follow_distance = 0.0, 9.0
         self.free: Optional[FreeCamera] = None
         self.show_tracks = not args.hide_tracks
+        self.show_ghosts = not args.track_dots
         self.show_help = True
         self.running = True
         self.dragging = False
@@ -120,7 +184,9 @@ class ReplayApp:
         self.original_settings: Any = None
         self.map: Any = None
         self.screen: Any = None
+        self.overlay: Any = None
         self.pygame: Any = None
+        self.occupied: List[Any] = []  # per frame: screen rectangles a track label must not cover
 
     # -- setup / teardown -------------------------------------------------------
 
@@ -141,6 +207,7 @@ class ReplayApp:
         pygame.init()
         pygame.display.set_caption("CARLA replay - " + self.run.name)
         self.screen = pygame.display.set_mode((self.width, self.height))
+        self.overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)  # translucent ghost footprints
         pygame.key.set_repeat(300, 80)
         mono = "consolas,dejavusansmono,couriernew,monospace"
         self.font = pygame.font.SysFont(mono, 15)
@@ -320,6 +387,8 @@ class ReplayApp:
                 self.clock.pause()
         elif key == pg.K_t:
             self.show_tracks = not self.show_tracks
+        elif key == pg.K_g:
+            self.show_ghosts = not self.show_ghosts
         elif key == pg.K_h:
             self.show_help = not self.show_help
 
@@ -389,19 +458,22 @@ class ReplayApp:
             screen.blit(pg.surfarray.make_surface(array[:, :, 2::-1].swapaxes(0, 1)), (0, 0))
         else:
             screen.fill((20, 20, 20))
-        if self.show_tracks:
-            self._draw_tracks(poses, t)
+        self.occupied = []  # screen rectangles a track label must not cover
+        labels = self._draw_tracks(poses, t) if self.show_tracks else []
         badges = {pid: self._draw_badge(pid, pose) for pid, pose in poses.items()}
         self._draw_side_panels(t, badges)
         self._draw_collision_banner(t)
         self._draw_hud(t)
         self._draw_timeline(t)
+        for label in labels:  # last, each in free space: off the panels, the badges and each other
+            label()
         pg.display.flip()
 
     def _panel(self, rect: Tuple[int, int, int, int], alpha: int = 170) -> None:
         panel = self.pygame.Surface((rect[2], rect[3]), self.pygame.SRCALPHA)
         panel.fill((0, 0, 0, alpha))
         self.screen.blit(panel, (rect[0], rect[1]))
+        self.occupied.append(self.pygame.Rect(rect))
 
     def _draw_badge(self, pid: str, pose: Pose) -> Any:
         """The vehicle's letter just above its roof; returns the badge rectangle (None if not visible)."""
@@ -418,6 +490,7 @@ class ReplayApp:
         pg.draw.rect(self.screen, color, box, border_radius=6)
         pg.draw.rect(self.screen, (255, 255, 255), box, width=2, border_radius=6)
         self.screen.blit(text, (box.x + 8, box.y + 2))
+        self.occupied.append(box.inflate(4, 14))
         return box
 
     def _vehicle_lines(self, pid: str, t: float) -> List[Tuple[str, Tuple[int, int, int], Any]]:
@@ -435,6 +508,10 @@ class ReplayApp:
             for state in self.run.active_states(pid, t):
                 subject = self.run.subject_name(pid, state.subject)
                 lines.append((state.state + (" → " + subject if subject else ""), (255, 255, 255), self.font_small))
+        anonymous = self.run.anonymous_at(pid, t)
+        if anonymous:
+            names = ", ".join(track.name + ("" if state.measured else " (PREDICTED)") for track, state in anonymous)
+            lines.append(("anonymous tracks: " + names, (200, 200, 255), self.font_small))
         for event in reversed(self.run.recent_events(pid, t, EVENT_WINDOW_S)):
             subject = self.run.subject_name(pid, event.subject)
             lines.append(("» " + event.event_type + (" → " + subject if subject else ""),
@@ -456,7 +533,7 @@ class ReplayApp:
             panels.append((pid, header, body))
         width = max(240, max(max([h.get_width()] + [b.get_width() for b in body]) for _, h, body in panels) + 18)
         x, y = self.width - width - 8, 8
-        bottom = self.height - 70  # keep clear of the help line and the timeline
+        bottom = self._bottom_bar_top() - 4  # keep clear of the help lines and the timeline
         for pid, header, body in panels:
             room = max(0, (bottom - y - header.get_height() - 12) // max(1, self.font_small.get_linesize()))
             if len(body) > room:
@@ -489,33 +566,159 @@ class ReplayApp:
             pass
         return near_z
 
-    def _draw_tracks(self, poses: Dict[str, Pose], t: float) -> None:
-        """What each recorder perceives: a dot in the recorder's colour at every track it is
-        tracking at ``t`` (estimated position, as reconstructed), labelled with the local id."""
-        pg = self.pygame
+    def _draw_tracks(self, poses: Dict[str, Pose], t: float) -> List[Any]:
+        """What each recorder's radar knows at ``t``, in the recorder's colour, as the reconstruction wrote it.
+
+        Each track is drawn from its own samples through its own observer's
+        frame; tracks of different recorders are never merged, even when they
+        overlap.  A track is shown only between its first and last sample (it
+        disappears at its TRACK_LOST).  Returns the deferred label drawings.
+        """
+        ghosts, dots = [], []
         for index, recorder in enumerate(self.ids):
-            if recorder not in poses:
+            observer = poses.get(recorder)
+            if observer is None:
                 continue
-            color = self.colors[recorder]
             for track in self.run.tracks.get(recorder, []):
-                position = track.position_at(t)  # None once the track is lost
-                if position is None:
+                state = track.state_at(t)
+                if state is None:
                     continue
-                z = self._ground_z(position[0], position[1], poses[recorder].z) + 0.8
-                uv = self._project((position[0], position[1], z))
-                if uv is None:
-                    continue
-                u, v = uv
-                pg.draw.circle(self.screen, color, (u, v), 7)
-                pg.draw.circle(self.screen, (255, 255, 255), (u, v), 7, width=2)
-                text = self.font_small.render(track.track_id, True, (255, 255, 255))
-                # Left of the dot (vehicle panels sit to the right); recorders stacked so labels of
-                # several recorders tracking the same target do not cover each other.
-                left = u - 14 - text.get_width()
-                top = int(round(v - 8 + 16 * (index - (len(self.ids) - 1) / 2.0)))
-                self._panel((left - 7, top - 1, text.get_width() + 11, text.get_height() + 2), 160)
-                pg.draw.rect(self.screen, color, (left - 7, top - 1, 4, text.get_height() + 2))
-                self.screen.blit(text, (left, top))
+                (ghosts if track.ghost and self.show_ghosts else dots).append((track, state, observer, index))
+        size = self.run.geometry
+        boxes = []
+        if ghosts:
+            self.overlay.fill((0, 0, 0, 0))
+            for track, state, observer, index in ghosts:
+                z = self._ground_z(state.centre[0], state.centre[1], observer.z)
+                corners = box_corners(state.centre, state.yaw, size.length, size.width, z, size.height)
+                footprint = [self._project(corner) for corner in corners[:4]]
+                if all(point is not None for point in footprint):  # translucent, under every line
+                    alpha = 70 if state.measured else 35
+                    self.pygame.draw.polygon(self.overlay, self.colors[track.recorder] + (alpha,), footprint)
+                boxes.append((track, state, corners, index))
+            self.screen.blit(self.overlay, (0, 0))
+        labels = [self._draw_ghost(track, state, corners, index) for track, state, corners, index in boxes]
+        labels += [self._draw_track_dot(track, state, observer, index) for track, state, observer, index in dots]
+        return [label for label in labels if label is not None]
+
+    def _track_lines(self, track: TrackPath, state: TrackPoint) -> List[str]:
+        """``A:track_001 / ANONYMOUS`` and ``[seen by A]`` with what the sample is (PREDICTED, heading)."""
+        detail = ["[seen by {0}]".format(track.recorder)]
+        if not state.measured:
+            detail.append("PREDICTED")
+        if state.heading == HEADING_HELD:
+            detail.append("heading held")
+        elif state.heading == HEADING_UNKNOWN:
+            detail.append("heading unknown")
+        return [track.label, "  ".join(detail)]
+
+    def _draw_ghost(self, track: TrackPath, state: TrackPoint, corners: List[Vector], index: int) -> Any:
+        """An anonymous track as a ghost: the reconstruction's nominal box where its CRITICAL_TTC model
+        places the target, an arrow along the estimated motion (none while the heading is unknown),
+        solid while measured, dashed while only predicted.  Returns the deferred label drawing."""
+        color = self.colors[track.recorder]
+        size = self.run.geometry
+        dashed = not state.measured
+        for i, j in BOX_EDGES:
+            self._line3d(corners[i], corners[j], color, 2, dashed)
+        roof = corners[4][2]
+        if state.heading != HEADING_UNKNOWN:
+            reach = size.length / 2.0 + 1.5
+            fx, fy = rotate(reach, 0.0, state.yaw)
+            tip = (state.centre[0] + fx, state.centre[1] + fy, roof)
+            self._line3d((state.centre[0], state.centre[1], roof), tip, color, 3, dashed)
+            for side in (-1.0, 1.0):
+                bx, by = rotate(-1.0, 0.6 * side, state.yaw)
+                self._line3d(tip, (tip[0] + bx, tip[1] + by, roof), color, 3, dashed)
+        anchor = self._project((state.centre[0], state.centre[1], roof + 0.3))
+        if anchor is None:
+            return None
+        lines = self._track_lines(track, state)
+        return lambda: self._label(anchor, lines, color, index, above=True)
+
+    def _draw_track_dot(self, track: TrackPath, state: TrackPoint, observer: Pose, index: int) -> Any:
+        """A radar dot at the track estimate.  For a track associated with a recorder (that recorder's
+        replayed vehicle: no second body), a line from the observer and ``A:track_002 → B``.
+        Returns the deferred label drawing."""
+        pg = self.pygame
+        color = self.colors[track.recorder]
+        x, y = state.position
+        point = (x, y, self._ground_z(x, y, observer.z) + TRACK_DOT_HEIGHT_M)
+        uv = self._project(point)
+        if not track.ghost:
+            self._line3d((observer.x, observer.y, observer.z + 1.0), point, color, 1)
+        if uv is None:
+            return None
+        if state.measured:
+            pg.draw.circle(self.screen, color, uv, 6)
+            pg.draw.circle(self.screen, (255, 255, 255), uv, 6, width=2)
+        else:
+            pg.draw.circle(self.screen, color, uv, 6, width=2)  # hollow: predicted
+        lines = self._track_lines(track, state) if track.ghost else [
+            track.label + ("  PREDICTED" if not state.measured else "")]
+        return lambda: self._label(uv, lines, color, index, above=False)
+
+    def _free_rect(self, rect: Any) -> Any:
+        """``rect`` or the nearest shift of it (rows up and down, or slid left of what it hits) that is
+        inside the window and covers nothing in ``self.occupied``; ``rect`` itself when none is free."""
+        window = self.pygame.Rect(0, 0, self.width, self.height)
+        for rows in (0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6):
+            moved = rect.move(0, rows * (rect.height + 3))
+            candidates = [moved] + [moved.move(other.left - 4 - moved.right, 0)
+                                    for other in self.occupied if moved.colliderect(other)]
+            for candidate in candidates:
+                if window.contains(candidate) and candidate.collidelist(self.occupied) < 0:
+                    return candidate
+        return rect
+
+    def _label(self, anchor: Tuple[int, int], lines: List[str], color: Tuple[int, int, int], index: int,
+               above: bool) -> None:
+        """A small panel with a bar in the recorder's colour and a leader line to what it names: above
+        a ghost box (one row per recorder, so the labels of overlapping ghosts of two recorders do not
+        cover each other) or left of a dot (vehicle panels sit to the right), moved to free space."""
+        pg = self.pygame
+        surfaces = [self.font_small.render(text, True, (255, 255, 255)) for text in lines]
+        width = max(surface.get_width() for surface in surfaces) + 13
+        height = sum(surface.get_height() for surface in surfaces) + 2
+        u, v = anchor
+        if above:
+            rect = pg.Rect(u - width // 2, v - height - 6 - index * (height + 4), width, height)
+        else:
+            row = index - (len(self.ids) - 1) / 2.0
+            rect = pg.Rect(u - 14 - width, int(round(v - height / 2.0 + (height + 2) * row)), width, height)
+        rect = self._free_rect(rect)
+        end = (min(max(u, rect.left), rect.right), rect.bottom) if above \
+            else (rect.right, min(max(v, rect.top), rect.bottom))
+        pg.draw.line(self.screen, color, (u, v), end, 1)
+        self._panel(tuple(rect), 165)
+        pg.draw.rect(self.screen, color, (rect.left, rect.top, 4, rect.height))
+        y = rect.top + 1
+        for surface in surfaces:
+            self.screen.blit(surface, (rect.left + 9, y))
+            y += surface.get_height()
+
+    def _line3d(self, a: Vector, b: Vector, color: Tuple[int, int, int], width: int = 2, dashed: bool = False) -> None:
+        """A world segment, clipped at the camera's near plane and at the window."""
+        segment = project_segment(a, b, self.camera_pose, self.args.fov, self.width, self.height)
+        if segment is None:
+            return
+        clipped = self.pygame.Rect(-4, -4, self.width + 8, self.height + 8).clipline(segment[0], segment[1])
+        if not clipped:
+            return
+        p0, p1 = clipped
+        if not dashed:
+            self.pygame.draw.line(self.screen, color, p0, p1, width)
+            return
+        length = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+        if length < 1.0:
+            return
+        ux, uy = (p1[0] - p0[0]) / length, (p1[1] - p0[1]) / length
+        start = 0.0
+        while start < length:  # 9 px dashes, 7 px gaps
+            end = min(start + 9.0, length)
+            self.pygame.draw.line(self.screen, color, (p0[0] + ux * start, p0[1] + uy * start),
+                                  (p0[0] + ux * end, p0[1] + uy * end), width)
+            start += 16.0
 
     def _draw_collision_banner(self, t: float) -> None:
         marks = self.run.collisions_near(t, COLLISION_WINDOW_S)
@@ -525,17 +728,19 @@ class ReplayApp:
         surface = self.font_banner.render(text, True, (255, 255, 255))
         rect = surface.get_rect(midtop=(self.width // 2, 16))
         self.pygame.draw.rect(self.screen, (200, 20, 30), rect.inflate(28, 12), border_radius=8)
+        self.occupied.append(rect.inflate(28, 12))
         self.screen.blit(surface, rect)
 
     def _draw_hud(self, t: float) -> None:
         state = "END" if self.clock.at_end and not self.clock.playing else ("PLAYING" if self.clock.playing else "PAUSED")
         camera = self.camera_mode + ("" if self.camera_mode == "overview" else " " + self.selected)
+        tracks = ("tracks: ghost boxes + dots" if self.show_ghosts else "tracks: dots") if self.show_tracks \
+            else "tracks hidden"
         lines = [(self.run.name + "  (" + self.map_name + ")", self.font_bold, (255, 255, 255)),
                  ("Time  {0:6.2f} / {1:.2f} s".format(t, self.run.duration), self.font, (255, 255, 255)),
                  ("Speed {0:.2f}x   {1}".format(self.clock.speed, state), self.font,
                   (120, 230, 120) if state == "PLAYING" else (255, 170, 60)),
-                 ("Camera {0}   selected {1}{2}".format(camera, self.selected,
-                                                      "   perceived tracks shown" if self.show_tracks else ""),
+                 ("Camera {0}   selected {1}   {2}".format(camera, self.selected, tracks),
                   self.font_small, (200, 200, 200))]
         passed = [e for e in self.events if e.time <= t + 1e-6]
         upcoming = [e for e in self.events if e.time > t + 1e-6]
@@ -569,11 +774,22 @@ class ReplayApp:
         x, _, w, _ = self._timeline_rect()
         self.clock.seek_to((px - x) / float(w) * self.run.duration)
 
+    def _help_lines(self) -> List[str]:
+        if not self.show_help:
+            return []
+        size = self.run.geometry
+        return [HELP, LEGEND.format(size.length, size.width, size.height)] + (
+            [FREE_HELP] if self.camera_mode == "free" else [])
+
+    def _bottom_bar_top(self) -> int:
+        """Top of the help lines and timeline at the bottom of the window."""
+        return self._timeline_rect()[1] - 14 - 16 * len(self._help_lines())
+
     def _draw_timeline(self, t: float) -> None:
         pg = self.pygame
         x, y, w, h = self._timeline_rect()
-        help_lines = [HELP] + ([FREE_HELP] if self.camera_mode == "free" else []) if self.show_help else []
-        top = y - 10 - 16 * len(help_lines)
+        help_lines = self._help_lines()
+        top = self._bottom_bar_top() + 4
         self._panel((0, top - 4, self.width, self.height - top + 4), 140)
         for index, text in enumerate(help_lines):
             self.screen.blit(self.font_small.render(text, True, (220, 220, 220)), (x, top + 16 * index))
@@ -594,26 +810,26 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     run_dir = Path(args.run_dir)
-    scenario_id, variant = read_run_identity(run_dir)
-    map_name, blueprints = args.map, {}
-    if scenario_id:
-        try:
-            resolved_map, blueprints = scenario_setup(scenario_id, variant)
-            map_name = map_name or resolved_map
-        except (FileNotFoundError, KeyError, ValueError) as exc:
-            LOGGER.warning("scenario configuration for %s/%s not usable: %s", scenario_id, variant, exc)
-    if not map_name:
-        LOGGER.error("cannot resolve the map of %s; pass --map", run_dir)
-        return 2
-    run = ReplayRun.load(run_dir, blueprints)
+    run = ReplayRun.load(run_dir)
     for note in run.notes:
         LOGGER.info("note: %s", note)
-    LOGGER.info("%s on %s: %d vehicle(s), %.2f s, %d reconstructed event(s)", run.name, map_name,
-                len(run.participants), run.duration, len(run.all_events()))
+    LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous tracks: %s", run.name,
+                ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()),
+                ", ".join(track.name for track in run.ghost_tracks()) or "none")
 
-    session = session_from_config(load_run_config(), autostart=not args.no_autostart)
+    cfg = load_run_config()  # configs/default.yaml: only the simulator connection (no scenario)
+    session = session_from_config(cfg, autostart=not args.no_autostart)
     app = None
     try:
+        map_name = args.map
+        if not map_name:
+            server_map = session.client().get_world().get_map()
+            map_name = resolve_map(run, find_carla_root(cfg.get("simulation.carla_root")),
+                                   map_basename(server_map.name), server_map)
+            if not map_name:
+                LOGGER.error("cannot recognise the map of %s from the recorded positions; pass --map", run_dir)
+                return 2
+        LOGGER.info("map %s (%s)", map_name, "--map" if args.map else "recognised from the recorded positions")
         world = session.world_for_map(map_name)
         app = ReplayApp(run, map_name, session.client(), world, args)
         app.setup()
