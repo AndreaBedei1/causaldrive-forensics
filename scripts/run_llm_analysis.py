@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """Two-stage LLM forensic analysis of one reconstructed run, then deterministic verification.
 
-    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.8-flash
+    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.5-flash-lite
     python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai
-    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.7-flash
-    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --stage explanation
-    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --stage formalize
+    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+    python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage formalize \\
+        --analysis-dir traces/S17/run_0_crash/reconstruction/llm/runs/<analysis>
+
+Models (configs/llm.yaml): OpenAI is locked to gpt-6-luna with reasoning effort high (``--model``
+with another OpenAI model is refused: changing it is Andrea's decision, made in configs/llm.yaml);
+Gemini accepts gemini-3.8-flash (default) and gemini-3.5-flash-lite, both with thinking level high.
+One analysis uses one model for both stages; nothing ever falls back to another model.  A quota
+error stops the analysis (QUOTA_EXHAUSTED, or INCOMPLETE_QUOTA with Stage 1 saved: complete it
+later with the same model, ``--stage formalize --analysis-dir``).
 
 Stage 1 (explanation) and Stage 2 (formalize) are separate calls; ``all`` runs both and then the
 verifier.  ``--dry-run`` renders and leak-checks the prompts, prints them and saves
-request_preview.json without contacting anyone.  A provider without its API key (.env) is reported
-as unavailable.  ``--oracle-identities`` is privileged evaluation infrastructure: anonymous tracks are
-renamed to their true simulator identities and everything goes to
-reconstruction/evaluation/llm_oracle/ (never an admissible analysis).
+request_preview.json without contacting anyone.  ``--audit-payload`` checks every request body
+against the run's semantic trace and privileged files before it is sent (manual integration runs).
+A provider without its API key (.env) is reported as unavailable.  ``--oracle-identities`` is
+privileged evaluation infrastructure: anonymous tracks are renamed to their true simulator
+identities and everything goes to reconstruction/evaluation/llm_oracle/ (never an admissible
+analysis).  Keys are checked without generating anything by scripts/check_llm_access.py.
 """
 
 from __future__ import annotations
@@ -26,21 +36,28 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.llm.guard import LeakGuardError  # noqa: E402
 from cdf.llm.pipeline import STAGES, AnalysisOptions, load_llm_config, run_analysis  # noqa: E402
-from cdf.llm.providers import PROVIDERS, ProviderUnavailable  # noqa: E402
+from cdf.llm.providers import PROVIDERS, ModelNotAllowed, ProviderUnavailable  # noqa: E402
 
-EXIT = {"COMPLETED": 0, "OK": 0, "DRY_RUN": 0, "BLOCKED_BY_LEAK_GUARD": 2, "PROVIDER_UNAVAILABLE": 3,
-        "FAILED": 4, "NO_EXPLANATION": 5, "EXPLANATION_UNUSABLE": 5}
+EXIT = {"COMPLETED": 0, "OK": 0, "DRY_RUN": 0, "BLOCKED_BY_LEAK_GUARD": 2, "BLOCKED_BY_PAYLOAD_AUDIT": 2,
+        "PROVIDER_UNAVAILABLE": 3, "FAILED": 4, "NO_EXPLANATION": 5, "EXPLANATION_UNUSABLE": 5,
+        "QUOTA_EXHAUSTED": 6, "INCOMPLETE_QUOTA": 6}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="LLM abductive forensics with formal verification")
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--provider", required=True, choices=sorted(PROVIDERS))
-    parser.add_argument("--model", default=None, help="override the model of configs/llm.yaml")
+    parser.add_argument("--model", default=None,
+                        help="a model configs/llm.yaml allows (gemini: gemini-3.8-flash or gemini-3.5-flash-lite; "
+                             "openai is locked to its configured model)")
     parser.add_argument("--stage", default="all", choices=STAGES)
     parser.add_argument("--dry-run", action="store_true", help="render, check and show the prompts; call nothing")
-    parser.add_argument("--analysis-dir", type=Path, default=None, help="continue this analysis (with --stage formalize)")
+    parser.add_argument("--analysis-dir", type=Path, default=None,
+                        help="continue this analysis (with --stage formalize), always with its own model")
     parser.add_argument("--no-verify", action="store_true", help="do not run the verifier after Stage 2")
+    parser.add_argument("--audit-payload", action="store_true",
+                        help="check every request body against the run's semantic trace and privileged files "
+                             "before it is sent (privileged audit for manual integration runs)")
     parser.add_argument("--oracle-identities", action="store_true",
                         help="PRIVILEGED evaluation only: give the model the true identities of anonymous tracks")
     parser.add_argument("--config", type=Path, default=None)
@@ -48,9 +65,12 @@ def main() -> int:
     args = parser.parse_args()
     options = AnalysisOptions(provider=args.provider, model=args.model, stage=args.stage, dry_run=args.dry_run,
                               oracle_identities=args.oracle_identities, analysis_dir=args.analysis_dir,
-                              verify=not args.no_verify)
+                              verify=not args.no_verify, audit_payload=args.audit_payload)
     try:
         result = run_analysis(args.run_dir, options, load_llm_config(args.config), echo=print)
+    except ModelNotAllowed as error:
+        print("REFUSED (nothing was sent): {0}".format(error), file=sys.stderr)
+        return 7
     except LeakGuardError as error:
         print("BLOCKED by the leak guard (nothing was sent): {0}".format(error), file=sys.stderr)
         return 2

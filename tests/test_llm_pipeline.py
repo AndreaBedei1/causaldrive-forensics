@@ -25,7 +25,7 @@ from src.cdf.llm.guard import LeakGuardError, check_packet, check_prompt_text
 from src.cdf.llm.pipeline import AnalysisOptions, load_llm_config, run_analysis, verify_analysis
 from src.cdf.llm.prompts import load_template, render_explanation, render_formalization
 from src.cdf.llm.providers import GeminiProvider, OpenAIProvider, make_provider
-from src.cdf.llm.providers.base import ProviderUnavailable, load_env_file, resolve_api_key
+from src.cdf.llm.providers.base import ProviderError, ProviderUnavailable, load_env_file, resolve_api_key
 from src.cdf.llm.schemas import (INVALID_EVENT_TYPE, INVALID_IDENTITY_HALLUCINATION, known_ids, stage1_schema,
                                  stage2_schema, validate_json_schema, validate_stage1, validate_stage2)
 from src.cdf.llm.vocabulary import load_vocabulary
@@ -466,8 +466,7 @@ class ProviderTests(unittest.TestCase):
 
     def test_gemini_request_uses_response_json_schema_and_header_key(self):
         transport = FakeTransport("gemini", [stage1_answer()])
-        provider = GeminiProvider("gemini-test", {"temperature": 0.0, "seed": 7}, api_key=SECRET,
-                                  transport=transport)
+        provider = GeminiProvider("gemini-test", {"thinking_level": "high"}, api_key=SECRET, transport=transport)
         response = provider.generate("sys", "user", self.schema, "forensic_explanation")
         call = transport.calls[0]
         self.assertEqual(call["headers"]["x-goog-api-key"], SECRET)
@@ -476,23 +475,21 @@ class ProviderTests(unittest.TestCase):
         config = call["body"]["generationConfig"]
         self.assertEqual(config["responseMimeType"], "application/json")
         self.assertEqual(config["responseJsonSchema"], self.schema)
-        self.assertEqual((config["temperature"], config["seed"]), (0.0, 7))
+        self.assertEqual(config["thinkingConfig"], {"thinkingLevel": "high"})
         self.assertEqual(response.parsed, stage1_answer())
 
-    def test_openai_retries_without_temperature_when_the_model_rejects_it(self):
+    def test_a_rejected_parameter_stops_the_request_unchanged(self):
         calls = []
 
         def transport(url, headers, body, timeout_s):
             calls.append(body)
-            if "temperature" in body:
-                return 400, {"error": {"message": "Unsupported parameter: 'temperature' is not supported"}}
-            return 200, {"output": [{"type": "message", "content": [{"type": "output_text", "text": "{}"}]}]}
+            return 400, {"error": {"message": "Unsupported parameter: 'temperature' is not supported"}}
 
         provider = OpenAIProvider("gpt-test", {"temperature": 0.0}, api_key=SECRET, transport=transport)
-        response = provider.generate("s", "u", {"type": "object"}, "x")
-        self.assertEqual(len(calls), 2)
-        self.assertIsNone(response.parameters_sent["temperature"])
-        self.assertTrue(any("temperature" in note for note in response.notes))
+        with self.assertRaises(ProviderError) as caught:
+            provider.generate("s", "u", {"type": "object"}, "x")
+        self.assertEqual(len(calls), 1)  # nothing is dropped and re-sent: the experiment stops and reports
+        self.assertEqual(caught.exception.kind, "fatal")
 
     def test_server_errors_are_retried_then_reported(self):
         statuses = [503, 200]

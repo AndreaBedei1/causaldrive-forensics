@@ -1,0 +1,2067 @@
+{
+  "run": "traces\\S17\\run_0_crash",
+  "analyses": [
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.5-flash-lite_20261008T195821Z",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "models_reported": [
+        "gemini-3.5-flash-lite"
+      ],
+      "generation_settings": {
+        "thinking_level": "high",
+        "max_output_tokens": 32000
+      },
+      "status": "COMPLETED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "prompt_versions": {
+        "explanation": "accident_abduction_v1",
+        "formalize": "formalize_hypothesis_v1"
+      },
+      "created_at": "2026-10-08T19:58:22Z",
+      "stage1": {
+        "validation_status": "VALID",
+        "explanation": "Vehicle A and Vehicle B were traveling in adjacent lanes on an urban multi-lane road below the speed limit. Vehicle A initiated a leftward steering maneuver starting around t_global = -1.25s, causing it to drift toward Vehicle B. Vehicle B maintained a straight trajectory with zero steering input. At t_global = 0.0s, a physical collision occurred between the two vehicles. Immediately after impact, at t_global = 0.05s, both drivers ceased acceleration and applied full brakes.",
+        "primary_hypothesis": "Vehicle A steered left into the path of Vehicle B, resulting in a side collision.",
+        "responsibility": {
+          "actor": "A",
+          "assessment": "Vehicle A initiated a left steering maneuver that brought it into contact with Vehicle B, which was traveling straight.",
+          "confidence": 0.9,
+          "limitations": [
+            "Exact lane markings are not recorded in the sensor data.",
+            "Analysis relies solely on telemetry and radar tracks from the two recorders."
+          ]
+        },
+        "causal_chain": [
+          {
+            "step": 1,
+            "claim": "Vehicle A and Vehicle B are driving on a multi-lane urban road below the speed limit.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "evidence_fact_ids": [
+              "F0001",
+              "F0005"
+            ]
+          },
+          {
+            "step": 2,
+            "claim": "Vehicle A initiates a left steering input, deviating from its straight path.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -1.25,
+            "evidence_fact_ids": [
+              "F0298"
+            ]
+          },
+          {
+            "step": 3,
+            "claim": "Vehicle B maintains a straight path with zero steering input.",
+            "actor_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": -1.25,
+            "evidence_fact_ids": [
+              "F0302"
+            ]
+          },
+          {
+            "step": 4,
+            "claim": "A physical collision occurs between Vehicle A and Vehicle B.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "evidence_fact_ids": [
+              "F0401"
+            ]
+          },
+          {
+            "step": 5,
+            "claim": "Both drivers release the accelerator and apply full brakes immediately after the collision.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "evidence_fact_ids": [
+              "F0403",
+              "F0407"
+            ]
+          }
+        ],
+        "alternative_hypotheses": [
+          {
+            "hypothesis": "Vehicle B drifted into Vehicle A's lane.",
+            "responsible_actor": "B",
+            "plausibility": 0.05,
+            "evidence_fact_ids": [
+              "F0006",
+              "F0806"
+            ]
+          }
+        ],
+        "unresolved_entities": [
+          {
+            "entity_id": "A:track_001",
+            "role": "Surrounding road user or stationary object",
+            "reason": "Anonymous radar track not associated with any known recorder."
+          },
+          {
+            "entity_id": "B:track_002",
+            "role": "Surrounding road user or stationary object",
+            "reason": "Anonymous radar track not associated with any known recorder."
+          },
+          {
+            "entity_id": "B:track_003",
+            "role": "Surrounding road user or stationary object",
+            "reason": "Anonymous radar track not associated with any known recorder."
+          }
+        ],
+        "identity_hallucinations": [],
+        "cited_fact_ids": 19,
+        "invalid_fact_references": 0,
+        "issue_counts": {}
+      },
+      "semantic_hypotheses": {
+        "config": {
+          "time_tolerance_s": 0.5,
+          "exclude_active_at_first_observation": true,
+          "reference_event_types": null,
+          "reference_window_s": null
+        },
+        "hypotheses": 10,
+        "reference_events": 36,
+        "TP": 5,
+        "FP": 5,
+        "FN": 31,
+        "precision": 0.5,
+        "recall": 0.1389,
+        "f1": 0.2174,
+        "hallucination_rate": 0.1,
+        "identity_hallucination_rate": 0.0,
+        "mean_abs_time_error_s": 0.0,
+        "per_hypothesis": [
+          {
+            "index": 0,
+            "event_type": "MOVING_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 1,
+            "event_type": "MOVING_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 2,
+            "event_type": "THROTTLE_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 3,
+            "event_type": "THROTTLE_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 4,
+            "event_type": "TURN_LEFT_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -1.25,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": false,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 5,
+            "event_type": "COLLISION",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "COLLISION",
+              "actor": null,
+              "subject": null,
+              "participants": [
+                "A",
+                "B"
+              ],
+              "t_global": 0.0
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 6,
+            "event_type": "THROTTLE_END",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "THROTTLE_END",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 7,
+            "event_type": "BRAKE_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "BRAKE_START",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 8,
+            "event_type": "THROTTLE_END",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "THROTTLE_END",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 9,
+            "event_type": "BRAKE_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "BRAKE_START",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          }
+        ],
+        "missed_reference_events": [
+          {
+            "event_type": "TRACK_APPEARED_LEFT",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_START",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -2.2
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_START",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": -2.1
+          },
+          {
+            "event_type": "EGO_PATH_ENTRY",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -1.6
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -1.35
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": -1.15
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.85
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -0.8
+          },
+          {
+            "event_type": "CLOSING_START",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": -0.75
+          },
+          {
+            "event_type": "CLOSING_START",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -0.7
+          },
+          {
+            "event_type": "CRITICAL_TTC_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.4
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.4
+          },
+          {
+            "event_type": "CRITICAL_TTC_END",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -0.05
+          },
+          {
+            "event_type": "CRITICAL_TTC_END",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": 0.0
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": 0.0
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": 0.0
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.2
+          },
+          {
+            "event_type": "EGO_PATH_EXIT",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": 0.25
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_END",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.3
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.75
+          },
+          {
+            "event_type": "MOVING_END",
+            "actor": "B",
+            "subject": null,
+            "participants": [
+              "B"
+            ],
+            "t_global": 1.0
+          },
+          {
+            "event_type": "STOP_START",
+            "actor": "B",
+            "subject": null,
+            "participants": [
+              "B"
+            ],
+            "t_global": 1.0
+          },
+          {
+            "event_type": "MOVING_END",
+            "actor": "A",
+            "subject": null,
+            "participants": [
+              "A"
+            ],
+            "t_global": 1.1
+          },
+          {
+            "event_type": "STOP_START",
+            "actor": "A",
+            "subject": null,
+            "participants": [
+              "A"
+            ],
+            "t_global": 1.1
+          },
+          {
+            "event_type": "EGO_PATH_ENTRY",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": 1.3
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "B",
+            "subject": "B:track_003",
+            "participants": [
+              "B"
+            ],
+            "t_global": 1.45
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "B",
+            "subject": "B:track_003",
+            "participants": [
+              "B"
+            ],
+            "t_global": 2.05
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": 2.5
+          }
+        ]
+      },
+      "attribution": {
+        "responsible_actor": "A",
+        "resolved_entity": "A",
+        "kind": "RECORDER",
+        "confidence": 0.9
+      },
+      "stage2": {
+        "validation_status": "VALID",
+        "formulas": 12,
+        "valid": 12,
+        "invalid": 0,
+        "untestable_claims": [
+          {
+            "claim_ref": "causal_chain[0]",
+            "claim": "Vehicle A and Vehicle B are driving on a multi-lane urban road below the speed limit.",
+            "reason": "Contains quantities (speed limit value) and environmental descriptions that the temporal logic grammar cannot express."
+          },
+          {
+            "claim_ref": "causal_chain[2]",
+            "claim": "Vehicle B maintains a straight path with zero steering input.",
+            "reason": "Contains numerical quantities (zero steering input value) which the temporal logic grammar cannot express."
+          },
+          {
+            "claim_ref": "causal_chain[4]",
+            "claim": "Both drivers release the accelerator and apply full brakes immediately after the collision.",
+            "reason": "Contains quantities (full brakes pedal value) which the temporal logic grammar cannot express."
+          }
+        ]
+      },
+      "verifier": {
+        "summary": {
+          "TRUE": 10,
+          "FALSE": 2,
+          "UNKNOWN": 0,
+          "INVALID": 0
+        },
+        "results": [
+          {
+            "formula_id": "f_cc1",
+            "claim_ref": "causal_chain[1]",
+            "formula_text": "F[-1.3,-1.2] event(TURN_LEFT_START,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "f_cc3",
+            "claim_ref": "causal_chain[3]",
+            "formula_text": "F[-0.1,0.1] event(COLLISION,A,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh0",
+            "claim_ref": "semantic_hypotheses[0]",
+            "formula_text": "F[-5.0,-4.9] event(MOVING_START,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh1",
+            "claim_ref": "semantic_hypotheses[1]",
+            "formula_text": "F[-5.0,-4.9] event(MOVING_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh2",
+            "claim_ref": "semantic_hypotheses[2]",
+            "formula_text": "F[-5.0,-4.9] event(THROTTLE_START,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh3",
+            "claim_ref": "semantic_hypotheses[3]",
+            "formula_text": "F[-5.0,-4.9] event(THROTTLE_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh4",
+            "claim_ref": "semantic_hypotheses[4]",
+            "formula_text": "F[-1.3,-1.2] event(TURN_LEFT_START,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "f_sh5",
+            "claim_ref": "semantic_hypotheses[5]",
+            "formula_text": "F[-0.1,0.1] event(COLLISION,A,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh6",
+            "claim_ref": "semantic_hypotheses[6]",
+            "formula_text": "F[0.0,0.1] event(THROTTLE_END,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh7",
+            "claim_ref": "semantic_hypotheses[7]",
+            "formula_text": "F[0.0,0.1] event(BRAKE_START,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh8",
+            "claim_ref": "semantic_hypotheses[8]",
+            "formula_text": "F[0.0,0.1] event(THROTTLE_END,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "f_sh9",
+            "claim_ref": "semantic_hypotheses[9]",
+            "formula_text": "F[0.0,0.1] event(BRAKE_START,B)",
+            "result": "TRUE"
+          }
+        ]
+      },
+      "security": {
+        "leak_guard": "PASS (packet and prompts checked before each request; the analysis ran)",
+        "payload_audit": [
+          "PASS",
+          "PASS"
+        ],
+        "embedded_packet_sha256": [
+          "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe"
+        ],
+        "identity_hallucination_rate": 0.0
+      },
+      "usage": {
+        "per_stage": {
+          "explanation": {
+            "input_tokens": 70698,
+            "cached_input_tokens": null,
+            "output_tokens": 2022,
+            "reasoning_tokens": 2280,
+            "total_tokens": 75000,
+            "latency_s": 10.609,
+            "response_id": "3_XHauavBaGExN8P6vndkQ0",
+            "model_reported": "gemini-3.5-flash-lite",
+            "finish_reason": "STOP"
+          },
+          "formalize": {
+            "input_tokens": 73157,
+            "cached_input_tokens": null,
+            "output_tokens": 2245,
+            "reasoning_tokens": 8061,
+            "total_tokens": 83463,
+            "latency_s": 22.245,
+            "response_id": "6fXHas6eLLOuvdIPvZTz6A0",
+            "model_reported": "gemini-3.5-flash-lite",
+            "finish_reason": "STOP"
+          }
+        },
+        "total": {
+          "input_tokens": 143855,
+          "cached_input_tokens": 0,
+          "output_tokens": 4267,
+          "reasoning_tokens": 10341,
+          "total_tokens": 158463,
+          "latency_s": 32.854
+        }
+      },
+      "cost": null
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\openai_gpt-6-luna_20261008T195958Z",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "models_reported": [
+        "gpt-6-luna"
+      ],
+      "generation_settings": {
+        "reasoning_effort": "high",
+        "max_output_tokens": 32000
+      },
+      "status": "COMPLETED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "prompt_versions": {
+        "explanation": "accident_abduction_v1",
+        "formalize": "formalize_hypothesis_v1"
+      },
+      "created_at": "2026-10-08T19:59:58Z",
+      "stage1": {
+        "validation_status": "VALID",
+        "explanation": "The most plausible account is a sideswipe during A’s leftward maneuver as B was drawing alongside from A’s left-rear. A’s radar shows B’s clearance shrinking while A turns left; B’s independent radar shows A approaching from B’s right, while B’s recorded motion remains nearly straight before contact. Both collision sensors match the contact at t_global_s = 0. A:track_001 was also tracked ahead-right of A and may have been relevant to A’s maneuver, but the recordings do not establish why A turned or that this track caused the collision. Exact lane boundaries and the precise contact points are not recorded.",
+        "primary_hypothesis": "A’s leftward maneuver brought A into B’s path as B was drawing alongside, making A’s movement the most plausible causal contribution to the collision.",
+        "responsibility": {
+          "actor": "A",
+          "assessment": "A’s measured leftward turn and lateral movement are the clearest recorded traffic behaviour that made the contact likely: B was approaching alongside from A’s left, while B’s recorded pre-contact path was nearly straight. This is a causal assessment from the available motion and radar evidence, not a legal finding.",
+          "confidence": 0.78,
+          "limitations": [
+            "The packet provides no lane-boundary or roadway-position map, so the exact lane occupancy and right-of-way cannot be established.",
+            "The exact contact points and the reason for A’s turn are not recorded.",
+            "A:track_001 and the other anonymous tracks are not identified road users; their roles and any influence on A’s behaviour remain uncertain.",
+            "The recordings cannot exclude relevant road users or events outside the recorders’ fields of view.",
+            "Brake onset is sampled at 0.1-second intervals and is only bracketed around the collision."
+          ]
+        },
+        "causal_chain": [
+          {
+            "step": 1,
+            "claim": "At the start of the aligned recordings, both recorders were moving. A tracked B behind and to A’s left, with B gaining longitudinally; B independently tracked A ahead and to B’s right. This establishes the relative approach, not the lane geometry.",
+            "actor_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "evidence_fact_ids": [
+              "F0001",
+              "F0004",
+              "F0005",
+              "F0007"
+            ]
+          },
+          {
+            "step": 2,
+            "claim": "A began a marked leftward turn around -1.15 s. At that time A still tracked B to its left, and B’s own recorded heading and lateral position remained nearly steady. A:track_002 (B) was then close, with about 1.32 m reported clearance from A.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -1.15,
+            "evidence_fact_ids": [
+              "F0305",
+              "F0308",
+              "F0310",
+              "F0311"
+            ]
+          },
+          {
+            "step": 3,
+            "claim": "As A’s leftward turn continued, the two recorders’ independent radar tracks show the separation narrowing: just before contact A reported only 0.14 m clearance to B, and B reported 0.25 m clearance to A. A was still turning left overall; B’s pre-contact motion remained approximately straight. These measurements are consistent with A moving into B’s occupied space, though they do not establish lane markings or exact body contact points.",
+            "actor_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -0.05,
+            "evidence_fact_ids": [
+              "F0361",
+              "F0367",
+              "F0396",
+              "F0399"
+            ]
+          },
+          {
+            "step": 4,
+            "claim": "The collision sensors matched a physical contact between A and B at t=0. Neither recorder’s brake pedal was pressed in the last sample before that time; both were first sampled with the brake fully pressed at +0.05 s, so the exact brake-onset time is only bracketed around contact.",
+            "actor_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "evidence_fact_ids": [
+              "F0394",
+              "F0398",
+              "F0401",
+              "F0403",
+              "F0407"
+            ]
+          },
+          {
+            "step": 5,
+            "claim": "Both recorders decelerated after the contact and came to a standstill, with B first recorded nearly stopped at +1.05 s and A at +1.15 s.",
+            "actor_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 1.1,
+            "evidence_fact_ids": [
+              "F0430",
+              "F0434",
+              "F0484",
+              "F0487"
+            ]
+          }
+        ],
+        "alternative_hypotheses": [
+          {
+            "hypothesis": "A’s leftward maneuver may have been an evasive response to A:track_001, which A tracked ahead-right and whose relative position and predicted approach changed before the collision. The packet does not establish that this track entered A’s lane or caused A to steer.",
+            "responsible_actor": "UNKNOWN",
+            "plausibility": 0.24,
+            "evidence_fact_ids": [
+              "F0003",
+              "F0307",
+              "F0315",
+              "F0395"
+            ]
+          },
+          {
+            "hypothesis": "B’s greater speed and closing from A’s left-rear may have contributed to the close interaction, so a contribution from B’s passing path cannot be excluded. The recorded evidence is weaker for this account because B’s own pre-contact motion and steering remain nearly steady.",
+            "responsible_actor": "B",
+            "plausibility": 0.16,
+            "evidence_fact_ids": [
+              "F0004",
+              "F0007",
+              "F0396",
+              "F0399"
+            ]
+          }
+        ],
+        "unresolved_entities": [
+          {
+            "entity_id": "A:track_001",
+            "role": "Anonymous radar track observed by A ahead and to the right",
+            "reason": "The packet supplies no identity association; its possible influence on A’s leftward maneuver is not established."
+          },
+          {
+            "entity_id": "B:track_002",
+            "role": "Anonymous radar track observed by B ahead",
+            "reason": "The packet supplies no identity association, and it is not established as a participant in the collision."
+          },
+          {
+            "entity_id": "B:track_003",
+            "role": "Anonymous radar track observed by B after the collision",
+            "reason": "The packet supplies no identity association; its identity and any relation to the other anonymous tracks are unknown."
+          }
+        ],
+        "identity_hallucinations": [],
+        "cited_fact_ids": 73,
+        "invalid_fact_references": 0,
+        "issue_counts": {}
+      },
+      "semantic_hypotheses": {
+        "config": {
+          "time_tolerance_s": 0.5,
+          "exclude_active_at_first_observation": true,
+          "reference_event_types": null,
+          "reference_window_s": null
+        },
+        "hypotheses": 26,
+        "reference_events": 36,
+        "TP": 15,
+        "FP": 11,
+        "FN": 21,
+        "precision": 0.5769,
+        "recall": 0.4167,
+        "f1": 0.4839,
+        "hallucination_rate": 0.1538,
+        "identity_hallucination_rate": 0.0,
+        "mean_abs_time_error_s": 0.04,
+        "per_hypothesis": [
+          {
+            "index": 0,
+            "event_type": "MOVING_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 1,
+            "event_type": "MOVING_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 2,
+            "event_type": "TRACK_APPEARED_FRONT",
+            "actor_id": "A",
+            "subject_id": "A:track_001",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": false,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 3,
+            "event_type": "TRACK_APPEARED_LEFT",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "TRACK_APPEARED_LEFT",
+              "actor": "A",
+              "subject": "B",
+              "participants": [
+                "A",
+                "B"
+              ],
+              "t_global": -4.95
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 4,
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "TRACK_APPEARED_RIGHT",
+              "actor": "B",
+              "subject": "A",
+              "participants": [
+                "B",
+                "A"
+              ],
+              "t_global": -4.95
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 5,
+            "event_type": "TRACK_APPEARED_FRONT",
+            "actor_id": "B",
+            "subject_id": "B:track_002",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": false,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 6,
+            "event_type": "CLOSING_START",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 7,
+            "event_type": "CLOSING_START",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -4.95,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 8,
+            "event_type": "TURN_LEFT_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -1.15,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": false,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 9,
+            "event_type": "TURN_LEFT_END",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": -0.25,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": false,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 10,
+            "event_type": "CRITICAL_TTC_START",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": -0.25,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 11,
+            "event_type": "CRITICAL_TTC_START",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": -0.15,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 12,
+            "event_type": "CRITICAL_TTC_END",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "CRITICAL_TTC_END",
+              "actor": "A",
+              "subject": "B",
+              "participants": [
+                "A",
+                "B"
+              ],
+              "t_global": 0.0
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 13,
+            "event_type": "CRITICAL_TTC_END",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "CRITICAL_TTC_END",
+              "actor": "B",
+              "subject": "A",
+              "participants": [
+                "B",
+                "A"
+              ],
+              "t_global": -0.05
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 14,
+            "event_type": "COLLISION",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "COLLISION",
+              "actor": null,
+              "subject": null,
+              "participants": [
+                "A",
+                "B"
+              ],
+              "t_global": 0.0
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 15,
+            "event_type": "COLLISION",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "FP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": []
+          },
+          {
+            "index": 16,
+            "event_type": "THROTTLE_END",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "THROTTLE_END",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 17,
+            "event_type": "THROTTLE_END",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.0,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "THROTTLE_END",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 18,
+            "event_type": "BRAKE_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "BRAKE_START",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 19,
+            "event_type": "BRAKE_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "BRAKE_START",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 0.05
+            },
+            "time_error_s": 0.0
+          },
+          {
+            "index": 20,
+            "event_type": "CLOSING_END",
+            "actor_id": "B",
+            "subject_id": "A",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "CLOSING_END",
+              "actor": "B",
+              "subject": "A",
+              "participants": [
+                "B",
+                "A"
+              ],
+              "t_global": 0.0
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 21,
+            "event_type": "CLOSING_END",
+            "actor_id": "A",
+            "subject_id": "B",
+            "time_reference": "GLOBAL",
+            "estimated_time": 0.2,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "CLOSING_END",
+              "actor": "A",
+              "subject": "B",
+              "participants": [
+                "A",
+                "B"
+              ],
+              "t_global": 0.0
+            },
+            "time_error_s": 0.2
+          },
+          {
+            "index": 22,
+            "event_type": "MOVING_END",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 1.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "MOVING_END",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 1.0
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 23,
+            "event_type": "STOP_START",
+            "actor_id": "B",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 1.05,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "STOP_START",
+              "actor": "B",
+              "subject": null,
+              "participants": [
+                "B"
+              ],
+              "t_global": 1.0
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 24,
+            "event_type": "MOVING_END",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 1.15,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "MOVING_END",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 1.1
+            },
+            "time_error_s": 0.05
+          },
+          {
+            "index": 25,
+            "event_type": "STOP_START",
+            "actor_id": "A",
+            "subject_id": null,
+            "time_reference": "GLOBAL",
+            "estimated_time": 1.15,
+            "outcome": "TP",
+            "exists_in_trace_at_any_time": true,
+            "unknown_entity_ids": [],
+            "matched_event": {
+              "event_type": "STOP_START",
+              "actor": "A",
+              "subject": null,
+              "participants": [
+                "A"
+              ],
+              "t_global": 1.1
+            },
+            "time_error_s": 0.05
+          }
+        ],
+        "missed_reference_events": [
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": -4.95
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_START",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -2.2
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_START",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": -2.1
+          },
+          {
+            "event_type": "EGO_PATH_ENTRY",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -1.6
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -1.35
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": -1.15
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.85
+          },
+          {
+            "event_type": "CRITICAL_TTC_START",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -0.8
+          },
+          {
+            "event_type": "CLOSING_START",
+            "actor": "A",
+            "subject": "B",
+            "participants": [
+              "A",
+              "B"
+            ],
+            "t_global": -0.75
+          },
+          {
+            "event_type": "CLOSING_START",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": -0.7
+          },
+          {
+            "event_type": "CRITICAL_TTC_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.4
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": -0.4
+          },
+          {
+            "event_type": "CLOSING_END",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.2
+          },
+          {
+            "event_type": "EGO_PATH_EXIT",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": 0.25
+          },
+          {
+            "event_type": "CUT_IN_FROM_RIGHT_END",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.3
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "B",
+            "subject": "B:track_002",
+            "participants": [
+              "B"
+            ],
+            "t_global": 0.75
+          },
+          {
+            "event_type": "EGO_PATH_ENTRY",
+            "actor": "B",
+            "subject": "A",
+            "participants": [
+              "B",
+              "A"
+            ],
+            "t_global": 1.3
+          },
+          {
+            "event_type": "TRACK_APPEARED_RIGHT",
+            "actor": "B",
+            "subject": "B:track_003",
+            "participants": [
+              "B"
+            ],
+            "t_global": 1.45
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "B",
+            "subject": "B:track_003",
+            "participants": [
+              "B"
+            ],
+            "t_global": 2.05
+          },
+          {
+            "event_type": "TRACK_LOST",
+            "actor": "A",
+            "subject": "A:track_001",
+            "participants": [
+              "A"
+            ],
+            "t_global": 2.5
+          }
+        ]
+      },
+      "attribution": {
+        "responsible_actor": "A",
+        "resolved_entity": "A",
+        "kind": "RECORDER",
+        "confidence": 0.78
+      },
+      "stage2": {
+        "validation_status": "VALID",
+        "formulas": 31,
+        "valid": 31,
+        "invalid": 0,
+        "untestable_claims": [
+          {
+            "claim_ref": "causal_chain[0]",
+            "claim": "B was gaining longitudinally on A.",
+            "reason": "The grammar cannot express relative speed or changes in longitudinal separation; these are quantitative motion claims."
+          },
+          {
+            "claim_ref": "causal_chain[0]",
+            "claim": "The relative approach does not establish lane geometry.",
+            "reason": "Lane geometry and spatial relationships beyond the event labels are not expressible in this temporal logic."
+          },
+          {
+            "claim_ref": "causal_chain[1]",
+            "claim": "B remained tracked by A at the turn time, B's heading and lateral position remained nearly steady, and the reported clearance was about 1.32 m.",
+            "reason": "The grammar cannot express continuous radar-track observation, heading, lateral position, or numerical clearance."
+          },
+          {
+            "claim_ref": "causal_chain[1]",
+            "claim": "A may have turned in response to A:track_001, or that track caused A to steer.",
+            "reason": "A possible motive or causal influence is not represented by temporal event/state formulas; the track's identity and role are also unresolved."
+          },
+          {
+            "claim_ref": "causal_chain[2]",
+            "claim": "The radar measurements show separation narrowing, with clearances of 0.14 m and 0.25 m just before contact; B's path was approximately straight and A moved into B's occupied space.",
+            "reason": "The grammar cannot express numerical distances, path geometry, or approximate motion. The claim that A moved into B's space is a spatial and causal interpretation."
+          },
+          {
+            "claim_ref": "causal_chain[2]",
+            "claim": "A's leftward maneuver made the collision likely or was a causal contribution to it.",
+            "reason": "Temporal logic satisfaction can establish temporal consistency, not causation, likelihood, or responsibility."
+          },
+          {
+            "claim_ref": "causal_chain[2]",
+            "claim": "The exact lane occupancy, lane markings, and precise body contact points are not established.",
+            "reason": "The grammar has no representation for lane boundaries, occupancy, or contact-point geometry."
+          },
+          {
+            "claim_ref": "causal_chain[3]",
+            "claim": "Both brake pedals were fully pressed in the first sample at +0.05 s.",
+            "reason": "The grammar can express a brake state or event, but not pedal magnitude, sampling status, or a sampled value of 1.0."
+          },
+          {
+            "claim_ref": "causal_chain[4]",
+            "claim": "Both recorders decelerated after contact.",
+            "reason": "Deceleration is a quantitative motion claim and is not expressible in the grammar."
+          }
+        ]
+      },
+      "verifier": {
+        "summary": {
+          "TRUE": 19,
+          "FALSE": 12,
+          "UNKNOWN": 0,
+          "INVALID": 0
+        },
+        "results": [
+          {
+            "formula_id": "cf0",
+            "claim_ref": "causal_chain[0]",
+            "formula_text": "F[-4.95,-4.95] (event(MOVING_START,A) AND event(MOVING_START,B) AND event(TRACK_APPEARED_LEFT,A,B) AND event(TRACK_APPEARED_RIGHT,B,A))",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "cf1",
+            "claim_ref": "causal_chain[1]",
+            "formula_text": "F[-1.25,-1.15] event(TURN_LEFT_START,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "cf2",
+            "claim_ref": "causal_chain[2]",
+            "formula_text": "BEFORE(event(TURN_LEFT_START,A),event(COLLISION,A,B))",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "cf3",
+            "claim_ref": "causal_chain[3]",
+            "formula_text": "F[0,0] event(COLLISION,A,B) AND F[0,0] event(COLLISION,B,A) AND F[-0.05,-0.05] (NOT state(BRAKE,A)) AND F[-0.05,-0.05] (NOT state(BRAKE,B)) AND F[-0.05,0.05] event(BRAKE_START,A) AND F[-0.05,0.05] event(BRAKE_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "cf4",
+            "claim_ref": "causal_chain[4]",
+            "formula_text": "F[0.95,1.05] (event(MOVING_END,B) AND event(STOP_START,B)) AND F[1.05,1.15] (event(MOVING_END,A) AND event(STOP_START,A))",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh0",
+            "claim_ref": "semantic_hypotheses[0]",
+            "formula_text": "F[-4.95,-4.95] event(MOVING_START,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh1",
+            "claim_ref": "semantic_hypotheses[1]",
+            "formula_text": "F[-4.95,-4.95] event(MOVING_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh2",
+            "claim_ref": "semantic_hypotheses[2]",
+            "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_FRONT,A,A:track_001)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh3",
+            "claim_ref": "semantic_hypotheses[3]",
+            "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_LEFT,A,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh4",
+            "claim_ref": "semantic_hypotheses[4]",
+            "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_RIGHT,B,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh5",
+            "claim_ref": "semantic_hypotheses[5]",
+            "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_FRONT,B,B:track_002)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh6",
+            "claim_ref": "semantic_hypotheses[6]",
+            "formula_text": "F[-4.95,-4.95] event(CLOSING_START,A,B)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh7",
+            "claim_ref": "semantic_hypotheses[7]",
+            "formula_text": "F[-4.95,-4.95] event(CLOSING_START,B,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh8",
+            "claim_ref": "semantic_hypotheses[8]",
+            "formula_text": "F[-1.25,-1.15] event(TURN_LEFT_START,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh9",
+            "claim_ref": "semantic_hypotheses[9]",
+            "formula_text": "F[-0.35,-0.25] event(TURN_LEFT_END,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh10",
+            "claim_ref": "semantic_hypotheses[10]",
+            "formula_text": "F[-0.25,-0.15] event(CRITICAL_TTC_START,A,B)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh11",
+            "claim_ref": "semantic_hypotheses[11]",
+            "formula_text": "F[-0.25,-0.15] event(CRITICAL_TTC_START,B,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh12",
+            "claim_ref": "semantic_hypotheses[12]",
+            "formula_text": "F[0,0] event(CRITICAL_TTC_END,A,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh13",
+            "claim_ref": "semantic_hypotheses[13]",
+            "formula_text": "F[0,0] event(CRITICAL_TTC_END,B,A)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh14",
+            "claim_ref": "semantic_hypotheses[14]",
+            "formula_text": "F[0,0] event(COLLISION,A,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh15",
+            "claim_ref": "semantic_hypotheses[15]",
+            "formula_text": "F[0,0] event(COLLISION,B,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh16",
+            "claim_ref": "semantic_hypotheses[16]",
+            "formula_text": "F[-0.05,0.05] event(THROTTLE_END,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh17",
+            "claim_ref": "semantic_hypotheses[17]",
+            "formula_text": "F[-0.05,0.05] event(THROTTLE_END,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh18",
+            "claim_ref": "semantic_hypotheses[18]",
+            "formula_text": "F[-0.05,0.05] event(BRAKE_START,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh19",
+            "claim_ref": "semantic_hypotheses[19]",
+            "formula_text": "F[-0.05,0.05] event(BRAKE_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh20",
+            "claim_ref": "semantic_hypotheses[20]",
+            "formula_text": "F[-0.05,0.05] event(CLOSING_END,B,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh21",
+            "claim_ref": "semantic_hypotheses[21]",
+            "formula_text": "F[0.15,0.25] event(CLOSING_END,A,B)",
+            "result": "FALSE"
+          },
+          {
+            "formula_id": "sh22",
+            "claim_ref": "semantic_hypotheses[22]",
+            "formula_text": "F[0.95,1.05] event(MOVING_END,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh23",
+            "claim_ref": "semantic_hypotheses[23]",
+            "formula_text": "F[0.95,1.05] event(STOP_START,B)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh24",
+            "claim_ref": "semantic_hypotheses[24]",
+            "formula_text": "F[1.05,1.15] event(MOVING_END,A)",
+            "result": "TRUE"
+          },
+          {
+            "formula_id": "sh25",
+            "claim_ref": "semantic_hypotheses[25]",
+            "formula_text": "F[1.05,1.15] event(STOP_START,A)",
+            "result": "TRUE"
+          }
+        ]
+      },
+      "security": {
+        "leak_guard": "PASS (packet and prompts checked before each request; the analysis ran)",
+        "payload_audit": [
+          "PASS",
+          "PASS"
+        ],
+        "embedded_packet_sha256": [
+          "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe"
+        ],
+        "identity_hallucination_rate": 0.0
+      },
+      "usage": {
+        "per_stage": {
+          "explanation": {
+            "input_tokens": 58713,
+            "cached_input_tokens": 0,
+            "output_tokens": 15918,
+            "reasoning_tokens": 13110,
+            "total_tokens": 74631,
+            "latency_s": 163.209,
+            "response_id": "resp_0884d30b68d6b8c1016ac7f640bc7887d29bf12bf13fb0c2e6",
+            "model_reported": "gpt-6-luna",
+            "finish_reason": "completed"
+          },
+          "formalize": {
+            "input_tokens": 62710,
+            "cached_input_tokens": 0,
+            "output_tokens": 12644,
+            "reasoning_tokens": 5061,
+            "total_tokens": 75354,
+            "latency_s": 92.434,
+            "response_id": "resp_02bebb321e3fa1ff016ac7f6e35c3487d29beaa1b14a49b64f",
+            "model_reported": "gpt-6-luna",
+            "finish_reason": "completed"
+          }
+        },
+        "total": {
+          "input_tokens": 121423,
+          "cached_input_tokens": 0,
+          "output_tokens": 28562,
+          "reasoning_tokens": 18171,
+          "total_tokens": 149985,
+          "latency_s": 255.643
+        }
+      },
+      "cost": {
+        "usd": 0.026423,
+        "basis": "returned usage x published list price (https://developers.openai.com/api/docs/models/gpt-6-luna, as of 2026-10-08); output tokens include reasoning tokens",
+        "prices_usd_per_1m": {
+          "input": 0.1,
+          "cached_input": 0.01,
+          "output": 0.5
+        }
+      }
+    }
+  ],
+  "unanswered": [
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T195647Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T19:56:47Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T195920Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T19:59:20Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T200203Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T20:02:03Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T200442Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T20:04:43Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T202105Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T20:21:05Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T204317Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "FAILED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "FAILED",
+          "started_at": "2026-10-08T20:43:17Z",
+          "http_statuses": [
+            503,
+            503,
+            503
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "transient"
+          ],
+          "last_error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261008T211403Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "QUOTA_EXHAUSTED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "QUOTA_EXHAUSTED",
+          "started_at": "2026-10-08T21:14:03Z",
+          "http_statuses": [
+            503,
+            503,
+            429
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "quota"
+          ],
+          "last_error": "quota exceeded: GenerateRequestsPerDayPerProjectPerModel-FreeTier (limit 20)"
+        }
+      }
+    },
+    {
+      "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\gemini_gemini-3.8-flash_20261009T000501Z",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "status": "QUOTA_EXHAUSTED",
+      "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+      "stages": {
+        "explanation": {
+          "status": "QUOTA_EXHAUSTED",
+          "started_at": "2026-10-09T00:05:01Z",
+          "http_statuses": [
+            503,
+            503,
+            429
+          ],
+          "error_kinds": [
+            "transient",
+            "transient",
+            "quota"
+          ],
+          "last_error": "quota exceeded: GenerateRequestsPerDayPerProjectPerModel-FreeTier (limit 20)"
+        }
+      }
+    }
+  ]
+}

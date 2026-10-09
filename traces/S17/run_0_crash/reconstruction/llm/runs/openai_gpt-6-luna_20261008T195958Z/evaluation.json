@@ -1,0 +1,678 @@
+{
+  "note": "computed from the saved answers and the reconstructed semantic trace; no model call",
+  "stage1_validation_status": "VALID",
+  "stage1_issue_counts": {},
+  "stage2_validation_status": "VALID",
+  "attribution": {
+    "responsible_actor": "A",
+    "resolved_entity": "A",
+    "kind": "RECORDER",
+    "confidence": 0.78
+  },
+  "semantic_hypotheses": {
+    "config": {
+      "time_tolerance_s": 0.5,
+      "exclude_active_at_first_observation": true,
+      "reference_event_types": null,
+      "reference_window_s": null
+    },
+    "hypotheses": 26,
+    "reference_events": 36,
+    "TP": 15,
+    "FP": 11,
+    "FN": 21,
+    "precision": 0.5769,
+    "recall": 0.4167,
+    "f1": 0.4839,
+    "hallucination_rate": 0.1538,
+    "identity_hallucination_rate": 0.0,
+    "mean_abs_time_error_s": 0.04,
+    "per_hypothesis": [
+      {
+        "index": 0,
+        "event_type": "MOVING_START",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 1,
+        "event_type": "MOVING_START",
+        "actor_id": "B",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 2,
+        "event_type": "TRACK_APPEARED_FRONT",
+        "actor_id": "A",
+        "subject_id": "A:track_001",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": false,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 3,
+        "event_type": "TRACK_APPEARED_LEFT",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "TRACK_APPEARED_LEFT",
+          "actor": "A",
+          "subject": "B",
+          "participants": [
+            "A",
+            "B"
+          ],
+          "t_global": -4.95
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 4,
+        "event_type": "TRACK_APPEARED_RIGHT",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "TRACK_APPEARED_RIGHT",
+          "actor": "B",
+          "subject": "A",
+          "participants": [
+            "B",
+            "A"
+          ],
+          "t_global": -4.95
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 5,
+        "event_type": "TRACK_APPEARED_FRONT",
+        "actor_id": "B",
+        "subject_id": "B:track_002",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": false,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 6,
+        "event_type": "CLOSING_START",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 7,
+        "event_type": "CLOSING_START",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": -4.95,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 8,
+        "event_type": "TURN_LEFT_START",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": -1.15,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": false,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 9,
+        "event_type": "TURN_LEFT_END",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": -0.25,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": false,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 10,
+        "event_type": "CRITICAL_TTC_START",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": -0.25,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 11,
+        "event_type": "CRITICAL_TTC_START",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": -0.15,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 12,
+        "event_type": "CRITICAL_TTC_END",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "CRITICAL_TTC_END",
+          "actor": "A",
+          "subject": "B",
+          "participants": [
+            "A",
+            "B"
+          ],
+          "t_global": 0.0
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 13,
+        "event_type": "CRITICAL_TTC_END",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "CRITICAL_TTC_END",
+          "actor": "B",
+          "subject": "A",
+          "participants": [
+            "B",
+            "A"
+          ],
+          "t_global": -0.05
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 14,
+        "event_type": "COLLISION",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "COLLISION",
+          "actor": null,
+          "subject": null,
+          "participants": [
+            "A",
+            "B"
+          ],
+          "t_global": 0.0
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 15,
+        "event_type": "COLLISION",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "FP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": []
+      },
+      {
+        "index": 16,
+        "event_type": "THROTTLE_END",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "THROTTLE_END",
+          "actor": "A",
+          "subject": null,
+          "participants": [
+            "A"
+          ],
+          "t_global": 0.05
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 17,
+        "event_type": "THROTTLE_END",
+        "actor_id": "B",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.0,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "THROTTLE_END",
+          "actor": "B",
+          "subject": null,
+          "participants": [
+            "B"
+          ],
+          "t_global": 0.05
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 18,
+        "event_type": "BRAKE_START",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.05,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "BRAKE_START",
+          "actor": "A",
+          "subject": null,
+          "participants": [
+            "A"
+          ],
+          "t_global": 0.05
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 19,
+        "event_type": "BRAKE_START",
+        "actor_id": "B",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.05,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "BRAKE_START",
+          "actor": "B",
+          "subject": null,
+          "participants": [
+            "B"
+          ],
+          "t_global": 0.05
+        },
+        "time_error_s": 0.0
+      },
+      {
+        "index": 20,
+        "event_type": "CLOSING_END",
+        "actor_id": "B",
+        "subject_id": "A",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.05,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "CLOSING_END",
+          "actor": "B",
+          "subject": "A",
+          "participants": [
+            "B",
+            "A"
+          ],
+          "t_global": 0.0
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 21,
+        "event_type": "CLOSING_END",
+        "actor_id": "A",
+        "subject_id": "B",
+        "time_reference": "GLOBAL",
+        "estimated_time": 0.2,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "CLOSING_END",
+          "actor": "A",
+          "subject": "B",
+          "participants": [
+            "A",
+            "B"
+          ],
+          "t_global": 0.0
+        },
+        "time_error_s": 0.2
+      },
+      {
+        "index": 22,
+        "event_type": "MOVING_END",
+        "actor_id": "B",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 1.05,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "MOVING_END",
+          "actor": "B",
+          "subject": null,
+          "participants": [
+            "B"
+          ],
+          "t_global": 1.0
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 23,
+        "event_type": "STOP_START",
+        "actor_id": "B",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 1.05,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "STOP_START",
+          "actor": "B",
+          "subject": null,
+          "participants": [
+            "B"
+          ],
+          "t_global": 1.0
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 24,
+        "event_type": "MOVING_END",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 1.15,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "MOVING_END",
+          "actor": "A",
+          "subject": null,
+          "participants": [
+            "A"
+          ],
+          "t_global": 1.1
+        },
+        "time_error_s": 0.05
+      },
+      {
+        "index": 25,
+        "event_type": "STOP_START",
+        "actor_id": "A",
+        "subject_id": null,
+        "time_reference": "GLOBAL",
+        "estimated_time": 1.15,
+        "outcome": "TP",
+        "exists_in_trace_at_any_time": true,
+        "unknown_entity_ids": [],
+        "matched_event": {
+          "event_type": "STOP_START",
+          "actor": "A",
+          "subject": null,
+          "participants": [
+            "A"
+          ],
+          "t_global": 1.1
+        },
+        "time_error_s": 0.05
+      }
+    ],
+    "missed_reference_events": [
+      {
+        "event_type": "TRACK_APPEARED_RIGHT",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -4.95
+      },
+      {
+        "event_type": "TRACK_APPEARED_RIGHT",
+        "actor": "B",
+        "subject": "B:track_002",
+        "participants": [
+          "B"
+        ],
+        "t_global": -4.95
+      },
+      {
+        "event_type": "CUT_IN_FROM_RIGHT_START",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -2.2
+      },
+      {
+        "event_type": "CUT_IN_FROM_RIGHT_START",
+        "actor": "B",
+        "subject": "B:track_002",
+        "participants": [
+          "B"
+        ],
+        "t_global": -2.1
+      },
+      {
+        "event_type": "EGO_PATH_ENTRY",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -1.6
+      },
+      {
+        "event_type": "CRITICAL_TTC_START",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -1.35
+      },
+      {
+        "event_type": "CRITICAL_TTC_START",
+        "actor": "A",
+        "subject": "B",
+        "participants": [
+          "A",
+          "B"
+        ],
+        "t_global": -1.15
+      },
+      {
+        "event_type": "CUT_IN_FROM_RIGHT_END",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -0.85
+      },
+      {
+        "event_type": "CRITICAL_TTC_START",
+        "actor": "B",
+        "subject": "A",
+        "participants": [
+          "B",
+          "A"
+        ],
+        "t_global": -0.8
+      },
+      {
+        "event_type": "CLOSING_START",
+        "actor": "A",
+        "subject": "B",
+        "participants": [
+          "A",
+          "B"
+        ],
+        "t_global": -0.75
+      },
+      {
+        "event_type": "CLOSING_START",
+        "actor": "B",
+        "subject": "A",
+        "participants": [
+          "B",
+          "A"
+        ],
+        "t_global": -0.7
+      },
+      {
+        "event_type": "CRITICAL_TTC_END",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -0.4
+      },
+      {
+        "event_type": "CLOSING_END",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": -0.4
+      },
+      {
+        "event_type": "CLOSING_END",
+        "actor": "B",
+        "subject": "B:track_002",
+        "participants": [
+          "B"
+        ],
+        "t_global": 0.2
+      },
+      {
+        "event_type": "EGO_PATH_EXIT",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": 0.25
+      },
+      {
+        "event_type": "CUT_IN_FROM_RIGHT_END",
+        "actor": "B",
+        "subject": "B:track_002",
+        "participants": [
+          "B"
+        ],
+        "t_global": 0.3
+      },
+      {
+        "event_type": "TRACK_LOST",
+        "actor": "B",
+        "subject": "B:track_002",
+        "participants": [
+          "B"
+        ],
+        "t_global": 0.75
+      },
+      {
+        "event_type": "EGO_PATH_ENTRY",
+        "actor": "B",
+        "subject": "A",
+        "participants": [
+          "B",
+          "A"
+        ],
+        "t_global": 1.3
+      },
+      {
+        "event_type": "TRACK_APPEARED_RIGHT",
+        "actor": "B",
+        "subject": "B:track_003",
+        "participants": [
+          "B"
+        ],
+        "t_global": 1.45
+      },
+      {
+        "event_type": "TRACK_LOST",
+        "actor": "B",
+        "subject": "B:track_003",
+        "participants": [
+          "B"
+        ],
+        "t_global": 2.05
+      },
+      {
+        "event_type": "TRACK_LOST",
+        "actor": "A",
+        "subject": "A:track_001",
+        "participants": [
+          "A"
+        ],
+        "t_global": 2.5
+      }
+    ]
+  },
+  "formulas": {
+    "TRUE": 19,
+    "FALSE": 12,
+    "UNKNOWN": 0,
+    "INVALID": 0
+  }
+}

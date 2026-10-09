@@ -1,7 +1,19 @@
 {
   "provider": "gemini",
-  "model": "gemini-3.7-flash",
+  "model": "gemini-3.8-flash",
   "api_key_env": "GEMINI_API_KEY",
+  "model_policy": {
+    "locked": false,
+    "allowed_models": [
+      "gemini-3.8-flash",
+      "gemini-3.5-flash-lite"
+    ],
+    "fallback": "none: Stage 1 and Stage 2 use this model; an error or a quota stops the analysis"
+  },
+  "generation_settings": {
+    "thinking_level": "high",
+    "max_output_tokens": 32000
+  },
   "prompt_versions": {
     "explanation": "accident_abduction_v1",
     "formalize": "formalize_hypothesis_v1"
@@ -18,11 +30,11 @@
   "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
   "oracle_identities": false,
   "dry_run": true,
-  "created_at": "2026-10-08T19:18:13Z",
-  "code_version": "88f51b0ed60a2f5cf011f1287c44308c491f64ad",
+  "created_at": "2026-10-08T19:56:31Z",
+  "code_version": "ea4d26c9f8f50c96ff7ef12ea3bb13c6de010aee",
   "python": "3.14.2",
   "platform": "win32",
-  "determinism": "Model outputs are not guaranteed to be reproducible: temperature 0 and a fixed seed (where the provider accepts them) reduce variation but do not remove it; repeat runs are needed to measure it.",
+  "determinism": "Model outputs are not reproducible: the reasoning models are sampled with their default settings (no temperature or seed is pinned; reasoning effort / thinking level is recorded); repeat runs are needed to measure the variation.",
   "stages": {},
   "provider_available": true,
   "status": "DRY_RUN"

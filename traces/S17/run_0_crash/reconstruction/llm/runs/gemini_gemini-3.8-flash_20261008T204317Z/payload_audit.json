@@ -1,0 +1,47 @@
+{
+  "note": "pre-send payload audit (privileged files were read only to search the outgoing bodies)",
+  "requests": [
+    {
+      "stage": "explanation",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "body_sha256": "ccdd9234764684b470374728e4f72059a5897b76836866a224c2d3e73186ec0a",
+      "body_characters": 110713,
+      "embedded_packet_sha256": "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe",
+      "markers_checked": {
+        "semantic_node_ids": 85,
+        "unrecorded_participants": 1,
+        "scripted_actions": 1,
+        "static": 24
+      },
+      "result": "PASS"
+    },
+    {
+      "stage": "explanation",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "body_sha256": "ccdd9234764684b470374728e4f72059a5897b76836866a224c2d3e73186ec0a",
+      "body_characters": 110713,
+      "embedded_packet_sha256": "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe",
+      "markers_checked": {
+        "semantic_node_ids": 85,
+        "unrecorded_participants": 1,
+        "scripted_actions": 1,
+        "static": 24
+      },
+      "result": "PASS"
+    },
+    {
+      "stage": "explanation",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "body_sha256": "ccdd9234764684b470374728e4f72059a5897b76836866a224c2d3e73186ec0a",
+      "body_characters": 110713,
+      "embedded_packet_sha256": "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe",
+      "markers_checked": {
+        "semantic_node_ids": 85,
+        "unrecorded_participants": 1,
+        "scripted_actions": 1,
+        "static": 24
+      },
+      "result": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "api_key_env": "GEMINI_API_KEY",
+  "model_policy": {
+    "locked": false,
+    "allowed_models": [
+      "gemini-3.8-flash",
+      "gemini-3.5-flash-lite"
+    ],
+    "fallback": "none: Stage 1 and Stage 2 use this model; an error or a quota stops the analysis"
+  },
+  "generation_settings": {
+    "thinking_level": "high",
+    "max_output_tokens": 32000
+  },
+  "prompt_versions": {
+    "explanation": "accident_abduction_v1",
+    "formalize": "formalize_hypothesis_v1"
+  },
+  "facts_schema_version": "cdf.forensic_facts/1",
+  "packet_schema_version": "cdf.forensic_packet/1",
+  "response_schema_versions": {
+    "explanation": "cdf.llm.stage1/1",
+    "formalize": "cdf.llm.stage2/1"
+  },
+  "grammar_version": "cdf.formal/1",
+  "vocabulary_version": 1,
+  "run_id": "case-1378e3e335bdf143",
+  "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8",
+  "oracle_identities": false,
+  "dry_run": false,
+  "created_at": "2026-10-08T19:58:22Z",
+  "code_version": "ea4d26c9f8f50c96ff7ef12ea3bb13c6de010aee",
+  "python": "3.14.2",
+  "platform": "win32",
+  "determinism": "Model outputs are not reproducible: the reasoning models are sampled with their default settings (no temperature or seed is pinned; reasoning effort / thinking level is recorded); repeat runs are needed to measure the variation.",
+  "stages": {
+    "explanation": {
+      "started_at": "2026-10-08T19:58:22Z",
+      "model": "gemini-3.5-flash-lite",
+      "prompt": {
+        "template": "accident_abduction_v1",
+        "template_sha256": "a9bc3ba28764a4aa8bf0955dcecbe77fbf1d25e3b5c06f2cc3cafe5c00a78fd2",
+        "system_sha256": "4e39de8fc169c9d71fd771846e115db170a8657d0a8e2f95e781a85218f0dab4",
+        "user_sha256": "3ea9921979b72d2e59836de13a8114c846e6d39e40df3216d9a4e6c54bd4c8f2"
+      },
+      "schema_name": "forensic_explanation",
+      "status": "ANSWERED",
+      "provider": "gemini",
+      "model_reported": "gemini-3.5-flash-lite",
+      "response_id": "3_XHauavBaGExN8P6vndkQ0",
+      "finish_reason": "STOP",
+      "refusal": null,
+      "usage": {
+        "input_tokens": 70698,
+        "cached_input_tokens": null,
+        "output_tokens": 2022,
+        "reasoning_tokens": 2280,
+        "total_tokens": 75000,
+        "note": "output_tokens exclude the thinking tokens (thoughtsTokenCount)",
+        "raw": {
+          "promptTokenCount": 70698,
+          "candidatesTokenCount": 2022,
+          "totalTokenCount": 75000,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 70698
+            }
+          ],
+          "thoughtsTokenCount": 2280,
+          "serviceTier": "standard"
+        }
+      },
+      "latency_s": 10.609,
+      "sent_at": "2026-10-08T19:58:22Z",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "seconds": 10.594
+        }
+      ],
+      "parameters_sent": {
+        "thinking_level": "high",
+        "max_output_tokens": 32000
+      },
+      "parse_error": null,
+      "notes": [],
+      "validation_status": "VALID"
+    },
+    "formalize": {
+      "started_at": "2026-10-08T19:58:33Z",
+      "model": "gemini-3.5-flash-lite",
+      "prompt": {
+        "template": "formalize_hypothesis_v1",
+        "template_sha256": "69dd38e42ce7cc6664abdbe48f94fe1789af7664a3d25359c977970b7cdb3671",
+        "system_sha256": "7c4dd9ceae41c650c1d01594fea32420505b044929ec639429f0bfbea0aa396f",
+        "user_sha256": "9d4af129ab3a777256f81d09bef59d20baa067ac77e3f12b58ca6d82e6a310cb"
+      },
+      "schema_name": "forensic_formalization",
+      "status": "ANSWERED",
+      "provider": "gemini",
+      "model_reported": "gemini-3.5-flash-lite",
+      "response_id": "6fXHas6eLLOuvdIPvZTz6A0",
+      "finish_reason": "STOP",
+      "refusal": null,
+      "usage": {
+        "input_tokens": 73157,
+        "cached_input_tokens": null,
+        "output_tokens": 2245,
+        "reasoning_tokens": 8061,
+        "total_tokens": 83463,
+        "note": "output_tokens exclude the thinking tokens (thoughtsTokenCount)",
+        "raw": {
+          "promptTokenCount": 73157,
+          "candidatesTokenCount": 2245,
+          "totalTokenCount": 83463,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 73157
+            }
+          ],
+          "thoughtsTokenCount": 8061,
+          "serviceTier": "standard"
+        }
+      },
+      "latency_s": 22.245,
+      "sent_at": "2026-10-08T19:58:33Z",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "seconds": 22.235
+        }
+      ],
+      "parameters_sent": {
+        "thinking_level": "high",
+        "max_output_tokens": 32000
+      },
+      "parse_error": null,
+      "notes": [],
+      "validation_status": "VALID"
+    }
+  },
+  "provider_available": true,
+  "status": "COMPLETED"
+}

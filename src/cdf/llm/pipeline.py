@@ -10,8 +10,15 @@
 Layout: ``<run>/reconstruction/llm/runs/<provider>_<model>_<UTC timestamp>/`` with
 ``request_metadata.json``, ``stage1_explanation.json``, ``stage2_formula.json``,
 ``verification.json``, ``evaluation.json`` (``request_preview.json`` for a dry
-run).  Oracle-identity analyses go under ``reconstruction/evaluation/llm_oracle/``.
-Nothing here writes into the reconstruction or feeds anything back into it.
+run; ``payload_audit.json`` with ``--audit-payload``).  Oracle-identity analyses
+go under ``reconstruction/evaluation/llm_oracle/``.  Nothing here writes into
+the reconstruction or feeds anything back into it.
+
+One analysis, one model: Stage 1 and Stage 2 are always answered by the same
+provider and model (recorded in ``request_metadata.json``); continuing an
+analysis with another model is refused.  A quota error stops the analysis
+(``QUOTA_EXHAUSTED`` at Stage 1, ``INCOMPLETE_QUOTA`` at Stage 2 with Stage 1
+saved); nothing switches to another model.
 """
 
 from __future__ import annotations
@@ -35,8 +42,9 @@ from .formal.grammar import GRAMMAR_VERSION
 from .formal.parser import ast_from_table
 from .formal.verifier import SEMANTICS, SemanticTrace
 from .guard import LeakGuardError, check_packet, check_request
+from .payload_audit import PayloadAuditError, PayloadAuditor
 from .prompts import DEFAULT_PROMPTS, render_explanation, render_formalization
-from .providers import ProviderError, ProviderUnavailable, make_provider
+from .providers import ModelNotAllowed, ProviderError, ProviderUnavailable, allowed_models, make_provider
 from .providers.base import Transport
 from .schemas import (STAGE1_SCHEMA_VERSION, STAGE2_SCHEMA_VERSION, known_ids, stage1_schema, stage2_schema,
                       validate_stage1, validate_stage2)
@@ -44,9 +52,9 @@ from .vocabulary import load_vocabulary
 
 STAGES = ("explanation", "formalize", "all")
 STAGE1_FILE, STAGE2_FILE = "stage1_explanation.json", "stage2_formula.json"
-DETERMINISM_NOTE = ("Model outputs are not guaranteed to be reproducible: temperature 0 and a fixed seed (where "
-                    "the provider accepts them) reduce variation but do not remove it; repeat runs are needed to "
-                    "measure it.")
+DETERMINISM_NOTE = ("Model outputs are not reproducible: the reasoning models are sampled with their default "
+                    "settings (no temperature or seed is pinned; reasoning effort / thinking level is recorded); "
+                    "repeat runs are needed to measure the variation.")
 
 
 def load_llm_config(path: Optional[Path] = None) -> Dict[str, Any]:
@@ -106,6 +114,7 @@ class AnalysisOptions:
     oracle_identities: bool = False
     analysis_dir: Optional[Path] = None
     verify: bool = True
+    audit_payload: bool = False
 
 
 @dataclass
@@ -139,6 +148,18 @@ def _base_dir(run_dir: Path, oracle: bool) -> Path:
     return Path(run_dir) / "reconstruction" / "llm" / "runs"
 
 
+def _continued_model(analysis_dir: Path, provider: str, model: Optional[str]) -> str:
+    """The model of an analysis being continued: one analysis, one provider and one model, always."""
+    metadata = _read_json(Path(analysis_dir) / "request_metadata.json")
+    if metadata.get("provider") != provider:
+        raise ModelNotAllowed("{0} was started with provider {1}; it cannot be continued with {2}".format(
+            analysis_dir, metadata.get("provider"), provider))
+    if model and model != metadata.get("model"):
+        raise ModelNotAllowed("one analysis uses one model: {0} was started with {1}; {2!r} is refused (start a new "
+                              "analysis for another model)".format(analysis_dir, metadata.get("model"), model))
+    return str(metadata.get("model"))
+
+
 def _latest_with_stage1(base: Path, prefix: str) -> Optional[Path]:
     candidates = sorted(path for path in base.glob(prefix + "_*") if (path / STAGE1_FILE).exists()
                         and not path.name.endswith("_dryrun"))
@@ -156,7 +177,10 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
     if not settings:
         raise ProviderUnavailable("provider {0!r} is not configured in configs/llm.yaml".format(options.provider))
     env_file = repo_root() / str(config.get("env_file", ".env"))
-    provider = make_provider(options.provider, settings, model=options.model, env_file=env_file, transport=transport)
+    model = options.model
+    if options.analysis_dir is not None and (Path(options.analysis_dir) / "request_metadata.json").exists():
+        model = _continued_model(Path(options.analysis_dir), options.provider, options.model)
+    provider = make_provider(options.provider, settings, model=model, env_file=env_file, transport=transport)
     prompts = dict(DEFAULT_PROMPTS, **(config.get("prompts") or {}))
 
     packet = _packet_for(run_dir, options.oracle_identities)
@@ -185,8 +209,14 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
                     {"_notice": NOTICE, "identities": oracle_identity_map(run_dir)})
 
     metadata_path = analysis_dir / "request_metadata.json"
+    if metadata_path.exists():
+        _continued_model(analysis_dir, provider.name, provider.model)  # one analysis, one model
     metadata = _read_json(metadata_path) if metadata_path.exists() else {
         "provider": provider.name, "model": provider.model, "api_key_env": provider.api_key_env,
+        "model_policy": {"locked": bool(settings.get("model_locked")), "allowed_models": allowed_models(settings),
+                         "fallback": "none: Stage 1 and Stage 2 use this model; an error or a quota stops the "
+                                     "analysis"},
+        "generation_settings": provider.generation_settings(),
         "prompt_versions": {"explanation": prompts["explanation"], "formalize": prompts["formalize"]},
         "facts_schema_version": FACTS_SCHEMA_VERSION, "packet_schema_version": PACKET_SCHEMA_VERSION,
         "response_schema_versions": {"explanation": STAGE1_SCHEMA_VERSION, "formalize": STAGE2_SCHEMA_VERSION},
@@ -201,9 +231,24 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
             metadata.get("forensic_packet_sha256"), digest))
     metadata["provider_available"] = provider.available
     result = AnalysisResult(analysis_dir=analysis_dir, status="OK")
+    auditor = PayloadAuditor(run_dir) if options.audit_payload else None
+    if auditor is not None and (analysis_dir / "payload_audit.json").exists():
+        # a continued analysis keeps the audit records of its earlier requests
+        auditor.records = list(_read_json(analysis_dir / "payload_audit.json").get("requests", []))
 
     def save_metadata() -> None:
         _write_json(metadata_path, metadata)
+
+    def audit_hook(stage: str, rendered) -> Optional[Callable[[str, Dict[str, Any]], None]]:
+        if auditor is None:
+            return None
+
+        def check(url: str, body: Dict[str, Any]) -> None:
+            try:
+                auditor.check(stage, url, body, rendered.packet_json, rendered.exempt_blocks)
+            finally:
+                _write_json(analysis_dir / "payload_audit.json", auditor.report())
+        return check
 
     def guarded(rendered) -> bool:
         try:
@@ -236,6 +281,17 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
                 stage2.system, stage2.user, stage2_schema(), "forensic_formalization")),
         }
         _write_json(analysis_dir / "request_preview.json", preview)
+        for stage, rendered in (("explanation", stage1), ("formalize", stage2)):
+            hook = audit_hook(stage, rendered)
+            if hook is not None:
+                try:
+                    hook(preview[stage]["request"]["url"], preview[stage]["request"]["body"])
+                except PayloadAuditError as error:
+                    result.status = "BLOCKED_BY_PAYLOAD_AUDIT"
+                    result.messages.append(str(error))
+                    metadata["status"] = result.status
+                    save_metadata()
+                    return result
         metadata["status"] = "DRY_RUN"
         save_metadata()
         result.status = "DRY_RUN"
@@ -243,14 +299,35 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
         return result
 
     def call(stage: str, rendered, schema: Dict[str, Any], schema_name: str) -> Optional[Dict[str, Any]]:
-        entry = {"started_at": _utc_iso(), "prompt": rendered.digest(), "schema_name": schema_name}
+        entry = {"started_at": _utc_iso(), "model": provider.model, "prompt": rendered.digest(),
+                 "schema_name": schema_name}
         metadata["stages"][stage] = entry
         try:
-            response = provider.generate(rendered.system, rendered.user, schema, schema_name)
+            response = provider.generate(rendered.system, rendered.user, schema, schema_name,
+                                         before_send=audit_hook(stage, rendered))
+        except PayloadAuditError as error:
+            entry.update(status="BLOCKED_BY_PAYLOAD_AUDIT", error=str(error))
+            result.status = "BLOCKED_BY_PAYLOAD_AUDIT"
+            result.messages.append(str(error) + " (nothing was sent)")
+            metadata["status"] = result.status
+            save_metadata()
+            return None
         except ProviderError as error:
-            entry.update(status="FAILED", error=str(error), http_status=error.status, attempts=error.attempts)
-            result.status = "FAILED"
-            result.messages.append(str(error))
+            entry.update(error=str(error), error_kind=error.kind, http_status=error.status, attempts=error.attempts)
+            if error.kind == "quota":
+                entry["status"] = "QUOTA_EXHAUSTED"
+                result.status = "INCOMPLETE_QUOTA" if stage == "formalize" else "QUOTA_EXHAUSTED"
+                result.messages.append(
+                    "{0} {1}: quota exhausted; no other model was tried.{2}".format(
+                        provider.name, provider.model,
+                        "  Stage 1 is saved; complete this analysis later with the same model: "
+                        "--provider {0} --model {1} --stage formalize --analysis-dir {2}".format(
+                            provider.name, provider.model, analysis_dir) if stage == "formalize" else ""))
+            else:
+                entry["status"] = "FAILED"
+                result.status = "FAILED"
+                result.messages.append(str(error))
+            metadata["status"] = result.status
             save_metadata()
             return None
         entry.update(status="ANSWERED" if response.parsed is not None else "UNPARSABLE", **response.to_dict())
@@ -273,7 +350,7 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
             "schema_version": STAGE1_SCHEMA_VERSION, "saved_at": _utc_iso(),
             "request": dict(rendered.digest(), system_prompt=rendered.system, user_prompt=rendered.user),
             "raw_response_text": response.text, "answer": response.parsed, "validation": validation,
-            "provider_response": response.to_dict()})
+            "provider_response": response.to_dict(), "raw_api_response": response.raw_response})
         metadata["stages"]["explanation"]["validation_status"] = validation["status"]
         save_metadata()
         echo("explanation: {0} ({1} issue(s))".format(validation["status"], len(validation["issues"])
@@ -304,7 +381,7 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
             "stage1_sha256": sha256_text(stage1_path.read_text(encoding="utf-8")),
             "request": dict(rendered.digest(), system_prompt=rendered.system, user_prompt=rendered.user),
             "raw_response_text": response.text, "answer": response.parsed, "validation": validation,
-            "provider_response": response.to_dict()})
+            "provider_response": response.to_dict(), "raw_api_response": response.raw_response})
         metadata["stages"]["formalize"]["validation_status"] = validation["status"]
         save_metadata()
         echo("formalize: {0} ({1} formula(s))".format(validation["status"], len(validation.get("formulas", []))))

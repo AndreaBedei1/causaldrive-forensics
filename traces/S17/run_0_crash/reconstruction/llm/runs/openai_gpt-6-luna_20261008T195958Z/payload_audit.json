@@ -1,0 +1,33 @@
+{
+  "note": "pre-send payload audit (privileged files were read only to search the outgoing bodies)",
+  "requests": [
+    {
+      "stage": "explanation",
+      "url": "https://api.openai.com/v1/responses",
+      "body_sha256": "d815530357ff9896061edb8f7c8400cac993d790bf5c636fdc2c951ee8227f6c",
+      "body_characters": 110735,
+      "embedded_packet_sha256": "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe",
+      "markers_checked": {
+        "semantic_node_ids": 85,
+        "unrecorded_participants": 1,
+        "scripted_actions": 1,
+        "static": 24
+      },
+      "result": "PASS"
+    },
+    {
+      "stage": "formalize",
+      "url": "https://api.openai.com/v1/responses",
+      "body_sha256": "2177f95cc26f785eb285ccef391aacde8966d0769737c215fe66074866502b75",
+      "body_characters": 124302,
+      "embedded_packet_sha256": "c0894ee5ea8c39f8df537f6eddbdb4bf219f820641ab7a6cebeb65ce12a2b0fe",
+      "markers_checked": {
+        "semantic_node_ids": 85,
+        "unrecorded_participants": 1,
+        "scripted_actions": 1,
+        "static": 24
+      },
+      "result": "PASS"
+    }
+  ]
+}

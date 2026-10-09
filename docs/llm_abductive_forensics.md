@@ -132,40 +132,74 @@ subject at any time), identity hallucination rate (an id not in the packet), mea
 the attributed actor (RECORDER, ANONYMOUS_TRACK, TRACK_IDENTIFIED_AS_RECORDER, NOT_IN_RECONSTRUCTION,
 UNKNOWN).  On S17 a correct answer attributes the cut-in to `A:track_001`, never to "C".
 
-## 7. Providers and reproducibility
+## 7. Providers, models and reproducibility
 
 - `cdf.llm.providers`: `BaseLLMProvider` with `OpenAIProvider` (Responses API, `text.format` strict JSON
   schema, `store: false`) and `GeminiProvider` (`generateContent`, `responseMimeType` +
-  `responseJsonSchema`, key in the `x-goog-api-key` header).  Models in `configs/llm.yaml` (`gpt-5.6-sol`,
-  `gemini-3.7-flash`), overridable with `--model`; urllib only, retries with back-off on 408/409/429/5xx.
+  `responseJsonSchema`, key in the `x-goog-api-key` header); urllib only.
+- Models (`configs/llm.yaml`):
+  - OpenAI is **locked** to `gpt-6-luna` with `reasoning.effort: high`; no temperature is sent;
+    `max_output_tokens` 32 000 (reasoning + answer; OpenAI advises reserving at least 25 000 for reasoning
+    models).  `--model` with another OpenAI model is refused and nothing ever falls back to another OpenAI
+    model (not after an error, an unavailable model, a rejected feature or a quota): the analysis stops and
+    reports.  Changing the OpenAI model is Andrea's decision, with his explicit approval, made in the
+    configuration (`model`, `model_locked`), never by the tool.
+  - Gemini: `gemini-3.8-flash` (primary, default) and `gemini-3.5-flash-lite` (second model: comparison on
+    the same packet, and new analyses once the 3.8 daily quota is used up), both with
+    `generationConfig.thinkingConfig.thinkingLevel: high`; no `temperature`, `topP`, `topK`,
+    `candidateCount`, `seed` or legacy `thinkingBudget` (Gemini 3 keeps its default sampling; the provider
+    refuses these settings); `maxOutputTokens` 32 000 (thinking + answer; both models allow 65 536).
+- One analysis = one model.  Stage 1 and Stage 2 always use the model recorded in `request_metadata.json`;
+  continuing an analysis with another model is refused.  A quota error stops the analysis:
+  `QUOTA_EXHAUSTED` at Stage 1, `INCOMPLETE_QUOTA` at Stage 2 with Stage 1 saved (complete it later with the
+  same model, `--stage formalize --analysis-dir <dir>`).  Errors are classified (quota, rate limit,
+  transient, network, time-out, fatal); retries repeat the identical request, only after transient or
+  rate-limit errors (OpenAI at most once, never after a client time-out; a Gemini per-minute limit waits the
+  delay the API asks for); no parameter is ever dropped or changed between attempts.
 - Keys: `OPENAI_API_KEY`, `GEMINI_API_KEY` from the environment or `.env` (ignored by git; `.env.example`
   tracked, empty).  Missing key = provider unavailable (exit code 3), no crash.  Keys are never printed,
-  saved or put in errors (redacted).
+  saved or put in errors (redacted, including echoed error bodies).  `scripts/check_llm_access.py` checks
+  them, and access to every configured model, from the model-metadata endpoints only (OpenAI
+  `GET /v1/models/<model>`, Gemini `models.get`): nothing is generated, only VALID / INVALID and YES / NO are
+  printed.
 - Per analysis (`reconstruction/llm/runs/<provider>_<model>_<UTC time>/`): `request_metadata.json` (provider,
-  model, prompt and schema versions, packet SHA-256, timestamps, parameters sent, token usage, latency,
-  attempts and errors), `stage1_explanation.json` and `stage2_formula.json` (prompts, raw answer, parsed
-  answer, validation), `verification.json`, `evaluation.json`; `request_preview.json` for a dry run.
-- Temperature 0 is sent (an OpenAI reasoning model that rejects it is called again without, and the analysis
-  says so); Gemini also gets a fixed seed; the Responses API has no seed.  Determinism is not claimed: repeat
-  runs are needed to measure variation (none yet).
+  exact model id, model policy, reasoning / thinking settings, prompt and schema versions, packet SHA-256,
+  timestamps, per stage: model, parameters sent, response id, model reported by the API, token usage with
+  reasoning / thinking tokens, latency, attempts and errors), `stage1_explanation.json` and
+  `stage2_formula.json` (prompts, raw answer text, parsed answer, validation, and the provider's raw response
+  body), `verification.json`, `evaluation.json`; `payload_audit.json` with `--audit-payload` (each request
+  body checked against the run's semantic graph node ids, privileged file and field names and unrecorded
+  participants before it is sent; the embedded packet's SHA-256); `request_preview.json` for a dry run.
+- Determinism is not claimed: reasoning models are sampled with their defaults; repeat runs are needed to
+  measure the variation.
 
 ## 8. Commands
 
 ```
+python scripts/check_llm_access.py
 python scripts/export_forensic_facts.py traces/S17/run_0_crash
-python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.8-flash
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.5-flash-lite
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai
-python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage explanation
-python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage formalize
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage formalize --analysis-dir <dir>
 python scripts/verify_llm_analysis.py traces/S17/run_0_crash/reconstruction/llm/runs/<analysis>
+python scripts/compare_llm_analyses.py traces/S17/run_0_crash <analysis> <analysis> ...
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --oracle-identities   # privileged
 ```
 
 ## 9. Caveats
 
-- No model has been called yet (no keys): providers, schemas and the pipeline are tested with mock transports
-  that reproduce the documented response formats; the configured model names are the ones requested and are
-  not verified against the providers' catalogues.
+- First real calls: 2026-10-08/09, S17 only: one analysis each with gpt-6-luna and gemini-3.5-flash-lite;
+  gemini-3.8-flash gave no answer (HTTP 503 overload, then the free-tier daily quota; the 8 attempts are
+  kept), so the 3.8 vs 3.5 Flash-Lite comparison is still to be run.  See
+  `traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.md`.  The automated tests never call
+  a provider: they use fake transports that reproduce the documented response formats.  One answer per
+  model measures nothing about the variation between runs.
+- Gemini free tier: `gemini-3.8-flash` allows 20 generateContent requests per day per project, and requests
+  that fail with HTTP 503 (model overloaded) count.  The transient retries (up to 3 requests per stage) can
+  therefore use up the day's quota during an overload without a single answer (2026-10-08: 20 x 503, then
+  429 `GenerateRequestsPerDayPerProjectPerModel-FreeTier`; reset at about 00:00 UTC).
 - The packet is large (S17: ~92 k characters, all facts at 10 Hz); no subsampling is applied.
 - Recorder frames are not related to each other (no map frame): the model cannot overlay positions of
   different recorders directly; relative geometry comes from each recorder's own tracks.
@@ -175,4 +209,8 @@ python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --or
   perceived-state frames refined by the event times; a hypothesis about an unobserved interval is UNKNOWN.
 - The evaluation's recall is against the complete reconstructed trace (including events no explanation would
   mention); it is a coverage figure, not an accuracy figure.
+- The vocabulary descriptions the model receives do not state the reconstruction's thresholds: a turn needs a
+  heading change of at least 15 degrees (a lane-change-like swerve is not a turn), `TRACK_APPEARED_FRONT`
+  means a first bearing within 5 degrees.  A model that calls S17's evasive swerve `TURN_LEFT_START`, or a
+  track ahead-right "front", gets FALSE / FP for a granularity mismatch, not for an invented manoeuvre.
 - Oracle mode is infrastructure only: no campaign has been run.

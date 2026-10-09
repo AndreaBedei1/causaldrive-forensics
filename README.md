@@ -704,12 +704,41 @@ deterministic verification on the reconstructed semantic trace.  Details,
 diagram and caveats: [docs/llm_abductive_forensics.md](docs/llm_abductive_forensics.md).
 
 ```text
+python scripts/check_llm_access.py
 python scripts/export_forensic_facts.py traces/S17/run_0_crash
-python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.8-flash
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --model gemini-3.5-flash-lite
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai
-python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage explanation
+python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
 python scripts/verify_llm_analysis.py traces/S17/run_0_crash/reconstruction/llm/runs/<analysis>
+python scripts/compare_llm_analyses.py traces/S17/run_0_crash <analysis> <analysis> ...
 ```
+
+Model policy (`configs/llm.yaml`):
+
+- **OpenAI is locked to `gpt-6-luna` with `reasoning.effort: high`** (Responses
+  API, no temperature).  `--model` with another OpenAI model is refused, and
+  nothing ever falls back to another OpenAI model: not after an error, not when
+  the model is unavailable to the key or rejects a feature, not on a quota.  The
+  analysis stops and reports.  Using another OpenAI model is Andrea's decision
+  and needs his explicit approval (a change of `model` / `model_locked` in the
+  configuration), never the tool's.
+- **Gemini**: `gemini-3.8-flash` (primary, default) and `gemini-3.5-flash-lite`
+  (second model, for comparison on the same packet and for new analyses once
+  the 3.8 daily quota is used up), both with `thinkingConfig.thinkingLevel:
+  high` and no `temperature` / `topP` / `topK` / `candidateCount` / `seed` /
+  `thinkingBudget` (Gemini 3 keeps its default sampling).
+- One analysis = one model for both stages.  A quota error stops it
+  (`QUOTA_EXHAUSTED`, or `INCOMPLETE_QUOTA` with Stage 1 saved, to be completed
+  later with the same model: `--stage formalize --analysis-dir <dir>`).
+  Retries repeat the identical request, only after transient or rate-limit
+  errors; an OpenAI client time-out is not retried.
+- `scripts/check_llm_access.py` checks the keys and the model access from the
+  model-metadata endpoints only (nothing generated) and prints only VALID /
+  INVALID and YES / NO.  `--audit-payload` checks every request body against
+  the run's semantic graphs and privileged files before it is sent.
+- Each call's raw API response, response id, token usage (incl. reasoning /
+  thinking tokens) and latency are saved with the answer; never a key.
 
 - The model sees only `reconstruction/llm/forensic_packet.json`: measured ego
   motion and controls, radar tracks through an allowlist (no conflict-model or

@@ -1,27 +1,58 @@
-# LLM forensic analysis (scripts/run_llm_analysis.py).  Models can be overridden with --model.
-# API keys are NOT here: OPENAI_API_KEY / GEMINI_API_KEY come from the environment or from
-# the repository's .env file (ignored by git; see .env.example).
+# LLM forensic analysis (scripts/run_llm_analysis.py) and key / model access check
+# (scripts/check_llm_access.py).  API keys are NOT here: OPENAI_API_KEY / GEMINI_API_KEY come from
+# the environment or from the repository's .env file (ignored by git; see .env.example).
+#
+# MODEL POLICY (experiments from 2026-10-08)
+# - OpenAI is LOCKED to gpt-6-luna with reasoning.effort high.  `--model <other>` is refused, and
+#   nothing ever falls back to another OpenAI model: not after an error, not when the model is not
+#   available to the key, not when a feature (structured output, reasoning effort) is rejected, not on
+#   a quota error.  The analysis stops and reports the exact problem.  Using another OpenAI model is a
+#   decision for Andrea and needs his explicit approval; it is made by editing this file (model,
+#   model_locked), never by the tool.
+# - Gemini: gemini-3.8-flash (primary, the default) and gemini-3.5-flash-lite (second model, for
+#   comparison on the same forensic packet and for new analyses once the 3.8 daily quota is used up),
+#   both with thinking level high.  Select one with --model; no other Gemini model is accepted.
+# - One analysis = one model: Stage 1 and Stage 2 always use the same model.  A quota error between
+#   them saves Stage 1 and stops (INCOMPLETE_QUOTA); the analysis can only be completed later with the
+#   same model (--stage formalize --analysis-dir <dir>).  No silent switch, no retry that changes the
+#   request: retries repeat the identical request, only after transient / rate-limit errors.
 llm:
   env_file: .env
   providers:
     openai:
-      model: gpt-5.6-sol
+      model: gpt-6-luna
+      model_locked: true          # refuse --model <other>; never fall back
       api_key_env: OPENAI_API_KEY
       endpoint: https://api.openai.com/v1/responses
-      temperature: 0.0          # sent; if the model rejects it the request is repeated without it
-      reasoning_effort: null    # e.g. medium for a reasoning model; null = not sent
+      models_endpoint: https://api.openai.com/v1/models   # access check: GET /v1/models/<model>, no generation
+      reasoning_effort: high
+      temperature: null           # not sent: a reasoning model keeps its default sampling
+      # Reasoning + answer.  OpenAI recommends reserving at least 25 000 tokens for reasoning and output
+      # on reasoning models; gpt-6-luna allows 128 000.  32 000 leaves room for high effort without a
+      # runaway: at the published 0.50 USD per 1M output tokens the cap costs at most 0.016 USD per call.
       max_output_tokens: 32000
-      timeout_s: 600
-      max_retries: 3
+      timeout_s: 900
+      max_retries: 1              # identical request, transient / rate-limit errors only
+      retry_on_timeout: false     # a client time-out may hide an answered (and billed) request
+      pricing_usd_per_1m_tokens:  # published list prices, for the cost of an analysis computed from usage
+        input: 0.10
+        cached_input: 0.01
+        output: 0.50              # reasoning tokens are billed as output tokens
+        source: https://developers.openai.com/api/docs/models/gpt-6-luna
+        as_of: "2026-10-08"
     gemini:
-      model: gemini-3.7-flash
+      primary_model: gemini-3.8-flash
+      secondary_model: gemini-3.5-flash-lite
       api_key_env: GEMINI_API_KEY
       endpoint: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
-      temperature: 0.0
-      seed: 20261007            # fixed seed: more repeatable, not guaranteed identical
-      max_output_tokens: 32000
-      timeout_s: 600
-      max_retries: 3
+      models_endpoint: https://generativelanguage.googleapis.com/v1beta/models   # access check: models.get
+      thinking_level: high        # generationConfig.thinkingConfig.thinkingLevel
+      # No temperature / top_p / top_k / candidate_count / seed / thinking_budget: Gemini 3 keeps its
+      # default sampling (Google strongly recommends temperature 1.0) and thinking_level replaces the
+      # legacy thinking budget.  The provider refuses these keys if they are added back.
+      max_output_tokens: 32000    # thinking + answer (Gemini counts thoughts in maxOutputTokens)
+      timeout_s: 900
+      max_retries: 2              # identical request; a per-minute rate limit waits the delay the API asks
   prompts:
     explanation: accident_abduction_v1
     formalize: formalize_hypothesis_v1

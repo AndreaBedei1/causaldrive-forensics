@@ -2,9 +2,13 @@
   "note": "dry run: nothing was sent; the API key header is redacted",
   "provider": {
     "provider": "gemini",
-    "model": "gemini-3.7-flash",
+    "model": "gemini-3.5-flash-lite",
     "api_key_env": "GEMINI_API_KEY",
-    "api_key_present": true
+    "api_key_present": true,
+    "generation_settings": {
+      "thinking_level": "high",
+      "max_output_tokens": 32000
+    }
   },
   "explanation": {
     "template": "accident_abduction_v1",
@@ -12,7 +16,7 @@
     "system_sha256": "4e39de8fc169c9d71fd771846e115db170a8657d0a8e2f95e781a85218f0dab4",
     "user_sha256": "3ea9921979b72d2e59836de13a8114c846e6d39e40df3216d9a4e6c54bd4c8f2",
     "request": {
-      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
       "headers": {
         "x-goog-api-key": "<redacted>",
         "Content-Type": "application/json"
@@ -315,8 +319,9 @@
               }
             }
           },
-          "temperature": 0.0,
-          "seed": 20261007,
+          "thinkingConfig": {
+            "thinkingLevel": "high"
+          },
           "maxOutputTokens": 32000
         }
       }
@@ -328,7 +333,7 @@
     "system_sha256": "7c4dd9ceae41c650c1d01594fea32420505b044929ec639429f0bfbea0aa396f",
     "user_sha256": "1d01bc52762e42efdae44a1c57198470cb9cc111f21c2152d3d646724dd98a2c",
     "request": {
-      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
       "headers": {
         "x-goog-api-key": "<redacted>",
         "Content-Type": "application/json"
@@ -513,8 +518,9 @@
               }
             }
           },
-          "temperature": 0.0,
-          "seed": 20261007,
+          "thinkingConfig": {
+            "thinkingLevel": "high"
+          },
           "maxOutputTokens": 32000
         }
       }
