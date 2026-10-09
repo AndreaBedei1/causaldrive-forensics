@@ -1,0 +1,358 @@
+{
+  "semantics": "formal consistency of the LLM hypothesis with the reconstructed semantic trace",
+  "meaning": {
+    "TRUE": "the reconstructed semantic trace satisfies the formula (consistency, not proof of causation)",
+    "FALSE": "the reconstructed semantic trace contradicts the formula",
+    "UNKNOWN": "the trace cannot decide: road user not tracked, state not established, identity not available, or outside the recorded interval",
+    "INVALID": "the formula is malformed or uses names outside the vocabulary"
+  },
+  "evaluated_at_t_global": 0.0,
+  "time_step_s": 0.05,
+  "trace_interval_t_global": [
+    -4.95,
+    6.0
+  ],
+  "inputs": {
+    "stage1_sha256": "5f8b5fe41db5d5447aec807caec76d09b50421cbb71bac6baf32ef1525cad093",
+    "stage2_sha256": "8b1047fb7e4b4067fbfbef83657a141b8a24ea0625b3062f8e23e0bd9ccbfdd7",
+    "stage1_saved_at": "2026-10-08T19:58:33Z",
+    "stage2_saved_at": "2026-10-08T19:58:55Z",
+    "semantic_trace_loaded_at": "2026-10-09T10:25:07Z",
+    "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8"
+  },
+  "results": [
+    {
+      "formula_id": "f_cc1",
+      "claim_ref": "causal_chain[1]",
+      "claim": "Vehicle A initiates a left steering input, deviating from its straight path.",
+      "formula_text": "F[-1.3,-1.2] event(TURN_LEFT_START,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_START, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_cc3",
+      "claim_ref": "causal_chain[3]",
+      "claim": "A physical collision occurs between Vehicle A and Vehicle B.",
+      "formula_text": "F[-0.1,0.1] event(COLLISION,A,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(COLLISION, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh0",
+      "claim_ref": "semantic_hypotheses[0]",
+      "claim": "Vehicle A starts moving at the beginning of the recording session.",
+      "formula_text": "F[-5.0,-4.9] event(MOVING_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_START, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh1",
+      "claim_ref": "semantic_hypotheses[1]",
+      "claim": "Vehicle B starts moving at the beginning of the recording session.",
+      "formula_text": "F[-5.0,-4.9] event(MOVING_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_START, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh2",
+      "claim_ref": "semantic_hypotheses[2]",
+      "claim": "Vehicle A starts pressing the accelerator pedal at the beginning of the recording session.",
+      "formula_text": "F[-5.0,-4.9] event(THROTTLE_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_START, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh3",
+      "claim_ref": "semantic_hypotheses[3]",
+      "claim": "Vehicle B starts pressing the accelerator pedal at the beginning of the recording session.",
+      "formula_text": "F[-5.0,-4.9] event(THROTTLE_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_START, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh4",
+      "claim_ref": "semantic_hypotheses[4]",
+      "claim": "Vehicle A starts turning left around t_global = -1.25s.",
+      "formula_text": "F[-1.3,-1.2] event(TURN_LEFT_START,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_START, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh5",
+      "claim_ref": "semantic_hypotheses[5]",
+      "claim": "A collision occurs between Vehicle A and Vehicle B at t_global = 0.0s.",
+      "formula_text": "F[-0.1,0.1] event(COLLISION,A,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(COLLISION, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh6",
+      "claim_ref": "semantic_hypotheses[6]",
+      "claim": "Vehicle A releases the accelerator pedal at t_global = 0.05s.",
+      "formula_text": "F[0.0,0.1] event(THROTTLE_END,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_END, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh7",
+      "claim_ref": "semantic_hypotheses[7]",
+      "claim": "Vehicle A applies the brake pedal at t_global = 0.05s.",
+      "formula_text": "F[0.0,0.1] event(BRAKE_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(BRAKE_START, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh8",
+      "claim_ref": "semantic_hypotheses[8]",
+      "claim": "Vehicle B releases the accelerator pedal at t_global = 0.05s.",
+      "formula_text": "F[0.0,0.1] event(THROTTLE_END,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_END, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "f_sh9",
+      "claim_ref": "semantic_hypotheses[9]",
+      "claim": "Vehicle B applies the brake pedal at t_global = 0.05s.",
+      "formula_text": "F[0.0,0.1] event(BRAKE_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(BRAKE_START, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "TRUE": 10,
+    "FALSE": 2,
+    "UNKNOWN": 0,
+    "INVALID": 0
+  },
+  "reverification": {
+    "note": "Re-verification on 2026-10-09 of the unchanged Stage-1 / Stage-2 answers against the semantic trace regenerated after the CRITICAL_TTC change (safe following distance, UNSAFE_FORWARD_GAP) and the CUT_IN pre-entry region / occlusion gate; the forensic packet is byte-identical (97cb278d); deterministic verifier only, no model call.",
+    "answers_unchanged": true,
+    "verified_at": "2026-10-09T10:25:07Z",
+    "previous_outputs_sha256": {
+      "verification.json": "183107ad069568694036635c640a85745ea4f65ac662ccd163aa59d0225afe87",
+      "evaluation.json": "73b0df30c066a25decbc1cd59eba9d7f61c1a0d49c581142b75b77a0409c72f8"
+    },
+    "semantic_trace_files_sha256": {
+      "global_graph.json": "d1d0b5d438a9fd25845c227cf9e84467591722ae67d050a1933812189f5705b2",
+      "global_trace.jsonl": "fe3614d8bff3212d9e4158b42c6891dd918c231055f90cea5e6795cb788b8a76"
+    }
+  }
+}

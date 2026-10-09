@@ -2,7 +2,8 @@
 """Compare LLM analyses of one run (same forensic packet) side by side; no model call.
 
     python scripts/compare_llm_analyses.py traces/S17/run_0_crash <analysis_dir> [<analysis_dir> ...]
-        [--unanswered <analysis_dir> ...] [--assessment assessment.md] [--out-name llm_comparison_S17]
+        [--unanswered <analysis_dir> ...] [--reverified <subdir>] [--assessment assessment.md]
+        [--out-name llm_comparison_S17]
 
 Writes reconstruction/evaluation/<out-name>.md and .json: this is a privileged evaluation artifact
 (it may set the answers against the ground truth of the run, e.g. who the anonymous tracks were), so
@@ -19,8 +20,10 @@ causal explanation:
 
 Costs are computed only where the provider returns the usage and configs/llm.yaml holds the published
 price (OpenAI); otherwise none is stated.  ``--unanswered`` lists analyses that ended without an answer
-(provider errors, quota) with every request's HTTP status.  ``--assessment`` appends an analyst's written
-assessment, clearly labelled as such.
+(provider errors, quota) with every request's HTTP status.  ``--reverified`` adds, next to each analysis's
+own scores, those of a re-verification of the same answers against a regenerated semantic trace
+(``<analysis>/<subdir>/``, written by scripts/verify_llm_analysis.py --out-dir).  ``--assessment`` appends
+an analyst's written assessment, clearly labelled as such.
 """
 
 from __future__ import annotations
@@ -127,6 +130,20 @@ def summarise(analysis_dir: Path, config: Dict[str, Any]) -> Dict[str, Any]:
                          "identity_hallucination_rate")},
         "usage": usage, "cost": _cost(metadata.get("provider"), usage, config),
     }
+
+
+def reverified(analysis_dir: Path, subdir: str) -> Optional[Dict[str, Any]]:
+    """Scores of a re-verification of the analysis's unchanged answers (None if there is none)."""
+    folder = Path(analysis_dir) / subdir
+    if not (folder / "verification.json").exists():
+        return None
+    verification, evaluation = _read(folder / "verification.json"), _read(folder / "evaluation.json")
+    return {"folder": subdir, "note": (verification.get("reverification") or {}).get("note"),
+            "verifier": verification.get("summary"), "semantic_hypotheses": {
+                key: (evaluation.get("semantic_hypotheses") or {}).get(key)
+                for key in ("hypotheses", "reference_events", "TP", "FP", "FN", "precision", "recall", "f1",
+                            "hallucination_rate", "identity_hallucination_rate")},
+            "attribution": evaluation.get("attribution")}
 
 
 def unanswered(analysis_dir: Path) -> Dict[str, Any]:
@@ -269,6 +286,20 @@ def render(run_dir: Path, items: List[Dict[str, Any]], assessment: Optional[str]
             lines += ["", "Untestable claims:", ""]
             for claim in item["stage2"]["untestable_claims"]:
                 lines.append("- {0}: {1} ({2})".format(claim.get("claim_ref"), claim.get("claim"), claim.get("reason")))
+    later = [i for i in items if i.get("reverified")]
+    if later:
+        lines += ["", "### Re-verification of the same answers against the regenerated semantic trace", "",
+                  later[0]["reverified"]["note"] or "", "", head]
+        for key in ("reference_events", "TP", "FP", "FN", "precision", "recall", "f1"):
+            lines.append(row(key + ": original -> re-verified", [
+                "{0} -> {1}".format(_fmt((i["semantic_hypotheses"] or {}).get(key)),
+                                    _fmt(((i.get("reverified") or {}).get("semantic_hypotheses") or {}).get(key)))
+                for i in items]))
+        for label_key in ("TRUE", "FALSE", "UNKNOWN", "INVALID"):
+            lines.append(row("verifier " + label_key + ": original -> re-verified", [
+                "{0} -> {1}".format((i["verifier"]["summary"] or {}).get(label_key),
+                                    ((i.get("reverified") or {}).get("verifier") or {}).get(label_key))
+                for i in items]))
     lines += ["", "## 4. Security", "", head]
     lines.append(row("leak guard", [i["security"]["leak_guard"] for i in items]))
     lines.append(row("pre-send payload audit", [", ".join(i["security"]["payload_audit"] or []) for i in items]))
@@ -301,11 +332,16 @@ def main() -> int:
     parser.add_argument("analysis_dirs", type=Path, nargs="+")
     parser.add_argument("--unanswered", type=Path, nargs="*", default=[],
                         help="analyses that ended without an answer (listed with their HTTP statuses)")
+    parser.add_argument("--reverified", default=None,
+                        help="subdirectory of each analysis holding a re-verification (verify_llm_analysis.py --out-dir)")
     parser.add_argument("--assessment", type=Path, default=None)
     parser.add_argument("--out-name", default="llm_comparison")
     args = parser.parse_args()
     config = load_llm_config()
     items = [summarise(path, config) for path in args.analysis_dirs]
+    if args.reverified:
+        for item, path in zip(items, args.analysis_dirs):
+            item["reverified"] = reverified(path, args.reverified)
     failed = [unanswered(path) for path in args.unanswered]
     digests = {item["forensic_packet_sha256"] for item in items + failed}
     if len(digests) != 1:

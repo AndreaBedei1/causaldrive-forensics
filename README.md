@@ -119,9 +119,11 @@ clearance when it starts) into B: A-B collision at 4.95 s (peak impulse 1577 N*s
 nobody (closest 0.59 m to A, 3.1 m to B) and speeds up to 16 m/s from 7.0 s.  Without C A
 never swerves and A and B never touch (closest 1.5 m); with C but the swerve disabled A runs
 into the back of C at 5.95 s and never touches B: `ground_truth/counterfactuals.json`,
-privileged.  In the reconstruction C is `A:track_001` (anonymous, CLOSING, CUT_IN_FROM_RIGHT,
-EGO_PATH_ENTRY and CRITICAL_TTC before the collision) and, separately, `B:track_002` and
-`B:track_003`; no entity C exists.  Research question: how does partial observability of a
+privileged.  In the reconstruction C is `A:track_001` (anonymous; CLOSING; CRITICAL_TTC from
+2.60 s for an unsafe forward gap, 3.3 m ahead of A where 16.8 m are needed; CUT_IN_FROM_RIGHT
+from 2.75 s; EGO_PATH_ENTRY at 3.35 s; all before the collision) and, separately, `B:track_002`
+and `B:track_003` (B, two lanes away and seeing C past A, observes no cut-in); no entity C
+exists.  Research question: how does partial observability of a
 causally relevant but non-colliding road user affect accident explanation and attribution?
 
 ## Stored streams
@@ -420,7 +422,12 @@ relative to the recorder, the closest point of approach `t_cpa_s`/`d_cpa_m`/
 assessment behind CRITICAL_TTC: `ego_speed_mps`, `encounter`,
 `collision_course`, `ttc_s` (first predicted overlap), `predicted_overlap_s`,
 `target_acceleration_used_mps2`, `required_deceleration_mps2`, `avoidance_by`,
-`braking_margin_mps2`, `unavoidable_by_braking`, `estimate_known`, `critical`).
+`braking_margin_mps2`, `unavoidable_by_braking`, `estimate_known`, `critical`,
+`critical_reason`, and the safe-following-distance check: `forward_region`,
+`forward_leader`, `longitudinal_clearance_m`, `lateral_body_gap_m`,
+`time_headway_s`, `minimum_time_gap_s`, `required_safe_distance_m`,
+`safe_distance_margin_m`, `line_of_sight_occluded`).  These conflict-model
+outputs never reach the forensic packet given to an LLM.
 The graph holds only semantic EVENTS, which are state transitions without
 telemetry:
 
@@ -433,9 +440,9 @@ telemetry:
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
 | TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radars' field: its bearing at the first detection within 5 deg of the recorder's heading (FRONT), else its side (negative = LEFT; a car closing in from behind appears on a side, out of the rear blind zone) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
-| CRITICAL_TTC_START / _END | on a 2-D collision course, avoiding the target by braking would need at least the available deceleration (below); ends below 75 % of it or when the course disappears |
+| CRITICAL_TTC_START / _END | either a 2-D collision course that braking can no longer avoid with the available deceleration (PREDICTED_OVERLAP), or a leader ahead closer than the safe following distance (UNSAFE_FORWARD_GAP), see below; ends once both reasons are clearly off (hysteresis) |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor beyond the recorder's front edge (not a lane change) |
-| CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, closes on the corridor from that side (see below); ends when the lateral motion settles |
+| CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, its body already within 1 m of the corridor, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
 | COLLISION | one per contact (see the segmentation rule above); keeps its peak impulse for alignment |
 
@@ -445,8 +452,19 @@ not invented; a state still active when observation ends has no END. A sign
 END means this recorder stopped detecting the sign, not that its obligation
 ended; `checks.sign_windows` lists the STOP_START events inside each window.
 
-CRITICAL_TTC (`src/cdf/reconstruction/conflict.py`) asks three questions of
-every track sample, from the recorder's own odometry and the track only:
+CRITICAL_TTC (`src/cdf/reconstruction/conflict.py`) is true for either of two
+reasons, recorded per TRACK_STATE fact as `critical_reason`:
+
+* PREDICTED_OVERLAP: a predicted 2-D collision course that braking can no longer
+  avoid (questions 1-3 below): crossing, oblique and converging conflicts, a
+  car from behind or from the side;
+* UNSAFE_FORWARD_GAP: a leader ahead closer than the safe following distance
+  (question 4), collision course or not: a car a few metres ahead at the
+  recorder's own speed is never on a collision course, but if it braked the
+  recorder would have no room to perceive, react and stop.
+
+For PREDICTED_OVERLAP it asks three questions of every track sample, from the
+recorder's own odometry and the track only:
 
 1. Is there a real geometric threat?  The next `prediction_horizon_s` = 6 s are
    predicted every 0.05 s in the recorder's frame.  The recorder: its footprint
@@ -472,31 +490,67 @@ every track sample, from the recorder's own odometry and the track only:
    instant stop of the recorder cannot avoid the overlap (a car closing in from
    behind).  CRITICAL when a_req >= `critical_deceleration_mps2` = 6 m/s^2.
 
+4. Is the gap to a leader too short?  The clearance runs from the recorder's
+   front face to the rear face of the target's nominal box along the recorder's
+   heading (never the radar range, which is short for a car beside the
+   recorder).  The required distance is the larger of the time-gap distance
+   v x t_front(v), t_front from the UN R157 table (7.2 km/h 1.0 s, 10 km/h 1.1 s,
+   20 km/h 1.2 s, 30 km/h 1.3 s, 40 km/h 1.4 s, 50 km/h 1.5 s, 60 km/h 1.6 s,
+   linear in between, the ends held: no extrapolation above 60 km/h), at least
+   2 m, and the braking distance v x 1 s + v^2 / (2 x 6) - v_lead^2 / (2 x 6)
+   + 1 m (at least 1 m), where the lead's braking at
+   `critical_lead_deceleration_mps2` = 6 m/s^2 is hypothetical: its measured
+   acceleration is not used, the question is whether the present gap would
+   suffice if it braked.  A leader moves in the same direction (within 30 deg),
+   its body is ahead of the front face and either overlaps the corridor
+   (+-`path_half_width_m` = 1.5 m) or lies within
+   `critical_front_lateral_margin_m` = 1.0 m of it while approaching it
+   laterally (`critical_front_lateral_speed_mps` = 0.3 m/s beyond the velocity
+   uncertainty), and the recorder itself moves (at least 1 m/s).  Without a
+   predicted overlap no TTC is invented (`ttc_s` stays null).
+
 ```text
-CRITICAL_TTC_START  <=>  collision course within 6 s  and  a_req >= 6 m/s^2
-CRITICAL_TTC_END    <=>  a_req < 0.75 x 6 m/s^2, or no collision course
+CRITICAL_TTC_START  <=>  (collision course within 6 s and a_req >= 6 m/s^2)
+                         or (leader and clearance < required distance)
+CRITICAL_TTC_END    <=>  (a_req < 0.75 x 6 m/s^2 or no collision course)
+                         and (no leader or clearance > 1.10 x required distance)
 ```
 
 No claim either way (UNKNOWN) while the track's estimate is not known: position
 or velocity std above 1 m / 1 m/s, or the track younger than
 `critical_min_track_age_s` = 0.5 s (the smoother's uncertainty at a track's first
-samples already draws on later data).  For a target ahead in the same lane this
-is the stopping-distance check of a following driver: reaction distance
-v x 1 s, braking distance v^2 / (2 x 6 m/s^2) and 1 m to spare, against a lead
-car that keeps its speed or its measured deceleration (at 14 m/s behind a
-stopped car: critical within 33.7 m of the vehicle origin).  That is the idea of
-the safety distance of art. 149 of the Italian Highway Code (room to stop if the
-vehicle ahead brakes), used as a concept only: the code prescribes no numbers
-and none is invented.  The reaction time (driver brake reactions of roughly
-0.7-1.5 s are reported) and the deceleration (hard, non-emergency; emergency
-braking reaches 8-10 m/s^2) are modelling assumptions in
-`configs/reconstruction.yaml`.  Euro NCAP AEB test protocols and UNECE R152
-(TTC-based test points, deceleration levels) are validation references only,
-not legal thresholds.  Limits: constant velocity and yaw rate (no intent, no
-lane geometry: a target turning in a roundabout is predicted straight), a
-nominal target size, braking as the only avoidance manoeuvre, one track at a
-time.  `closing_ttc_s = clearance / closing speed` (line of sight) remains a
-fact in TRACK_STATE.
+samples already draws on later data).  For a target ahead in the same lane
+question 3 is the stopping-capability check against a lead car that keeps its
+speed or its measured deceleration (at 14 m/s behind a stopped car: critical
+within 33.7 m of the vehicle origin); question 4 adds the room needed if the
+lead braked.  Cars behind, beside the recorder, two lanes away, or keeping
+their own lane next to the corridor are never critical for the gap alone
+(they still are on a 2-D collision course); a car next to the corridor counts
+only while it moves toward it, because in 3.5 m lanes a car keeping the next
+lane sits only about 1 m outside the 3 m corridor and the nominal box placed
+from a radar track misses its real side by up to ~0.7 m.  A track seen past
+another tracked vehicle (its line of sight crosses that vehicle's box, grown by
+`occlusion_margin_m` = 0.5 m) gives no UNSAFE_FORWARD_GAP (and no CUT_IN)
+evidence either way.
+
+References, as engineering anchors only.  Art. 149 of the Italian Highway Code
+(keep a distance from the vehicle ahead that allows stopping in time and avoids
+collisions) and Directive 2006/126/EC (adequate distance to the vehicles in
+front and at the side; a speed that allows stopping within the visible free
+road) prescribe no numbers.  UN Regulation No. 157 (ALKS) gives minimum
+following time gaps for automated lane keeping systems of categories M1 / N1
+and names the temporary disruption of the following distance by a cutting-in
+vehicle; it is a technical reference for ALKS, not a universal law of human
+TTC.  UN Regulation No. 152 (AEBS) asks for a braking demand of at least
+5.0 m/s^2 when an imminent car-to-car collision is detected.  There is no single
+European critical-TTC threshold for human driving: the 1 s reaction time and
+the 6 m/s^2 decelerations are modelling assumptions of this reconstruction
+(`configs/reconstruction.yaml`), not values prescribed by EU or UNECE rules.
+Limits: constant velocity and yaw rate (no intent, no lane geometry: a target
+turning in a roundabout is predicted straight), a nominal target size, braking
+as the only avoidance manoeuvre, one track at a time for the prediction.
+`closing_ttc_s = clearance / closing speed` (line of sight) remains a fact in
+TRACK_STATE.
 
 TURN_LEFT / TURN_RIGHT describe the motion the recorder really performed, from
 its own odometry (`ego.jsonl`): the unwrapped heading, its rate over the
@@ -534,12 +588,17 @@ of approach of the relative motion stays a quantitative fact (`t_CPA =
 from it. A CUT_IN needs a car ahead moving roughly in the recorder's
 direction (so crossing traffic is never a cut-in) that approaches the corridor
 laterally at 0.3 m/s or more for 0.5 s, starting at least 0.5 m outside it,
-having closed 0.5 m, and due to reach it within 3 s. The side is the
+having closed 0.5 m, due to reach it within 3 s, and whose nominal body is
+already within `cut_in_preentry_margin_m` = 1.0 m of the corridor (pre-entry):
+a car still crossing a lane further away is not cutting in yet (it may be
+heading for the lane next to the recorder's), and a car seen past another
+tracked vehicle gives no evidence either way. The side is the
 recorder's own view (negative lateral = left). It ENDS when the lateral
 approach stays below 0.2 m/s for 0.3 s; a COLLISION does not end it, and a lost
 track leaves it UNKNOWN. Thresholds are global (`configs/reconstruction.yaml`),
-never per scenario. Limitation: the corridor is straight ahead, so on a curved
-road an adjacent-lane car could look like a cut-in. A track estimate with
+never per scenario. Limitations: the corridor is straight ahead, so on a curved
+road an adjacent-lane car could look like a cut-in; the lateral motion is
+relative, so a recorder changing lanes toward a car sees that car cut in. A track estimate with
 position std above 1 m or velocity std above 1 m/s supports no cut-in claim.
 
 Every event node carries `perceived_state_before`: the recorder's own semantic

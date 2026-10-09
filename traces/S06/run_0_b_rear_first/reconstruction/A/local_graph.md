@@ -16,7 +16,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e02 | 0.00 | THROTTLE_START | A | - | controls | active_at_first_observation=True |
 | A:e03 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 | radar |  |
 | A:e04 | 4.60 | CLOSING_START | A | track_001 | radar |  |
-| A:e05 | 4.70 | CRITICAL_TTC_START | A | track_001 | radar |  |
+| A:e05 | 4.65 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e06 | 6.15 | THROTTLE_END | A | - | controls |  |
 | A:e07 | 6.15 | BRAKE_START | A | - | controls |  |
 | A:e08 | 6.25 | COLLISION | A | - | collision_sensor | peak_impulse=31706.27 |
@@ -62,7 +62,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_FRONT track_001 | ego: not yet observed | - |
 | 4.60 | A:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH | 4.50 |
-| 4.70 | A:e05 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH | 4.60 |
+| 4.65 | A:e05 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH | 4.60 |
 | 6.15 | A:e06 THROTTLE_END<br>A:e07 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 6.10 |
 | 6.25 | A:e08 COLLISION<br>A:e09 CRITICAL_TTC_END track_001<br>A:e10 CLOSING_END track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 6.20 |
 | 6.35 | A:e11 MOVING_END<br>A:e12 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH | 6.30 |
@@ -80,7 +80,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 4.70, COLLISION 6.25 (+1.55 s)
+- track_001: CRITICAL_TTC_START 4.65, COLLISION 6.25 (+1.60 s)
 
 ## Sign detection windows
 
@@ -102,7 +102,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: A pressed the accelerator (already the case when first observed).
 - t = 0.00 s: A's radar started tracking track_001, which appeared in front of it.
 - t = 4.60 s: A observed track_001 start closing in.
-- t = 4.70 s: A's time-to-contact with track_001 became critical.
+- t = 4.65 s: A's time-to-contact with track_001 became critical.
 - t = 6.15 s: A released the accelerator.
 - t = 6.15 s: A started braking.
 - t = 6.25 s: A's collision sensor recorded a contact (peak impulse 31706 N*s).

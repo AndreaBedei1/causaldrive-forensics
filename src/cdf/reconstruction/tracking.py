@@ -727,6 +727,9 @@ class TrackSample:
     acceleration_mps2: float = 0.0  # the target's own acceleration along its velocity (smoothed)
     relative_vx_mps: float = 0.0  # target minus recorder velocity, along the recorder's heading
     relative_vy_mps: float = 0.0  # ... and to its right (non-rotating)
+    # Seen past another track of the same recorder (set by the local reconstruction,
+    # conflict.occluded_by): its returns may be hidden by or mixed with that vehicle's.
+    occluded: bool = False
 
     def __post_init__(self) -> None:
         if self.clearance_m is None:

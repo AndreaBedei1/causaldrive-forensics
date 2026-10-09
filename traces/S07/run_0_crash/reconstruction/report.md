@@ -42,11 +42,11 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
 ### Event sequence (global time)
 
 - `-5.90` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,B:track_001)
+- `-5.40` CRITICAL_TTC_START(A,B)
 - `-2.70` CLOSING_START(B,B:track_001)
 - `-2.50` CRITICAL_TTC_START(B,B:track_001)
 - `-2.25` THROTTLE_END(B); BRAKE_START(B)
 - `-2.05` CLOSING_START(A,B)
-- `-1.90` CRITICAL_TTC_START(A,B)
 - `-1.55` CRITICAL_TTC_END(B,B:track_001)
 - `-1.05` CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)
 - `-0.65` THROTTLE_END(A); BRAKE_START(A)
@@ -61,12 +61,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
 - 5.90 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 5.90 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 5.90 s before the reference collision, B's radar started tracking unidentified object B:track_001, which appeared in front of it.
+- 5.40 s before the reference collision, A's time-to-contact with B became critical.
 - 2.70 s before the reference collision, B observed unidentified object B:track_001 start closing in.
 - 2.50 s before the reference collision, B's time-to-contact with unidentified object B:track_001 became critical.
 - 2.25 s before the reference collision, B released the accelerator.
 - 2.25 s before the reference collision, B started braking.
 - 2.05 s before the reference collision, A observed B start closing in.
-- 1.90 s before the reference collision, A's time-to-contact with B became critical.
 - 1.55 s before the reference collision, B's time-to-contact with unidentified object B:track_001 stopped being critical.
 - 1.05 s before the reference collision, B observed unidentified object B:track_001 stop closing in.
 - 1.05 s before the reference collision, B stopped moving.
@@ -89,7 +89,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 4.00, COLLISION with B 5.90 (+1.90 s) [local times; t_global: critical_ttc_start -1.90, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 0.50, COLLISION with B 5.90 (+5.40 s) [local times; t_global: critical_ttc_start -5.40, collision +0.00]
 - B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 3.40, COLLISION 5.90 (+2.50 s) [local times; t_global: critical_ttc_start -2.50, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
@@ -198,6 +198,43 @@ C:
     "target_width_m": 1.9,
     "target_braking_min_mps2": 1.0,
     "critical_min_track_age_s": 0.5,
+    "critical_time_gap_table": [
+      [
+        7.2,
+        1.0
+      ],
+      [
+        10.0,
+        1.1
+      ],
+      [
+        20.0,
+        1.2
+      ],
+      [
+        30.0,
+        1.3
+      ],
+      [
+        40.0,
+        1.4
+      ],
+      [
+        50.0,
+        1.5
+      ],
+      [
+        60.0,
+        1.6
+      ]
+    ],
+    "critical_min_following_distance_m": 2.0,
+    "critical_lead_deceleration_mps2": 6.0,
+    "critical_forward_min_speed_mps": 1.0,
+    "critical_front_lateral_margin_m": 1.0,
+    "critical_front_lateral_speed_mps": 0.3,
+    "critical_forward_release_factor": 1.1,
+    "occlusion_margin_m": 0.5,
     "turn_yaw_rate_window_s": 0.2,
     "turn_yaw_rate_on_dps": 10.0,
     "turn_yaw_rate_off_dps": 5.0,
@@ -216,6 +253,7 @@ C:
     "cut_in_outside_margin_m": 0.5,
     "cut_in_min_displacement_m": 0.5,
     "cut_in_horizon_s": 3.0,
+    "cut_in_preentry_margin_m": 1.0,
     "cut_in_settle_speed_mps": 0.2,
     "cut_in_settle_s": 0.3
   },

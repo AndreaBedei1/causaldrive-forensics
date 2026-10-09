@@ -8,7 +8,7 @@ digraph "local_A" {
   "A:e04" [label="CLOSING_START\nA -> track_001\nt=0.15", fillcolor="#bfdbfe"];
   "A:e05" [label="THROTTLE_END\nA\nt=2.45", fillcolor="#fde68a"];
   "A:e06" [label="BRAKE_START\nA\nt=2.45", fillcolor="#fde68a"];
-  "A:e07" [label="CRITICAL_TTC_START\nA -> track_001\nt=2.65", fillcolor="#bfdbfe"];
+  "A:e07" [label="CRITICAL_TTC_START\nA -> track_001\nt=2.60", fillcolor="#bfdbfe"];
   "A:e08" [label="CUT_IN_FROM_LEFT_START\nA -> track_001\nt=2.95", fillcolor="#bfdbfe"];
   "A:e09" [label="BRAKE_END\nA\nt=3.25", fillcolor="#fde68a"];
   "A:e10" [label="THROTTLE_START\nA\nt=3.35", fillcolor="#fde68a"];

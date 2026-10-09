@@ -394,8 +394,15 @@ def run_analysis(run_dir: Path, options: AnalysisOptions, config: Optional[Dict[
     return result
 
 
-def verify_analysis(analysis_dir: Path, config: Optional[Dict[str, Any]] = None):
-    """Deterministic, no model call: load the semantic trace (only now) and check the saved answers."""
+def verify_analysis(analysis_dir: Path, config: Optional[Dict[str, Any]] = None, out_dir: Optional[Path] = None,
+                    note: Optional[str] = None):
+    """Deterministic, no model call: load the semantic trace (only now) and check the saved answers.
+
+    By default verification.json and evaluation.json are (re)written in the analysis directory.  With
+    ``out_dir`` they go there instead and the analysis directory is left untouched (a re-verification
+    of unchanged answers against a regenerated semantic trace); ``note`` says why, and the digests of
+    the trace files used are recorded.
+    """
     analysis_dir = Path(analysis_dir)
     config = config or load_llm_config()
     stage1_path, stage2_path = analysis_dir / STAGE1_FILE, analysis_dir / STAGE2_FILE
@@ -447,7 +454,19 @@ def verify_analysis(analysis_dir: Path, config: Optional[Dict[str, Any]] = None)
                    "semantic_trace_loaded_at": trace_loaded_at,
                    "forensic_packet_sha256": metadata.get("forensic_packet_sha256")},
         "results": rows, "summary": summary}
-    _write_json(analysis_dir / "verification.json", verification)
+    target = analysis_dir if out_dir is None else Path(out_dir)
+    target.mkdir(parents=True, exist_ok=True)
+    if out_dir is not None:
+        global_dir = run_dir / "reconstruction" / "global"
+        previous = {name: sha256_text((analysis_dir / name).read_text(encoding="utf-8"))
+                    for name in ("verification.json", "evaluation.json") if (analysis_dir / name).exists()}
+        verification["reverification"] = {
+            "note": note or "re-verification of the saved answers against the current semantic trace; no model call",
+            "answers_unchanged": True, "verified_at": _utc_iso(), "previous_outputs_sha256": previous,
+            "semantic_trace_files_sha256": {name: sha256_text((global_dir / name).read_text(encoding="utf-8"))
+                                            for name in ("global_graph.json", "global_trace.jsonl")
+                                            if (global_dir / name).exists()}}
+    _write_json(target / "verification.json", verification)
 
     identity_map = None
     if metadata.get("oracle_identities"):
@@ -467,7 +486,9 @@ def verify_analysis(analysis_dir: Path, config: Optional[Dict[str, Any]] = None)
             answer, trace, known_ids(packet), ScoringConfig.from_mapping(config.get("evaluation")),
             identity_map=identity_map) if answer else None,
         "formulas": summary}
-    _write_json(analysis_dir / "evaluation.json", evaluation)
+    if out_dir is not None:
+        evaluation["reverification"] = verification["reverification"]
+    _write_json(target / "evaluation.json", evaluation)
     return verification, evaluation
 
 

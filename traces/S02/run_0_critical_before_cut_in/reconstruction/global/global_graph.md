@@ -45,7 +45,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 | g08 | -1.90 | CLOSING_START | B | A | B:e04 @ 2.20 | active_at_first_observation=True |
 | g09 | -1.65 | THROTTLE_END | A | - | A:e05 @ 2.45 |  |
 | g10 | -1.65 | BRAKE_START | A | - | A:e06 @ 2.45 |  |
-| g11 | -1.45 | CRITICAL_TTC_START | A | B | A:e07 @ 2.65 |  |
+| g11 | -1.50 | CRITICAL_TTC_START | A | B | A:e07 @ 2.60 |  |
 | g12 | -1.40 | CRITICAL_TTC_START | B | A | B:e05 @ 2.70 |  |
 | g13 | -1.15 | CUT_IN_FROM_LEFT_START | A | B | A:e08 @ 2.95 |  |
 | g14 | -0.85 | BRAKE_END | A | - | A:e09 @ 3.25 |  |
@@ -164,7 +164,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -3.95 | TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B) |
 | -1.90 | TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A) |
 | -1.65 | THROTTLE_END(A); BRAKE_START(A) |
-| -1.45 | CRITICAL_TTC_START(A,B) |
+| -1.50 | CRITICAL_TTC_START(A,B) |
 | -1.40 | CRITICAL_TTC_START(B,A) |
 | -1.15 | CUT_IN_FROM_LEFT_START(A,B) |
 | -0.85 | BRAKE_END(A) |
@@ -179,7 +179,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.65 <= CUT_IN_FROM_LEFT_START 2.95 (+0.30 s); EGO_PATH_ENTRY 3.65 after critical TTC (+1.00 s) [local times; t_global: cut_in -1.15, critical_ttc_start -1.45, ego_path_entry -0.45, collision +0.00]
+- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.60 <= CUT_IN_FROM_LEFT_START 2.95 (+0.35 s); EGO_PATH_ENTRY 3.65 after critical TTC (+1.05 s) [local times; t_global: cut_in -1.15, critical_ttc_start -1.50, ego_path_entry -0.45, collision +0.00]
 - B's track_001 (A): CRITICAL_TTC_START 2.70, COLLISION with A 4.10 (+1.40 s) [local times; t_global: critical_ttc_start -1.40, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
@@ -193,7 +193,7 @@ Each recorder's own belief just before its events, in its own local names (track
 | -3.95 | A | g05 TRACK_APPEARED_LEFT(A,B) (A:e03)<br>g06 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE |
 | -1.90 | B | g07 TRACK_APPEARED_RIGHT(B,A) (B:e03)<br>g08 CLOSING_START(B,A) (B:e04) | ego: MOVING, THROTTLE |
 | -1.65 | A | g09 THROTTLE_END(A) (A:e05)<br>g10 BRAKE_START(A) (A:e06) | ego: MOVING, THROTTLE<br>track_001: CLOSING |
-| -1.45 | A | g11 CRITICAL_TTC_START(A,B) (A:e07) | ego: MOVING, BRAKE<br>track_001: CLOSING |
+| -1.50 | A | g11 CRITICAL_TTC_START(A,B) (A:e07) | ego: MOVING, BRAKE<br>track_001: CLOSING |
 | -1.40 | B | g12 CRITICAL_TTC_START(B,A) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC? |
 | -1.15 | A | g13 CUT_IN_FROM_LEFT_START(A,B) (A:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC |
 | -0.85 | A | g14 BRAKE_END(A) (A:e09) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_LEFT |
@@ -219,7 +219,7 @@ Each recorder's own belief just before its events, in its own local names (track
 - 1.90 s before the reference collision, B observed A start closing in (already the case when first observed).
 - 1.65 s before the reference collision, A released the accelerator.
 - 1.65 s before the reference collision, A started braking.
-- 1.45 s before the reference collision, A's time-to-contact with B became critical.
+- 1.50 s before the reference collision, A's time-to-contact with B became critical.
 - 1.40 s before the reference collision, B's time-to-contact with A became critical.
 - 1.15 s before the reference collision, A observed B cutting in from the left.
 - 0.85 s before the reference collision, A released the brake.

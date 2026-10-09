@@ -1,0 +1,1031 @@
+{
+  "semantics": "formal consistency of the LLM hypothesis with the reconstructed semantic trace",
+  "meaning": {
+    "TRUE": "the reconstructed semantic trace satisfies the formula (consistency, not proof of causation)",
+    "FALSE": "the reconstructed semantic trace contradicts the formula",
+    "UNKNOWN": "the trace cannot decide: road user not tracked, state not established, identity not available, or outside the recorded interval",
+    "INVALID": "the formula is malformed or uses names outside the vocabulary"
+  },
+  "evaluated_at_t_global": 0.0,
+  "time_step_s": 0.05,
+  "trace_interval_t_global": [
+    -4.95,
+    6.0
+  ],
+  "inputs": {
+    "stage1_sha256": "9fed3f16d466773cc47e96c50144f50c8d63b226437d3a1e2475af35b8f594a8",
+    "stage2_sha256": "186b05b4dd3f9fe8f8332869ad096c2d0690ead6a87cb8834363aa77957fe2be",
+    "stage1_saved_at": "2026-10-08T20:02:42Z",
+    "stage2_saved_at": "2026-10-08T20:04:14Z",
+    "semantic_trace_loaded_at": "2026-10-09T10:25:08Z",
+    "forensic_packet_sha256": "97cb278d7eab664e9090521a7a982d996284d7ae83c4a3d643cfb7a27c9701f8"
+  },
+  "results": [
+    {
+      "formula_id": "cf0",
+      "claim_ref": "causal_chain[0]",
+      "claim": "At t = -4.95 s, A and B were moving; A reported B appearing on its left, and B reported A appearing on its right.",
+      "formula_text": "F[-4.95,-4.95] (event(MOVING_START,A) AND event(MOVING_START,B) AND event(TRACK_APPEARED_LEFT,A,B) AND event(TRACK_APPEARED_RIGHT,B,A))",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_START, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(MOVING_START, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(TRACK_APPEARED_LEFT, A, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(TRACK_APPEARED_RIGHT, B, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "cf1",
+      "claim_ref": "causal_chain[1]",
+      "claim": "A reported starting a left turn in the interval from -1.25 s to -1.15 s.",
+      "formula_text": "F[-1.25,-1.15] event(TURN_LEFT_START,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_START, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "cf2",
+      "claim_ref": "causal_chain[2]",
+      "claim": "A's left-turn start occurred before the recorded A–B collision.",
+      "formula_text": "BEFORE(event(TURN_LEFT_START,A),event(COLLISION,A,B))",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_START, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(COLLISION, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "cf3",
+      "claim_ref": "causal_chain[3]",
+      "claim": "Both recorders reported the collision at t = 0; neither brake state was active at -0.05 s, and each reported a brake start within the bracket from -0.05 s to +0.05 s.",
+      "formula_text": "F[0,0] event(COLLISION,A,B) AND F[0,0] event(COLLISION,B,A) AND F[-0.05,-0.05] (NOT state(BRAKE,A)) AND F[-0.05,-0.05] (NOT state(BRAKE,B)) AND F[-0.05,0.05] event(BRAKE_START,A) AND F[-0.05,0.05] event(BRAKE_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(COLLISION, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(COLLISION, B, A)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "state(BRAKE, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              6.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 120,
+            "FALSE": 100,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "state(BRAKE, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              6.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 120,
+            "FALSE": 100,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(BRAKE_START, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(BRAKE_START, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "cf4",
+      "claim_ref": "causal_chain[4]",
+      "claim": "B reported moving-end and stop-start events within 0.95–1.05 s after the collision; A reported those events within 1.05–1.15 s.",
+      "formula_text": "F[0.95,1.05] (event(MOVING_END,B) AND event(STOP_START,B)) AND F[1.05,1.15] (event(MOVING_END,A) AND event(STOP_START,A))",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_END, B)",
+          "true_at_t_global": [
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(STOP_START, B)",
+          "true_at_t_global": [
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(MOVING_END, A)",
+          "true_at_t_global": [
+            [
+              1.1,
+              1.1
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        },
+        {
+          "atom": "event(STOP_START, A)",
+          "true_at_t_global": [
+            [
+              1.1,
+              1.1
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh0",
+      "claim_ref": "semantic_hypotheses[0]",
+      "claim": "A reported MOVING_START at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(MOVING_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_START, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh1",
+      "claim_ref": "semantic_hypotheses[1]",
+      "claim": "B reported MOVING_START at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(MOVING_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_START, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh2",
+      "claim_ref": "semantic_hypotheses[2]",
+      "claim": "A reported A:track_001 appearing in front at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_FRONT,A,A:track_001)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TRACK_APPEARED_FRONT, A, A:track_001)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh3",
+      "claim_ref": "semantic_hypotheses[3]",
+      "claim": "A reported B appearing on its left at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_LEFT,A,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TRACK_APPEARED_LEFT, A, B)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh4",
+      "claim_ref": "semantic_hypotheses[4]",
+      "claim": "B reported A appearing on its right at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_RIGHT,B,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TRACK_APPEARED_RIGHT, B, A)",
+          "true_at_t_global": [
+            [
+              -4.95,
+              -4.95
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh5",
+      "claim_ref": "semantic_hypotheses[5]",
+      "claim": "B reported B:track_002 appearing in front at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(TRACK_APPEARED_FRONT,B,B:track_002)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TRACK_APPEARED_FRONT, B, B:track_002)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh6",
+      "claim_ref": "semantic_hypotheses[6]",
+      "claim": "A reported CLOSING_START for B at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(CLOSING_START,A,B)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CLOSING_START, A, B)",
+          "true_at_t_global": [
+            [
+              -0.75,
+              -0.75
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh7",
+      "claim_ref": "semantic_hypotheses[7]",
+      "claim": "B reported CLOSING_START for A at t = -4.95 s.",
+      "formula_text": "F[-4.95,-4.95] event(CLOSING_START,B,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CLOSING_START, B, A)",
+          "true_at_t_global": [
+            [
+              -0.7,
+              -0.7
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh8",
+      "claim_ref": "semantic_hypotheses[8]",
+      "claim": "A reported TURN_LEFT_START between -1.25 s and -1.15 s.",
+      "formula_text": "F[-1.25,-1.15] event(TURN_LEFT_START,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_START, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh9",
+      "claim_ref": "semantic_hypotheses[9]",
+      "claim": "A reported TURN_LEFT_END between -0.35 s and -0.25 s.",
+      "formula_text": "F[-0.35,-0.25] event(TURN_LEFT_END,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(TURN_LEFT_END, A)",
+          "true_at_t_global": [],
+          "samples": {
+            "TRUE": 0,
+            "FALSE": 220,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh10",
+      "claim_ref": "semantic_hypotheses[10]",
+      "claim": "A reported CRITICAL_TTC_START for B between -0.25 s and -0.15 s.",
+      "formula_text": "F[-0.25,-0.15] event(CRITICAL_TTC_START,A,B)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CRITICAL_TTC_START, A, B)",
+          "true_at_t_global": [
+            [
+              -1.15,
+              -1.15
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh11",
+      "claim_ref": "semantic_hypotheses[11]",
+      "claim": "B reported CRITICAL_TTC_START for A between -0.25 s and -0.15 s.",
+      "formula_text": "F[-0.25,-0.15] event(CRITICAL_TTC_START,B,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CRITICAL_TTC_START, B, A)",
+          "true_at_t_global": [
+            [
+              -0.8,
+              -0.8
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh12",
+      "claim_ref": "semantic_hypotheses[12]",
+      "claim": "A reported CRITICAL_TTC_END for B at t = 0.",
+      "formula_text": "F[0,0] event(CRITICAL_TTC_END,A,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CRITICAL_TTC_END, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh13",
+      "claim_ref": "semantic_hypotheses[13]",
+      "claim": "B reported CRITICAL_TTC_END for A at t = 0.",
+      "formula_text": "F[0,0] event(CRITICAL_TTC_END,B,A)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CRITICAL_TTC_END, B, A)",
+          "true_at_t_global": [
+            [
+              -0.05,
+              -0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh14",
+      "claim_ref": "semantic_hypotheses[14]",
+      "claim": "A reported COLLISION with B at t = 0.",
+      "formula_text": "F[0,0] event(COLLISION,A,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(COLLISION, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh15",
+      "claim_ref": "semantic_hypotheses[15]",
+      "claim": "B reported COLLISION with A at t = 0.",
+      "formula_text": "F[0,0] event(COLLISION,B,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(COLLISION, B, A)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh16",
+      "claim_ref": "semantic_hypotheses[16]",
+      "claim": "A reported THROTTLE_END between -0.05 s and +0.05 s.",
+      "formula_text": "F[-0.05,0.05] event(THROTTLE_END,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_END, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh17",
+      "claim_ref": "semantic_hypotheses[17]",
+      "claim": "B reported THROTTLE_END between -0.05 s and +0.05 s.",
+      "formula_text": "F[-0.05,0.05] event(THROTTLE_END,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(THROTTLE_END, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh18",
+      "claim_ref": "semantic_hypotheses[18]",
+      "claim": "A reported BRAKE_START between -0.05 s and +0.05 s.",
+      "formula_text": "F[-0.05,0.05] event(BRAKE_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(BRAKE_START, A)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh19",
+      "claim_ref": "semantic_hypotheses[19]",
+      "claim": "B reported BRAKE_START between -0.05 s and +0.05 s.",
+      "formula_text": "F[-0.05,0.05] event(BRAKE_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(BRAKE_START, B)",
+          "true_at_t_global": [
+            [
+              0.05,
+              0.05
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh20",
+      "claim_ref": "semantic_hypotheses[20]",
+      "claim": "B reported CLOSING_END for A between -0.05 s and +0.05 s.",
+      "formula_text": "F[-0.05,0.05] event(CLOSING_END,B,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CLOSING_END, B, A)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh21",
+      "claim_ref": "semantic_hypotheses[21]",
+      "claim": "A reported CLOSING_END for B between +0.15 s and +0.25 s.",
+      "formula_text": "F[0.15,0.25] event(CLOSING_END,A,B)",
+      "text_matches_ast": true,
+      "result": "FALSE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(CLOSING_END, A, B)",
+          "true_at_t_global": [
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh22",
+      "claim_ref": "semantic_hypotheses[22]",
+      "claim": "B reported MOVING_END between +0.95 s and +1.05 s.",
+      "formula_text": "F[0.95,1.05] event(MOVING_END,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_END, B)",
+          "true_at_t_global": [
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh23",
+      "claim_ref": "semantic_hypotheses[23]",
+      "claim": "B reported STOP_START between +0.95 s and +1.05 s.",
+      "formula_text": "F[0.95,1.05] event(STOP_START,B)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(STOP_START, B)",
+          "true_at_t_global": [
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh24",
+      "claim_ref": "semantic_hypotheses[24]",
+      "claim": "A reported MOVING_END between +1.05 s and +1.15 s.",
+      "formula_text": "F[1.05,1.15] event(MOVING_END,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(MOVING_END, A)",
+          "true_at_t_global": [
+            [
+              1.1,
+              1.1
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "formula_id": "sh25",
+      "claim_ref": "semantic_hypotheses[25]",
+      "claim": "A reported STOP_START between +1.05 s and +1.15 s.",
+      "formula_text": "F[1.05,1.15] event(STOP_START,A)",
+      "text_matches_ast": true,
+      "result": "TRUE",
+      "evaluated_at_t_global": 0.0,
+      "reasons": [],
+      "atoms": [
+        {
+          "atom": "event(STOP_START, A)",
+          "true_at_t_global": [
+            [
+              1.1,
+              1.1
+            ]
+          ],
+          "samples": {
+            "TRUE": 1,
+            "FALSE": 219,
+            "UNKNOWN": 0
+          },
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "TRUE": 19,
+    "FALSE": 12,
+    "UNKNOWN": 0,
+    "INVALID": 0
+  },
+  "reverification": {
+    "note": "Re-verification on 2026-10-09 of the unchanged Stage-1 / Stage-2 answers against the semantic trace regenerated after the CRITICAL_TTC change (safe following distance, UNSAFE_FORWARD_GAP) and the CUT_IN pre-entry region / occlusion gate; the forensic packet is byte-identical (97cb278d); deterministic verifier only, no model call.",
+    "answers_unchanged": true,
+    "verified_at": "2026-10-09T10:25:08Z",
+    "previous_outputs_sha256": {
+      "verification.json": "d9b058683c96f5b7b56c028f6fc3400974f2f4fceba136ed16579ecd7a8508fc",
+      "evaluation.json": "0489c9bed801d204c126225197e0861f1cf9f0c3f6a5bb81ef4b3793649261cb"
+    },
+    "semantic_trace_files_sha256": {
+      "global_graph.json": "d1d0b5d438a9fd25845c227cf9e84467591722ae67d050a1933812189f5705b2",
+      "global_trace.jsonl": "fe3614d8bff3212d9e4158b42c6891dd918c231055f90cea5e6795cb788b8a76"
+    }
+  }
+}

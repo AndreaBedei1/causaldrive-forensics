@@ -247,6 +247,24 @@ Untestable claims:
 - causal_chain[3]: Both brake pedals were fully pressed in the first sample at +0.05 s. (The grammar can express a brake state or event, but not pedal magnitude, sampling status, or a sampled value of 1.0.)
 - causal_chain[4]: Both recorders decelerated after contact. (Deceleration is a quantitative motion claim and is not expressible in the grammar.)
 
+### Re-verification of the same answers against the regenerated semantic trace
+
+Re-verification on 2026-10-09 of the unchanged Stage-1 / Stage-2 answers against the semantic trace regenerated after the CRITICAL_TTC change (safe following distance, UNSAFE_FORWARD_GAP) and the CUT_IN pre-entry region / occlusion gate; the forensic packet is byte-identical (97cb278d); deterministic verifier only, no model call.
+
+| | gemini-3.5-flash-lite (high) | gpt-6-luna (high) |
+|---|---|---|
+| reference_events: original -> re-verified | 36 -> 34 | 36 -> 34 |
+| TP: original -> re-verified | 5 -> 5 | 15 -> 15 |
+| FP: original -> re-verified | 5 -> 5 | 11 -> 11 |
+| FN: original -> re-verified | 31 -> 29 | 21 -> 19 |
+| precision: original -> re-verified | 0.5 -> 0.5 | 0.577 -> 0.577 |
+| recall: original -> re-verified | 0.139 -> 0.147 | 0.417 -> 0.441 |
+| f1: original -> re-verified | 0.217 -> 0.227 | 0.484 -> 0.5 |
+| verifier TRUE: original -> re-verified | 10 -> 10 | 19 -> 19 |
+| verifier FALSE: original -> re-verified | 2 -> 2 | 12 -> 12 |
+| verifier UNKNOWN: original -> re-verified | 0 -> 0 | 0 -> 0 |
+| verifier INVALID: original -> re-verified | 0 -> 0 | 0 -> 0 |
+
 ## 4. Security
 
 | | gemini-3.5-flash-lite (high) | gpt-6-luna (high) |
@@ -353,3 +371,14 @@ So these FALSEs are a granularity mismatch. A did steer left. The same applies t
 - recall 0.14.
 
 GPT-6 Luna keeps that line of reasoning as an alternative. Whether this is a Lite limitation or a Gemini-family one can only be settled by G38.
+
+**Re-verification on 2026-10-09 (same answers, regenerated semantic trace).** The reconstruction now marks two things differently:
+- **CRITICAL_TTC(A, A:track_001)** starts at −2.35 s, before the cut-in, for an unsafe forward gap: C entered A's path 3.3 m ahead while A needed 16.8 m. The collision-course reason still joins at −1.35 s.
+- **B's CUT_IN_FROM_RIGHT on B:track_002** is gone. It was a false classification: C was moving two lanes away from B and was seen past A.
+
+Effect on the scores:
+- **Formula verdicts:** unchanged for both models, since neither formalised these events.
+- **Reference events:** 36 → 34.
+- **Recall and F1:** both models gain slightly (the before/after numbers are in the table "Re-verification…" above).
+
+None of the four conclusions above changes. The packet, the prompts and the answers are byte-identical, and no model was called.

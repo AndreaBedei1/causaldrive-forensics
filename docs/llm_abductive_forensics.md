@@ -65,8 +65,12 @@ changed for it.
 Removed from TRACK_STATE (`TRACK_STATE_REMOVED`): `encounter`, `motion_relation`, `collision_course`, `ttc_s`,
 `predicted_overlap_s`, `required_deceleration_mps2`, `avoidance_by`, `braking_margin_mps2`,
 `unavoidable_by_braking`, `critical`, `target_acceleration_used_mps2`, `estimate_known`, `ahead_of_front_m`,
-`surface_offset_m`, `relative_motion_angle_deg`, `ego_speed_mps`.  Never exported: events, perceived states,
-graphs, the report, the evaluation, ground truth, the run's `metadata.json`, the scenario configuration.
+`surface_offset_m`, `relative_motion_angle_deg`, `ego_speed_mps`, and the safe-following-distance outputs of
+the conflict model (`critical_reason`, `forward_region`, `forward_leader`, `longitudinal_clearance_m`,
+`lateral_body_gap_m`, `time_headway_s`, `minimum_time_gap_s`, `required_safe_distance_m`,
+`safe_distance_margin_m`, `line_of_sight_occluded`; the leak guard refuses them too).  Never exported: events,
+perceived states, graphs, the report, the evaluation, ground truth, the run's `metadata.json`, the scenario
+configuration.
 
 - Identity: an ASSOCIATED track is exported as `observed_subject = B`, `local_track_id = A:track_002`,
   `identity_status = ASSOCIATED`; every other track as `observed_subject = A:track_001`, `ANONYMOUS`.  No
@@ -184,7 +188,8 @@ python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --dry-run
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider gemini --stage formalize --analysis-dir <dir>
 python scripts/verify_llm_analysis.py traces/S17/run_0_crash/reconstruction/llm/runs/<analysis>
-python scripts/compare_llm_analyses.py traces/S17/run_0_crash <analysis> <analysis> ...
+python scripts/verify_llm_analysis.py <analysis> --out-dir <analysis>/reverification_<date> --note "<why>"
+python scripts/compare_llm_analyses.py traces/S17/run_0_crash <analysis> <analysis> ... [--reverified <subdir>]
 python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --oracle-identities   # privileged
 ```
 
@@ -196,6 +201,12 @@ python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --or
   `traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.md`.  The automated tests never call
   a provider: they use fake transports that reproduce the documented response formats.  One answer per
   model measures nothing about the variation between runs.
+- Re-verification: when the reconstruction changes but the packet does not (2026-10-09: CRITICAL_TTC with
+  the safe following distance, CUT_IN with a pre-entry region; all 14 packets byte-identical), the saved
+  answers stay valid inputs and only the deterministic verifier is run again, into
+  `<analysis>/reverification_<date>/` (`verify_llm_analysis.py --out-dir`): the analysis's own
+  `verification.json` / `evaluation.json` stay as they were, the new ones carry a `reverification` block
+  (why, when, digests of the previous outputs and of the semantic trace used).  No model is called.
 - Gemini free tier: `gemini-3.8-flash` allows 20 generateContent requests per day per project, and requests
   that fail with HTTP 503 (model overloaded) count.  The transient retries (up to 3 requests per stage) can
   therefore use up the day's quota during an overload without a single answer (2026-10-08: 20 x 503, then

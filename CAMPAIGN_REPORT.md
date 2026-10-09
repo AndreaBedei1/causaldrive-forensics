@@ -1,6 +1,6 @@
-# Campaign report: three body radars (2026-10-03) and S17 partial observability (2026-10-07, re-recorded 2026-10-08)
+# Campaign report: three body radars (2026-10-03), S17 partial observability (2026-10-07, re-recorded 2026-10-08), safe following distance in CRITICAL_TTC (2026-10-09)
 
-Front, left and right radars on each vehicle's body; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC (13 runs recorded 2026-10-03).  Added 2026-10-07: S17, a causally relevant vehicle that records nothing (record: false; re-recorded 2026-10-08 with a closer cut-in), and the LLM forensic pipeline (admissible facts -> explanation -> formulas -> verification), sections 8-9.  Ground truth is read only by the evaluation, the audits and the counterfactual summary.
+Front, left and right radars on each vehicle's body; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC (13 runs recorded 2026-10-03).  Added 2026-10-07: S17, a causally relevant vehicle that records nothing (record: false; re-recorded 2026-10-08 with a closer cut-in), and the LLM forensic pipeline (admissible facts -> explanation -> formulas -> verification), sections 8-9.  Added 2026-10-09: CRITICAL_TTC also for an unsafe forward gap (safe following distance), a pre-entry region for CUT_IN and an occlusion gate; the 14 runs re-reconstructed from the same raw files, nothing re-recorded (section 4.3, before/after in section 5.8).  Ground truth is read only by the evaluation, the audits and the counterfactual summary.
 
 ## 1. Campaign
 
@@ -139,7 +139,19 @@ At each track sample the next 6 s are predicted in the recorder's frame, every 0
 
 Collision course = the two boxes overlap within the horizon; TTC = the first overlapping instant; the overlap span is the temporal occupancy overlap of the conflict area.  A target closing in radially that passes ahead of or behind the envelope never overlaps: no collision course.  Required deceleration a_req = the smallest deceleration (bisection) that removes every overlap when the braking vehicle reacts after 1 s and brakes to a stop along its path; the braking vehicle is the recorder, or the target when even an instant stop of the recorder cannot avoid it (a car from behind).  CRITICAL_TTC_START when a collision course needs a_req >= 6 m/s^2 (available, hard non-emergency braking); CRITICAL_TTC_END when it falls below 75 % of that or the course disappears.  No claim either way while the track's estimate is not known: position or velocity std above 1 m / 1 m/s, or the track younger than 0.5 s (UNKNOWN).
 
-For a target ahead in the same lane this is the stopping-distance check of a following driver: reaction distance v x 1 s, braking distance v^2 / (2 x 6 m/s^2), 1 m left over, against a lead car that keeps its speed or its measured deceleration.  It is the idea of the safety distance of art. 149 of the Italian Highway Code (room to stop if the vehicle ahead brakes), used as a concept only: the code prescribes no numbers and none is invented here.  Example: at 14 m/s behind a stopped car the state turns critical with the near surface within 33.7 m of the vehicle origin (tests/test_critical_ttc.py).  Reaction time 1 s and 6 m/s^2 are modelling assumptions in the range used by Euro NCAP AEB test protocols and UNECE R152 (which list deceleration levels and TTC-based warning timing for evaluation, not a legal threshold); they serve as plausibility references only.  Limits: constant velocity and yaw rate (no intent, no lane geometry: a target turning in a roundabout is predicted straight), a nominal target size, braking as the only avoidance manoeuvre, one track at a time.
+For a target ahead in the same lane this is the stopping-capability check of a following driver: reaction distance v x 1 s, braking distance v^2 / (2 x 6 m/s^2), 1 m left over, against a lead car that keeps its speed or its measured deceleration.  Example: at 14 m/s behind a stopped car the state turns critical with the near surface within 33.7 m of the vehicle origin (tests/test_critical_ttc.py).  A car ahead at the recorder's own speed is never on a collision course, however close: this reason is PREDICTED_OVERLAP.
+
+UNSAFE_FORWARD_GAP (added 2026-10-09) is the second reason: a leader closer than the safe following distance, collision course or not.  Clearance = from the recorder's front face to the rear face of the target's nominal box, along the recorder's heading (never the radar range).  Required distance = the larger of
+- time gap: v x t_front(v), t_front from the UN R157 (ALKS, M1/N1) table 7.2 km/h 1.0 s, 10 km/h 1.1 s, 20 km/h 1.2 s, 30 km/h 1.3 s, 40 km/h 1.4 s, 50 km/h 1.5 s, 60 km/h 1.6 s, linear in between, the ends held (no extrapolation beyond 60 km/h; the campaign stays below it), at least 2 m;
+- braking: v x 1 s + v^2 / (2 x 6) - v_lead^2 / (2 x 6) + 1 m, at least 1 m, where the lead's braking at 6 m/s^2 is hypothetical (its measured acceleration is not used: the question is whether the present gap would suffice if it braked).
+
+A leader is a road user moving in the same direction, its body ahead of the front face and either overlapping the path corridor (+-1.5 m) or within 1.0 m of it while approaching it laterally (0.3 m/s beyond the estimate's uncertainty), with the recorder moving (>= 1 m/s).  Cars behind, beside or two lanes away, and a car keeping its own lane next to the corridor, are never critical for this reason; crossing and oblique conflicts keep the collision-course model.  No TTC is invented: ttc_s stays null without a predicted overlap.  Hysteresis: the reason ends once the clearance exceeds 1.10 x the required distance (or the target stops being a leader), with the usual 0.2 s debounce; the estimate gates (std, 0.5 s track age) apply as before.  The conflict model's outputs (critical_reason, longitudinal_clearance_m, lateral_body_gap_m, time_headway_s, minimum_time_gap_s, required_safe_distance_m, safe_distance_margin_m, forward_region, line_of_sight_occluded) are TRACK_STATE facts of the local trace; the forensic packet drops them (TRACK_STATE_REMOVED) and the leak guard refuses them: the 14 packet SHA-256 are unchanged.
+
+Why a lateral approach is required beside the corridor: in these 3.5 m lanes a car keeping its own lane next to the recorder's has its body about 1.0 m outside the 3.0 m corridor (ground truth: 0.92-1.01 m in S16 and S17), and the nominal box placed from a radar track misses that by up to ~0.7 m either way (S16's van in the next lane: 0.30-0.66 m; S02's cutting-in car seen from behind: within 0.1 m).  A purely geometric 1.0 m margin made the van a leader of A for the whole of S16 and B's overtaking of A in S17 critical.
+
+References, used as engineering anchors only: art. 149 of the Italian Highway Code (a distance that allows the following vehicle to stop in time and avoid a collision with the one ahead) and Directive 2006/126/EC (adequate distance to the vehicles in front and at the side; a speed that allows stopping within the visible free road), which prescribe no numbers; UN Regulation No. 157 (ALKS), whose minimum time gaps apply to automated lane keeping systems and whose text names the temporary disruption of the following distance by a cutting-in vehicle; UN Regulation No. 152 (AEBS), which asks for a braking demand of at least 5.0 m/s^2 when an imminent car-to-car collision is detected.  There is no single European critical-TTC threshold for human drivers; the 1 s reaction time and the 6 m/s^2 decelerations are this reconstruction's modelling assumptions, not values prescribed by EU or UNECE rules.  Limits: constant velocity and yaw rate (no intent, no lane geometry: a target turning in a roundabout is predicted straight), a nominal target size, braking as the only avoidance manoeuvre, one track at a time for the prediction.
+
+CUT_IN (same date): a cut-in now also needs the target's nominal body within 1.0 m of the corridor (cut_in_preentry_margin_m), so a car still crossing a lane further away is not cutting in yet (S17: B's CUT_IN_FROM_RIGHT on C, which was moving from the right lane into A's middle lane two lanes away, is gone).  Occlusion gate: a track sample whose line of sight from the recorder's body to its near surface crosses another track's nominal box grown by 0.5 m (the radar's position noise) is seen past that vehicle; it gives no CUT_IN and no UNSAFE_FORWARD_GAP evidence either way (its returns can be partly hidden or mixed with the nearer vehicle's).  It removes the apparent lateral approach of C seen by B past A in S17 (at 4.55-4.95 s the track most likely picked up returns of A's swerving front: ground truth puts A's front corner about 1 m from C's rear corner, on B's line of sight) and of S16's van seen by B past A (B's former CUT_IN_FROM_LEFT 1.35-2.70 s on a van that never moved laterally).  The collision-course prediction is not gated.
 
 Robustness added in this campaign: the target's deceleration used by the prediction is bounded by what the forward-filtered track shows up to that instant (the smoother would otherwise announce an abrupt stop, a crash, up to 0.2 s before it happens); a confirmed track follows its target through an abrupt stop (section 4.5); the 0.5 s minimum track age (a track 0.1 s old at 74 m in S15 drifted laterally and was claimed critical by the first model).
 
@@ -167,22 +179,22 @@ S15 false STOP (360-degree campaign, A after its first collision): a red adverti
 
 ### 5.1 Contacts, associations, CRITICAL_TTC
 
-| run | CRITICAL_TTC_START (recorder->true target, local s) | associated (all correct) | anonymous (true identity, offline) |
+| run | CRITICAL_TTC_START (recorder->true target, local s; (gap) = UNSAFE_FORWARD_GAP at the start) | associated (all correct) | anonymous (true identity, offline) |
 |---|---|---|---|
 | S01/run_0_crash | A->B 4.40 | A:track_001=B | - |
-| S02/run_0_crash | A->B 3.25 | A:track_001=B | - |
-| S02/run_0_critical_before_cut_in | A->B 2.65; B->A 2.70 | A:track_001=B, B:track_001=A | - |
+| S02/run_0_crash | A->B 1.80 (gap) | A:track_001=B | - |
+| S02/run_0_critical_before_cut_in | A->B 2.60 (gap); B->A 2.70 | A:track_001=B, B:track_001=A | - |
 | S03/run_0_crash | A->B 2.55; B->A 2.60 | A:track_001=B, B:track_001=A | - |
-| S06/run_0_a_front_pushed | A->B 3.90; B->C 3.30 | A:track_001=B, B:track_001=C | - |
-| S06/run_0_b_rear_first | A->B 4.70; B->C 3.30 | A:track_001=B, B:track_001=C | - |
-| S07/run_0_crash | A->B 4.00; B->C 3.40 | A:track_001=B | B:track_001 (is C) |
+| S06/run_0_a_front_pushed | A->B 0.50 (gap); B->C 0.50 (gap) | A:track_001=B, B:track_001=C | - |
+| S06/run_0_b_rear_first | A->B 4.65 (gap+overlap); B->C 0.50 (gap) | A:track_001=B, B:track_001=C | - |
+| S07/run_0_crash | A->B 0.50 (gap); B->C 3.40 | A:track_001=B | B:track_001 (is C) |
 | S08/run_0_crash | A->B 2.55; B->A 2.60 | A:track_002=B, B:track_002=A | A:track_001 (is C), B:track_001 (is C), C:track_001 (is A), C:track_002 (is B) |
 | S09/run_0_merge_conflict | A->B 6.90; B->A 6.65 | A:track_001=B, B:track_001=A | - |
 | S10/run_0_rolls_through | A->B 3.40; B->A 3.60 | A:track_001=B | B:track_001 (is A) |
 | S12/run_0_near_simultaneous | A->B 5.90; B->A 6.05 | A:track_001=B, B:track_001=A | - |
 | S15/run_0_deflected_into_c | A->B 2.55; A->C 3.75; B->A 2.50; B->A 3.95; C->A 3.75 | A:track_001=C, A:track_002=B, B:track_002=A, C:track_001=A | B:track_001 (is A), C:track_002 (is B) |
-| S16/run_0_consequential | A->C 5.55; B->A 4.15; C->A 5.60 | A:track_001=C, B:track_001=A, C:track_001=A | A:track_002 (is C), B:track_002 (is C), B:track_003 (is C), B:track_004 (is C) |
-| S17/run_0_crash | A->C 3.60; A->B 3.80; B->A 4.15 | A:track_002=B, B:track_001=A | A:track_001 (is C), B:track_002 (is C), B:track_003 (is C) |
+| S16/run_0_consequential | A->C 5.20 (gap); B->A 0.50 (gap); C->A 5.60 | A:track_001=C, B:track_001=A, C:track_001=A | A:track_002 (is C), B:track_002 (is C), B:track_003 (is C), B:track_004 (is C) |
+| S17/run_0_crash | A->C 2.60 (gap); A->B 3.80; B->A 4.15 | A:track_002=B, B:track_001=A | A:track_001 (is C), B:track_002 (is C), B:track_003 (is C) |
 
 Every true vehicle contact is reconstructed, every association is correct, no extra collision node.  Tracks lost before their contact but associated: S16 C:track_001 -> A (last observed 0.15 s before the contact); synthetic regression: lost 0.85 s before (window 1.0 s).
 
@@ -258,7 +270,30 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 
 ### 5.7 Tests
 
-309 tests pass on Python 3.8 (CARLA environment) and 3.14, among them tests/test_llm_pipeline.py and tests/test_unrecorded_vehicle.py (section 9), tests/test_three_radars.py (layout, mounts, coverage, rear blind zone, front -> side continuity, per-mount Doppler for a stopped / straight / turning / accelerating / braking recorder, static and moving targets ahead, at the side and in a rear quarter), tests/test_critical_ttc.py (following, stopped target, same speed, crossing ahead / behind, collision course near and far, oncoming traffic, a car from behind, S08 regression), tests/test_semantic_events.py (THROTTLE), tests/test_traffic_signs.py, tests/test_multi_collision.py, tests/test_campaign_perception.py (recorded campaign: radar layout, S07 occlusion, signs, S09 / S12 / S16 timing).
+347 tests pass on Python 3.8 (CARLA environment) and 3.14 (2026-10-09), among them tests/test_forward_gap.py (safe following distance: UN R157 table and interpolation, the required distance, a close car at the same speed, the same car far enough, a car behind, beside, front-lateral entering / keeping its lane, two lanes away, crossing traffic unchanged, a standing recorder, uncertain and occluded estimates, the 1.10 release hysteresis, cut-in pre-entry and occlusion, the leak guard, S02 / S17 campaign regressions), tests/test_llm_pipeline.py and tests/test_unrecorded_vehicle.py (section 9), tests/test_three_radars.py (layout, mounts, coverage, rear blind zone, front -> side continuity, per-mount Doppler for a stopped / straight / turning / accelerating / braking recorder, static and moving targets ahead, at the side and in a rear quarter), tests/test_critical_ttc.py (following, stopped target, same speed, crossing ahead / behind, collision course near and far, oncoming traffic, a car from behind, S08 regression), tests/test_semantic_events.py (THROTTLE), tests/test_traffic_signs.py, tests/test_multi_collision.py, tests/test_campaign_perception.py (recorded campaign: radar layout, S07 occlusion, signs, S09 / S12 / S16 timing).
+
+### 5.8 CRITICAL_TTC and CUT_IN before and after the safe following distance (2026-10-09)
+
+The 14 runs were re-reconstructed from the same raw files (562 raw and ground-truth files byte-identical, nothing re-recorded, no CARLA).  Collisions, alignment, associations and every event other than CRITICAL_TTC / CUT_IN are unchanged; the 14 forensic packets are byte-identical (same SHA-256), the radar visibility audit too.
+
+| run | CRITICAL_TTC_START before -> after | CUT_IN_*_START before -> after | changes (local s) | assessment |
+|---|---|---|---|---|
+| S01/run_0_crash | 1 -> 1 | 0 -> 0 | none | - |
+| S02/run_0_crash | 1 -> 1 | 1 -> 1 | A->B 3.25 -> 1.80; END 4.65 -> 5.00 | correct: B enters A's lane 16.0 m ahead (ground truth 15.8 m) while A at 49 km/h needs 24.0 m (headway 1.16 s); critical now 0.30 s before the cut-in (2.10) instead of 1.15 s after it; the collision-course reason joins at 3.30 (the former start); END when A comes to rest after the impact |
+| S02/run_0_critical_before_cut_in | 2 -> 2 | 1 -> 1 | A->B 2.65 -> 2.60 | correct, order kept: CRITICAL_TTC 2.60 < CUT_IN_FROM_LEFT 2.95 < EGO_PATH_ENTRY 3.65 (B entering 3.8 m ahead, headway 0.29 s) |
+| S03/run_0_crash | 2 -> 2 | 0 -> 0 | none | crossing: collision-course model |
+| S06/run_0_a_front_pushed | 2 -> 2 | 0 -> 0 | A->B 3.90 -> 0.50; B->C 3.30 -> 0.50 | correct, the scenario's own premise ("A following B far too closely"): A 4.5 m behind B at 50 km/h (0.33 s), B 13.5 m behind C (0.99 s); C's braking shows as the collision-course reason joining at 3.30 / 3.90 |
+| S06/run_0_b_rear_first | 2 -> 2 | 0 -> 0 | B->C 3.30 -> 0.50; A->B 4.70 -> 4.65 | correct: B 13.5 m behind C at 49 km/h (0.99 s); A closing on the braking B with 21 m against 23 m |
+| S07/run_0_crash | 2 -> 2 | 0 -> 0 | A->B 4.00 -> 0.50 | correct by the definition, the weakest case: 19.3 m at 50 km/h = 1.39 s < 1.5 s (UN R157 time gap); the braking criterion alone (14.9 m) would call it safe; the emergency (C and B braking) is the collision-course reason joining at 4.00 |
+| S08/run_0_crash | 2 -> 2 | 0 -> 0 | none | crossing; still critical only between the colliding pair (test) |
+| S09/run_0_merge_conflict | 2 -> 2 | 0 -> 0 | none | roundabout merge: collision-course model |
+| S10/run_0_rolls_through | 2 -> 2 | 0 -> 0 | none | junction: collision-course model |
+| S12/run_0_near_simultaneous | 2 -> 2 | 0 -> 0 | none | all-way stop: no standing recorder follows anybody |
+| S15/run_0_deflected_into_c | 5 -> 5 | 0 -> 0 | none | junction pile-up: collision-course model |
+| S16/run_0_consequential | 3 -> 3 | 3 -> 1 | B->A 4.15 -> 0.50; A->C 5.55 -> 5.20 (END 6.60 -> 7.00); CUT_IN_FROM_LEFT(B, B:track_003) 1.35 removed; CUT_IN_FROM_LEFT(A, A:track_002) 5.20 removed | B 7.2 m behind A at 45 km/h (0.57 s; the scenario's "B, following A too closely"); A's merge ends 1.3 m behind the van, critical at 5.20, before the first collision (5.55); B's cut-in was false (the van never moved laterally; it is seen past A: occlusion gate); A's cut-in on track_002 was A's own lane change into the van's lane (that track is seen past the van's other track); the same relative-motion artefact remains on A:track_001 (CUT_IN_FROM_LEFT 5.45, section 7) |
+| S17/run_0_crash | 3 -> 3 | 2 -> 1 | A->C 3.60 -> 2.60 (END 4.55 -> 4.65); CUT_IN_FROM_RIGHT(B, B:track_002) 2.85 removed | correct: section 8.5 |
+
+New false positives searched for: no UNSAFE_FORWARD_GAP fact on a target behind the front face, beside the recorder or with its body more than 1.0 m outside the corridor (tests/test_forward_gap.py); no new CUT_IN anywhere; crossing runs unchanged.  Every new early start is a same-lane or entering leader closer than the safe distance, and the reconstructed clearances agree with the ground-truth bumper-to-bumper gaps within 0.2 m (S06 4.36 / 13.34 m, S07 19.16 m, S16 6.95 m, S02 15.78 m, S17 3.29 m).  Scenario adaptations: none needed (every run still exercises its question; S06 and S16 are designed around a too-close follower, S07's 1.39 s is below the R157 time gap).  Temporal safety relations that changed: S02/run_0_crash and S16 A:track_001 (C) become "critical TTC already active before the cut-in", S17 A:track_001 too.
 
 ## 6. Compared with the 360-degree campaign
 
@@ -292,6 +327,10 @@ The clearance is biased high (track farther than the box): radar returns lie on 
 - CRITICAL_TTC predicts targets on straight lines: in S09 the circulating A is predicted straight, so the onset (6.65 s, 3.6 s before the collision) is earlier than a curved prediction would give.
 - A track born less than 0.5 s earlier makes no CRITICAL claim: a target appearing on a collision course gets its CRITICAL_TTC at least 0.5 s after it appears (S15 A on B at 2.55 s, collision 3.80 s).
 - S16: A sees the van C as two tracks; B sees C as up to four short tracks (never in contact with it: anonymous).
+- Lateral body gap from a radar track: the nominal 4.6 x 1.9 m box placed behind the near surface misses a car's real inner side by up to ~0.7 m either way (section 4.3), about the distance between a car keeping the next lane and the 3 m corridor; a car next to the corridor is therefore a leader (UNSAFE_FORWARD_GAP) only while it approaches the corridor, and a cut-in needs its body within 1.0 m of the corridor.
+- UNSAFE_FORWARD_GAP keeps CRITICAL_TTC active through a whole car-following phase when the gap is short from the start (S06, S07, S16): the onset of the braking emergency is no separate event, it is in the TRACK_STATE facts (critical_reason gains PREDICTED_OVERLAP at the former start time).  S07's 1.39 s headway is critical only by the R157 time gap.
+- CUT_IN uses the relative lateral motion (no lane map): a recorder that changes lanes toward a car sees that car "cut in".  S16: A's merge into the van's lane gives CUT_IN_FROM_LEFT(A, A:track_001) at 5.45 although the van never moved laterally (pre-existing; the van's second track, seen past the first, is now gated by occlusion).
+- The occlusion gate works on nominal boxes grown by 0.5 m: it can withhold CUT_IN / forward-gap evidence for a car seen right past another one (S08 and S15 around their contacts, where no event changed; S16, see section 5.8).
 - A stationary braked vehicle is immovable when struck in CARLA; chain scenarios rely on the struck car still rolling (S06 a_front_pushed).
 - The depth camera (unused) misses frames on the second and third vehicle (section 2.4).
 - S17: the reconstruction cannot know that A:track_001, B:track_002 and B:track_003 are one road user (C): identities are anchored on collisions and C collides with nobody.  A's swerve is not precautionary: with it disabled A runs into the back of C (section 8.4).  A's track of B is associated only because C is slower than B: a second track of A near A at the contact, with a speed within 1.5 m/s RMSE of B's (C at 11 m/s against B at 12.5 m/s in a first design), leaves both anonymous (fusion: ambiguous), so B drives at 13 m/s.
@@ -386,21 +425,21 @@ Events about the anonymous tracks (global time, s):
 | -4.95 | TRACK_APPEARED_RIGHT | B | B:track_002 |
 | -4.95 | CLOSING_START | A | A:track_001 |
 | -4.95 | CLOSING_START | B | B:track_002 |
+| -2.35 | CRITICAL_TTC_START | A | A:track_001 |
 | -2.20 | CUT_IN_FROM_RIGHT_START | A | A:track_001 |
-| -2.10 | CUT_IN_FROM_RIGHT_START | B | B:track_002 |
 | -1.60 | EGO_PATH_ENTRY | A | A:track_001 |
-| -1.35 | CRITICAL_TTC_START | A | A:track_001 |
 | -0.85 | CUT_IN_FROM_RIGHT_END | A | A:track_001 |
-| -0.40 | CRITICAL_TTC_END | A | A:track_001 |
 | -0.40 | CLOSING_END | A | A:track_001 |
+| -0.30 | CRITICAL_TTC_END | A | A:track_001 |
 | 0.00 | COLLISION | - | A, B |
 | 0.20 | CLOSING_END | B | B:track_002 |
 | 0.25 | EGO_PATH_EXIT | A | A:track_001 |
-| 0.30 | CUT_IN_FROM_RIGHT_END | B | B:track_002 |
 | 0.75 | TRACK_LOST | B | B:track_002 |
 | 1.45 | TRACK_APPEARED_RIGHT | B | B:track_003 |
 | 2.05 | TRACK_LOST | B | B:track_003 |
 | 2.50 | TRACK_LOST | A | A:track_001 |
+
+A's critical TTC on the anonymous track starts at -2.35 s (local 2.60) for an unsafe forward gap, 0.15 s before the cut-in is established (-2.20) and 0.75 s before C's body enters A's corridor (-1.60): clearance 3.31 m (ground truth 3.29 m bumper to bumper) against a required 16.83 m (A at 11.81 m/s, UN R157 time gap 1.43 s; braking criterion 14.8 m), time headway 0.28 s, C at 10.84 m/s, front-lateral and approaching A's corridor at 1.4 m/s.  The collision-course reason joins at -1.35 s (the former start).  B sees no cut-in: C moved from the right lane into A's middle lane, two lanes from B, and B sees it past A (occlusion gate).
 
 Privileged evaluation: A:track_001 is C (correctly left anonymous), B:track_002 is C (correctly left anonymous), B:track_003 is C (correctly left anonymous); associations 2/2 correct.  No entity C exists anywhere in reconstruction/ outside evaluation/.
 
@@ -410,7 +449,7 @@ reconstruction/llm/forensic_packet.json, run_id case-1378e3e335bdf143, packet SH
 
 ## 9. LLM abductive forensics (infrastructure)
 
-FACTS -> abductive explanation (Stage 1) -> semantic hypotheses -> temporal formulas (Stage 2, a separate call) -> deterministic three-valued verification on the semantic trace, loaded only after both answers are saved.  Description, diagram and caveats: docs/llm_abductive_forensics.md.  No API key was available: no model was called; providers, schemas, guard, verifier and scoring are tested with mock transports; dry-run prompts for S17 are in traces/S17/run_0_crash/reconstruction/llm/runs/*_dryrun/.
+FACTS -> abductive explanation (Stage 1) -> semantic hypotheses -> temporal formulas (Stage 2, a separate call) -> deterministic three-valued verification on the semantic trace, loaded only after both answers are saved.  Description, diagram and caveats: docs/llm_abductive_forensics.md.  Providers, schemas, guard, verifier and scoring are tested with mock transports only; dry-run prompts for S17 are in traces/S17/run_0_crash/reconstruction/llm/runs/*_dryrun/.  First real calls 2026-10-08/09, S17 only: one complete analysis with gpt-6-luna and one with gemini-3.5-flash-lite; gemini-3.8-flash gave no answer (HTTP 503, then the free-tier daily quota): traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.md.  After the 2026-10-09 reconstruction change (section 4.3) the 14 packets are byte-identical; the two saved answers were re-verified against the regenerated semantic trace into reverification_20261009/ (deterministic verifier only, no model call; formula verdicts unchanged, 34 reference events instead of 36).
 
 Forensic packets exported for every run (reconstruction/llm/; the leak guard passed for all):
 
@@ -451,13 +490,15 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ```
 -4.65 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 -4.50 TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
+-2.85 CRITICAL_TTC_START(A,B)
 -2.55 CUT_IN_FROM_LEFT_START(A,B)
 -1.50 THROTTLE_END(B); BRAKE_START(B)
--1.40 EGO_PATH_ENTRY(A,B); CRITICAL_TTC_START(A,B)
+-1.40 EGO_PATH_ENTRY(A,B)
 -1.00 BRAKE_END(B)
 -0.90 THROTTLE_START(B)
 -0.80 THROTTLE_END(A); BRAKE_START(A)
-+0.00 COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
++0.00 COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
++0.35 CRITICAL_TTC_END(A,B)
 +0.40 MOVING_END(A); STOP_START(A)
 +0.55 MOVING_END(B); STOP_START(B)
 ```
@@ -469,7 +510,7 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 -3.95 TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 -1.90 TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 -1.65 THROTTLE_END(A); BRAKE_START(A)
--1.45 CRITICAL_TTC_START(A,B)
+-1.50 CRITICAL_TTC_START(A,B)
 -1.40 CRITICAL_TTC_START(B,A)
 -1.15 CUT_IN_FROM_LEFT_START(A,B)
 -0.85 BRAKE_END(A)
@@ -503,11 +544,10 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 
 ```
 -4.80 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+-4.30 CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,C)
 -1.85 THROTTLE_END(C); BRAKE_START(C)
 -1.60 CLOSING_START(B,C)
--1.50 CRITICAL_TTC_START(B,C)
 -1.10 THROTTLE_END(B); BRAKE_START(B)
--0.90 CRITICAL_TTC_START(A,B)
 -0.85 CLOSING_START(A,B)
 -0.75 MOVING_END(C); STOP_START(C)
 -0.25 THROTTLE_END(A); BRAKE_START(A)
@@ -523,12 +563,13 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 
 ```
 -6.25 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+-5.75 CRITICAL_TTC_START(B,C)
 -3.30 THROTTLE_END(C); BRAKE_START(C)
 -3.05 CLOSING_START(B,C)
--2.95 CRITICAL_TTC_START(B,C)
 -2.20 MOVING_END(C); STOP_START(C)
 -1.65 CLOSING_START(A,B)
--1.55 COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C); CRITICAL_TTC_START(A,B)
+-1.60 CRITICAL_TTC_START(A,B)
+-1.55 COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 -1.50 THROTTLE_END(B); BRAKE_START(B)
 -1.40 MOVING_END(B); STOP_START(B)
 -0.10 THROTTLE_END(A); BRAKE_START(A)
@@ -540,11 +581,11 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 
 ```
 -5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,B:track_001)
+-5.40 CRITICAL_TTC_START(A,B)
 -2.70 CLOSING_START(B,B:track_001)
 -2.50 CRITICAL_TTC_START(B,B:track_001)
 -2.25 THROTTLE_END(B); BRAKE_START(B)
 -2.05 CLOSING_START(A,B)
--1.90 CRITICAL_TTC_START(A,B)
 -1.55 CRITICAL_TTC_END(B,B:track_001)
 -1.05 CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)
 -0.65 THROTTLE_END(A); BRAKE_START(A)
@@ -679,32 +720,32 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ```
 -5.55 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(B,A); TRACK_APPEARED_LEFT(A,C); TRACK_APPEARED_LEFT(B,B:track_002); CLOSING_START(A,C); CLOSING_START(B,B:track_002)
 -5.50 TRACK_APPEARED_LEFT(A,A:track_002); CLOSING_START(A,A:track_002)
+-5.05 CRITICAL_TTC_START(B,A)
 -4.70 TRACK_APPEARED_LEFT(B,B:track_003); CLOSING_START(B,B:track_003)
--4.20 CUT_IN_FROM_LEFT_START(B,B:track_003)
 -2.90 TRACK_APPEARED_RIGHT(C,A); CLOSING_START(C,A)
--2.85 CUT_IN_FROM_LEFT_END(B,B:track_003)
 -1.60 THROTTLE_END(A); BRAKE_START(A)
--1.40 CLOSING_START(B,A); CRITICAL_TTC_START(B,A)
+-1.40 CLOSING_START(B,A)
 -1.15 CLOSING_END(C,A)
 -1.10 CLOSING_END(A,A:track_002); CLOSING_END(A,C)
 -1.00 BRAKE_END(A)
 -0.90 THROTTLE_START(A)
 -0.70 TRACK_LOST(B,B:track_003)
--0.35 CUT_IN_FROM_LEFT_START(A,A:track_002)
+-0.35 CRITICAL_TTC_START(A,C)
 -0.15 THROTTLE_END(B); BRAKE_START(B); EGO_PATH_ENTRY(A,A:track_002)
 -0.10 CUT_IN_FROM_LEFT_START(A,C)
-+0.00 COLLISION(A,B); THROTTLE_END(A); BRAKE_START(A); CLOSING_START(A,A:track_002); CLOSING_START(A,C); CLOSING_START(C,A); CRITICAL_TTC_START(A,C)
++0.00 COLLISION(A,B); THROTTLE_END(A); BRAKE_START(A); CLOSING_START(A,A:track_002); CLOSING_START(A,C); CLOSING_START(C,A)
 +0.05 CRITICAL_TTC_END(B,A); BRAKE_END(A); CRITICAL_TTC_START(C,A)
 +0.10 CLOSING_END(B,A)
 +0.20 EGO_PATH_ENTRY(A,C)
 +0.25 CLOSING_END(B,B:track_002)
 +0.65 MOVING_END(B); STOP_START(B)
 +0.90 TRACK_LOST(C,A)
-+1.05 COLLISION(A,C); CRITICAL_TTC_END(A,C); CLOSING_END(A,A:track_002); CLOSING_END(A,C)
++1.05 COLLISION(A,C); CLOSING_END(A,A:track_002); CLOSING_END(A,C)
 +1.10 THROTTLE_END(C); BRAKE_START(C)
 +1.20 TRACK_LOST(A,A:track_002)
 +1.25 TRACK_APPEARED_LEFT(B,B:track_004)
 +1.30 CUT_IN_FROM_LEFT_END(A,C)
++1.45 CRITICAL_TTC_END(A,C)
 +1.55 TRACK_LOST(B,B:track_004)
 +1.70 EGO_PATH_EXIT(B,A)
 +1.90 MOVING_END(A); MOVING_END(C); STOP_START(A); STOP_START(C); BRAKE_START(A)
@@ -714,22 +755,21 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 
 ```
 -4.95 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,A:track_001); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,B:track_002); CLOSING_START(A,A:track_001); CLOSING_START(B,B:track_002)
+-2.35 CRITICAL_TTC_START(A,A:track_001)
 -2.20 CUT_IN_FROM_RIGHT_START(A,A:track_001)
--2.10 CUT_IN_FROM_RIGHT_START(B,B:track_002)
 -1.60 EGO_PATH_ENTRY(A,A:track_001)
--1.35 CRITICAL_TTC_START(A,A:track_001)
 -1.15 CRITICAL_TTC_START(A,B)
 -0.85 CUT_IN_FROM_RIGHT_END(A,A:track_001)
 -0.80 CRITICAL_TTC_START(B,A)
 -0.75 CLOSING_START(A,B)
 -0.70 CLOSING_START(B,A)
--0.40 CRITICAL_TTC_END(A,A:track_001); CLOSING_END(A,A:track_001)
+-0.40 CLOSING_END(A,A:track_001)
+-0.30 CRITICAL_TTC_END(A,A:track_001)
 -0.05 CRITICAL_TTC_END(B,A)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); CLOSING_END(B,A)
 +0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 +0.20 CLOSING_END(B,B:track_002)
 +0.25 EGO_PATH_EXIT(A,A:track_001)
-+0.30 CUT_IN_FROM_RIGHT_END(B,B:track_002)
 +0.75 TRACK_LOST(B,B:track_002)
 +1.00 MOVING_END(B); STOP_START(B)
 +1.10 MOVING_END(A); STOP_START(A)

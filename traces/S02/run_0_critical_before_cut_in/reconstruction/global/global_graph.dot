@@ -12,7 +12,7 @@ digraph "global" {
   "g08" [label="CLOSING_START\nB -> A\nt=-1.90", fillcolor="#bfdbfe"];
   "g09" [label="THROTTLE_END\nA\nt=-1.65", fillcolor="#fde68a"];
   "g10" [label="BRAKE_START\nA\nt=-1.65", fillcolor="#fde68a"];
-  "g11" [label="CRITICAL_TTC_START\nA -> B\nt=-1.45", fillcolor="#bfdbfe"];
+  "g11" [label="CRITICAL_TTC_START\nA -> B\nt=-1.50", fillcolor="#bfdbfe"];
   "g12" [label="CRITICAL_TTC_START\nB -> A\nt=-1.40", fillcolor="#bfdbfe"];
   "g13" [label="CUT_IN_FROM_LEFT_START\nA -> B\nt=-1.15", fillcolor="#bfdbfe"];
   "g14" [label="BRAKE_END\nA\nt=-0.85", fillcolor="#fde68a"];

@@ -55,16 +55,22 @@ class LongitudinalTests(unittest.TestCase):
     def test_following_a_slower_car_needs_only_its_speed_difference(self):
         # 14 m/s behind a car at 8 m/s: 6 m/s to shed, 6 m reaction + 3 m braking + 1 m margin.
         critical = assess(ego(14.0), target(12.0, 0.0, 8.0, 0.0, closing=6.0))
-        safe = assess(ego(14.0), target(13.0, 0.0, 8.0, 0.0, closing=6.0))
-        self.assertTrue(critical.critical)
-        self.assertTrue(safe.collision_course and not safe.critical)
+        avoidable = assess(ego(14.0), target(13.0, 0.0, 8.0, 0.0, closing=6.0))
+        self.assertIn("PREDICTED_OVERLAP", critical.critical_reason)
+        self.assertTrue(avoidable.collision_course)
+        self.assertLess(avoidable.required_deceleration_mps2, CFG.critical_deceleration_mps2)
+        # Braking still avoids the collision course, but 10.6 m behind a car is no safe following
+        # distance at 50 km/h: critical for the other reason only.
+        self.assertEqual(avoidable.critical_reason, "UNSAFE_FORWARD_GAP")
 
     def test_a_car_at_the_same_speed_is_no_collision_course(self):
         for gap in (6.0, 12.0, 30.0):
             result = assess(ego(14.0), target(gap, 0.0, 14.0, 0.0))
             self.assertFalse(result.collision_course, gap)
-            self.assertFalse(result.critical)
             self.assertIsNone(result.ttc_s)
+            # No collision course, but within 21 m (1.5 s at 50 km/h) the gap itself is unsafe.
+            self.assertEqual(result.critical, gap < 21.0, gap)
+            self.assertEqual(result.critical_reason, "UNSAFE_FORWARD_GAP" if gap < 21.0 else None)
         inside = assess(ego(14.0), target(3.0, 0.0, 14.0, 0.0, closing=0.0))  # within the margin, not closing
         self.assertFalse(inside.collision_course)
 

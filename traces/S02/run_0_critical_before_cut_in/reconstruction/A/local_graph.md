@@ -18,7 +18,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e04 | 0.15 | CLOSING_START | A | track_001 | radar | active_at_first_observation=True |
 | A:e05 | 2.45 | THROTTLE_END | A | - | controls |  |
 | A:e06 | 2.45 | BRAKE_START | A | - | controls |  |
-| A:e07 | 2.65 | CRITICAL_TTC_START | A | track_001 | radar |  |
+| A:e07 | 2.60 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e08 | 2.95 | CUT_IN_FROM_LEFT_START | A | track_001 | radar |  |
 | A:e09 | 3.25 | BRAKE_END | A | - | controls |  |
 | A:e10 | 3.35 | THROTTLE_START | A | - | controls |  |
@@ -85,7 +85,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START | ego: not yet observed | - |
 | 0.15 | A:e03 TRACK_APPEARED_LEFT track_001<br>A:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE | 0.10 |
 | 2.45 | A:e05 THROTTLE_END<br>A:e06 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING | 2.40 |
-| 2.65 | A:e07 CRITICAL_TTC_START track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING | 2.60 |
+| 2.60 | A:e07 CRITICAL_TTC_START track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING | 2.50 |
 | 2.95 | A:e08 CUT_IN_FROM_LEFT_START track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC | 2.90 |
 | 3.25 | A:e09 BRAKE_END | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_LEFT | 3.20 |
 | 3.35 | A:e10 THROTTLE_START | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_LEFT | 3.30 |
@@ -109,7 +109,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: critical TTC already active before the cut-in: CRITICAL_TTC_START 2.65 <= CUT_IN_FROM_LEFT_START 2.95 (+0.30 s); EGO_PATH_ENTRY 3.65 after critical TTC (+1.00 s)
+- track_001: critical TTC already active before the cut-in: CRITICAL_TTC_START 2.60 <= CUT_IN_FROM_LEFT_START 2.95 (+0.35 s); EGO_PATH_ENTRY 3.65 after critical TTC (+1.05 s)
 
 ## Sign detection windows
 
@@ -133,7 +133,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 0.15 s: A observed track_001 start closing in (already the case when first observed).
 - t = 2.45 s: A released the accelerator.
 - t = 2.45 s: A started braking.
-- t = 2.65 s: A's time-to-contact with track_001 became critical.
+- t = 2.60 s: A's time-to-contact with track_001 became critical.
 - t = 2.95 s: A observed track_001 cutting in from the left.
 - t = 3.25 s: A released the brake.
 - t = 3.35 s: A pressed the accelerator.

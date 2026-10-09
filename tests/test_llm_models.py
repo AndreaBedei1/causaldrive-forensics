@@ -17,7 +17,7 @@ from pathlib import Path
 from unittest import mock
 
 from src.cdf.llm.payload_audit import PayloadAuditError, PayloadAuditor
-from src.cdf.llm.pipeline import AnalysisOptions, load_llm_config, run_analysis
+from src.cdf.llm.pipeline import AnalysisOptions, load_llm_config, run_analysis, verify_analysis
 from src.cdf.llm.prompts import packet_text
 from src.cdf.llm.providers import (GeminiProvider, ModelNotAllowed, OpenAIProvider, allowed_models, default_model,
                                    make_provider)
@@ -306,6 +306,21 @@ class AnalysisModelTests(_RunTestCase):
         self.assertIn(INVALID_IDENTITY_HALLUCINATION, codes)
         evaluation = json.loads((result.analysis_dir / "evaluation.json").read_text())
         self.assertEqual(evaluation["attribution"]["kind"], "NOT_IN_RECONSTRUCTION")
+
+    def test_a_reverification_leaves_the_saved_analysis_untouched(self):
+        result = self.analyse("gemini", FakeTransport("gemini", [stage1_answer(), stage2_answer()]),
+                              model="gemini-3.5-flash-lite")
+        before = {path.name: path.read_bytes() for path in result.analysis_dir.iterdir() if path.is_file()}
+        out = result.analysis_dir / "reverification_test"
+        verification, evaluation = verify_analysis(result.analysis_dir, CONFIG, out_dir=out, note="trace regenerated")
+        after = {path.name: path.read_bytes() for path in result.analysis_dir.iterdir() if path.is_file()}
+        self.assertEqual(before, after)  # answers, verification and evaluation of the analysis unchanged
+        saved = json.loads((out / "verification.json").read_text())
+        self.assertEqual(saved["reverification"]["note"], "trace regenerated")
+        self.assertTrue(saved["reverification"]["answers_unchanged"])
+        self.assertEqual(set(saved["reverification"]["previous_outputs_sha256"]), {"verification.json", "evaluation.json"})
+        self.assertIn("global_trace.jsonl", saved["reverification"]["semantic_trace_files_sha256"])
+        self.assertEqual(json.loads((out / "evaluation.json").read_text())["reverification"], saved["reverification"])
 
 
 if __name__ == "__main__":

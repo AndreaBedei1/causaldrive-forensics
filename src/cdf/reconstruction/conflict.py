@@ -1,4 +1,12 @@
-"""Collision course and braking avoidability of a radar track: the CRITICAL_TTC model.
+"""Collision course, braking avoidability and safe following distance of a radar track: the CRITICAL_TTC model.
+
+CRITICAL_TTC is true for either of two reasons (``critical_reason``):
+
+* PREDICTED_OVERLAP: a predicted 2-D collision course that braking can no longer
+  avoid with the available deceleration (points 1-3 below);
+* UNSAFE_FORWARD_GAP: a road user ahead of the recorder, in its path or entering
+  it from just beside it, is closer than the safe following distance (point 4),
+  whether or not the two are on a collision course at their current speeds.
 
 Everything is local to one recorder: its own odometry (speed, yaw rate), its own
 footprint and one smoothed radar track.  At each track sample the future is
@@ -39,28 +47,69 @@ predicted over ``prediction_horizon_s`` in the recorder's vehicle frame:
    young track's velocity is not yet known (the smoother's uncertainty at a
    track's first samples already draws on later data and understates it).
 
-For a target ahead in the same lane this is the stopping-capability check of a
-following vehicle: with the reaction distance, the braking distance and the
-margin it must stop short of the target, which keeps its speed or (when
-braking) its measured deceleration.  This is the idea of the safety distance of
-art. 149 of the Italian Highway Code (room to stop if the vehicle ahead brakes),
-used as a concept only: the code prescribes no numbers.  For crossing traffic the
-space-time overlap of the two predicted footprints replaces any one-dimensional
-distance: a car that crosses ahead of or behind the recorder's envelope is not
-on a collision course, whatever its range rate.
+For a target ahead in the same lane points 1-3 check whether the recorder can
+still stop short of the target as it moves now (keeping its speed, or its
+measured deceleration when it brakes): a car ahead at the recorder's own speed
+is never on a collision course, however close it is.  Point 4 adds what that
+misses: the room the recorder would need if the vehicle ahead braked.  For
+crossing traffic the space-time overlap of the two predicted footprints
+replaces any one-dimensional distance: a car that crosses ahead of or behind the
+recorder's envelope is not on a collision course, whatever its range rate.
 
-Parameters are global and documented in ``configs/reconstruction.yaml``; they
-are modelling assumptions, not a norm.  Limits: constant velocity / yaw rate
-(no intent, no lane geometry), a nominal target size, braking as the only
-avoidance manoeuvre (no swerve), one track at a time (no occlusion of the
-predicted paths by third vehicles).
+4. SAFE FOLLOWING DISTANCE (UNSAFE_FORWARD_GAP).  The longitudinal clearance
+   from the recorder's front face to the rear face of the target's nominal box,
+   along the recorder's heading, is compared with the larger of two distances:
+
+   * time gap: speed x minimum time gap of the table of UN Regulation No. 157
+     (ALKS, M1/N1: 1.0 s at 7.2 km/h ... 1.6 s at 60 km/h, linear interpolation;
+     the first and last values are held outside the table, with at least
+     ``critical_min_following_distance_m``);
+   * braking: the recorder's reaction distance plus its braking distance, minus
+     the braking distance of the vehicle ahead if that one brakes at
+     ``critical_lead_deceleration_mps2``, plus the standstill margin d0, never
+     less than d0.  The lead's braking is hypothetical: its measured
+     acceleration is not used, the question is whether the present gap would
+     suffice if it braked.
+
+   It applies only to a road user that is a leader of the recorder: moving in
+   the same direction (SAME_DIRECTION encounter), its body ahead of the
+   recorder's front face, either overlapping the path corridor
+   (``path_half_width_m`` either side of the heading) or within
+   ``critical_front_lateral_margin_m`` of it while approaching it laterally
+   (``critical_front_lateral_speed_mps`` beyond the estimate's uncertainty), and
+   with the recorder itself moving.  A car beside or behind the recorder, a car
+   keeping its own lane next to the corridor and a car further away are never
+   critical for this reason (they still are when the 2-D prediction finds a
+   collision course).  Without a predicted overlap there is no TTC: ``ttc_s``
+   stays None.  Hysteresis: the reason holds until the clearance exceeds
+   ``critical_forward_release_factor`` x the required distance (or the target
+   stops being a leader).  The estimate gates of point 3 apply, and a track seen
+   past another tracked vehicle (``TrackSample.occluded``) gives no evidence
+   either way for this reason, since its returns may be hidden by or mixed with
+   that vehicle's.
+
+The safe distance follows the idea of art. 149 of the Italian Highway Code (keep
+a distance that lets the recorder stop in time and avoid a collision with the
+vehicle ahead) and of Directive 2006/126/EC (adequate distance to the vehicles
+in front and at the side, speed that allows stopping within the free distance),
+which prescribe no numbers.  UN R157 regulates automated lane keeping systems:
+its time-gap table is an engineering anchor, not a legal rule for human
+drivers, and no single European "critical TTC" threshold exists.  UN R152
+(AEBS) asks for at least 5 m/s^2 of braking demand when a collision is imminent;
+the reaction time and decelerations used here are modelling assumptions of this
+reconstruction, not values prescribed by EU or UNECE rules.
+
+Parameters are global and documented in ``configs/reconstruction.yaml``.  Limits:
+constant velocity / yaw rate (no intent, no lane geometry), a nominal target
+size, braking as the only avoidance manoeuvre (no swerve), one track at a time
+for the prediction (no occlusion of the predicted paths by third vehicles).
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -75,8 +124,41 @@ HEADING_MIN_SPEED_MPS = 1.0
 # The recorder's path curvature is limited to this (a 5 m radius).
 MAX_CURVATURE_PER_M = 0.2
 # Beyond this angle between the line of sight and a target's axis, its near surface point is
-# taken as the corner towards the recorder (see _Prediction).
+# taken as the corner towards the recorder (see target_box).
 OBLIQUE_VIEW_DEG = 20.0
+# A recorder footprint for tracks of a recorder whose own shape is unknown.
+DEFAULT_FOOTPRINT = EgoFootprint(-2.3, 2.3, -0.95, 0.95)
+
+PREDICTED_OVERLAP = "PREDICTED_OVERLAP"
+UNSAFE_FORWARD_GAP = "UNSAFE_FORWARD_GAP"
+IN_PATH = "IN_PATH"
+FRONT_LATERAL = "FRONT_LATERAL"
+
+
+@dataclass
+class ForwardGap:
+    """The safe-following-distance check of one target (module docstring, point 4).
+
+    Conflict-model output: never part of the forensic packet given to an LLM.
+    """
+
+    leader: bool  # a road user the recorder follows: same direction, ahead, in or entering the path, recorder moving
+    region: Optional[str]  # IN_PATH (body overlaps the corridor) or FRONT_LATERAL (beside it, approaching), else None
+    longitudinal_clearance_m: float  # recorder's front face -> target box's rear face, along the recorder's heading
+    lateral_body_gap_m: float  # target box -> path corridor, across the heading (0: it overlaps the corridor)
+    lateral_approach_mps: float  # speed toward the corridor (relative, + = closing in), before the uncertainty
+    time_headway_s: Optional[float]  # clearance / recorder speed
+    minimum_time_gap_s: float  # UN R157 table at the recorder's speed
+    time_gap_distance_m: float
+    braking_distance_m: float  # reaction + own braking - lead braking + d0 (>= d0)
+    required_distance_m: float  # the larger of the two
+    unsafe: bool  # a leader closer than the required distance (before the estimate gates)
+    released: bool  # no leader, or clearance > release factor x required distance
+
+    @property
+    def margin_m(self) -> float:
+        """Clearance minus required distance (negative when unsafe)."""
+        return self.longitudinal_clearance_m - self.required_distance_m
 
 
 @dataclass
@@ -90,11 +172,14 @@ class ConflictAssessment:
     required_deceleration_mps2: Optional[float]  # None without collision course; inf: braking cannot avoid it
     avoidance_by: Optional[str]  # "recorder" or "target": whose braking the requirement refers to
     available_deceleration_mps2: float
-    critical: bool
+    critical: bool  # either reason below, claimed only on a known estimate
     known: bool  # the track estimate is precise enough for a claim (max_position_std_m, max_velocity_std_mps)
     target_speed_mps: float
     target_acceleration_mps2: float  # used in the prediction (0 unless it brakes)
     ego_speed_mps: float
+    forward: Optional[ForwardGap] = None  # safe following distance (None: not evaluated)
+    occluded: bool = False  # seen past another tracked vehicle: no forward-gap evidence either way
+    critical_reason: Optional[str] = None  # PREDICTED_OVERLAP, UNSAFE_FORWARD_GAP or both joined by "+"
 
     @property
     def braking_margin_mps2(self) -> Optional[float]:
@@ -102,6 +187,143 @@ class ConflictAssessment:
         if self.required_deceleration_mps2 is None or math.isinf(self.required_deceleration_mps2):
             return None
         return self.available_deceleration_mps2 - self.required_deceleration_mps2
+
+    @property
+    def forward_known(self) -> bool:
+        """The forward-gap reason can be claimed either way (estimate gates, line of sight clear)."""
+        return self.known and not self.occluded
+
+    def released(self, release_deceleration_mps2: float) -> bool:
+        """Both reasons are clearly off (the hysteresis of CRITICAL_TTC_END); False on an uncertain estimate."""
+        if not self.known:
+            return False
+        overlap_off = (not self.collision_course or self.required_deceleration_mps2 is None
+                       or self.required_deceleration_mps2 < release_deceleration_mps2)
+        forward_off = self.forward is None or self.occluded or self.forward.released
+        return overlap_off and forward_off
+
+
+def minimum_time_gap_s(speed_mps: float, table: Sequence[Sequence[float]]) -> float:
+    """Minimum following time gap (s) at a speed, from a (km/h, s) table: linear interpolation, ends held."""
+    points = sorted((float(kmh), float(gap)) for kmh, gap in table)
+    kmh = max(speed_mps, 0.0) * 3.6
+    if kmh <= points[0][0]:
+        return points[0][1]
+    for (k0, t0), (k1, t1) in zip(points, points[1:]):
+        if kmh <= k1:
+            return t0 + (t1 - t0) * (kmh - k0) / (k1 - k0)
+    return points[-1][1]
+
+
+def safe_following_distance(ego_speed_mps: float, lead_speed_mps: float, cfg: SemanticsConfig) -> Tuple[float, float, float]:
+    """(time-gap distance, braking distance, required distance) behind a lead vehicle (module docstring, point 4)."""
+    ego_speed, lead_speed = max(ego_speed_mps, 0.0), max(lead_speed_mps, 0.0)
+    time_gap = max(ego_speed * minimum_time_gap_s(ego_speed, cfg.critical_time_gap_table),
+                   cfg.critical_min_following_distance_m)
+    d0 = cfg.critical_standstill_margin_m
+    braking = (ego_speed * cfg.critical_reaction_time_s
+               + ego_speed * ego_speed / (2.0 * cfg.critical_deceleration_mps2)
+               - lead_speed * lead_speed / (2.0 * cfg.critical_lead_deceleration_mps2) + d0)
+    braking = max(braking, d0)
+    return time_gap, braking, max(time_gap, braking)
+
+
+def lateral_body_gap(y_min: float, y_max: float, half_width: float) -> float:
+    """Distance across the heading from a body spanning [y_min, y_max] to the corridor |y| <= half_width."""
+    return max(y_min - half_width, -half_width - y_max, 0.0)
+
+
+def target_box(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootprint],
+               cfg: SemanticsConfig) -> Tuple[np.ndarray, np.ndarray, Tuple[float, float], float, float]:
+    """The target's nominal box in the recorder's vehicle frame: (centre, unit heading, half sizes,
+    speed used, heading angle) -- see the module docstring, "target"."""
+    footprint = footprint or DEFAULT_FOOTPRINT
+    c, s = math.cos(own.heading), math.sin(own.heading)
+    # Target: ground velocity in the recorder's axes, heading, near surface, box centre.
+    tvx, tvy = c * sample.vx_mps + s * sample.vy_mps, -s * sample.vx_mps + c * sample.vy_mps
+    # The target's motion across the recorder's heading counts only beyond the uncertainty of
+    # its estimate: a radar track's median point slides over the target's visible body while
+    # the view angle changes (S08: an oncoming car passing beside the recorder looked 1 m/s
+    # closer to its lane than it was), and the null hypothesis for a car is to keep to its
+    # lane, parallel to the recorder, not to head straight at it.
+    tvy = math.copysign(max(abs(tvy) - sample.vel_std_mps, 0.0), tvy)
+    speed = math.hypot(tvx, tvy)
+    if speed >= HEADING_MIN_SPEED_MPS:
+        ux, uy = tvx / speed, tvy / speed
+    else:
+        ux, uy = 1.0, 0.0
+    nx, ny = footprint.outward(sample.longitudinal_m, sample.lateral_m)
+    near = np.array([sample.longitudinal_m - sample.surface_offset_m * nx,
+                     sample.lateral_m - sample.surface_offset_m * ny])
+    length, width = cfg.target_length_m, cfg.target_width_m
+    # The near surface point is the part of the target closest to the recorder: seen obliquely,
+    # the corner towards it; seen along one of its axes, the middle of the facing side.  The
+    # box lies behind it, in each of its two axes by a weight growing from 0 (looking along
+    # that face) to 1 at OBLIQUE_VIEW_DEG and beyond.
+    gx, gy = -nx, -ny  # from the target towards the recorder
+    along, across = gx * ux + gy * uy, gx * -uy + gy * ux  # in the target's axes (across = its right)
+    oblique = math.sin(math.radians(OBLIQUE_VIEW_DEG))
+    weight_along, weight_across = min(abs(along) / oblique, 1.0), min(abs(across) / oblique, 1.0)
+    centre = (near - math.copysign(length / 2.0 * weight_along, along) * np.array([ux, uy])
+              - math.copysign(width / 2.0 * weight_across, across) * np.array([-uy, ux]))
+    return centre, np.array([ux, uy]), (length / 2.0, width / 2.0), speed, math.atan2(uy, ux)
+
+
+def box_corners(centre: np.ndarray, unit: np.ndarray, half: Tuple[float, float]) -> np.ndarray:
+    along, across = unit * half[0], np.array([-unit[1], unit[0]]) * half[1]
+    return np.array([centre + along + across, centre + along - across, centre - along - across, centre - along + across])
+
+
+def segment_hits_box(p0: np.ndarray, p1: np.ndarray, centre: np.ndarray, unit: np.ndarray,
+                     half: Tuple[float, float]) -> bool:
+    """Whether the segment p0-p1 enters the oriented box (clipping in the box's own axes)."""
+    def local(point: np.ndarray) -> np.ndarray:
+        d = point - centre
+        return np.array([d[0] * unit[0] + d[1] * unit[1], -d[0] * unit[1] + d[1] * unit[0]])
+    a, b = local(np.asarray(p0, dtype=float)), local(np.asarray(p1, dtype=float))
+    d = b - a
+    low, high = 0.0, 1.0
+    for axis in (0, 1):
+        for sign in (-1.0, 1.0):
+            p = sign * d[axis]
+            q = half[axis] - sign * a[axis]
+            if abs(p) < 1e-12:
+                if q < 0.0:
+                    return False
+                continue
+            r = q / p
+            if p < 0.0:
+                low = max(low, r)
+            else:
+                high = min(high, r)
+            if low > high:
+                return False
+    return True
+
+
+def near_surface_point(sample: TrackSample, footprint: Optional[EgoFootprint]) -> np.ndarray:
+    """The target's observed near surface in the vehicle frame: the tracked point moved back by its depth."""
+    footprint = footprint or DEFAULT_FOOTPRINT
+    nx, ny = footprint.outward(sample.longitudinal_m, sample.lateral_m)
+    return np.array([sample.longitudinal_m - sample.surface_offset_m * nx,
+                     sample.lateral_m - sample.surface_offset_m * ny])
+
+
+def occluded_by(sample: TrackSample, own: EgoState, others: Sequence[TrackSample],
+                footprint: Optional[EgoFootprint], cfg: SemanticsConfig) -> bool:
+    """Whether the line of sight from the recorder's body to the sample's near surface crosses the nominal
+    box (grown by ``occlusion_margin_m``) of another track of the same recorder at the same instant:
+    the target is seen past that vehicle, and its radar returns may be hidden by or mixed with it."""
+    footprint = footprint or DEFAULT_FOOTPRINT
+    target = near_surface_point(sample, footprint)
+    qx, qy = footprint.nearest(float(target[0]), float(target[1]))
+    eye = np.array([float(qx), float(qy)])
+    grow = cfg.occlusion_margin_m
+    for other in others:
+        centre, unit, half, _, _ = target_box(other, own, footprint, cfg)
+        if segment_hits_box(eye, target, centre, unit, (half[0] + grow, half[1] + grow)):
+            return True
+    return False
 
 
 def _corners(half_x: float, half_y: float) -> np.ndarray:
@@ -168,48 +390,27 @@ class _Prediction:
         self.ego_speed = max(c * own.vx + s * own.vy, 0.0)
         curvature = own.yaw_rate / self.ego_speed if self.ego_speed > 1.0 else 0.0
         self.curvature = max(-MAX_CURVATURE_PER_M, min(MAX_CURVATURE_PER_M, curvature))
-        if footprint is None:
-            footprint = EgoFootprint(-2.3, 2.3, -0.95, 0.95)
+        footprint = footprint or DEFAULT_FOOTPRINT
         d0, lateral = cfg.critical_standstill_margin_m, cfg.critical_lateral_margin_m
         x_min, x_max = footprint.x_min - d0, footprint.x_max + d0
         y_min, y_max = footprint.y_min - lateral, footprint.y_max + lateral
         self.ego_half = ((x_max - x_min) / 2.0, (y_max - y_min) / 2.0)
         self.ego_offset = np.array([(x_max + x_min) / 2.0, (y_max + y_min) / 2.0])
-        # Target: ground velocity in the recorder's axes, heading, near surface, box centre.
-        tvx, tvy = c * sample.vx_mps + s * sample.vy_mps, -s * sample.vx_mps + c * sample.vy_mps
-        # The target's motion across the recorder's heading counts only beyond the uncertainty of
-        # its estimate: a radar track's median point slides over the target's visible body while
-        # the view angle changes (S08: an oncoming car passing beside the recorder looked 1 m/s
-        # closer to its lane than it was), and the null hypothesis for a car is to keep to its
-        # lane, parallel to the recorder, not to head straight at it.
-        tvy = math.copysign(max(abs(tvy) - sample.vel_std_mps, 0.0), tvy)
-        self.target_speed = math.hypot(tvx, tvy)
-        if self.target_speed >= HEADING_MIN_SPEED_MPS:
-            ux, uy = tvx / self.target_speed, tvy / self.target_speed
-        else:
-            ux, uy = 1.0, 0.0
-        self.target_angle = math.atan2(uy, ux)
+        self.footprint = footprint
+        # Target: its nominal box behind the observed near surface, moving at its velocity.
+        centre, unit, half, speed, angle = target_box(sample, own, footprint, cfg)
+        self.target_speed = speed
+        self.target_angle = angle
         acceleration = sample.acceleration_mps2 if self.target_speed >= HEADING_MIN_SPEED_MPS else 0.0
         self.target_acceleration = (max(acceleration, -MAX_SEARCH_DECELERATION_MPS2)
                                     if acceleration <= -cfg.target_braking_min_mps2 else 0.0)
-        px, py = sample.longitudinal_m, sample.lateral_m
-        nx, ny = footprint.outward(px, py)
-        near = np.array([px - sample.surface_offset_m * nx, py - sample.surface_offset_m * ny])
-        length, width = cfg.target_length_m, cfg.target_width_m
-        # The near surface point is the part of the target closest to the recorder: seen obliquely,
-        # the corner towards it; seen along one of its axes, the middle of the facing side.  The
-        # box lies behind it, in each of its two axes by a weight growing from 0 (looking along
-        # that face) to 1 at OBLIQUE_VIEW_DEG and beyond.
-        gx, gy = -nx, -ny  # from the target towards the recorder
-        along, across = gx * ux + gy * uy, gx * -uy + gy * ux  # in the target's axes (across = its right)
-        oblique = math.sin(math.radians(OBLIQUE_VIEW_DEG))
-        weight_along, weight_across = min(abs(along) / oblique, 1.0), min(abs(across) / oblique, 1.0)
-        centre = (near - math.copysign(length / 2.0 * weight_along, along) * np.array([ux, uy])
-                  - math.copysign(width / 2.0 * weight_across, across) * np.array([-uy, ux]))
         self.target_centre = centre
-        self.target_unit = np.array([ux, uy])
-        self.target_half = (length / 2.0, width / 2.0)
+        self.target_unit = unit
+        self.target_half = half
         self.encounter = _encounter(self.target_speed, math.degrees(self.target_angle))
+        # Relative velocity across the recorder's heading (+ = to its right; no uncertainty removed).
+        self.lateral_relative_speed = -s * (sample.vx_mps - own.vx) + c * (sample.vy_mps - own.vy)
+        self.lead_speed = c * sample.vx_mps + s * sample.vy_mps  # the target's speed along the recorder's heading
 
     def ego_pose(self, travel: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Envelope centres and headings after travelling ``travel`` metres along the path."""
@@ -249,11 +450,43 @@ def _required(predict) -> float:
     return high
 
 
+def forward_gap(prediction: "_Prediction", cfg: SemanticsConfig, vel_std_mps: float) -> ForwardGap:
+    """The safe-following-distance check of one prediction (module docstring, point 4)."""
+    corners = box_corners(prediction.target_centre, prediction.target_unit, prediction.target_half)
+    clearance = float(corners[:, 0].min()) - prediction.footprint.x_max
+    y_min, y_max = float(corners[:, 1].min()), float(corners[:, 1].max())
+    gap = lateral_body_gap(y_min, y_max, cfg.path_half_width_m)
+    # Toward the corridor: the side the body lies on (a body overlapping the corridor has no side).
+    side = 1.0 if y_min > cfg.path_half_width_m else (-1.0 if y_max < -cfg.path_half_width_m else 0.0)
+    approach = -side * prediction.lateral_relative_speed
+    if gap <= 0.0:
+        region: Optional[str] = IN_PATH
+    elif (gap <= cfg.critical_front_lateral_margin_m
+          and approach - vel_std_mps >= cfg.critical_front_lateral_speed_mps):
+        region = FRONT_LATERAL
+    else:
+        region = None
+    ego_speed = prediction.ego_speed
+    leader = (region is not None and clearance > 0.0 and prediction.encounter == "SAME_DIRECTION"
+              and ego_speed >= cfg.critical_forward_min_speed_mps)
+    time_gap_distance, braking_distance, required = safe_following_distance(ego_speed, prediction.lead_speed, cfg)
+    unsafe = leader and clearance < required
+    released = not leader or clearance > cfg.critical_forward_release_factor * required
+    return ForwardGap(leader=leader, region=region, longitudinal_clearance_m=clearance, lateral_body_gap_m=gap,
+                      lateral_approach_mps=approach,
+                      time_headway_s=clearance / ego_speed if ego_speed > 0.1 and clearance > 0.0 else None,
+                      minimum_time_gap_s=minimum_time_gap_s(ego_speed, cfg.critical_time_gap_table),
+                      time_gap_distance_m=time_gap_distance, braking_distance_m=braking_distance,
+                      required_distance_m=required, unsafe=unsafe, released=released)
+
+
 def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootprint],
                     cfg: SemanticsConfig, track_age_s: Optional[float] = None) -> ConflictAssessment:
-    """Collision course, TTC and braking avoidability of one track sample (see the module docstring).
+    """Collision course, TTC, braking avoidability and safe following distance of one track sample
+    (see the module docstring).
 
-    ``track_age_s``: time since the track's first sample (None: old enough).
+    ``track_age_s``: time since the track's first sample (None: old enough).  ``sample.occluded``
+    (set by the local reconstruction) withholds the forward-gap reason either way.
     """
     prediction = _Prediction(sample, own, footprint, cfg)
     available = cfg.critical_deceleration_mps2
@@ -264,12 +497,28 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
                                 available_deceleration_mps2=available, critical=False, known=known,
                                 target_speed_mps=prediction.target_speed,
                                 target_acceleration_mps2=prediction.target_acceleration,
-                                ego_speed_mps=prediction.ego_speed)
+                                ego_speed_mps=prediction.ego_speed,
+                                forward=forward_gap(prediction, cfg, sample.vel_std_mps),
+                                occluded=bool(getattr(sample, "occluded", False)))
+    _collision_course(prediction, sample, cfg, result)
+    reasons = []
+    if result.collision_course and result.required_deceleration_mps2 >= available:
+        reasons.append(PREDICTED_OVERLAP)
+    if result.forward.unsafe and not result.occluded:
+        reasons.append(UNSAFE_FORWARD_GAP)
+    result.critical = known and bool(reasons)
+    result.critical_reason = "+".join(reasons) if result.critical else None
+    return result
+
+
+def _collision_course(prediction: "_Prediction", sample: TrackSample, cfg: SemanticsConfig,
+                      result: ConflictAssessment) -> None:
+    """Points 1-2 of the module docstring: overlap, TTC and the deceleration that removes it."""
     overlap = prediction.overlaps()
     if not overlap.any():
-        return result
+        return
     if overlap[0] and sample.closing_speed_mps < cfg.closing_speed_threshold_mps:
-        return result  # already inside the envelope, but no longer closing in
+        return  # already inside the envelope, but no longer closing in
     times = prediction.times[overlap]
     result.collision_course = True
     result.ttc_s = round(float(times[0]), 3)
@@ -287,5 +536,3 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
         by = "target"
     result.required_deceleration_mps2 = required
     result.avoidance_by = by
-    result.critical = known and required >= available
-    return result

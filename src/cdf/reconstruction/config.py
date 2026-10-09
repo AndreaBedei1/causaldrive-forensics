@@ -8,7 +8,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Tuple
+
+# UN Regulation No. 157 (ALKS), vehicles of categories M1 / N1: present speed (km/h) -> minimum
+# following time gap (s).  An engineering anchor for the safe following distance of CRITICAL_TTC,
+# not a legal rule for human drivers (reconstruction/conflict.py).
+UNECE_R157_TIME_GAP = ((7.2, 1.0), (10.0, 1.1), (20.0, 1.2), (30.0, 1.3), (40.0, 1.4), (50.0, 1.5), (60.0, 1.6))
 
 
 @dataclass
@@ -118,6 +123,28 @@ class SemanticsConfig:
     target_braking_min_mps2: float = 1.0
     # No CRITICAL_TTC claim (either way) on a track younger than this.
     critical_min_track_age_s: float = 0.5
+    # CRITICAL_TTC also for an unsafe forward gap (UNSAFE_FORWARD_GAP): a leader (same direction,
+    # body ahead of the front face, in the path corridor or within the front-lateral margin of it
+    # while approaching it) closer than the larger of the time-gap distance (speed x this table's
+    # time gap, linear interpolation, ends held, at least the minimum distance) and the braking
+    # distance (reaction + own braking - the lead's braking at the lead deceleration + d0).
+    critical_time_gap_table: Tuple[Tuple[float, float], ...] = UNECE_R157_TIME_GAP
+    critical_min_following_distance_m: float = 2.0
+    # Hypothetical braking of the vehicle ahead (its measured acceleration is not used).
+    critical_lead_deceleration_mps2: float = 6.0
+    # The recorder must be moving: a standing recorder follows nobody.
+    critical_forward_min_speed_mps: float = 1.0
+    # Beside the corridor a body counts only within this margin and approaching it laterally at
+    # least this fast beyond the velocity uncertainty (a car keeping its lane next to the
+    # corridor is not a leader; in 3.5 m lanes it sits about 1 m outside the 3 m corridor).
+    critical_front_lateral_margin_m: float = 1.0
+    critical_front_lateral_speed_mps: float = 0.3
+    # The forward-gap reason ends once the clearance exceeds this factor x the required distance.
+    critical_forward_release_factor: float = 1.10
+    # A track whose line of sight from the recorder crosses another track's nominal box grown by
+    # this margin (the radar's position noise, tracking.measurement_std_m) is seen past that
+    # vehicle: no CUT_IN evidence and no forward-gap evidence either way.
+    occlusion_margin_m: float = 0.5
     # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading: the yaw
     # rate (over the preceding window) reaches the on threshold while moving at least
     # the minimum speed, and the turn ends below the off threshold...
@@ -147,7 +174,7 @@ class SemanticsConfig:
     # recorder's heading and at least this fast, approaches the corridor
     # laterally at this speed or more, for this long, starting at least this
     # far outside the corridor, by at least this lateral displacement, and is
-    # due to reach the corridor within this lateral time.
+    # due to reach the corridor within this lateral time...
     cut_in_max_heading_deg: float = 25.0
     cut_in_min_target_speed_mps: float = 2.0
     cut_in_lateral_speed_mps: float = 0.3
@@ -155,6 +182,9 @@ class SemanticsConfig:
     cut_in_outside_margin_m: float = 0.5
     cut_in_min_displacement_m: float = 0.5
     cut_in_horizon_s: float = 3.0
+    # ...and its nominal body is already within this distance of the corridor (pre-entry): a car
+    # still crossing a lane further away is not cutting in yet.
+    cut_in_preentry_margin_m: float = 1.0
     # The manoeuvre ends once its lateral approach stays below this speed this long.
     cut_in_settle_speed_mps: float = 0.2
     cut_in_settle_s: float = 0.3

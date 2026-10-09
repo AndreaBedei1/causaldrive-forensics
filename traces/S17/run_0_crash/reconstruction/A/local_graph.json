@@ -208,6 +208,46 @@
     },
     {
       "node_id": "A:e06",
+      "event_type": "CRITICAL_TTC_START",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "track_001",
+      "t_local": 2.6,
+      "attributes": {},
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": true,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          },
+          "track_002": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {},
+        "facts_t_local": 2.5
+      }
+    },
+    {
+      "node_id": "A:e07",
       "event_type": "CUT_IN_FROM_RIGHT_START",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -229,7 +269,7 @@
         "external": {
           "track_001": {
             "CLOSING": true,
-            "CRITICAL_TTC": false,
+            "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
@@ -247,7 +287,7 @@
       }
     },
     {
-      "node_id": "A:e07",
+      "node_id": "A:e08",
       "event_type": "EGO_PATH_ENTRY",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -269,7 +309,7 @@
         "external": {
           "track_001": {
             "CLOSING": true,
-            "CRITICAL_TTC": false,
+            "CRITICAL_TTC": true,
             "IN_EGO_PATH": false,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": true
@@ -284,46 +324,6 @@
         },
         "signs": {},
         "facts_t_local": 3.3
-      }
-    },
-    {
-      "node_id": "A:e08",
-      "event_type": "CRITICAL_TTC_START",
-      "kind": "PERCEPTION",
-      "actor_id": "A",
-      "subject_id": "track_001",
-      "t_local": 3.6,
-      "attributes": {},
-      "source": "radar",
-      "confidence": null,
-      "perceived_state_before": {
-        "ego": {
-          "MOVING": true,
-          "STOP": false,
-          "BRAKE": false,
-          "THROTTLE": true,
-          "TURN_LEFT": false,
-          "TURN_RIGHT": false,
-          "SPEED_LIMIT_EXCEEDED": false
-        },
-        "external": {
-          "track_001": {
-            "CLOSING": true,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": true,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": true
-          },
-          "track_002": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": false,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
-          }
-        },
-        "signs": {},
-        "facts_t_local": 3.5
       }
     },
     {
@@ -448,7 +448,7 @@
     },
     {
       "node_id": "A:e12",
-      "event_type": "CRITICAL_TTC_END",
+      "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
@@ -488,11 +488,11 @@
     },
     {
       "node_id": "A:e13",
-      "event_type": "CLOSING_END",
+      "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 4.55,
+      "t_local": 4.65,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -508,7 +508,7 @@
         },
         "external": {
           "track_001": {
-            "CLOSING": true,
+            "CLOSING": false,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
@@ -523,7 +523,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 4.5
+        "facts_t_local": 4.6
       }
     },
     {
@@ -956,23 +956,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "A:e11",
+      "from": "A:e12",
       "to": "A:e13",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "A:e12",
-      "to": "A:e14",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "A:e12",
-      "to": "A:e15",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "A:e12",
-      "to": "A:e16",
       "relation": "PRECEDES"
     },
     {

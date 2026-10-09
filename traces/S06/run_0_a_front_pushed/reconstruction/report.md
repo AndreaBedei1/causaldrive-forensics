@@ -41,16 +41,15 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 ## Global graph
 
-33 nodes, 63 edges; 3 merged node(s): g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
+33 nodes, 65 edges; 3 merged node(s): g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
 
 ### Event sequence (global time)
 
 - `-4.80` MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+- `-4.30` CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,C)
 - `-1.85` THROTTLE_END(C); BRAKE_START(C)
 - `-1.60` CLOSING_START(B,C)
-- `-1.50` CRITICAL_TTC_START(B,C)
 - `-1.10` THROTTLE_END(B); BRAKE_START(B)
-- `-0.90` CRITICAL_TTC_START(A,B)
 - `-0.85` CLOSING_START(A,B)
 - `-0.75` MOVING_END(C); STOP_START(C)
 - `-0.25` THROTTLE_END(A); BRAKE_START(A)
@@ -71,13 +70,13 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - 4.80 s before the reference collision, C pressed the accelerator (already the case when first observed).
 - 4.80 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 4.80 s before the reference collision, B's radar started tracking C, which appeared in front of it.
+- 4.30 s before the reference collision, A's time-to-contact with B became critical.
+- 4.30 s before the reference collision, B's time-to-contact with C became critical.
 - 1.85 s before the reference collision, C released the accelerator.
 - 1.85 s before the reference collision, C started braking.
 - 1.60 s before the reference collision, B observed C start closing in.
-- 1.50 s before the reference collision, B's time-to-contact with C became critical.
 - 1.10 s before the reference collision, B released the accelerator.
 - 1.10 s before the reference collision, B started braking.
-- 0.90 s before the reference collision, A's time-to-contact with B became critical.
 - 0.85 s before the reference collision, A observed B start closing in.
 - 0.75 s before the reference collision, C stopped moving.
 - 0.75 s before the reference collision, C came to a stop.
@@ -101,12 +100,13 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 3.90, COLLISION with B 4.80 (+0.90 s) [local times; t_global: critical_ttc_start -0.90, collision +0.00]
-- B's track_001 (C): CRITICAL_TTC_START 3.30, COLLISION with C 5.30 (+2.00 s) [local times; t_global: critical_ttc_start -1.50, collision +0.50]
+- A's track_001 (B): CRITICAL_TTC_START 0.50, COLLISION with B 4.80 (+4.30 s) [local times; t_global: critical_ttc_start -4.30, collision +0.00]
+- B's track_001 (C): CRITICAL_TTC_START 0.50, COLLISION with C 5.30 (+4.80 s) [local times; t_global: critical_ttc_start -4.30, collision +0.50]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
 - MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+- CRITICAL_TTC_START(A,B); CRITICAL_TTC_START(B,C)
 - THROTTLE_END(C); BRAKE_START(C)
 - THROTTLE_END(B); BRAKE_START(B)
 - MOVING_END(C); STOP_START(C)
@@ -214,6 +214,43 @@ C:
     "target_width_m": 1.9,
     "target_braking_min_mps2": 1.0,
     "critical_min_track_age_s": 0.5,
+    "critical_time_gap_table": [
+      [
+        7.2,
+        1.0
+      ],
+      [
+        10.0,
+        1.1
+      ],
+      [
+        20.0,
+        1.2
+      ],
+      [
+        30.0,
+        1.3
+      ],
+      [
+        40.0,
+        1.4
+      ],
+      [
+        50.0,
+        1.5
+      ],
+      [
+        60.0,
+        1.6
+      ]
+    ],
+    "critical_min_following_distance_m": 2.0,
+    "critical_lead_deceleration_mps2": 6.0,
+    "critical_forward_min_speed_mps": 1.0,
+    "critical_front_lateral_margin_m": 1.0,
+    "critical_front_lateral_speed_mps": 0.3,
+    "critical_forward_release_factor": 1.1,
+    "occlusion_margin_m": 0.5,
     "turn_yaw_rate_window_s": 0.2,
     "turn_yaw_rate_on_dps": 10.0,
     "turn_yaw_rate_off_dps": 5.0,
@@ -232,6 +269,7 @@ C:
     "cut_in_outside_margin_m": 0.5,
     "cut_in_min_displacement_m": 0.5,
     "cut_in_horizon_s": 3.0,
+    "cut_in_preentry_margin_m": 1.0,
     "cut_in_settle_speed_mps": 0.2,
     "cut_in_settle_s": 0.3
   },

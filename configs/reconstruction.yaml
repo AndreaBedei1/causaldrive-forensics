@@ -42,14 +42,18 @@ reconstruction:
     full_stop_speed_mps: 0.3          # STOP_START below; moving again above 1 m/s
     speed_limit_hysteresis_kmh: 1.0   # exceeding: above limit + 1 km/h, ends at or below limit - 1 km/h
     closing_speed_threshold_mps: 1.0  # CLOSING_START at or above, CLOSING_END below half of it
-    # CRITICAL_TTC (src/cdf/reconstruction/conflict.py, README "CRITICAL_TTC"): the recorder's
-    # envelope and the target's nominal box are predicted over the horizon (recorder: constant
-    # speed and yaw rate; target: its velocity, its measured deceleration when braking).  A
-    # collision course is an overlap; it is CRITICAL when avoiding it by braking (after the
-    # reaction time, to a stop, keeping the margins) needs at least the available deceleration.
-    # The braking vehicle is the recorder, or the target when no braking of the recorder helps
-    # (a car closing in from behind).  Modelling assumptions, not a norm: the stopping-distance
-    # idea of art. 149 CdS (safe distance = room to stop if the car ahead brakes) in 2-D.
+    # CRITICAL_TTC (src/cdf/reconstruction/conflict.py, README "CRITICAL_TTC") has two reasons.
+    # PREDICTED_OVERLAP: the recorder's envelope and the target's nominal box are predicted over
+    # the horizon (recorder: constant speed and yaw rate; target: its velocity, its measured
+    # deceleration when braking).  A collision course is an overlap; it is CRITICAL when avoiding
+    # it by braking (after the reaction time, to a stop, keeping the margins) needs at least the
+    # available deceleration.  The braking vehicle is the recorder, or the target when no braking
+    # of the recorder helps (a car closing in from behind).
+    # UNSAFE_FORWARD_GAP: a leader (same direction, ahead, in the path or entering it) is closer
+    # than the safe following distance, collision course or not (a car ahead at the same speed).
+    # Modelling assumptions, not a norm: the safe-distance idea of art. 149 CdS and Directive
+    # 2006/126/EC (room to stop if the vehicle ahead brakes), the UN R157 (ALKS) time-gap table as
+    # an engineering anchor; reaction time and decelerations are this reconstruction's choice.
     critical_reaction_time_s: 1.0     # reaction before braking (driver brake reaction ~0.7-1.5 s)...
     critical_deceleration_mps2: 6.0   # ...then braking at up to this (hard, non-emergency; emergency ~8-10)...
     critical_standstill_margin_m: 1.0 # ...stopping at least this far ahead of / behind the target (envelope)
@@ -61,6 +65,22 @@ reconstruction:
     target_width_m: 1.9               # measures no size; a mid-size car, campaign cars 4.2-5.9 x 1.8-2.2)
     target_braking_min_mps2: 1.0      # a target decelerating at least this is predicted to keep braking to a stop
     critical_min_track_age_s: 0.5     # no CRITICAL_TTC claim either way on a younger track (its velocity is not yet known)
+    # UNSAFE_FORWARD_GAP: clearance from the front face to the leader's box < max(time gap, braking).
+    critical_time_gap_table:          # UN R157 (ALKS, M1/N1): km/h -> minimum time gap s, linear, ends held
+      - [7.2, 1.0]
+      - [10.0, 1.1]
+      - [20.0, 1.2]
+      - [30.0, 1.3]
+      - [40.0, 1.4]
+      - [50.0, 1.5]
+      - [60.0, 1.6]
+    critical_min_following_distance_m: 2.0 # time-gap distance never below this (2 m at 7.2 km/h in the table)
+    critical_lead_deceleration_mps2: 6.0   # braking: reaction + v^2/2a(own) - v_lead^2/2a(lead) + d0; hypothetical lead braking
+    critical_forward_min_speed_mps: 1.0    # the recorder must be moving (a standing recorder follows nobody)
+    critical_front_lateral_margin_m: 1.0   # beside the corridor: body within this of it...
+    critical_front_lateral_speed_mps: 0.3  # ...and approaching it at least this fast beyond the velocity uncertainty
+    critical_forward_release_factor: 1.10  # the reason ends once the clearance > 1.10 x the required distance
+    occlusion_margin_m: 0.5           # seen past another track's box grown by this: no CUT_IN / forward-gap evidence
     # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading (never from the steer command)
     turn_yaw_rate_window_s: 0.2       # yaw rate = heading change over this preceding window (causal)
     turn_yaw_rate_on_dps: 10.0        # TURN_*_START at or above (lane changes peak below ~9 deg/s)...
@@ -80,6 +100,7 @@ reconstruction:
     cut_in_outside_margin_m: 0.5      # ...starting at least this far outside the corridor
     cut_in_min_displacement_m: 0.5    # ...having closed at least this much laterally
     cut_in_horizon_s: 3.0             # ...and due to reach the corridor within this lateral time
+    cut_in_preentry_margin_m: 1.0     # ...with its nominal body already within this of the corridor (not 2 lanes away)
     cut_in_settle_speed_mps: 0.2      # CUT_IN_END: lateral approach below this...
     cut_in_settle_s: 0.3              # ...for this long
 

@@ -749,7 +749,35 @@
           "latency_s": 32.854
         }
       },
-      "cost": null
+      "cost": null,
+      "reverified": {
+        "folder": "reverification_20261009",
+        "note": "Re-verification on 2026-10-09 of the unchanged Stage-1 / Stage-2 answers against the semantic trace regenerated after the CRITICAL_TTC change (safe following distance, UNSAFE_FORWARD_GAP) and the CUT_IN pre-entry region / occlusion gate; the forensic packet is byte-identical (97cb278d); deterministic verifier only, no model call.",
+        "verifier": {
+          "TRUE": 10,
+          "FALSE": 2,
+          "UNKNOWN": 0,
+          "INVALID": 0
+        },
+        "semantic_hypotheses": {
+          "hypotheses": 10,
+          "reference_events": 34,
+          "TP": 5,
+          "FP": 5,
+          "FN": 29,
+          "precision": 0.5,
+          "recall": 0.1471,
+          "f1": 0.2273,
+          "hallucination_rate": 0.1,
+          "identity_hallucination_rate": 0.0
+        },
+        "attribution": {
+          "responsible_actor": "A",
+          "resolved_entity": "A",
+          "kind": "RECORDER",
+          "confidence": 0.9
+        }
+      }
     },
     {
       "analysis_dir": "traces\\S17\\run_0_crash\\reconstruction\\llm\\runs\\openai_gpt-6-luna_20261008T195958Z",
@@ -1866,6 +1894,34 @@
           "input": 0.1,
           "cached_input": 0.01,
           "output": 0.5
+        }
+      },
+      "reverified": {
+        "folder": "reverification_20261009",
+        "note": "Re-verification on 2026-10-09 of the unchanged Stage-1 / Stage-2 answers against the semantic trace regenerated after the CRITICAL_TTC change (safe following distance, UNSAFE_FORWARD_GAP) and the CUT_IN pre-entry region / occlusion gate; the forensic packet is byte-identical (97cb278d); deterministic verifier only, no model call.",
+        "verifier": {
+          "TRUE": 19,
+          "FALSE": 12,
+          "UNKNOWN": 0,
+          "INVALID": 0
+        },
+        "semantic_hypotheses": {
+          "hypotheses": 26,
+          "reference_events": 34,
+          "TP": 15,
+          "FP": 11,
+          "FN": 19,
+          "precision": 0.5769,
+          "recall": 0.4412,
+          "f1": 0.5,
+          "hallucination_rate": 0.1538,
+          "identity_hallucination_rate": 0.0
+        },
+        "attribution": {
+          "responsible_actor": "A",
+          "resolved_entity": "A",
+          "kind": "RECORDER",
+          "confidence": 0.78
         }
       }
     }

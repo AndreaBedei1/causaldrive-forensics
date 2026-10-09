@@ -44,12 +44,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
 | g04 | -5.90 | THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
 | g05 | -5.90 | TRACK_APPEARED_FRONT | A | B | A:e03 @ 0.00 |  |
 | g06 | -5.90 | TRACK_APPEARED_FRONT | B | B:track_001 | B:e03 @ 0.00 |  |
-| g07 | -2.70 | CLOSING_START | B | B:track_001 | B:e04 @ 3.20 |  |
-| g08 | -2.50 | CRITICAL_TTC_START | B | B:track_001 | B:e05 @ 3.40 |  |
-| g09 | -2.25 | THROTTLE_END | B | - | B:e06 @ 3.65 |  |
-| g10 | -2.25 | BRAKE_START | B | - | B:e07 @ 3.65 |  |
-| g11 | -2.05 | CLOSING_START | A | B | A:e04 @ 3.85 |  |
-| g12 | -1.90 | CRITICAL_TTC_START | A | B | A:e05 @ 4.00 |  |
+| g07 | -5.40 | CRITICAL_TTC_START | A | B | A:e04 @ 0.50 |  |
+| g08 | -2.70 | CLOSING_START | B | B:track_001 | B:e04 @ 3.20 |  |
+| g09 | -2.50 | CRITICAL_TTC_START | B | B:track_001 | B:e05 @ 3.40 |  |
+| g10 | -2.25 | THROTTLE_END | B | - | B:e06 @ 3.65 |  |
+| g11 | -2.25 | BRAKE_START | B | - | B:e07 @ 3.65 |  |
+| g12 | -2.05 | CLOSING_START | A | B | A:e05 @ 3.85 |  |
 | g13 | -1.55 | CRITICAL_TTC_END | B | B:track_001 | B:e08 @ 4.35 |  |
 | g14 | -1.05 | CLOSING_END | B | B:track_001 | B:e09 @ 4.85 |  |
 | g15 | -1.05 | MOVING_END | B | - | B:e10 @ 4.85 |  |
@@ -79,9 +79,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
     g06 --PRECEDES--> g07
     g07 --PRECEDES--> g08
     g08 --PRECEDES--> g09
-    g08 --PRECEDES--> g10
+    g09 --PRECEDES--> g10
     g09 --PRECEDES--> g11
-    g10 --PRECEDES--> g11
+    g10 --PRECEDES--> g12
     g11 --PRECEDES--> g12
     g12 --PRECEDES--> g13
     g13 --PRECEDES--> g14
@@ -105,12 +105,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
     g20 --PRECEDES--> g23
     g21 --PRECEDES--> g22
     g21 --PRECEDES--> g23
-    g05 --SAME_TRACK--> g11
+    g05 --SAME_TRACK--> g07
     g05 --SAME_TRACK--> g12
     g05 --SAME_TRACK--> g20
     g05 --SAME_TRACK--> g21
-    g06 --SAME_TRACK--> g07
     g06 --SAME_TRACK--> g08
+    g06 --SAME_TRACK--> g09
     g06 --SAME_TRACK--> g13
     g06 --SAME_TRACK--> g14
 ```
@@ -122,11 +122,11 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | t_global | Events |
 |---------:|--------|
 | -5.90 | MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,B:track_001) |
+| -5.40 | CRITICAL_TTC_START(A,B) |
 | -2.70 | CLOSING_START(B,B:track_001) |
 | -2.50 | CRITICAL_TTC_START(B,B:track_001) |
 | -2.25 | THROTTLE_END(B); BRAKE_START(B) |
 | -2.05 | CLOSING_START(A,B) |
-| -1.90 | CRITICAL_TTC_START(A,B) |
 | -1.55 | CRITICAL_TTC_END(B,B:track_001) |
 | -1.05 | CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B) |
 | -0.65 | THROTTLE_END(A); BRAKE_START(A) |
@@ -137,7 +137,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 4.00, COLLISION with B 5.90 (+1.90 s) [local times; t_global: critical_ttc_start -1.90, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 0.50, COLLISION with B 5.90 (+5.40 s) [local times; t_global: critical_ttc_start -5.40, collision +0.00]
 - B's track_001 (unidentified B:track_001): CRITICAL_TTC_START 3.40, COLLISION 5.90 (+2.50 s) [local times; t_global: critical_ttc_start -2.50, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
@@ -148,11 +148,11 @@ Each recorder's own belief just before its events, in its own local names (track
 |---------:|----------|---------------------|-----------------------------|
 | -5.90 | A | g01 MOVING_START(A) (A:e01)<br>g03 THROTTLE_START(A) (A:e02)<br>g05 TRACK_APPEARED_FRONT(A,B) (A:e03) | ego: not yet observed |
 | -5.90 | B | g02 MOVING_START(B) (B:e01)<br>g04 THROTTLE_START(B) (B:e02)<br>g06 TRACK_APPEARED_FRONT(B,B:track_001) (B:e03) | ego: not yet observed |
-| -2.70 | B | g07 CLOSING_START(B,B:track_001) (B:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
-| -2.50 | B | g08 CRITICAL_TTC_START(B,B:track_001) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
-| -2.25 | B | g09 THROTTLE_END(B) (B:e06)<br>g10 BRAKE_START(B) (B:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| -2.05 | A | g11 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
-| -1.90 | A | g12 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
+| -5.40 | A | g07 CRITICAL_TTC_START(A,B) (A:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
+| -2.70 | B | g08 CLOSING_START(B,B:track_001) (B:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -2.50 | B | g09 CRITICAL_TTC_START(B,B:track_001) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
+| -2.25 | B | g10 THROTTLE_END(B) (B:e06)<br>g11 BRAKE_START(B) (B:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| -2.05 | A | g12 CLOSING_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
 | -1.55 | B | g13 CRITICAL_TTC_END(B,B:track_001) (B:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
 | -1.05 | B | g14 CLOSING_END(B,B:track_001) (B:e09)<br>g15 MOVING_END(B) (B:e10)<br>g16 STOP_START(B) (B:e11) | ego: MOVING, BRAKE<br>track_001: CLOSING, IN_EGO_PATH |
 | -0.65 | A | g17 THROTTLE_END(A) (A:e06)<br>g18 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
@@ -171,12 +171,12 @@ Each recorder's own belief just before its events, in its own local names (track
 - 5.90 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 5.90 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 5.90 s before the reference collision, B's radar started tracking unidentified object B:track_001, which appeared in front of it.
+- 5.40 s before the reference collision, A's time-to-contact with B became critical.
 - 2.70 s before the reference collision, B observed unidentified object B:track_001 start closing in.
 - 2.50 s before the reference collision, B's time-to-contact with unidentified object B:track_001 became critical.
 - 2.25 s before the reference collision, B released the accelerator.
 - 2.25 s before the reference collision, B started braking.
 - 2.05 s before the reference collision, A observed B start closing in.
-- 1.90 s before the reference collision, A's time-to-contact with B became critical.
 - 1.55 s before the reference collision, B's time-to-contact with unidentified object B:track_001 stopped being critical.
 - 1.05 s before the reference collision, B observed unidentified object B:track_001 stop closing in.
 - 1.05 s before the reference collision, B stopped moving.

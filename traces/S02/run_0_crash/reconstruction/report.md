@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 15 | 35 | 1 | A:e10 @ 4.65 s |
+| A | 15.15 s | 153 | 15 | 28 | 1 | A:e10 @ 4.65 s |
 | B | 15.15 s | 153 | 11 | 16 | 0 | B:e07 @ 4.65 s |
 
 ## Graph alignment
@@ -34,19 +34,21 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
 
 ## Global graph
 
-25 nodes, 56 edges; 1 merged node(s): g16 COLLISION(A,B) from A:e10 + B:e07.
+25 nodes, 47 edges; 1 merged node(s): g16 COLLISION(A,B) from A:e10 + B:e07.
 
 ### Event sequence (global time)
 
 - `-4.65` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - `-4.50` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
+- `-2.85` CRITICAL_TTC_START(A,B)
 - `-2.55` CUT_IN_FROM_LEFT_START(A,B)
 - `-1.50` THROTTLE_END(B); BRAKE_START(B)
-- `-1.40` EGO_PATH_ENTRY(A,B); CRITICAL_TTC_START(A,B)
+- `-1.40` EGO_PATH_ENTRY(A,B)
 - `-1.00` BRAKE_END(B)
 - `-0.90` THROTTLE_START(B)
 - `-0.80` THROTTLE_END(A); BRAKE_START(A)
-- `+0.00` COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
+- `+0.00` COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
+- `+0.35` CRITICAL_TTC_END(A,B)
 - `+0.40` MOVING_END(A); STOP_START(A)
 - `+0.55` MOVING_END(B); STOP_START(B)
 
@@ -58,21 +60,21 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
 - 4.65 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 4.50 s before the reference collision, A's radar started tracking B, which appeared on its left.
 - 4.50 s before the reference collision, A observed B start closing in (already the case when first observed).
+- 2.85 s before the reference collision, A's time-to-contact with B became critical.
 - 2.55 s before the reference collision, A observed B cutting in from the left.
 - 1.50 s before the reference collision, B released the accelerator.
 - 1.50 s before the reference collision, B started braking.
 - 1.40 s before the reference collision, A observed B enter its forward path corridor.
-- 1.40 s before the reference collision, A's time-to-contact with B became critical.
 - 1.00 s before the reference collision, B released the brake.
 - 0.90 s before the reference collision, B pressed the accelerator.
 - 0.80 s before the reference collision, A released the accelerator.
 - 0.80 s before the reference collision, A started braking.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 2900, B: 2900 N*s).
 - At the reference collision, A observed B's cut-in from the left settle.
-- At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B released the accelerator.
 - At the reference collision, B started braking.
+- 0.35 s after the reference collision, A's time-to-contact with B stopped being critical.
 - 0.40 s after the reference collision, A stopped moving.
 - 0.40 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B stopped moving.
@@ -82,23 +84,22 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 2.10 < CRITICAL_TTC_START 3.25 (+1.15 s) < COLLISION with B 4.65 (+1.40 s); EGO_PATH_ENTRY 3.25 together with critical TTC (+0.00 s) [local times; t_global: cut_in -2.55, critical_ttc_start -1.40, ego_path_entry -1.40, collision +0.00]
+- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 1.80 <= CUT_IN_FROM_LEFT_START 2.10 (+0.30 s); EGO_PATH_ENTRY 3.25 after critical TTC (+1.45 s) [local times; t_global: cut_in -2.55, critical_ttc_start -2.85, ego_path_entry -1.40, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
 - MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - THROTTLE_END(B); BRAKE_START(B)
-- EGO_PATH_ENTRY(A,B); CRITICAL_TTC_START(A,B)
 - THROTTLE_END(A); BRAKE_START(A)
-- COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
+- COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
 - MOVING_END(A); STOP_START(A)
 - MOVING_END(B); STOP_START(B)
 
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e06 (t = 3.25 s)
+- EGO_PATH of track_001, since A:e07 (t = 3.25 s)
 - BRAKE, since A:e09 (t = 3.85 s)
 - STOP, since A:e15 (t = 5.05 s)
 B:
@@ -184,6 +185,43 @@ B:
     "target_width_m": 1.9,
     "target_braking_min_mps2": 1.0,
     "critical_min_track_age_s": 0.5,
+    "critical_time_gap_table": [
+      [
+        7.2,
+        1.0
+      ],
+      [
+        10.0,
+        1.1
+      ],
+      [
+        20.0,
+        1.2
+      ],
+      [
+        30.0,
+        1.3
+      ],
+      [
+        40.0,
+        1.4
+      ],
+      [
+        50.0,
+        1.5
+      ],
+      [
+        60.0,
+        1.6
+      ]
+    ],
+    "critical_min_following_distance_m": 2.0,
+    "critical_lead_deceleration_mps2": 6.0,
+    "critical_forward_min_speed_mps": 1.0,
+    "critical_front_lateral_margin_m": 1.0,
+    "critical_front_lateral_speed_mps": 0.3,
+    "critical_forward_release_factor": 1.1,
+    "occlusion_margin_m": 0.5,
     "turn_yaw_rate_window_s": 0.2,
     "turn_yaw_rate_on_dps": 10.0,
     "turn_yaw_rate_off_dps": 5.0,
@@ -202,6 +240,7 @@ B:
     "cut_in_outside_margin_m": 0.5,
     "cut_in_min_displacement_m": 0.5,
     "cut_in_horizon_s": 3.0,
+    "cut_in_preentry_margin_m": 1.0,
     "cut_in_settle_speed_mps": 0.2,
     "cut_in_settle_s": 0.3
   },

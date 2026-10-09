@@ -15,7 +15,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
 | A:e02 | 0.00 | THROTTLE_START | A | - | controls | active_at_first_observation=True |
 | A:e03 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 | radar |  |
-| A:e04 | 3.90 | CRITICAL_TTC_START | A | track_001 | radar |  |
+| A:e04 | 0.50 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e05 | 3.95 | CLOSING_START | A | track_001 | radar |  |
 | A:e06 | 4.55 | THROTTLE_END | A | - | controls |  |
 | A:e07 | 4.55 | BRAKE_START | A | - | controls |  |
@@ -60,7 +60,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_FRONT track_001 | ego: not yet observed | - |
-| 3.90 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH | 3.80 |
+| 0.50 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
 | 3.95 | A:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.90 |
 | 4.55 | A:e06 THROTTLE_END<br>A:e07 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.50 |
 | 4.80 | A:e08 COLLISION | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.70 |
@@ -81,7 +81,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 3.90, COLLISION 4.80 (+0.90 s)
+- track_001: CRITICAL_TTC_START 0.50, COLLISION 4.80 (+4.30 s)
 
 ## Sign detection windows
 
@@ -102,7 +102,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: A started moving (already the case when first observed).
 - t = 0.00 s: A pressed the accelerator (already the case when first observed).
 - t = 0.00 s: A's radar started tracking track_001, which appeared in front of it.
-- t = 3.90 s: A's time-to-contact with track_001 became critical.
+- t = 0.50 s: A's time-to-contact with track_001 became critical.
 - t = 3.95 s: A observed track_001 start closing in.
 - t = 4.55 s: A released the accelerator.
 - t = 4.55 s: A started braking.

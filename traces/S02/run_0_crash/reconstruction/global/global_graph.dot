@@ -8,31 +8,30 @@ digraph "global" {
   "g04" [label="THROTTLE_START\nB\nt=-4.65", fillcolor="#fde68a"];
   "g05" [label="TRACK_APPEARED_LEFT\nA -> B\nt=-4.50", fillcolor="#bfdbfe"];
   "g06" [label="CLOSING_START\nA -> B\nt=-4.50", fillcolor="#bfdbfe"];
-  "g07" [label="CUT_IN_FROM_LEFT_START\nA -> B\nt=-2.55", fillcolor="#bfdbfe"];
-  "g08" [label="THROTTLE_END\nB\nt=-1.50", fillcolor="#fde68a"];
-  "g09" [label="BRAKE_START\nB\nt=-1.50", fillcolor="#fde68a"];
-  "g10" [label="EGO_PATH_ENTRY\nA -> B\nt=-1.40", fillcolor="#bfdbfe"];
-  "g11" [label="CRITICAL_TTC_START\nA -> B\nt=-1.40", fillcolor="#bfdbfe"];
+  "g07" [label="CRITICAL_TTC_START\nA -> B\nt=-2.85", fillcolor="#bfdbfe"];
+  "g08" [label="CUT_IN_FROM_LEFT_START\nA -> B\nt=-2.55", fillcolor="#bfdbfe"];
+  "g09" [label="THROTTLE_END\nB\nt=-1.50", fillcolor="#fde68a"];
+  "g10" [label="BRAKE_START\nB\nt=-1.50", fillcolor="#fde68a"];
+  "g11" [label="EGO_PATH_ENTRY\nA -> B\nt=-1.40", fillcolor="#bfdbfe"];
   "g12" [label="BRAKE_END\nB\nt=-1.00", fillcolor="#fde68a"];
   "g13" [label="THROTTLE_START\nB\nt=-0.90", fillcolor="#fde68a"];
   "g14" [label="THROTTLE_END\nA\nt=-0.80", fillcolor="#fde68a"];
   "g15" [label="BRAKE_START\nA\nt=-0.80", fillcolor="#fde68a"];
   "g16" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
   "g17" [label="CUT_IN_FROM_LEFT_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
-  "g18" [label="CRITICAL_TTC_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
-  "g19" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
-  "g20" [label="THROTTLE_END\nB\nt=+0.00", fillcolor="#fde68a"];
-  "g21" [label="BRAKE_START\nB\nt=+0.00", fillcolor="#fde68a"];
+  "g18" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
+  "g19" [label="THROTTLE_END\nB\nt=+0.00", fillcolor="#fde68a"];
+  "g20" [label="BRAKE_START\nB\nt=+0.00", fillcolor="#fde68a"];
+  "g21" [label="CRITICAL_TTC_END\nA -> B\nt=+0.35", fillcolor="#bfdbfe"];
   "g22" [label="MOVING_END\nA\nt=+0.40", fillcolor="#e5e7eb"];
   "g23" [label="STOP_START\nA\nt=+0.40", fillcolor="#e5e7eb"];
   "g24" [label="MOVING_END\nB\nt=+0.55", fillcolor="#e5e7eb"];
   "g25" [label="STOP_START\nB\nt=+0.55", fillcolor="#e5e7eb"];
   {rank=same; "g01"; "g02"; "g03"; "g04";}
   {rank=same; "g05"; "g06";}
-  {rank=same; "g08"; "g09";}
-  {rank=same; "g10"; "g11";}
+  {rank=same; "g09"; "g10";}
   {rank=same; "g14"; "g15";}
-  {rank=same; "g16"; "g17"; "g18"; "g19"; "g20"; "g21";}
+  {rank=same; "g16"; "g17"; "g18"; "g19"; "g20";}
   {rank=same; "g22"; "g23";}
   {rank=same; "g24"; "g25";}
   "g01" -> "g05" [label="PRECEDES"];
@@ -46,12 +45,10 @@ digraph "global" {
   "g05" -> "g07" [label="PRECEDES"];
   "g06" -> "g07" [label="PRECEDES"];
   "g07" -> "g08" [label="PRECEDES"];
-  "g07" -> "g09" [label="PRECEDES"];
+  "g08" -> "g09" [label="PRECEDES"];
   "g08" -> "g10" [label="PRECEDES"];
-  "g08" -> "g11" [label="PRECEDES"];
-  "g09" -> "g10" [label="PRECEDES"];
   "g09" -> "g11" [label="PRECEDES"];
-  "g10" -> "g12" [label="PRECEDES"];
+  "g10" -> "g11" [label="PRECEDES"];
   "g11" -> "g12" [label="PRECEDES"];
   "g12" -> "g13" [label="PRECEDES"];
   "g13" -> "g14" [label="PRECEDES"];
@@ -61,23 +58,16 @@ digraph "global" {
   "g14" -> "g18" [label="PRECEDES"];
   "g14" -> "g19" [label="PRECEDES"];
   "g14" -> "g20" [label="PRECEDES"];
-  "g14" -> "g21" [label="PRECEDES"];
   "g15" -> "g16" [label="PRECEDES"];
   "g15" -> "g17" [label="PRECEDES"];
   "g15" -> "g18" [label="PRECEDES"];
   "g15" -> "g19" [label="PRECEDES"];
   "g15" -> "g20" [label="PRECEDES"];
-  "g15" -> "g21" [label="PRECEDES"];
-  "g16" -> "g22" [label="PRECEDES"];
-  "g16" -> "g23" [label="PRECEDES"];
-  "g17" -> "g22" [label="PRECEDES"];
-  "g17" -> "g23" [label="PRECEDES"];
-  "g18" -> "g22" [label="PRECEDES"];
-  "g18" -> "g23" [label="PRECEDES"];
-  "g19" -> "g22" [label="PRECEDES"];
-  "g19" -> "g23" [label="PRECEDES"];
-  "g20" -> "g22" [label="PRECEDES"];
-  "g20" -> "g23" [label="PRECEDES"];
+  "g16" -> "g21" [label="PRECEDES"];
+  "g17" -> "g21" [label="PRECEDES"];
+  "g18" -> "g21" [label="PRECEDES"];
+  "g19" -> "g21" [label="PRECEDES"];
+  "g20" -> "g21" [label="PRECEDES"];
   "g21" -> "g22" [label="PRECEDES"];
   "g21" -> "g23" [label="PRECEDES"];
   "g22" -> "g24" [label="PRECEDES"];
@@ -86,9 +76,9 @@ digraph "global" {
   "g23" -> "g25" [label="PRECEDES"];
   "g05" -> "g06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g05" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g05" -> "g08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g18" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g05" -> "g19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g05" -> "g21" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

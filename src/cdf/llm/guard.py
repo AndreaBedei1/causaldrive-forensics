@@ -9,7 +9,8 @@ What is refused:
 * any key containing a blacklisted token (``ground_truth``, ``expected``,
   ``culprit``, ``scenario``, ``variant``, ``semantic_trace``,
   ``perceived_state``, ``events``, ``critical``, ``collision_course``,
-  ``required_deceleration``, ... ) or equal to ``ttc_s``;
+  ``required_deceleration``, ``time_headway``, ``required_safe_distance``, ... )
+  or equal to ``ttc_s``;
 * the same tokens inside the packet's string values and inside the prompt
   templates' own text;
 * any semantic event type of the vocabulary (``CRITICAL_TTC_START``,
@@ -40,6 +41,9 @@ FORBIDDEN_TOKENS = (
     "critical", "collision_course", "collision course", "required_deceleration",
     "encounter", "motion_relation", "avoidance", "braking_margin", "unavoidable",
     "predicted_overlap", "cut_in", "ego_path", "privileged", "oracle",
+    # safe-following-distance outputs of the conflict model (UNSAFE_FORWARD_GAP)
+    "time_headway", "minimum_time_gap", "required_safe_distance", "safe_distance_margin", "forward_region",
+    "forward_leader", "lateral_body_gap", "longitudinal_clearance", "line_of_sight_occluded",
 )
 FORBIDDEN_EXACT_KEYS = ("ttc_s",)
 PATH_PATTERNS = (re.compile(r"traces[\\/]"), re.compile(r"\brun_\d+"), re.compile(r"\bS\d{2}\b"))

@@ -31,7 +31,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
-from .conflict import ConflictAssessment, assess_conflict
+from .conflict import ConflictAssessment, assess_conflict, occluded_by
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
 from .tracking import (EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount, RadarStream,
@@ -566,6 +566,23 @@ def appearance_side(bearing_deg: float, cfg: SemanticsConfig) -> str:
     return "LEFT" if bearing_deg < 0 else "RIGHT"
 
 
+def mark_occlusions(tracks: Sequence[LocalTrack], ego: EgoTrajectory, footprint: Optional[EgoFootprint],
+                    cfg: SemanticsConfig) -> None:
+    """Flag every track sample seen past another track of this recorder (``conflict.occluded_by``).
+
+    Local to the recorder (its own tracks only).  An occluded sample gives no
+    CUT_IN evidence and no UNSAFE_FORWARD_GAP evidence either way: a radar target
+    behind or right beside a nearer vehicle returns only part of its body, and its
+    returns can mix with that vehicle's (S16: the van seen past A from B; S17: C
+    seen past A from B).  The collision-course prediction is not affected.
+    """
+    for track in tracks:
+        others = [other for other in tracks if other is not track]
+        for sample in track.samples:
+            present = [near for near in (other.sample_near(sample.t_local) for other in others) if near is not None]
+            sample.occluded = bool(present) and occluded_by(sample, ego.at(sample.t_local), present, footprint, cfg)
+
+
 def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cfg: SemanticsConfig,
                           footprint: Optional[EgoFootprint] = None) -> List[ConflictAssessment]:
     first = samples[0].t_local if samples else 0.0
@@ -574,7 +591,7 @@ def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cf
 
 
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
-                 cfg: SemanticsConfig) -> Tuple[List[Span], List[Span]]:
+                 cfg: SemanticsConfig, body_gaps: Sequence[float]) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
 
     Kinematic only: a target ahead of the recorder's front edge, moving within ``cut_in_max_heading_deg`` of
@@ -582,12 +599,17 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
     laterally at ``cut_in_lateral_speed_mps`` or more without interruption.
     The cut-in STARTS once that run has lasted ``cut_in_persistence_s``,
     began at least ``cut_in_outside_margin_m`` outside the corridor, has moved
-    the target ``cut_in_min_displacement_m`` closer, and the corridor is due
-    within ``cut_in_horizon_s`` at the current lateral speed.  The side at the
-    start gives the direction, from the recorder's viewpoint (negative lateral
-    = left).  It ENDS once the lateral approach has stayed below
-    ``cut_in_settle_speed_mps`` for ``cut_in_settle_s``: a collision does not
-    end it by itself.  Uncertain samples give no evidence either way.
+    the target ``cut_in_min_displacement_m`` closer, the corridor is due
+    within ``cut_in_horizon_s`` at the current lateral speed, and the target's
+    nominal body is already within ``cut_in_preentry_margin_m`` of the corridor
+    (``body_gaps``, per sample: ``conflict.ForwardGap.lateral_body_gap_m``): a
+    car still crossing a lane further away may be heading for the lane next to
+    the recorder's, not for its path.  The side at the start gives the
+    direction, from the recorder's viewpoint (negative lateral = left).  It
+    ENDS once the lateral approach has stayed below ``cut_in_settle_speed_mps``
+    for ``cut_in_settle_s``: a collision does not end it by itself.  Uncertain
+    samples, and samples seen past another tracked vehicle
+    (``TrackSample.occluded``), give no evidence either way.
     """
     corridor = cfg.path_half_width_m
     left: List[Span] = []
@@ -596,7 +618,7 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
     active: Optional[Tuple[int, int]] = None  # (start index, side)
     settle: Optional[int] = None
     for index, (sample, motion) in enumerate(zip(samples, motions)):
-        if not motion.known:
+        if not motion.known or sample.occluded:
             run, settle = (None if active is None else run), None
             continue
         if active is not None:
@@ -622,7 +644,8 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
         due = lateral <= corridor or (lateral - corridor) / toward <= cfg.cut_in_horizon_s
         if (run[2] >= corridor + cfg.cut_in_outside_margin_m
                 and run[2] - lateral >= cfg.cut_in_min_displacement_m
-                and times[index] - times[run[0]] >= cfg.cut_in_persistence_s - 1e-6 and due):
+                and times[index] - times[run[0]] >= cfg.cut_in_persistence_s - 1e-6 and due
+                and body_gaps[index] <= cfg.cut_in_preentry_margin_m + 1e-9):
             active, settle = (index, run[1]), None
     if active is not None:
         (left if active[1] < 0 else right).append((active[0], None))
@@ -673,17 +696,19 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
                            times, closing_spans)
 
-    # A critical TTC: a predicted collision course that braking cannot avoid with
-    # the available deceleration (``conflict.assess_conflict``).  It ends once no
-    # collision course remains or the required deceleration drops below
-    # ``critical_release_ratio`` of the available one (hysteresis, debounced).
+    # A critical TTC (``conflict.assess_conflict``): a predicted collision course that
+    # braking cannot avoid with the available deceleration (PREDICTED_OVERLAP), or a
+    # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  It ends once
+    # both reasons are clearly off (hysteresis, debounced): no collision course or a
+    # required deceleration below ``critical_release_ratio`` of the available one, and
+    # no leader or a clearance beyond ``critical_forward_release_factor`` x the safe
+    # distance.  The reason is in the TRACK_STATE facts (``critical_reason``).
     assessments = _critical_assessments(samples, ego, cfg, footprint)
     release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
 
     def critical_off(a: ConflictAssessment) -> bool:
         # An uncertain estimate is no evidence either way: it neither starts nor ends the state.
-        return a.known and (not a.collision_course or a.required_deceleration_mps2 is None
-                            or a.required_deceleration_mps2 < release)
+        return a.released(release)
 
     spans = active_intervals(times, assessments, lambda a: a.critical, critical_off, CRITICAL_RELEASE_DEBOUNCE_S)
     critical_spans = _lasting(spans, times)
@@ -693,7 +718,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
 
     # A cut-in can be established only once the estimate is precise enough.
     first_known = next((index for index, motion in enumerate(motions) if motion.known), len(motions))
-    from_left, from_right = cut_in_spans(times, samples, motions, cfg)
+    body_gaps = [a.forward.lateral_body_gap_m for a in assessments]
+    from_left, from_right = cut_in_spans(times, samples, motions, cfg, body_gaps)
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
     events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
@@ -792,7 +818,18 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
             avoidance_by=conflict.avoidance_by,
             braking_margin_mps2=_rounded(conflict.braking_margin_mps2, 2),
             unavoidable_by_braking=required is not None and math.isinf(required),
-            estimate_known=conflict.known, critical=conflict.critical)
+            estimate_known=conflict.known, critical=conflict.critical, critical_reason=conflict.critical_reason,
+            line_of_sight_occluded=conflict.occluded)
+        forward = conflict.forward
+        if forward is not None:
+            attributes.update(
+                forward_region=forward.region, forward_leader=forward.leader,
+                longitudinal_clearance_m=round(forward.longitudinal_clearance_m, 2),
+                lateral_body_gap_m=round(forward.lateral_body_gap_m, 2),
+                time_headway_s=_rounded(forward.time_headway_s, 2),
+                minimum_time_gap_s=round(forward.minimum_time_gap_s, 2),
+                required_safe_distance_m=round(forward.required_distance_m, 2),
+                safe_distance_margin_m=round(forward.margin_m, 2))
     return SemanticEvent(type="TRACK_STATE", kind=FACT, actor_id=owner, subject_id=track_id,
                          t_local=t_local, source="radar", attributes=attributes)
 
@@ -928,6 +965,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats)
 
     semantics = cfg.semantics
+    mark_occlusions(tracks, ego, footprint, semantics)
     world = PerceivedWorld()
     events: List[SemanticEvent] = []
     events += control_events(owner, controls, clock_origin, semantics, world)

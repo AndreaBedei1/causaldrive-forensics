@@ -7,14 +7,14 @@ digraph "local_A" {
   "A:e03" [label="TRACK_APPEARED_LEFT\nA -> track_002\nt=0.00", fillcolor="#bfdbfe"];
   "A:e04" [label="TRACK_APPEARED_RIGHT\nA -> track_001\nt=0.00", fillcolor="#bfdbfe"];
   "A:e05" [label="CLOSING_START\nA -> track_001\nt=0.00", fillcolor="#bfdbfe"];
-  "A:e06" [label="CUT_IN_FROM_RIGHT_START\nA -> track_001\nt=2.75", fillcolor="#bfdbfe"];
-  "A:e07" [label="EGO_PATH_ENTRY\nA -> track_001\nt=3.35", fillcolor="#bfdbfe"];
-  "A:e08" [label="CRITICAL_TTC_START\nA -> track_001\nt=3.60", fillcolor="#bfdbfe"];
+  "A:e06" [label="CRITICAL_TTC_START\nA -> track_001\nt=2.60", fillcolor="#bfdbfe"];
+  "A:e07" [label="CUT_IN_FROM_RIGHT_START\nA -> track_001\nt=2.75", fillcolor="#bfdbfe"];
+  "A:e08" [label="EGO_PATH_ENTRY\nA -> track_001\nt=3.35", fillcolor="#bfdbfe"];
   "A:e09" [label="CRITICAL_TTC_START\nA -> track_002\nt=3.80", fillcolor="#bfdbfe"];
   "A:e10" [label="CUT_IN_FROM_RIGHT_END\nA -> track_001\nt=4.10", fillcolor="#bfdbfe"];
   "A:e11" [label="CLOSING_START\nA -> track_002\nt=4.20", fillcolor="#bfdbfe"];
-  "A:e12" [label="CRITICAL_TTC_END\nA -> track_001\nt=4.55", fillcolor="#bfdbfe"];
-  "A:e13" [label="CLOSING_END\nA -> track_001\nt=4.55", fillcolor="#bfdbfe"];
+  "A:e12" [label="CLOSING_END\nA -> track_001\nt=4.55", fillcolor="#bfdbfe"];
+  "A:e13" [label="CRITICAL_TTC_END\nA -> track_001\nt=4.65", fillcolor="#bfdbfe"];
   "A:e14" [label="COLLISION\nA\nt=4.95", fillcolor="#fca5a5"];
   "A:e15" [label="CRITICAL_TTC_END\nA -> track_002\nt=4.95", fillcolor="#bfdbfe"];
   "A:e16" [label="CLOSING_END\nA -> track_002\nt=4.95", fillcolor="#bfdbfe"];
@@ -25,7 +25,6 @@ digraph "local_A" {
   "A:e21" [label="STOP_START\nA\nt=6.05", fillcolor="#e5e7eb"];
   "A:e22" [label="TRACK_LOST\nA -> track_001\nt=7.45", fillcolor="#bfdbfe"];
   {rank=same; "A:e01"; "A:e02"; "A:e03"; "A:e04"; "A:e05";}
-  {rank=same; "A:e12"; "A:e13";}
   {rank=same; "A:e14"; "A:e15"; "A:e16";}
   {rank=same; "A:e17"; "A:e18";}
   {rank=same; "A:e20"; "A:e21";}
@@ -40,10 +39,7 @@ digraph "local_A" {
   "A:e09" -> "A:e10" [label="PRECEDES"];
   "A:e10" -> "A:e11" [label="PRECEDES"];
   "A:e11" -> "A:e12" [label="PRECEDES"];
-  "A:e11" -> "A:e13" [label="PRECEDES"];
-  "A:e12" -> "A:e14" [label="PRECEDES"];
-  "A:e12" -> "A:e15" [label="PRECEDES"];
-  "A:e12" -> "A:e16" [label="PRECEDES"];
+  "A:e12" -> "A:e13" [label="PRECEDES"];
   "A:e13" -> "A:e14" [label="PRECEDES"];
   "A:e13" -> "A:e15" [label="PRECEDES"];
   "A:e13" -> "A:e16" [label="PRECEDES"];

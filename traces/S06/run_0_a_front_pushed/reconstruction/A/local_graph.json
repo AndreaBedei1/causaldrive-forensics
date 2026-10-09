@@ -160,7 +160,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.9,
+      "t_local": 0.5,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -177,14 +177,14 @@
         "external": {
           "track_001": {
             "CLOSING": false,
-            "CRITICAL_TTC": false,
+            "CRITICAL_TTC": "UNKNOWN",
             "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
         },
         "signs": {},
-        "facts_t_local": 3.8
+        "facts_t_local": 0.4
       }
     },
     {
