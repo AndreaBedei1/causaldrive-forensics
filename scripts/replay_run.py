@@ -51,6 +51,7 @@ from cdf.replay.model import (BOX_EDGES, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_
                               FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath, TrackPoint, Vector,
                               box_corners, choose_map, follow_camera, overview_camera, project, project_segment,
                               rotate)
+from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -93,6 +94,13 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--no-autostart", action="store_true", help="do not start a local CARLA process")
     parser.add_argument("--keep-server", action="store_true", help="leave a CARLA server this viewer started running")
     parser.add_argument("--exit-after", type=float, default=None, help=argparse.SUPPRESS)  # smoke tests
+    parser.add_argument("--export", default=None, metavar="DIR",
+                        help="headless: draw top-down frames into DIR instead of opening the viewer (no CARLA "
+                             "server; driving lanes from the public OpenDRIVE files when the carla module is there)")
+    parser.add_argument("--at", action="append", type=float, default=[], metavar="T",
+                        help="with --export: a displayed time to draw (t_global when aligned); repeatable; "
+                             "default: the reconstruction's keyframes")
+    parser.add_argument("--format", default="png", choices=("png", "svg", "pdf"), help="with --export: image format")
     args = parser.parse_args(argv)
     width, _, height = args.res.lower().partition("x")
     args.res = (int(width), int(height))
@@ -107,6 +115,17 @@ def opendrive_sources(carla_root: Optional[Path]) -> Dict[str, str]:
         return {}
     return {path.stem: path.read_text(encoding="utf-8", errors="replace")
             for path in sorted((Path(carla_root) / OPENDRIVE_DIR).glob("*.xodr"))}
+
+
+_PARSED_MAPS: Dict[Tuple[int, str, str], Any] = {}
+
+
+def parsed_map(carla: Any, name: str, text: str) -> Any:
+    """A client-side carla.Map of an OpenDRIVE text, parsed once per process."""
+    key = (id(carla), name, hashlib.sha1(text.encode("utf-8")).hexdigest())
+    if key not in _PARSED_MAPS:
+        _PARSED_MAPS[key] = carla.Map(name, text)
+    return _PARSED_MAPS[key]
 
 
 def lane_share(lane_map: Any, samples: Sequence[Vector]) -> float:
@@ -144,7 +163,7 @@ def resolve_map(run: ReplayRun, carla_root: Optional[Path], current: Optional[st
     for name, text in sources.items():
         network = hashlib.sha1(text.encode("utf-8")).hexdigest()  # Town05 and Town05_Opt share one
         if network not in scored:
-            scored[network] = lane_share(carla.Map(name, text), samples)
+            scored[network] = lane_share(parsed_map(carla, name, text), samples)
         fits[name], networks[name] = scored[network], network
     ranked = sorted(fits.items(), key=lambda item: (-item[1], item[0]))
     LOGGER.info("recorded positions in the driving lanes of: %s",
@@ -809,10 +828,48 @@ class ReplayApp:
         pg.draw.line(self.screen, (255, 255, 255), (cx, y - 7), (cx, y + h + 7), 2)
 
 
+_LANES: Dict[str, Any] = {}
+
+
+def export_lanes(run: ReplayRun, map_name: Optional[str] = None) -> Tuple[Optional[str], Optional[List[Any]]]:
+    """(map, driving lanes) for the headless export: the map recognised from the recorded positions and
+    the public OpenDRIVE files (``resolve_map``), parsed client-side; (None, None) without the carla module
+    or a local installation.  No server, scenario or run metadata is used."""
+    try:
+        carla = import_carla()
+    except Exception:  # the carla module is optional for a headless export
+        return map_name, None
+    root = find_carla_root(load_run_config().get("simulation.carla_root"))
+    sources = opendrive_sources(root)
+    name = map_name or resolve_map(run, root, None)
+    if not name or name not in sources:
+        return name, None
+    if name not in _LANES:
+        _LANES[name] = lanes_from_map(parsed_map(carla, name, sources[name]))
+    return name, _LANES[name]
+
+
+def export_run(run_dir: Path, directory: Path, at: Sequence[float] = (), image_format: str = "png",
+               map_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Headless export of one run: top-down frames at ``at`` (displayed times) or at its keyframes."""
+    run = ReplayRun.load(Path(run_dir))
+    name, lanes = export_lanes(run, map_name)
+    LOGGER.info("%s: map %s, %s", run.name, name or "unknown", "lanes drawn" if lanes else "no lanes")
+    times = None
+    if at:
+        offset = run.display_time(0.0)
+        times = [("t = {0:+.2f} s".format(value), value - offset) for value in at]
+    return export_keyframes(run, Path(directory), lanes=lanes, times=times, suffix="." + image_format)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     args = parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     run_dir = Path(args.run_dir)
+    if args.export:
+        for frame in export_run(run_dir, Path(args.export), args.at, args.format, args.map):
+            LOGGER.info("%s  %s", frame["file"], frame["label"])
+        return 0
     run = ReplayRun.load(run_dir)
     for note in run.notes:
         LOGGER.info("note: %s", note)

@@ -64,6 +64,25 @@ SAME_TIME_ORDER = (
 )
 
 
+# The paper's core view: the events evaluated and shown by default.  The other events stay in the
+# graphs (they are part of the software), but the paper's evaluation and figures use only these.
+PAPER_CORE_EVENTS = (
+    "COLLISION",
+    "BRAKE_START", "BRAKE_END",
+    "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END", "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
+    "EGO_PATH_ENTRY",
+    "CRITICAL_TTC_START", "CRITICAL_TTC_END",
+    "TRACK_APPEARED_FRONT", "TRACK_APPEARED_LEFT", "TRACK_APPEARED_RIGHT", "TRACK_LOST",
+)
+# Their state names in a recorder's perceived state (``world_state``).
+PAPER_CORE_STATES = ("BRAKE", "CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT", "IN_EGO_PATH")
+
+
+def is_core_event(event_type: str) -> bool:
+    """Whether an event belongs to the paper's core view (``PAPER_CORE_EVENTS``)."""
+    return event_type in PAPER_CORE_EVENTS
+
+
 def same_time_rank(event_type: str) -> int:
     if event_type in SAME_TIME_ORDER:
         return SAME_TIME_ORDER.index(event_type)

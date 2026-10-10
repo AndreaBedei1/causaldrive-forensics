@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 23.35 s | 235 | 16 | 27 | 1 | A:e10 @ 10.25 s |
+| A | 23.35 s | 235 | 16 | 29 | 1 | A:e09 @ 10.25 s |
 | B | 23.35 s | 235 | 14 | 25 | 1 | B:e08 @ 10.25 s |
 
 ## Graph alignment
@@ -19,7 +19,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e10 | 10.25 | -10.25 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e09 | 10.25 | -10.25 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e08 | 10.25 | -10.25 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -35,7 +35,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
 
 ## Global graph
 
-29 nodes, 62 edges; 1 merged node(s): g17 COLLISION(A,B) from A:e10 + B:e08.
+29 nodes, 66 edges; 1 merged node(s): g16 COLLISION(A,B) from A:e09 + B:e08.
 
 ### Event sequence (global time)
 
@@ -47,9 +47,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
 - `-3.60` CRITICAL_TTC_START(B,A)
 - `-3.35` CRITICAL_TTC_START(A,B)
 - `-2.05` TURN_RIGHT_START(B)
-- `-0.80` CRITICAL_TTC_END(A,B)
 - `-0.30` TURN_RIGHT_END(B)
-- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 - `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.30` TURN_LEFT_END(A)
 - `+0.75` MOVING_END(B); STOP_START(B)
@@ -71,9 +70,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
 - 3.60 s before the reference collision, B's time-to-contact with A became critical.
 - 3.35 s before the reference collision, A's time-to-contact with B became critical.
 - 2.05 s before the reference collision, B started turning right.
-- 0.80 s before the reference collision, A's time-to-contact with B stopped being critical.
 - 0.30 s before the reference collision, B stopped turning right.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 1905, B: 1905 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, B's time-to-contact with A stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B observed A stop closing in.
@@ -99,7 +98,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TURN_LEFT_START(A)
 - TRACK_APPEARED_LEFT(B,A); CLOSING_START(B,A)
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
-- COLLISION(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 - THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(B); STOP_START(B)
 - MOVING_END(A); STOP_START(A)
@@ -122,7 +121,7 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e10 at 10.25 s (local): ego: MOVING, THROTTLE, TURN_LEFT; track_001: CLOSING
+- A A:e09 at 10.25 s (local): ego: MOVING, THROTTLE, TURN_LEFT; track_001: CLOSING, CRITICAL_TTC
 - B B:e08 at 10.25 s (local): ego: MOVING, THROTTLE; track_001: CLOSING, CRITICAL_TTC
 
 ### Tracks lost while a state was active
@@ -222,7 +221,6 @@ B:
       ]
     ],
     "critical_min_following_distance_m": 2.0,
-    "critical_lead_deceleration_mps2": 6.0,
     "critical_forward_min_speed_mps": 1.0,
     "critical_front_lateral_margin_m": 1.0,
     "critical_front_lateral_speed_mps": 0.3,
@@ -236,6 +234,7 @@ B:
     "turn_min_duration_s": 0.5,
     "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
+    "path_hysteresis_m": 0.5,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,

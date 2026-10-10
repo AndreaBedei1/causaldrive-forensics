@@ -190,6 +190,51 @@ class NearContactTests(unittest.TestCase):
         self.assertEqual(ends[0], min(t for t, a in assessments.items() if a.at_rest))
 
 
+def _beside(closing, lateral=3.0):
+    """A car beside the recorder's front half at its 12 m/s, its near side ``lateral`` m right of the centre
+    line: no collision course at constant velocity, whatever ``closing`` the radar measures."""
+    return TrackSample(t_local=1.0, x_m=1.0, y_m=lateral, vx_mps=12.0, vy_mps=0.0, speed_mps=12.0, pos_std_m=0.1,
+                       vel_std_mps=0.1, range_m=math.hypot(1.0, lateral), bearing_deg=math.degrees(math.atan2(lateral, 1.0)),
+                       longitudinal_m=1.0, lateral_m=lateral, closing_speed_mps=closing, closing_ttc_s=None,
+                       measured=True, n_returns=4, clearance_m=float(CAR.distance(1.0, lateral)), ahead_m=1.0 - CAR.x_max)
+
+
+class ImminentContactTests(unittest.TestCase):
+    """A target closing in so fast that it covers its clearance within the reaction time is never released,
+    whatever the constant-velocity prediction says (conflict.py point 5)."""
+
+    def assess(self, closing):
+        own = EgoState(t_local=1.0, x=0.0, y=0.0, heading=0.0, vx=12.0, vy=0.0)
+        return assess_conflict(_beside(closing), own, CAR, CFG, 1.0)
+
+    def test_closing_within_the_reaction_time_holds_the_state(self):
+        fast = self.assess(3.0)  # 1.92 m of clearance at 3 m/s: 0.64 s
+        self.assertFalse(fast.collision_course)
+        self.assertFalse(fast.inside_envelope)
+        self.assertTrue(fast.contact_imminent)
+        self.assertFalse(fast.released(RELEASE, False))
+
+    def test_slower_or_farther_targets_are_released(self):
+        for closing in (1.5, 0.8):  # 1.28 s; below the CLOSING threshold
+            result = self.assess(closing)
+            self.assertFalse(result.contact_imminent, closing)
+            self.assertTrue(result.released(RELEASE, False), closing)
+
+
+class S09Tests(unittest.TestCase):
+    """S09: B merges into the roundabout along a curve; A circulates (-20 deg/s)."""
+
+    def test_a_stays_critical_about_b_until_the_collision(self):
+        run = ROOT / "traces" / "S09" / "run_0_merge_conflict"
+        if not (run / "vehicles" / "A").exists():
+            self.skipTest("canonical trace not present")
+        local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
+        nodes = [(n.event_type, n.subject_id, n.t_local) for n in local.graph.nodes]
+        collision = next(t for name, _, t in nodes if name == "COLLISION")
+        ends = [t for name, subject, t in nodes if name == "CRITICAL_TTC_END" and subject == "track_001"]
+        self.assertEqual(ends, [collision])  # formerly 0.80 s before it
+
+
 class S17Tests(unittest.TestCase):
     """S17: A (cut in on by C) swerves into B.  Reconstructed live from the recorders' own files."""
 

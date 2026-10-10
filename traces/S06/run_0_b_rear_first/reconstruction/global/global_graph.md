@@ -54,10 +54,10 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
 | g13 | -2.20 | MOVING_END | C | - | C:e05 @ 4.05 |  |
 | g14 | -2.20 | STOP_START | C | - | C:e06 @ 4.05 |  |
 | g15 | -1.65 | CLOSING_START | A | B | A:e04 @ 4.60 |  |
-| g16 | -1.60 | CRITICAL_TTC_START | A | B | A:e05 @ 4.65 |  |
-| g17 | -1.55 | COLLISION | - | B, C | B:e06 @ 4.70, C:e07 @ 4.70 | matched_event=collision_002; reference_event=False; peak_impulse=B 21842.46, C 21842.46 |
-| g18 | -1.55 | CRITICAL_TTC_END | B | C | B:e07 @ 4.70 |  |
-| g19 | -1.55 | CLOSING_END | B | C | B:e08 @ 4.70 |  |
+| g16 | -1.55 | COLLISION | - | B, C | B:e06 @ 4.70, C:e07 @ 4.70 | matched_event=collision_002; reference_event=False; peak_impulse=B 21842.46, C 21842.46 |
+| g17 | -1.55 | CRITICAL_TTC_END | B | C | B:e07 @ 4.70 |  |
+| g18 | -1.55 | CLOSING_END | B | C | B:e08 @ 4.70 |  |
+| g19 | -1.55 | CRITICAL_TTC_START | A | B | A:e05 @ 4.70 |  |
 | g20 | -1.50 | THROTTLE_END | B | - | B:e09 @ 4.75 |  |
 | g21 | -1.50 | BRAKE_START | B | - | B:e10 @ 4.75 |  |
 | g22 | -1.40 | MOVING_END | B | - | B:e11 @ 4.85 |  |
@@ -90,9 +90,11 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
     g13 --PRECEDES--> g15
     g14 --PRECEDES--> g15
     g15 --PRECEDES--> g16
-    g16 --PRECEDES--> g17
-    g16 --PRECEDES--> g18
-    g16 --PRECEDES--> g19
+    g15 --PRECEDES--> g17
+    g15 --PRECEDES--> g18
+    g15 --PRECEDES--> g19
+    g16 --PRECEDES--> g20
+    g16 --PRECEDES--> g21
     g17 --PRECEDES--> g20
     g17 --PRECEDES--> g21
     g18 --PRECEDES--> g20
@@ -120,13 +122,13 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
     g28 --PRECEDES--> g29
     g28 --PRECEDES--> g30
     g07 --SAME_TRACK--> g15
-    g07 --SAME_TRACK--> g16
+    g07 --SAME_TRACK--> g19
     g07 --SAME_TRACK--> g27
     g07 --SAME_TRACK--> g28
     g08 --SAME_TRACK--> g09
     g08 --SAME_TRACK--> g12
+    g08 --SAME_TRACK--> g17
     g08 --SAME_TRACK--> g18
-    g08 --SAME_TRACK--> g19
 ```
 
 ## Global trace
@@ -141,8 +143,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -3.05 | CLOSING_START(B,C) |
 | -2.20 | MOVING_END(C); STOP_START(C) |
 | -1.65 | CLOSING_START(A,B) |
-| -1.60 | CRITICAL_TTC_START(A,B) |
-| -1.55 | COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C) |
+| -1.55 | COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C); CRITICAL_TTC_START(A,B) |
 | -1.50 | THROTTLE_END(B); BRAKE_START(B) |
 | -1.40 | MOVING_END(B); STOP_START(B) |
 | -0.10 | THROTTLE_END(A); BRAKE_START(A) |
@@ -153,7 +154,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 4.65, COLLISION with B 6.25 (+1.60 s) [local times; t_global: critical_ttc_start -1.60, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 4.70, COLLISION with B 6.25 (+1.55 s) [local times; t_global: critical_ttc_start -1.55, collision +0.00]
 - B's track_001 (C): CRITICAL_TTC_START 0.50, COLLISION with C 4.70 (+4.20 s) [local times; t_global: critical_ttc_start -5.75, collision -1.55]
 
 ## Perceived state before each event, per observing recorder
@@ -170,9 +171,9 @@ Each recorder's own belief just before its events, in its own local names (track
 | -3.05 | B | g12 CLOSING_START(B,C) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
 | -2.20 | C | g13 MOVING_END(C) (C:e05)<br>g14 STOP_START(C) (C:e06) | ego: MOVING, BRAKE |
 | -1.65 | A | g15 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
-| -1.60 | A | g16 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
-| -1.55 | B | g17 COLLISION(B,C) (B:e06)<br>g18 CRITICAL_TTC_END(B,C) (B:e07)<br>g19 CLOSING_END(B,C) (B:e08) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| -1.55 | C | g17 COLLISION(B,C) (C:e07) | ego: STOP, BRAKE |
+| -1.55 | B | g16 COLLISION(B,C) (B:e06)<br>g17 CRITICAL_TTC_END(B,C) (B:e07)<br>g18 CLOSING_END(B,C) (B:e08) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| -1.55 | C | g16 COLLISION(B,C) (C:e07) | ego: STOP, BRAKE |
+| -1.55 | A | g19 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
 | -1.50 | B | g20 THROTTLE_END(B) (B:e09)<br>g21 BRAKE_START(B) (B:e10) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
 | -1.40 | B | g22 MOVING_END(B) (B:e11)<br>g23 STOP_START(B) (B:e12) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
 | -0.10 | A | g24 THROTTLE_END(A) (A:e06)<br>g25 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
@@ -197,10 +198,10 @@ Each recorder's own belief just before its events, in its own local names (track
 - 2.20 s before the reference collision, C stopped moving.
 - 2.20 s before the reference collision, C came to a stop.
 - 1.65 s before the reference collision, A observed B start closing in.
-- 1.60 s before the reference collision, A's time-to-contact with B became critical.
 - 1.55 s before the reference collision, B and C both recorded this same collision (peak impulses B: 21842, C: 21842 N*s).
 - 1.55 s before the reference collision, B's time-to-contact with C stopped being critical.
 - 1.55 s before the reference collision, B observed C stop closing in.
+- 1.55 s before the reference collision, A's time-to-contact with B became critical.
 - 1.50 s before the reference collision, B released the accelerator.
 - 1.50 s before the reference collision, B started braking.
 - 1.40 s before the reference collision, B stopped moving.

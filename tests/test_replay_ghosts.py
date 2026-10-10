@@ -28,7 +28,8 @@ from src.cdf.replay.model import (ANONYMOUS, ASSOCIATED, BOX_EDGES, HEADING_FROM
 ROOT = Path(__file__).resolve().parents[1]
 S17 = ROOT / "traces" / "S17" / "run_0_crash"
 S16 = ROOT / "traces" / "S16" / "run_0_consequential"
-VIEWER_SOURCES = (ROOT / "scripts" / "replay_run.py", ROOT / "src" / "cdf" / "replay" / "model.py")
+VIEWER_SOURCES = (ROOT / "scripts" / "replay_run.py", ROOT / "src" / "cdf" / "replay" / "model.py",
+                  ROOT / "src" / "cdf" / "replay" / "topdown.py", ROOT / "src" / "cdf" / "replay" / "qa.py")
 RECONSTRUCTION_FILES = ("local_graph.json", "local_tracks.jsonl", "local_trace.jsonl")
 GLOBAL_FILES = ("global_graph.json", "associations.json", "alignment.json")
 FOOTPRINT = EgoFootprint(-2.0, 2.0, -1.0, 1.0)
@@ -289,6 +290,30 @@ class NoPrivilegedInputTests(unittest.TestCase):
             self.assertFalse(path.endswith(".yaml"), path)
             self.assertNotIn(_norm(poisoned / "vehicles" / "C"), path)
         self.assertEqual(set(opened), {_norm(path) for path in _viewer_inputs(poisoned, "AB")})
+
+    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    def test_the_headless_export_reads_only_the_recorders_and_the_reconstruction(self):
+        viewer = _load_viewer_script()
+
+        def no_carla():
+            raise ImportError("no carla module in this test")
+        viewer.import_carla = no_carla  # no lanes: only the run's own inputs can be read
+        with tempfile.TemporaryDirectory() as tmp:
+            clean = _copy_inputs(S17, Path(tmp) / "clean" / "S17" / "run_0_crash", "AB")
+            poisoned = _copy_inputs(S17, Path(tmp) / "poisoned" / "S17" / "run_0_crash", "AB")
+            _poison(poisoned)
+            with _Reads() as reads:
+                frames = viewer.export_run(poisoned, Path(tmp) / "out_poisoned")
+            expected = viewer.export_run(clean, Path(tmp) / "out_clean")
+            opened = [path for event, path in reads.under(poisoned) if event == "open"]
+            written = sorted(p.name for p in (Path(tmp) / "out_poisoned").glob("*.png"))
+        self.assertEqual([(f["file"], f["label"]) for f in frames], [(f["file"], f["label"]) for f in expected])
+        self.assertEqual(written, sorted(f["file"] for f in frames))
+        self.assertTrue(any("COLLISION(A,B)" in f["label"] and abs(f["display_time"]) < 1e-6 for f in frames))
+        self.assertTrue(set(opened) <= {_norm(path) for path in _viewer_inputs(poisoned, "AB")}, opened)
+        for path in opened:
+            for forbidden in ("ground_truth", "evaluation", "scenarios", "counterfactual"):
+                self.assertNotIn(forbidden, path)
 
     def test_the_map_is_recognised_from_recorded_positions_and_public_map_files_only(self):
         viewer = _load_viewer_script()

@@ -19,10 +19,10 @@ digraph "global" {
   "g15" [label="BRAKE_START\nA\nt=-0.80", fillcolor="#fde68a"];
   "g16" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
   "g17" [label="CUT_IN_FROM_LEFT_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
-  "g18" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
-  "g19" [label="THROTTLE_END\nB\nt=+0.00", fillcolor="#fde68a"];
-  "g20" [label="BRAKE_START\nB\nt=+0.00", fillcolor="#fde68a"];
-  "g21" [label="CRITICAL_TTC_END\nA -> B\nt=+0.35", fillcolor="#bfdbfe"];
+  "g18" [label="CRITICAL_TTC_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
+  "g19" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
+  "g20" [label="THROTTLE_END\nB\nt=+0.00", fillcolor="#fde68a"];
+  "g21" [label="BRAKE_START\nB\nt=+0.00", fillcolor="#fde68a"];
   "g22" [label="MOVING_END\nA\nt=+0.40", fillcolor="#e5e7eb"];
   "g23" [label="STOP_START\nA\nt=+0.40", fillcolor="#e5e7eb"];
   "g24" [label="MOVING_END\nB\nt=+0.55", fillcolor="#e5e7eb"];
@@ -31,7 +31,7 @@ digraph "global" {
   {rank=same; "g05"; "g06";}
   {rank=same; "g09"; "g10";}
   {rank=same; "g14"; "g15";}
-  {rank=same; "g16"; "g17"; "g18"; "g19"; "g20";}
+  {rank=same; "g16"; "g17"; "g18"; "g19"; "g20"; "g21";}
   {rank=same; "g22"; "g23";}
   {rank=same; "g24"; "g25";}
   "g01" -> "g05" [label="PRECEDES"];
@@ -58,16 +58,23 @@ digraph "global" {
   "g14" -> "g18" [label="PRECEDES"];
   "g14" -> "g19" [label="PRECEDES"];
   "g14" -> "g20" [label="PRECEDES"];
+  "g14" -> "g21" [label="PRECEDES"];
   "g15" -> "g16" [label="PRECEDES"];
   "g15" -> "g17" [label="PRECEDES"];
   "g15" -> "g18" [label="PRECEDES"];
   "g15" -> "g19" [label="PRECEDES"];
   "g15" -> "g20" [label="PRECEDES"];
-  "g16" -> "g21" [label="PRECEDES"];
-  "g17" -> "g21" [label="PRECEDES"];
-  "g18" -> "g21" [label="PRECEDES"];
-  "g19" -> "g21" [label="PRECEDES"];
-  "g20" -> "g21" [label="PRECEDES"];
+  "g15" -> "g21" [label="PRECEDES"];
+  "g16" -> "g22" [label="PRECEDES"];
+  "g16" -> "g23" [label="PRECEDES"];
+  "g17" -> "g22" [label="PRECEDES"];
+  "g17" -> "g23" [label="PRECEDES"];
+  "g18" -> "g22" [label="PRECEDES"];
+  "g18" -> "g23" [label="PRECEDES"];
+  "g19" -> "g22" [label="PRECEDES"];
+  "g19" -> "g23" [label="PRECEDES"];
+  "g20" -> "g22" [label="PRECEDES"];
+  "g20" -> "g23" [label="PRECEDES"];
   "g21" -> "g22" [label="PRECEDES"];
   "g21" -> "g23" [label="PRECEDES"];
   "g22" -> "g24" [label="PRECEDES"];
@@ -80,5 +87,5 @@ digraph "global" {
   "g05" -> "g11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g18" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g05" -> "g21" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g05" -> "g19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

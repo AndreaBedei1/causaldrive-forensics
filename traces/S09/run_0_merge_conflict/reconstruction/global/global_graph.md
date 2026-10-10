@@ -17,7 +17,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e10 | 10.25 | -10.25 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e09 | 10.25 | -10.25 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e08 | 10.25 | -10.25 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -49,9 +49,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
 | g12 | -3.60 | CRITICAL_TTC_START | B | A | B:e05 @ 6.65 |  |
 | g13 | -3.35 | CRITICAL_TTC_START | A | B | A:e08 @ 6.90 |  |
 | g14 | -2.05 | TURN_RIGHT_START | B | - | B:e06 @ 8.20 |  |
-| g15 | -0.80 | CRITICAL_TTC_END | A | B | A:e09 @ 9.45 |  |
-| g16 | -0.30 | TURN_RIGHT_END | B | - | B:e07 @ 9.95 |  |
-| g17 | 0.00 | COLLISION | - | A, B | A:e10 @ 10.25, B:e08 @ 10.25 | matched_event=collision_001; reference_event=True; peak_impulse=A 1904.84, B 1904.84 |
+| g15 | -0.30 | TURN_RIGHT_END | B | - | B:e07 @ 9.95 |  |
+| g16 | 0.00 | COLLISION | - | A, B | A:e09 @ 10.25, B:e08 @ 10.25 | matched_event=collision_001; reference_event=True; peak_impulse=A 1904.84, B 1904.84 |
+| g17 | 0.00 | CRITICAL_TTC_END | A | B | A:e10 @ 10.25 |  |
 | g18 | 0.00 | CRITICAL_TTC_END | B | A | B:e09 @ 10.25 |  |
 | g19 | 0.00 | CLOSING_END | A | B | A:e11 @ 10.25 |  |
 | g20 | 0.00 | CLOSING_END | B | A | B:e10 @ 10.25 |  |
@@ -90,10 +90,14 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
     g13 --PRECEDES--> g14
     g14 --PRECEDES--> g15
     g15 --PRECEDES--> g16
-    g16 --PRECEDES--> g17
-    g16 --PRECEDES--> g18
-    g16 --PRECEDES--> g19
-    g16 --PRECEDES--> g20
+    g15 --PRECEDES--> g17
+    g15 --PRECEDES--> g18
+    g15 --PRECEDES--> g19
+    g15 --PRECEDES--> g20
+    g16 --PRECEDES--> g21
+    g16 --PRECEDES--> g22
+    g16 --PRECEDES--> g23
+    g16 --PRECEDES--> g24
     g17 --PRECEDES--> g21
     g17 --PRECEDES--> g22
     g17 --PRECEDES--> g23
@@ -124,7 +128,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1904.8
     g08 --SAME_TRACK--> g10
     g08 --SAME_TRACK--> g11
     g08 --SAME_TRACK--> g13
-    g08 --SAME_TRACK--> g15
+    g08 --SAME_TRACK--> g17
     g08 --SAME_TRACK--> g19
     g06 --SAME_TRACK--> g07
     g06 --SAME_TRACK--> g12
@@ -146,9 +150,8 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -3.60 | CRITICAL_TTC_START(B,A) |
 | -3.35 | CRITICAL_TTC_START(A,B) |
 | -2.05 | TURN_RIGHT_START(B) |
-| -0.80 | CRITICAL_TTC_END(A,B) |
 | -0.30 | TURN_RIGHT_END(B) |
-| +0.00 | COLLISION(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A) |
+| +0.00 | COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A) |
 | +0.05 | THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B) |
 | +0.30 | TURN_LEFT_END(A) |
 | +0.75 | MOVING_END(B); STOP_START(B) |
@@ -176,10 +179,9 @@ Each recorder's own belief just before its events, in its own local names (track
 | -3.60 | B | g12 CRITICAL_TTC_START(B,A) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING |
 | -3.35 | A | g13 CRITICAL_TTC_START(A,B) (A:e08) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING |
 | -2.05 | B | g14 TURN_RIGHT_START(B) (B:e06) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC |
-| -0.80 | A | g15 CRITICAL_TTC_END(A,B) (A:e09) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC |
-| -0.30 | B | g16 TURN_RIGHT_END(B) (B:e07) | ego: MOVING, THROTTLE, TURN_RIGHT<br>track_001: CLOSING, CRITICAL_TTC |
-| +0.00 | A | g17 COLLISION(A,B) (A:e10)<br>g19 CLOSING_END(A,B) (A:e11) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING |
-| +0.00 | B | g17 COLLISION(A,B) (B:e08)<br>g18 CRITICAL_TTC_END(B,A) (B:e09)<br>g20 CLOSING_END(B,A) (B:e10) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC |
+| -0.30 | B | g15 TURN_RIGHT_END(B) (B:e07) | ego: MOVING, THROTTLE, TURN_RIGHT<br>track_001: CLOSING, CRITICAL_TTC |
+| +0.00 | A | g16 COLLISION(A,B) (A:e09)<br>g17 CRITICAL_TTC_END(A,B) (A:e10)<br>g19 CLOSING_END(A,B) (A:e11) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC |
+| +0.00 | B | g16 COLLISION(A,B) (B:e08)<br>g18 CRITICAL_TTC_END(B,A) (B:e09)<br>g20 CLOSING_END(B,A) (B:e10) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC |
 | +0.05 | A | g21 THROTTLE_END(A) (A:e12)<br>g23 BRAKE_START(A) (A:e13) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: no active state |
 | +0.05 | B | g22 THROTTLE_END(B) (B:e11)<br>g24 BRAKE_START(B) (B:e12) | ego: MOVING, THROTTLE<br>track_001: no active state |
 | +0.30 | A | g25 TURN_LEFT_END(A) (A:e14) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state |
@@ -202,9 +204,9 @@ Each recorder's own belief just before its events, in its own local names (track
 - 3.60 s before the reference collision, B's time-to-contact with A became critical.
 - 3.35 s before the reference collision, A's time-to-contact with B became critical.
 - 2.05 s before the reference collision, B started turning right.
-- 0.80 s before the reference collision, A's time-to-contact with B stopped being critical.
 - 0.30 s before the reference collision, B stopped turning right.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 1905, B: 1905 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, B's time-to-contact with A stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B observed A stop closing in.

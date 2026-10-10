@@ -6,7 +6,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 - Trace: 141 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (13.95 s)
 - Anonymous radar tracks: 2 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 28; edges: 49 (PRECEDES 38, SAME_TRACK 11)
+- Nodes: 28; edges: 51 (PRECEDES 40, SAME_TRACK 11)
 
 ## Nodes
 
@@ -28,16 +28,16 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e14 | 3.65 | THROTTLE_START | B | - | controls |  |
 | B:e15 | 3.75 | EGO_PATH_ENTRY | B | track_002 | radar |  |
 | B:e16 | 3.80 | COLLISION | B | - | collision_sensor | peak_impulse=10358.22 |
-| B:e17 | 3.80 | TURN_LEFT_END | B | - | ego |  |
-| B:e18 | 3.85 | THROTTLE_END | B | - | controls |  |
-| B:e19 | 3.85 | BRAKE_START | B | - | controls |  |
-| B:e20 | 3.95 | CLOSING_END | B | track_002 | radar |  |
-| B:e21 | 3.95 | CRITICAL_TTC_START | B | track_001 | radar |  |
-| B:e22 | 4.00 | MOVING_END | B | - | ego |  |
-| B:e23 | 4.00 | STOP_START | B | - | ego |  |
-| B:e24 | 4.05 | CRITICAL_TTC_END | B | track_002 | radar |  |
+| B:e17 | 3.80 | CRITICAL_TTC_END | B | track_002 | radar |  |
+| B:e18 | 3.80 | TURN_LEFT_END | B | - | ego |  |
+| B:e19 | 3.85 | THROTTLE_END | B | - | controls |  |
+| B:e20 | 3.85 | BRAKE_START | B | - | controls |  |
+| B:e21 | 3.95 | CLOSING_END | B | track_002 | radar |  |
+| B:e22 | 3.95 | CRITICAL_TTC_START | B | track_001 | radar |  |
+| B:e23 | 4.00 | MOVING_END | B | - | ego |  |
+| B:e24 | 4.00 | STOP_START | B | - | ego |  |
 | B:e25 | 4.55 | EGO_PATH_EXIT | B | track_002 | radar |  |
-| B:e26 | 4.95 | CRITICAL_TTC_END | B | track_001 | radar |  |
+| B:e26 | 5.05 | CRITICAL_TTC_END | B | track_001 | radar |  |
 | B:e27 | 5.50 | TRACK_LOST | B | track_002 | radar |  |
 | B:e28 | 5.60 | CLOSING_END | B | track_001 | radar |  |
 
@@ -66,20 +66,22 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e14 --PRECEDES--> B:e15
     B:e15 --PRECEDES--> B:e16
     B:e15 --PRECEDES--> B:e17
-    B:e16 --PRECEDES--> B:e18
+    B:e15 --PRECEDES--> B:e18
     B:e16 --PRECEDES--> B:e19
-    B:e17 --PRECEDES--> B:e18
+    B:e16 --PRECEDES--> B:e20
     B:e17 --PRECEDES--> B:e19
+    B:e17 --PRECEDES--> B:e20
+    B:e18 --PRECEDES--> B:e19
     B:e18 --PRECEDES--> B:e20
-    B:e18 --PRECEDES--> B:e21
-    B:e19 --PRECEDES--> B:e20
     B:e19 --PRECEDES--> B:e21
+    B:e19 --PRECEDES--> B:e22
+    B:e20 --PRECEDES--> B:e21
     B:e20 --PRECEDES--> B:e22
-    B:e20 --PRECEDES--> B:e23
-    B:e21 --PRECEDES--> B:e22
     B:e21 --PRECEDES--> B:e23
+    B:e21 --PRECEDES--> B:e24
+    B:e22 --PRECEDES--> B:e23
     B:e22 --PRECEDES--> B:e24
-    B:e23 --PRECEDES--> B:e24
+    B:e23 --PRECEDES--> B:e25
     B:e24 --PRECEDES--> B:e25
     B:e25 --PRECEDES--> B:e26
     B:e26 --PRECEDES--> B:e27
@@ -88,9 +90,9 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e06 --SAME_TRACK--> B:e07
     B:e06 --SAME_TRACK--> B:e10
     B:e06 --SAME_TRACK--> B:e15
-    B:e06 --SAME_TRACK--> B:e20
-    B:e04 --SAME_TRACK--> B:e21
-    B:e06 --SAME_TRACK--> B:e24
+    B:e06 --SAME_TRACK--> B:e17
+    B:e06 --SAME_TRACK--> B:e21
+    B:e04 --SAME_TRACK--> B:e22
     B:e06 --SAME_TRACK--> B:e25
     B:e04 --SAME_TRACK--> B:e26
     B:e06 --SAME_TRACK--> B:e27
@@ -114,20 +116,19 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 3.50 | B:e13 BRAKE_END | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 3.40 |
 | 3.65 | B:e14 THROTTLE_START | ego: MOVING, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 3.60 |
 | 3.75 | B:e15 EGO_PATH_ENTRY track_002 | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 3.70 |
-| 3.80 | B:e16 COLLISION<br>B:e17 TURN_LEFT_END | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.70 |
-| 3.85 | B:e18 THROTTLE_END<br>B:e19 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.80 |
-| 3.95 | B:e20 CLOSING_END track_002<br>B:e21 CRITICAL_TTC_START track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.90 |
-| 4.00 | B:e22 MOVING_END<br>B:e23 STOP_START | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.90 |
-| 4.05 | B:e24 CRITICAL_TTC_END track_002 | ego: STOP, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 4.00 |
+| 3.80 | B:e16 COLLISION<br>B:e17 CRITICAL_TTC_END track_002<br>B:e18 TURN_LEFT_END | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.70 |
+| 3.85 | B:e19 THROTTLE_END<br>B:e20 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.80 |
+| 3.95 | B:e21 CLOSING_END track_002<br>B:e22 CRITICAL_TTC_START track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING<br>track_002: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.90 |
+| 4.00 | B:e23 MOVING_END<br>B:e24 STOP_START | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 3.90 |
 | 4.55 | B:e25 EGO_PATH_EXIT track_002 | ego: STOP, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 4.50 |
-| 4.95 | B:e26 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state<br>sign-0: STOP sign known, relevant to the path | 4.90 |
+| 5.05 | B:e26 CRITICAL_TTC_END track_001 | ego: STOP, BRAKE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state<br>sign-0: STOP sign known, relevant to the path | 5.00 |
 | 5.50 | B:e27 TRACK_LOST track_002 | ego: STOP, BRAKE<br>track_001: CLOSING<br>track_002: no active state<br>sign-0: STOP sign known, relevant to the path | 5.40 |
 | 5.60 | B:e28 CLOSING_END track_001 | ego: STOP, BRAKE<br>track_001: CLOSING<br>track lost, states UNKNOWN: track_002<br>sign-0: STOP sign known, relevant to the path | 5.50 |
 
 ## States still active when observation ended
 
-- BRAKE, since B:e19 (t = 3.85 s)
-- STOP, since B:e23 (t = 4.00 s)
+- BRAKE, since B:e20 (t = 3.85 s)
+- STOP, since B:e24 (t = 4.00 s)
 
 ## Tracks lost
 
@@ -173,6 +174,7 @@ Bearing: positive = to B's right. Ranges are measured from the radar to the visi
 - t = 3.65 s: B pressed the accelerator.
 - t = 3.75 s: B observed track_002 enter its forward path corridor.
 - t = 3.80 s: B's collision sensor recorded a contact (peak impulse 10358 N*s).
+- t = 3.80 s: B's time-to-contact with track_002 stopped being critical.
 - t = 3.80 s: B stopped turning left.
 - t = 3.85 s: B released the accelerator.
 - t = 3.85 s: B started braking.
@@ -180,8 +182,7 @@ Bearing: positive = to B's right. Ranges are measured from the radar to the visi
 - t = 3.95 s: B's time-to-contact with track_001 became critical.
 - t = 4.00 s: B stopped moving.
 - t = 4.00 s: B came to a stop.
-- t = 4.05 s: B's time-to-contact with track_002 stopped being critical.
 - t = 4.55 s: B observed track_002 leave its forward path corridor.
-- t = 4.95 s: B's time-to-contact with track_001 stopped being critical.
+- t = 5.05 s: B's time-to-contact with track_001 stopped being critical.
 - t = 5.50 s: B's radar lost track_002 (its states are UNKNOWN from then on, not ended).
 - t = 5.60 s: B observed track_001 stop closing in.

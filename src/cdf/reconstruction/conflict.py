@@ -104,6 +104,12 @@ recorder's envelope is not on a collision course, whatever its range rate.
 
    * no collision course, or one that braking avoids with less than
      ``critical_release_ratio`` x the available deceleration;
+   * no imminent contact along the line of sight: a target closing in at
+     ``closing_speed_threshold_mps`` or more that would cover its clearance
+     within ``critical_reaction_time_s`` (clearance / closing speed, the
+     TRACK_STATE ``closing_ttc_s``) is not resolved, whatever the 2-D
+     prediction says (its constant-velocity target misses a curved path: S09,
+     a car merging into a roundabout alongside a recorder that turns);
    * the target's box outside the recorder's safety envelope now (no near
      contact), unless both stand still (below ``HEADING_MIN_SPEED_MPS``, so
      nothing moves toward anything): a target that touches the envelope and
@@ -231,6 +237,7 @@ class ConflictAssessment:
     occluded: bool = False  # seen past another tracked vehicle: no forward-gap evidence either way
     critical_reason: Optional[str] = None  # PREDICTED_OVERLAP, UNSAFE_FORWARD_GAP or both joined by "+"
     inside_envelope: bool = False  # the target's box overlaps the recorder's safety envelope now (near contact)
+    contact_imminent: bool = False  # closing in so fast that its clearance goes within the reaction time
 
     @property
     def braking_margin_mps2(self) -> Optional[float]:
@@ -250,9 +257,10 @@ class ConflictAssessment:
         return self.ego_speed_mps < HEADING_MIN_SPEED_MPS and self.target_speed_mps < HEADING_MIN_SPEED_MPS
 
     def overlap_released(self, release_deceleration_mps2: float) -> bool:
-        """The collision-course reason is clearly off (module docstring, point 5): no near contact (unless
-        both stand still) and no collision course, or one braking avoids below the release deceleration."""
-        if self.inside_envelope and not self.at_rest:
+        """The collision-course reason is clearly off (module docstring, point 5): no imminent line-of-sight
+        contact, no near contact (unless both stand still) and no collision course, or one braking avoids
+        below the release deceleration."""
+        if self.contact_imminent or (self.inside_envelope and not self.at_rest):
             return False
         return (not self.collision_course or self.required_deceleration_mps2 is None
                 or self.required_deceleration_mps2 < release_deceleration_mps2)
@@ -572,7 +580,10 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
                                 target_acceleration_mps2=prediction.target_acceleration,
                                 ego_speed_mps=prediction.ego_speed,
                                 forward=forward_gap(prediction, cfg, sample.vel_std_mps),
-                                occluded=bool(getattr(sample, "occluded", False)))
+                                occluded=bool(getattr(sample, "occluded", False)),
+                                contact_imminent=(sample.closing_speed_mps >= cfg.closing_speed_threshold_mps
+                                                  and sample.clearance_m < cfg.critical_reaction_time_s
+                                                  * sample.closing_speed_mps))
     _collision_course(prediction, sample, cfg, result)
     reasons = []
     if result.collision_course and result.required_deceleration_mps2 >= available:

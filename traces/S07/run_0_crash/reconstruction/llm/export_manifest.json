@@ -11,6 +11,7 @@
     "estimate_known": 276,
     "forward_leader": 276,
     "forward_region": 276,
+    "inside_safety_envelope": 276,
     "lateral_body_gap_m": 276,
     "line_of_sight_occluded": 276,
     "longitudinal_clearance_m": 276,
@@ -23,6 +24,7 @@
     "safe_distance_margin_m": 276,
     "surface_offset_m": 276,
     "target_acceleration_used_mps2": 276,
+    "time_gap_distance_m": 276,
     "time_headway_s": 276,
     "ttc_s": 276,
     "unavoidable_by_braking": 276
@@ -40,9 +42,9 @@
   "inputs": {
     "incident_context.json": "7eb879d606de537af1ac985422f49dfc4172aa7382a0f409ba3e627f6bf8535f",
     "reconstruction/A/local_graph.json": "61e7549756f7e3a9e186dcc4c0bdf850be5569b71410ca2e088abe4fdba3315f",
-    "reconstruction/A/local_trace.jsonl": "5f19453fc3e6be9d2f6eb9166674b8fbebe0541304f1c6a9296ab50f8c2a7103",
+    "reconstruction/A/local_trace.jsonl": "e1a17d738dbcbe1fb3514c8fd59d6a5867a3b0c958dc10e4ca33f28e22db9d2d",
     "reconstruction/B/local_graph.json": "f588a6af2d1d8b058195ba5d568f6ffeae41df2e798b921d62da419091a9d080",
-    "reconstruction/B/local_trace.jsonl": "448ac211336f8474fe8e31705bd8074ea4da6bb47a56039b02ebd83cc5c620c4",
+    "reconstruction/B/local_trace.jsonl": "97b5bf743bb51f590e4bb48ad6d33bb100f22f341c1297e64c99127be16b9430",
     "reconstruction/C/local_graph.json": "2421c569edb1ed4096ae1e74a0f73561c9f0849ff6c4912f5c566c83a437163d",
     "reconstruction/C/local_trace.jsonl": "c9dba26b7bdbcea575f127e122826221acaa2f32ad2bdf56ce5b469dfbad22c5",
     "reconstruction/global/alignment.json": "bc8262e6405d538128ee6f42c0ba709603990cf1889b4c2075da7cc1b27b6c5f",
@@ -68,6 +70,7 @@
     "estimate_known": "semantic gate of the conflict model",
     "forward_leader": "conflict-model classification (safe following distance)",
     "forward_region": "conflict-model classification (safe following distance)",
+    "inside_safety_envelope": "conflict-model geometry (near contact with the safety envelope)",
     "lateral_body_gap_m": "conflict-model geometry (nominal target box)",
     "line_of_sight_occluded": "semantic gate of the conflict model (seen past another track)",
     "longitudinal_clearance_m": "conflict-model geometry (nominal target box)",
@@ -80,6 +83,7 @@
     "safe_distance_margin_m": "conflict-model output (safe following distance)",
     "surface_offset_m": "internal tracking detail",
     "target_acceleration_used_mps2": "conflict-model input choice",
+    "time_gap_distance_m": "conflict-model threshold (recorder speed x UN R157 time gap)",
     "time_headway_s": "conflict-model output (safe following distance)",
     "ttc_s": "conflict-model time to contact (not the geometric closing_ttc_s)",
     "unavoidable_by_braking": "conflict-model output"

@@ -571,7 +571,7 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 5.6,
+      "t_local": 5.55,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -1023,13 +1023,23 @@
       "relation": "PRECEDES"
     },
     {
+      "from": "B:e11",
+      "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "B:e12",
       "to": "B:e13",
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e13",
+      "from": "B:e12",
       "to": "B:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "B:e13",
+      "to": "B:e15",
       "relation": "PRECEDES"
     },
     {

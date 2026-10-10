@@ -16,9 +16,9 @@ digraph "global" {
   "g12" [label="CRITICAL_TTC_START\nB -> A\nt=-3.60", fillcolor="#bfdbfe"];
   "g13" [label="CRITICAL_TTC_START\nA -> B\nt=-3.35", fillcolor="#bfdbfe"];
   "g14" [label="TURN_RIGHT_START\nB\nt=-2.05", fillcolor="#e5e7eb"];
-  "g15" [label="CRITICAL_TTC_END\nA -> B\nt=-0.80", fillcolor="#bfdbfe"];
-  "g16" [label="TURN_RIGHT_END\nB\nt=-0.30", fillcolor="#e5e7eb"];
-  "g17" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
+  "g15" [label="TURN_RIGHT_END\nB\nt=-0.30", fillcolor="#e5e7eb"];
+  "g16" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
+  "g17" [label="CRITICAL_TTC_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
   "g18" [label="CRITICAL_TTC_END\nB -> A\nt=+0.00", fillcolor="#bfdbfe"];
   "g19" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
   "g20" [label="CLOSING_END\nB -> A\nt=+0.00", fillcolor="#bfdbfe"];
@@ -34,7 +34,7 @@ digraph "global" {
   {rank=same; "g01"; "g02"; "g03"; "g04"; "g05";}
   {rank=same; "g06"; "g07";}
   {rank=same; "g08"; "g09";}
-  {rank=same; "g17"; "g18"; "g19"; "g20";}
+  {rank=same; "g16"; "g17"; "g18"; "g19"; "g20";}
   {rank=same; "g21"; "g22"; "g23"; "g24";}
   {rank=same; "g26"; "g27";}
   {rank=same; "g28"; "g29";}
@@ -60,10 +60,14 @@ digraph "global" {
   "g13" -> "g14" [label="PRECEDES"];
   "g14" -> "g15" [label="PRECEDES"];
   "g15" -> "g16" [label="PRECEDES"];
-  "g16" -> "g17" [label="PRECEDES"];
-  "g16" -> "g18" [label="PRECEDES"];
-  "g16" -> "g19" [label="PRECEDES"];
-  "g16" -> "g20" [label="PRECEDES"];
+  "g15" -> "g17" [label="PRECEDES"];
+  "g15" -> "g18" [label="PRECEDES"];
+  "g15" -> "g19" [label="PRECEDES"];
+  "g15" -> "g20" [label="PRECEDES"];
+  "g16" -> "g21" [label="PRECEDES"];
+  "g16" -> "g22" [label="PRECEDES"];
+  "g16" -> "g23" [label="PRECEDES"];
+  "g16" -> "g24" [label="PRECEDES"];
   "g17" -> "g21" [label="PRECEDES"];
   "g17" -> "g22" [label="PRECEDES"];
   "g17" -> "g23" [label="PRECEDES"];
@@ -94,7 +98,7 @@ digraph "global" {
   "g08" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g11" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g08" -> "g15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g08" -> "g17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g08" -> "g19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g06" -> "g07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g06" -> "g12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];

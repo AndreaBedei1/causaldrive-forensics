@@ -27,7 +27,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-31 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 433/433 pairs.
+31 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 423/423 pairs.
 
 ## Anonymous tracks: identity and trajectory
 

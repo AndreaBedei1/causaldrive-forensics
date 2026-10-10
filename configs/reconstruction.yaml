@@ -80,7 +80,8 @@ reconstruction:
     critical_front_lateral_margin_m: 1.0   # beside the corridor: body within this of it...
     critical_front_lateral_speed_mps: 0.3  # ...and approaching it at least this fast beyond the velocity uncertainty
     # CRITICAL_TTC_END: 0.2 s of clearly resolved samples (conflict.py point 5): no collision course (or a
-    # required deceleration below the release ratio), the target outside the safety envelope unless both
+    # required deceleration below the release ratio), no imminent line-of-sight contact (closing >= the
+    # closing threshold with clearance < reaction time x closing speed), the target outside the safety envelope unless both
     # stand still, and a leader of the episode gone: recorder below 1 m/s, clearance beyond the release
     # factor x d_min, its body no longer ahead, or beyond path_hysteresis_m outside the corridor and not
     # moving back toward it.  Uncertain or occluded samples, and near contact, never end it.

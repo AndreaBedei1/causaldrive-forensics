@@ -51,10 +51,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
 | g15 | -0.80 | BRAKE_START | A | - | A:e09 @ 3.85 |  |
 | g16 | 0.00 | COLLISION | - | A, B | A:e10 @ 4.65, B:e07 @ 4.65 | matched_event=collision_001; reference_event=True; peak_impulse=A 2900.23, B 2900.23 |
 | g17 | 0.00 | CUT_IN_FROM_LEFT_END | A | B | A:e11 @ 4.65 |  |
-| g18 | 0.00 | CLOSING_END | A | B | A:e12 @ 4.65 |  |
-| g19 | 0.00 | THROTTLE_END | B | - | B:e08 @ 4.65 |  |
-| g20 | 0.00 | BRAKE_START | B | - | B:e09 @ 4.65 |  |
-| g21 | 0.35 | CRITICAL_TTC_END | A | B | A:e13 @ 5.00 |  |
+| g18 | 0.00 | CRITICAL_TTC_END | A | B | A:e12 @ 4.65 |  |
+| g19 | 0.00 | CLOSING_END | A | B | A:e13 @ 4.65 |  |
+| g20 | 0.00 | THROTTLE_END | B | - | B:e08 @ 4.65 |  |
+| g21 | 0.00 | BRAKE_START | B | - | B:e09 @ 4.65 |  |
 | g22 | 0.40 | MOVING_END | A | - | A:e14 @ 5.05 |  |
 | g23 | 0.40 | STOP_START | A | - | A:e15 @ 5.05 |  |
 | g24 | 0.55 | MOVING_END | B | - | B:e10 @ 5.20 |  |
@@ -87,16 +87,23 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
     g14 --PRECEDES--> g18
     g14 --PRECEDES--> g19
     g14 --PRECEDES--> g20
+    g14 --PRECEDES--> g21
     g15 --PRECEDES--> g16
     g15 --PRECEDES--> g17
     g15 --PRECEDES--> g18
     g15 --PRECEDES--> g19
     g15 --PRECEDES--> g20
-    g16 --PRECEDES--> g21
-    g17 --PRECEDES--> g21
-    g18 --PRECEDES--> g21
-    g19 --PRECEDES--> g21
-    g20 --PRECEDES--> g21
+    g15 --PRECEDES--> g21
+    g16 --PRECEDES--> g22
+    g16 --PRECEDES--> g23
+    g17 --PRECEDES--> g22
+    g17 --PRECEDES--> g23
+    g18 --PRECEDES--> g22
+    g18 --PRECEDES--> g23
+    g19 --PRECEDES--> g22
+    g19 --PRECEDES--> g23
+    g20 --PRECEDES--> g22
+    g20 --PRECEDES--> g23
     g21 --PRECEDES--> g22
     g21 --PRECEDES--> g23
     g22 --PRECEDES--> g24
@@ -109,7 +116,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2900.2
     g05 --SAME_TRACK--> g11
     g05 --SAME_TRACK--> g17
     g05 --SAME_TRACK--> g18
-    g05 --SAME_TRACK--> g21
+    g05 --SAME_TRACK--> g19
 ```
 
 ## Global trace
@@ -127,8 +134,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -1.00 | BRAKE_END(B) |
 | -0.90 | THROTTLE_START(B) |
 | -0.80 | THROTTLE_END(A); BRAKE_START(A) |
-| +0.00 | COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B) |
-| +0.35 | CRITICAL_TTC_END(A,B) |
+| +0.00 | COLLISION(A,B); CUT_IN_FROM_LEFT_END(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B) |
 | +0.40 | MOVING_END(A); STOP_START(A) |
 | +0.55 | MOVING_END(B); STOP_START(B) |
 
@@ -154,9 +160,8 @@ Each recorder's own belief just before its events, in its own local names (track
 | -1.00 | B | g12 BRAKE_END(B) (B:e05) | ego: MOVING, BRAKE |
 | -0.90 | B | g13 THROTTLE_START(B) (B:e06) | ego: MOVING |
 | -0.80 | A | g14 THROTTLE_END(A) (A:e08)<br>g15 BRAKE_START(A) (A:e09) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT |
-| +0.00 | A | g16 COLLISION(A,B) (A:e10)<br>g17 CUT_IN_FROM_LEFT_END(A,B) (A:e11)<br>g18 CLOSING_END(A,B) (A:e12) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT |
-| +0.00 | B | g16 COLLISION(A,B) (B:e07)<br>g19 THROTTLE_END(B) (B:e08)<br>g20 BRAKE_START(B) (B:e09) | ego: MOVING, THROTTLE |
-| +0.35 | A | g21 CRITICAL_TTC_END(A,B) (A:e13) | ego: MOVING, BRAKE<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
+| +0.00 | A | g16 COLLISION(A,B) (A:e10)<br>g17 CUT_IN_FROM_LEFT_END(A,B) (A:e11)<br>g18 CRITICAL_TTC_END(A,B) (A:e12)<br>g19 CLOSING_END(A,B) (A:e13) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT |
+| +0.00 | B | g16 COLLISION(A,B) (B:e07)<br>g20 THROTTLE_END(B) (B:e08)<br>g21 BRAKE_START(B) (B:e09) | ego: MOVING, THROTTLE |
 | +0.40 | A | g22 MOVING_END(A) (A:e14)<br>g23 STOP_START(A) (A:e15) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
 | +0.55 | B | g24 MOVING_END(B) (B:e10)<br>g25 STOP_START(B) (B:e11) | ego: MOVING, BRAKE |
 
@@ -179,10 +184,10 @@ Each recorder's own belief just before its events, in its own local names (track
 - 0.80 s before the reference collision, A started braking.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 2900, B: 2900 N*s).
 - At the reference collision, A observed B's cut-in from the left settle.
+- At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B released the accelerator.
 - At the reference collision, B started braking.
-- 0.35 s after the reference collision, A's time-to-contact with B stopped being critical.
 - 0.40 s after the reference collision, A stopped moving.
 - 0.40 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B stopped moving.

@@ -540,6 +540,8 @@ CRITICAL_TTC_END    <=>  0.2 s without interruption of clearly resolved samples
                          (the END is the first of them), each one:
                            known estimate
                            and (no collision course or a_req < 0.75 x 6 m/s^2)
+                           and no imminent line-of-sight contact (not closing
+                               at >= 1 m/s with clearance < 1 s x closing speed)
                            and (target box outside the safety envelope
                                 or recorder and target both below 1 m/s)
                            and, if UNSAFE_FORWARD_GAP was a reason of the episode,
@@ -561,7 +563,13 @@ formerly ended 0.30 s before the collision with B).  A target already touching
 the safety envelope that momentarily closes in below 1 m/s starts no new
 collision course but does not end one either (S17: B about A, formerly ended
 0.05 s before the contact, closing at 0.96 m/s, 0.16 m away); only separation, or
-both vehicles at rest, does.  An uncertain or occluded sample is no evidence of
+both vehicles at rest, does.  A target closing in at the CLOSING threshold or
+faster that would cover its clearance within the reaction time (the
+line-of-sight time to contact `closing_ttc_s` below `critical_reaction_time_s`)
+is not resolved either, whatever the constant-velocity 2-D prediction says (S09:
+B merges into the roundabout along a curve; the straight-line prediction lost
+the collision course 0.80 s before the contact while B was 2-3 m away and
+closing at 1.6-3.5 m/s).  An uncertain or occluded sample is no evidence of
 safety: it interrupts the release.
 
 CRITICAL_TTC describes the pre-collision threat episode.  If the recorder
@@ -830,6 +838,53 @@ world settings.  A participant with `record: false` (S17's third vehicle) has
 no `ego.jsonl` and is not replayed or named: it appears only as the anonymous
 tracks the recorders formed of it, A:track_001 and B:track_002, two separate
 ghosts that overlap where both radars see it.
+
+### Headless export, visual audit and ground-truth audit
+
+```
+python scripts/replay_run.py traces/S17/run_0_crash --export out/            # keyframes (PNG)
+python scripts/replay_run.py traces/S17/run_0_crash --export out/ --at -2.35 --at 0 --format svg
+python scripts/visual_audit.py traces/S*/run_* --verdicts docs/audit/visual_audit_baseline_verdicts.json
+python scripts/gt_audit.py traces/S*/run_*                                     # privileged, evaluation only
+```
+
+`--export` draws the replay headlessly as top-down frames (`cdf.replay.topdown`,
+no CARLA server): the recorders at their recorded poses with their own footprints,
+each recorder's tracks as the viewer draws them (anonymous ones as nominal ghost
+boxes, associated ones as dots), the states of the paper's core view
+(CRITICAL_TTC red, CUT_IN orange, IN_EGO_PATH yellow, BRAKE), exact at event
+instants (from the local graphs' START/END events), the core events of the last
+half second and the collisions, on t_global.  The driving lanes come from the
+public OpenDRIVE file of the map recognised from the recorded positions, parsed
+client-side when the `carla` module is installed (the CARLA Python 3.8
+environment); without it the frames have no lanes.  By default the keyframes are
+taken from the reconstructed events: a lead-in 3 s before the first important
+event, every CRITICAL_TTC / CUT_IN start and end and EGO_PATH_ENTRY, and each
+collision 0.2 s before, at and 0.5 s after.  Inputs are those of the viewer only
+(tests/test_replay_ghosts.py poisons every privileged file).
+
+`scripts/visual_audit.py` (evaluation side) exports the keyframes of each run to
+`reconstruction/evaluation/<name>/`, runs the automatic visual-QA checks of
+`cdf.replay.qa` (implausible track or recorder speeds, ghost boxes that jump or
+spin, duplicated ghosts, events outside a track's lifetime, a CRITICAL_TTC that
+ends just before or starts just after the collision of its own pair, recorders of
+a collision that do not touch, a cut-in without lateral approach, a path entry
+outside the corridor) and writes the reviewer's verdicts (PASS / WARN / FAIL, per
+finding, from a JSON file such as `docs/audit/visual_audit_baseline_verdicts.json`)
+to `reconstruction/evaluation/<name>.md` and `traces/<name>.md`.  A flag is a
+reason to look, not a verdict.
+
+`scripts/gt_audit.py` is privileged and runs after the reconstruction: per
+track sample the nearest true vehicle gives the identity (purity, switches) and
+the errors in physical units (nominal box centre, track point to the true
+outline, speed and velocity, heading), reported as median / IQR / p90 / p95 /
+max per run and pooled over the campaign (`traces/gt_audit_baseline.md`); at every
+CRITICAL_TTC_START and CUT_IN start the reconstructed clearance, body gap and
+lateral speed are compared with the true ones.
+
+The paper's core view (`cdf.reconstruction.models.PAPER_CORE_EVENTS`) is
+COLLISION, BRAKE, CUT_IN, EGO_PATH_ENTRY, CRITICAL_TTC, TRACK_APPEARED and
+TRACK_LOST; the other events stay in the graphs.
 
 ## LLM abductive forensics
 

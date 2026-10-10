@@ -416,7 +416,7 @@
     },
     {
       "node_id": "A:e12",
-      "event_type": "CLOSING_END",
+      "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
@@ -449,11 +449,11 @@
     },
     {
       "node_id": "A:e13",
-      "event_type": "CRITICAL_TTC_END",
+      "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 5.0,
+      "t_local": 4.65,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -469,15 +469,15 @@
         },
         "external": {
           "track_001": {
-            "CLOSING": false,
+            "CLOSING": true,
             "CRITICAL_TTC": true,
             "IN_EGO_PATH": true,
-            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_LEFT": true,
             "CUT_IN_FROM_RIGHT": false
           }
         },
         "signs": {},
-        "facts_t_local": 4.9
+        "facts_t_local": 4.6
       }
     },
     {
@@ -614,6 +614,11 @@
       "relation": "PRECEDES"
     },
     {
+      "from": "A:e08",
+      "to": "A:e13",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "A:e09",
       "to": "A:e10",
       "relation": "PRECEDES"
@@ -629,18 +634,38 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "A:e10",
+      "from": "A:e09",
       "to": "A:e13",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "A:e10",
+      "to": "A:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "A:e10",
+      "to": "A:e15",
       "relation": "PRECEDES"
     },
     {
       "from": "A:e11",
-      "to": "A:e13",
+      "to": "A:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "A:e11",
+      "to": "A:e15",
       "relation": "PRECEDES"
     },
     {
       "from": "A:e12",
-      "to": "A:e13",
+      "to": "A:e14",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "A:e12",
+      "to": "A:e15",
       "relation": "PRECEDES"
     },
     {

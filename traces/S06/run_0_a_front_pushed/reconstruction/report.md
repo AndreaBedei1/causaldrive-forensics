@@ -41,7 +41,7 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 ## Global graph
 
-33 nodes, 65 edges; 3 merged node(s): g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
+33 nodes, 64 edges; 3 merged node(s): g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
 
 ### Event sequence (global time)
 
@@ -53,9 +53,9 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - `-0.85` CLOSING_START(A,B)
 - `-0.75` MOVING_END(C); STOP_START(C)
 - `-0.25` THROTTLE_END(A); BRAKE_START(A)
-- `+0.00` COLLISION(A,B)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B)
 - `+0.05` BRAKE_END(B)
-- `+0.40` CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
+- `+0.40` CLOSING_END(A,B)
 - `+0.50` COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - `+0.55` MOVING_END(A); STOP_START(A)
 - `+0.65` COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
@@ -83,8 +83,8 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - 0.25 s before the reference collision, A released the accelerator.
 - 0.25 s before the reference collision, A started braking.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 10281, B: 10281 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
 - 0.05 s after the reference collision, B released the brake.
-- 0.40 s after the reference collision, A's time-to-contact with B stopped being critical.
 - 0.40 s after the reference collision, A observed B stop closing in.
 - 0.50 s after the reference collision, B and C both recorded this same collision (peak impulses B: 8788, C: 8788 N*s).
 - 0.50 s after the reference collision, B's time-to-contact with C stopped being critical.
@@ -111,7 +111,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - THROTTLE_END(B); BRAKE_START(B)
 - MOVING_END(C); STOP_START(C)
 - THROTTLE_END(A); BRAKE_START(A)
-- CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B)
 - COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - MOVING_END(A); STOP_START(A)
 - COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
@@ -245,7 +245,6 @@ C:
       ]
     ],
     "critical_min_following_distance_m": 2.0,
-    "critical_lead_deceleration_mps2": 6.0,
     "critical_forward_min_speed_mps": 1.0,
     "critical_front_lateral_margin_m": 1.0,
     "critical_front_lateral_speed_mps": 0.3,
@@ -259,6 +258,7 @@ C:
     "turn_min_duration_s": 0.5,
     "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
+    "path_hysteresis_m": 0.5,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,
