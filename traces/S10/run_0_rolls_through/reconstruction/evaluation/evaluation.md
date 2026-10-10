@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -34,7 +34,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | B | B | correct | 134 | 0.225 / 0.264 m | 1.946 m | 1.966 / 0.173 m/s |
-| B:track_001 | B:track_001 | A | left anonymous (true identity A) | 133 | 0.113 / 0.274 m | 2.113 m | 2.02 / 0.744 m/s |
+| B:track_001 | A | A | correct | 133 | 0.113 / 0.274 m | 2.113 m | 2.02 / 0.744 m/s |
 
 ## Clearance at the true contacts
 

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src.cdf.reconstruction.alignment import align_graphs
 from src.cdf.reconstruction.config import FusionConfig, ReconstructionConfig
+from src.cdf.reconstruction.fusion import associate_tracks
 from src.cdf.reconstruction.models import GraphEdge, GraphNode, LocalGraph
 from src.cdf.reconstruction.pipeline import reconstruct_run
 
@@ -82,17 +83,23 @@ class FusionTests(unittest.TestCase):
         gap = float(line.split("last observed ")[1].split(" s")[0])
         self.assertTrue(0.75 <= gap <= 1.0, line)  # the last sweep before the cut, 0.8-0.85 s before contact
 
-    def test_track_stays_anonymous_when_evidence_is_weak(self):
+    def test_track_stays_anonymous_when_collision_evidence_is_weak(self):
         with tempfile.TemporaryDirectory() as tmp:
             run = make_run(Path(tmp), a_sees_b_until=CONTACT_T - 2.0)
             result = reconstruct_run(run, ReconstructionConfig())
+        # The collision-based association alone: lost 2 s before the contact, the track stays anonymous.
+        alone = associate_tracks(result.locals, result.alignment, FusionConfig())[0]
+        self.assertEqual((alone.status, alone.global_entity, alone.confidence), ("ANONYMOUS", "A:track_001", None))
+        self.assertTrue(any("lost 2.00 s before the matched collision" in reason for reason in alone.blocking))
+        # In the common frame of the pose streams its returns lay on B's own footprint at B's velocity while
+        # it was tracked: the road-user fusion names it B, and keeps the failed collision check as evidence.
         association = result.associations[0]
-        self.assertEqual(association.status, "ANONYMOUS")
-        self.assertEqual(association.global_entity, "A:track_001")
-        self.assertIsNone(association.confidence)
-        self.assertTrue(any("lost 2.00 s before the matched collision" in reason for reason in association.blocking))
+        self.assertEqual((association.status, association.global_entity), ("ASSOCIATED", "B"))
+        self.assertTrue(any("lost 2.00 s before the matched collision" in line for line in association.evidence))
+        self.assertTrue(any(line.startswith("common frame: its returns lie on B's own footprint")
+                            for line in association.evidence))
         subjects = {node.subject_id for node in result.graph.nodes if node.actor_id == "A" and node.subject_id}
-        self.assertEqual(subjects, {"A:track_001"})
+        self.assertEqual(subjects, {"B"})
 
 
 if __name__ == "__main__":

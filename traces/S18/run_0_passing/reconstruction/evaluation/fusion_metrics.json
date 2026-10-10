@@ -1,0 +1,550 @@
+{
+  "run": "S18/run_0_passing",
+  "privileged_assumptions": [
+    "recorder raw clocks are CARLA simulator time",
+    "a vehicle box is centred on its origin in the horizontal plane"
+  ],
+  "identity_max_box_distance_m": 1.5,
+  "track_decisions": [
+    {
+      "track": "A:track_001",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 0.649,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "A:track_002",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "B",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "A:track_003",
+      "decision": "U2",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "A:track_004",
+      "decision": "U3",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "B:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "U2",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "B:track_003",
+      "decision": "U3",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "B:track_004",
+      "decision": "U2",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "B:track_005",
+      "decision": "U3",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    }
+  ],
+  "decision_counts": {
+    "anonymous": 7,
+    "correct link": 2
+  },
+  "entities": [
+    {
+      "id": "U1",
+      "source_tracks": [
+        "A:track_001"
+      ],
+      "observers": [
+        "A"
+      ],
+      "true_identity": "C",
+      "identity_is_recorder": false,
+      "purity": 0.649,
+      "track_identities": {
+        "A:track_001": "C"
+      }
+    },
+    {
+      "id": "U2",
+      "source_tracks": [
+        "B:track_002",
+        "B:track_004",
+        "A:track_003"
+      ],
+      "observers": [
+        "A",
+        "B"
+      ],
+      "true_identity": "C",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "B:track_002": "C",
+        "B:track_004": "C",
+        "A:track_003": "C"
+      }
+    },
+    {
+      "id": "U3",
+      "source_tracks": [
+        "B:track_003",
+        "A:track_004",
+        "B:track_005"
+      ],
+      "observers": [
+        "A",
+        "B"
+      ],
+      "true_identity": "D",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "B:track_003": "D",
+        "A:track_004": "D",
+        "B:track_005": "D"
+      }
+    }
+  ],
+  "merges": {
+    "correct": 6,
+    "false": 0,
+    "missed": 3
+  },
+  "fragmentation": {
+    "C": [
+      "U1",
+      "U2"
+    ],
+    "D": [
+      "U3"
+    ]
+  },
+  "state_errors": {
+    "centre_error_m": {
+      "n": 257,
+      "median": 0.4115,
+      "q25": 0.2368,
+      "q75": 0.6151,
+      "p90": 0.8455,
+      "p95": 0.97,
+      "max": 2.0767,
+      "mean": 0.47,
+      "iqr": 0.3783
+    },
+    "coverage_s": {
+      "n": 3,
+      "median": 9.7,
+      "q25": 9.325,
+      "q75": 9.95,
+      "p90": 10.1,
+      "p95": 10.15,
+      "max": 10.2,
+      "mean": 9.6167,
+      "iqr": 0.625
+    },
+    "heading_error_deg": {
+      "n": 257,
+      "median": 0.4147,
+      "q25": 0.2141,
+      "q75": 0.8651,
+      "p90": 1.295,
+      "p95": 1.7438,
+      "max": 14.5401,
+      "mean": 0.8301,
+      "iqr": 0.651
+    },
+    "length_error_m": {
+      "n": 3,
+      "median": 0.192,
+      "q25": 0.139,
+      "q75": 0.192,
+      "p90": 0.192,
+      "p95": 0.192,
+      "max": 0.192,
+      "mean": 0.1567,
+      "iqr": 0.053
+    },
+    "normalised_centre_error": {
+      "n": 257,
+      "median": 0.8267,
+      "q25": 0.5334,
+      "q75": 1.1334,
+      "p90": 1.5147,
+      "p95": 1.7377,
+      "max": 3.8876,
+      "mean": 0.871,
+      "iqr": 0.6
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 377,
+      "median": 0.5255,
+      "q25": 0.3215,
+      "q75": 0.6967,
+      "p90": 3.46,
+      "p95": 3.5644,
+      "max": 3.6733,
+      "mean": 0.8511,
+      "iqr": 0.3752
+    },
+    "speed_error_mps": {
+      "n": 257,
+      "median": 0.0482,
+      "q25": 0.0272,
+      "q75": 0.0852,
+      "p90": 0.146,
+      "p95": 0.1739,
+      "max": 1.0888,
+      "mean": 0.0709,
+      "iqr": 0.058
+    },
+    "velocity_error_mps": {
+      "n": 257,
+      "median": 0.1142,
+      "q25": 0.0727,
+      "q75": 0.2183,
+      "p90": 0.3198,
+      "p95": 0.4063,
+      "max": 3.1846,
+      "mean": 0.2058,
+      "iqr": 0.1456
+    },
+    "width_error_m": {
+      "n": 3,
+      "median": 0.263,
+      "q25": 0.185,
+      "q75": 0.263,
+      "p90": 0.263,
+      "p95": 0.263,
+      "max": 0.263,
+      "mean": 0.211,
+      "iqr": 0.078
+    }
+  },
+  "state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 94,
+        "median": 0.2686,
+        "q25": 0.1877,
+        "q75": 0.392,
+        "p90": 0.5481,
+        "p95": 0.724,
+        "max": 1.7352,
+        "mean": 0.3235,
+        "iqr": 0.2043
+      },
+      "heading_error_deg": {
+        "n": 94,
+        "median": 0.3963,
+        "q25": 0.2007,
+        "q75": 0.686,
+        "p90": 1.541,
+        "p95": 4.7259,
+        "max": 14.5401,
+        "mean": 1.1427,
+        "iqr": 0.4853
+      },
+      "speed_error_mps": {
+        "n": 94,
+        "median": 0.0422,
+        "q25": 0.027,
+        "q75": 0.0873,
+        "p90": 0.1403,
+        "p95": 0.1717,
+        "max": 1.0888,
+        "mean": 0.0774,
+        "iqr": 0.0603
+      },
+      "velocity_error_mps": {
+        "n": 94,
+        "median": 0.1053,
+        "q25": 0.0632,
+        "q75": 0.184,
+        "p90": 0.3445,
+        "p95": 0.9821,
+        "max": 3.1846,
+        "mean": 0.2623,
+        "iqr": 0.1208
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 163,
+        "median": 0.4984,
+        "q25": 0.3303,
+        "q75": 0.7087,
+        "p90": 0.94,
+        "p95": 0.9928,
+        "max": 2.0767,
+        "mean": 0.5546,
+        "iqr": 0.3784
+      },
+      "heading_error_deg": {
+        "n": 163,
+        "median": 0.4363,
+        "q25": 0.2217,
+        "q75": 0.8847,
+        "p90": 1.1511,
+        "p95": 1.5571,
+        "max": 9.6002,
+        "mean": 0.6498,
+        "iqr": 0.663
+      },
+      "speed_error_mps": {
+        "n": 163,
+        "median": 0.0538,
+        "q25": 0.0274,
+        "q75": 0.0844,
+        "p90": 0.1466,
+        "p95": 0.1717,
+        "max": 0.3235,
+        "mean": 0.0672,
+        "iqr": 0.057
+      },
+      "velocity_error_mps": {
+        "n": 163,
+        "median": 0.1316,
+        "q25": 0.079,
+        "q75": 0.2209,
+        "p90": 0.3167,
+        "p95": 0.3997,
+        "max": 2.002,
+        "mean": 0.1732,
+        "iqr": 0.1419
+      }
+    }
+  },
+  "calibration": {
+    "states": 257,
+    "observed_within": {
+      "1_sigma": 0.634,
+      "2_sigma": 0.981,
+      "3_sigma": 0.996
+    },
+    "expected_within_gaussian": {
+      "1_sigma": 0.393,
+      "2_sigma": 0.865,
+      "3_sigma": 0.989
+    }
+  },
+  "entity_errors": [
+    {
+      "id": "U1",
+      "true_identity": "C",
+      "coverage_s": 10.2,
+      "states": 69,
+      "impure_states": 34,
+      "centre_error_m": {
+        "n": 69,
+        "median": 0.3567,
+        "q25": 0.1934,
+        "q75": 0.6784,
+        "p90": 0.8528,
+        "p95": 0.9483,
+        "max": 1.59,
+        "mean": 0.447,
+        "iqr": 0.4851
+      },
+      "velocity_error_mps": {
+        "n": 69,
+        "median": 0.1498,
+        "q25": 0.075,
+        "q75": 0.2411,
+        "p90": 0.7692,
+        "p95": 2.285,
+        "max": 3.1846,
+        "mean": 0.3839,
+        "iqr": 0.1661
+      },
+      "speed_error_mps": {
+        "n": 69,
+        "median": 0.0577,
+        "q25": 0.0389,
+        "q75": 0.106,
+        "p90": 0.214,
+        "p95": 0.3021,
+        "max": 1.0888,
+        "mean": 0.1029,
+        "iqr": 0.0672
+      },
+      "heading_error_deg": {
+        "n": 69,
+        "median": 0.5911,
+        "q25": 0.2225,
+        "q75": 1.0371,
+        "p90": 3.7019,
+        "p95": 10.9202,
+        "max": 14.5401,
+        "mean": 1.6529,
+        "iqr": 0.8145
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    },
+    {
+      "id": "U2",
+      "true_identity": "C",
+      "coverage_s": 8.95,
+      "states": 90,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 90,
+        "median": 0.333,
+        "q25": 0.213,
+        "q75": 0.5447,
+        "p90": 0.6225,
+        "p95": 0.8384,
+        "max": 1.4008,
+        "mean": 0.3932,
+        "iqr": 0.3317
+      },
+      "velocity_error_mps": {
+        "n": 90,
+        "median": 0.0958,
+        "q25": 0.0632,
+        "q75": 0.2193,
+        "p90": 0.308,
+        "p95": 0.3557,
+        "max": 0.4364,
+        "mean": 0.1397,
+        "iqr": 0.1561
+      },
+      "speed_error_mps": {
+        "n": 90,
+        "median": 0.0344,
+        "q25": 0.018,
+        "q75": 0.0555,
+        "p90": 0.1074,
+        "p95": 0.1471,
+        "max": 0.1854,
+        "mean": 0.0454,
+        "iqr": 0.0375
+      },
+      "heading_error_deg": {
+        "n": 90,
+        "median": 0.4143,
+        "q25": 0.1832,
+        "q75": 0.9234,
+        "p90": 1.2539,
+        "p95": 1.5253,
+        "max": 1.7902,
+        "mean": 0.5806,
+        "iqr": 0.7402
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    },
+    {
+      "id": "U3",
+      "true_identity": "D",
+      "coverage_s": 9.7,
+      "states": 98,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 98,
+        "median": 0.469,
+        "q25": 0.3259,
+        "q75": 0.6959,
+        "p90": 0.9188,
+        "p95": 1.1852,
+        "max": 2.0767,
+        "mean": 0.5568,
+        "iqr": 0.37
+      },
+      "velocity_error_mps": {
+        "n": 98,
+        "median": 0.1139,
+        "q25": 0.0837,
+        "q75": 0.1745,
+        "p90": 0.2736,
+        "p95": 0.3444,
+        "max": 0.5162,
+        "mean": 0.141,
+        "iqr": 0.0908
+      },
+      "speed_error_mps": {
+        "n": 98,
+        "median": 0.0632,
+        "q25": 0.0344,
+        "q75": 0.097,
+        "p90": 0.1365,
+        "p95": 0.165,
+        "max": 0.2564,
+        "mean": 0.0719,
+        "iqr": 0.0626
+      },
+      "heading_error_deg": {
+        "n": 98,
+        "median": 0.379,
+        "q25": 0.2186,
+        "q75": 0.5389,
+        "p90": 1.042,
+        "p95": 1.4266,
+        "max": 1.821,
+        "mean": 0.4798,
+        "iqr": 0.3203
+      },
+      "length_error_m": 0.086,
+      "width_error_m": -0.107,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.514,
+      "true_width_m": 2.007
+    }
+  ],
+  "observed_alignment": [],
+  "states_compared": 257,
+  "impure_states": 34
+}

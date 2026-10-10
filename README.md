@@ -119,17 +119,26 @@ clearance when it starts) into B: A-B collision at 4.95 s (peak impulse 1577 N*s
 nobody (closest 0.59 m to A, 3.1 m to B) and speeds up to 16 m/s from 7.0 s.  Without C A
 never swerves and A and B never touch (closest 1.5 m); with C but the swerve disabled A runs
 into the back of C at 5.95 s and never touches B: `ground_truth/counterfactuals.json`,
-privileged.  In the reconstruction C is `A:track_001` (anonymous; CLOSING; CRITICAL_TTC from
-2.60 s for an unsafe forward gap, 3.3 m ahead of A where 16.8 m are needed; CUT_IN_FROM_RIGHT
-from 2.75 s; EGO_PATH_ENTRY at 3.35 s; all before the collision) and, separately, `B:track_002`
-and `B:track_003` (B, two lanes away and seeing C past A, observes no cut-in); no entity C
-exists.  A deterministic worked example (`python scripts/worked_example.py
+privileged.  In the reconstruction C is the anonymous road user `U1`: A's track `A:track_001`
+(CLOSING; CRITICAL_TTC from 2.60 s for an unsafe forward gap, 3.3 m ahead of A where 16.8 m are
+needed; CUT_IN_FROM_RIGHT from 2.75 s; EGO_PATH_ENTRY at 3.35 s; all before the collision) and
+B's tracks `B:track_002` and `B:track_003` (B, two lanes away and seeing C past A, observes no
+cut-in), fused in the common frame of the recorders' pose streams (below); no entity C exists.  A deterministic worked example (`python scripts/worked_example.py
 traces/S17/run_0_crash`, written to `reconstruction/evaluation/s17_worked_example.md`)
 lists the reconstructed timeline, A's safe-gap facts about `A:track_001` and the observed
 vehicle response delays from the recorders' files only (under a file audit), then, in a
 separate privileged section, checks the experiment against the ground truth; it also
 reconstructs the run again without the privileged files and requires identical outputs.  Research question: how does partial observability of a
 causally relevant but non-colliding road user affect accident explanation and attribution?
+
+S18 `anonymous_pair` is the negative case of that fusion: two non-recording vehicles, C
+(model3) and D (prius), drive close together ahead of the recorders at about the same speed --
+`abreast` in adjacent lanes (1.4 m apart side to side, both 12 m/s), `platoon` in one lane 8 m
+apart, or `passing` (D at 13 m/s overtaking C).  A (middle lane, 12 m/s) and B (left lane,
+13 m/s, catching up) observe both for 5-6 s, then A drifts left into B (lane shift at 5.0 s): the
+A-B contact aligns their clocks.  C and D touch nobody and speed up to 14 m/s from 8.0 s.  A correct
+reconstruction never fuses C and D into one road user and names neither.  Two cars abreast spawn
+3.5 m apart, so S18 lowers `simulation.min_spawn_gap_m` to 3 m in its own file.
 
 ## Stored streams
 
@@ -280,8 +289,11 @@ local event graphs and then into one global graph:
 ```text
 vehicles/X/*  -> local trace (10 Hz, X's own clock)  -> local graph of X
                  anonymous radar tracks (track_001, ...; Kalman + RTS)
-all local graphs -> graph-level alignment (matched COLLISION nodes)
+all local graphs -> graph-level alignment (matched COLLISION nodes;
+                    else the recorder's observed trajectory, if unique)
                  -> identity association (track -> recorder, or stays anonymous)
+                 -> road users in the common frame of the pose streams
+                    (track -> recorder; anonymous road users U1, U2, ...)
                  -> global graph + global trace
 ```
 
@@ -291,7 +303,7 @@ python scripts/reconstruct_run.py traces/S01/run_0_crash traces/S02/run_0_crash 
 
 Output goes to `<run>/reconstruction/`: per recorder `local_trace.jsonl`,
 `local_tracks.jsonl`, `local_graph.json|md|dot`; under `global/`
-`alignment.json`, `associations.json`, `global_trace.jsonl`,
+`alignment.json`, `associations.json`, `anonymous_entities.json`, `global_trace.jsonl`,
 `global_graph.json|md|dot`; a plain-language `report.md`. SVG files are written
 only when Graphviz `dot` is installed. `--evaluate` runs afterwards and writes
 `reconstruction/evaluation/`.
@@ -374,6 +386,66 @@ Rules the code follows:
   track compatible with two partners is a conflict: such tracks stay anonymous
   (`A:track_001`); every reason, and the collision the decision rests on, is
   in `associations.json`. Ground truth is never used.
+- Road users in the common frame (`common_frame.py`, `anonymous.py`), after the
+  collision-based association and with no ground truth.  Every recorder's own
+  pose stream (`ego.jsonl`, the recorded GNSS-like pose; exact in CARLA, a
+  perturbed `PoseSource` in the robustness study, which declares its accuracy)
+  places its radar tracks, their observed near surfaces and the returns they
+  claimed in one map frame.  Gates scale with the tracker's own noise
+  (`tracking.measurement_std_m`, `radial_speed_std_mps`,
+  `acceleration_std_mps2`) and the pose sources' declared accuracy:
+  - Observed alignment: a recorder that no matched collision aligned gets the
+    clock offset at which the near surfaces observed of it (or by it) lie on a
+    footprint outline, pooled over every comparison that fits somewhere, on
+    samples of a target moving at least 2 m/s.  It is accepted only when the
+    offsets within `max(3 x best, 2 sigma)` form one interval (the
+    uncertainty); a second interval -- a target at rest or moving along its own
+    outline -- leaves the recorder UNALIGNED (`method` in `alignment.json`).
+  - Recorder links: an anonymous track whose returns lie on another recorder's
+    own footprint (inside counts: no other body can be there) at that
+    recorder's own velocity -- median within 2 sigma, 80 % of at least 10
+    samples within 3 sigma -- is that recorder (ASSOCIATED, evidence line
+    `common frame: ...`).  The evidence stops at the recorder's first contact
+    with a third body (a radar sees two bodies in contact as one cluster); a
+    track that afterwards lies clearly off it (median beyond 3 sigma) switched
+    body and stays anonymous.
+  - Anonymous road users: two anonymous tracks of different observers are one
+    road user when ONE rigid box -- centre, half length and half width with
+    priors 4.6 +- 0.7 m and 1.9 +- 0.2 m, heading from the motion -- explains
+    the faces both observers' returns show (each visible face is a linear
+    constraint: `normal . centre + half = offset` and `tangent . centre =
+    along`) and their velocities agree, chi-square at 99 % (2 dof each) on at
+    least 80 % of at least 10 shared instants.  Two simultaneous tracks of one
+    observer pass the same test when a tracker split one body.  A track of
+    one observer that ends and another that starts within 1.5 s where the
+    first is predicted at constant velocity (uncertainty growing with the
+    unmodelled acceleration) are stitched.  A link with a rival (two
+    successors, or two simultaneous partners that are not one body) is
+    refused: an ambiguity fragments a road user rather than merging two.
+    Clusters never hold two simultaneous tracks of one observer that are not
+    one body.  Entities are `U1`, `U2`, ... by first appearance, never named
+    after a participant; the global graph uses these names.
+  - The fused state of each entity at 10 Hz: one box fitted to the faces of
+    all its observers' returns (`box_fit`), or, when the returns fix no box
+    (one face of one observer, no heading), covariance intersection of the
+    observers' centre estimates (no assumption on their correlation).  The
+    footprint is fitted where opposite faces are seen, else the prior, at
+    least the returns' spread along a face (unless wider than any car: two
+    bodies).  `global/anonymous_entities.json` keeps every decision: the
+    observed alignment, the recorder links, the evidence of every pair, and
+    per entity its source tracks and segments, observers, time span,
+    association links and confidence, fusion method, footprint and fused
+    trajectory with uncertainty.
+  - `python scripts/fusion_metrics.py traces/*/run_*` (privileged, after the
+    reconstruction) writes `reconstruction/evaluation/fusion_metrics.json|md`
+    per run and `traces/fusion_metrics.json|md`: identity decisions (correct,
+    wrong, missed links), merges over pairs of anonymous tracks (correct, false,
+    missed), entity purity and fragmentation, fused-state errors (centre,
+    velocity, speed, heading, footprint) against the true vehicle as
+    distributions, beside the phase-0 nominal ghost box of every source track,
+    the calibration of the declared uncertainty, observed-alignment errors,
+    and the provenance of the numbers (code and configuration hashes, commit,
+    runs, time).
 - Radar detection velocity is used as stored: the range rate (negative while
   the range shrinks), whatever label older radar metadata carries.
 - Geometry of the body radars.  Every return is placed from the position of

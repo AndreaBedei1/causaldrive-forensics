@@ -295,6 +295,14 @@ class LocalGraph:
                    recorder=copy.deepcopy(data.get("recorder", {})))
 
 
+def is_anonymous_entity(name: Optional[str]) -> bool:
+    """A global name that identifies no recorder: an anonymous road user (U1, U2, ...) or, for a recorder
+    without a global clock, the local track name (A:track_001)."""
+    if not name:
+        return False
+    return ":" in name or (name[0] == "U" and name[1:].isdigit())
+
+
 @dataclass
 class GraphClock:
     """How one local graph's clock maps to global graph time.
@@ -313,6 +321,8 @@ class GraphClock:
     offset_to_global: Optional[float] = None
     reason: str = ""
     chain: List[str] = field(default_factory=list)
+    # How the offset was fixed: "matched_collisions" or "observed_trajectories" (None while unaligned).
+    method: Optional[str] = None
 
     def to_global(self, t_local: float) -> Optional[float]:
         if self.offset_to_global is None:
@@ -322,7 +332,8 @@ class GraphClock:
     def to_dict(self) -> Dict[str, Any]:
         return {"status": self.status, "anchor_node": self.anchor_node,
                 "anchor_t_local": self.anchor_t_local,
-                "offset_to_global": self.offset_to_global, "chain": list(self.chain), "reason": self.reason}
+                "offset_to_global": self.offset_to_global, "method": self.method, "chain": list(self.chain),
+                "reason": self.reason}
 
 
 @dataclass
@@ -333,6 +344,8 @@ class Alignment:
     # Impulse-compatible report pairs refused because their clock offset
     # contradicts the matches already accepted.
     rejected_matches: List[Dict[str, Any]] = field(default_factory=list)
+    # Recorders without a matched collision: the observed-trajectory alignment's decisions (anonymous.py).
+    observed: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         aligned = sorted(name for name, clock in self.graphs.items() if clock.status == "ALIGNED")
@@ -343,15 +356,18 @@ class Alignment:
                     # How far the second clock reads ahead of the first one.
                     relative[second + " - " + first] = round(
                         self.graphs[first].offset_to_global - self.graphs[second].offset_to_global, 4)
-        return {"method": "matched_collisions",
+        methods = sorted({clock.method for clock in self.graphs.values() if clock.method})
+        return {"method": " + ".join(methods) if methods else "matched_collisions",
                 "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; "
                               "a graph is aligned through any chain of matched collisions linking it to the "
-                              "reference one",
+                              "reference one, or else through its own trajectory observed by aligned recorders "
+                              "(observed_alignment)",
                 "reference_event": self.reference_event,
                 "graphs": {name: self.graphs[name].to_dict() for name in sorted(self.graphs)},
                 "relative_clock_offsets_s": relative,
                 "matched_events": copy.deepcopy(self.matched_events),
-                "rejected_matches": copy.deepcopy(self.rejected_matches)}
+                "rejected_matches": copy.deepcopy(self.rejected_matches),
+                "observed_alignment": copy.deepcopy(self.observed)}
 
 
 @dataclass

@@ -1,0 +1,378 @@
+{
+  "run": "S08/run_0_crash",
+  "privileged_assumptions": [
+    "recorder raw clocks are CARLA simulator time",
+    "a vehicle box is centred on its origin in the horizontal plane"
+  ],
+  "identity_max_box_distance_m": 1.5,
+  "track_decisions": [
+    {
+      "track": "A:track_001",
+      "decision": "C",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "A:track_002",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "B",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_001",
+      "decision": "C",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "C:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "A",
+      "purity": 0.882,
+      "verdict": "correct link"
+    },
+    {
+      "track": "C:track_002",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "B",
+      "purity": 0.632,
+      "verdict": "missed link (true identity B)"
+    }
+  ],
+  "decision_counts": {
+    "correct link": 5,
+    "missed link": 1
+  },
+  "entities": [
+    {
+      "id": "U1",
+      "source_tracks": [
+        "C:track_002"
+      ],
+      "observers": [
+        "C"
+      ],
+      "true_identity": "B",
+      "identity_is_recorder": true,
+      "purity": 0.632,
+      "track_identities": {
+        "C:track_002": "B"
+      }
+    }
+  ],
+  "merges": {
+    "correct": 0,
+    "false": 0,
+    "missed": 0
+  },
+  "fragmentation": {
+    "B": [
+      "U1"
+    ]
+  },
+  "state_errors": {
+    "centre_error_m": {
+      "n": 24,
+      "median": 0.3365,
+      "q25": 0.2633,
+      "q75": 0.481,
+      "p90": 1.0422,
+      "p95": 1.761,
+      "max": 1.9369,
+      "mean": 0.523,
+      "iqr": 0.2177
+    },
+    "coverage_s": {
+      "n": 1,
+      "median": 3.7,
+      "q25": 3.7,
+      "q75": 3.7,
+      "p90": 3.7,
+      "p95": 3.7,
+      "max": 3.7,
+      "mean": 3.7,
+      "iqr": 0.0
+    },
+    "heading_error_deg": {
+      "n": 24,
+      "median": 1.7723,
+      "q25": 0.7742,
+      "q75": 3.3722,
+      "p90": 4.6884,
+      "p95": 5.1893,
+      "max": 9.319,
+      "mean": 2.3234,
+      "iqr": 2.598
+    },
+    "length_error_m": {
+      "n": 1,
+      "median": 0.419,
+      "q25": 0.419,
+      "q75": 0.419,
+      "p90": 0.419,
+      "p95": 0.419,
+      "max": 0.419,
+      "mean": 0.419,
+      "iqr": 0.0
+    },
+    "normalised_centre_error": {
+      "n": 24,
+      "median": 0.7659,
+      "q25": 0.562,
+      "q75": 0.8862,
+      "p90": 1.3583,
+      "p95": 1.8034,
+      "max": 4.7357,
+      "mean": 0.9373,
+      "iqr": 0.3243
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 24,
+      "median": 0.8964,
+      "q25": 0.7081,
+      "q75": 1.1378,
+      "p90": 1.2287,
+      "p95": 1.3162,
+      "max": 1.3441,
+      "mean": 0.9302,
+      "iqr": 0.4298
+    },
+    "speed_error_mps": {
+      "n": 24,
+      "median": 0.3097,
+      "q25": 0.0928,
+      "q75": 0.6985,
+      "p90": 2.9003,
+      "p95": 3.4084,
+      "max": 4.4724,
+      "mean": 0.8429,
+      "iqr": 0.6058
+    },
+    "velocity_error_mps": {
+      "n": 24,
+      "median": 0.5955,
+      "q25": 0.2318,
+      "q75": 0.982,
+      "p90": 3.8512,
+      "p95": 4.5151,
+      "max": 6.667,
+      "mean": 1.2267,
+      "iqr": 0.7502
+    },
+    "width_error_m": {
+      "n": 1,
+      "median": 0.094,
+      "q25": 0.094,
+      "q75": 0.094,
+      "p90": 0.094,
+      "p95": 0.094,
+      "max": 0.094,
+      "mean": 0.094,
+      "iqr": 0.0
+    }
+  },
+  "state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 17,
+        "median": 0.3033,
+        "q25": 0.2418,
+        "q75": 0.3377,
+        "p90": 0.4084,
+        "p95": 0.7373,
+        "max": 1.9369,
+        "mean": 0.3959,
+        "iqr": 0.0959
+      },
+      "heading_error_deg": {
+        "n": 17,
+        "median": 1.0997,
+        "q25": 0.7096,
+        "q75": 2.1237,
+        "p90": 2.841,
+        "p95": 3.1033,
+        "max": 3.4577,
+        "mean": 1.396,
+        "iqr": 1.4141
+      },
+      "speed_error_mps": {
+        "n": 17,
+        "median": 0.1434,
+        "q25": 0.0829,
+        "q75": 0.3412,
+        "p90": 0.7756,
+        "p95": 1.7615,
+        "max": 4.4724,
+        "mean": 0.4833,
+        "iqr": 0.2583
+      },
+      "velocity_error_mps": {
+        "n": 17,
+        "median": 0.2692,
+        "q25": 0.1687,
+        "q75": 0.6518,
+        "p90": 0.942,
+        "p95": 1.9024,
+        "max": 4.6042,
+        "mean": 0.6291,
+        "iqr": 0.4832
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 7,
+        "median": 0.6648,
+        "q25": 0.4815,
+        "q75": 1.0374,
+        "p90": 1.3843,
+        "p95": 1.6354,
+        "max": 1.8865,
+        "mean": 0.8316,
+        "iqr": 0.5558
+      },
+      "heading_error_deg": {
+        "n": 7,
+        "median": 3.6109,
+        "q25": 3.4454,
+        "q75": 5.1732,
+        "p90": 6.8453,
+        "p95": 8.0821,
+        "max": 9.319,
+        "mean": 4.5754,
+        "iqr": 1.7278
+      },
+      "speed_error_mps": {
+        "n": 7,
+        "median": 1.6498,
+        "q25": 0.4165,
+        "q75": 2.8267,
+        "p90": 3.1978,
+        "p95": 3.3382,
+        "max": 3.4786,
+        "mean": 1.7161,
+        "iqr": 2.4102
+      },
+      "velocity_error_mps": {
+        "n": 7,
+        "median": 1.9645,
+        "q25": 0.8938,
+        "q75": 3.7451,
+        "p90": 5.073,
+        "p95": 5.87,
+        "max": 6.667,
+        "mean": 2.678,
+        "iqr": 2.8513
+      }
+    }
+  },
+  "calibration": {
+    "states": 24,
+    "observed_within": {
+      "1_sigma": 0.792,
+      "2_sigma": 0.958,
+      "3_sigma": 0.958
+    },
+    "expected_within_gaussian": {
+      "1_sigma": 0.393,
+      "2_sigma": 0.865,
+      "3_sigma": 0.989
+    }
+  },
+  "entity_errors": [
+    {
+      "id": "U1",
+      "true_identity": "B",
+      "coverage_s": 3.7,
+      "states": 24,
+      "impure_states": 14,
+      "centre_error_m": {
+        "n": 24,
+        "median": 0.3365,
+        "q25": 0.2633,
+        "q75": 0.481,
+        "p90": 1.0422,
+        "p95": 1.761,
+        "max": 1.9369,
+        "mean": 0.523,
+        "iqr": 0.2177
+      },
+      "velocity_error_mps": {
+        "n": 24,
+        "median": 0.5955,
+        "q25": 0.2318,
+        "q75": 0.982,
+        "p90": 3.8512,
+        "p95": 4.5151,
+        "max": 6.667,
+        "mean": 1.2267,
+        "iqr": 0.7502
+      },
+      "speed_error_mps": {
+        "n": 24,
+        "median": 0.3097,
+        "q25": 0.0928,
+        "q75": 0.6985,
+        "p90": 2.9003,
+        "p95": 3.4084,
+        "max": 4.4724,
+        "mean": 0.8429,
+        "iqr": 0.6058
+      },
+      "heading_error_deg": {
+        "n": 24,
+        "median": 1.7723,
+        "q25": 0.7742,
+        "q75": 3.3722,
+        "p90": 4.6884,
+        "p95": 5.1893,
+        "max": 9.319,
+        "mean": 2.3234,
+        "iqr": 2.598
+      },
+      "length_error_m": 0.419,
+      "width_error_m": -0.094,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.181,
+      "true_width_m": 1.994
+    }
+  ],
+  "observed_alignment": [
+    {
+      "recorder": "C",
+      "accepted": true,
+      "estimated_offset_s": -4.1,
+      "true_offset_s": -4.1,
+      "error_s": 0.0,
+      "interval": [
+        -4.2,
+        -3.75
+      ],
+      "status": "ALIGNED"
+    }
+  ],
+  "states_compared": 24,
+  "impure_states": 14
+}

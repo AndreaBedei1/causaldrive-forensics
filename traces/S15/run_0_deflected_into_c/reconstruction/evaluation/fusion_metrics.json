@@ -1,0 +1,365 @@
+{
+  "run": "S15/run_0_deflected_into_c",
+  "privileged_assumptions": [
+    "recorder raw clocks are CARLA simulator time",
+    "a vehicle box is centred on its origin in the horizontal plane"
+  ],
+  "identity_max_box_distance_m": 1.5,
+  "track_decisions": [
+    {
+      "track": "A:track_001",
+      "decision": "C",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "A:track_002",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "B",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_001",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "A",
+      "purity": 0.76,
+      "verdict": "missed link (true identity A)"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "C:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "C:track_002",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "B",
+      "purity": 1.0,
+      "verdict": "correct link"
+    }
+  ],
+  "decision_counts": {
+    "correct link": 5,
+    "missed link": 1
+  },
+  "entities": [
+    {
+      "id": "U1",
+      "source_tracks": [
+        "B:track_001"
+      ],
+      "observers": [
+        "B"
+      ],
+      "true_identity": "A",
+      "identity_is_recorder": true,
+      "purity": 0.76,
+      "track_identities": {
+        "B:track_001": "A"
+      }
+    }
+  ],
+  "merges": {
+    "correct": 0,
+    "false": 0,
+    "missed": 0
+  },
+  "fragmentation": {
+    "A": [
+      "U1"
+    ]
+  },
+  "state_errors": {
+    "centre_error_m": {
+      "n": 94,
+      "median": 1.4678,
+      "q25": 1.4045,
+      "q75": 1.5055,
+      "p90": 1.5263,
+      "p95": 1.5577,
+      "max": 6.588,
+      "mean": 1.4876,
+      "iqr": 0.101
+    },
+    "coverage_s": {
+      "n": 1,
+      "median": 12.25,
+      "q25": 12.25,
+      "q75": 12.25,
+      "p90": 12.25,
+      "p95": 12.25,
+      "max": 12.25,
+      "mean": 12.25,
+      "iqr": 0.0
+    },
+    "heading_error_deg": {
+      "n": 4,
+      "median": 164.7084,
+      "q25": 161.9777,
+      "q75": 168.9211,
+      "p90": 173.6296,
+      "p95": 175.1991,
+      "max": 176.7686,
+      "mean": 166.1904,
+      "iqr": 6.9435
+    },
+    "length_error_m": {
+      "n": 1,
+      "median": 0.192,
+      "q25": 0.192,
+      "q75": 0.192,
+      "p90": 0.192,
+      "p95": 0.192,
+      "max": 0.192,
+      "mean": 0.192,
+      "iqr": 0.0
+    },
+    "normalised_centre_error": {
+      "n": 94,
+      "median": 1.1277,
+      "q25": 1.0997,
+      "q75": 1.1543,
+      "p90": 2.6811,
+      "p95": 2.7959,
+      "max": 16.1075,
+      "mean": 1.6234,
+      "iqr": 0.0547
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 94,
+      "median": 1.4084,
+      "q25": 1.3423,
+      "q75": 1.4349,
+      "p90": 1.4751,
+      "p95": 2.4901,
+      "max": 5.2827,
+      "mean": 1.5268,
+      "iqr": 0.0926
+    },
+    "speed_error_mps": {
+      "n": 94,
+      "median": 0.0519,
+      "q25": 0.0082,
+      "q75": 0.1739,
+      "p90": 0.6987,
+      "p95": 2.5578,
+      "max": 3.828,
+      "mean": 0.3287,
+      "iqr": 0.1657
+    },
+    "velocity_error_mps": {
+      "n": 94,
+      "median": 0.0724,
+      "q25": 0.0247,
+      "q75": 0.1942,
+      "p90": 1.4948,
+      "p95": 3.7467,
+      "max": 10.3575,
+      "mean": 0.6666,
+      "iqr": 0.1695
+    },
+    "width_error_m": {
+      "n": 1,
+      "median": 0.263,
+      "q25": 0.263,
+      "q75": 0.263,
+      "p90": 0.263,
+      "p95": 0.263,
+      "max": 0.263,
+      "mean": 0.263,
+      "iqr": 0.0
+    }
+  },
+  "state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 17,
+        "median": 1.0687,
+        "q25": 0.8987,
+        "q75": 1.1294,
+        "p90": 1.144,
+        "p95": 2.2375,
+        "max": 6.588,
+        "mean": 1.2762,
+        "iqr": 0.2307
+      },
+      "heading_error_deg": {
+        "n": 1,
+        "median": 158.5763,
+        "q25": 158.5763,
+        "q75": 158.5763,
+        "p90": 158.5763,
+        "p95": 158.5763,
+        "max": 158.5763,
+        "mean": 158.5763,
+        "iqr": 0.0
+      },
+      "speed_error_mps": {
+        "n": 17,
+        "median": 0.4335,
+        "q25": 0.2475,
+        "q75": 1.6801,
+        "p90": 2.8927,
+        "p95": 2.995,
+        "max": 3.0265,
+        "mean": 1.0398,
+        "iqr": 1.4325
+      },
+      "velocity_error_mps": {
+        "n": 17,
+        "median": 0.4579,
+        "q25": 0.2683,
+        "q75": 2.4462,
+        "p90": 3.1388,
+        "p95": 4.6503,
+        "max": 10.3575,
+        "mean": 1.6445,
+        "iqr": 2.1779
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 77,
+        "median": 1.4806,
+        "q25": 1.4539,
+        "q75": 1.5098,
+        "p90": 1.5276,
+        "p95": 1.5561,
+        "max": 4.0362,
+        "mean": 1.5343,
+        "iqr": 0.0559
+      },
+      "heading_error_deg": {
+        "n": 3,
+        "median": 166.3053,
+        "q25": 164.7084,
+        "q75": 171.537,
+        "p90": 174.6759,
+        "p95": 175.7223,
+        "max": 176.7686,
+        "mean": 168.7285,
+        "iqr": 6.8285
+      },
+      "speed_error_mps": {
+        "n": 77,
+        "median": 0.0304,
+        "q25": 0.0075,
+        "q75": 0.0925,
+        "p90": 0.1647,
+        "p95": 0.2308,
+        "max": 3.828,
+        "mean": 0.1717,
+        "iqr": 0.085
+      },
+      "velocity_error_mps": {
+        "n": 77,
+        "median": 0.0502,
+        "q25": 0.0199,
+        "q75": 0.1127,
+        "p90": 0.1851,
+        "p95": 1.123,
+        "max": 8.7357,
+        "mean": 0.4507,
+        "iqr": 0.0928
+      }
+    }
+  },
+  "calibration": {
+    "states": 94,
+    "observed_within": {
+      "1_sigma": 0.021,
+      "2_sigma": 0.83,
+      "3_sigma": 0.957
+    },
+    "expected_within_gaussian": {
+      "1_sigma": 0.393,
+      "2_sigma": 0.865,
+      "3_sigma": 0.989
+    }
+  },
+  "entity_errors": [
+    {
+      "id": "U1",
+      "true_identity": "A",
+      "coverage_s": 12.25,
+      "states": 94,
+      "impure_states": 29,
+      "centre_error_m": {
+        "n": 94,
+        "median": 1.4678,
+        "q25": 1.4045,
+        "q75": 1.5055,
+        "p90": 1.5263,
+        "p95": 1.5577,
+        "max": 6.588,
+        "mean": 1.4876,
+        "iqr": 0.101
+      },
+      "velocity_error_mps": {
+        "n": 94,
+        "median": 0.0724,
+        "q25": 0.0247,
+        "q75": 0.1942,
+        "p90": 1.4948,
+        "p95": 3.7467,
+        "max": 10.3575,
+        "mean": 0.6666,
+        "iqr": 0.1695
+      },
+      "speed_error_mps": {
+        "n": 94,
+        "median": 0.0519,
+        "q25": 0.0082,
+        "q75": 0.1739,
+        "p90": 0.6987,
+        "p95": 2.5578,
+        "max": 3.828,
+        "mean": 0.3287,
+        "iqr": 0.1657
+      },
+      "heading_error_deg": {
+        "n": 4,
+        "median": 164.7084,
+        "q25": 161.9777,
+        "q75": 168.9211,
+        "p90": 173.6296,
+        "p95": 175.1991,
+        "max": 176.7686,
+        "mean": 166.1904,
+        "iqr": 6.9435
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    }
+  ],
+  "observed_alignment": [],
+  "states_compared": 94,
+  "impure_states": 29
+}

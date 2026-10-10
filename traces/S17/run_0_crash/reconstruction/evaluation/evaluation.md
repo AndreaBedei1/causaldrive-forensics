@@ -33,11 +33,11 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | A:track_001 | C | correctly left anonymous | 73 | 0.289 / 0.313 m | 2.132 m | 0.788 / 0.081 m/s |
+| A:track_001 | U1 | C | correctly left anonymous | 73 | 0.289 / 0.313 m | 2.132 m | 0.788 / 0.081 m/s |
 | A:track_002 | B | B | correct | 110 | 0.174 / 0.194 m | 2.103 m | 0.832 / 0.34 m/s |
 | B:track_001 | A | A | correct | 110 | 0.1 / 0.223 m | 1.342 m | 2.283 / 0.461 m/s |
-| B:track_002 | B:track_002 | C | correctly left anonymous | 58 | 0.18 / 0.387 m | 1.018 m | 5.152 / 0.558 m/s |
-| B:track_003 | B:track_003 | C | correctly left anonymous | 6 | 0.424 / 0.557 m | 1.007 m | 6.697 / 0.427 m/s |
+| B:track_002 | U1 | C | correctly left anonymous | 58 | 0.18 / 0.387 m | 1.018 m | 5.152 / 0.558 m/s |
+| B:track_003 | U1 | C | correctly left anonymous | 6 | 0.424 / 0.557 m | 1.007 m | 6.697 / 0.427 m/s |
 
 ## Clearance at the true contacts
 

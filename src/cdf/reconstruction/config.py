@@ -226,6 +226,35 @@ class FusionConfig:
     # as two tracks, S16's van: the one at its touching end is the partner).
     touching_clearance_m: float = 1.0
     rival_clearance_m: float = 2.0
+    # --- Road users in the common frame of the recorders' own pose streams (anonymous.py) ---
+    # A recorder no matched collision aligned gets the clock offset at which the near surfaces observed
+    # of it (or by it) lie on a footprint outline: candidate offsets every step (one radar period); a
+    # comparison needs this many samples of a target moving at least this fast (only motion fixes time);
+    # accepted only when the offsets scoring within max(ratio x best, 2 sigma) form one interval.
+    observed_alignment_step_s: float = 0.05
+    observed_alignment_min_samples: int = 10
+    observed_alignment_min_speed_mps: float = 2.0
+    observed_alignment_uniqueness_ratio: float = 3.0
+    # An anonymous track is another recorder when its near surface lies on that recorder's own footprint
+    # outline at that recorder's own velocity over at least this many samples and this fraction of them.
+    link_min_samples: int = 10
+    link_min_fraction: float = 0.8
+    # Two anonymous tracks are one road user: chi-square gates (2 dof) at this probability, at least this
+    # many shared instants compared, at least this fraction of them passing.
+    anonymous_gate_probability: float = 0.99
+    anonymous_min_shared_samples: int = 10
+    anonymous_pass_fraction: float = 0.8
+    # One observer losing a road user and tracking it again: at most this gap (the prediction's
+    # uncertainty grows with it, tracking.acceleration_std_mps2).
+    stitch_max_gap_s: float = 1.5
+    # Box fit to the faces the radar returns show: spread of a face's returns around the box face
+    # (engineering assumption: bumpers, mirrors, wheels), spread of the length and width priors around
+    # semantics.target_length_m / target_width_m (passenger cars to vans).
+    box_face_std_m: float = 0.25
+    box_length_std_m: float = 0.7
+    box_width_std_m: float = 0.2
+    # Rate of the fused trajectories written to global/anonymous_entities.json.
+    entity_output_rate_hz: float = 10.0
 
 
 @dataclass

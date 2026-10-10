@@ -1,6 +1,6 @@
 {
   "method": "matched_collisions",
-  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; a graph is aligned through any chain of matched collisions linking it to the reference one",
+  "definition": "t_global = t_local + offset_to_global; t_global = 0 at the reference collision; a graph is aligned through any chain of matched collisions linking it to the reference one, or else through its own trajectory observed by aligned recorders (observed_alignment)",
   "reference_event": "collision_001",
   "graphs": {
     "A": {
@@ -8,6 +8,7 @@
       "anchor_node": "A:e14",
       "anchor_t_local": 5.4,
       "offset_to_global": -5.4,
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -18,6 +19,7 @@
       "anchor_node": "B:e07",
       "anchor_t_local": 5.4,
       "offset_to_global": -5.4,
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -55,5 +57,6 @@
       ]
     }
   ],
-  "rejected_matches": []
+  "rejected_matches": [],
+  "observed_alignment": []
 }

@@ -20,6 +20,7 @@
     {
       "graph": "A",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -30,6 +31,7 @@
     {
       "graph": "B",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -40,6 +42,7 @@
     {
       "graph": "C",
       "status": "UNALIGNED",
+      "method": null,
       "chain": [],
       "estimated_reference_t_local": null,
       "true_reference_t_local": 5.9,
@@ -80,7 +83,7 @@
     },
     {
       "track": "B:track_001",
-      "decision": "B:track_001",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {

@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4; max |t_global error| 0.0 s**
+**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -40,11 +40,11 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | C | C | correct | 120 | 0.128 / 0.162 m | 2.803 m | 0.783 / 0.204 m/s |
-| A:track_002 | A:track_002 | C | left anonymous (true identity C) | 66 | 0.057 / 0.078 m | 1.27 m | 4.585 / 0.05 m/s |
+| A:track_002 | C | C | correct | 66 | 0.057 / 0.078 m | 1.27 m | 4.585 / 0.05 m/s |
 | B:track_001 | A | A | correct | 120 | 0.464 / 0.448 m | 1.715 m | 2.587 / 0.282 m/s |
-| B:track_002 | B:track_002 | C | left anonymous (true identity C) | 117 | 0.268 / 0.272 m | 2.71 m | 3.528 / 0.184 m/s |
-| B:track_003 | B:track_003 | C | left anonymous (true identity C) | 17 | 0.082 / 0.091 m | 1.161 m | 3.873 / 0.056 m/s |
-| B:track_004 | B:track_004 | C | left anonymous (true identity C) | 3 | 0.122 / 0.171 m | 1.317 m | 3.361 / 0.407 m/s |
+| B:track_002 | C | C | correct | 117 | 0.268 / 0.272 m | 2.71 m | 3.528 / 0.184 m/s |
+| B:track_003 | C | C | correct | 17 | 0.082 / 0.091 m | 1.161 m | 3.873 / 0.056 m/s |
+| B:track_004 | U1 | C | left anonymous (true identity C) | 3 | 0.122 / 0.171 m | 1.317 m | 3.361 / 0.407 m/s |
 | C:track_001 | A | A | correct | 38 | 0.162 / 0.196 m | 1.967 m | 0.291 / 0.268 m/s |
 
 ## Clearance at the true contacts

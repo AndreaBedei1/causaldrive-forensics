@@ -1,8 +1,10 @@
 """Orchestration: one run directory in, ``<run>/reconstruction/`` out.
 
     RAW LOG -> LOCAL TRACE -> LOCAL GRAPH      (every recorder alone)
-            -> GRAPH-LEVEL ALIGNMENT           (collision anchors)
+            -> GRAPH-LEVEL ALIGNMENT           (collision anchors; else observed trajectories)
             -> IDENTITY ASSOCIATION            (anonymous track -> recorder)
+            -> ROAD USERS                      (common frame of the recorders' own pose streams:
+                                                track -> recorder, anonymous road users U1, U2, ...)
             -> GLOBAL GRAPH + GLOBAL TRACE
 
 Only ``<run>/vehicles/`` and the supplied ``<run>/incident_context.json`` are
@@ -16,9 +18,11 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .alignment import align_graphs
+from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
+from .common_frame import PoseSource, RecordedPoseSource
 from .config import ReconstructionConfig, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .local import LocalReconstruction, reconstruct_vehicle
@@ -36,6 +40,11 @@ class RunReconstruction:
     associations: List[Association]
     graph: GlobalGraph
     trace: List[Dict[str, Any]]
+    road_users: Optional[RoadUserFusion] = None
+
+# A recorder's pose stream in the common frame from (vehicle directory, its clock origin): the recorded
+# GNSS-like stream by default; the robustness study substitutes a perturbed one.
+PoseFactory = Callable[[Path, float], PoseSource]
 
 
 def run_title(run_dir: Path) -> str:
@@ -77,7 +86,27 @@ def write_local_outputs(directory: Path, local: LocalReconstruction, trace_hz: f
     render_svg(directory / "local_graph.dot")
 
 
-def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -> RunReconstruction:
+def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: ReconstructionConfig,
+                   pose_factory: Optional[PoseFactory] = None
+                   ) -> Tuple[Alignment, List[Association], RoadUserFusion, GlobalGraph]:
+    """The cross-recorder steps on finished local reconstructions: alignment, identity association,
+    road users in the common frame, global graph (nothing is written)."""
+    pose_factory = pose_factory or RecordedPoseSource.from_vehicle_dir
+    alignment = align_graphs([local.graph for local in locals_], cfg.fusion)
+    associations = associate_tracks(locals_, alignment, cfg.fusion)
+    # A recorder no matched collision aligned: the clock offset its observed trajectory fixes, if unique,
+    # in the common frame of the recorders' own pose streams (then the association is redone).
+    poses = {local.owner: pose_factory(Path(run_dir) / "vehicles" / local.owner, local.clock_origin)
+             for local in locals_}
+    if any(item["accepted"] for item in align_by_observations(locals_, alignment, associations, poses, cfg)):
+        associations = associate_tracks(locals_, alignment, cfg.fusion)
+    # Anonymous tracks that are recorders, and the road users that recorded nothing (U1, U2, ...).
+    road_users = fuse_road_users(locals_, alignment, associations, poses, cfg)
+    return alignment, associations, road_users, fuse_graphs(locals_, alignment, associations)
+
+
+def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,
+                    pose_factory: Optional[PoseFactory] = None) -> RunReconstruction:
     run_dir = Path(run_dir)
     cfg = cfg or load_config()
     output_dir = run_dir / "reconstruction"
@@ -94,10 +123,8 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     for local in locals_:
         write_local_outputs(output_dir / local.owner, local, cfg.trace_hz)
 
-    # 5-8. Only now look across recorders, and only at their graphs and tracks.
-    alignment = align_graphs([local.graph for local in locals_], cfg.fusion)
-    associations = associate_tracks(locals_, alignment, cfg.fusion)
-    graph = fuse_graphs(locals_, alignment, associations)
+    # 5-8. Only now look across recorders, and only at their graphs, tracks and pose streams.
+    alignment, associations, road_users, graph = fuse_recorders(run_dir, locals_, cfg, pose_factory)
     trace = global_trace(graph)
     relations = global_temporal_relations(locals_, alignment, associations)
 
@@ -106,6 +133,8 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     global_dir = output_dir / "global"
     write_json(global_dir / "alignment.json", alignment.to_dict())
     write_json(global_dir / "associations.json", [item.to_dict() for item in associations])
+    road_user_record = road_users.to_dict(cfg, alignment)
+    write_json(global_dir / "anonymous_entities.json", road_user_record)
     write_jsonl(global_dir / "global_trace.jsonl", trace)
     write_json(global_dir / "global_graph.json", dict(graph.to_dict(), run=title, incident_context=context or None,
                                                      temporal_safety_relations=relations,
@@ -116,6 +145,6 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None) -
     render_svg(global_dir / "global_graph.dot")
     write_text(output_dir / "report.md",
                report_markdown(title, locals_, alignment, associations, graph, trace, cfg.to_dict(), context,
-                               relations))
+                               relations, road_user_record))
     return RunReconstruction(run_dir=run_dir, output_dir=output_dir, locals=locals_, alignment=alignment,
-                             associations=associations, graph=graph, trace=trace)
+                             associations=associations, graph=graph, trace=trace, road_users=road_users)

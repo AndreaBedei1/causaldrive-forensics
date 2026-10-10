@@ -4,7 +4,7 @@ Inputs: `vehicles/A/`, `vehicles/B/` (vehicle-local files) and the supplied `inc
 
 Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
 
-Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) -> graph-level alignment -> identity association -> global graph.
+Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) -> graph-level alignment -> identity association -> road users in the common frame of the recorders' own pose streams -> global graph.
 
 ## Local reconstructions
 
@@ -32,6 +32,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 |-------------|---------------|--------|-----------:|----------|
 | A:track_001 | B | ASSOCIATED | 0.91 | A and B both reported collision_001 (peak impulse 12137.59 vs 12137.59 N*s)<br>tracked for 2.05 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 14.8 m -> 0.3 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.65 m/s over 2.0 s<br>clearance at the contact 0.35 m<br>the only track of A compatible with the contact |
 | B:track_001 | A | ASSOCIATED | 0.89 | B and A both reported collision_001 (peak impulse 12137.59 vs 12137.59 N*s)<br>tracked for 2.00 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 15.2 m -> 0.5 m over the last 1.0 s<br>track speed agrees with A's own speed: RMSE 0.71 m/s over 2.0 s<br>clearance at the contact 0.46 m<br>the only track of B compatible with the contact |
+
+## Road users in the common frame
+
+- no anonymous track of an aligned recorder
 
 ## Global graph
 
@@ -142,7 +146,7 @@ B:
 ## Files
 
 - Local: `<recorder>/local_trace.jsonl`, `local_tracks.jsonl`, `local_graph.json|md|dot`
-- Global: `global/alignment.json`, `associations.json`, `global_trace.jsonl`, `global_graph.json|md|dot`
+- Global: `global/alignment.json`, `associations.json`, `anonymous_entities.json`, `global_trace.jsonl`, `global_graph.json|md|dot`
 
 ## Parameters
 
@@ -260,7 +264,21 @@ B:
     "min_track_persistence_s": 1.0,
     "speed_consistency_mps": 1.5,
     "touching_clearance_m": 1.0,
-    "rival_clearance_m": 2.0
+    "rival_clearance_m": 2.0,
+    "observed_alignment_step_s": 0.05,
+    "observed_alignment_min_samples": 10,
+    "observed_alignment_min_speed_mps": 2.0,
+    "observed_alignment_uniqueness_ratio": 3.0,
+    "link_min_samples": 10,
+    "link_min_fraction": 0.8,
+    "anonymous_gate_probability": 0.99,
+    "anonymous_min_shared_samples": 10,
+    "anonymous_pass_fraction": 0.8,
+    "stitch_max_gap_s": 1.5,
+    "box_face_std_m": 0.25,
+    "box_length_std_m": 0.7,
+    "box_width_std_m": 0.2,
+    "entity_output_rate_hz": 10.0
   }
 }
 ```

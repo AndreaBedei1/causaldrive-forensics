@@ -1,6 +1,6 @@
 {
   "run": "S15/run_0_deflected_into_c",
-  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 5/5; anonymous: 1; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -31,6 +31,7 @@
     {
       "graph": "A",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -41,6 +42,7 @@
     {
       "graph": "B",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -51,6 +53,7 @@
     {
       "graph": "C",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001",
         "collision_002"
@@ -123,7 +126,7 @@
     },
     {
       "track": "B:track_001",
-      "decision": "B:track_001",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "A",
       "median_box_distance_m": {
@@ -174,14 +177,14 @@
     },
     {
       "track": "C:track_002",
-      "decision": "C:track_002",
-      "status": "ANONYMOUS",
+      "decision": "B",
+      "status": "ASSOCIATED",
       "true_identity": "B",
       "median_box_distance_m": {
         "A": 2.39,
         "B": 0.0
       },
-      "verdict": "left anonymous (true identity B)",
+      "verdict": "correct",
       "samples": 134,
       "raw_rmse_to_surface_m": 0.146,
       "smoothed_rmse_to_surface_m": 0.207,

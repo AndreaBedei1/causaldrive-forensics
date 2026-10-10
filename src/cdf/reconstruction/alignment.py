@@ -216,7 +216,7 @@ def align_graphs(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Alignment:
         clocks[owner] = GraphClock(graph=owner, status=ALIGNED, anchor_node=reference["nodes"][owner],
                                    anchor_t_local=anchor, offset_to_global=round(-anchor, 4),
                                    reason="reported the reference collision " + reference["event_id"],
-                                   chain=[reference["event_id"]])
+                                   chain=[reference["event_id"]], method="matched_collisions")
     # Multi-hop: breadth first from the reference graphs, the strongest shared contact first.
     frontier = list(reference["graphs"])
     while frontier:
@@ -233,7 +233,8 @@ def align_graphs(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Alignment:
                 graph=owner, status=ALIGNED, anchor_node=event["nodes"][owner], anchor_t_local=anchor,
                 offset_to_global=round(t_global - anchor, 4), chain=via.chain + [event["event_id"]],
                 reason="shares {0} with {1}, aligned through {2}".format(
-                    event["event_id"], known[0], " -> ".join(via.chain + [event["event_id"]])))
+                    event["event_id"], known[0], " -> ".join(via.chain + [event["event_id"]])),
+                method="matched_collisions")
             reached.append(owner)
         frontier = reached
     for owner, clock in clocks.items():

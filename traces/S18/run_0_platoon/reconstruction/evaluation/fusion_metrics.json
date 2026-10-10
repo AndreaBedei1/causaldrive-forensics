@@ -1,0 +1,621 @@
+{
+  "run": "S18/run_0_platoon",
+  "privileged_assumptions": [
+    "recorder raw clocks are CARLA simulator time",
+    "a vehicle box is centred on its origin in the horizontal plane"
+  ],
+  "identity_max_box_distance_m": 1.5,
+  "track_decisions": [
+    {
+      "track": "A:track_001",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "A:track_002",
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "B",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "A:track_003",
+      "decision": "U2",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "A:track_004",
+      "decision": "U4",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "B:track_001",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "B:track_003",
+      "decision": "U3",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    },
+    {
+      "track": "B:track_004",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "D",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user D)"
+    },
+    {
+      "track": "B:track_005",
+      "decision": "U4",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "C",
+      "purity": 1.0,
+      "verdict": "anonymous (non-recording road user C)"
+    }
+  ],
+  "decision_counts": {
+    "anonymous": 7,
+    "correct link": 2
+  },
+  "entities": [
+    {
+      "id": "U1",
+      "source_tracks": [
+        "A:track_001",
+        "B:track_002",
+        "B:track_004"
+      ],
+      "observers": [
+        "A",
+        "B"
+      ],
+      "true_identity": "D",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "A:track_001": "D",
+        "B:track_002": "D",
+        "B:track_004": "D"
+      }
+    },
+    {
+      "id": "U2",
+      "source_tracks": [
+        "A:track_003"
+      ],
+      "observers": [
+        "A"
+      ],
+      "true_identity": "D",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "A:track_003": "D"
+      }
+    },
+    {
+      "id": "U3",
+      "source_tracks": [
+        "B:track_003"
+      ],
+      "observers": [
+        "B"
+      ],
+      "true_identity": "C",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "B:track_003": "C"
+      }
+    },
+    {
+      "id": "U4",
+      "source_tracks": [
+        "A:track_004",
+        "B:track_005"
+      ],
+      "observers": [
+        "A",
+        "B"
+      ],
+      "true_identity": "C",
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "A:track_004": "C",
+        "B:track_005": "C"
+      }
+    }
+  ],
+  "merges": {
+    "correct": 4,
+    "false": 0,
+    "missed": 5
+  },
+  "fragmentation": {
+    "C": [
+      "U3",
+      "U4"
+    ],
+    "D": [
+      "U1",
+      "U2"
+    ]
+  },
+  "state_errors": {
+    "centre_error_m": {
+      "n": 204,
+      "median": 0.6159,
+      "q25": 0.3207,
+      "q75": 1.0508,
+      "p90": 1.2327,
+      "p95": 3.4817,
+      "max": 3.5422,
+      "mean": 0.8281,
+      "iqr": 0.7301
+    },
+    "coverage_s": {
+      "n": 4,
+      "median": 4.15,
+      "q25": 3.125,
+      "q75": 6.075,
+      "p90": 8.73,
+      "p95": 9.615,
+      "max": 10.5,
+      "mean": 5.05,
+      "iqr": 2.95
+    },
+    "heading_error_deg": {
+      "n": 204,
+      "median": 0.7276,
+      "q25": 0.35,
+      "q75": 1.1926,
+      "p90": 2.1557,
+      "p95": 3.1103,
+      "max": 5.9356,
+      "mean": 1.0066,
+      "iqr": 0.8426
+    },
+    "length_error_m": {
+      "n": 4,
+      "median": 0.139,
+      "q25": 0.086,
+      "q75": 0.192,
+      "p90": 0.192,
+      "p95": 0.192,
+      "max": 0.192,
+      "mean": 0.139,
+      "iqr": 0.106
+    },
+    "normalised_centre_error": {
+      "n": 204,
+      "median": 1.1988,
+      "q25": 0.7891,
+      "q75": 1.946,
+      "p90": 2.2636,
+      "p95": 6.3534,
+      "max": 6.4638,
+      "mean": 1.6167,
+      "iqr": 1.1569
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 370,
+      "median": 0.5217,
+      "q25": 0.2936,
+      "q75": 1.0588,
+      "p90": 3.5021,
+      "p95": 3.5367,
+      "max": 3.563,
+      "mean": 1.0463,
+      "iqr": 0.7652
+    },
+    "speed_error_mps": {
+      "n": 204,
+      "median": 0.0403,
+      "q25": 0.0143,
+      "q75": 0.087,
+      "p90": 0.1525,
+      "p95": 0.1785,
+      "max": 0.5349,
+      "mean": 0.0626,
+      "iqr": 0.0728
+    },
+    "velocity_error_mps": {
+      "n": 204,
+      "median": 0.1715,
+      "q25": 0.0995,
+      "q75": 0.2951,
+      "p90": 0.5021,
+      "p95": 0.8034,
+      "max": 1.5241,
+      "mean": 0.2475,
+      "iqr": 0.1956
+    },
+    "width_error_m": {
+      "n": 4,
+      "median": 0.185,
+      "q25": 0.107,
+      "q75": 0.263,
+      "p90": 0.263,
+      "p95": 0.263,
+      "max": 0.263,
+      "mean": 0.185,
+      "iqr": 0.156
+    }
+  },
+  "state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 91,
+        "median": 0.3174,
+        "q25": 0.2447,
+        "q75": 0.3797,
+        "p90": 0.539,
+        "p95": 0.6852,
+        "max": 0.9853,
+        "mean": 0.3433,
+        "iqr": 0.135
+      },
+      "heading_error_deg": {
+        "n": 91,
+        "median": 0.511,
+        "q25": 0.2842,
+        "q75": 0.8553,
+        "p90": 1.1886,
+        "p95": 1.296,
+        "max": 1.67,
+        "mean": 0.6039,
+        "iqr": 0.5711
+      },
+      "speed_error_mps": {
+        "n": 91,
+        "median": 0.0265,
+        "q25": 0.013,
+        "q75": 0.0558,
+        "p90": 0.0968,
+        "p95": 0.1525,
+        "max": 0.1792,
+        "mean": 0.042,
+        "iqr": 0.0428
+      },
+      "velocity_error_mps": {
+        "n": 91,
+        "median": 0.1107,
+        "q25": 0.0704,
+        "q75": 0.1832,
+        "p90": 0.2787,
+        "p95": 0.2989,
+        "max": 0.3465,
+        "mean": 0.1373,
+        "iqr": 0.1129
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 113,
+        "median": 0.9863,
+        "q25": 0.6854,
+        "q75": 1.1763,
+        "p90": 3.4764,
+        "p95": 3.4981,
+        "max": 3.5422,
+        "mean": 1.2185,
+        "iqr": 0.491
+      },
+      "heading_error_deg": {
+        "n": 113,
+        "median": 0.9481,
+        "q25": 0.465,
+        "q75": 1.8367,
+        "p90": 2.9739,
+        "p95": 3.8851,
+        "max": 5.9356,
+        "mean": 1.3309,
+        "iqr": 1.3718
+      },
+      "speed_error_mps": {
+        "n": 113,
+        "median": 0.058,
+        "q25": 0.0218,
+        "q75": 0.1061,
+        "p90": 0.1658,
+        "p95": 0.1975,
+        "max": 0.5349,
+        "mean": 0.0793,
+        "iqr": 0.0842
+      },
+      "velocity_error_mps": {
+        "n": 113,
+        "median": 0.2353,
+        "q25": 0.1491,
+        "q75": 0.4401,
+        "p90": 0.7626,
+        "p95": 0.9932,
+        "max": 1.5241,
+        "mean": 0.3362,
+        "iqr": 0.291
+      }
+    }
+  },
+  "calibration": {
+    "states": 204,
+    "observed_within": {
+      "1_sigma": 0.402,
+      "2_sigma": 0.784,
+      "3_sigma": 0.926
+    },
+    "expected_within_gaussian": {
+      "1_sigma": 0.393,
+      "2_sigma": 0.865,
+      "3_sigma": 0.989
+    }
+  },
+  "entity_errors": [
+    {
+      "id": "U1",
+      "true_identity": "D",
+      "coverage_s": 10.5,
+      "states": 106,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 106,
+        "median": 0.3255,
+        "q25": 0.245,
+        "q75": 0.439,
+        "p90": 0.6153,
+        "p95": 0.6272,
+        "max": 0.715,
+        "mean": 0.3535,
+        "iqr": 0.1941
+      },
+      "velocity_error_mps": {
+        "n": 106,
+        "median": 0.1557,
+        "q25": 0.0826,
+        "q75": 0.2721,
+        "p90": 0.3269,
+        "p95": 0.6283,
+        "max": 1.5241,
+        "mean": 0.2137,
+        "iqr": 0.1895
+      },
+      "speed_error_mps": {
+        "n": 106,
+        "median": 0.0403,
+        "q25": 0.0178,
+        "q75": 0.0862,
+        "p90": 0.1535,
+        "p95": 0.1744,
+        "max": 0.2765,
+        "mean": 0.0605,
+        "iqr": 0.0684
+      },
+      "heading_error_deg": {
+        "n": 106,
+        "median": 0.7032,
+        "q25": 0.3119,
+        "q75": 1.1223,
+        "p90": 1.4403,
+        "p95": 2.3448,
+        "max": 5.9356,
+        "mean": 0.8682,
+        "iqr": 0.8104
+      },
+      "length_error_m": 0.086,
+      "width_error_m": -0.107,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.514,
+      "true_width_m": 2.007
+    },
+    {
+      "id": "U2",
+      "true_identity": "D",
+      "coverage_s": 1.4,
+      "states": 15,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 15,
+        "median": 3.4905,
+        "q25": 3.4797,
+        "q75": 3.5092,
+        "p90": 3.5219,
+        "p95": 3.5289,
+        "max": 3.5422,
+        "mean": 3.4961,
+        "iqr": 0.0295
+      },
+      "velocity_error_mps": {
+        "n": 15,
+        "median": 0.4022,
+        "q25": 0.286,
+        "q75": 0.4459,
+        "p90": 0.5298,
+        "p95": 0.5503,
+        "max": 0.56,
+        "mean": 0.3607,
+        "iqr": 0.1599
+      },
+      "speed_error_mps": {
+        "n": 15,
+        "median": 0.0347,
+        "q25": 0.0069,
+        "q75": 0.0643,
+        "p90": 0.1031,
+        "p95": 0.1296,
+        "max": 0.1652,
+        "mean": 0.0469,
+        "iqr": 0.0575
+      },
+      "heading_error_deg": {
+        "n": 15,
+        "median": 1.9506,
+        "q25": 1.3764,
+        "q75": 2.1524,
+        "p90": 2.6109,
+        "p95": 2.7119,
+        "max": 2.7609,
+        "mean": 1.7463,
+        "iqr": 0.776
+      },
+      "length_error_m": 0.086,
+      "width_error_m": -0.107,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.514,
+      "true_width_m": 2.007
+    },
+    {
+      "id": "U3",
+      "true_identity": "C",
+      "coverage_s": 4.6,
+      "states": 46,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 46,
+        "median": 0.9328,
+        "q25": 0.7506,
+        "q75": 1.016,
+        "p90": 1.136,
+        "p95": 1.1782,
+        "max": 1.2344,
+        "mean": 0.8753,
+        "iqr": 0.2654
+      },
+      "velocity_error_mps": {
+        "n": 46,
+        "median": 0.1656,
+        "q25": 0.1022,
+        "q75": 0.2227,
+        "p90": 0.3536,
+        "p95": 0.4622,
+        "max": 0.4971,
+        "mean": 0.1835,
+        "iqr": 0.1205
+      },
+      "speed_error_mps": {
+        "n": 46,
+        "median": 0.0397,
+        "q25": 0.0166,
+        "q75": 0.0846,
+        "p90": 0.111,
+        "p95": 0.1553,
+        "max": 0.1817,
+        "mean": 0.0564,
+        "iqr": 0.0679
+      },
+      "heading_error_deg": {
+        "n": 46,
+        "median": 0.7244,
+        "q25": 0.3993,
+        "q75": 1.0649,
+        "p90": 1.6483,
+        "p95": 2.088,
+        "max": 2.2227,
+        "mean": 0.818,
+        "iqr": 0.6656
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    },
+    {
+      "id": "U4",
+      "true_identity": "C",
+      "coverage_s": 3.7,
+      "states": 37,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 37,
+        "median": 1.1134,
+        "q25": 0.9718,
+        "q75": 1.1902,
+        "p90": 1.2388,
+        "p95": 1.2502,
+        "max": 1.2551,
+        "mean": 1.0473,
+        "iqr": 0.2183
+      },
+      "velocity_error_mps": {
+        "n": 37,
+        "median": 0.2316,
+        "q25": 0.1086,
+        "q75": 0.5448,
+        "p90": 0.9189,
+        "p95": 1.067,
+        "max": 1.336,
+        "mean": 0.3781,
+        "iqr": 0.4362
+      },
+      "speed_error_mps": {
+        "n": 37,
+        "median": 0.0442,
+        "q25": 0.0072,
+        "q75": 0.0934,
+        "p90": 0.2138,
+        "p95": 0.3321,
+        "max": 0.5349,
+        "mean": 0.0829,
+        "iqr": 0.0862
+      },
+      "heading_error_deg": {
+        "n": 37,
+        "median": 0.5822,
+        "q25": 0.38,
+        "q75": 2.081,
+        "p90": 3.5797,
+        "p95": 4.2292,
+        "max": 5.2535,
+        "mean": 1.3376,
+        "iqr": 1.701
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    }
+  ],
+  "observed_alignment": [],
+  "states_compared": 204,
+  "impure_states": 0
+}

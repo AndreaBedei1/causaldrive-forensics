@@ -14,7 +14,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from .checks import describe_temporal_relation, open_states, sign_windows, temporal_safety_relations
 from .fusion import ASSOCIATED, short_label
-from .models import Alignment, Association, GlobalGraph, GlobalNode, GraphNode, LocalGraph
+from .models import (Alignment, Association, GlobalGraph, GlobalNode, GraphNode, LocalGraph,
+                     is_anonymous_entity)
 from .world_state import TRACK_STATES, compact_state
 
 KIND_COLOURS = {"ACTION": "#fde68a", "PERCEPTION": "#bfdbfe", "FACT": "#e5e7eb", "OUTCOME": "#fca5a5"}
@@ -70,8 +71,10 @@ def render_svg(dot_path: Path) -> Optional[Path]:
 def _object(subject: Optional[str]) -> str:
     if subject is None:
         return "an unknown object"
-    if ":" in subject:  # anonymous global entity such as A:track_001
+    if ":" in subject:  # a track of a recorder without a global clock, such as A:track_001
         return "unidentified object " + subject
+    if is_anonymous_entity(subject):  # a road user that recorded nothing: U1, U2, ...
+        return "anonymous road user " + subject
     return subject
 
 
@@ -402,7 +405,8 @@ def global_graph_markdown(title: str, graph: GlobalGraph, alignment: Alignment,
             detail = "clock {0}; observed by others as: {1}".format(
                 entity["clock"], ", ".join(entity["observed_as"]) or "-")
         else:
-            detail = "seen only by {0}; candidate: {1}".format(entity["observed_by"], _cell(entity["candidate"]))
+            detail = "anonymous; observed by {0} as {1}".format(", ".join(entity["observed_by"]),
+                                                                ", ".join(entity["observed_as"]))
         lines.append("| {0} | {1} | {2} |".format(entity["entity_id"], entity["kind"], detail))
     lines += ["", "## Graph alignment", ""] + _alignment_lines(alignment)
     lines += ["", "## Identity associations", ""] + _association_lines(associations)
@@ -522,18 +526,52 @@ def global_graph_dot(title: str, graph: GlobalGraph) -> str:
 # Run report
 # --------------------------------------------------------------------------
 
+def _road_user_lines(road_users: Optional[Mapping[str, Any]]) -> List[str]:
+    """Recorder links and anonymous road users of ``global/anonymous_entities.json``."""
+    if not road_users:
+        return ["Not computed."]
+    lines = []
+    for item in road_users.get("observed_alignment", []):
+        lines.append("- Observed-trajectory alignment of {0}: {1} (offset {2}, pooled median {3} sigma{4}){5}.".format(
+            item["recorder"], "accepted" if item["accepted"] else "refused", _cell(item.get("offset_to_global")),
+            _cell(item.get("median_distance_sigma")),
+            ", interval {0}".format(item["interval"]) if item.get("interval") else "",
+            "" if item["accepted"] else ": " + item.get("reason", "")))
+    for link in road_users.get("recorder_links", []):
+        lines.append("- {0} is {1}: its returns lie on {1}'s own footprint (median {2:.2f} m over {3} samples, "
+                     "{4:.0%} within 3 sigma) at {1}'s velocity.".format(
+                         link["track"], link["recorder"], link["median_distance_m"], link["samples"],
+                         link["fraction_within"]))
+    for entity in road_users.get("entities", []):
+        links = entity["association"]["links"]
+        lines.append("- {0} (anonymous, {1} to {2} s): {3}{4}; footprint {5:.2f} x {6:.2f} m ({7}/{8}); "
+                     "fusion {9}.".format(
+                         entity["id"], _cell(entity["time_span"][0]), _cell(entity["time_span"][1]),
+                         ", ".join(entity["source_tracks"]),
+                         "" if not links else " joined by " + "; ".join(
+                             "{0} {1}-{2} ({3:.0%} of {4} instants)".format(
+                                 "stitch" if link["kind"] == "stitch" else "same box",
+                                 link["a"], link["b"], link["passed"], link["compared"]) for link in links),
+                         entity["footprint"]["length_m"], entity["footprint"]["width_m"],
+                         entity["footprint"]["length"]["source"], entity["footprint"]["width"]["source"],
+                         entity["fusion_method"]))
+    return lines or ["- no anonymous track of an aligned recorder"]
+
+
 def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
                     associations: Sequence[Association], graph: GlobalGraph,
                     trace: Sequence[Dict[str, Any]], config: Dict[str, Any],
                     context: Optional[Mapping[str, Any]] = None,
-                    relations: Optional[Sequence[Dict[str, Any]]] = None) -> str:
+                    relations: Optional[Sequence[Dict[str, Any]]] = None,
+                    road_users: Optional[Mapping[str, Any]] = None) -> str:
     lines = ["# Reconstruction report - " + title, "",
              "Inputs: `vehicles/{0}/` (vehicle-local files) and the supplied `incident_context.json`. "
              "`ground_truth/` and the run's `metadata.json` were not read; the privileged comparison, "
              "if run, is in `evaluation/`.".format("/`, `vehicles/".join(local.owner for local in locals_)), "",
              _context_line(context), "",
              "Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) "
-             "-> graph-level alignment -> identity association -> global graph.", "",
+             "-> graph-level alignment -> identity association -> road users in the common frame of the "
+             "recorders' own pose streams -> global graph.", "",
              "## Local reconstructions", "",
              "| Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |",
              "|----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|"]
@@ -545,6 +583,7 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
             len(local.tracks), ", ".join(collisions) or "none"))
     lines += ["", "## Graph alignment", ""] + _alignment_lines(alignment)
     lines += ["", "## Identity associations", ""] + _association_lines(associations)
+    lines += ["", "## Road users in the common frame", ""] + _road_user_lines(road_users)
     merged = [node for node in graph.nodes if len(node.observations) > 1]
     lines += ["", "## Global graph", "",
               "{0} nodes, {1} edges; {2} merged node(s): {3}.".format(
@@ -590,8 +629,10 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
                          "long enough, so {0} has no perception of the others.".format(local.owner))
     for item in associations:
         if item.status != ASSOCIATED:
-            notes.append("{0}:{1} stays anonymous: {2}.".format(
-                item.local_graph, item.local_track, "; ".join(item.blocking) or "insufficient evidence"))
+            notes.append("{0}:{1} stays anonymous{2}: {3}.".format(
+                item.local_graph, item.local_track,
+                " ({0})".format(item.global_entity) if item.global_entity != item.local_graph + ":" + item.local_track
+                else "", "; ".join(item.blocking) or "insufficient evidence"))
     for name in sorted(alignment.graphs):
         if alignment.graphs[name].status != "ALIGNED":
             notes.append("{0} is UNALIGNED: {1}.".format(name, alignment.graphs[name].reason))
@@ -604,7 +645,7 @@ def report_markdown(title: str, locals_: Sequence[Any], alignment: Alignment,
 
     lines += ["", "## Files", "",
               "- Local: `<recorder>/local_trace.jsonl`, `local_tracks.jsonl`, `local_graph.json|md|dot`",
-              "- Global: `global/alignment.json`, `associations.json`, `global_trace.jsonl`, "
-              "`global_graph.json|md|dot`", "",
+              "- Global: `global/alignment.json`, `associations.json`, `anonymous_entities.json`, "
+              "`global_trace.jsonl`, `global_graph.json|md|dot`", "",
               "## Parameters", "", "```", json.dumps(config, indent=2), "```"]
     return "\n".join(lines) + "\n"

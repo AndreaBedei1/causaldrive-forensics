@@ -1047,6 +1047,8 @@ class LocalReconstruction:
     tracks: List[LocalTrack]
     trace: List[TraceFrame]
     graph: LocalGraph
+    # The recorder's own footprint from its metadata (None if it recorded none).
+    footprint: Optional[EgoFootprint] = None
 
 
 def vehicle_metadata(vehicle_dir: Path) -> Dict[str, Any]:
@@ -1155,4 +1157,4 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     }
     graph = build_local_graph(owner, trace, tracks, recorder)
     return LocalReconstruction(owner=owner, clock_origin=clock_origin, ego=ego,
-                               tracks=tracks, trace=trace, graph=graph)
+                               tracks=tracks, trace=trace, graph=graph, footprint=footprint)

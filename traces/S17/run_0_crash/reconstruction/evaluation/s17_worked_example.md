@@ -10,11 +10,11 @@ Track identities known to the reconstruction (associations.json):
 
 | local track | status | global entity |
 |---|---|---|
-| A:track_001 | ANONYMOUS | A:track_001 |
+| A:track_001 | ANONYMOUS | U1 |
 | A:track_002 | ASSOCIATED | B |
 | B:track_001 | ASSOCIATED | A |
-| B:track_002 | ANONYMOUS | B:track_002 |
-| B:track_003 | ANONYMOUS | B:track_003 |
+| B:track_002 | ANONYMOUS | U1 |
+| B:track_003 | ANONYMOUS | U1 |
 
 ### 1.1 Timeline
 
@@ -85,7 +85,7 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 ### 1.5 Isolation checks
 
 - File audit of part 1: it opened reconstruction/A/local_graph.json, reconstruction/A/local_trace.jsonl, reconstruction/B/local_graph.json, reconstruction/global/alignment.json, reconstruction/global/associations.json, reconstruction/global/global_graph.json, vehicles/A/controls.jsonl (and nothing else of the run): none under ground_truth/, reconstruction/evaluation/, configs/scenarios/, nor the run's metadata.json.
-- Reconstruction rerun from a copy holding only vehicles/ and the incident context (no ground_truth, metadata.json): 17 output files compared, all byte-identical.
+- Reconstruction rerun from a copy holding only vehicles/ and the incident context (no ground_truth, metadata.json): 18 output files compared, all byte-identical.
 
 ## Part 2. Privileged evaluation (ground truth; never an input of part 1)
 

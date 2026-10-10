@@ -7,20 +7,20 @@ digraph "global" {
   "g03" [label="THROTTLE_START\nA\nt=-4.95", fillcolor="#fde68a"];
   "g04" [label="THROTTLE_START\nB\nt=-4.95", fillcolor="#fde68a"];
   "g05" [label="TRACK_APPEARED_LEFT\nA -> B\nt=-4.95", fillcolor="#bfdbfe"];
-  "g06" [label="TRACK_APPEARED_RIGHT\nA -> A:track_001\nt=-4.95", fillcolor="#bfdbfe"];
+  "g06" [label="TRACK_APPEARED_RIGHT\nA -> U1\nt=-4.95", fillcolor="#bfdbfe"];
   "g07" [label="TRACK_APPEARED_RIGHT\nB -> A\nt=-4.95", fillcolor="#bfdbfe"];
-  "g08" [label="TRACK_APPEARED_RIGHT\nB -> B:track_002\nt=-4.95", fillcolor="#bfdbfe"];
-  "g09" [label="CLOSING_START\nA -> A:track_001\nt=-4.95", fillcolor="#bfdbfe"];
-  "g10" [label="CLOSING_START\nB -> B:track_002\nt=-4.95", fillcolor="#bfdbfe"];
-  "g11" [label="CRITICAL_TTC_START\nA -> A:track_001\nt=-2.35", fillcolor="#bfdbfe"];
-  "g12" [label="CUT_IN_FROM_RIGHT_START\nA -> A:track_001\nt=-2.20", fillcolor="#bfdbfe"];
-  "g13" [label="EGO_PATH_ENTRY\nA -> A:track_001\nt=-1.60", fillcolor="#bfdbfe"];
+  "g08" [label="TRACK_APPEARED_RIGHT\nB -> U1\nt=-4.95", fillcolor="#bfdbfe"];
+  "g09" [label="CLOSING_START\nA -> U1\nt=-4.95", fillcolor="#bfdbfe"];
+  "g10" [label="CLOSING_START\nB -> U1\nt=-4.95", fillcolor="#bfdbfe"];
+  "g11" [label="CRITICAL_TTC_START\nA -> U1\nt=-2.35", fillcolor="#bfdbfe"];
+  "g12" [label="CUT_IN_FROM_RIGHT_START\nA -> U1\nt=-2.20", fillcolor="#bfdbfe"];
+  "g13" [label="EGO_PATH_ENTRY\nA -> U1\nt=-1.60", fillcolor="#bfdbfe"];
   "g14" [label="CRITICAL_TTC_START\nA -> B\nt=-1.15", fillcolor="#bfdbfe"];
-  "g15" [label="CUT_IN_FROM_RIGHT_END\nA -> A:track_001\nt=-0.85", fillcolor="#bfdbfe"];
+  "g15" [label="CUT_IN_FROM_RIGHT_END\nA -> U1\nt=-0.85", fillcolor="#bfdbfe"];
   "g16" [label="CRITICAL_TTC_START\nB -> A\nt=-0.80", fillcolor="#bfdbfe"];
   "g17" [label="CLOSING_START\nA -> B\nt=-0.75", fillcolor="#bfdbfe"];
   "g18" [label="CLOSING_START\nB -> A\nt=-0.70", fillcolor="#bfdbfe"];
-  "g19" [label="CLOSING_END\nA -> A:track_001\nt=-0.40", fillcolor="#bfdbfe"];
+  "g19" [label="CLOSING_END\nA -> U1\nt=-0.40", fillcolor="#bfdbfe"];
   "g20" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
   "g21" [label="CRITICAL_TTC_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
   "g22" [label="CRITICAL_TTC_END\nB -> A\nt=+0.00", fillcolor="#bfdbfe"];
@@ -30,18 +30,18 @@ digraph "global" {
   "g26" [label="THROTTLE_END\nB\nt=+0.05", fillcolor="#fde68a"];
   "g27" [label="BRAKE_START\nA\nt=+0.05", fillcolor="#fde68a"];
   "g28" [label="BRAKE_START\nB\nt=+0.05", fillcolor="#fde68a"];
-  "g29" [label="CLOSING_END\nB -> B:track_002\nt=+0.20", fillcolor="#bfdbfe"];
-  "g30" [label="EGO_PATH_EXIT\nA -> A:track_001\nt=+0.25", fillcolor="#bfdbfe"];
-  "g31" [label="CRITICAL_TTC_END\nA -> A:track_001\nt=+0.55", fillcolor="#bfdbfe"];
-  "g32" [label="TRACK_LOST\nB -> B:track_002\nt=+0.75", fillcolor="#bfdbfe"];
+  "g29" [label="CLOSING_END\nB -> U1\nt=+0.20", fillcolor="#bfdbfe"];
+  "g30" [label="EGO_PATH_EXIT\nA -> U1\nt=+0.25", fillcolor="#bfdbfe"];
+  "g31" [label="CRITICAL_TTC_END\nA -> U1\nt=+0.55", fillcolor="#bfdbfe"];
+  "g32" [label="TRACK_LOST\nB -> U1\nt=+0.75", fillcolor="#bfdbfe"];
   "g33" [label="MOVING_END\nB\nt=+1.00", fillcolor="#e5e7eb"];
   "g34" [label="STOP_START\nB\nt=+1.00", fillcolor="#e5e7eb"];
   "g35" [label="MOVING_END\nA\nt=+1.10", fillcolor="#e5e7eb"];
   "g36" [label="STOP_START\nA\nt=+1.10", fillcolor="#e5e7eb"];
   "g37" [label="EGO_PATH_ENTRY\nB -> A\nt=+1.30", fillcolor="#bfdbfe"];
-  "g38" [label="TRACK_APPEARED_RIGHT\nB -> B:track_003\nt=+1.45", fillcolor="#bfdbfe"];
-  "g39" [label="TRACK_LOST\nB -> B:track_003\nt=+2.05", fillcolor="#bfdbfe"];
-  "g40" [label="TRACK_LOST\nA -> A:track_001\nt=+2.50", fillcolor="#bfdbfe"];
+  "g38" [label="TRACK_APPEARED_RIGHT\nB -> U1\nt=+1.45", fillcolor="#bfdbfe"];
+  "g39" [label="TRACK_LOST\nB -> U1\nt=+2.05", fillcolor="#bfdbfe"];
+  "g40" [label="TRACK_LOST\nA -> U1\nt=+2.50", fillcolor="#bfdbfe"];
   {rank=same; "g01"; "g02"; "g03"; "g04"; "g05"; "g06"; "g07"; "g08"; "g09"; "g10";}
   {rank=same; "g20"; "g21"; "g22"; "g23"; "g24";}
   {rank=same; "g25"; "g26"; "g27"; "g28";}

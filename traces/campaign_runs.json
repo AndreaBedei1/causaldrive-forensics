@@ -239,5 +239,68 @@
   "not_recorders": {
    "C": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)"
   }
+ },
+ {
+  "scenario": "S18",
+  "variant": "abreast",
+  "map": "Town05",
+  "status": "recorded",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-10",
+  "attempts": [
+   {
+    "exit": 0,
+    "engine_crash": false,
+    "note": "private engine on port 3000; a lab run of the same variant agreed within 0.15 m (no launch outlier)",
+    "wall_s": null
+   }
+  ],
+  "not_recorders": {
+   "C": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)",
+   "D": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)"
+  }
+ },
+ {
+  "scenario": "S18",
+  "variant": "platoon",
+  "map": "Town05",
+  "status": "recorded",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-10",
+  "attempts": [
+   {
+    "exit": 0,
+    "engine_crash": false,
+    "note": "private engine on port 3000; a lab run of the same variant agreed within 0.15 m (no launch outlier)",
+    "wall_s": null
+   }
+  ],
+  "not_recorders": {
+   "C": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)",
+   "D": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)"
+  }
+ },
+ {
+  "scenario": "S18",
+  "variant": "passing",
+  "map": "Town05",
+  "status": "recorded",
+  "radar": "three body radars: front 150 deg (front bumper), left / right 140 deg (sides, yaw -/+90); 20 deg vertical, 90 m, 12000 pps each, 0.6 m above the road; no rear radar",
+  "camera": "1280x720, 110 deg, 10 Hz, behind the windscreen (per-blueprint mount)",
+  "recorded_on": "2026-10-10",
+  "attempts": [
+   {
+    "exit": 0,
+    "engine_crash": false,
+    "note": "private engine on port 3000; a lab run of the same variant agreed within 0.15 m (no launch outlier)",
+    "wall_s": null
+   }
+  ],
+  "not_recorders": {
+   "C": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)",
+   "D": "physical participant with record: false (no sensors, nothing under vehicles/, only in ground_truth/)"
+  }
  }
 ]

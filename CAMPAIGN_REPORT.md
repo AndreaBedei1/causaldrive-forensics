@@ -1,10 +1,10 @@
-# Campaign report: three body radars (2026-10-03), S17 partial observability (2026-10-07, re-recorded 2026-10-08), safe following distance in CRITICAL_TTC (2026-10-09), CRITICAL_TTC release hysteresis and end at the collision (2026-10-10), paper-readiness phase 0 baseline (2026-10-10)
+# Campaign report: three body radars (2026-10-03), S17 partial observability (2026-10-07, re-recorded 2026-10-08), safe following distance in CRITICAL_TTC (2026-10-09), CRITICAL_TTC release hysteresis and end at the collision (2026-10-10), paper-readiness phase 0 baseline (2026-10-10), phase 1 road-user fusion and S18 (2026-10-10)
 
-Front, left and right radars on each vehicle's body; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC (13 runs recorded 2026-10-03).  Added 2026-10-07: S17, a causally relevant vehicle that records nothing (record: false; re-recorded 2026-10-08 with a closer cut-in), and the LLM forensic pipeline (admissible facts -> explanation -> formulas -> verification), sections 8-9.  Added 2026-10-09: CRITICAL_TTC also for an unsafe forward gap (safe following distance), a pre-entry region for CUT_IN and an occlusion gate; the 14 runs re-reconstructed from the same raw files, nothing re-recorded (section 4.3, before/after in section 5.8).  Added 2026-10-10: the end of CRITICAL_TTC became a geometric hysteresis (near contact, uncertain and occluded samples never end it; S17 regenerated, section 5.10), and a recorder's collision with the road user of an episode ends it at the collision (section 5.11).  Ground truth is read only by the evaluation, the audits and the counterfactual summary.
+Front, left and right radars on each vehicle's body; a windscreen camera at 110 deg; THROTTLE events; a 2-D collision-course CRITICAL_TTC (13 runs recorded 2026-10-03).  Added 2026-10-07: S17, a causally relevant vehicle that records nothing (record: false; re-recorded 2026-10-08 with a closer cut-in), and the LLM forensic pipeline (admissible facts -> explanation -> formulas -> verification), sections 8-9.  Added 2026-10-09: CRITICAL_TTC also for an unsafe forward gap (safe following distance), a pre-entry region for CUT_IN and an occlusion gate; the 14 runs re-reconstructed from the same raw files, nothing re-recorded (section 4.3, before/after in section 5.8).  Added 2026-10-10: the end of CRITICAL_TTC became a geometric hysteresis (near contact, uncertain and occluded samples never end it; S17 regenerated, section 5.10), and a recorder's collision with the road user of an episode ends it at the collision (section 5.11).  Added 2026-10-10 (phase 1): road users in the common frame of the recorders' own pose streams -- observed-trajectory alignment, track-to-recorder links, anonymous road users U1, U2, ... fused across observers -- and S18 anonymous_pair, the negative case (three runs; section 5.13).  Ground truth is read only by the evaluation, the audits and the counterfactual summary.
 
 ## 1. Campaign
 
-Fourteen runs on a private CARLA 0.9.15 (port 3000; the user's port-2000 server was never used) with the sensors of section 2: the thirteen runs of the three-radar campaign (recorded 2026-10-03, unchanged) and S17 unobserved_causal_vehicle (recorded 2026-10-07, re-recorded 2026-10-08 with a closer cut-in, section 8).  The 13 earlier runs were not re-recorded; their reconstruction, evaluation and audits regenerate identically.  A vehicle marked 'not recorded' is a physical participant with record: false (no sensors, nothing under vehicles/).
+Seventeen runs on a private CARLA 0.9.15 (port 3000; the user's port-2000 server was never used) with the sensors of section 2: the thirteen runs of the three-radar campaign (recorded 2026-10-03, unchanged), S17 unobserved_causal_vehicle (recorded 2026-10-07, re-recorded 2026-10-08 with a closer cut-in, section 8) and the three runs of S18 anonymous_pair (recorded 2026-10-10, section 5.13).  Columns "associations correct" and "anonymous tracks" are those of the phase-1 reconstruction (collision-based association plus the common-frame links).  The 13 earlier runs were not re-recorded; their reconstruction, evaluation and audits regenerate identically.  A vehicle marked 'not recorded' is a physical participant with record: false (no sensors, nothing under vehicles/).
 
 | run | vehicles | s | true contacts (pair, time) | reconstructed | associations correct | anonymous tracks |
 |---|---|---|---|---|---|---|
@@ -15,13 +15,16 @@ Fourteen runs on a private CARLA 0.9.15 (port 3000; the user's port-2000 server 
 | S06/run_0_a_front_pushed | A model3, B tt, C patrol | 13.8 | A-B 4.80 s; B-C 5.30 s; A-B 5.45 s | yes (3/3 vehicle contacts) | 2/2 | 0 |
 | S06/run_0_b_rear_first | A model3, B tt, C patrol | 14.2 | B-C 4.70 s; A-B 6.25 s | yes (2/2 vehicle contacts) | 2/2 | 0 |
 | S07/run_0_crash | A model3, B tt, C model3 | 13.7 | A-B 5.90 s | yes (1/1 vehicle contacts) | 1/1 | 1 |
-| S08/run_0_crash | A model3, B tt, C patrol | 15.2 | A-B 4.10 s | yes (1/1 vehicle contacts) | 2/2 | 4 |
+| S08/run_0_crash | A model3, B tt, C patrol | 15.2 | A-B 4.10 s | yes (1/1 vehicle contacts) | 5/5 | 1 |
 | S09/run_0_merge_conflict | A model3, B tt | 23.4 | A-B 10.25 s | yes (1/1 vehicle contacts) | 2/2 | 0 |
-| S10/run_0_rolls_through | A model3, B tt | 16.0 | A-B 5.40 s | yes (1/1 vehicle contacts) | 1/1 | 1 |
+| S10/run_0_rolls_through | A model3, B tt | 16.0 | A-B 5.40 s | yes (1/1 vehicle contacts) | 2/2 | 0 |
 | S12/run_0_near_simultaneous | A model3, B tt | 12.9 | A-B 7.15 s | yes (1/1 vehicle contacts) | 2/2 | 0 |
-| S15/run_0_deflected_into_c | A model3, B tt, C tt | 14.0 | A-B 3.80 s; A-C 4.70 s | yes (2/2 vehicle contacts) | 4/4 | 2 |
-| S16/run_0_consequential | A tt, B patrol, C sprinter | 12.0 | A-B 5.55 s; A-C 6.60 s | yes (2/2 vehicle contacts) | 3/3 | 4 |
+| S15/run_0_deflected_into_c | A model3, B tt, C tt | 14.0 | A-B 3.80 s; A-C 4.70 s | yes (2/2 vehicle contacts) | 5/5 | 1 |
+| S16/run_0_consequential | A tt, B patrol, C sprinter | 12.0 | A-B 5.55 s; A-C 6.60 s | yes (2/2 vehicle contacts) | 6/6 | 1 |
 | S17/run_0_crash | A tt, B patrol, C model3 (not recorded) | 11.0 | A-B 4.95 s | yes (1/1 vehicle contacts) | 2/2 | 3 |
+| S18/run_0_abreast | A tt, B patrol, C model3, D prius (C, D not recorded) | 11.5 | A-B 6.20 s | yes (1/1 vehicle contacts) | 2/2 | 5 |
+| S18/run_0_platoon | A tt, B patrol, C model3, D prius (C, D not recorded) | 11.5 | A-B 6.20 s | yes (1/1 vehicle contacts) | 2/2 | 7 |
+| S18/run_0_passing | A tt, B patrol, C model3, D prius (C, D not recorded) | 11.5 | A-B 6.20 s | yes (1/1 vehicle contacts) | 2/2 | 7 |
 
 Deleted on request (runs, directories under traces/ and their configuration): S01 avoided; S02 avoided; S05 (whole scenario); S07 full_view and occluded (replaced by S07 crash); S10 stops_safely and stops_then_proceeds; S11 (whole scenario); S12 a_arrives_first, b_arrives_first, b_fails_to_stop; S13 (whole scenario); S15 b_stops and single_impact; S16 avoided and independent.  Scenario numbers were kept.  The radar_degraded / dropout / narrow_fov / noisy sensor profiles were deleted (no run used them; their degradation block was never implemented).
 
@@ -193,13 +196,13 @@ S15 false STOP (360-degree campaign, A after its first collision): a red adverti
 | S03/run_0_crash | A->B 2.55; B->A 2.60 | A:track_001=B, B:track_001=A | - |
 | S06/run_0_a_front_pushed | A->B 0.50 (gap); B->C 0.50 (gap) | A:track_001=B, B:track_001=C | - |
 | S06/run_0_b_rear_first | A->B 4.70; B->C 0.50 (gap) | A:track_001=B, B:track_001=C | - |
-| S07/run_0_crash | A->B 0.50 (gap); B->C 3.40 | A:track_001=B | B:track_001 (is C) |
-| S08/run_0_crash | A->B 2.55; B->A 2.60 | A:track_002=B, B:track_002=A | A:track_001 (is C), B:track_001 (is C), C:track_001 (is A), C:track_002 (is B) |
+| S07/run_0_crash | A->B 0.50 (gap); B->C 3.40 | 1/1 | 1 |
+| S08/run_0_crash | A->B 2.55; B->A 2.60 | 5/5 | 1 |
 | S09/run_0_merge_conflict | A->B 6.90; B->A 6.65 | A:track_001=B, B:track_001=A | - |
-| S10/run_0_rolls_through | A->B 3.40; B->A 3.60 | A:track_001=B | B:track_001 (is A) |
+| S10/run_0_rolls_through | A->B 3.40; B->A 3.60 | 2/2 | 0 |
 | S12/run_0_near_simultaneous | A->B 5.90; B->A 6.05 | A:track_001=B, B:track_001=A | - |
-| S15/run_0_deflected_into_c | A->B 2.55; A->C 3.75; B->A 2.50; B->A 3.95; C->A 3.75 | A:track_001=C, A:track_002=B, B:track_002=A, C:track_001=A | B:track_001 (is A), C:track_002 (is B) |
-| S16/run_0_consequential | A->C 5.20 (gap); B->A 0.50 (gap); C->A 5.60 | A:track_001=C, B:track_001=A, C:track_001=A | A:track_002 (is C), B:track_002 (is C), B:track_003 (is C), B:track_004 (is C) |
+| S15/run_0_deflected_into_c | A->B 2.55; A->C 3.75; B->A 2.50; B->A 3.95; C->A 3.75 | 5/5 | 1 |
+| S16/run_0_consequential | A->C 5.20 (gap); B->A 0.50 (gap); C->A 5.60 | 6/6 | 1 |
 | S17/run_0_crash | A->C 2.60 (gap); A->B 3.80; B->A 4.15 | A:track_002=B, B:track_001=A | A:track_001 (is C), B:track_002 (is C), B:track_003 (is C) |
 
 Every true vehicle contact is reconstructed, every association is correct, no extra collision node.  Tracks lost before their contact but associated: S16 C:track_001 -> A (last observed 0.15 s before the contact); synthetic regression: lost 0.85 s before (window 1.0 s).
@@ -245,16 +248,16 @@ Both on a collision course in 2-D (the predicted boxes overlap 1.65-1.7 s ahead)
 |---|---|---|---|---|
 | S03/run_0_crash | A | - | stop#58, stop#59 | [4.75] |
 | S03/run_0_crash | B | - | stop#54, stop#57 | [4.6] |
-| S08/run_0_crash | A | - | stop#58, stop#59 | [4.75] |
-| S08/run_0_crash | B | - | stop#54, stop#57 | [4.6] |
-| S08/run_0_crash | C | - | stop#27, stop#63 | [2.9] |
-| S10/run_0_rolls_through | A | sign-0 1.15-2.75 s | stop#27, stop#63 | [5.5] |
-| S10/run_0_rolls_through | B | - | stop#36 | [5.6] |
+| S08/run_0_crash | A | - | 5/5 | 1 |
+| S08/run_0_crash | B | - | 5/5 | 1 |
+| S08/run_0_crash | C | - | 5/5 | 1 |
+| S10/run_0_rolls_through | A | sign-0 1.15-2.75 s | 2/2 | 0 |
+| S10/run_0_rolls_through | B | - | 2/2 | 0 |
 | S12/run_0_near_simultaneous | A | sign-0 0.20-2.75 s | stop#56 | [3.7, 7.65] |
 | S12/run_0_near_simultaneous | B | sign-0 0.70-2.80 s | stop#29, stop#53 | [3.6, 7.45] |
-| S15/run_0_deflected_into_c | A | - | stop#36 | [5.1] |
-| S15/run_0_deflected_into_c | B | sign-0 1.10-2.25 s | stop#27, stop#63 | [4.0] |
-| S15/run_0_deflected_into_c | C | - | stop#62 | [5.0] |
+| S15/run_0_deflected_into_c | A | - | 5/5 | 1 |
+| S15/run_0_deflected_into_c | B | sign-0 1.10-2.25 s | 5/5 | 1 |
+| S15/run_0_deflected_into_c | C | - | 5/5 | 1 |
 
 Over the campaign: 89 STOP candidates in 4640 camera frames, 4 confirmed STOP tracks, all on real signs (S10 A 19 detections, S12 A 29, S12 B 24, S15 B 15); 2 single-frame candidates rejected by the tracker (S08 B, S15 B); 0 YIELD candidates (no YIELD sign on these routes; the YIELD detector is validated on the Town10HD yield sign: every frame of the approach).  S15 A: no sign at all (the phantom STOP is gone).  S03 / S08 junction 'STOP' is a road marking: never a sign.  S17 (2 x 111 frames, same road as S01 / S02 / S16): no sign candidate, no sign track and no sign trigger volume on its path (the audit, re-run on the 14 runs with the sign actors extracted again, adds no row; the 2026-10-08 re-recording drives the same lanes).
 
@@ -290,13 +293,13 @@ The 14 runs were re-reconstructed from the same raw files (562 raw and ground-tr
 | S03/run_0_crash | 2 -> 2 | 0 -> 0 | none | crossing: collision-course model |
 | S06/run_0_a_front_pushed | 2 -> 2 | 0 -> 0 | A->B 3.90 -> 0.50; B->C 3.30 -> 0.50 | correct, the scenario's own premise ("A following B far too closely"): A 4.5 m behind B at 50 km/h (0.33 s), B 13.5 m behind C (0.99 s); C's braking shows as the collision-course reason joining at 3.30 / 3.90 |
 | S06/run_0_b_rear_first | 2 -> 2 | 0 -> 0 | B->C 3.30 -> 0.50; A->B 4.70 -> 4.65 | correct: B 13.5 m behind C at 49 km/h (0.99 s); A closing on the braking B with 21 m against 23 m |
-| S07/run_0_crash | 2 -> 2 | 0 -> 0 | A->B 4.00 -> 0.50 | correct by the definition, the weakest case: 19.3 m at 50 km/h = 1.39 s < 1.5 s (UN R157 time gap); the braking criterion alone (14.9 m) would call it safe; the emergency (C and B braking) is the collision-course reason joining at 4.00 |
-| S08/run_0_crash | 2 -> 2 | 0 -> 0 | none | crossing; still critical only between the colliding pair (test) |
+| S07/run_0_crash | 2 -> 2 | 0 -> 0 | 1/1 | 1 |
+| S08/run_0_crash | 2 -> 2 | 0 -> 0 | 5/5 | 1 |
 | S09/run_0_merge_conflict | 2 -> 2 | 0 -> 0 | none | roundabout merge: collision-course model |
-| S10/run_0_rolls_through | 2 -> 2 | 0 -> 0 | none | junction: collision-course model |
+| S10/run_0_rolls_through | 2 -> 2 | 0 -> 0 | 2/2 | 0 |
 | S12/run_0_near_simultaneous | 2 -> 2 | 0 -> 0 | none | all-way stop: no standing recorder follows anybody |
-| S15/run_0_deflected_into_c | 5 -> 5 | 0 -> 0 | none | junction pile-up: collision-course model |
-| S16/run_0_consequential | 3 -> 3 | 3 -> 1 | B->A 4.15 -> 0.50; A->C 5.55 -> 5.20 (END 6.60 -> 7.00); CUT_IN_FROM_LEFT(B, B:track_003) 1.35 removed; CUT_IN_FROM_LEFT(A, A:track_002) 5.20 removed | B 7.2 m behind A at 45 km/h (0.57 s; the scenario's "B, following A too closely"); A's merge ends 1.3 m behind the van, critical at 5.20, before the first collision (5.55); B's cut-in was false (the van never moved laterally; it is seen past A: occlusion gate); A's cut-in on track_002 was A's own lane change into the van's lane (that track is seen past the van's other track); the same relative-motion artefact remains on A:track_001 (CUT_IN_FROM_LEFT 5.45, section 7) |
+| S15/run_0_deflected_into_c | 5 -> 5 | 0 -> 0 | 5/5 | 1 |
+| S16/run_0_consequential | 3 -> 3 | 3 -> 1 | 6/6 | 1 |
 | S17/run_0_crash | 3 -> 3 | 2 -> 1 | A->C 3.60 -> 2.60 (END 4.55 -> 4.65); CUT_IN_FROM_RIGHT(B, B:track_002) 2.85 removed | correct: section 8.5 |
 
 New false positives searched for: no UNSAFE_FORWARD_GAP fact on a target behind the front face, beside the recorder or with its body more than 1.0 m outside the corridor (tests/test_forward_gap.py); no new CUT_IN anywhere; crossing runs unchanged.  Every new early start is a same-lane or entering leader closer than the safe distance, and the reconstructed clearances agree with the ground-truth bumper-to-bumper gaps within 0.2 m (S06 4.36 / 13.34 m, S07 19.16 m, S16 6.95 m, S02 15.78 m, S17 3.29 m).  Scenario adaptations: none needed (every run still exercises its question; S06 and S16 are designed around a too-close follower, S07's 1.39 s is below the R157 time gap).  Temporal safety relations that changed: S02/run_0_crash and S16 A:track_001 (C) become "critical TTC already active before the cut-in", S17 A:track_001 too.
@@ -368,6 +371,22 @@ Ground-truth audit (privileged, `scripts/gt_audit.py`, traces/gt_audit_baseline.
 
 The radar points lie on the true outline within 0.2 m (median); the nominal box centre (4.6 x 1.9 m placed behind the observed near surface) is the weak point: median 0.86 m but p95 3.6 m, worst in S09 (3.5 m median: B seen side-on while turning) and S10 (2.9 m).  Identity purity is 1.0 except S08 C:track_001 / C:track_002 and S15 B:track_001 (identity switches at contacts).
 
+### 5.13 Paper-readiness phase 1: road users in the common frame (2026-10-10)
+
+Every recorder's own pose stream places its radar tracks, their near surfaces and the returns they claimed in one map frame (`common_frame.py`); `anonymous.py` then decides, with no ground truth: the clock of a recorder no collision aligned (observed trajectory, accepted only when one interval of offsets fits), the anonymous tracks that are another recorder (its returns on that recorder's own footprint at its velocity, up to its contact with a third body), and the anonymous road users U1, U2, ... (one rigid box explaining the faces several observers see, split tracks of one observer, stitches across short losses; ambiguities refused).  The 17 runs were re-reconstructed; local outputs are byte-identical, only the global files, reports and evaluations changed.  The LLM forensic packets were not re-exported: the LLM pipeline is out of the paper and its stored analyses refer to those packets (phase 0 versions).
+
+| | before (phase 0) | after (phase 1) |
+|---|---|---|
+| S07 recorder C | UNALIGNED (no collision) | UNALIGNED: offsets -5.95 and -5.60 s both fit (C nearly at rest); B:track_001 (C) is U1 |
+| S08 recorder C | UNALIGNED | ALIGNED by observed trajectories at -4.10 s (true -4.10 s, interval [-4.20, -3.75] s); A:track_001 and B:track_001 -> C, C:track_001 -> A; C:track_002 (B until the A-B contact, then the A-B pair) stays anonymous (U1) |
+| S10 B:track_001 | anonymous | -> A (common frame) |
+| S15 C:track_002 | anonymous | -> B; B:track_001 (C, then A after the A-B contact) stays anonymous (U1) |
+| S16 van C | A:track_002, B:track_002, B:track_003 anonymous | all -> C; B:track_004 (0.3 s after the contacts) is U1 |
+| S17 non-recorder C | three anonymous tracks | one road user U1 = A:track_001 + B:track_002 + B:track_003 (cross-observer box, stitch after a 0.75 s loss) |
+| S18 (new) | - | C and D never fused in any variant; fragments only |
+
+Against ground truth (privileged, `scripts/fusion_metrics.py`, traces/fusion_metrics.md): 41 correct recorder links, 0 wrong, 4 missed (S07 C unaligned, two identity switches at contacts, one 0.3 s fragment); merges over pairs of anonymous tracks 15 correct, **0 false**, 10 missed (S18 fragments); 15 anonymous entities, purity median 1.00 (min 0.63: a track of C mixed with D's returns 1.4 m away).  Fused centre error over the 1062 instants every source track was on the entity's own road user: median 0.39 m, p95 1.51 m (box fit alone: median 0.27 m), against 0.57 m / 3.53 m for the phase-0 nominal ghost box of each source track at the same instants; velocity error median 0.12 m/s, heading error median 0.53 deg; the declared position uncertainty holds 0.595/0.919/0.968 of the errors within 1/2/3 sigma (Gaussian 0.39/0.86/0.99: conservative in the bulk, a heavier tail).  S17 U1: centre error median 0.11 m (p95 0.36 m) against 0.69 m (p95 2.26 m) for the three ghosts.  The cross-recorder steps take 0.03-1.3 s per canonical run and 3.7-5.9 s per S18 run (many anonymous pairs); `anonymous_entities.json` adds 684 kB over the 17 runs.
+
 ## 6. Compared with the 360-degree campaign
 
 | run | 360-degree: reconstruction | CRITICAL | three radars: reconstruction | CRITICAL |
@@ -378,13 +397,13 @@ The radar points lie on the true outline within 0.2 m (median); the nominal box 
 | S03/run_0_crash | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
 | S06/run_0_a_front_pushed | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4 | 3 | yes (3/3 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
 | S06/run_0_b_rear_first | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4 | 2 | yes (2/2 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
-| S07/run_0_crash | S07 had full_view / occluded variants | - | yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1 | 2 |
-| S08/run_0_crash | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 4 | 8 | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 4 | 2 |
+| S07/run_0_crash | S07 had full_view / occluded variants | - | 1/1 | 1 |
+| S08/run_0_crash | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 4 | 8 | 5/5 | 1 |
 | S09/run_0_merge_conflict | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 3 | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
-| S10/run_0_rolls_through | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 | yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1 | 2 |
+| S10/run_0_rolls_through | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 | 2/2 | 0 |
 | S12/run_0_near_simultaneous | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0 | 2 |
-| S15/run_0_deflected_into_c | yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2 | 6 | yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2 | 5 |
-| S16/run_0_consequential | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 1 | 2 | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4 | 3 |
+| S15/run_0_deflected_into_c | yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2 | 6 | 5/5 | 1 |
+| S16/run_0_consequential | yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 1 | 2 | 6/6 | 1 |
 | S17/run_0_crash | new run (2026-10-07; re-recorded 2026-10-08) | - | yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 3 | 3 |
 
 - Fewer associations where the struck vehicle cannot see its follower (rear blind zone): S01, S02, S10 (2 -> 1).  The identity of the striking car still comes from its own track of the struck one.
@@ -536,13 +555,13 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 | S03/run_0_crash | case-3ff854c61d8e8a08 | 877 | 264 | 0 | 1 | 0 | 177 | 50ed73829956 |
 | S06/run_0_a_front_pushed | case-43c5a5788d1a9a19 | 1107 | 276 | 0 | 3 | 0 | 207 | b6b29b309ee2 |
 | S06/run_0_b_rear_first | case-7202c5a4933604c5 | 1146 | 286 | 0 | 2 | 0 | 215 | efdde8eed675 |
-| S07/run_0_crash | case-a5478bd50abe12db | 1105 | 276 | 0 | 1 | 1 | 208 | 71118072466a |
-| S08/run_0_crash | case-59f4c77fe3da70f8 | 1659 | 740 | 0 | 1 | 4 | 398 | b5f734c686d6 |
+| S07/run_0_crash | case-a5478bd50abe12db | 1105 | 276 | 0 | 1 | 1 | 1/1 | 1 |
+| S08/run_0_crash | case-59f4c77fe3da70f8 | 1659 | 740 | 0 | 1 | 4 | 5/5 | 1 |
 | S09/run_0_merge_conflict | case-3302772030bd0a80 | 1357 | 416 | 0 | 1 | 0 | 275 | 4ebf53931b02 |
-| S10/run_0_rolls_through | case-7f400bb834f48527 | 915 | 269 | 1 | 1 | 1 | 184 | de948f555ed1 |
+| S10/run_0_rolls_through | case-7f400bb834f48527 | 915 | 269 | 1 | 1 | 1 | 2/2 | 0 |
 | S12/run_0_near_simultaneous | case-891ca9b5821d62c6 | 733 | 210 | 2 | 1 | 0 | 149 | b907f1269e31 |
-| S15/run_0_deflected_into_c | case-0f891d8e43b20f3a | 1550 | 701 | 1 | 2 | 2 | 374 | 64db22a4f0a4 |
-| S16/run_0_consequential | case-16dc7a2c76943785 | 1240 | 512 | 0 | 2 | 4 | 290 | 7ca298f6c691 |
+| S15/run_0_deflected_into_c | case-0f891d8e43b20f3a | 1550 | 701 | 1 | 2 | 2 | 5/5 | 1 |
+| S16/run_0_consequential | case-16dc7a2c76943785 | 1240 | 512 | 0 | 2 | 4 | 6/6 | 1 |
 | S17/run_0_crash | case-1378e3e335bdf143 | 807 | 362 | 0 | 1 | 3 | 198 | 97cb278d7eab |
 
 ## 10. Global event sequences
@@ -652,14 +671,14 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ### S07/run_0_crash
 
 ```
--5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,B:track_001)
+-5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,U1)
 -5.40 CRITICAL_TTC_START(A,B)
--2.70 CLOSING_START(B,B:track_001)
--2.50 CRITICAL_TTC_START(B,B:track_001)
+-2.70 CLOSING_START(B,U1)
+-2.50 CRITICAL_TTC_START(B,U1)
 -2.25 THROTTLE_END(B); BRAKE_START(B)
 -2.05 CLOSING_START(A,B)
--1.55 CRITICAL_TTC_END(B,B:track_001)
--1.05 CLOSING_END(B,B:track_001); MOVING_END(B); STOP_START(B)
+-1.55 CRITICAL_TTC_END(B,U1)
+-1.05 CLOSING_END(B,U1); MOVING_END(B); STOP_START(B)
 -0.65 THROTTLE_END(A); BRAKE_START(A)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
 +0.10 MOVING_END(A); STOP_START(A)
@@ -668,18 +687,22 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ### S08/run_0_crash
 
 ```
--4.10 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,A:track_001); CLOSING_START(A,A:track_001)
+-4.10 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,C); TRACK_APPEARED_FRONT(C,A); CLOSING_START(A,C); CLOSING_START(C,A)
 -2.05 TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B)
--2.00 TRACK_APPEARED_LEFT(B,A); TRACK_APPEARED_RIGHT(B,B:track_001); CLOSING_START(B,A); CLOSING_START(B,B:track_001)
+-2.00 TRACK_APPEARED_LEFT(B,A); TRACK_APPEARED_LEFT(C,U1); TRACK_APPEARED_RIGHT(B,C); CLOSING_START(B,A); CLOSING_START(B,C); CLOSING_START(C,U1)
+-1.75 THROTTLE_END(C); BRAKE_START(C)
 -1.55 CRITICAL_TTC_START(A,B)
 -1.50 CRITICAL_TTC_START(B,A)
+-1.20 MOVING_END(C); STOP_START(C)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B)
-+0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); EGO_PATH_ENTRY(A,A:track_001)
-+0.15 EGO_PATH_EXIT(A,A:track_001); CLOSING_START(A,B); CLOSING_START(B,A)
-+0.50 CLOSING_END(B,B:track_001); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B)
-+0.55 CLOSING_END(A,B)
++0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); EGO_PATH_ENTRY(A,C)
++0.15 EGO_PATH_EXIT(A,C); CLOSING_START(A,B); CLOSING_START(B,A)
++0.50 CLOSING_END(B,C); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B)
++0.55 CLOSING_END(A,B); CLOSING_END(C,A); EGO_PATH_ENTRY(C,U1)
 +0.60 TURN_LEFT_END(A)
-+0.65 CLOSING_END(A,A:track_001); CLOSING_END(B,A); MOVING_END(A); STOP_START(A)
++0.65 CLOSING_END(A,C); CLOSING_END(B,A); CLOSING_END(C,U1); MOVING_END(A); STOP_START(A)
++1.70 TRACK_LOST(C,U1)
++2.25 EGO_PATH_ENTRY(C,A)
 ```
 
 ### S09/run_0_merge_conflict
@@ -708,15 +731,15 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 -4.25 STOP_SIGN_DETECTED_START(A,A:sign-0)
 -3.45 THROTTLE_END(A); BRAKE_START(A)
 -2.80 TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
--2.70 TRACK_APPEARED_RIGHT(B,B:track_001); CLOSING_START(B,B:track_001)
+-2.70 TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 -2.65 STOP_SIGN_DETECTED_END(A,A:sign-0)
 -2.55 BRAKE_END(A); THROTTLE_START(A)
 -2.00 CRITICAL_TTC_START(A,B)
--1.80 CRITICAL_TTC_START(B,B:track_001)
+-1.80 CRITICAL_TTC_START(B,A)
 -1.70 TURN_LEFT_START(A)
--0.15 EGO_PATH_ENTRY(B,B:track_001)
+-0.15 EGO_PATH_ENTRY(B,A)
 -0.10 EGO_PATH_ENTRY(A,B)
-+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,B:track_001); CLOSING_END(B,B:track_001); TURN_LEFT_END(A)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TURN_LEFT_END(A)
 +0.05 CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 +0.10 MOVING_END(A); STOP_START(A)
 +0.20 MOVING_END(B); STOP_START(B)
@@ -753,9 +776,9 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 
 ```
 -3.80 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,C); TRACK_APPEARED_FRONT(C,A); CLOSING_START(A,C); CLOSING_START(C,A)
--3.60 TRACK_APPEARED_LEFT(C,C:track_002); CLOSING_START(C,C:track_002)
+-3.60 TRACK_APPEARED_LEFT(C,B); CLOSING_START(C,B)
 -2.70 STOP_SIGN_DETECTED_START(B,B:sign-0)
--2.10 TRACK_APPEARED_RIGHT(B,B:track_001); CLOSING_START(B,B:track_001)
+-2.10 TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(B,U1)
 -1.80 TRACK_APPEARED_LEFT(B,A); CLOSING_START(B,A)
 -1.75 TRACK_APPEARED_RIGHT(A,B); CLOSING_START(A,B)
 -1.55 STOP_SIGN_DETECTED_END(B,B:sign-0)
@@ -768,51 +791,51 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 -0.05 EGO_PATH_ENTRY(B,A); CRITICAL_TTC_START(A,C); CRITICAL_TTC_START(C,A)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); TURN_LEFT_END(B)
 +0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(B); TURN_LEFT_START(A)
-+0.15 CLOSING_END(B,A); CRITICAL_TTC_START(B,B:track_001)
++0.15 CLOSING_END(B,A); CRITICAL_TTC_START(B,U1)
 +0.20 MOVING_END(B); STOP_START(B)
 +0.55 EGO_PATH_ENTRY(A,C)
 +0.75 EGO_PATH_EXIT(B,A)
 +0.90 COLLISION(A,C); CRITICAL_TTC_END(A,C); CRITICAL_TTC_END(C,A); CLOSING_END(C,A); EGO_PATH_EXIT(A,C)
 +0.95 THROTTLE_END(C); BRAKE_START(C)
 +1.05 CLOSING_END(A,C)
-+1.20 CLOSING_END(C,C:track_002); MOVING_END(C); STOP_START(C)
-+1.25 CRITICAL_TTC_END(B,B:track_001); TURN_LEFT_END(A)
++1.20 CLOSING_END(C,B); MOVING_END(C); STOP_START(C)
++1.25 CRITICAL_TTC_END(B,U1); TURN_LEFT_END(A)
 +1.30 MOVING_END(A); STOP_START(A)
 +1.70 TRACK_LOST(B,A)
-+1.80 CLOSING_END(B,B:track_001)
++1.80 CLOSING_END(B,U1)
 ```
 
 ### S16/run_0_consequential
 
 ```
--5.55 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(B,A); TRACK_APPEARED_LEFT(A,C); TRACK_APPEARED_LEFT(B,B:track_002); CLOSING_START(A,C); CLOSING_START(B,B:track_002)
--5.50 TRACK_APPEARED_LEFT(A,A:track_002); CLOSING_START(A,A:track_002)
+-5.55 MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(B,A); TRACK_APPEARED_LEFT(A,C); TRACK_APPEARED_LEFT(B,C); CLOSING_START(A,C); CLOSING_START(B,C)
+-5.50 TRACK_APPEARED_LEFT(A,C); CLOSING_START(A,C)
 -5.05 CRITICAL_TTC_START(B,A)
--4.70 TRACK_APPEARED_LEFT(B,B:track_003); CLOSING_START(B,B:track_003)
+-4.70 TRACK_APPEARED_LEFT(B,C); CLOSING_START(B,C)
 -2.90 TRACK_APPEARED_RIGHT(C,A); CLOSING_START(C,A)
 -1.60 THROTTLE_END(A); BRAKE_START(A)
 -1.40 CLOSING_START(B,A)
 -1.15 CLOSING_END(C,A)
--1.10 CLOSING_END(A,A:track_002); CLOSING_END(A,C)
+-1.10 CLOSING_END(A,C); CLOSING_END(A,C)
 -1.00 BRAKE_END(A)
 -0.90 THROTTLE_START(A)
--0.70 TRACK_LOST(B,B:track_003)
+-0.70 TRACK_LOST(B,C)
 -0.35 CRITICAL_TTC_START(A,C)
--0.15 THROTTLE_END(B); BRAKE_START(B); EGO_PATH_ENTRY(A,A:track_002)
+-0.15 THROTTLE_END(B); BRAKE_START(B); EGO_PATH_ENTRY(A,C)
 -0.10 CUT_IN_FROM_LEFT_START(A,C)
-+0.00 COLLISION(A,B); CRITICAL_TTC_END(B,A); THROTTLE_END(A); BRAKE_START(A); CLOSING_START(A,A:track_002); CLOSING_START(A,C); CLOSING_START(C,A)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(B,A); THROTTLE_END(A); BRAKE_START(A); CLOSING_START(A,C); CLOSING_START(A,C); CLOSING_START(C,A)
 +0.05 BRAKE_END(A); CRITICAL_TTC_START(C,A)
 +0.10 CLOSING_END(B,A)
 +0.20 EGO_PATH_ENTRY(A,C)
-+0.25 CLOSING_END(B,B:track_002)
++0.25 CLOSING_END(B,C)
 +0.65 MOVING_END(B); STOP_START(B)
 +0.90 TRACK_LOST(C,A)
-+1.05 COLLISION(A,C); CRITICAL_TTC_END(A,C); CLOSING_END(A,A:track_002); CLOSING_END(A,C)
++1.05 COLLISION(A,C); CRITICAL_TTC_END(A,C); CLOSING_END(A,C); CLOSING_END(A,C)
 +1.10 THROTTLE_END(C); BRAKE_START(C)
-+1.20 TRACK_LOST(A,A:track_002)
-+1.25 TRACK_APPEARED_LEFT(B,B:track_004)
++1.20 TRACK_LOST(A,C)
++1.25 TRACK_APPEARED_LEFT(B,U1)
 +1.30 CUT_IN_FROM_LEFT_END(A,C)
-+1.55 TRACK_LOST(B,B:track_004)
++1.55 TRACK_LOST(B,U1)
 +1.70 EGO_PATH_EXIT(B,A)
 +1.90 MOVING_END(A); MOVING_END(C); STOP_START(A); STOP_START(C); BRAKE_START(A)
 ```
@@ -820,27 +843,120 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ### S17/run_0_crash
 
 ```
--4.95 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,A:track_001); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,B:track_002); CLOSING_START(A,A:track_001); CLOSING_START(B,B:track_002)
--2.35 CRITICAL_TTC_START(A,A:track_001)
--2.20 CUT_IN_FROM_RIGHT_START(A,A:track_001)
--1.60 EGO_PATH_ENTRY(A,A:track_001)
+-4.95 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1)
+-2.35 CRITICAL_TTC_START(A,U1)
+-2.20 CUT_IN_FROM_RIGHT_START(A,U1)
+-1.60 EGO_PATH_ENTRY(A,U1)
 -1.15 CRITICAL_TTC_START(A,B)
--0.85 CUT_IN_FROM_RIGHT_END(A,A:track_001)
+-0.85 CUT_IN_FROM_RIGHT_END(A,U1)
 -0.80 CRITICAL_TTC_START(B,A)
 -0.75 CLOSING_START(A,B)
 -0.70 CLOSING_START(B,A)
--0.40 CLOSING_END(A,A:track_001)
+-0.40 CLOSING_END(A,U1)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 +0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
-+0.20 CLOSING_END(B,B:track_002)
-+0.25 EGO_PATH_EXIT(A,A:track_001)
-+0.55 CRITICAL_TTC_END(A,A:track_001)
-+0.75 TRACK_LOST(B,B:track_002)
++0.20 CLOSING_END(B,U1)
++0.25 EGO_PATH_EXIT(A,U1)
++0.55 CRITICAL_TTC_END(A,U1)
++0.75 TRACK_LOST(B,U1)
 +1.00 MOVING_END(B); STOP_START(B)
 +1.10 MOVING_END(A); STOP_START(A)
 +1.30 EGO_PATH_ENTRY(B,A)
-+1.45 TRACK_APPEARED_RIGHT(B,B:track_003)
-+2.05 TRACK_LOST(B,B:track_003)
-+2.50 TRACK_LOST(A,A:track_001)
++1.45 TRACK_APPEARED_RIGHT(B,U1)
++2.05 TRACK_LOST(B,U1)
++2.50 TRACK_LOST(A,U1)
+```
+
+### S18/run_0_abreast
+
+```
+-6.20 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U2); TRACK_APPEARED_RIGHT(B,U2); TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U2); CLOSING_START(B,U2); CLOSING_START(B,U3)
+-5.95 TRACK_APPEARED_FRONT(A,U3)
+-5.45 EGO_PATH_EXIT(A,U3)
+-4.15 CRITICAL_TTC_START(A,U1)
+-3.80 CLOSING_START(A,U3); CUT_IN_FROM_RIGHT_START(A,U1)
+-3.55 EGO_PATH_ENTRY(A,U1)
+-2.65 CUT_IN_FROM_RIGHT_END(A,U1)
+-2.00 CLOSING_END(A,U3)
+-1.65 TRACK_LOST(B,U2)
+-1.05 CRITICAL_TTC_START(A,B)
+-0.65 CRITICAL_TTC_START(B,A)
+-0.60 CLOSING_START(A,B)
+-0.55 EGO_PATH_EXIT(A,U1); CLOSING_START(B,A)
+-0.45 CRITICAL_TTC_END(A,U1)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
++0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
++0.10 CLOSING_END(B,U3)
++0.20 CLOSING_END(A,B); CLOSING_END(B,U2)
++0.30 CLOSING_END(B,A)
++1.05 MOVING_END(B); STOP_START(B)
++1.15 MOVING_END(A); STOP_START(A)
++2.75 TRACK_LOST(B,U2); TRACK_LOST(B,U3)
++3.70 CUT_IN_FROM_RIGHT_START(A,U1)
++4.00 TRACK_LOST(A,U1)
++4.25 TRACK_LOST(A,U3)
+```
+
+### S18/run_0_platoon
+
+```
+-6.20 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,U1); TRACK_APPEARED_FRONT(A,U2); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(B,U1); CLOSING_START(B,U1)
+-6.15 TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U3)
+-5.70 CRITICAL_TTC_START(A,U1)
+-4.80 TRACK_LOST(A,U2)
+-1.55 TRACK_LOST(B,U3)
+-1.40 TRACK_LOST(B,U1)
+-1.05 CRITICAL_TTC_START(A,B)
+-0.65 CRITICAL_TTC_START(B,A)
+-0.60 CLOSING_START(A,B)
+-0.55 CLOSING_START(B,A)
+-0.50 EGO_PATH_EXIT(A,U1)
+-0.35 CRITICAL_TTC_END(A,U1)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
++0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); TRACK_APPEARED_RIGHT(A,U4)
++0.15 CLOSING_END(B,U1)
++0.20 CLOSING_END(A,B)
++0.30 TRACK_APPEARED_RIGHT(B,U4)
++0.40 CLOSING_END(B,A)
++1.05 MOVING_END(B); STOP_START(B)
++1.15 MOVING_END(A); STOP_START(A)
++2.35 TRACK_LOST(B,U4)
++3.35 TRACK_LOST(B,U1)
++3.75 TRACK_LOST(A,U4)
++4.30 TRACK_LOST(A,U1)
+```
+
+### S18/run_0_passing
+
+```
+-6.20 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U2); TRACK_APPEARED_RIGHT(B,U2); TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U2)
+-6.10 CLOSING_START(B,U2)
+-6.05 TRACK_APPEARED_FRONT(A,U2)
+-5.55 CRITICAL_TTC_START(A,U2)
+-3.60 CRITICAL_TTC_START(A,U1)
+-3.20 CUT_IN_FROM_RIGHT_START(A,U1)
+-2.75 EGO_PATH_ENTRY(A,U1)
+-2.70 TRACK_LOST(A,U2)
+-2.30 TRACK_APPEARED_RIGHT(A,U3)
+-1.90 CUT_IN_FROM_RIGHT_END(A,U1)
+-1.65 TRACK_LOST(B,U2)
+-1.15 TRACK_LOST(B,U3)
+-1.05 CRITICAL_TTC_START(A,B)
+-0.65 CRITICAL_TTC_START(B,A)
+-0.60 CLOSING_START(A,B)
+-0.55 EGO_PATH_EXIT(A,U1); CLOSING_START(B,A)
+-0.45 CRITICAL_TTC_END(A,U1)
+-0.25 TRACK_APPEARED_RIGHT(B,U3)
++0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
++0.05 THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
++0.20 CLOSING_END(A,B); CLOSING_END(B,U2)
++0.30 CLOSING_END(B,A)
++1.05 MOVING_END(B); STOP_START(B)
++1.15 MOVING_END(A); STOP_START(A)
++2.55 TRACK_LOST(B,U3)
++2.75 TRACK_LOST(B,U2)
++3.50 TRACK_LOST(A,U3)
++3.70 CUT_IN_FROM_RIGHT_START(A,U1)
++4.00 TRACK_LOST(A,U1)
 ```
 

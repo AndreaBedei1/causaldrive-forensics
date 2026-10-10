@@ -122,3 +122,19 @@ reconstruction:
     speed_consistency_mps: 1.5        # track speed vs partner's own speed (RMSE)
     touching_clearance_m: 1.0         # several compatible tracks: the only one touching the body at the contact...
     rival_clearance_m: 2.0            # ...while every rival is at least this far, is the partner
+    # Road users in the common frame of the recorders' own pose streams (anonymous.py).  Gates scale
+    # with tracking.measurement_std_m / radial_speed_std_mps and the pose sources' declared accuracy.
+    observed_alignment_step_s: 0.05   # recorder without a matched collision: candidate clock offsets every step
+    observed_alignment_min_samples: 10      # ...a comparison needs this many samples of a moving target
+    observed_alignment_min_speed_mps: 2.0   # ...moving at least this fast (only motion fixes time)
+    observed_alignment_uniqueness_ratio: 3.0  # ...offsets within max(ratio x best, 2 sigma) must form one interval
+    link_min_samples: 10              # anonymous track on another recorder's own outline, at its velocity,
+    link_min_fraction: 0.8            # ...over this many samples and this fraction of them: that recorder
+    anonymous_gate_probability: 0.99  # same road user: one rigid box and one velocity (chi-square, 2 dof)...
+    anonymous_min_shared_samples: 10  # ...over at least this many shared instants...
+    anonymous_pass_fraction: 0.8      # ...this fraction of them passing
+    stitch_max_gap_s: 1.5             # one observer tracking a road user again after at most this gap
+    box_face_std_m: 0.25              # box fit: spread of a face's returns around the face (engineering assumption)
+    box_length_std_m: 0.7             # ...prior spread of the length around semantics.target_length_m
+    box_width_std_m: 0.2              # ...and of the width around semantics.target_width_m
+    entity_output_rate_hz: 10.0       # fused trajectories in global/anonymous_entities.json

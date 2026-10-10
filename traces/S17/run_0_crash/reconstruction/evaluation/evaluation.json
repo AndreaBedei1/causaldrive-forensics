@@ -20,6 +20,7 @@
     {
       "graph": "A",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -30,6 +31,7 @@
     {
       "graph": "B",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -55,7 +57,7 @@
   "tracks": [
     {
       "track": "A:track_001",
-      "decision": "A:track_001",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
@@ -106,7 +108,7 @@
     },
     {
       "track": "B:track_002",
-      "decision": "B:track_002",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
@@ -123,7 +125,7 @@
     },
     {
       "track": "B:track_003",
-      "decision": "B:track_003",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {

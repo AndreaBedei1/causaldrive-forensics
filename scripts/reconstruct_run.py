@@ -41,6 +41,9 @@ def main() -> int:
         for item in result.associations:
             print("  track {0}:{1} -> {2} ({3}, confidence {4})".format(
                 item.local_graph, item.local_track, item.global_entity, item.status, item.confidence))
+        for entity in result.road_users.entities if result.road_users else []:
+            print("  road user {0}: {1} ({2})".format(entity["id"], ", ".join(entity["source_tracks"]),
+                                                     entity["fusion_method"]))
         print("  global: {0} nodes, {1} edges".format(len(result.graph.nodes), len(result.graph.edges)))
         if args.evaluate:
             # Imported only here: ground truth enters after the reconstruction is on disk.

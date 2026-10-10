@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 4/4; anonymous: 2; max |t_global error| 0.0 s**
+**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 5/5; anonymous: 1; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -41,10 +41,10 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | C | C | correct | 140 | 0.197 / 0.228 m | 1.845 m | 3.117 / 0.241 m/s |
 | A:track_002 | B | B | correct | 119 | 0.15 / 0.271 m | 1.06 m | 2.829 / 0.683 m/s |
-| B:track_001 | B:track_001 | A | left anonymous (true identity A) | 121 | 12.894 / 12.772 m | 13.925 m | 2.734 / 2.223 m/s |
+| B:track_001 | U1 | A | left anonymous (true identity A) | 121 | 12.894 / 12.772 m | 13.925 m | 2.734 / 2.223 m/s |
 | B:track_002 | A | A | correct | 36 | 0.304 / 0.466 m | 1.266 m | 5.18 / 0.956 m/s |
 | C:track_001 | A | A | correct | 140 | 0.401 / 0.439 m | 1.908 m | 2.889 / 0.145 m/s |
-| C:track_002 | C:track_002 | B | left anonymous (true identity B) | 134 | 0.146 / 0.207 m | 1.738 m | 4.05 / 0.509 m/s |
+| C:track_002 | B | B | correct | 134 | 0.146 / 0.207 m | 1.738 m | 4.05 / 0.509 m/s |
 
 ## Clearance at the true contacts
 

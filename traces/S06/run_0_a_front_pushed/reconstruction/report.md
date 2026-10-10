@@ -4,7 +4,7 @@ Inputs: `vehicles/A/`, `vehicles/B/`, `vehicles/C/` (vehicle-local files) and th
 
 Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
 
-Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) -> graph-level alignment -> identity association -> global graph.
+Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) -> graph-level alignment -> identity association -> road users in the common frame of the recorders' own pose streams -> global graph.
 
 ## Local reconstructions
 
@@ -38,6 +38,10 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 |-------------|---------------|--------|-----------:|----------|
 | A:track_001 | B | ASSOCIATED | 0.87 | A and B both reported collision_001 at 4.80 s (peak impulse 10281.41 vs 10281.41 N*s)<br>tracked for 4.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 4.6 m -> 0.3 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.81 m/s over 3.0 s<br>clearance at the contact 0.30 m<br>the only track of A compatible with the contact<br>collision_002 with B at 5.45 s: also compatible |
 | B:track_001 | C | ASSOCIATED | 1.00 | B and C both reported collision_003 at 5.30 s (peak impulse 8788.05 vs 8788.05 N*s)<br>tracked for 5.30 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 6.4 m -> 0.0 m over the last 1.0 s<br>track speed agrees with C's own speed: RMSE 0.13 m/s over 3.0 s<br>clearance at the contact 0.03 m<br>the only track of B compatible with the contact<br>collision_001 with A at 4.80 s: not compatible (track speed disagrees with A's own speed: RMSE 7.48 m/s over 3.0 s (> 1.50))<br>collision_002 with A at 5.45 s: not compatible (track speed disagrees with A's own speed: RMSE 7.91 m/s over 3.0 s (> 1.50)) |
+
+## Road users in the common frame
+
+- no anonymous track of an aligned recorder
 
 ## Global graph
 
@@ -165,7 +169,7 @@ C:
 ## Files
 
 - Local: `<recorder>/local_trace.jsonl`, `local_tracks.jsonl`, `local_graph.json|md|dot`
-- Global: `global/alignment.json`, `associations.json`, `global_trace.jsonl`, `global_graph.json|md|dot`
+- Global: `global/alignment.json`, `associations.json`, `anonymous_entities.json`, `global_trace.jsonl`, `global_graph.json|md|dot`
 
 ## Parameters
 
@@ -283,7 +287,21 @@ C:
     "min_track_persistence_s": 1.0,
     "speed_consistency_mps": 1.5,
     "touching_clearance_m": 1.0,
-    "rival_clearance_m": 2.0
+    "rival_clearance_m": 2.0,
+    "observed_alignment_step_s": 0.05,
+    "observed_alignment_min_samples": 10,
+    "observed_alignment_min_speed_mps": 2.0,
+    "observed_alignment_uniqueness_ratio": 3.0,
+    "link_min_samples": 10,
+    "link_min_fraction": 0.8,
+    "anonymous_gate_probability": 0.99,
+    "anonymous_min_shared_samples": 10,
+    "anonymous_pass_fraction": 0.8,
+    "stitch_max_gap_s": 1.5,
+    "box_face_std_m": 0.25,
+    "box_length_std_m": 0.7,
+    "box_width_std_m": 0.2,
+    "entity_output_rate_hz": 10.0
   }
 }
 ```

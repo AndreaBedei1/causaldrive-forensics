@@ -35,7 +35,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | B | B | correct | 136 | 0.186 / 0.178 m | 1.935 m | 1.727 / 0.075 m/s |
-| B:track_001 | B:track_001 | C | left anonymous (true identity C) | 136 | 0.449 / 0.438 m | 1.96 m | 2.193 / 0.071 m/s |
+| B:track_001 | U1 | C | left anonymous (true identity C) | 136 | 0.449 / 0.438 m | 1.96 m | 2.193 / 0.071 m/s |
 
 ## Clearance at the true contacts
 

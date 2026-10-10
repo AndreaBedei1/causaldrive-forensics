@@ -14,7 +14,8 @@
       "kind": "recorder",
       "clock": "ALIGNED",
       "observed_as": [
-        "A:track_002"
+        "A:track_002",
+        "C:track_002"
       ]
     },
     {
@@ -26,16 +27,14 @@
       ]
     },
     {
-      "entity_id": "B:track_001",
-      "kind": "anonymous_track",
-      "observed_by": "B",
-      "candidate": "A"
-    },
-    {
-      "entity_id": "C:track_002",
-      "kind": "anonymous_track",
-      "observed_by": "C",
-      "candidate": "A"
+      "entity_id": "U1",
+      "kind": "anonymous_road_user",
+      "observed_by": [
+        "B"
+      ],
+      "observed_as": [
+        "B:track_001"
+      ]
     }
   ],
   "nodes": [
@@ -434,9 +433,10 @@
       "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "C",
-      "subject_id": "C:track_002",
+      "subject_id": "B",
       "participants": [
-        "C"
+        "C",
+        "B"
       ],
       "t_global": -3.6,
       "attributes": {},
@@ -479,9 +479,10 @@
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "C",
-      "subject_id": "C:track_002",
+      "subject_id": "B",
       "participants": [
-        "C"
+        "C",
+        "B"
       ],
       "t_global": -3.6,
       "attributes": {
@@ -565,7 +566,7 @@
       "event_type": "TRACK_APPEARED_RIGHT",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "B:track_001",
+      "subject_id": "U1",
       "participants": [
         "B"
       ],
@@ -608,7 +609,7 @@
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "B:track_001",
+      "subject_id": "U1",
       "participants": [
         "B"
       ],
@@ -2080,7 +2081,7 @@
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "B:track_001",
+      "subject_id": "U1",
       "participants": [
         "B"
       ],
@@ -2829,9 +2830,10 @@
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "C",
-      "subject_id": "C:track_002",
+      "subject_id": "B",
       "participants": [
-        "C"
+        "C",
+        "B"
       ],
       "t_global": 1.2,
       "attributes": {},
@@ -2985,7 +2987,7 @@
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "B:track_001",
+      "subject_id": "U1",
       "participants": [
         "B"
       ],
@@ -3258,7 +3260,7 @@
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
-      "subject_id": "B:track_001",
+      "subject_id": "U1",
       "participants": [
         "B"
       ],
@@ -4151,7 +4153,7 @@
       "ego_path_entry_vs_critical_ttc": null,
       "deltas_s": {},
       "recorder": "B",
-      "entity": "B:track_001",
+      "entity": "U1",
       "association": "ANONYMOUS",
       "t_global": {
         "critical_ttc_start": 0.15
@@ -4315,7 +4317,21 @@
       "min_track_persistence_s": 1.0,
       "speed_consistency_mps": 1.5,
       "touching_clearance_m": 1.0,
-      "rival_clearance_m": 2.0
+      "rival_clearance_m": 2.0,
+      "observed_alignment_step_s": 0.05,
+      "observed_alignment_min_samples": 10,
+      "observed_alignment_min_speed_mps": 2.0,
+      "observed_alignment_uniqueness_ratio": 3.0,
+      "link_min_samples": 10,
+      "link_min_fraction": 0.8,
+      "anonymous_gate_probability": 0.99,
+      "anonymous_min_shared_samples": 10,
+      "anonymous_pass_fraction": 0.8,
+      "stitch_max_gap_s": 1.5,
+      "box_face_std_m": 0.25,
+      "box_length_std_m": 0.7,
+      "box_width_std_m": 0.2,
+      "entity_output_rate_hz": 10.0
     }
   }
 }

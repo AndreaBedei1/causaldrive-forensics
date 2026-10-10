@@ -1,6 +1,6 @@
 {
   "run": "S16/run_0_consequential",
-  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 3/3; anonymous: 4; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -31,6 +31,7 @@
     {
       "graph": "A",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -41,6 +42,7 @@
     {
       "graph": "B",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -51,6 +53,7 @@
     {
       "graph": "C",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001",
         "collision_002"
@@ -106,14 +109,14 @@
     },
     {
       "track": "A:track_002",
-      "decision": "A:track_002",
-      "status": "ANONYMOUS",
+      "decision": "C",
+      "status": "ASSOCIATED",
       "true_identity": "C",
       "median_box_distance_m": {
         "B": 16.57,
         "C": 0.0
       },
-      "verdict": "left anonymous (true identity C)",
+      "verdict": "correct",
       "samples": 66,
       "raw_rmse_to_surface_m": 0.057,
       "smoothed_rmse_to_surface_m": 0.078,
@@ -140,14 +143,14 @@
     },
     {
       "track": "B:track_002",
-      "decision": "B:track_002",
-      "status": "ANONYMOUS",
+      "decision": "C",
+      "status": "ASSOCIATED",
       "true_identity": "C",
       "median_box_distance_m": {
         "A": 1.73,
         "C": 0.0
       },
-      "verdict": "left anonymous (true identity C)",
+      "verdict": "correct",
       "samples": 117,
       "raw_rmse_to_surface_m": 0.268,
       "smoothed_rmse_to_surface_m": 0.272,
@@ -157,14 +160,14 @@
     },
     {
       "track": "B:track_003",
-      "decision": "B:track_003",
-      "status": "ANONYMOUS",
+      "decision": "C",
+      "status": "ASSOCIATED",
       "true_identity": "C",
       "median_box_distance_m": {
         "A": 8.57,
         "C": 0.0
       },
-      "verdict": "left anonymous (true identity C)",
+      "verdict": "correct",
       "samples": 17,
       "raw_rmse_to_surface_m": 0.082,
       "smoothed_rmse_to_surface_m": 0.091,
@@ -174,7 +177,7 @@
     },
     {
       "track": "B:track_004",
-      "decision": "B:track_004",
+      "decision": "U1",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {

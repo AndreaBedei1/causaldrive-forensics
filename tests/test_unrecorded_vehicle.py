@@ -253,21 +253,22 @@ class S17RecordingTests(unittest.TestCase):
     def test_reconstruction_keeps_c_anonymous(self):
         associations = json.loads((S17 / "reconstruction" / "global" / "associations.json").read_text())
         entities = {(a["local_graph"], a["local_track"]): (a["status"], a["global_entity"]) for a in associations}
-        self.assertEqual(entities[("A", "track_001")], ("ANONYMOUS", "A:track_001"))
+        # C's tracks of both recorders are one anonymous road user, U1: never named C.
+        self.assertEqual(entities[("A", "track_001")], ("ANONYMOUS", "U1"))
         self.assertEqual(entities[("A", "track_002")], ("ASSOCIATED", "B"))
         self.assertEqual(entities[("B", "track_001")], ("ASSOCIATED", "A"))
         graph = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text())
         mentioned = {n["actor_id"] for n in graph["nodes"]} | {n["subject_id"] for n in graph["nodes"]}
         self.assertNotIn("C", mentioned)
         types = {(n["event_type"], n["subject_id"]) for n in graph["nodes"] if n["actor_id"] == "A"}
-        self.assertIn(("CUT_IN_FROM_RIGHT_START", "A:track_001"), types)
-        self.assertIn(("EGO_PATH_ENTRY", "A:track_001"), types)
+        self.assertIn(("CUT_IN_FROM_RIGHT_START", "U1"), types)
+        self.assertIn(("EGO_PATH_ENTRY", "U1"), types)
         evaluation = json.loads((S17 / "reconstruction" / "evaluation" / "evaluation.json").read_text())
         verdicts = {row["track"]: (row["true_identity"], row["verdict"]) for row in evaluation["tracks"]}
         self.assertEqual(verdicts["A:track_001"], ("C", "correctly left anonymous"))
         for (recorder, track), (status, entity) in entities.items():
-            if verdicts["{0}:{1}".format(recorder, track)][0] == "C":  # every track of C stays anonymous
-                self.assertEqual((status, entity), ("ANONYMOUS", "{0}:{1}".format(recorder, track)))
+            if verdicts["{0}:{1}".format(recorder, track)][0] == "C":  # every track of C stays anonymous: U1
+                self.assertEqual((status, entity), ("ANONYMOUS", "U1"))
 
 
 if __name__ == "__main__":

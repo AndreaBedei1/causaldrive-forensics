@@ -77,9 +77,119 @@ centre (p95 3.6 m) -- addressed by the face correction of phase 1.  Collision-fr
 aligned by collisions (S07, S08 C).  The 2-D prediction keeps a constant-velocity target (S09); the
 imminent-contact release prevents the premature END but not a late START.
 
-**Commit.**  `phase0: baseline regeneration, headless replay export, visual and ground-truth audit, S09 fix`
-(SHA recorded in the phase 1 section).
+**Commit.**  `9ad719fa3d5a98a95eb0baae4f068cd3b90582bb` -- `phase0: baseline regeneration, headless replay export,
+visual and ground-truth audit, S09 fix`.
 
 **Gate.**  PASS: full tests green on Python 3.8 and 3.14; all canonical runs reconstructible and regenerated;
 replay without privileged input (poisoned tests); no open visual FAIL; S17 coherent; S02
 critical-before-cut-in preserved; campaign outputs aligned with the current code.
+
+## Phase 1 -- fusion of road users that recorded nothing
+
+**Objective.**  One anonymous road user (U1, U2, ...) per physical road user that recorded nothing, from the
+recorders' own data: a common frame, cross-observer association, face correction, same-observer stitching,
+a multi-observer box fit with uncertainty, `anonymous_entities.json`; positive cases S17, S16, S08; a new
+negative scenario; metrics against ground truth.
+
+**Implementation.**
+- 1A common frame (`cdf.reconstruction.common_frame`): `PoseSource` (a recorder's pose by its own clock,
+  declaring its position, heading and velocity accuracy), `RecordedPoseSource` (the recorded `ego.jsonl`
+  stream: the GNSS-like baseline, exact in CARLA; the robustness phase substitutes a perturbed source through
+  `reconstruct_run(..., pose_factory=...)`), every track sample with its point, observed near surface,
+  ground velocity, line of sight and -- in memory only, never written -- the radar returns it claimed with
+  their radars' positions (`tracking.py` keeps them on the track).
+- Observed alignment (`anonymous.align_by_observations`) of a recorder no matched collision aligned:
+  near surfaces against footprint outlines over candidate clock offsets, pooled over the comparisons that fit
+  somewhere, moving targets only; accepted when the offsets within `max(3 x best, 2 sigma)` form one interval
+  (`GraphClock.method = observed_trajectories`, decisions in `alignment.json` and `anonymous_entities.json`).
+- Recorder links (`link_to_recorders`): an anonymous track whose returns lie on another recorder's own
+  footprint at its own velocity is that recorder; the evidence stops at the recorder's first contact with a
+  third body; a track that afterwards lies clearly off it switched body and stays anonymous.
+- 1B/1C/1E association and face correction (`pair_evidence`, `fit_box`): the returns of each observer are
+  assigned to the box faces visible from their own radar; each face is two linear constraints (offset along
+  its normal, position along it); one rigid box (centre, half length, half width with priors, heading from
+  the motion) for both observers against two separate boxes: chi-square difference (2 dof) and velocity
+  chi-square at 99 % on at least 80 % of at least 10 shared instants.  The same test detects a tracker
+  splitting one body into two simultaneous tracks of one observer.
+- 1D stitching (`stitch_evidence`): constant-velocity prediction across a loss of at most 1.5 s, uncertainty
+  growing with the tracker's unmodelled acceleration; S17 B:track_002 -> B:track_003 after 0.75 s (miss
+  2.16 m, d^2 1.63) is kept as two `source_track_segments`.
+- Conservative clustering (`refuse_ambiguous`, `cluster`): a link with a rival is refused; an entity never
+  holds two simultaneous tracks of one observer unless a link showed them to be one body.
+- 1E fused state (`entity_trajectory`, 10 Hz): one box fitted to all observers' faces when they fix it (two
+  faces or two observers); otherwise covariance intersection of the observers' centre estimates.  Choice:
+  a track-level fusion of points is biased (two radars see different faces: their points differ by up to a
+  car length, 2.4 m in S17), the box explains the faces; covariance intersection is the fallback because the
+  observers' estimates share the target's unmodelled motion and their cross-correlation is unknown.
+- 1F `global/anonymous_entities.json`: per entity `id`, `anonymous: true`, `source_tracks`,
+  `source_track_segments`, `observers`, `time_span`, association links and confidence, `fusion_method`,
+  footprint (value, source fitted / prior / observed extent, spread), trajectory (position, velocity, heading
+  and its source, uncertainty, method, observers); plus the observed alignments, the recorder links and the
+  evidence of every pair.  The global graph names anonymous road users U1, U2, ... (`models.is_anonymous_entity`).
+- `pipeline.fuse_recorders` runs every cross-recorder step; the evaluation's clock-shift check uses it too.
+- 1H S18 anonymous_pair (configs/scenarios/s18_anonymous_pair.yaml): C and D record nothing and drive close
+  together at about the same speed ahead of A and B -- abreast (1.4 m apart), platoon (8 m), passing (D
+  overtaking C) -- then A drifts into B (their contact aligns the clocks).  Recorded on the private engine
+  (port 3000), each run matching a lab run of the same variant within 0.15 m.
+- 1I `cdf.evaluation.fusion_metrics` and `scripts/fusion_metrics.py` (privileged), with
+  `cdf.evaluation.provenance` (git commit, code and configuration hashes, runs, time).
+- The LLM oracle mode (offline, evaluation only) maps anonymous entity names too; no LLM call.
+
+**Assumptions** (engineering choices unless stated).  Road users are rigid boxes; the heading is the direction
+of motion (held when slow); length 4.6 +- 0.7 m and width 1.9 +- 0.2 m priors (the reconstruction's nominal
+box; cars to vans); returns spread 0.25 m around a face (bumpers, mirrors, wheels); gates at 99 % of
+chi-square with 2 dof, 80 % of instants, at least 10 instants; stitching across at most 1.5 s; the observed
+alignment uses targets faster than 2 m/s and requires one interval at 3x the best score; recorder links need
+80 % of at least 10 samples within 3 sigma, sigma from the tracker's measurement noise and the pose sources'
+declared accuracy.  Mutual-track refinement of the pose sources is not implemented: with exact recorded poses
+there is nothing to refine or measure; it is designed for phase 4, where perturbed poses make baseline vs
+refined measurable.
+
+**Tests.**  418 pass on Python 3.8 (CARLA environment) and Python 3.14.  New `tests/test_road_user_fusion.py`
+(22): box fit from two observers' faces, prior along a single face, covariance intersection never tighter than
+an independence fusion, one box seen from two sides is one road user, two cars abreast and two in a platoon
+stay two, stitching and its refusals, ambiguous successors and simultaneous partners refused, clusters never
+hold simultaneous tracks of one observer, samples carried in time, chi-square quantiles; on the canonical runs:
+S17 U1 from three tracks with a cross link and a stitch, the global graph names U1 and never C, a poisoned copy
+(ground truth and run metadata naming C and its track) gives identical outputs, renamed recorders give the same
+road user, the fusion source names no scenario, participant or privileged field, S16 van tracks -> C, S08 C
+aligned by its observed trajectory, S07 C refused.  Updated: the weak-collision-evidence test (collision-based
+association alone vs the common-frame link), the S17 anonymity test (U1).
+
+**Results** (traces/fusion_metrics.md, CAMPAIGN_REPORT section 5.13).
+- Identity decisions of the aligned recorders' tracks: 41 correct links, **0 wrong**, 4 missed (S07 C
+  unaligned; S08 C:track_002 and S15 B:track_001 switch body at a contact with a third vehicle; S16 B:track_004,
+  0.3 s after the contacts).
+- S17: U1 = A:track_001 + B:track_002 + B:track_003, purity 1.00.  S16: the van's tracks A:track_002, B:track_002,
+  B:track_003 -> C.  S08: C aligned at -4.10 s (true -4.10 s, interval [-4.20, -3.75] s), A:track_001 and
+  B:track_001 -> C, C:track_001 -> A.  S10 B:track_001 -> A.  S07: C refused (offsets -5.95 and -5.60 s both fit).
+- Negative case S18: **0 false merges** in all three variants; fragments only (C in 2 entities in each variant,
+  D in 1, 1 and 2).  Over the campaign: merges 15 correct, 0 false, 10 missed; 15 entities, purity median 1.00
+  (min 0.63); entities per true road user median 1, max 2.
+- Fused state over 1062 pure instants: centre error median 0.39 m, IQR 0.54, p90 1.42, p95 1.51, max 6.59 m (box
+  fit: median 0.27 m) against the phase-0 nominal ghost box of each source track at the same instants: median
+  0.57 m, p95 3.53 m.  Velocity error median 0.12 m/s (p95 0.69); speed 0.05 m/s (p95 0.27); heading 0.53 deg
+  (p95 2.8; max 177 deg in a post-impact slide, S15).  Footprint: length error median 0.19 m (max 1.3 m: a van
+  seen 0.3 s), width 0.26 m; mostly the prior (opposite faces are rarely seen).  Coverage per entity median 9.0 s.
+  Calibration: 0.60 / 0.92 / 0.97 of the errors within 1 / 2 / 3 declared sigma (Gaussian 0.39 / 0.86 / 0.99).
+- Clock-shift check: global graph identical in all 17 runs (S08: the observed alignment absorbs the 0.73 s shift).
+- Cost: cross-recorder steps 0.03-1.3 s per canonical run, 3.7-5.9 s per S18 run; `anonymous_entities.json`
+  684 kB over 17 runs; S18 raw recordings 40 MB.
+
+**Regressions.**  None: local outputs byte-identical over all runs; every collision and every association
+of phase 0 unchanged (evaluation headlines); global names changed where intended (U entities, new links).
+The LLM forensic packets were not re-exported (LLM pipeline out of the paper; stored analyses refer to them).
+
+**Limitations.**  Identity is per track: a track that switches body at a contact stays anonymous (two cases)
+instead of being split.  A recorder at rest or moving along its own outline cannot be aligned by observation
+(S07).  Fragmentation is the price of conservative gates (S18: 10 missed merges); a local tracker mixing two
+cars 1.4 m apart (S18 abreast, A:track_001 purity 0.73) also yields a spurious CUT_IN in A's local graph
+(phase 5).  Heading from motion fails in post-impact slides.  The declared position uncertainty is
+conservative in the bulk with a heavier tail.  Box dimensions mostly come from the prior.  An observed alignment
+is not propagated through a matched collision between two recorders that are both unaligned (no such case).
+
+**Commit.**  `phase1: ...` (SHA recorded in the phase 2 section).
+
+**Gate.**  PASS: S17 / S16 / S08 correct; the negative case passes (0 false merges in three configurations);
+no ground truth at runtime (boundary, poisoned-copy and renamed-recorder tests); tests green on both Pythons;
+metrics produced with provenance.

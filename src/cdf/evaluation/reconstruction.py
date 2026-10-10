@@ -19,11 +19,9 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from ..reconstruction.alignment import align_graphs
 from ..reconstruction.config import ReconstructionConfig, config_from_mapping
-from ..reconstruction.fusion import associate_tracks, fuse_graphs
 from ..reconstruction.local import reconstruct_vehicle
-from ..reconstruction.pipeline import read_incident_context, run_title
+from ..reconstruction.pipeline import fuse_recorders, read_incident_context, run_title
 from ..reconstruction.render import write_json, write_text
 
 # A track "is" a vehicle when its median distance to that vehicle's box is below this.
@@ -154,9 +152,7 @@ def _clock_shift_check(run_dir: Path, graph: Dict[str, Any], alignment: Dict[str
         if vehicle_dir.name == shifted:
             origin = _read_jsonl(vehicle_dir / "ego.jsonl")[0]["timestamp"] - CLOCK_SHIFT_S
         locals_.append(reconstruct_vehicle(vehicle_dir, config, clock_origin=origin, context=context))
-    shifted_alignment = align_graphs([local.graph for local in locals_], config.fusion)
-    associations = associate_tracks(locals_, shifted_alignment, config.fusion)
-    shifted_graph = fuse_graphs(locals_, shifted_alignment, associations)
+    shifted_alignment, _, _, shifted_graph = fuse_recorders(run_dir, locals_, config)
 
     def signature(nodes: List[Tuple[Any, ...]]) -> List[Tuple[Any, ...]]:
         return [(kind, actor, subject, None if t is None else round(t, 3)) for kind, actor, subject, t in nodes]
@@ -236,7 +232,8 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         true_reference = None if reference_truth is None else round(reference_truth["sim_time"] - origins[name], 4)
         estimated = None if clock["offset_to_global"] is None else round(-clock["offset_to_global"], 4)
         error = None if estimated is None or true_reference is None else round(estimated - true_reference, 4)
-        alignment_rows.append({"graph": name, "status": clock["status"], "chain": clock.get("chain", []),
+        alignment_rows.append({"graph": name, "status": clock["status"], "method": clock.get("method"),
+                               "chain": clock.get("chain", []),
                                "estimated_reference_t_local": estimated,
                                "true_reference_t_local": true_reference, "error_s": error})
     relative = []

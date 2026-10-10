@@ -371,10 +371,16 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                    if item.status == ASSOCIATED and item.global_entity == owner]
         entities.append({"entity_id": owner, "kind": "recorder",
                          "clock": alignment.graphs[owner].status, "observed_as": aliases})
+    # One entry per anonymous road user (U1, U2, ...: possibly several tracks of several observers), or per
+    # track of a recorder without a global clock (A:track_001).
+    anonymous: Dict[str, List[Association]] = {}
     for item in associations:
         if item.status == ANONYMOUS:
-            entities.append({"entity_id": item.global_entity, "kind": "anonymous_track",
-                             "observed_by": item.local_graph, "candidate": item.candidate})
+            anonymous.setdefault(item.global_entity, []).append(item)
+    for entity_id, items in anonymous.items():
+        entities.append({"entity_id": entity_id, "kind": "anonymous_road_user",
+                         "observed_by": sorted({item.local_graph for item in items}),
+                         "observed_as": [item.local_graph + ":" + item.local_track for item in items]})
     return GlobalGraph(entities=entities, nodes=nodes, edges=edges)
 
 

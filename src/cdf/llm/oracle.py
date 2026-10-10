@@ -28,10 +28,15 @@ def oracle_identity_map(run_dir: Path) -> Dict[str, str]:
     if not path.exists():
         raise FileNotFoundError("no privileged evaluation at {0}; run scripts/reconstruct_run.py --evaluate".format(path))
     evaluation = json.loads(path.read_text(encoding="utf-8"))
-    out = {}
+    out: Dict[str, str] = {}
+    entities: Dict[str, set] = {}
     for row in evaluation.get("tracks", []):
         if row.get("status") != "ASSOCIATED" and row.get("true_identity"):
             out[row["track"]] = row["true_identity"]
+            if row.get("decision") and row["decision"] != row["track"]:
+                entities.setdefault(row["decision"], set()).add(row["true_identity"])
+    # An anonymous road user of the global graph (U1, ...) whose tracks were all one participant.
+    out.update({entity: next(iter(truth)) for entity, truth in entities.items() if len(truth) == 1})
     return dict(sorted(out.items()))
 
 

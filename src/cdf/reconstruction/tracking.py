@@ -462,6 +462,10 @@ class TrackMeasurement:
     surface_offset: Optional[float] = None  # median clearance of its returns minus the near one
     radar: Optional[str] = None  # the radar with most of the track's returns in this sweep
     radars: Tuple[str, ...] = ()  # every radar that saw it in this sweep
+    # The returns it claimed (local frame) and the position of the radar of each: kept in memory only,
+    # for the multi-observer box fit of the anonymous-entity fusion (never written).
+    points: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
+    origins: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
 
 
 def _transition(dt: float) -> np.ndarray:
@@ -593,7 +597,8 @@ def _measurement_from_returns(sweep: RadarSweep, mask: np.ndarray) -> TrackMeasu
     return TrackMeasurement(t_local=sweep.t_local, xy=xy, dopplers=[(line, radial) for _, line, radial in dopplers],
                             n_returns=int(mask.sum()), near_clearance=near, surface_offset=offset,
                             radar=sweep.radars[main] if sweep.radars else str(main),
-                            radars=tuple(sorted(sweep.radars[k] if sweep.radars else str(k) for _, k in counts)))
+                            radars=tuple(sorted(sweep.radars[k] if sweep.radars else str(k) for _, k in counts)),
+                            points=sweep.points[mask].copy(), origins=sweep.origins[mask].copy())
 
 
 def _gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, cfg: TrackingConfig) -> np.ndarray:
@@ -748,6 +753,9 @@ class TrackSample:
 class LocalTrack:
     track_id: str
     samples: List[TrackSample]
+    # Per sample, the returns its sweep claimed (local frame points, radar positions), None when only
+    # predicted.  In memory only (``TrackMeasurement.points``): the outputs never carry them.
+    returns: List[Optional[Tuple[np.ndarray, np.ndarray]]] = field(default_factory=list, repr=False, compare=False)
 
     @property
     def first_t(self) -> float:
@@ -909,10 +917,12 @@ def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock
         offsets = surface_offsets(measurements) if footprint is not None else [0.0] * len(measurements)
         acceleration = accelerations([m.t_local for m in measurements], states, filtered)
         samples = []
+        returns = []
         radar = None
         for m, state, covariance, offset, accel in zip(measurements, states, covariances, offsets, acceleration):
             radar = m.radar or radar
             samples.append(_relative_sample(m.t_local, state, covariance, m, ego, mounts.get(radar), footprint,
                                             offset, accel))
-        tracks.append(LocalTrack(track_id=raw.track_id, samples=samples))
+            returns.append(None if m.points is None else (m.points, m.origins))
+        tracks.append(LocalTrack(track_id=raw.track_id, samples=samples, returns=returns))
     return tracks

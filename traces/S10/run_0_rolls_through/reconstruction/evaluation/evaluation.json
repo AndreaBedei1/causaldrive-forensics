@@ -1,6 +1,6 @@
 {
   "run": "S10/run_0_rolls_through",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -20,6 +20,7 @@
     {
       "graph": "A",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -30,6 +31,7 @@
     {
       "graph": "B",
       "status": "ALIGNED",
+      "method": "matched_collisions",
       "chain": [
         "collision_001"
       ],
@@ -71,13 +73,13 @@
     },
     {
       "track": "B:track_001",
-      "decision": "B:track_001",
-      "status": "ANONYMOUS",
+      "decision": "A",
+      "status": "ASSOCIATED",
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0
       },
-      "verdict": "left anonymous (true identity A)",
+      "verdict": "correct",
       "samples": 133,
       "raw_rmse_to_surface_m": 0.113,
       "smoothed_rmse_to_surface_m": 0.274,
