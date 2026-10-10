@@ -31,7 +31,7 @@ S16 = ROOT / "traces" / "S16" / "run_0_consequential"
 VIEWER_SOURCES = (ROOT / "scripts" / "replay_run.py", ROOT / "src" / "cdf" / "replay" / "model.py",
                   ROOT / "src" / "cdf" / "replay" / "topdown.py", ROOT / "src" / "cdf" / "replay" / "qa.py")
 RECONSTRUCTION_FILES = ("local_graph.json", "local_tracks.jsonl", "local_trace.jsonl")
-GLOBAL_FILES = ("global_graph.json", "associations.json", "alignment.json")
+GLOBAL_FILES = ("global_graph.json", "associations.json", "alignment.json", "anonymous_entities.json")
 FOOTPRINT = EgoFootprint(-2.0, 2.0, -1.0, 1.0)
 
 
@@ -126,6 +126,12 @@ def _poison(run_dir):
             "associations": [{"local_graph": "A", "local_track": "track_001", "global_entity": "C",
                               "status": "ASSOCIATED"}]})
     _write(run_dir / "vehicles" / "C" / "metadata.json", {"blueprint": "vehicle.nissan.patrol", "participant_id": "C"})
+    # The privileged evaluation of the fusion and the LLM oracle name the anonymous road user.
+    _write(run_dir / "reconstruction" / "evaluation" / "fusion_metrics.json",
+           {"entities": [{"id": "U1", "true_identity": "C"}], "track_decisions": [{"track": "A:track_001",
+                                                                                  "true_identity": "C"}]})
+    _write(run_dir / "reconstruction" / "evaluation" / "llm_oracle" / "oracle_identities.json",
+           {"identities": {"U1": "C", "A:track_001": "C"}})
 
 
 def _summary(run):
@@ -139,9 +145,12 @@ def _summary(run):
                for pose in (p.trajectory.pose_at(run.start + 0.5 * k) for k in range(int(run.duration / 0.5) + 1))])
              for p in run.participants]
     perceived = {pid: (states.times, states.states) for pid, states in run.perceived.items()}
+    entities = [(e.entity_id, e.source_tracks, e.observers, e.length, e.width,
+                 [(s.time, round(s.centre[0], 6), round(s.centre[1], 6), s.yaw, s.heading, s.pos_std, s.measured)
+                  for s in e.states]) for e in run.entities]
     return (poses, tracks, [(e.time, e.actor, e.event_type, e.subject) for e in run.all_events()],
             [(m.time, m.participants) for m in run.collisions], perceived, run.identities,
-            (run.clock, run.start, run.duration, run.clock_origins), run.notes)
+            (run.clock, run.start, run.duration, run.clock_origins), run.notes, entities, run.road_users, run.hidden)
 
 
 def _code_constants_and_names(path):
@@ -224,8 +233,10 @@ class NoPrivilegedInputTests(unittest.TestCase):
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call) and getattr(node.func, "id", getattr(node.func, "attr", "")) \
                         == "load_run_config":
-                    # configs/default.yaml only (the simulator connection): no scenario argument.
-                    self.assertEqual((node.args, node.keywords), ([], []), path.name)
+                    # configs/default.yaml only (the simulator connection): no scenario argument, at most
+                    # connection overrides (the viewer's --port).
+                    self.assertEqual(node.args, [], path.name)
+                    self.assertTrue(all(keyword.arg == "overrides" for keyword in node.keywords), path.name)
                 if isinstance(node, ast.BinOp) and isinstance(node.right, ast.Constant) \
                         and node.right.value == "metadata.json":
                     # Only a recorder's own metadata (blueprint, footprint), never the run's.
@@ -290,6 +301,47 @@ class NoPrivilegedInputTests(unittest.TestCase):
             self.assertFalse(path.endswith(".yaml"), path)
             self.assertNotIn(_norm(poisoned / "vehicles" / "C"), path)
         self.assertEqual(set(opened), {_norm(path) for path in _viewer_inputs(poisoned, "AB")})
+
+    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    def test_the_road_users_come_from_the_reconstruction_never_from_the_evaluation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            poisoned = _copy_inputs(S17, Path(tmp) / "S17" / "run_0_crash", "AB")
+            _poison(poisoned)
+            run = ReplayRun.load(poisoned)
+        self.assertEqual([(e.entity_id, e.source_tracks) for e in run.entities],
+                         [("U1", ["A:track_001", "B:track_002", "B:track_003"])])
+        texts = [e.label for e in run.entities] + [e.sources for e in run.entities]
+        texts += [run.subject_name(t.recorder, t.track_id) for t in run.all_tracks()] + run.notes
+        standalone_c = re.compile(r"(^|[^A-Za-z0-9_])C([^A-Za-z0-9_]|$)")
+        for text in texts:
+            self.assertIsNone(standalone_c.search(text), text)
+
+    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    def test_a_pose_source_moves_the_recorders_and_what_they_observe_together(self):
+        from src.cdf.reconstruction.common_frame import RecordedPoseSource, WorldPose
+
+        class Shifted(RecordedPoseSource):
+            """The recorded stream 2 m east and 1 m south: a constant position error of the pose source."""
+
+            def pose_at(self, t_local):
+                pose = super().pose_at(t_local)
+                return WorldPose(pose.x + 2.0, pose.y + 1.0, pose.yaw, pose.vx, pose.vy)
+
+        plain = ReplayRun.load(S17)
+        shifted = ReplayRun.load(S17, pose_factory=Shifted.from_vehicle_dir)
+        for t in (0.5, 2.0, 4.0):
+            a, b = plain.participant("A").trajectory.pose_at(plain.start + t), \
+                shifted.participant("A").trajectory.pose_at(shifted.start + t)
+            self.assertAlmostEqual(b.x - a.x, 2.0, places=6)
+            self.assertAlmostEqual(b.y - a.y, 1.0, places=6)
+            self.assertAlmostEqual(wrap_deg(b.yaw - a.yaw), 0.0, places=6)
+            for track in ("track_001", "track_002"):
+                pa = next(x for x in plain.tracks["A"] if x.track_id == track).state_at(t)
+                pb = next(x for x in shifted.tracks["A"] if x.track_id == track).state_at(t)
+                if pa is not None:
+                    self.assertAlmostEqual(pb.position[0] - pa.position[0], 2.0, places=6)
+                    self.assertAlmostEqual(pb.position[1] - pa.position[1], 1.0, places=6)
+                    self.assertAlmostEqual(wrap_deg(pb.yaw - pa.yaw), 0.0, places=6)
 
     @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
     def test_the_headless_export_reads_only_the_recorders_and_the_reconstruction(self):
@@ -381,16 +433,35 @@ class S17GhostTests(unittest.TestCase):
         self.assertAlmostEqual(self.replay.display_time(critical.time), -2.35, places=6)
 
     def test_the_tracks_are_shown_as_the_fusion_decided(self):
-        self.assertEqual({name: (t.status, t.entity, t.ghost) for name, t in self.tracks.items()},
-                         {"A:track_001": (ANONYMOUS, None, True), "A:track_002": (ASSOCIATED, "B", False),
-                          "B:track_001": (ASSOCIATED, "A", False), "B:track_002": (ANONYMOUS, None, True),
-                          "B:track_003": (ANONYMOUS, None, True)})
-        # An associated track is the associated recorder's replayed vehicle: no duplicate ghost.
-        self.assertEqual([track.name for track in self.replay.ghost_tracks()],
-                         ["A:track_001", "B:track_002", "B:track_003"])
+        self.assertEqual({name: (t.status, t.entity, t.road_user, t.ghost) for name, t in self.tracks.items()},
+                         {"A:track_001": (ANONYMOUS, None, "U1", False), "A:track_002": (ASSOCIATED, "B", None, False),
+                          "B:track_001": (ASSOCIATED, "A", None, False), "B:track_002": (ANONYMOUS, None, "U1", False),
+                          "B:track_003": (ANONYMOUS, None, "U1", False)})
+        # An associated track is the associated recorder's replayed vehicle, a track of a road user is drawn
+        # through that road user's single box: no ghost of its own.
+        self.assertEqual(self.replay.ghost_tracks(), [])
         self.assertEqual([self.tracks[name].label for name in sorted(self.tracks)],
-                         ["A:track_001 / ANONYMOUS", "A:track_002 → B", "B:track_001 → A", "B:track_002 / ANONYMOUS",
-                          "B:track_003 / ANONYMOUS"])
+                         ["A:track_001 → U1", "A:track_002 → B", "B:track_001 → A", "B:track_002 → U1",
+                          "B:track_003 → U1"])
+        self.assertEqual(self.replay.subject_name("A", "track_001"), "track_001 (U1)")
+
+    def test_the_non_recorder_is_one_road_user_drawn_once(self):
+        self.assertEqual([(e.entity_id, e.source_tracks, e.observers) for e in self.replay.entities],
+                         [("U1", ["A:track_001", "B:track_002", "B:track_003"], ["A", "B"])])
+        u1 = self.replay.entities[0]
+        both = [t for t in self.tracks["A:track_001"].times
+                if self.tracks["B:track_002"].start <= t <= self.tracks["B:track_002"].end and u1.start <= t <= u1.end]
+        self.assertTrue(both)  # both recorders track it at once ...
+        for t in both[::10]:
+            self.assertEqual([entity.entity_id for entity, _ in self.replay.entities_at(t)], ["U1"])  # ... one body
+        for t in (u1.start, (u1.start + u1.end) / 2.0, u1.end):
+            state = u1.state_at(t)
+            self.assertIsNotNone(state)
+            corners = box_corners(state.centre, state.yaw, u1.length, u1.width, 0.0, 1.5)
+            self.assertTrue(all(math.isfinite(value) for corner in corners for value in corner))
+            self.assertGreater(state.pos_std, 0.0)
+        self.assertIsNone(u1.state_at(u1.end + 0.6))
+        self.assertEqual((u1.length, u1.width), (4.6, 1.9))  # the fitted footprint (here the prior)
 
     def test_only_the_recorders_are_replayed_and_nothing_is_named_c(self):
         self.assertEqual([p.participant_id for p in self.replay.participants], ["A", "B"])
@@ -440,9 +511,9 @@ class S17GhostTests(unittest.TestCase):
         for other in (self.tracks["B:track_002"], self.tracks["B:track_003"]):
             self.assertIsNot(a1, other)
             self.assertEqual((a1.recorder, other.recorder), ("A", "B"))
-            # Each went through its own observer's recorded pose and its own view of the road user (A
-            # sees its rear, B partly behind A its left side): the two nominal boxes land on the same
-            # road user, overlapping, without ever being compared or merged.
+            # Each went through its own observer's pose and its own view of the road user (A sees its
+            # rear, B partly behind A its left side): the two tracks stay two objects in their observers'
+            # frames (radar dots); the reconstruction, not the viewer, made them one road user (U1).
             common = [t for t in a1.times if other.start <= t <= other.end]
             self.assertTrue(common)
             distances = [math.hypot(a1.state_at(t).centre[0] - other.state_at(t).centre[0],

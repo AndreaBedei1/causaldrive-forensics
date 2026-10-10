@@ -34,7 +34,7 @@ Fragmentation (true road user -> entities): C -> U1
 | heading_error_deg | 3 | 7.606 | 7.404 | 7.670 | 0.266 | 7.709 | 7.721 | 7.734 |
 | length_error_m | 1 | 1.315 | 1.315 | 1.315 | 0.000 | 1.315 | 1.315 | 1.315 |
 | normalised_centre_error | 3 | 6.026 | 6.006 | 6.077 | 0.071 | 6.106 | 6.117 | 6.127 |
-| single_track_nominal_centre_error_m | 3 | 3.306 | 3.291 | 3.340 | 0.049 | 3.360 | 3.366 | 3.373 |
+| single_track_nominal_centre_error_m | 3 | 3.307 | 3.291 | 3.340 | 0.049 | 3.360 | 3.366 | 3.373 |
 | speed_error_mps | 3 | 0.361 | 0.197 | 0.400 | 0.204 | 0.424 | 0.432 | 0.440 |
 | velocity_error_mps | 3 | 0.916 | 0.776 | 0.959 | 0.183 | 0.985 | 0.994 | 1.002 |
 | width_error_m | 1 | 0.088 | 0.088 | 0.088 | 0.000 | 0.088 | 0.088 | 0.088 |

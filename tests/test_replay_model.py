@@ -158,14 +158,24 @@ class ClockTests(unittest.TestCase):
         self.assertAlmostEqual(b.start, -6.2)
         self.assertEqual([(m.time, m.participants) for m in run.collisions], [(6.3, ("A", "B"))])
 
-    def test_a_recorder_without_alignment_falls_back_to_the_source_clock_and_says_so(self):
+    def test_a_recorder_without_alignment_is_not_replayed_and_the_replay_says_so(self):
         with tempfile.TemporaryDirectory() as tmp:
             run_dir = _make_run(Path(tmp))
             _align(run_dir, {"A": -6.5, "B": None})
             run = ReplayRun.load(run_dir)
+        self.assertEqual(run.clock, "t_global")  # the global time of the aligned recorders, never the simulator's
+        self.assertEqual([p.participant_id for p in run.participants], ["A"])
+        self.assertEqual(run.hidden, ["B"])
+        self.assertTrue(any("B has no global clock" in note for note in run.notes))
+        self.assertNotIn("B", run.local_events)
+
+    def test_no_aligned_recorder_falls_back_to_the_source_clock_and_says_so(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = _make_run(Path(tmp))
+            _align(run_dir, {"A": None, "B": None})
+            run = ReplayRun.load(run_dir)
         self.assertEqual(run.clock, "source")
         self.assertEqual(run.start, 100.0)
-        self.assertTrue(any("not every recorder is aligned" in note for note in run.notes))
         self.assertEqual([e.time for e in run.local_events["B"].events], [0.5, 6.5])
 
 

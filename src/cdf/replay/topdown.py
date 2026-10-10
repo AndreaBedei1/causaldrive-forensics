@@ -1,10 +1,13 @@
 """Headless top-down rendering of a replay, for keyframe export and visual QA (reconstruction only).
 
-``render_frame`` draws what ``ReplayRun`` holds at one instant of the replay clock (t_global when every
-recorder is aligned): the recorders at their recorded poses with their own footprints and a short trail;
-each recorder's radar tracks -- an anonymous track as a ghost box of the reconstruction's nominal size
-(solid while measured, dashed while only predicted), a track the fusion associated with a recorder as a
-dot linked to its observer, never a second body; the recorders' states of the paper's core view
+``render_frame`` draws what ``ReplayRun`` holds at one instant of the replay clock (t_global): the
+recorders at the poses of their pose source with their own footprints and a short trail; every anonymous
+road user of the fusion (U1, U2, ...) once, as a box of its fitted footprint at the fused position and
+heading (solid while measured, dashed while only predicted) with a dotted circle of twice its position
+uncertainty when that exceeds 0.3 m, and the radar points of the tracks it fuses as small dots in their
+observers' colours; a track the fusion associated with a recorder as a dot linked to its observer, never
+a second body; a track that is neither (none after the fusion) as a ghost box of the nominal size; the
+recorders' states of the paper's core view
 (CRITICAL_TTC red, CUT_IN orange, IN_EGO_PATH yellow, BRAKE), exact at event instants from the local
 graphs' START/END events; the reconstructed core events of the
 last half second and the collisions.  The driving lanes come from the public OpenDRIVE geometry of the
@@ -23,6 +26,8 @@ from ..reconstruction.models import PAPER_CORE_EVENTS
 from .model import DEFAULT_FOOTPRINT, HEADING_UNKNOWN, ReplayRun, rotate
 
 RECORDER_COLOURS = ("#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#8c564b", "#e377c2", "#17becf", "#bcbd22")
+ROAD_USER_COLOUR = "#3a3a3a"  # an anonymous road user belongs to no observer
+UNCERTAINTY_MIN_M = 0.3  # the 2-sigma circle is drawn only when it says something
 STATE_COLOURS = {"CRITICAL_TTC": "#d62728", "CUT_IN_FROM_LEFT": "#f4a100", "CUT_IN_FROM_RIGHT": "#f4a100",
                  "IN_EGO_PATH": "#e9c46a"}
 TRACK_HIGHLIGHTS = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT", "IN_EGO_PATH")
@@ -124,7 +129,7 @@ def states_at(run: ReplayRun, recorder: str, t: float) -> Tuple[List[str], Dict[
 
 def frame_items(run: ReplayRun, t: float) -> Dict[str, Any]:
     """What a frame at ``t`` shows, as plain data (also used by the QA checks)."""
-    recorders, ghosts, associated = [], [], []
+    recorders, ghosts, associated, members, entities = [], [], [], [], []
     for index, participant in enumerate(run.participants):
         pid = participant.participant_id
         pose = participant.trajectory.pose_at(run.start + t)  # trajectories run on the clock, t is replay time
@@ -138,17 +143,32 @@ def frame_items(run: ReplayRun, t: float) -> Dict[str, Any]:
             flags = [name for name in TRACK_HIGHLIGHTS if name in external.get(track.track_id, [])]
             item = {"observer": pid, "track": track, "point": point, "states": flags,
                     "colour": RECORDER_COLOURS[index % len(RECORDER_COLOURS)]}
-            if track.ghost:
+            if track.road_user is not None:
+                members.append(item)  # drawn through its road user's single box
+            elif track.ghost:
                 item["box"] = _box(point.centre, point.yaw, run.geometry.length, run.geometry.width)
                 ghosts.append(item)
             else:
                 associated.append(item)
-    return {"recorders": recorders, "ghosts": ghosts, "associated": associated}
+    poses = {r["id"]: r["pose"] for r in recorders}
+    for entity, state in run.entities_at(t):
+        own = [m for m in members if m["track"].road_user == entity.entity_id]
+        flags = [name for name in TRACK_HIGHLIGHTS if any(name in m["states"] for m in own)]
+        yaw = state.yaw
+        if yaw is None:  # no heading known: parallel to its first observer, as the CRITICAL_TTC model takes it
+            yaw = next((poses[o].yaw for o in state.observers if o in poses), 0.0)
+        entities.append({"entity": entity, "state": state, "yaw": yaw, "states": flags,
+                         "box": _box(state.centre, yaw, entity.length, entity.width),
+                         "observers": sorted({m["observer"] for m in own})})
+    return {"recorders": recorders, "ghosts": ghosts, "associated": associated, "members": members,
+            "entities": entities}
 
 
 def _extent(items: Dict[str, Any], minimum: float = 22.0, margin: float = 10.0) -> Tuple[float, float, float]:
-    xs = [r["pose"].x for r in items["recorders"]] + [g["point"].centre[0] for g in items["ghosts"]]
-    ys = [r["pose"].y for r in items["recorders"]] + [g["point"].centre[1] for g in items["ghosts"]]
+    xs = ([r["pose"].x for r in items["recorders"]] + [g["point"].centre[0] for g in items["ghosts"]]
+          + [e["state"].centre[0] for e in items.get("entities", [])])
+    ys = ([r["pose"].y for r in items["recorders"]] + [g["point"].centre[1] for g in items["ghosts"]]
+          + [e["state"].centre[1] for e in items.get("entities", [])])
     cx, cy = (min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0
     half = max(minimum, (max(xs) - min(xs)) / 2.0 + margin, (max(ys) - min(ys)) / 2.0 + margin)
     return cx, cy, half
@@ -161,7 +181,7 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.collections import PolyCollection
-    from matplotlib.patches import Polygon
+    from matplotlib.patches import Circle, Polygon
 
     items = frame_items(run, t)
     cx, cy, half = extent or _extent(items)
@@ -202,6 +222,29 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
                         arrowprops=dict(arrowstyle="->", color=colour, lw=1.0), zorder=4)
         ax.text(point.centre[0], point.centre[1] - 1.8, ghost["track"].name, ha="center", fontsize=7, color=colour,
                 zorder=8)
+    for item in items["entities"]:
+        entity, state = item["entity"], item["state"]
+        edge = STATE_COLOURS["CRITICAL_TTC"] if "CRITICAL_TTC" in item["states"] else (
+            STATE_COLOURS["CUT_IN_FROM_LEFT"] if any(name.startswith("CUT_IN") for name in item["states"])
+            else ROAD_USER_COLOUR)
+        ax.add_patch(Polygon(item["box"], closed=True, facecolor="#9a9a9a", alpha=0.35, edgecolor="none", zorder=3))
+        if "IN_EGO_PATH" in item["states"]:
+            ax.add_patch(Polygon(item["box"], closed=True, facecolor=STATE_COLOURS["IN_EGO_PATH"], alpha=0.35,
+                                 edgecolor="none", zorder=3))
+        ax.add_patch(Polygon(item["box"], closed=True, fill=False, edgecolor=edge,
+                             lw=3.0 if edge != ROAD_USER_COLOUR else 1.8, ls="-" if state.measured else "--", zorder=4))
+        if 2.0 * state.pos_std >= UNCERTAINTY_MIN_M:
+            ax.add_patch(Circle(state.centre, 2.0 * state.pos_std, fill=False, edgecolor=ROAD_USER_COLOUR, lw=0.8,
+                                ls=":", alpha=0.8, zorder=4))
+        if state.heading != HEADING_UNKNOWN and state.yaw is not None:
+            hx, hy = rotate(entity.length / 2.0 + 1.2, 0.0, state.yaw)
+            ax.annotate("", xy=(state.centre[0] + hx, state.centre[1] + hy), xytext=state.centre,
+                        arrowprops=dict(arrowstyle="->", color=ROAD_USER_COLOUR, lw=1.2), zorder=4)
+        ax.text(state.centre[0], state.centre[1], entity.entity_id, ha="center", va="center", fontsize=10,
+                fontweight="bold", color=ROAD_USER_COLOUR, zorder=8)
+    for item in items["members"]:
+        ax.plot([item["point"].position[0]], [item["point"].position[1]], marker="o", ms=3.5, color=item["colour"],
+                markeredgecolor="white", markeredgewidth=0.5, alpha=0.9 if item["point"].measured else 0.4, zorder=7)
     for item in items["associated"]:
         point, colour = item["point"], item["colour"]
         observer = next(r["pose"] for r in items["recorders"] if r["id"] == item["observer"])
@@ -234,12 +277,24 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
     for recorder in items["recorders"]:
         pid = recorder["id"]
         states = [name for name in recorder["states"] if name == "BRAKE"]
-        tracked = [(g["track"].track_id, g["states"]) for g in items["ghosts"] + items["associated"]
+        tracked = [(g["track"].track_id, g["states"]) for g in items["ghosts"] + items["associated"] + items["members"]
                    if g["observer"] == pid and g["states"]]
         lines.append(("{0}: {1}".format(pid, ", ".join(states) or "-"), recorder["colour"], "bold"))
         for track_id, states_of in tracked:
             lines.append(("   {0}: {1}".format(run.subject_name(pid, track_id), ", ".join(states_of)),
                           STATE_COLOURS["CRITICAL_TTC"] if "CRITICAL_TTC" in states_of else "black", "normal"))
+    if items["entities"]:
+        lines.append(("", "black", "normal"))
+        lines.append(("anonymous road users (recorded nothing):", ROAD_USER_COLOUR, "bold"))
+        for item in items["entities"]:
+            entity, state = item["entity"], item["state"]
+            lines.append(("  {0} = {1}".format(entity.entity_id, entity.sources), ROAD_USER_COLOUR, "normal"))
+            lines.append(("     {0} x {1:.1f} m, {2:.1f} m/s, +-{3:.2f} m ({4}{5})".format(
+                "{0:.1f}".format(entity.length), entity.width, state.speed, state.pos_std,
+                state.method.replace("covariance_intersection", "CI").replace("box_fit", "box fit"),
+                "" if state.measured else ", predicted"), ROAD_USER_COLOUR, "normal"))
+    if run.hidden:
+        lines.append(("not on the global timeline: " + ", ".join(run.hidden), "#555555", "normal"))
     recent = [event for event in run.all_events()
               if t - EVENT_WINDOW_S < event.time <= t + 1e-6 and event.event_type in PAPER_CORE_EVENTS]
     if recent:

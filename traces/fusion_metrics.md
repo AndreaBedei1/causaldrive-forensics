@@ -1,6 +1,6 @@
 # Road-user fusion against ground truth (campaign)
 
-Privileged evaluation: ground truth is read only here, after the reconstruction was written. Provenance: commit `9ad719fa3d5a98a95eb0baae4f068cd3b90582bb` (uncommitted changes), code `e07e0689bf362f80`, configuration `87109d249a009c15`, 2026-10-10T21:24:33Z.
+Privileged evaluation: ground truth is read only here, after the reconstruction was written. Provenance: commit `c79b1e627cbfaa5c042749291876597e922509f7` (uncommitted changes), code `1c410466c184df92`, configuration `87109d249a009c15`, 2026-10-10T21:47:54Z.
 
 ## Identity decisions (tracks of aligned recorders)
 
@@ -19,13 +19,13 @@ Merges over pairs of anonymous tracks: correct 15, false 0, missed 10. Anonymous
 | S06/run_0_a_front_pushed | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S06/run_0_b_rear_first | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S07/run_0_crash | 1 correct link, 1 missed link | 0/0/0 | 1 | 1 | C->U1 | 0.278 | 0.214 |
-| S08/run_0_crash | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | B->U1 | 0.337 | 0.896 |
+| S08/run_0_crash | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | B->U1 | 0.337 | 0.897 |
 | S09/run_0_merge_conflict | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S10/run_0_rolls_through | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S12/run_0_near_simultaneous | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
-| S15/run_0_deflected_into_c | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | A->U1 | 1.468 | 1.408 |
-| S16/run_0_consequential | 6 correct link, 1 missed link | 0/0/0 | 1 | 1 | C->U1 | 3.303 | 3.306 |
-| S17/run_0_crash | 3 anonymous, 2 correct link | 3/0/0 | 1 | 0 | C->U1 | 0.106 | 0.689 |
+| S15/run_0_deflected_into_c | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | A->U1 | 1.468 | 1.409 |
+| S16/run_0_consequential | 6 correct link, 1 missed link | 0/0/0 | 1 | 1 | C->U1 | 3.303 | 3.307 |
+| S17/run_0_crash | 3 anonymous, 2 correct link | 3/0/0 | 1 | 0 | C->U1 | 0.106 | 0.690 |
 | S18/run_0_abreast | 5 anonymous, 2 correct link | 2/0/2 | 3 | 0 | C->U1/U2, D->U3 | 0.401 | 0.616 |
 | S18/run_0_passing | 7 anonymous, 2 correct link | 6/0/3 | 3 | 0 | C->U1/U2, D->U3 | 0.411 | 0.525 |
 | S18/run_0_platoon | 7 anonymous, 2 correct link | 4/0/5 | 4 | 0 | C->U3/U4, D->U1/U2 | 0.616 | 0.522 |
@@ -41,7 +41,7 @@ Against the entity's majority identity, at the 1062 instants every source track 
 | heading_error_deg | 878 | 0.534 | 0.253 | 1.046 | 0.793 | 1.798 | 2.799 | 176.769 |
 | length_error_m | 15 | 0.192 | 0.139 | 0.192 | 0.053 | 0.328 | 0.688 | 1.315 |
 | normalised_centre_error | 1062 | 0.829 | 0.479 | 1.228 | 0.749 | 1.846 | 2.282 | 16.108 |
-| single_track_nominal_centre_error_m | 1539 | 0.572 | 0.306 | 1.083 | 0.777 | 3.372 | 3.528 | 5.283 |
+| single_track_nominal_centre_error_m | 1539 | 0.571 | 0.306 | 1.082 | 0.776 | 3.372 | 3.528 | 5.283 |
 | speed_error_mps | 1062 | 0.049 | 0.023 | 0.097 | 0.074 | 0.166 | 0.270 | 4.472 |
 | velocity_error_mps | 1062 | 0.119 | 0.064 | 0.233 | 0.169 | 0.400 | 0.685 | 10.357 |
 | width_error_m | 15 | 0.263 | 0.107 | 0.263 | 0.156 | 0.263 | 0.263 | 0.263 |

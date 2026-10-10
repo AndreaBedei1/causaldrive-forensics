@@ -188,8 +188,70 @@ cars 1.4 m apart (S18 abreast, A:track_001 purity 0.73) also yields a spurious C
 conservative in the bulk with a heavier tail.  Box dimensions mostly come from the prior.  An observed alignment
 is not propagated through a matched collision between two recorders that are both unaligned (no such case).
 
-**Commit.**  `phase1: ...` (SHA recorded in the phase 2 section).
+**Commit.**  `c79b1e627cbfaa5c042749291876597e922509f7` -- `phase1: road users in the common frame of the
+recorders' pose streams; S18 negative case`.
 
 **Gate.**  PASS: S17 / S16 / S08 correct; the negative case passes (0 false merges in three configurations);
 no ground truth at runtime (boundary, poisoned-copy and renamed-recorder tests); tests green on both Pythons;
 metrics produced with provenance.
+
+## Phase 2 -- definitive replay
+
+**Objective.**  A replay built only from the reconstruction, on t_global, with recorders at the poses of their
+pose source, one body per anonymous road user with its uncertainty, no privileged input, audited visually.
+
+**Implementation.**
+- `cdf.replay.model`: GLOBAL_CLOCK whenever a recorder is aligned (a recorder without a global clock is not
+  replayed: `ReplayRun.hidden`, a note); SOURCE_CLOCK only when none is.  `ReplayRun.load(pose_factory=...)`
+  draws each recorder from its pose source (`Participant.trajectory`; the recorded stream kept as
+  `Participant.recorded` for the local headings); a track sample is placed by its vehicle-frame measurement
+  from its observer's pose.  `EntityPath` / `EntityState` / `load_entities` read `global/anonymous_entities.json`:
+  one road user with its fitted footprint, fused states, uncertainty, method and observers;
+  `TrackPath.road_user` marks the tracks it fuses (no ghost of their own), `subject_name` gives
+  `track_001 (U1)`, `entities_at(t)`.
+- `cdf.replay.topdown`: one grey box per road user (solid measured, dashed predicted), a dotted circle of
+  twice its position uncertainty when that exceeds 0.3 m, the source tracks' radar points in their observers'
+  colours, its states (CRITICAL_TTC / CUT_IN / IN_EGO_PATH of any observer on its tracks), a panel line
+  `U1 = A:track_001 + B:track_002 + B:track_003` with footprint, speed, +-sigma and method, and the recorders not
+  on the timeline.
+- CARLA viewer (`scripts/replay_run.py`): the same road users as wireframe boxes with labels (sources,
+  +-sigma, observers), member tracks as dots, panels `sees road users: U1 (track_001)`; `--port` to choose
+  the server.  Smoke-tested headless (SDL dummy driver) on the private engine (port 3000) for S17, S18
+  platoon and S07: road users drawn with labels, no error.
+- `cdf.replay.qa`: road-user speed / jump / spin, two road users overlapping, a road user on a recorder's body.
+- Visual audit `visual_audit_phase2` (17 runs, 151 keyframes).
+
+**Assumptions.**  The drawn footprint is the fitted one, else the prior; heading unknown -> parallel to the
+first observer (no arrow), as the CRITICAL_TTC model takes it; the entity grid is the 10 Hz global grid, so a
+road user appears up to 0.1 s after its first radar sample.
+
+**Tests.**  422 pass on Python 3.8 and 3.14.  New / updated: S17 shows the non-recorder once (U1) while both
+recorders track it; the tracks are drawn as the fusion decided (no ghost of their own); the road users come from
+the reconstruction, never from the evaluation (poisoned fusion metrics and LLM oracle naming C); a pose source
+moves the recorders and what they observe together (constant 2 m / 1 m offset); the poisoned-copy comparison
+now covers road users, links and hidden recorders; an unaligned recorder is not replayed and the replay says
+so; the source clock only when no recorder is aligned; the headless export of S17 flags nothing; the viewer's
+only configuration read is the simulator connection.  The anti-leak tests poison ground truth (states with
+actor ids, collisions, triggers, counterfactuals, its metadata), the run's metadata, a scenario YAML beside the
+run, the evaluation (true identities of tracks and of U1), the LLM oracle identities and a vehicle folder with
+no recording; an audit hook checks every file opened.
+
+**Results.**  Visual audit: 10 PASS, 7 WARN, 0 FAIL (phase 0: 7 PASS, 7 WARN over 14 runs).  Resolved: S17,
+S10; S08, S15, S16 without ghosts of recorders.  Remaining WARNs, all documented limitations: identity switches
+at contacts (S08, S15), an unaligned recorder (S07), a post-contact fragment and an episode open at TRACK_LOST
+(S16), fragmentation and two spurious CUT_IN / EGO_PATH_ENTRY caused by A's radar clustering two cars 1.4 m
+apart (S18 abreast, passing).  The pose-based placement of the tracks agrees with the local-frame one to the
+millimetre (fusion metrics' single-track baseline 0.5714 vs 0.5715 m median).
+
+**Regressions.**  None in the reconstruction (unchanged).  Replay behaviour changed on purpose: S07 is now on
+t_global without C (phase 0: source clock with C).
+
+**Limitations.**  Uncertainty is shown for position only (heading and footprint spreads are in the files, not
+drawn); with a perturbed pose source the recorded headings still orient the track velocities in the vehicle
+frame (exact odometry assumption); an unaligned recorder cannot be shown at all.
+
+**Commit.**  Phase 1: `c79b1e627cbfaa5c042749291876597e922509f7`.  Phase 2: `phase2: ...` (SHA recorded in the
+phase 3 section).
+
+**Gate.**  PASS: t_global only; poses from the pose source; one body per road user with its uncertainty;
+anti-leak tests green; visual audit of every run with no FAIL; tests green on both Pythons.

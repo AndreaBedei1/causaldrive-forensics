@@ -1,8 +1,9 @@
 """Automatic visual-QA checks of a reconstructed run (reconstruction only, no ground truth).
 
-Each check looks at what the replay shows (``ReplayRun``: the recorders' recorded poses, their tracks as
-drawn, the reconstructed events and collisions) and flags what a reviewer should look at: implausible
-track motion, boxes that jump or spin, duplicated ghosts, events outside a track's lifetime, a
+Each check looks at what the replay shows (``ReplayRun``: the recorders' poses, their tracks and the
+anonymous road users as drawn, the reconstructed events and collisions) and flags what a reviewer should
+look at: implausible track or road-user motion, boxes that jump or spin, two drawn bodies in one place (two
+road users, or a road user on a recorder's own body), events outside a track's lifetime, a
 CRITICAL_TTC episode that ends just before the collision of its own pair or starts just after it, a
 collision whose recorders are not in contact, a cut-in or a path entry the drawn geometry does not show.
 A flag is a reason to look, not a verdict: the visual audit decides.
@@ -14,7 +15,7 @@ import math
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .model import DEFAULT_FOOTPRINT, HEADING_FROM_VELOCITY, ReplayRun, TrackPath, rotate
+from .model import DEFAULT_FOOTPRINT, HEADING_FROM_VELOCITY, EntityPath, ReplayRun, TrackPath, rotate
 from .topdown import _box, _footprint_world
 
 MAX_SPEED_MPS = 70.0  # no road vehicle of the campaign: a faster track or recorder is an artefact
@@ -89,6 +90,29 @@ def _track_motion(run: ReplayRun, track: TrackPath) -> List[Flag]:
     return flags
 
 
+def _entity_motion(run: ReplayRun, entity: EntityPath) -> List[Flag]:
+    """A road user's drawn box: faster than any vehicle, a jump beyond its own speed, a sudden turn."""
+    flags = []
+    for a, b in zip(entity.states, entity.states[1:]):
+        dt = b.time - a.time
+        if dt <= 1e-6 or dt > entity.max_gap + 1e-6:
+            continue
+        moved = math.hypot(b.centre[0] - a.centre[0], b.centre[1] - a.centre[1])
+        if moved / dt > MAX_SPEED_MPS:
+            flags.append(_flag(run, "impossible_road_user_speed", b.time, entity.entity_id,
+                               "{0:.1f} m/s between states".format(moved / dt)))
+        if moved - 0.5 * (a.speed + b.speed) * dt > BOX_JUMP_M:
+            flags.append(_flag(run, "road_user_box_jump", b.time, entity.entity_id,
+                               "box moved {0:.1f} m at {1:.1f} m/s".format(moved, 0.5 * (a.speed + b.speed))))
+        if (a.heading == HEADING_FROM_VELOCITY and b.heading == HEADING_FROM_VELOCITY
+                and a.yaw is not None and b.yaw is not None):
+            spin = abs((b.yaw - a.yaw + 180.0) % 360.0 - 180.0)
+            if spin > BOX_SPIN_DEG:
+                flags.append(_flag(run, "road_user_box_spin", b.time, entity.entity_id,
+                                   "heading turned {0:.0f} deg".format(spin)))
+    return flags
+
+
 def _recorder_motion(run: ReplayRun) -> List[Flag]:
     flags = []
     for participant in run.participants:
@@ -110,6 +134,41 @@ def _ghosts_at(run: ReplayRun, t: float) -> List[Tuple[str, TrackPath, Any]]:
                 if point is not None:
                     out.append((participant.participant_id, track, point))
     return out
+
+
+def _bodies_at(run: ReplayRun, t: float) -> List[Tuple[str, str, List[Tuple[float, float]]]]:
+    """(kind, name, footprint) of every body drawn at ``t``: recorders and anonymous road users."""
+    out = [("recorder", p.participant_id, _footprint_world(p.trajectory.pose_at(run.start + t), p.footprint))
+           for p in run.participants]
+    for entity, state in run.entities_at(t):
+        yaw = state.yaw if state.yaw is not None else 0.0
+        out.append(("road_user", entity.entity_id, _box(state.centre, yaw, entity.length, entity.width)))
+    return out
+
+
+def _overlapping_bodies(run: ReplayRun) -> List[Flag]:
+    """Two drawn bodies in one place: two road users (one body fused twice) or a road user on a recorder's
+    own footprint (a recorder seen as an anonymous road user).  Contacts at collisions excepted."""
+    flags, seen = [], set()
+    steps = int(run.duration / SAMPLE_STEP_S) + 1
+    for k in range(steps):
+        t = k * SAMPLE_STEP_S
+        if any(abs(mark.time - t) <= 1.0 for mark in run.collisions):
+            continue
+        bodies = _bodies_at(run, t)
+        for i in range(len(bodies)):
+            for j in range(i + 1, len(bodies)):
+                (ka, na, pa), (kb, nb, pb) = bodies[i], bodies[j]
+                if "road_user" not in (ka, kb):
+                    continue
+                if _polygon_distance(pa, pb) > 0.0:
+                    continue
+                check = "road_users_overlap" if ka == kb else "road_user_on_recorder"
+                key = (check, na, nb)
+                if key not in seen:
+                    seen.add(key)
+                    flags.append(_flag(run, check, t, "{0} / {1}".format(na, nb), "drawn bodies overlap from here"))
+    return flags
 
 
 def _duplicates(run: ReplayRun) -> List[Flag]:
@@ -156,6 +215,13 @@ def _partner_tracks(run: ReplayRun, recorder: str, mark: Any) -> List[str]:
     body = _footprint_world(participant.trajectory.pose_at(run.start + mark.time), participant.footprint)
     out = []
     for track in run.tracks.get(recorder, []):
+        if track.road_user is not None:
+            entity = run.entity(track.road_user)
+            state = entity.state_at(mark.time) if entity is not None else None
+            if state is not None and _polygon_distance(body, _box(state.centre, state.yaw or 0.0, entity.length,
+                                                                  entity.width)) <= CONTACT_M:
+                out.append(track.track_id)
+            continue
         if not track.ghost:
             if track.entity in mark.participants and track.entity != recorder:
                 out.append(track.track_id)
@@ -248,8 +314,11 @@ def check_run(run: ReplayRun) -> List[Flag]:
     flags: List[Flag] = []
     for track in run.all_tracks():
         flags += _track_motion(run, track)
+    for entity in run.entities:
+        flags += _entity_motion(run, entity)
     flags += _recorder_motion(run)
     flags += _duplicates(run)
+    flags += _overlapping_bodies(run)
     flags += _events_outside_lifetime(run)
     flags += _critical_around_collisions(run)
     flags += _collision_geometry(run)

@@ -15,14 +15,17 @@ displayed, never derived here; nothing is written anywhere.
 The viewer shows what the reconstruction knows, not the simulator's ground
 truth: only the recorders (vehicles with their own ego.jsonl) are replayed as
 vehicles, and the map is recognised from their recorded positions and the
-public OpenDRIVE files (``--map`` overrides it).  What each recorder's radar
-tracks is drawn in its colour: an ANONYMOUS track (no recorder identified with
-it) as a ghost, a wireframe box of the reconstruction's nominal target size
-(not a measured body) with an arrow along its estimated motion, solid while
-measured, dashed while only PREDICTED, gone at its TRACK_LOST; a track
-associated with a recorder as a radar dot, a line from its observer and
-``A:track_002 → B``, never a second body.  Tracks of different recorders are
-never merged.
+public OpenDRIVE files (``--map`` overrides it).  The clock is the
+reconstruction's global time; a recorder it could not align is not replayed.
+Every anonymous road user of the fusion (U1, U2, ...: a road user that recorded
+nothing) is drawn once, in grey: a wireframe box of its fitted footprint at the
+fused position and heading with an arrow along its motion, solid while measured,
+dashed while only PREDICTED, labelled with the tracks it fuses and its position
+uncertainty; each of those tracks is a radar dot in its observer's colour.  A
+track associated with a recorder is a radar dot, a line from its observer and
+``A:track_002 → B``, never a second body.  A track that is neither (none after
+the fusion) is drawn as before: a ghost box of the nominal size in its
+observer's colour.
 
 Controls: SPACE play/pause, R restart, LEFT/RIGHT seek 0.5 s (with SHIFT
 0.05 s), N/P next/previous reconstructed event, 1-4 speed 0.25/0.5/1/2x,
@@ -47,10 +50,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.common.config import load_run_config  # noqa: E402
-from cdf.replay.model import (BOX_EDGES, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT, SPEEDS,  # noqa: E402
-                              FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath, TrackPoint, Vector,
-                              box_corners, choose_map, follow_camera, overview_camera, project, project_segment,
-                              rotate)
+from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT,  # noqa: E402
+                              SPEEDS, EntityPath, EntityState, FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath,
+                              TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
+                              project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
@@ -59,6 +62,7 @@ LOGGER = logging.getLogger("replay")
 ROLE_PREFIX = "replay_"
 PALETTE = [(230, 57, 70), (52, 120, 246), (46, 184, 92), (245, 158, 11), (168, 85, 247),
            (20, 184, 166), (236, 72, 153), (140, 140, 140)]
+ROAD_USER_RGB = (225, 225, 225)  # an anonymous road user belongs to no observer
 CAMERA_MODES = ("overview", "follow", "free")
 SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
@@ -68,8 +72,9 @@ TRACK_DOT_HEIGHT_M = 0.8  # radar dots above the road (tracks are planar)
 OPENDRIVE_DIR = Path("CarlaUE4") / "Content" / "Carla" / "Maps" / "OpenDrive"
 HELP = ("SPACE play/pause   R restart   ←/→ ±0.5 s (SHIFT ±0.05 s)   N/P next/prev event   "
         "1-4 speed   C camera   TAB recorder   T tracks   G ghost boxes/dots   H help   ESC exit")
-LEGEND = ("ghost box = ANONYMOUS radar track (nominal {0:.1f} x {1:.1f} x {2:.1f} m, not a measured body): "
-          "solid measured, dashed PREDICTED   dot + line = track associated with a recorder")
+LEGEND = ("grey box = anonymous road user U1, U2, ... (fused; fitted footprint, about {0:.1f} x {1:.1f} x {2:.1f} m "
+          "nominal): solid measured, dashed PREDICTED   dot = a radar track   dot + line = track associated with "
+          "a recorder")
 FREE_HELP = "free camera: W/A/S/D/Q/E move (SHIFT faster), drag to look, wheel to move"
 
 
@@ -92,6 +97,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--map", default=None,
                         help="CARLA map; default: recognised from the recorders' recorded positions")
     parser.add_argument("--no-autostart", action="store_true", help="do not start a local CARLA process")
+    parser.add_argument("--port", type=int, default=None,
+                        help="CARLA RPC port (default: simulation.port of configs/default.yaml)")
     parser.add_argument("--keep-server", action="store_true", help="leave a CARLA server this viewer started running")
     parser.add_argument("--exit-after", type=float, default=None, help=argparse.SUPPRESS)  # smoke tests
     parser.add_argument("--export", default=None, metavar="DIR",
@@ -531,6 +538,10 @@ class ReplayApp:
         if anonymous:
             names = ", ".join(track.name + ("" if state.measured else " (PREDICTED)") for track, state in anonymous)
             lines.append(("anonymous tracks: " + names, (200, 200, 255), self.font_small))
+        seen = sorted({"{0} ({1})".format(track.road_user, track.track_id) for track in self.run.tracks.get(pid, [])
+                       if track.road_user is not None and track.state_at(t) is not None})
+        if seen:
+            lines.append(("sees road users: " + ", ".join(seen), (220, 220, 220), self.font_small))
         for event in reversed(self.run.recent_events(pid, t, EVENT_WINDOW_S)):
             subject = self.run.subject_name(pid, event.subject)
             lines.append(("» " + event.event_type + (" → " + subject if subject else ""),
@@ -604,8 +615,9 @@ class ReplayApp:
                     continue
                 (ghosts if track.ghost and self.show_ghosts else dots).append((track, state, observer, index))
         size = self.run.geometry
-        boxes = []
-        if ghosts:
+        boxes, users = [], []
+        entities = self.run.entities_at(t) if self.show_ghosts else []
+        if ghosts or entities:
             self.overlay.fill((0, 0, 0, 0))
             for track, state, observer, index in ghosts:
                 z = self._ground_z(state.centre[0], state.centre[1], observer.z)
@@ -615,10 +627,47 @@ class ReplayApp:
                     alpha = 70 if state.measured else 35
                     self.pygame.draw.polygon(self.overlay, self.colors[track.recorder] + (alpha,), footprint)
                 boxes.append((track, state, corners, index))
+            for entity, state in entities:
+                near = next((poses[o] for o in state.observers if o in poses), next(iter(poses.values()), None))
+                yaw = state.yaw if state.yaw is not None else (near.yaw if near is not None else 0.0)
+                z = self._ground_z(state.centre[0], state.centre[1], near.z if near is not None else 0.0)
+                corners = box_corners(state.centre, yaw, entity.length, entity.width, z, size.height)
+                footprint = [self._project(corner) for corner in corners[:4]]
+                if all(point is not None for point in footprint):
+                    self.pygame.draw.polygon(self.overlay, ROAD_USER_RGB + (80 if state.measured else 40,), footprint)
+                users.append((entity, state, corners, yaw))
             self.screen.blit(self.overlay, (0, 0))
         labels = [self._draw_ghost(track, state, corners, index) for track, state, corners, index in boxes]
+        labels += [self._draw_road_user(entity, state, corners, yaw) for entity, state, corners, yaw in users]
         labels += [self._draw_track_dot(track, state, observer, index) for track, state, observer, index in dots]
         return [label for label in labels if label is not None]
+
+    def _draw_road_user(self, entity: EntityPath, state: EntityState, corners: List[Vector], yaw: float) -> Any:
+        """An anonymous road user of the fusion: its fitted box, an arrow along its motion (none while its
+        heading is unknown), solid while measured, dashed while only predicted, and a label naming the
+        tracks it fuses and its position uncertainty.  Returns the deferred label drawing."""
+        dashed = not state.measured
+        for i, j in BOX_EDGES:
+            self._line3d(corners[i], corners[j], ROAD_USER_RGB, 2, dashed)
+        roof = corners[4][2]
+        if state.heading != HEADING_UNKNOWN and state.yaw is not None:
+            reach = entity.length / 2.0 + 1.5
+            fx, fy = rotate(reach, 0.0, yaw)
+            tip = (state.centre[0] + fx, state.centre[1] + fy, roof)
+            self._line3d((state.centre[0], state.centre[1], roof), tip, ROAD_USER_RGB, 3, dashed)
+            for side in (-1.0, 1.0):
+                bx, by = rotate(-1.0, 0.6 * side, yaw)
+                self._line3d(tip, (tip[0] + bx, tip[1] + by, roof), ROAD_USER_RGB, 3, dashed)
+        anchor = self._project((state.centre[0], state.centre[1], roof + 0.3))
+        if anchor is None:
+            return None
+        detail = ["+-{0:.2f} m".format(state.pos_std), "seen by " + ", ".join(state.observers)]
+        if not state.measured:
+            detail.append("PREDICTED")
+        if state.heading == HEADING_HELD:
+            detail.append("heading held")
+        lines = [entity.label, entity.sources, "  ".join(detail)]
+        return lambda: self._label(anchor, lines, ROAD_USER_RGB, len(self.ids), above=True)
 
     def _track_lines(self, track: TrackPath, state: TrackPoint) -> List[str]:
         """``A:track_001 / ANONYMOUS`` and ``[seen by A]`` with what the sample is (PREDICTED, heading)."""
@@ -664,7 +713,7 @@ class ReplayApp:
         x, y = state.position
         point = (x, y, self._ground_z(x, y, observer.z) + TRACK_DOT_HEIGHT_M)
         uv = self._project(point)
-        if not track.ghost:
+        if track.status == ASSOCIATED:
             self._line3d((observer.x, observer.y, observer.z + 1.0), point, color, 1)
         if uv is None:
             return None
@@ -873,11 +922,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     run = ReplayRun.load(run_dir)
     for note in run.notes:
         LOGGER.info("note: %s", note)
-    LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous tracks: %s", run.name,
+    LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous road users: %s%s", run.name,
                 ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()),
-                ", ".join(track.name for track in run.ghost_tracks()) or "none")
+                "; ".join("{0} = {1}".format(e.entity_id, e.sources) for e in run.entities) or "none",
+                "" if not run.ghost_tracks() else "; unfused tracks: " + ", ".join(t.name for t in run.ghost_tracks()))
 
-    cfg = load_run_config()  # configs/default.yaml: only the simulator connection (no scenario)
+    # configs/default.yaml: only the simulator connection (no scenario).
+    cfg = load_run_config(overrides=[] if args.port is None else ["simulation.port={0}".format(args.port)])
     session = session_from_config(cfg, autostart=not args.no_autostart)
     app = None
     try:

@@ -55,22 +55,28 @@ class S17ExportTests(unittest.TestCase):
         _, tracks_before = states_at(self.replay, "A", self.at(-0.05))
         self.assertIn("CRITICAL_TTC", tracks_before.get("track_002", []))
 
-    def test_a_frame_draws_the_recorders_and_the_anonymous_tracks(self):
+    def test_a_frame_draws_the_recorders_and_the_anonymous_road_user_once(self):
         items = frame_items(self.replay, self.at(-2.35))
         self.assertEqual([r["id"] for r in items["recorders"]], ["A", "B"])
-        self.assertEqual(sorted(g["track"].name for g in items["ghosts"]), ["A:track_001", "B:track_002"])
+        self.assertEqual(items["ghosts"], [])
+        self.assertEqual([e["entity"].entity_id for e in items["entities"]], ["U1"])
+        self.assertEqual(sorted(m["track"].name for m in items["members"]), ["A:track_001", "B:track_002"])
         self.assertEqual(sorted(a["track"].name for a in items["associated"]), ["A:track_002", "B:track_001"])
-        ghost = next(g for g in items["ghosts"] if g["track"].name == "A:track_001")
-        self.assertIn("CRITICAL_TTC", ghost["states"])
+        u1 = items["entities"][0]
+        self.assertIn("CRITICAL_TTC", u1["states"])  # A's CRITICAL_TTC on its track of U1
+        self.assertEqual(u1["observers"], ["A", "B"])
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "frame.png"
             render_frame(self.replay, self.at(0.0), path, label="test")
             self.assertGreater(path.stat().st_size, 10000)
 
-    def test_s17_flags_the_duplicated_ghosts_and_nothing_semantic(self):
+    def test_s17_flags_nothing(self):
         flags = check_run(self.replay)
         checks = {flag.check for flag in flags}
-        self.assertIn("duplicate_ghost_across_observers", checks)  # C seen by A and by B: PHASE 1
+        # C, seen by A and by B, is one road user: no duplicated ghost any more (phase 0 flagged three).
+        for duplicate in ("duplicate_ghost_across_observers", "duplicate_ghost_same_observer", "road_users_overlap",
+                          "road_user_on_recorder", "road_user_box_jump", "road_user_box_spin"):
+            self.assertNotIn(duplicate, checks)
         for semantic in ("critical_end_before_own_collision", "critical_start_after_own_collision",
                          "collision_without_contact", "cut_in_without_lateral_approach", "path_entry_outside_corridor",
                          "event_outside_track_lifetime", "impossible_track_speed", "impossible_recorder_speed"):

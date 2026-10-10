@@ -2,31 +2,42 @@
 
 Pure Python (no CARLA, no pygame) and read-only; used by scripts/replay_run.py.
 
-Timeline.  The clock is the reconstruction's global time whenever the
-reconstruction aligned every recorder (``reconstruction/global/alignment.json``,
-collision-anchored):
+Timeline.  The clock is the reconstruction's global time (``reconstruction/global/alignment.json``:
+matched collisions, else a recorder's observed trajectory):
 
     t_global = t_local + offset_to_global(X),   t_local = source_timestamp - origin(X)
 
-for every sample of recorder X (its ego poses, events, tracks and perceived
+for every sample of recorder X (its poses, events, tracks and perceived
 states), where ``origin(X)`` is X's own clock origin as its local graph records
-it.  Recorders are then synchronised by the reconstruction's alignment, not by
-the simulator's shared clock.  When a recorder is not aligned the viewer falls
-back to the recorded source timestamps of every recorder (one simulator clock in
-a CARLA run) and says so.  Replay time runs from 0 at the earliest recorded
-sample; ``display_time`` gives t_global (or the source-clock time).  The poses
-themselves are the recorders' own recorded ego stream (``ego.jsonl``, CARLA
-world frame): no ground truth, but not an estimated pose either.
+it.  Recorders are synchronised by the reconstruction's alignment, never by the
+simulator's shared clock.  A recorder the reconstruction could not align has no
+place on that timeline: it is not replayed, and the replay says so.  Only when no
+recorder is aligned does the viewer fall back to the recorded source timestamps
+of every recorder (one simulator clock in a CARLA run), and says so.  Replay time
+runs from 0 at the earliest sample shown; ``display_time`` gives t_global (or
+the source-clock time).
+
+Poses.  A recorder is drawn at the poses of its pose source -- by default its own
+recorded stream (``ego.jsonl``, the GNSS-like pose, exact in CARLA); the robustness
+study passes a perturbed source (``ReplayRun.load(pose_factory=...)``), as the
+reconstruction does.  A radar track is drawn where its vehicle-frame measurement
+(``longitudinal_m``, ``lateral_m``) puts it from its observer's pose.
+
+Road users.  The fusion's anonymous road users (``global/anonymous_entities.json``:
+U1, U2, ...) are drawn once each: one box of the fitted footprint at the fused
+position and heading, with the position uncertainty, labelled with the tracks
+it fuses and their observers; those tracks are no ghosts of their own.  A track
+the fusion identified with a recorder is that recorder's replayed vehicle.
 
 Inputs.  The viewer shows what the reconstruction knows, not what the
 simulator knew.  It reads the recorders' own files (``vehicles/<id>/ego.jsonl``,
 ``vehicles/<id>/metadata.json``: blueprint and own footprint), the
 reconstruction outputs (``reconstruction/<id>/``, ``reconstruction/global/``
-graph and associations) and the global reconstruction parameters
+graph, associations and road users) and the global reconstruction parameters
 (``configs/reconstruction.yaml``).  It never reads ground truth, the run's own
 ``metadata.json``, the scenario configuration or the privileged evaluation: a
-road user that recorded nothing exists here only as the anonymous radar tracks
-of the recorders that saw it, each drawn separately in its observer's frame.
+road user that recorded nothing exists here only as what the recorders' radars
+saw of it, under an anonymous name.
 """
 
 from __future__ import annotations
@@ -36,7 +47,7 @@ import math
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..reconstruction.config import ReconstructionConfig, load_config
 from ..reconstruction.conflict import HEADING_MIN_SPEED_MPS, OBLIQUE_VIEW_DEG
@@ -457,6 +468,7 @@ class TrackPath:
     status: str = ANONYMOUS
     entity: Optional[str] = None  # the associated recorder (ASSOCIATED only)
     max_gap: float = 0.5
+    road_user: Optional[str] = None  # the anonymous road user (U1, ...) the fusion made of it, if any
     times: List[float] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -470,12 +482,15 @@ class TrackPath:
 
     @property
     def ghost(self) -> bool:
-        """Drawn as a body of its own: no recorder was identified with it.  An associated
-        track is the associated recorder's replayed vehicle and gets no second body."""
-        return self.status != ASSOCIATED
+        """Drawn as a body of its own: no recorder was identified with it and it belongs to no fused
+        road user.  An associated track is the associated recorder's replayed vehicle, and a track of a
+        road user is drawn through that road user's single box: neither gets a second body."""
+        return self.status != ASSOCIATED and self.road_user is None
 
     @property
     def label(self) -> str:
+        if self.road_user is not None:
+            return "{0} → {1}".format(self.name, self.road_user)
         if self.ghost:
             return "{0} / {1}".format(self.name, ANONYMOUS)
         return "{0} → {1}".format(self.name, self.entity)
@@ -510,16 +525,20 @@ class TrackPath:
 
 def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin: Pose, clock_origin: float,
                 run_start: float, footprint: Optional[EgoFootprint] = None, geometry: Optional[GhostGeometry] = None,
-                statuses: Optional[Mapping[Tuple[str, str], Tuple[str, Optional[str]]]] = None) -> List[TrackPath]:
-    """A recorder's tracks from its ``local_tracks.jsonl``, each sample through the recorder's own frame.
+                statuses: Optional[Mapping[Tuple[str, str], Tuple[str, Optional[str]]]] = None,
+                recorded: Optional[Trajectory] = None,
+                road_users: Optional[Mapping[Tuple[str, str], str]] = None) -> List[TrackPath]:
+    """A recorder's tracks from its ``local_tracks.jsonl``, each sample from its observer's pose.
 
-    The estimate (``x_m``, ``y_m``) is in the recorder's local frame (origin =
-    its first recorded pose); its vehicle-frame offsets (``longitudinal_m``,
-    ``lateral_m``) turn with the recorder's recorded yaw at the sample.  The box
-    heading is ``atan2(vy, vx)`` of the estimated velocity when the speed fixes
-    it (``track_heading``), else the track's last reliable heading, else unknown
-    (the box is then drawn parallel to the recorder, as the CRITICAL_TTC model
-    takes it, with no direction).  Tracks of different recorders are never
+    The estimate is placed by its vehicle-frame offsets (``longitudinal_m``,
+    ``lateral_m``) from the observer's pose at the sample (``trajectory``: its pose
+    source); without them, by the local-frame estimate (``x_m``, ``y_m``) through
+    the local frame's origin (the first recorded pose).  The box heading is
+    ``atan2(vy, vx)`` of the estimated velocity (in the local frame) when the
+    speed fixes it (``track_heading``), turned into the observer's pose through its
+    recorded heading (``recorded``), else the track's last reliable heading, else
+    unknown (the box is then drawn parallel to the recorder, as the CRITICAL_TTC
+    model takes it, with no direction).  Tracks of different recorders are never
     compared or merged.
     """
     footprint = footprint or DEFAULT_FOOTPRINT
@@ -532,12 +551,18 @@ def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin:
         samples, held = [], None
         for row in sorted(rows[track_id], key=lambda item: float(item["t_local"])):
             source_time = clock_origin + float(row["t_local"])
-            observer = trajectory.pose_at(source_time)  # the recorder's own recorded pose at the sample
-            position = local_to_world(frame_origin, float(row["x_m"]), float(row["y_m"]))
+            observer = trajectory.pose_at(source_time)  # the observer's pose (its pose source) at the sample
+            own = (recorded or trajectory).pose_at(source_time)  # its recorded pose: its local heading
+            if row.get("longitudinal_m") is not None and row.get("lateral_m") is not None:
+                dx, dy = rotate(float(row["longitudinal_m"]), float(row["lateral_m"]), observer.yaw)
+                position = (observer.x + dx, observer.y + dy)
+            else:
+                position = local_to_world(frame_origin, float(row["x_m"]), float(row["y_m"]))
             motion = track_heading(float(row.get("vx_mps") or 0.0), float(row.get("vy_mps") or 0.0),
                                    float(row.get("vel_std_mps") or 0.0))
             if motion is not None:
-                yaw, heading = wrap_deg(frame_origin.yaw + motion), HEADING_FROM_VELOCITY
+                # Local-frame direction -> relative to the observer (recorded) -> through the drawn pose.
+                yaw, heading = wrap_deg(observer.yaw + frame_origin.yaw + motion - own.yaw), HEADING_FROM_VELOCITY
                 held = yaw
             elif held is not None:
                 yaw, heading = held, HEADING_HELD
@@ -553,8 +578,109 @@ def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin:
             samples.append(TrackPoint(round(source_time - run_start, 6), position, centre, yaw, heading,
                                       bool(row.get("measured", True))))
         status, entity = (statuses or {}).get((recorder, track_id), (ANONYMOUS, None))
-        tracks.append(TrackPath(recorder, track_id, samples, status, entity, geometry.max_gap))
+        tracks.append(TrackPath(recorder, track_id, samples, status, entity, geometry.max_gap,
+                                (road_users or {}).get((recorder, track_id))))
     return tracks
+
+
+# --------------------------------------------------------------------------
+# Road users that recorded nothing: the fusion's anonymous entities
+# --------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class EntityState:
+    """One fused state of an anonymous road user on the replay timeline (world frame)."""
+
+    time: float
+    centre: Tuple[float, float]
+    yaw: Optional[float]  # box heading [deg]; None while no heading is known
+    heading: str  # HEADING_FROM_VELOCITY, HEADING_HELD or HEADING_UNKNOWN
+    speed: float
+    pos_std: float  # position uncertainty [m] (1 sigma, largest axis)
+    method: str  # box_fit or covariance_intersection
+    observers: Tuple[str, ...]  # recorders whose tracks give this state
+    measured: bool  # some observer measured it at this instant (else only predicted)
+
+
+@dataclass
+class EntityPath:
+    """An anonymous road user (U1, ...) as the fusion made it: one body, never named after a participant."""
+
+    entity_id: str
+    source_tracks: List[str]
+    observers: List[str]
+    length: float  # footprint used for drawing (fitted, prior or observed extent)
+    width: float
+    states: List[EntityState]
+    max_gap: float = 0.5
+    times: List[float] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self.states = sorted(self.states, key=lambda state: state.time)
+        self.times = [state.time for state in self.states]
+
+    @property
+    def name(self) -> str:
+        return self.entity_id
+
+    @property
+    def label(self) -> str:
+        return "{0} / {1}".format(self.entity_id, ANONYMOUS)
+
+    @property
+    def sources(self) -> str:
+        return " + ".join(self.source_tracks)
+
+    @property
+    def start(self) -> float:
+        return self.times[0]
+
+    @property
+    def end(self) -> float:
+        return self.times[-1]
+
+    def state_at(self, t: float) -> Optional[EntityState]:
+        """The fused state at ``t``: a state, or between two consecutive ones; None outside or across a gap."""
+        if not self.states or t < self.times[0] - _EPS or t > self.times[-1] + _EPS:
+            return None
+        index = max(0, bisect_right(self.times, t + _EPS) - 1)
+        a = self.states[index]
+        if index == len(self.states) - 1 or t <= a.time + _EPS:
+            return a
+        b = self.states[index + 1]
+        if b.time - a.time > self.max_gap + _EPS:
+            return None
+        f = (t - a.time) / (b.time - a.time)
+        yaw = a.yaw
+        if a.yaw is not None and b.yaw is not None:
+            yaw = lerp_angle_deg(a.yaw, b.yaw, f)
+        return EntityState(t, (lerp(a.centre[0], b.centre[0], f), lerp(a.centre[1], b.centre[1], f)), yaw,
+                           a.heading, lerp(a.speed, b.speed, f), lerp(a.pos_std, b.pos_std, f), a.method,
+                           a.observers, a.measured or b.measured)
+
+
+def load_entities(path: Path, run_start: float, max_gap: float = 0.5) -> List[EntityPath]:
+    """The anonymous road users of ``global/anonymous_entities.json`` on the replay timeline (t_global)."""
+    if not Path(path).exists():
+        return []
+    entities = []
+    for item in _read_json(path).get("entities", []):
+        states = []
+        for row in item.get("trajectory", []):
+            heading = row.get("heading_source")
+            states.append(EntityState(
+                round(float(row["t_global"]) - run_start, 6), (float(row["x"]), float(row["y"])),
+                None if row.get("heading_deg") is None else float(row["heading_deg"]),
+                {"velocity": HEADING_FROM_VELOCITY, "held": HEADING_HELD}.get(heading, HEADING_UNKNOWN),
+                math.hypot(float(row.get("vx") or 0.0), float(row.get("vy") or 0.0)), float(row.get("pos_std_m") or 0.0),
+                str(row.get("method") or ""), tuple(row.get("observers") or ()), bool(row.get("measured_by"))))
+        if states:
+            footprint = item.get("footprint") or {}
+            entities.append(EntityPath(str(item["id"]), [str(name) for name in item.get("source_tracks", [])],
+                                       [str(name) for name in item.get("observers", [])],
+                                       float(footprint.get("length_m") or 4.6), float(footprint.get("width_m") or 1.9),
+                                       states, max_gap))
+    return entities
 
 
 # --------------------------------------------------------------------------
@@ -601,9 +727,10 @@ SOURCE_CLOCK = "source"  # the recorded source timestamps (one simulator clock i
 def recorder_clocks(run_dir: Path, ids: Sequence[str]) -> Tuple[str, Dict[str, float], Dict[str, float]]:
     """(clock, source origins, offsets_to_global) from the reconstruction outputs only.
 
-    GLOBAL_CLOCK when every recorder has a local graph with its clock origin and
-    an ALIGNED offset in ``reconstruction/global/alignment.json``; otherwise
-    SOURCE_CLOCK (the origins and offsets found are still returned).
+    GLOBAL_CLOCK when at least one recorder has a local graph with its clock
+    origin and an ALIGNED offset in ``reconstruction/global/alignment.json`` (the
+    recorders without one are not replayed); otherwise SOURCE_CLOCK (the origins
+    and offsets found are still returned).
     """
     rec = Path(run_dir) / "reconstruction"
     origins: Dict[str, float] = {}
@@ -616,8 +743,21 @@ def recorder_clocks(run_dir: Path, ids: Sequence[str]) -> Tuple[str, Dict[str, f
         for name, info in (_read_json(rec / "global" / "alignment.json").get("graphs") or {}).items():
             if info.get("status") == "ALIGNED" and info.get("offset_to_global") is not None:
                 offsets[str(name)] = float(info["offset_to_global"])
-    aligned = bool(ids) and all(pid in origins and pid in offsets for pid in ids)
+    aligned = any(pid in origins and pid in offsets for pid in ids)
     return (GLOBAL_CLOCK if aligned else SOURCE_CLOCK), origins, offsets
+
+
+def _pose_source_trajectory(source: Any, records: Sequence[Mapping[str, Any]], origin: float) -> Trajectory:
+    """A recorder's poses from its pose source at its recorded instants (heights and attitude as recorded)."""
+    times, poses, speeds = [], [], []
+    for record in records:
+        t = float(record["timestamp"])
+        pose = source.pose_at(t - origin)
+        times.append(t)
+        poses.append(Pose(float(pose.x), float(pose.y), float(record["z"]), math.degrees(float(pose.yaw)),
+                          float(record.get("pitch_deg", 0.0)), float(record.get("roll_deg", 0.0))))
+        speeds.append(math.hypot(float(pose.vx), float(pose.vy)))
+    return Trajectory(times, poses, speeds)
 
 
 @dataclass
@@ -627,9 +767,10 @@ class Participant:
     participant_id: str
     blueprint: str
     blueprint_source: str  # "recorded" or "fallback"
-    trajectory: Trajectory
+    trajectory: Trajectory  # the poses drawn: its pose source on the replay clock
     frame_origin: Pose  # first ego record in file order: the reconstruction's local frame
     footprint: Optional[EgoFootprint] = None  # its own recorded footprint (vehicle frame)
+    recorded: Optional[Trajectory] = None  # its recorded ego stream on the replay clock (local headings)
 
 
 @dataclass
@@ -648,10 +789,16 @@ class ReplayRun:
     perceived: Dict[str, PerceivedStates] = field(default_factory=dict)
     notes: List[str] = field(default_factory=list)
     geometry: GhostGeometry = field(default_factory=GhostGeometry)
+    entities: List[EntityPath] = field(default_factory=list)  # anonymous road users (U1, ...)
+    road_users: Dict[Tuple[str, str], str] = field(default_factory=dict)  # (recorder, track) -> U1, ...
+    hidden: List[str] = field(default_factory=list)  # recorders without a global clock: not replayed
 
     @classmethod
-    def load(cls, run_dir: Path, geometry: Optional[GhostGeometry] = None) -> "ReplayRun":
-        """Read a run: the recorders' own files and the reconstruction outputs only (module docstring)."""
+    def load(cls, run_dir: Path, geometry: Optional[GhostGeometry] = None,
+             pose_factory: Optional[Callable[[Path, float], Any]] = None) -> "ReplayRun":
+        """Read a run: the recorders' own files and the reconstruction outputs only (module docstring).
+        ``pose_factory(vehicle_dir, clock_origin)`` gives a recorder's pose source (a
+        ``cdf.reconstruction.common_frame.PoseSource``); by default its recorded stream."""
         run_dir = Path(run_dir)
         notes: List[str] = []
         vehicles_dir = run_dir / "vehicles"
@@ -661,8 +808,14 @@ class ReplayRun:
             raise ValueError("no vehicles/<id>/ego.jsonl under " + str(run_dir))
 
         clock, origins, offsets = recorder_clocks(run_dir, ids)
-        if clock == SOURCE_CLOCK and offsets:
-            notes.append("not every recorder is aligned: replay on the recorded source timestamps")
+        hidden = []
+        if clock == GLOBAL_CLOCK:
+            hidden = [pid for pid in ids if pid not in offsets or pid not in origins]
+            for pid in hidden:
+                notes.append("{0} has no global clock (the reconstruction could not align it): not replayed".format(pid))
+            ids = [pid for pid in ids if pid not in hidden]
+        elif offsets:
+            notes.append("no recorder is aligned: replay on the recorded source timestamps")
         participants = []
         for pid in ids:
             records = _read_jsonl(vehicles_dir / pid / "ego.jsonl")
@@ -676,19 +829,25 @@ class ReplayRun:
                 blueprint, source = FALLBACK_BLUEPRINT, "fallback"
                 notes.append("{0}: no recorded blueprint; using {1}".format(pid, FALLBACK_BLUEPRINT))
             first = records[0]
-            trajectory = Trajectory.from_records(records)
+            recorded = Trajectory.from_records(records)
+            trajectory = recorded
+            if pose_factory is not None and pid in origins:
+                trajectory = _pose_source_trajectory(pose_factory(vehicles_dir / pid, origins[pid]), records,
+                                                     origins[pid])
             if clock == GLOBAL_CLOCK:
+                recorded = recorded.shifted(offsets[pid] - origins[pid])
                 trajectory = trajectory.shifted(offsets[pid] - origins[pid])
             participants.append(Participant(pid, str(blueprint), source, trajectory,
                                             Pose(float(first["x"]), float(first["y"]), float(first["z"]),
                                                  float(first["yaw_deg"])),
-                                            EgoFootprint.from_metadata(meta.get("ego_footprint"))))
+                                            EgoFootprint.from_metadata(meta.get("ego_footprint")), recorded))
         start = min(p.trajectory.start for p in participants)
         end = max(p.trajectory.end for p in participants)
         run = cls(run_dir=run_dir, name="{0} / {1}".format(run_dir.parent.name, run_dir.name),
                   participants=participants, start=start, duration=round(end - start, 6), notes=notes,
                   geometry=geometry or GhostGeometry.from_config(load_config()), clock=clock,
-                  clock_origins=dict(offsets) if clock == GLOBAL_CLOCK else dict(origins))
+                  clock_origins=({pid: offsets[pid] for pid in ids} if clock == GLOBAL_CLOCK else dict(origins)),
+                  hidden=hidden)
         run._load_reconstruction()
         return run
 
@@ -699,6 +858,10 @@ class ReplayRun:
             statuses = load_track_statuses(rec / "global" / "associations.json")
         self.identities = {key: entity for key, (status, entity) in statuses.items()
                            if status == ASSOCIATED and entity is not None}
+        if self.clock == GLOBAL_CLOCK:
+            self.entities = load_entities(rec / "global" / "anonymous_entities.json", self.start, self.geometry.max_gap)
+            self.road_users = {(name.split(":", 1)[0], name.split(":", 1)[1]): entity.entity_id
+                               for entity in self.entities for name in entity.source_tracks if ":" in name}
         for participant in self.participants:
             pid = participant.participant_id
             graph = rec / pid / "local_graph.json"
@@ -711,7 +874,8 @@ class ReplayRun:
             tracks = rec / pid / "local_tracks.jsonl"
             if tracks.exists():
                 self.tracks[pid] = load_tracks(tracks, pid, participant.trajectory, participant.frame_origin,
-                                               origin, self.start, participant.footprint, self.geometry, statuses)
+                                               origin, self.start, participant.footprint, self.geometry, statuses,
+                                               participant.recorded, self.road_users)
             trace = rec / pid / "local_trace.jsonl"
             perceived = load_perceived_states(trace, origin, self.start) if trace.exists() else None
             if perceived is not None:
@@ -767,10 +931,11 @@ class ReplayRun:
         return next((x for x in reversed(self.event_times()) if x < t - _EPS), None)
 
     def subject_name(self, actor: str, subject: Optional[str]) -> str:
-        """``track_001 (B)`` when the fusion associated the track, else the local name."""
+        """``track_001 (B)`` when the fusion associated the track with a recorder, ``track_001 (U1)`` when it
+        made it part of an anonymous road user, else the local name."""
         if subject is None:
             return ""
-        entity = self.identities.get((actor, subject))
+        entity = self.identities.get((actor, subject)) or self.road_users.get((actor, subject))
         return subject if entity is None else "{0} ({1})".format(subject, entity)
 
     def all_tracks(self) -> List[TrackPath]:
@@ -780,6 +945,18 @@ class ReplayRun:
     def ghost_tracks(self) -> List[TrackPath]:
         """The anonymous tracks: road users no recorder was identified with, drawn as ghost boxes."""
         return [track for track in self.all_tracks() if track.ghost]
+
+    def entities_at(self, t: float) -> List[Tuple[EntityPath, EntityState]]:
+        """The anonymous road users present at ``t``, with their fused state."""
+        out = []
+        for entity in self.entities:
+            state = entity.state_at(t)
+            if state is not None:
+                out.append((entity, state))
+        return out
+
+    def entity(self, entity_id: str) -> Optional[EntityPath]:
+        return next((entity for entity in self.entities if entity.entity_id == entity_id), None)
 
     def anonymous_at(self, recorder: str, t: float) -> List[Tuple[TrackPath, TrackPoint]]:
         """The recorder's anonymous tracks alive at ``t``, with their state."""

@@ -819,34 +819,35 @@ python scripts/replay_run.py traces/S01/run_0_crash --speed 0.25 --start 0.45 --
 python scripts/replay_run.py traces/S17/run_0_crash --camera follow --follow A
 ```
 
-This is an offline visualization of recorded trajectories. It does not rerun
+This is an offline visualization of the reconstruction. It does not rerun
 scenario physics and does not participate in reconstruction: every rendered
-frame, each vehicle's `vehicles/<id>/ego.jsonl` pose is interpolated at the
-playback time (position linearly, angles the short way round) and applied to a
-physics-less CARLA actor, so 0.25x, 0.5x (default), 1x and 2x all show exactly
-the recorded trajectories. The clock is the reconstruction's global time when
-every recorder is aligned (`reconstruction/global/alignment.json`): each
-recorder's samples, events, tracks and perceived states are placed at
-t_global = t_local + offset_to_global, t_local = source timestamp - that
-recorder's own clock origin, so recorders are synchronised by the
-collision-anchored alignment, not by the simulator's shared clock; the HUD shows
-t_global (and the replay time from 0). If a recorder is not aligned the viewer
-falls back to the recorded source timestamps and says so. The viewer shows what
-the reconstruction knows: it reads only the recorders' own files
-(`vehicles/<id>/ego.jsonl`, `vehicles/<id>/metadata.json` with the recorder's
-own blueprint, sensors and footprint), the reconstruction outputs when present
-(`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl`, `local_trace.jsonl`,
-`reconstruction/global/global_graph.json`, `associations.json`, `alignment.json`),
+frame, each recorder's pose from its pose source -- by default its own recorded
+GNSS-like stream `vehicles/<id>/ego.jsonl`, exact in CARLA; the robustness study
+passes a perturbed one (`ReplayRun.load(pose_factory=...)`, as the
+reconstruction) -- is interpolated at the playback time (position linearly,
+angles the short way round) and applied to a physics-less CARLA actor, so 0.25x,
+0.5x (default), 1x and 2x all show exactly those trajectories. The clock is the
+reconstruction's global time (`reconstruction/global/alignment.json`: matched
+collisions, else a recorder's observed trajectory): each recorder's samples,
+events, tracks and perceived states are placed at t_global = t_local +
+offset_to_global, t_local = source timestamp - that recorder's own clock origin,
+so recorders are synchronised by the reconstruction's alignment, never by the
+simulator's shared clock; the HUD shows t_global (and the replay time from 0). A
+recorder the reconstruction could not align has no place on that timeline: it is
+not replayed, and the viewer says so (S07's C); only when no recorder is aligned
+does the viewer fall back to the recorded source timestamps, and says so. The
+viewer shows what the reconstruction knows: it reads only the recorders' own
+files (`vehicles/<id>/ego.jsonl`, `vehicles/<id>/metadata.json` with the
+recorder's own blueprint, sensors and footprint), the reconstruction outputs
+when present (`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl`,
+`local_trace.jsonl`, `reconstruction/global/global_graph.json`,
+`associations.json`, `alignment.json`, `anonymous_entities.json`),
 `configs/reconstruction.yaml` (nominal target size, tracking gap),
-`configs/default.yaml` and the sensor profile (only the simulator connection)
-and the public OpenDRIVE files of the local CARLA installation (map
-recognition). It never reads `ground_truth/`, the run's own `metadata.json`, the
-scenario configuration or `reconstruction/evaluation/`; only vehicles with their
-own `ego.jsonl` are replayed. The replay does not read privileged ground_truth or
-scenario metadata, but recorder poses currently come from their recorded
-ego/GNSS stream (`ego.jsonl`, in the CARLA world frame and in this campaign
-practically exact): placing recorders from estimated poses is future work (the
-robustness / GNSS-noise phase). The map is recognised from the recorders' recorded positions: every
+`configs/default.yaml` and the sensor profile (only the simulator connection;
+`--port` chooses the server) and the public OpenDRIVE files of the local CARLA
+installation (map recognition). It never reads `ground_truth/`, the run's own
+`metadata.json`, the scenario configuration or `reconstruction/evaluation/`;
+only vehicles with their own `ego.jsonl` are replayed. The map is recognised from the recorders' recorded positions: every
 OpenDRIVE map shipped with the local CARLA installation is parsed client-side
 and the one whose driving lanes hold all of them (at least 98%, 5 points ahead
 of any other road network) is loaded, preferring the server's current map
@@ -865,7 +866,7 @@ every file opened).
 | C | camera: overview, follow selected recorder, free |
 | TAB | next recorder (follow camera; SHIFT+TAB previous); ghosts are never selectable |
 | T | hide / show the radar tracks of every recorder (`--hide-tracks` starts hidden) |
-| G | anonymous tracks as ghost boxes or as dots (`--track-dots` starts with dots) |
+| G | anonymous road users as boxes or only their tracks' dots (`--track-dots` starts with dots) |
 | H | hide / show the key help |
 | ESC | exit |
 
@@ -876,25 +877,27 @@ its recorded speed, its perceived state as the reconstruction wrote it in
 `local_trace.jsonl` (its tracks with CLOSING, CRITICAL_TTC, IN_EGO_PATH,
 CUT_IN..., lost tracks greyed with their states UNKNOWN, known signs; older
 outputs without it show the open START..END pairs) and the events of the last
-second, such as TRACK_APPEARED_LEFT, and the recorder's anonymous tracks alive
-at that instant. A reconstructed COLLISION shows its participants from the
-global graph. What each recorder's radar tracks is drawn in the scene in the
-recorder's colour, each track from its own samples through its own observer's
-recorded pose (tracks of different recorders are never compared or merged):
+second, such as TRACK_APPEARED_LEFT, and the anonymous road users it sees at
+that instant (`sees road users: U1 (track_001)`). A reconstructed COLLISION shows
+its participants from the global graph. What the recorders' radars track is drawn
+in the scene, each track from its own samples through its own observer's pose
+(its vehicle-frame measurement from the observer's pose source):
 
-- an ANONYMOUS track (the fusion identified no recorder with it) is a ghost:
-  a wireframe box of the reconstruction's nominal target size (4.6 x 1.9 m,
-  drawn 1.5 m high; the radar measures no size, so it is not a measured body)
-  placed behind the observed near surface as the CRITICAL_TTC model places
-  it, with an arrow along `atan2(vy, vx)` of the estimated velocity. When the
-  speed does not fix a direction (below 1 m/s or within twice its
-  uncertainty) the last reliable heading is held, or the box is drawn
-  parallel to the recorder without an arrow; a heading is never invented. It
-  is labelled `A:track_001 / ANONYMOUS [seen by A]`, solid while measured,
-  dashed and `PREDICTED` while the tracker only predicts it;
+- an anonymous road user of the fusion (`global/anonymous_entities.json`: U1,
+  U2, ..., a road user that recorded nothing) is drawn ONCE, in grey, however
+  many tracks of however many recorders saw it: a wireframe box of its fitted
+  footprint (else the 4.6 x 1.9 m prior; drawn 1.5 m high) at the fused position
+  and heading, with an arrow along its motion (none while no heading is known),
+  solid while measured, dashed and `PREDICTED` while only predicted, labelled
+  `U1 / ANONYMOUS`, the tracks it fuses (`A:track_001 + B:track_002 + ...`), its
+  position uncertainty (`+-0.36 m`) and its observers; each of those tracks is a
+  radar dot in its observer's colour;
 - a track ASSOCIATED with a recorder is that recorder's replayed vehicle and
   gets no second body: a radar dot at the track estimate, a thin line from its
-  observer and `A:track_002 → B`.
+  observer and `A:track_002 → B`;
+- a track that is neither (none in a run whose recorders are all aligned) is a
+  ghost of its own as before: a nominal box behind the observed near surface in
+  its observer's colour, `A:track_001 / ANONYMOUS [seen by A]`.
 
 A track is interpolated at the render rate only between consecutive samples
 of the same track at most `tracking.max_track_gap_s` apart, is never
@@ -908,22 +911,25 @@ It renders through its own camera into a pygame window, runs the world in
 synchronous mode while open, and on exit destroys its actors and restores the
 world settings.  A participant with `record: false` (S17's third vehicle) has
 no `ego.jsonl` and is not replayed or named: it appears only as the anonymous
-tracks the recorders formed of it, A:track_001 and B:track_002, two separate
-ghosts that overlap where both radars see it.
+road user the reconstruction made of the recorders' tracks of it, U1
+(A:track_001 + B:track_002 + B:track_003), drawn once.
 
 ### Headless export, visual audit and ground-truth audit
 
 ```
 python scripts/replay_run.py traces/S17/run_0_crash --export out/            # keyframes (PNG)
 python scripts/replay_run.py traces/S17/run_0_crash --export out/ --at -2.35 --at 0 --format svg
-python scripts/visual_audit.py traces/S*/run_* --verdicts docs/audit/visual_audit_baseline_verdicts.json
+python scripts/visual_audit.py traces/S*/run_* --name visual_audit_phase2 --verdicts docs/audit/visual_audit_phase2_verdicts.json
 python scripts/gt_audit.py traces/S*/run_*                                     # privileged, evaluation only
 ```
 
 `--export` draws the replay headlessly as top-down frames (`cdf.replay.topdown`,
-no CARLA server): the recorders at their recorded poses with their own footprints,
-each recorder's tracks as the viewer draws them (anonymous ones as nominal ghost
-boxes, associated ones as dots), the states of the paper's core view
+no CARLA server): the recorders at the poses of their pose source with their own
+footprints, every anonymous road user once (its fitted box at the fused position,
+a dotted circle of twice its position uncertainty when that exceeds 0.3 m, the
+radar points of the tracks it fuses as dots in their observers' colours, and a
+panel line `U1 = A:track_001 + B:track_002 + ...`), associated tracks as dots, the
+states of the paper's core view
 (CRITICAL_TTC red, CUT_IN orange, IN_EGO_PATH yellow, BRAKE), exact at event
 instants (from the local graphs' START/END events), the core events of the last
 half second and the collisions, on t_global.  The driving lanes come from the
@@ -937,14 +943,17 @@ collision 0.2 s before, at and 0.5 s after.  Inputs are those of the viewer only
 
 `scripts/visual_audit.py` (evaluation side) exports the keyframes of each run to
 `reconstruction/evaluation/<name>/`, runs the automatic visual-QA checks of
-`cdf.replay.qa` (implausible track or recorder speeds, ghost boxes that jump or
-spin, duplicated ghosts, events outside a track's lifetime, a CRITICAL_TTC that
+`cdf.replay.qa` (implausible track, road-user or recorder speeds, boxes that jump
+or spin, duplicated ghosts, two road users drawn in one place or a road user on a
+recorder's own body, events outside a track's lifetime, a CRITICAL_TTC that
 ends just before or starts just after the collision of its own pair, recorders of
 a collision that do not touch, a cut-in without lateral approach, a path entry
 outside the corridor) and writes the reviewer's verdicts (PASS / WARN / FAIL, per
-finding, from a JSON file such as `docs/audit/visual_audit_baseline_verdicts.json`)
+finding, from a JSON file such as `docs/audit/visual_audit_phase2_verdicts.json`)
 to `reconstruction/evaluation/<name>.md` and `traces/<name>.md`.  A flag is a
-reason to look, not a verdict.
+reason to look, not a verdict.  `visual_audit_baseline` is the phase-0 audit (14
+runs, ghosts per track), `visual_audit_phase2` the audit of the definitive replay
+(17 runs: 10 PASS, 7 WARN, no FAIL; traces/visual_audit_phase2.md).
 
 `scripts/gt_audit.py` is privileged and runs after the reconstruction: per
 track sample the nearest true vehicle gives the identity (purity, switches) and

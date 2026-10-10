@@ -1,9 +1,9 @@
 {
   "definition": "road-user fusion against ground truth: identity decisions of the aligned recorders' tracks, merges over pairs of anonymous tracks, fragmentation of each true road user over anonymous entities, pooled fused-state errors against the entity's majority identity, observed-trajectory alignments",
   "provenance": {
-    "git_commit": "9ad719fa3d5a98a95eb0baae4f068cd3b90582bb",
+    "git_commit": "c79b1e627cbfaa5c042749291876597e922509f7",
     "git_dirty": true,
-    "code_sha256": "e07e0689bf362f80d5602d446ab5982d0d0d1921af46c8fe6a89b73600a9ad0a",
+    "code_sha256": "1c410466c184df92496f94e6d3383798296759c21788f388d823436f27a0cadb",
     "config_sha256": "87109d249a009c15ac4c0aad3cfe9c7a9d02d434b84b9b34e9b7514ca85253b9",
     "runs": [
       "S01/run_0_crash",
@@ -26,7 +26,7 @@
     ],
     "perturbation_profile": null,
     "seed": null,
-    "generated_utc": "2026-10-10T21:24:33Z",
+    "generated_utc": "2026-10-10T21:47:54Z",
     "python": "3.14.2"
   },
   "decision_counts": {
@@ -122,14 +122,14 @@
     },
     "single_track_nominal_centre_error_m": {
       "n": 1539,
-      "median": 0.5715,
-      "q25": 0.3058,
-      "q75": 1.0826,
-      "p90": 3.3722,
-      "p95": 3.5283,
-      "max": 5.2827,
+      "median": 0.5714,
+      "q25": 0.3059,
+      "q75": 1.0824,
+      "p90": 3.372,
+      "p95": 3.5281,
+      "max": 5.2831,
       "mean": 0.9495,
-      "iqr": 0.7768
+      "iqr": 0.7765
     },
     "speed_error_mps": {
       "n": 1062,
@@ -416,7 +416,7 @@
         ]
       },
       "centre_error_median_m": 0.2781,
-      "single_track_centre_error_median_m": 0.2139
+      "single_track_centre_error_median_m": 0.2137
     },
     {
       "run": "S08/run_0_crash",
@@ -437,7 +437,7 @@
         ]
       },
       "centre_error_median_m": 0.3365,
-      "single_track_centre_error_median_m": 0.8964
+      "single_track_centre_error_median_m": 0.8967
     },
     {
       "run": "S09/run_0_merge_conflict",
@@ -506,7 +506,7 @@
         ]
       },
       "centre_error_median_m": 1.4678,
-      "single_track_centre_error_median_m": 1.4084
+      "single_track_centre_error_median_m": 1.4085
     },
     {
       "run": "S16/run_0_consequential",
@@ -527,7 +527,7 @@
         ]
       },
       "centre_error_median_m": 3.3025,
-      "single_track_centre_error_median_m": 3.3063
+      "single_track_centre_error_median_m": 3.3066
     },
     {
       "run": "S17/run_0_crash",
@@ -548,7 +548,7 @@
         ]
       },
       "centre_error_median_m": 0.1059,
-      "single_track_centre_error_median_m": 0.6892
+      "single_track_centre_error_median_m": 0.6896
     },
     {
       "run": "S18/run_0_abreast",
@@ -573,7 +573,7 @@
         ]
       },
       "centre_error_median_m": 0.401,
-      "single_track_centre_error_median_m": 0.616
+      "single_track_centre_error_median_m": 0.6158
     },
     {
       "run": "S18/run_0_passing",
@@ -598,7 +598,7 @@
         ]
       },
       "centre_error_median_m": 0.4115,
-      "single_track_centre_error_median_m": 0.5255
+      "single_track_centre_error_median_m": 0.5254
     },
     {
       "run": "S18/run_0_platoon",
@@ -624,7 +624,7 @@
         ]
       },
       "centre_error_median_m": 0.6159,
-      "single_track_centre_error_median_m": 0.5217
+      "single_track_centre_error_median_m": 0.5225
     }
   ]
 }
