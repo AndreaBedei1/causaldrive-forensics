@@ -123,7 +123,12 @@ privileged.  In the reconstruction C is `A:track_001` (anonymous; CLOSING; CRITI
 2.60 s for an unsafe forward gap, 3.3 m ahead of A where 16.8 m are needed; CUT_IN_FROM_RIGHT
 from 2.75 s; EGO_PATH_ENTRY at 3.35 s; all before the collision) and, separately, `B:track_002`
 and `B:track_003` (B, two lanes away and seeing C past A, observes no cut-in); no entity C
-exists.  Research question: how does partial observability of a
+exists.  A deterministic worked example (`python scripts/worked_example.py
+traces/S17/run_0_crash`, written to `reconstruction/evaluation/s17_worked_example.md`)
+lists the reconstructed timeline, A's safe-gap facts about `A:track_001` and the observed
+vehicle response delays from the recorders' files only (under a file audit), then, in a
+separate privileged section, checks the experiment against the ground truth; it also
+reconstructs the run again without the privileged files and requires identical outputs.  Research question: how does partial observability of a
 causally relevant but non-colliding road user affect accident explanation and attribution?
 
 ## Stored streams
@@ -490,30 +495,47 @@ recorder's own odometry and the track only:
    instant stop of the recorder cannot avoid the overlap (a car closing in from
    behind).  CRITICAL when a_req >= `critical_deceleration_mps2` = 6 m/s^2.
 
-4. Is the gap to a leader too short?  The clearance runs from the recorder's
-   front face to the rear face of the target's nominal box along the recorder's
-   heading (never the radar range, which is short for a car beside the
-   recorder).  The required distance is the larger of the time-gap distance
-   v x t_front(v), t_front from the UN R157 table (7.2 km/h 1.0 s, 10 km/h 1.1 s,
-   20 km/h 1.2 s, 30 km/h 1.3 s, 40 km/h 1.4 s, 50 km/h 1.5 s, 60 km/h 1.6 s,
-   linear in between, the ends held: no extrapolation above 60 km/h), at least
-   2 m, and the braking distance v x 1 s + v^2 / (2 x 6) - v_lead^2 / (2 x 6)
-   + 1 m (at least 1 m), where the lead's braking at
-   `critical_lead_deceleration_mps2` = 6 m/s^2 is hypothetical: its measured
-   acceleration is not used, the question is whether the present gap would
-   suffice if it braked.  A leader moves in the same direction (within 30 deg),
-   its body is ahead of the front face and either overlaps the corridor
-   (+-`path_half_width_m` = 1.5 m) or lies within
-   `critical_front_lateral_margin_m` = 1.0 m of it while approaching it
+4. Is the gap to a leader too short?  SAFE FOLLOWING DISTANCE:
+
+   ```text
+   d_min = max(v_ego * t_front_UN_R157(v_ego), 2.0 m)
+   ```
+
+   with v_ego the recorder's own speed and t_front the UN R157 (ALKS, M1/N1)
+   minimum time gap: 7.2 km/h 1.0 s, 10 km/h 1.1 s, 20 km/h 1.2 s, 30 km/h
+   1.3 s, 40 km/h 1.4 s, 50 km/h 1.5 s, 60 km/h 1.6 s, linear in between, the
+   ends held (no extrapolation above 60 km/h; below 7.2 km/h the 2 m minimum
+   rules).  The 2 m minimum is part of the rule; no margin is added (no +1 m)
+   and the target's speed is not used, so the gap can be unsafe when the
+   target is exactly as fast as the recorder, or a little faster.  The clearance
+   runs from the recorder's front face to the rear face of the target's nominal
+   box along the recorder's heading (never the raw radar range, which is short
+   for a car beside the recorder).  The braking avoidability of question 3
+   (reaction time, decelerations) is not part of the safe gap: the former
+   braking-distance branch (2026-10-09) was removed on 2026-10-10.  A leader
+   moves in the same direction (within 30 deg), its body is ahead of the front
+   face and either overlaps the corridor (+-`path_half_width_m` = 1.5 m) or lies
+   within `critical_front_lateral_margin_m` = 1.0 m of it while approaching it
    laterally (`critical_front_lateral_speed_mps` = 0.3 m/s beyond the velocity
-   uncertainty), and the recorder itself moves (at least 1 m/s).  Without a
-   predicted overlap no TTC is invented (`ttc_s` stays null).
+   uncertainty), and the recorder itself moves (at least 1 m/s, the MOVING
+   threshold; from 1 to 2 m/s the 2 m minimum binds).
+
+CRITICAL_TTC is the event's historical name, kept so that the pipeline is
+unchanged: an UNSAFE_FORWARD_GAP does not imply a finite classical TTC (two cars
+at the same speed 3 m apart have an infinite TTC).  `ttc_s` exists only where a
+2-D overlap is predicted; an unsafe gap alone is critical with `ttc_s` = null,
+and the time headway (`time_headway_s`) is never used as a TTC.  Every
+TRACK_STATE fact carries `critical_reason` (PREDICTED_OVERLAP,
+UNSAFE_FORWARD_GAP or PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP) and the safe-gap
+diagnostics `minimum_time_gap_s`, `time_gap_distance_m` (v_ego x t_front),
+`required_safe_distance_m` (d_min), `longitudinal_clearance_m`,
+`lateral_body_gap_m`, `time_headway_s`, `safe_distance_margin_m`.
 
 ```text
 CRITICAL_TTC_START  <=>  (collision course within 6 s and a_req >= 6 m/s^2)
-                         or (leader and clearance < required distance)
+                         or (leader and clearance < d_min)
 CRITICAL_TTC_END    <=>  (a_req < 0.75 x 6 m/s^2 or no collision course)
-                         and (no leader or clearance > 1.10 x required distance)
+                         and (no leader or clearance > 1.10 x d_min), 0.2 s debounce
 ```
 
 No claim either way (UNKNOWN) while the track's estimate is not known: position
@@ -522,8 +544,8 @@ or velocity std above 1 m / 1 m/s, or the track younger than
 samples already draws on later data).  For a target ahead in the same lane
 question 3 is the stopping-capability check against a lead car that keeps its
 speed or its measured deceleration (at 14 m/s behind a stopped car: critical
-within 33.7 m of the vehicle origin); question 4 adds the room needed if the
-lead braked.  Cars behind, beside the recorder, two lanes away, or keeping
+within 33.7 m of the vehicle origin); question 4 adds the minimum following
+distance.  Cars behind, beside the recorder, two lanes away, or keeping
 their own lane next to the corridor are never critical for the gap alone
 (they still are on a 2-D collision course); a car next to the corridor counts
 only while it moves toward it, because in 3.5 m lanes a car keeping the next
@@ -679,19 +701,29 @@ scenario physics and does not participate in reconstruction: every rendered
 frame, each vehicle's `vehicles/<id>/ego.jsonl` pose is interpolated at the
 playback time (position linearly, angles the short way round) and applied to a
 physics-less CARLA actor, so 0.25x, 0.5x (default), 1x and 2x all show exactly
-the recorded trajectories. The replay timeline is the recorded simulator time
-(0 s = the earliest ego sample); reconstructed events are placed on it through
-each local graph's own clock origin, for display only (this is not the
-graph-level alignment). The viewer shows what the reconstruction knows, not
-the simulator's ground truth. It reads only the recorders' own files
-(`vehicles/<id>/ego.jsonl`, the recorded blueprint and footprint in
-`vehicles/<id>/metadata.json`), the reconstruction outputs when present
+the recorded trajectories. The clock is the reconstruction's global time when
+every recorder is aligned (`reconstruction/global/alignment.json`): each
+recorder's samples, events, tracks and perceived states are placed at
+t_global = t_local + offset_to_global, t_local = source timestamp - that
+recorder's own clock origin, so recorders are synchronised by the
+collision-anchored alignment, not by the simulator's shared clock; the HUD shows
+t_global (and the replay time from 0). If a recorder is not aligned the viewer
+falls back to the recorded source timestamps and says so. The viewer shows what
+the reconstruction knows: it reads only the recorders' own files
+(`vehicles/<id>/ego.jsonl`, `vehicles/<id>/metadata.json` with the recorder's
+own blueprint, sensors and footprint), the reconstruction outputs when present
 (`reconstruction/<id>/local_graph.json`, `local_tracks.jsonl`, `local_trace.jsonl`,
-`reconstruction/global/global_graph.json` and `associations.json`) and the global
-`configs/reconstruction.yaml` (nominal target size, tracking gap). It never reads
-`ground_truth/`, the run's own `metadata.json`, the scenario configuration or
-`reconstruction/evaluation/`; only vehicles with their own `ego.jsonl` are
-replayed. The map is recognised from the recorders' recorded positions: every
+`reconstruction/global/global_graph.json`, `associations.json`, `alignment.json`),
+`configs/reconstruction.yaml` (nominal target size, tracking gap),
+`configs/default.yaml` and the sensor profile (only the simulator connection)
+and the public OpenDRIVE files of the local CARLA installation (map
+recognition). It never reads `ground_truth/`, the run's own `metadata.json`, the
+scenario configuration or `reconstruction/evaluation/`; only vehicles with their
+own `ego.jsonl` are replayed. The replay does not read privileged ground_truth or
+scenario metadata, but recorder poses currently come from their recorded
+ego/GNSS stream (`ego.jsonl`, in the CARLA world frame and in this campaign
+practically exact): placing recorders from estimated poses is future work (the
+robustness / GNSS-noise phase). The map is recognised from the recorders' recorded positions: every
 OpenDRIVE map shipped with the local CARLA installation is parsed client-side
 and the one whose driving lanes hold all of them (at least 98%, 5 points ahead
 of any other road network) is loaded, preferring the server's current map

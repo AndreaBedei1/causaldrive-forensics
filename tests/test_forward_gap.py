@@ -1,9 +1,10 @@
 """CRITICAL_TTC for an unsafe forward gap (safe following distance) and the CUT_IN pre-entry region.
 
-Geometry in the recorder's vehicle frame (x forward, y right): a model3-sized recorder (front face
-2.4 m ahead of its origin, 2.16 m wide), the target given by its observed near surface.  Reaction
-time 1 s, decelerations 6 m/s^2, standstill margin 1 m, corridor +-1.5 m, front-lateral margin 1 m
-(configs/reconstruction.yaml).  The UN R157 time gaps are an engineering anchor, not a norm.
+Safe following distance d_min = max(v_ego * t_front(v_ego), 2 m), t_front from the UN R157 (ALKS,
+M1/N1) table, an engineering reference, not a norm.  Geometry in the recorder's vehicle frame (x
+forward, y right): a model3-sized recorder (front face 2.4 m ahead of its origin, 2.16 m wide), the
+target given by its observed near surface.  Corridor +-1.5 m, front-lateral margin 1 m
+(configs/reconstruction.yaml).  CASE numbers follow the 2026-10-10 specification.
 """
 
 import json
@@ -14,7 +15,9 @@ from pathlib import Path
 from src.cdf.llm.guard import LeakGuardError, check_packet
 from src.cdf.reconstruction.config import SemanticsConfig
 from src.cdf.reconstruction.conflict import assess_conflict, minimum_time_gap_s, safe_following_distance
-from src.cdf.reconstruction.local import mark_occlusions, track_events
+from src.cdf.reconstruction.config import ReconstructionConfig
+from src.cdf.reconstruction.local import mark_occlusions, reconstruct_vehicle, track_events
+from src.cdf.reconstruction.pipeline import read_incident_context
 from src.cdf.reconstruction.tracking import EgoFootprint, EgoState, EgoTrajectory, LocalTrack, TrackSample
 
 CFG = SemanticsConfig()
@@ -40,7 +43,7 @@ def assess(own, sample):
 
 
 class TimeGapTableTests(unittest.TestCase):
-    def test_un_r157_time_gaps_with_linear_interpolation(self):  # CASE 8
+    def test_un_r157_time_gaps_with_linear_interpolation(self):
         table = CFG.critical_time_gap_table
         for kmh, gap in ((7.2, 1.0), (10.0, 1.1), (20.0, 1.2), (30.0, 1.3), (40.0, 1.4), (50.0, 1.5), (60.0, 1.6),
                          (45.0, 1.45), (25.0, 1.25)):
@@ -48,20 +51,26 @@ class TimeGapTableTests(unittest.TestCase):
         self.assertEqual(minimum_time_gap_s(1.0, table), 1.0)  # below the table: its first value is held
         self.assertEqual(minimum_time_gap_s(30.0, table), 1.6)  # above it: its last value, no extrapolation
 
-    def test_required_distance_is_the_larger_of_time_gap_and_braking(self):
-        # Equal speeds: braking needs only the reaction distance and the margin, the time gap rules.
-        time_gap, braking, required = safe_following_distance(12.0, 12.0, CFG)
-        self.assertAlmostEqual(time_gap, 12.0 * (1.4 + 0.1 * (43.2 - 40.0) / 10.0))
-        self.assertAlmostEqual(braking, 12.0 * 1.0 + 1.0)
-        self.assertEqual(required, time_gap)
-        # A much slower lead: its braking distance is short, the recorder's braking rules.
-        time_gap, braking, required = safe_following_distance(14.0, 6.0, CFG)
-        self.assertAlmostEqual(braking, 14.0 + (14.0 ** 2 - 6.0 ** 2) / 12.0 + 1.0)
-        self.assertEqual(required, braking)
-        # Crawling: never below the minimum following distance.
-        self.assertEqual(safe_following_distance(1.5, 1.5, CFG)[0], CFG.critical_min_following_distance_m)
-        # A faster lead never makes the braking distance shorter than the margin.
-        self.assertEqual(safe_following_distance(5.0, 20.0, CFG)[1], CFG.critical_standstill_margin_m)
+    def test_d_min_is_speed_times_time_gap_never_below_two_metres(self):
+        t_front, distance, required = safe_following_distance(12.0, CFG)
+        self.assertAlmostEqual(t_front, 1.4 + 0.1 * (43.2 - 40.0) / 10.0)
+        self.assertAlmostEqual(distance, 12.0 * t_front)
+        self.assertEqual(required, distance)  # no margin added
+        self.assertAlmostEqual(safe_following_distance(50.0 / 3.6, CFG)[2], 50.0 / 3.6 * 1.5)
+        for speed in [0.1 * k for k in range(0, 400)]:
+            t_front, distance, required = safe_following_distance(speed, CFG)
+            self.assertGreaterEqual(required, 2.0, speed)
+            self.assertAlmostEqual(required, max(speed * t_front, 2.0), msg=speed)
+        self.assertEqual(safe_following_distance(0.0, CFG)[2], 2.0)
+        self.assertEqual(safe_following_distance(1.5, CFG)[2], 2.0)  # 1.5 m/s x 1.0 s < 2 m
+
+    def test_the_target_speed_is_no_input(self):
+        # Only the recorder's speed: the signature takes no target and the threshold cannot depend on it.
+        import inspect
+        self.assertEqual(list(inspect.signature(safe_following_distance).parameters), ["ego_speed_mps", "cfg"])
+        slower = assess(ego(12.0), target(2.4 + 10.0, 0.0, 6.0, 0.0))
+        faster = assess(ego(12.0), target(2.4 + 10.0, 0.0, 13.0, 0.0))
+        self.assertEqual(slower.forward.required_distance_m, faster.forward.required_distance_m)
 
 
 class ForwardGapTests(unittest.TestCase):
@@ -76,6 +85,7 @@ class ForwardGapTests(unittest.TestCase):
         self.assertAlmostEqual(forward.longitudinal_clearance_m, 3.0, places=6)
         self.assertAlmostEqual(forward.time_headway_s, 0.25, places=6)
         self.assertAlmostEqual(forward.minimum_time_gap_s, 1.432, places=6)
+        self.assertAlmostEqual(forward.required_distance_m, 12.0 * 1.432, places=6)
         self.assertLess(forward.margin_m, -14.0)
 
     def test_the_same_car_beyond_the_safe_distance_is_not_critical(self):  # CASE 2
@@ -85,19 +95,64 @@ class ForwardGapTests(unittest.TestCase):
         self.assertFalse(result.critical)
         self.assertIsNone(result.critical_reason)
 
-    def test_a_car_behind_at_the_same_speed_is_no_leader(self):  # CASE 3
+    def test_just_below_and_just_above_the_threshold(self):  # CASE 3 (one sample; hysteresis below)
+        d_min = 12.0 * 1.432
+        below = assess(ego(12.0), target(2.4 + d_min - 0.05, 0.0, 12.0, 0.0))
+        above = assess(ego(12.0), target(2.4 + d_min + 0.05, 0.0, 12.0, 0.0))
+        self.assertTrue(below.forward.unsafe and below.critical)
+        self.assertFalse(above.forward.unsafe or above.critical)
+        # Above d_min but within the release band: no new start, yet not released either.
+        self.assertFalse(above.forward.released)
+        released = assess(ego(12.0), target(2.4 + 1.11 * d_min, 0.0, 12.0, 0.0))
+        self.assertTrue(released.forward.released)
+
+    def test_a_slightly_faster_car_close_ahead_is_still_an_unsafe_gap(self):
+        result = assess(ego(12.0), target(2.4 + 3.0, 0.0, 13.0, 0.0))
+        self.assertFalse(result.collision_course)
+        self.assertIsNone(result.ttc_s)
+        self.assertEqual(result.critical_reason, "UNSAFE_FORWARD_GAP")
+
+    def test_a_crawling_recorder_keeps_at_least_two_metres(self):  # CASES 4 and 5
+        close = assess(ego(1.5), target(2.4 + 1.5, 0.0, 1.5, 0.0))
+        self.assertEqual(close.forward.required_distance_m, 2.0)
+        self.assertTrue(close.forward.leader)
+        self.assertEqual(close.critical_reason, "UNSAFE_FORWARD_GAP")
+        self.assertIsNone(close.ttc_s)
+        enough = assess(ego(1.5), target(2.4 + 2.5, 0.0, 1.5, 0.0))
+        self.assertFalse(enough.forward.unsafe)
+        self.assertFalse(enough.critical)
+        # A standing car 2.5 m ahead is no leader (no forward-gap claim); only a real predicted overlap can
+        # make it critical: here the collision-course model does (1 s reaction at 1.5 m/s plus its 1 m
+        # envelope leave no room to stop), independently of the safe gap.
+        standing = assess(ego(1.5), target(2.4 + 2.5, 0.0, 0.0, 0.0))
+        self.assertFalse(standing.forward.leader)
+        self.assertFalse(standing.forward.unsafe)
+        self.assertTrue(standing.collision_course)
+        self.assertEqual(standing.critical_reason, "PREDICTED_OVERLAP")
+        self.assertIsNotNone(standing.ttc_s)
+
+    def test_the_former_braking_branch_no_longer_counts(self):
+        # 14 m/s behind a car at 6 m/s, 22 m ahead: d_min = 14 x 1.504 = 21.06 m, so the gap itself is safe
+        # (the former max(time gap, reaction + braking difference + 1 m) asked for 28.3 m).
+        result = assess(ego(14.0), target(2.4 + 22.0, 0.0, 6.0, 0.0))
+        self.assertAlmostEqual(result.forward.required_distance_m, 14.0 * 1.504, places=3)
+        self.assertFalse(result.forward.unsafe)
+        self.assertNotIn("UNSAFE_FORWARD_GAP", result.critical_reason or "")
+        self.assertTrue(result.collision_course)  # closing at 8 m/s: the 2-D model still looks at it
+
+    def test_a_car_behind_at_the_same_speed_is_no_leader(self):  # CASE 6
         result = assess(ego(12.0), target(-2.37 - 3.0, 0.0, 12.0, 0.0))
         self.assertLess(result.forward.longitudinal_clearance_m, 0.0)
         self.assertFalse(result.forward.leader)
         self.assertFalse(result.critical)
 
-    def test_a_car_exactly_beside_is_no_leader_however_close(self):  # CASE 4
+    def test_a_car_exactly_beside_is_no_leader_however_close(self):  # CASE 7
         for lateral in (2.0, 3.0):
             result = assess(ego(12.0), target(0.0, lateral, 12.0, 0.0))
             self.assertFalse(result.forward.leader, lateral)
             self.assertFalse(result.critical, lateral)
 
-    def test_a_front_lateral_car_entering_the_path_close_ahead_is_critical(self):  # CASE 5
+    def test_a_front_lateral_car_entering_the_path_close_ahead_is_critical(self):  # CASE 9
         # Its near (rear-left) corner 6 m ahead and 2 m to the right, moving toward the corridor at
         # 1 m/s: its nominal body (turned toward the corridor, front corner leading) lies just
         # outside it, a leader about 3.6 m ahead of the front face.
@@ -117,13 +172,13 @@ class ForwardGapTests(unittest.TestCase):
         drifting = assess(ego(12.0), target(6.0, 2.0, 12.0, -0.35, vel_std=0.1))
         self.assertFalse(drifting.forward.leader)
 
-    def test_a_car_two_lanes_away_is_no_leader_even_when_it_moves_over(self):  # CASE 6
+    def test_a_car_two_lanes_away_is_no_leader_even_when_it_moves_over(self):  # CASE 8
         result = assess(ego(12.0), target(8.0, 6.0, 12.0, -1.5))
         self.assertGreater(result.forward.lateral_body_gap_m, CFG.critical_front_lateral_margin_m)
         self.assertFalse(result.forward.leader)
         self.assertFalse(result.critical)
 
-    def test_crossing_traffic_keeps_the_collision_course_model(self):  # CASE 7
+    def test_crossing_traffic_keeps_the_collision_course_model(self):  # CASE 10
         close = assess(ego(10.0), target(20.0, 20.0, 0.0, -10.0))
         self.assertEqual(close.encounter, "CROSSING")
         self.assertTrue(close.collision_course and close.critical)
@@ -138,9 +193,10 @@ class ForwardGapTests(unittest.TestCase):
         self.assertFalse(result.forward.leader)
 
     def test_a_standing_recorder_follows_nobody(self):
-        result = assess(ego(0.0), target(2.4 + 1.0, 0.0, 0.0, 0.0))
-        self.assertFalse(result.forward.leader)
-        self.assertFalse(result.critical)
+        for lead_speed in (0.0, 1.5):
+            result = assess(ego(0.0), target(2.4 + 1.0, 0.0, lead_speed, 0.0))
+            self.assertFalse(result.forward.leader)
+            self.assertFalse(result.critical)
 
     def test_uncertain_estimates_and_occluded_samples_make_no_claim(self):
         uncertain = assess(ego(12.0), target(5.4, 0.0, 12.0, 0.0, vel_std=1.5))
@@ -185,7 +241,7 @@ class ForwardGapHysteresisTests(unittest.TestCase):
     def test_the_state_ends_only_beyond_ten_percent_more_than_the_safe_distance(self):
         # Recorder at 12 m/s (safe distance 17.18 m); the car ahead first 10 m away, then pulls away
         # at 2 m/s: unsafe until 17.18 m, held up to 1.10 x 17.18 = 18.9 m, released beyond.
-        required = safe_following_distance(12.0, 14.0, CFG)[2]
+        required = safe_following_distance(12.0, CFG)[2]
 
         def motion(t):
             return 2.4 + 10.0 + 2.0 * max(t - 1.0, 0.0), 0.0, 12.0 + (2.0 if t >= 1.0 else 0.0), 0.0
@@ -271,9 +327,13 @@ class CampaignRegressionTests(unittest.TestCase):
         return next((n["t_local"] for n in nodes if n["event_type"] == event_type and n["subject_id"] == subject), None)
 
     def test_s02_critical_before_cut_in_keeps_its_order(self):  # E
-        nodes = _graph("S02/run_0_critical_before_cut_in", "A")
-        if nodes is None:
+        run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
+        if not (run / "vehicles" / "A").exists():
             self.skipTest("canonical trace not present")
+        # Reconstructed now from the raw files with the current rules (not read from the stored outputs).
+        local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
+        nodes = [{"event_type": n.event_type, "subject_id": n.subject_id, "t_local": n.t_local}
+                 for n in local.graph.nodes]
         critical = self.first(nodes, "CRITICAL_TTC_START", "track_001")
         cut_in = self.first(nodes, "CUT_IN_FROM_LEFT_START", "track_001")
         self.assertIsNotNone(critical)

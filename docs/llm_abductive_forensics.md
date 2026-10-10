@@ -67,7 +67,7 @@ Removed from TRACK_STATE (`TRACK_STATE_REMOVED`): `encounter`, `motion_relation`
 `unavoidable_by_braking`, `critical`, `target_acceleration_used_mps2`, `estimate_known`, `ahead_of_front_m`,
 `surface_offset_m`, `relative_motion_angle_deg`, `ego_speed_mps`, and the safe-following-distance outputs of
 the conflict model (`critical_reason`, `forward_region`, `forward_leader`, `longitudinal_clearance_m`,
-`lateral_body_gap_m`, `time_headway_s`, `minimum_time_gap_s`, `required_safe_distance_m`,
+`lateral_body_gap_m`, `time_headway_s`, `minimum_time_gap_s`, `time_gap_distance_m`, `required_safe_distance_m`,
 `safe_distance_margin_m`, `line_of_sight_occluded`; the leak guard refuses them too).  Never exported: events,
 perceived states, graphs, the report, the evaluation, ground truth, the run's `metadata.json`, the scenario
 configuration.

@@ -737,7 +737,10 @@ class ReplayApp:
         tracks = ("tracks: ghost boxes + dots" if self.show_ghosts else "tracks: dots") if self.show_tracks \
             else "tracks hidden"
         lines = [(self.run.name + "  (" + self.map_name + ")", self.font_bold, (255, 255, 255)),
-                 ("Time  {0:6.2f} / {1:.2f} s".format(t, self.run.duration), self.font, (255, 255, 255)),
+                 (("t_global {0:+6.2f} s   replay {1:5.2f} / {2:.2f} s" if self.run.clock == "t_global" else
+                   "Time  {1:6.2f} / {2:.2f} s (recorded source clock)").format(self.run.display_time(t), t,
+                                                                               self.run.duration),
+                  self.font, (255, 255, 255)),
                  ("Speed {0:.2f}x   {1}".format(self.clock.speed, state), self.font,
                   (120, 230, 120) if state == "PLAYING" else (255, 170, 60)),
                  ("Camera {0}   selected {1}   {2}".format(camera, self.selected, tracks),
@@ -746,12 +749,12 @@ class ReplayApp:
         upcoming = [e for e in self.events if e.time > t + 1e-6]
         if passed:
             e = passed[-1]
-            lines.append(("last {0:5.2f} {1} {2} {3}".format(e.time, e.actor, e.event_type,
+            lines.append(("last {0:+6.2f} {1} {2} {3}".format(self.run.display_time(e.time), e.actor, e.event_type,
                                                           self.run.subject_name(e.actor, e.subject)).rstrip(),
                           self.font_small, (255, 214, 10)))
         if upcoming:
             e = upcoming[0]
-            lines.append(("next {0:5.2f} {1} {2} {3}".format(e.time, e.actor, e.event_type,
+            lines.append(("next {0:+6.2f} {1} {2} {3}".format(self.run.display_time(e.time), e.actor, e.event_type,
                                                           self.run.subject_name(e.actor, e.subject)).rstrip(),
                           self.font_small, (200, 200, 200)))
         rendered = [font.render(text, True, rgb) for text, font, rgb in lines]

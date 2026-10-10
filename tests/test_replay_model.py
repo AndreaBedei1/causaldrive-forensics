@@ -118,6 +118,57 @@ class ClockTests(unittest.TestCase):
         self.assertEqual(trajectory.pose_at(wandering.time), trajectory.pose_at(1.0))
 
 
+def _align(run, offsets):
+    """The reconstruction's alignment: recorder -> offset_to_global (None: not aligned)."""
+    _write(run / "reconstruction" / "global" / "alignment.json", {"graphs": {
+        name: ({"status": "ALIGNED", "offset_to_global": offset} if offset is not None
+               else {"status": "UNALIGNED", "offset_to_global": None}) for name, offset in offsets.items()}})
+
+
+class ClockTests(unittest.TestCase):
+    def test_without_alignment_the_recorded_source_clock_is_used(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run = ReplayRun.load(_make_run(Path(tmp)))
+        self.assertEqual(run.clock, "source")
+        self.assertEqual(run.display_time(0.45), 0.45)
+
+    def test_an_aligned_run_replays_on_global_time(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = _make_run(Path(tmp))
+            _align(run_dir, {"A": -6.5, "B": -6.0})  # both collision reports at t_global 0
+            run = ReplayRun.load(run_dir)
+        self.assertEqual(run.clock, "t_global")
+        self.assertEqual(run.start, -6.5)
+        self.assertEqual([(e.time, e.event_type) for e in run.local_events["A"].events][2:4],
+                         [(0.45, "CLOSING_START"), (1.6, "CLOSING_END")])
+        self.assertEqual([e.time for e in run.local_events["B"].events], [0.5, 6.5])
+        self.assertEqual([(run.display_time(m.time), m.participants) for m in run.collisions], [(0.0, ("A", "B"))])
+        self.assertEqual(run.display_time(0.45), -6.05)
+        # A's pose at t_global -6.0 is its recorded pose 0.5 s after its first sample.
+        self.assertEqual(run.participant("A").trajectory.pose_at(-6.0).x, 0.5 * 10)
+
+    def test_the_alignment_not_the_simulator_clock_synchronises_the_recorders(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = _make_run(Path(tmp))
+            # The reconstruction places B's clock 0.2 s off the source timestamps: the replay follows it.
+            _align(run_dir, {"A": -6.5, "B": -6.2})
+            run = ReplayRun.load(run_dir)
+        self.assertEqual([e.time for e in run.local_events["B"].events], [0.3, 6.3])
+        b = run.participant("B").trajectory
+        self.assertAlmostEqual(b.start, -6.2)
+        self.assertEqual([(m.time, m.participants) for m in run.collisions], [(6.3, ("A", "B"))])
+
+    def test_a_recorder_without_alignment_falls_back_to_the_source_clock_and_says_so(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = _make_run(Path(tmp))
+            _align(run_dir, {"A": -6.5, "B": None})
+            run = ReplayRun.load(run_dir)
+        self.assertEqual(run.clock, "source")
+        self.assertEqual(run.start, 100.0)
+        self.assertTrue(any("not every recorder is aligned" in note for note in run.notes))
+        self.assertEqual([e.time for e in run.local_events["B"].events], [0.5, 6.5])
+
+
 class EventTimelineTests(unittest.TestCase):
     def test_local_times_map_through_each_recorders_clock_origin(self):
         with tempfile.TemporaryDirectory() as tmp:

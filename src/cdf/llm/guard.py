@@ -42,7 +42,8 @@ FORBIDDEN_TOKENS = (
     "encounter", "motion_relation", "avoidance", "braking_margin", "unavoidable",
     "predicted_overlap", "cut_in", "ego_path", "privileged", "oracle",
     # safe-following-distance outputs of the conflict model (UNSAFE_FORWARD_GAP)
-    "time_headway", "minimum_time_gap", "required_safe_distance", "safe_distance_margin", "forward_region",
+    "time_headway", "minimum_time_gap", "time_gap_distance", "required_safe_distance", "safe_distance_margin",
+    "forward_region",
     "forward_leader", "lateral_body_gap", "longitudinal_clearance", "line_of_sight_occluded",
 )
 FORBIDDEN_EXACT_KEYS = ("ttc_s",)

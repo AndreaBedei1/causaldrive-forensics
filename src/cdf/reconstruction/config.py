@@ -125,14 +125,13 @@ class SemanticsConfig:
     critical_min_track_age_s: float = 0.5
     # CRITICAL_TTC also for an unsafe forward gap (UNSAFE_FORWARD_GAP): a leader (same direction,
     # body ahead of the front face, in the path corridor or within the front-lateral margin of it
-    # while approaching it) closer than the larger of the time-gap distance (speed x this table's
-    # time gap, linear interpolation, ends held, at least the minimum distance) and the braking
-    # distance (reaction + own braking - the lead's braking at the lead deceleration + d0).
+    # while approaching it) closer than d_min = max(v_ego x t_front(v_ego), the minimum distance),
+    # t_front from this table (linear interpolation, the ends held).  No margin is added and the
+    # target's speed is not used.
     critical_time_gap_table: Tuple[Tuple[float, float], ...] = UNECE_R157_TIME_GAP
     critical_min_following_distance_m: float = 2.0
-    # Hypothetical braking of the vehicle ahead (its measured acceleration is not used).
-    critical_lead_deceleration_mps2: float = 6.0
-    # The recorder must be moving: a standing recorder follows nobody.
+    # The recorder must be moving (the MOVING threshold, 1 m/s): a standing or creeping recorder
+    # follows nobody; from 1 to 2 m/s the 2 m minimum binds (v x t_front < 2 m).
     critical_forward_min_speed_mps: float = 1.0
     # Beside the corridor a body counts only within this margin and approaching it laterally at
     # least this fast beyond the velocity uncertainty (a car keeping its lane next to the

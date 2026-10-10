@@ -827,7 +827,8 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
                 longitudinal_clearance_m=round(forward.longitudinal_clearance_m, 2),
                 lateral_body_gap_m=round(forward.lateral_body_gap_m, 2),
                 time_headway_s=_rounded(forward.time_headway_s, 2),
-                minimum_time_gap_s=round(forward.minimum_time_gap_s, 2),
+                minimum_time_gap_s=round(forward.minimum_time_gap_s, 3),
+                time_gap_distance_m=round(forward.time_gap_distance_m, 2),
                 required_safe_distance_m=round(forward.required_distance_m, 2),
                 safe_distance_margin_m=round(forward.margin_m, 2))
     return SemanticEvent(type="TRACK_STATE", kind=FACT, actor_id=owner, subject_id=track_id,

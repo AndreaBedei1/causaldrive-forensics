@@ -23,6 +23,7 @@
     "safe_distance_margin_m": 362,
     "surface_offset_m": 362,
     "target_acceleration_used_mps2": 362,
+    "time_gap_distance_m": 362,
     "time_headway_s": 362,
     "ttc_s": 362,
     "unavoidable_by_braking": 362
@@ -40,9 +41,9 @@
   "inputs": {
     "incident_context.json": "79f6822c7604e0659504ee3fe24d6ab556457daf5a441e84cc1996af88fa3b99",
     "reconstruction/A/local_graph.json": "b3fade0f2c95394bd25e1151d74d54e188d091ad285f4cdba2b67b142f6b121b",
-    "reconstruction/A/local_trace.jsonl": "ee8ec7c9caf64e3eb255433ee5c77c594afdd8b18c9b9b26bad3dbd93e2e9062",
+    "reconstruction/A/local_trace.jsonl": "57a6fd2ae95461a1203c68a216c36725bba12c5a112159066b14e3a6dc199a06",
     "reconstruction/B/local_graph.json": "979fd797034ad26c024c2ba761be752dc8f506787a46591c4c0501c6eea438b2",
-    "reconstruction/B/local_trace.jsonl": "f8cdc9bfa57dfcfa6535f214f3f19f823c333485d1fb8f69485a4bd83a25bf9a",
+    "reconstruction/B/local_trace.jsonl": "c249f6a010be2f0ce9070e4a34a7a2e2db60fb844796bd7024a1e3171e8de97d",
     "reconstruction/global/alignment.json": "1def30477eb3efbdb66c404c73da5a42fd022681fe1c72e847939e69701388d0",
     "reconstruction/global/associations.json": "b703ce6c3edcdfebb5ac5eb06f7871f4d23224624bcc7749a0d4b278087ac533",
     "vehicles/A/metadata.json": "fe1fdce37c11a8a4daa2ba1f1aa06f2e81a5be621a2ad64b2378d5b50babcb19",
@@ -76,6 +77,7 @@
     "safe_distance_margin_m": "conflict-model output (safe following distance)",
     "surface_offset_m": "internal tracking detail",
     "target_acceleration_used_mps2": "conflict-model input choice",
+    "time_gap_distance_m": "conflict-model threshold (recorder speed x UN R157 time gap)",
     "time_headway_s": "conflict-model output (safe following distance)",
     "ttc_s": "conflict-model time to contact (not the geometric closing_ttc_s)",
     "unavoidable_by_braking": "conflict-model output"

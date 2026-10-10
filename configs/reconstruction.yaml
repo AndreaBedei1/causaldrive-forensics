@@ -50,10 +50,11 @@ reconstruction:
     # available deceleration.  The braking vehicle is the recorder, or the target when no braking
     # of the recorder helps (a car closing in from behind).
     # UNSAFE_FORWARD_GAP: a leader (same direction, ahead, in the path or entering it) is closer
-    # than the safe following distance, collision course or not (a car ahead at the same speed).
-    # Modelling assumptions, not a norm: the safe-distance idea of art. 149 CdS and Directive
-    # 2006/126/EC (room to stop if the vehicle ahead brakes), the UN R157 (ALKS) time-gap table as
-    # an engineering anchor; reaction time and decelerations are this reconstruction's choice.
+    # than the safe following distance d_min = max(v_ego x t_front(v_ego), 2 m), collision course
+    # or not (a car ahead at the same speed: its classical TTC is infinite, ttc_s stays null).
+    # Not a norm: the safe-distance idea of art. 149 CdS and Directive 2006/126/EC, the UN R157
+    # (ALKS) time-gap table as a technical reference; the reaction time and decelerations below
+    # belong to the collision-course model only and are this reconstruction's choice.
     critical_reaction_time_s: 1.0     # reaction before braking (driver brake reaction ~0.7-1.5 s)...
     critical_deceleration_mps2: 6.0   # ...then braking at up to this (hard, non-emergency; emergency ~8-10)...
     critical_standstill_margin_m: 1.0 # ...stopping at least this far ahead of / behind the target (envelope)
@@ -65,7 +66,7 @@ reconstruction:
     target_width_m: 1.9               # measures no size; a mid-size car, campaign cars 4.2-5.9 x 1.8-2.2)
     target_braking_min_mps2: 1.0      # a target decelerating at least this is predicted to keep braking to a stop
     critical_min_track_age_s: 0.5     # no CRITICAL_TTC claim either way on a younger track (its velocity is not yet known)
-    # UNSAFE_FORWARD_GAP: clearance from the front face to the leader's box < max(time gap, braking).
+    # UNSAFE_FORWARD_GAP: clearance from the front face to the leader's box < d_min = max(v_ego x t_front, 2 m).
     critical_time_gap_table:          # UN R157 (ALKS, M1/N1): km/h -> minimum time gap s, linear, ends held
       - [7.2, 1.0]
       - [10.0, 1.1]
@@ -74,9 +75,8 @@ reconstruction:
       - [40.0, 1.4]
       - [50.0, 1.5]
       - [60.0, 1.6]
-    critical_min_following_distance_m: 2.0 # time-gap distance never below this (2 m at 7.2 km/h in the table)
-    critical_lead_deceleration_mps2: 6.0   # braking: reaction + v^2/2a(own) - v_lead^2/2a(lead) + d0; hypothetical lead braking
-    critical_forward_min_speed_mps: 1.0    # the recorder must be moving (a standing recorder follows nobody)
+    critical_min_following_distance_m: 2.0 # d_min never below this (no margin added, the target's speed not used)
+    critical_forward_min_speed_mps: 1.0    # the recorder must be moving (MOVING threshold); 1-2 m/s: the 2 m minimum binds
     critical_front_lateral_margin_m: 1.0   # beside the corridor: body within this of it...
     critical_front_lateral_speed_mps: 0.3  # ...and approaching it at least this fast beyond the velocity uncertainty
     critical_forward_release_factor: 1.10  # the reason ends once the clearance > 1.10 x the required distance

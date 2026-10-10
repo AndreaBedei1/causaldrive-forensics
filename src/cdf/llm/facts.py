@@ -86,6 +86,7 @@ TRACK_STATE_REMOVED = {
     "lateral_body_gap_m": "conflict-model geometry (nominal target box)",
     "time_headway_s": "conflict-model output (safe following distance)",
     "minimum_time_gap_s": "conflict-model threshold (UN R157 table)",
+    "time_gap_distance_m": "conflict-model threshold (recorder speed x UN R157 time gap)",
     "required_safe_distance_m": "conflict-model threshold (safe following distance)",
     "safe_distance_margin_m": "conflict-model output (safe following distance)",
     "target_acceleration_used_mps2": "conflict-model input choice",

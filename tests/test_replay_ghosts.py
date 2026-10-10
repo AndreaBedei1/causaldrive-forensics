@@ -27,9 +27,10 @@ from src.cdf.replay.model import (ANONYMOUS, ASSOCIATED, BOX_EDGES, HEADING_FROM
 
 ROOT = Path(__file__).resolve().parents[1]
 S17 = ROOT / "traces" / "S17" / "run_0_crash"
+S16 = ROOT / "traces" / "S16" / "run_0_consequential"
 VIEWER_SOURCES = (ROOT / "scripts" / "replay_run.py", ROOT / "src" / "cdf" / "replay" / "model.py")
 RECONSTRUCTION_FILES = ("local_graph.json", "local_tracks.jsonl", "local_trace.jsonl")
-GLOBAL_FILES = ("global_graph.json", "associations.json")
+GLOBAL_FILES = ("global_graph.json", "associations.json", "alignment.json")
 FOOTPRINT = EgoFootprint(-2.0, 2.0, -1.0, 1.0)
 
 
@@ -98,27 +99,48 @@ def _write(path, data, lines=False):
 
 
 def _poison(run_dir):
-    """Privileged material a viewer must not use: a third vehicle in ground truth (with simulator actor
-    ids), the scenario's participants in the run metadata, an evaluation naming the anonymous tracks,
-    and a vehicle folder without a recording of its own."""
+    """Privileged material a viewer must not use, all of it deliberately false: a third vehicle C in ground
+    truth with simulator actor ids and positions, a false map, false triggers / counterfactuals / contacts,
+    the scenario's participants in the run metadata, a scenario file, an evaluation that names the anonymous
+    tracks and associates them, and a vehicle folder without a recording of its own."""
     third = [{"participant_id": "C", "actor_id": 777, "timestamp": 12.9 + 0.05 * k,
               "transform": {"x": -20.0 - k, "y": -207.0, "z": 0.3, "yaw_deg": 180.0}} for k in range(200)]
     _write(run_dir / "ground_truth" / "states.jsonl", third, lines=True)
     _write(run_dir / "ground_truth" / "metadata.json",
            {"map": "Town03", "participants": [{"participant_id": p, "record": p != "C"} for p in "ABC"]})
-    _write(run_dir / "metadata.json", {"scenario_id": "S17", "variant": "crash", "participants": ["A", "B", "C"]})
+    _write(run_dir / "ground_truth" / "triggers.jsonl",
+           [{"participant_id": "A", "action_id": "fake_action", "trigger": {"target": "C"}, "t_scenario": 1.0}],
+           lines=True)
+    _write(run_dir / "ground_truth" / "counterfactuals.json", {"factual": {"collisions": {"A-C": {"first_s": 2.0}}}})
+    _write(run_dir / "ground_truth" / "collisions.jsonl",
+           [{"participant_id": "A", "other_actor_id": 777, "timestamp": 14.0, "impulse": 9999.0}], lines=True)
+    _write(run_dir / "metadata.json", {"scenario_id": "S17", "variant": "crash", "map": "Town03",
+                                       "participants": ["A", "B", "C"]})
+    (run_dir / "s17_unobserved_causal_vehicle.yaml").write_text("scenario:\n  scenario_id: S17\n  map: Town03\n",
+                                                                encoding="utf-8")
     _write(run_dir / "reconstruction" / "evaluation" / "identity.json",
            {"A:track_001": "C", "B:track_002": "C"})
+    _write(run_dir / "reconstruction" / "evaluation" / "evaluation.json",
+           {"tracks": [{"track": "A:track_001", "true_identity": "C", "verdict": "C"}],
+            "associations": [{"local_graph": "A", "local_track": "track_001", "global_entity": "C",
+                              "status": "ASSOCIATED"}]})
     _write(run_dir / "vehicles" / "C" / "metadata.json", {"blueprint": "vehicle.nissan.patrol", "participant_id": "C"})
 
 
 def _summary(run):
+    """Everything the viewer shows: recorders and their poses, tracks and ghosts, events, collisions,
+    perceived states, the clock and the notes."""
     tracks = [(t.name, t.status, t.entity, t.ghost, t.label,
                [(s.time, round(s.centre[0], 6), round(s.centre[1], 6), round(s.yaw, 6), s.heading, s.measured)
                 for s in t.samples]) for t in run.all_tracks()]
-    return ([(p.participant_id, p.blueprint) for p in run.participants], tracks,
-            [(e.time, e.actor, e.event_type, e.subject) for e in run.all_events()],
-            [(m.time, m.participants) for m in run.collisions])
+    poses = [(p.participant_id, p.blueprint, p.blueprint_source,
+              [tuple(round(v, 6) for v in (pose.x, pose.y, pose.z, pose.yaw))
+               for pose in (p.trajectory.pose_at(run.start + 0.5 * k) for k in range(int(run.duration / 0.5) + 1))])
+             for p in run.participants]
+    perceived = {pid: (states.times, states.states) for pid, states in run.perceived.items()}
+    return (poses, tracks, [(e.time, e.actor, e.event_type, e.subject) for e in run.all_events()],
+            [(m.time, m.participants) for m in run.collisions], perceived, run.identities,
+            (run.clock, run.start, run.duration, run.clock_origins), run.notes)
 
 
 def _code_constants_and_names(path):
@@ -230,6 +252,23 @@ class NoPrivilegedInputTests(unittest.TestCase):
                 self.assertNotIn(forbidden, path)
         self.assertIn(_norm(S17 / "reconstruction" / "global" / "associations.json"), {p for _, p in seen})
 
+    @unittest.skipUnless((S16 / "reconstruction").exists(), "S16 trace not present")
+    def test_loading_s16_reads_only_the_recorders_and_the_reconstruction(self):
+        with _Reads() as reads:
+            run = ReplayRun.load(S16)
+        self.assertEqual([p.participant_id for p in run.participants], ["A", "B", "C"])  # three recorders
+        allowed = {_norm(path) for path in _viewer_inputs(S16, ["A", "B", "C"])}
+        seen = reads.under(S16)
+        self.assertTrue(seen)
+        for event, path in seen:
+            if event == "open":
+                self.assertIn(path, allowed)
+            else:
+                self.assertEqual(path, _norm(S16 / "vehicles"))
+        for event, path in reads.under(ROOT):
+            for forbidden in ("ground_truth", "evaluation", os.sep + "scenarios" + os.sep, os.sep + "llm" + os.sep):
+                self.assertNotIn(forbidden, path)
+
     @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
     def test_privileged_files_change_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -242,11 +281,14 @@ class NoPrivilegedInputTests(unittest.TestCase):
             opened = [path for event, path in reads.under(poisoned) if event == "open"]
         self.assertEqual(_summary(with_privileged), _summary(without))
         self.assertEqual([p.participant_id for p in with_privileged.participants], ["A", "B"])
+        self.assertEqual(with_privileged.clock, "t_global")
         for path in opened:
             self.assertNotIn("ground_truth", path)
             self.assertNotIn("evaluation", path)
             self.assertNotEqual(path, _norm(poisoned / "metadata.json"))
+            self.assertFalse(path.endswith(".yaml"), path)
             self.assertNotIn(_norm(poisoned / "vehicles" / "C"), path)
+        self.assertEqual(set(opened), {_norm(path) for path in _viewer_inputs(poisoned, "AB")})
 
     def test_the_map_is_recognised_from_recorded_positions_and_public_map_files_only(self):
         viewer = _load_viewer_script()
@@ -297,6 +339,21 @@ class S17GhostTests(unittest.TestCase):
     def setUpClass(cls):
         cls.replay = ReplayRun.load(S17)
         cls.tracks = {track.name: track for track in cls.replay.all_tracks()}
+
+    def test_the_replay_runs_on_the_reconstructions_global_time(self):
+        self.assertEqual(self.replay.clock, "t_global")
+        graph = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text(encoding="utf-8"))
+        t_global = {obs["local_node"]: node["t_global"] for node in graph["nodes"]
+                    for obs in node.get("observations") or []}
+        events = self.replay.all_events()
+        self.assertTrue(events)
+        for event in events:
+            self.assertAlmostEqual(self.replay.display_time(event.time), t_global[event.node_id], places=6)
+        self.assertEqual([(self.replay.display_time(m.time), m.participants) for m in self.replay.collisions],
+                         [(0.0, ("A", "B"))])
+        critical = next(e for e in events if e.event_type == "CRITICAL_TTC_START" and e.subject == "track_001"
+                        and e.actor == "A")
+        self.assertAlmostEqual(self.replay.display_time(critical.time), -2.35, places=6)
 
     def test_the_tracks_are_shown_as_the_fusion_decided(self):
         self.assertEqual({name: (t.status, t.entity, t.ghost) for name, t in self.tracks.items()},

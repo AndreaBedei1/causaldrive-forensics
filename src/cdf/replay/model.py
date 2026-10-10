@@ -2,15 +2,21 @@
 
 Pure Python (no CARLA, no pygame) and read-only; used by scripts/replay_run.py.
 
-Timeline.  Every recorder of a CARLA run stamps its samples with simulator
-time, so the recorded source timestamps form one visualization clock:
+Timeline.  The clock is the reconstruction's global time whenever the
+reconstruction aligned every recorder (``reconstruction/global/alignment.json``,
+collision-anchored):
 
-    replay_time = source_timestamp - run_start
+    t_global = t_local + offset_to_global(X),   t_local = source_timestamp - origin(X)
 
-where ``run_start`` is the earliest recorded ego sample.  A reconstructed event
-of recorder X is shown at ``X's clock origin + t_local - run_start``.  This
-mapping exists for display only: it is not the graph-level alignment, and
-nothing is ever written back to a trace or a graph.
+for every sample of recorder X (its ego poses, events, tracks and perceived
+states), where ``origin(X)`` is X's own clock origin as its local graph records
+it.  Recorders are then synchronised by the reconstruction's alignment, not by
+the simulator's shared clock.  When a recorder is not aligned the viewer falls
+back to the recorded source timestamps of every recorder (one simulator clock in
+a CARLA run) and says so.  Replay time runs from 0 at the earliest recorded
+sample; ``display_time`` gives t_global (or the source-clock time).  The poses
+themselves are the recorders' own recorded ego stream (``ego.jsonl``, CARLA
+world frame): no ground truth, but not an estimated pose either.
 
 Inputs.  The viewer shows what the reconstruction knows, not what the
 simulator knew.  It reads the recorders' own files (``vehicles/<id>/ego.jsonl``,
@@ -129,6 +135,10 @@ class Trajectory:
             return len(self.times) - 1, 0.0
         index = bisect_right(self.times, t) - 1
         return index, (t - self.times[index]) / (self.times[index + 1] - self.times[index])
+
+    def shifted(self, delta: float) -> "Trajectory":
+        """The same poses on a clock ``delta`` seconds ahead (t -> t + delta)."""
+        return Trajectory([t + delta for t in self.times], list(self.poses), list(self.speeds))
 
     def pose_at(self, t: float) -> Pose:
         index, f = self._bracket(t)
@@ -296,12 +306,16 @@ class LocalEvents:
     intervals: List[StateInterval]
 
 
-def load_local_events(path: Path, run_start: float) -> LocalEvents:
-    """Events of one local_graph.json on the replay timeline (read-only)."""
+def load_local_events(path: Path, run_start: float, clock_origin: Optional[float] = None) -> LocalEvents:
+    """Events of one local_graph.json on the replay timeline (read-only).
+
+    ``clock_origin``: the replay clock's value at the recorder's t_local = 0 (its
+    offset_to_global on the global clock); by default its recorded source origin.
+    """
     graph = _read_json(path)
     owner = str(graph["owner"])
     origin = float(graph["recorder"]["clock"]["origin_source_timestamp"])
-    offset = origin - run_start
+    offset = (origin if clock_origin is None else clock_origin) - run_start
     events = [ReplayEvent(round(offset + float(node["t_local"]), 6), owner, str(node["event_type"]),
                           node.get("subject_id"), str(node["node_id"])) for node in graph["nodes"]]
     return LocalEvents(owner, origin, events, state_intervals(events, observed_from=round(offset, 6)))
@@ -580,6 +594,32 @@ def choose_map(fits: Mapping[str, float], networks: Mapping[str, str], current: 
 # A recorded run
 # --------------------------------------------------------------------------
 
+GLOBAL_CLOCK = "t_global"  # the reconstruction's collision-anchored global time
+SOURCE_CLOCK = "source"  # the recorded source timestamps (one simulator clock in a CARLA run)
+
+
+def recorder_clocks(run_dir: Path, ids: Sequence[str]) -> Tuple[str, Dict[str, float], Dict[str, float]]:
+    """(clock, source origins, offsets_to_global) from the reconstruction outputs only.
+
+    GLOBAL_CLOCK when every recorder has a local graph with its clock origin and
+    an ALIGNED offset in ``reconstruction/global/alignment.json``; otherwise
+    SOURCE_CLOCK (the origins and offsets found are still returned).
+    """
+    rec = Path(run_dir) / "reconstruction"
+    origins: Dict[str, float] = {}
+    for pid in ids:
+        graph = rec / pid / "local_graph.json"
+        if graph.exists():
+            origins[pid] = float(_read_json(graph)["recorder"]["clock"]["origin_source_timestamp"])
+    offsets: Dict[str, float] = {}
+    if (rec / "global" / "alignment.json").exists():
+        for name, info in (_read_json(rec / "global" / "alignment.json").get("graphs") or {}).items():
+            if info.get("status") == "ALIGNED" and info.get("offset_to_global") is not None:
+                offsets[str(name)] = float(info["offset_to_global"])
+    aligned = bool(ids) and all(pid in origins and pid in offsets for pid in ids)
+    return (GLOBAL_CLOCK if aligned else SOURCE_CLOCK), origins, offsets
+
+
 @dataclass
 class Participant:
     """A recorder: a vehicle with its own recorded ``ego.jsonl`` (the only vehicles replayed)."""
@@ -601,6 +641,8 @@ class ReplayRun:
     duration: float
     local_events: Dict[str, LocalEvents] = field(default_factory=dict)
     collisions: List[CollisionMark] = field(default_factory=list)
+    clock: str = SOURCE_CLOCK  # GLOBAL_CLOCK (reconstruction alignment) or SOURCE_CLOCK (recorded timestamps)
+    clock_origins: Dict[str, float] = field(default_factory=dict)  # the clock's value at each recorder's t_local = 0
     identities: Dict[Tuple[str, str], str] = field(default_factory=dict)
     tracks: Dict[str, List[TrackPath]] = field(default_factory=dict)
     perceived: Dict[str, PerceivedStates] = field(default_factory=dict)
@@ -618,6 +660,9 @@ class ReplayRun:
         if not ids:
             raise ValueError("no vehicles/<id>/ego.jsonl under " + str(run_dir))
 
+        clock, origins, offsets = recorder_clocks(run_dir, ids)
+        if clock == SOURCE_CLOCK and offsets:
+            notes.append("not every recorder is aligned: replay on the recorded source timestamps")
         participants = []
         for pid in ids:
             records = _read_jsonl(vehicles_dir / pid / "ego.jsonl")
@@ -631,7 +676,10 @@ class ReplayRun:
                 blueprint, source = FALLBACK_BLUEPRINT, "fallback"
                 notes.append("{0}: no recorded blueprint; using {1}".format(pid, FALLBACK_BLUEPRINT))
             first = records[0]
-            participants.append(Participant(pid, str(blueprint), source, Trajectory.from_records(records),
+            trajectory = Trajectory.from_records(records)
+            if clock == GLOBAL_CLOCK:
+                trajectory = trajectory.shifted(offsets[pid] - origins[pid])
+            participants.append(Participant(pid, str(blueprint), source, trajectory,
                                             Pose(float(first["x"]), float(first["y"]), float(first["z"]),
                                                  float(first["yaw_deg"])),
                                             EgoFootprint.from_metadata(meta.get("ego_footprint"))))
@@ -639,7 +687,8 @@ class ReplayRun:
         end = max(p.trajectory.end for p in participants)
         run = cls(run_dir=run_dir, name="{0} / {1}".format(run_dir.parent.name, run_dir.name),
                   participants=participants, start=start, duration=round(end - start, 6), notes=notes,
-                  geometry=geometry or GhostGeometry.from_config(load_config()))
+                  geometry=geometry or GhostGeometry.from_config(load_config()), clock=clock,
+                  clock_origins=dict(offsets) if clock == GLOBAL_CLOCK else dict(origins))
         run._load_reconstruction()
         return run
 
@@ -656,22 +705,26 @@ class ReplayRun:
             if not graph.exists():
                 self.notes.append("{0}: no local_graph.json; no events shown".format(pid))
                 continue
-            local = load_local_events(graph, self.start)
+            local = load_local_events(graph, self.start, self.clock_origins.get(pid))
             self.local_events[pid] = local
+            origin = self.clock_origins.get(pid, local.origin)
             tracks = rec / pid / "local_tracks.jsonl"
             if tracks.exists():
                 self.tracks[pid] = load_tracks(tracks, pid, participant.trajectory, participant.frame_origin,
-                                               local.origin, self.start, participant.footprint, self.geometry,
-                                               statuses)
+                                               origin, self.start, participant.footprint, self.geometry, statuses)
             trace = rec / pid / "local_trace.jsonl"
-            perceived = load_perceived_states(trace, local.origin, self.start) if trace.exists() else None
+            perceived = load_perceived_states(trace, origin, self.start) if trace.exists() else None
             if perceived is not None:
                 self.perceived[pid] = perceived
-        origins = {pid: local.origin for pid, local in self.local_events.items()}
+        origins = {pid: self.clock_origins.get(pid, local.origin) for pid, local in self.local_events.items()}
         if (rec / "global" / "global_graph.json").exists():
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
 
     # -- queries --------------------------------------------------------------
+
+    def display_time(self, t: float) -> float:
+        """Replay time -> the clock shown to the user: t_global, or seconds since the first source sample."""
+        return (round(t + self.start, 6) if self.clock == GLOBAL_CLOCK else round(t, 6)) + 0.0  # no -0.0
 
     def participant(self, participant_id: str) -> Participant:
         return next(p for p in self.participants if p.participant_id == participant_id)

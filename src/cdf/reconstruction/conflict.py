@@ -8,6 +8,10 @@ CRITICAL_TTC is true for either of two reasons (``critical_reason``):
   it from just beside it, is closer than the safe following distance (point 4),
   whether or not the two are on a collision course at their current speeds.
 
+CRITICAL_TTC is the event's historical name: a forward gap can be unsafe while the
+classical TTC is infinite (two cars at the same speed 3 m apart never meet), so an
+UNSAFE_FORWARD_GAP alone has no TTC (``ttc_s`` None).  A time headway is not a TTC.
+
 Everything is local to one recorder: its own odometry (speed, yaw rate), its own
 footprint and one smoothed radar track.  At each track sample the future is
 predicted over ``prediction_horizon_s`` in the recorder's vehicle frame:
@@ -58,18 +62,18 @@ recorder's envelope is not on a collision course, whatever its range rate.
 
 4. SAFE FOLLOWING DISTANCE (UNSAFE_FORWARD_GAP).  The longitudinal clearance
    from the recorder's front face to the rear face of the target's nominal box,
-   along the recorder's heading, is compared with the larger of two distances:
+   along the recorder's heading (never the radar range), is compared with
 
-   * time gap: speed x minimum time gap of the table of UN Regulation No. 157
-     (ALKS, M1/N1: 1.0 s at 7.2 km/h ... 1.6 s at 60 km/h, linear interpolation;
-     the first and last values are held outside the table, with at least
-     ``critical_min_following_distance_m``);
-   * braking: the recorder's reaction distance plus its braking distance, minus
-     the braking distance of the vehicle ahead if that one brakes at
-     ``critical_lead_deceleration_mps2``, plus the standstill margin d0, never
-     less than d0.  The lead's braking is hypothetical: its measured
-     acceleration is not used, the question is whether the present gap would
-     suffice if it braked.
+       d_min = max(v_ego * t_front(v_ego), critical_min_following_distance_m = 2 m)
+
+   where v_ego is the recorder's own speed and t_front the minimum following time
+   gap of UN Regulation No. 157 (ALKS, vehicles M1 / N1): 1.0 s at 7.2 km/h,
+   1.1 s at 10, 1.2 s at 20, 1.3 s at 30, 1.4 s at 40, 1.5 s at 50, 1.6 s at
+   60 km/h, linear in between, the first and last values held outside the table
+   (no extrapolation above 60 km/h; below 7.2 km/h the 2 m minimum rules).  No
+   margin is added and the target's speed is not used: the gap can be unsafe
+   when the target is as fast as the recorder, or a little faster.  The braking
+   avoidability of points 2-3 (reaction time, decelerations) is not part of it.
 
    It applies only to a road user that is a leader of the recorder: moving in
    the same direction (SAME_DIRECTION encounter), its body ahead of the
@@ -77,13 +81,16 @@ recorder's envelope is not on a collision course, whatever its range rate.
    (``path_half_width_m`` either side of the heading) or within
    ``critical_front_lateral_margin_m`` of it while approaching it laterally
    (``critical_front_lateral_speed_mps`` beyond the estimate's uncertainty), and
-   with the recorder itself moving.  A car beside or behind the recorder, a car
-   keeping its own lane next to the corridor and a car further away are never
-   critical for this reason (they still are when the 2-D prediction finds a
-   collision course).  Without a predicted overlap there is no TTC: ``ttc_s``
-   stays None.  Hysteresis: the reason holds until the clearance exceeds
-   ``critical_forward_release_factor`` x the required distance (or the target
-   stops being a leader).  The estimate gates of point 3 apply, and a track seen
+   with the recorder itself moving (at least ``critical_forward_min_speed_mps``,
+   the MOVING threshold; from 1 to 2 m/s the 2 m minimum binds).  A car beside
+   or behind the recorder, a car keeping its own lane next to the corridor and a
+   car further away are never critical for this reason (they still are when the
+   2-D prediction finds a collision course).  Without a predicted overlap there
+   is no TTC: ``ttc_s`` stays None (a time headway is not a TTC).  Hysteresis:
+   the reason starts when the clearance drops below d_min and holds until it
+   exceeds ``critical_forward_release_factor`` x d_min (or the target stops
+   being a leader), with the state's 0.2 s release debounce.  The estimate gates
+   of point 3 apply, and a track seen
    past another tracked vehicle (``TrackSample.occluded``) gives no evidence
    either way for this reason, since its returns may be hidden by or mixed with
    that vehicle's.
@@ -93,11 +100,12 @@ a distance that lets the recorder stop in time and avoid a collision with the
 vehicle ahead) and of Directive 2006/126/EC (adequate distance to the vehicles
 in front and at the side, speed that allows stopping within the free distance),
 which prescribe no numbers.  UN R157 regulates automated lane keeping systems:
-its time-gap table is an engineering anchor, not a legal rule for human
-drivers, and no single European "critical TTC" threshold exists.  UN R152
-(AEBS) asks for at least 5 m/s^2 of braking demand when a collision is imminent;
-the reaction time and decelerations used here are modelling assumptions of this
-reconstruction, not values prescribed by EU or UNECE rules.
+its time-gap table is used here as a technical reference, not as a universal
+law of human driving, and no single European "critical TTC" threshold exists.
+UN R152 (AEBS) asks for at least 5 m/s^2 of braking demand when a collision is
+imminent; the reaction time and deceleration of the collision-course model are
+modelling assumptions of this reconstruction, not values prescribed by EU or
+UNECE rules.
 
 Parameters are global and documented in ``configs/reconstruction.yaml``.  Limits:
 constant velocity / yaw rate (no intent, no lane geometry), a nominal target
@@ -147,12 +155,11 @@ class ForwardGap:
     longitudinal_clearance_m: float  # recorder's front face -> target box's rear face, along the recorder's heading
     lateral_body_gap_m: float  # target box -> path corridor, across the heading (0: it overlaps the corridor)
     lateral_approach_mps: float  # speed toward the corridor (relative, + = closing in), before the uncertainty
-    time_headway_s: Optional[float]  # clearance / recorder speed
-    minimum_time_gap_s: float  # UN R157 table at the recorder's speed
-    time_gap_distance_m: float
-    braking_distance_m: float  # reaction + own braking - lead braking + d0 (>= d0)
-    required_distance_m: float  # the larger of the two
-    unsafe: bool  # a leader closer than the required distance (before the estimate gates)
+    time_headway_s: Optional[float]  # clearance / recorder speed (a time gap, not a TTC)
+    minimum_time_gap_s: float  # t_front: UN R157 table at the recorder's speed
+    time_gap_distance_m: float  # v_ego * t_front
+    required_distance_m: float  # d_min = max(v_ego * t_front, critical_min_following_distance_m)
+    unsafe: bool  # a leader closer than d_min (before the estimate gates)
     released: bool  # no leader, or clearance > release factor x required distance
 
     @property
@@ -215,17 +222,16 @@ def minimum_time_gap_s(speed_mps: float, table: Sequence[Sequence[float]]) -> fl
     return points[-1][1]
 
 
-def safe_following_distance(ego_speed_mps: float, lead_speed_mps: float, cfg: SemanticsConfig) -> Tuple[float, float, float]:
-    """(time-gap distance, braking distance, required distance) behind a lead vehicle (module docstring, point 4)."""
-    ego_speed, lead_speed = max(ego_speed_mps, 0.0), max(lead_speed_mps, 0.0)
-    time_gap = max(ego_speed * minimum_time_gap_s(ego_speed, cfg.critical_time_gap_table),
-                   cfg.critical_min_following_distance_m)
-    d0 = cfg.critical_standstill_margin_m
-    braking = (ego_speed * cfg.critical_reaction_time_s
-               + ego_speed * ego_speed / (2.0 * cfg.critical_deceleration_mps2)
-               - lead_speed * lead_speed / (2.0 * cfg.critical_lead_deceleration_mps2) + d0)
-    braking = max(braking, d0)
-    return time_gap, braking, max(time_gap, braking)
+def safe_following_distance(ego_speed_mps: float, cfg: SemanticsConfig) -> Tuple[float, float, float]:
+    """(t_front, v_ego * t_front, d_min) for the recorder's speed (module docstring, point 4).
+
+    d_min = max(v_ego * t_front(v_ego), critical_min_following_distance_m): only the recorder's own
+    speed counts, never the target's, and nothing is added to it.
+    """
+    ego_speed = max(ego_speed_mps, 0.0)
+    time_gap = minimum_time_gap_s(ego_speed, cfg.critical_time_gap_table)
+    distance = ego_speed * time_gap
+    return time_gap, distance, max(distance, cfg.critical_min_following_distance_m)
 
 
 def lateral_body_gap(y_min: float, y_max: float, half_width: float) -> float:
@@ -410,7 +416,6 @@ class _Prediction:
         self.encounter = _encounter(self.target_speed, math.degrees(self.target_angle))
         # Relative velocity across the recorder's heading (+ = to its right; no uncertainty removed).
         self.lateral_relative_speed = -s * (sample.vx_mps - own.vx) + c * (sample.vy_mps - own.vy)
-        self.lead_speed = c * sample.vx_mps + s * sample.vy_mps  # the target's speed along the recorder's heading
 
     def ego_pose(self, travel: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Envelope centres and headings after travelling ``travel`` metres along the path."""
@@ -469,14 +474,13 @@ def forward_gap(prediction: "_Prediction", cfg: SemanticsConfig, vel_std_mps: fl
     ego_speed = prediction.ego_speed
     leader = (region is not None and clearance > 0.0 and prediction.encounter == "SAME_DIRECTION"
               and ego_speed >= cfg.critical_forward_min_speed_mps)
-    time_gap_distance, braking_distance, required = safe_following_distance(ego_speed, prediction.lead_speed, cfg)
+    time_gap, time_gap_distance, required = safe_following_distance(ego_speed, cfg)
     unsafe = leader and clearance < required
     released = not leader or clearance > cfg.critical_forward_release_factor * required
     return ForwardGap(leader=leader, region=region, longitudinal_clearance_m=clearance, lateral_body_gap_m=gap,
                       lateral_approach_mps=approach,
                       time_headway_s=clearance / ego_speed if ego_speed > 0.1 and clearance > 0.0 else None,
-                      minimum_time_gap_s=minimum_time_gap_s(ego_speed, cfg.critical_time_gap_table),
-                      time_gap_distance_m=time_gap_distance, braking_distance_m=braking_distance,
+                      minimum_time_gap_s=time_gap, time_gap_distance_m=time_gap_distance,
                       required_distance_m=required, unsafe=unsafe, released=released)
 
 
