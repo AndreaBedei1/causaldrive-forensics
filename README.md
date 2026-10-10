@@ -445,7 +445,7 @@ telemetry:
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
 | TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radars' field: its bearing at the first detection within 5 deg of the recorder's heading (FRONT), else its side (negative = LEFT; a car closing in from behind appears on a side, out of the rear blind zone) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
-| CRITICAL_TTC_START / _END | either a 2-D collision course that braking can no longer avoid with the available deceleration (PREDICTED_OVERLAP), or a leader ahead closer than the safe following distance (UNSAFE_FORWARD_GAP), see below; ends once both reasons are clearly off (hysteresis) |
+| CRITICAL_TTC_START / _END | either a 2-D collision course that braking can no longer avoid with the available deceleration (PREDICTED_OVERLAP), or a leader ahead closer than the safe following distance (UNSAFE_FORWARD_GAP), see below; ends only after 0.2 s of clearly resolved samples (geometric hysteresis; near contact, uncertain and occluded samples never end it) |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor beyond the recorder's front edge (not a lane change) |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, its body already within 1 m of the corridor, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
@@ -529,14 +529,39 @@ TRACK_STATE fact carries `critical_reason` (PREDICTED_OVERLAP,
 UNSAFE_FORWARD_GAP or PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP) and the safe-gap
 diagnostics `minimum_time_gap_s`, `time_gap_distance_m` (v_ego x t_front),
 `required_safe_distance_m` (d_min), `longitudinal_clearance_m`,
-`lateral_body_gap_m`, `time_headway_s`, `safe_distance_margin_m`.
+`lateral_body_gap_m`, `time_headway_s`, `safe_distance_margin_m`, and
+`inside_safety_envelope` (the target's box overlaps the recorder's safety
+envelope now: near contact).
 
 ```text
 CRITICAL_TTC_START  <=>  (collision course within 6 s and a_req >= 6 m/s^2)
                          or (leader and clearance < d_min)
-CRITICAL_TTC_END    <=>  (a_req < 0.75 x 6 m/s^2 or no collision course)
-                         and (no leader or clearance > 1.10 x d_min), 0.2 s debounce
+CRITICAL_TTC_END    <=>  0.2 s without interruption of clearly resolved samples
+                         (the END is the first of them), each one:
+                           known estimate
+                           and (no collision course or a_req < 0.75 x 6 m/s^2)
+                           and (target box outside the safety envelope
+                                or recorder and target both below 1 m/s)
+                           and, if UNSAFE_FORWARD_GAP was a reason of the episode,
+                               seen without occlusion and the leader gone:
+                               recorder below 1 m/s
+                               or clearance > 1.10 x d_min
+                               or no part of its body ahead of the front face
+                               or body > path_hysteresis_m = 0.5 m outside the
+                                  corridor and not moving back toward it
+                                  (lateral approach <= its velocity std)
 ```
+
+The start conditions are gates, the end conditions a geometric hysteresis: a
+leader whose box leaves the corridor by 1 cm, or stops approaching it for one
+sample, is still the car just ahead and does not end the state (S17: A about C,
+formerly ended 0.30 s before the collision with B).  A target already touching
+the safety envelope that momentarily closes in below 1 m/s starts no new
+collision course but does not end one either (S17: B about A, formerly ended
+0.05 s before the contact, closing at 0.96 m/s, 0.16 m away); only separation, or
+both vehicles at rest, does.  An uncertain or occluded sample is no evidence of
+safety: it interrupts the release.  After a crash the state therefore usually
+ends when the vehicles separate or come to rest, not at the impact.
 
 No claim either way (UNKNOWN) while the track's estimate is not known: position
 or velocity std above 1 m / 1 m/s, or the track younger than

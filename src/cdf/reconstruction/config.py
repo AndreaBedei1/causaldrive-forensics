@@ -160,6 +160,9 @@ class SemanticsConfig:
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT;
     # the corridor starts at the recorder's front edge (its own footprint).
     path_half_width_m: float = 1.5
+    # Out of the path only this far beyond the corridor (hysteresis): a track's point for
+    # EGO_PATH_EXIT, a leader's nominal body for the end of the forward-gap reason (CRITICAL_TTC).
+    path_hysteresis_m: float = 0.5
     # TRACK_APPEARED_FRONT when the track's first bearing from the vehicle
     # origin lies within this angle of the recorder's heading (about its own
     # lane at 20 m); otherwise TRACK_APPEARED_LEFT (negative bearing) or _RIGHT.

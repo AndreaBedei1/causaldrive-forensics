@@ -45,6 +45,7 @@ FORBIDDEN_TOKENS = (
     "time_headway", "minimum_time_gap", "time_gap_distance", "required_safe_distance", "safe_distance_margin",
     "forward_region",
     "forward_leader", "lateral_body_gap", "longitudinal_clearance", "line_of_sight_occluded",
+    "safety_envelope",
 )
 FORBIDDEN_EXACT_KEYS = ("ttc_s",)
 PATH_PATTERNS = (re.compile(r"traces[\\/]"), re.compile(r"\brun_\d+"), re.compile(r"\bS\d{2}\b"))

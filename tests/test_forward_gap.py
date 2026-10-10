@@ -209,8 +209,10 @@ class ForwardGapTests(unittest.TestCase):
         result = assess(ego(12.0), hidden)
         self.assertTrue(result.occluded)
         self.assertFalse(result.critical)
-        # Seen past another vehicle, it is not the vehicle the recorder follows: the reason can end.
-        self.assertTrue(result.released(CFG.critical_release_ratio * CFG.critical_deceleration_mps2))
+        # Seen past another vehicle it is no evidence either way: occluded is not safe, the reason
+        # does not end on it (tests/test_critical_release.py, case C).
+        self.assertFalse(result.forward_released())
+        self.assertFalse(result.released(CFG.critical_release_ratio * CFG.critical_deceleration_mps2))
 
 
 def _ego_trajectory(speed, end=10.0):

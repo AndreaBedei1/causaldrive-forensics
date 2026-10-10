@@ -80,6 +80,7 @@ TRACK_STATE_REMOVED = {
     "critical": "the boolean behind CRITICAL_TTC",
     "critical_reason": "conflict-model output (PREDICTED_OVERLAP / UNSAFE_FORWARD_GAP)",
     "line_of_sight_occluded": "semantic gate of the conflict model (seen past another track)",
+    "inside_safety_envelope": "conflict-model geometry (near contact with the safety envelope)",
     "forward_region": "conflict-model classification (safe following distance)",
     "forward_leader": "conflict-model classification (safe following distance)",
     "longitudinal_clearance_m": "conflict-model geometry (nominal target box)",

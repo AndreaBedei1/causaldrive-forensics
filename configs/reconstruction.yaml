@@ -79,7 +79,12 @@ reconstruction:
     critical_forward_min_speed_mps: 1.0    # the recorder must be moving (MOVING threshold); 1-2 m/s: the 2 m minimum binds
     critical_front_lateral_margin_m: 1.0   # beside the corridor: body within this of it...
     critical_front_lateral_speed_mps: 0.3  # ...and approaching it at least this fast beyond the velocity uncertainty
-    critical_forward_release_factor: 1.10  # the reason ends once the clearance > 1.10 x the required distance
+    # CRITICAL_TTC_END: 0.2 s of clearly resolved samples (conflict.py point 5): no collision course (or a
+    # required deceleration below the release ratio), the target outside the safety envelope unless both
+    # stand still, and a leader of the episode gone: recorder below 1 m/s, clearance beyond the release
+    # factor x d_min, its body no longer ahead, or beyond path_hysteresis_m outside the corridor and not
+    # moving back toward it.  Uncertain or occluded samples, and near contact, never end it.
+    critical_forward_release_factor: 1.10  # a leader is gone once the clearance > 1.10 x the required distance
     occlusion_margin_m: 0.5           # seen past another track's box grown by this: no CUT_IN / forward-gap evidence
     # TURN_LEFT / TURN_RIGHT from the recorder's own unwrapped heading (never from the steer command)
     turn_yaw_rate_window_s: 0.2       # yaw rate = heading change over this preceding window (causal)
@@ -90,6 +95,7 @@ reconstruction:
     turn_min_duration_s: 0.5          # a turn lasts at least this long...
     turn_min_heading_change_deg: 15.0 # ...and changes the heading by at least this (lane changes <= ~10 deg)
     path_half_width_m: 1.5            # straight-ahead corridor for EGO_PATH_ENTRY / EXIT (from the front edge)
+    path_hysteresis_m: 0.5            # out of the path only this far beyond it (EGO_PATH_EXIT; a leader's body, CRITICAL_TTC_END)
     track_appeared_front_deg: 5.0     # TRACK_APPEARED_FRONT within this first bearing, else _LEFT / _RIGHT (no rear radar)
     max_position_std_m: 1.0           # track estimates more uncertain than these (Kalman std)...
     max_velocity_std_mps: 1.0         # ...leave CUT_IN and CRITICAL_TTC UNKNOWN (no claim either way)

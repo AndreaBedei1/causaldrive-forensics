@@ -35,7 +35,9 @@ predicted over ``prediction_horizon_s`` in the recorder's vehicle frame:
    temporal overlap of the two vehicles in the conflict area.  A target that
    approaches radially but passes ahead of or behind the recorder never
    overlaps: no collision course, whatever its range rate.  A target already
-   inside the envelope counts only while it still closes in.
+   inside the envelope (``inside_envelope``: the present overlap, near contact)
+   starts a collision course only while it still closes in; that it stops
+   closing in is no evidence that the conflict is over (point 5).
 2. AVOIDANCE BY BRAKING: the smallest deceleration that removes every overlap
    when the braking vehicle reacts after ``critical_reaction_time_s`` and then
    brakes along its path until it stops (bisection; the overlap disappears
@@ -86,14 +88,36 @@ recorder's envelope is not on a collision course, whatever its range rate.
    or behind the recorder, a car keeping its own lane next to the corridor and a
    car further away are never critical for this reason (they still are when the
    2-D prediction finds a collision course).  Without a predicted overlap there
-   is no TTC: ``ttc_s`` stays None (a time headway is not a TTC).  Hysteresis:
-   the reason starts when the clearance drops below d_min and holds until it
-   exceeds ``critical_forward_release_factor`` x d_min (or the target stops
-   being a leader), with the state's 0.2 s release debounce.  The estimate gates
-   of point 3 apply, and a track seen
-   past another tracked vehicle (``TrackSample.occluded``) gives no evidence
-   either way for this reason, since its returns may be hidden by or mixed with
-   that vehicle's.
+   is no TTC: ``ttc_s`` stays None (a time headway is not a TTC).  The reason
+   starts when a leader's clearance drops below d_min; it ends only as point 5
+   says (``ForwardGap.released``), not as soon as one leader condition fails.
+   The estimate gates of point 3 apply, and a track seen past another tracked
+   vehicle (``TrackSample.occluded``) gives no evidence either way for this
+   reason, since its returns may be hidden by or mixed with that vehicle's: it
+   neither starts nor ends it.
+
+5. RELEASE (CRITICAL_TTC_END, ``local.critical_intervals``).  A sample is
+   either critical (point 3 or 4), clearly resolved (``released``) or neither;
+   only a run of resolved samples lasting the 0.2 s debounce ends the state, at
+   its first sample, and any other sample restarts the run.  Resolved means, on
+   a known estimate:
+
+   * no collision course, or one that braking avoids with less than
+     ``critical_release_ratio`` x the available deceleration;
+   * the target's box outside the recorder's safety envelope now (no near
+     contact), unless both stand still (below ``HEADING_MIN_SPEED_MPS``, so
+     nothing moves toward anything): a target that touches the envelope and
+     momentarily stops closing in (below ``closing_speed_threshold_mps``) is
+     not released by that alone;
+   * when the unsafe forward gap was a reason of this episode, that leader
+     clearly gone, seen without occlusion: the recorder below the MOVING
+     threshold, or the clearance beyond ``critical_forward_release_factor`` x
+     d_min, or its whole body level with or behind the recorder's front face
+     (no longer ahead at all), or its body more than ``path_hysteresis_m``
+     outside the corridor (the EGO_PATH_EXIT hysteresis) and not moving back
+     toward it beyond its velocity uncertainty (``ForwardGap.released``).  The
+     leader conditions of point 4 are a start gate: failing one of them by a
+     centimetre (a body 0.01 m outside the corridor) does not end the state.
 
 The safe distance follows the idea of art. 149 of the Italian Highway Code (keep
 a distance that lets the recorder stop in time and avoid a collision with the
@@ -153,6 +177,7 @@ class ForwardGap:
     leader: bool  # a road user the recorder follows: same direction, ahead, in or entering the path, recorder moving
     region: Optional[str]  # IN_PATH (body overlaps the corridor) or FRONT_LATERAL (beside it, approaching), else None
     longitudinal_clearance_m: float  # recorder's front face -> target box's rear face, along the recorder's heading
+    front_clearance_m: float  # recorder's front face -> target box's front face (<= 0: no part of it ahead)
     lateral_body_gap_m: float  # target box -> path corridor, across the heading (0: it overlaps the corridor)
     lateral_approach_mps: float  # speed toward the corridor (relative, + = closing in), before the uncertainty
     time_headway_s: Optional[float]  # clearance / recorder speed (a time gap, not a TTC)
@@ -160,7 +185,10 @@ class ForwardGap:
     time_gap_distance_m: float  # v_ego * t_front
     required_distance_m: float  # d_min = max(v_ego * t_front, critical_min_following_distance_m)
     unsafe: bool  # a leader closer than d_min (before the estimate gates)
-    released: bool  # no leader, or clearance > release factor x required distance
+    # The leader is clearly gone (module docstring, point 5): recorder below the MOVING threshold, or
+    # clearance > release factor x d_min, or no part of its body ahead of the front face, or its body
+    # beyond the path hysteresis outside the corridor and not moving back toward it.
+    released: bool
 
     @property
     def margin_m(self) -> float:
@@ -187,6 +215,7 @@ class ConflictAssessment:
     forward: Optional[ForwardGap] = None  # safe following distance (None: not evaluated)
     occluded: bool = False  # seen past another tracked vehicle: no forward-gap evidence either way
     critical_reason: Optional[str] = None  # PREDICTED_OVERLAP, UNSAFE_FORWARD_GAP or both joined by "+"
+    inside_envelope: bool = False  # the target's box overlaps the recorder's safety envelope now (near contact)
 
     @property
     def braking_margin_mps2(self) -> Optional[float]:
@@ -200,14 +229,34 @@ class ConflictAssessment:
         """The forward-gap reason can be claimed either way (estimate gates, line of sight clear)."""
         return self.known and not self.occluded
 
-    def released(self, release_deceleration_mps2: float) -> bool:
-        """Both reasons are clearly off (the hysteresis of CRITICAL_TTC_END); False on an uncertain estimate."""
+    @property
+    def at_rest(self) -> bool:
+        """Recorder and target both slower than HEADING_MIN_SPEED_MPS: nothing moves toward anything."""
+        return self.ego_speed_mps < HEADING_MIN_SPEED_MPS and self.target_speed_mps < HEADING_MIN_SPEED_MPS
+
+    def overlap_released(self, release_deceleration_mps2: float) -> bool:
+        """The collision-course reason is clearly off (module docstring, point 5): no near contact (unless
+        both stand still) and no collision course, or one braking avoids below the release deceleration."""
+        if self.inside_envelope and not self.at_rest:
+            return False
+        return (not self.collision_course or self.required_deceleration_mps2 is None
+                or self.required_deceleration_mps2 < release_deceleration_mps2)
+
+    def forward_released(self) -> bool:
+        """The forward-gap reason is clearly off: the leader is gone, seen without occlusion (an occluded
+        sample is no evidence either way: it does not end the reason)."""
+        if self.forward is None:
+            return True
+        return not self.occluded and self.forward.released
+
+    def released(self, release_deceleration_mps2: float, forward_engaged: bool = True) -> bool:
+        """Clearly resolved (the release of CRITICAL_TTC, module docstring point 5); False on an uncertain
+        estimate.  ``forward_engaged``: the unsafe forward gap was a reason of the current episode, so
+        that leader must be gone too (a reason that never applied cannot hold the state)."""
         if not self.known:
             return False
-        overlap_off = (not self.collision_course or self.required_deceleration_mps2 is None
-                       or self.required_deceleration_mps2 < release_deceleration_mps2)
-        forward_off = self.forward is None or self.occluded or self.forward.released
-        return overlap_off and forward_off
+        return (self.overlap_released(release_deceleration_mps2)
+                and (not forward_engaged or self.forward_released()))
 
 
 def minimum_time_gap_s(speed_mps: float, table: Sequence[Sequence[float]]) -> float:
@@ -459,6 +508,7 @@ def forward_gap(prediction: "_Prediction", cfg: SemanticsConfig, vel_std_mps: fl
     """The safe-following-distance check of one prediction (module docstring, point 4)."""
     corners = box_corners(prediction.target_centre, prediction.target_unit, prediction.target_half)
     clearance = float(corners[:, 0].min()) - prediction.footprint.x_max
+    front_clearance = float(corners[:, 0].max()) - prediction.footprint.x_max
     y_min, y_max = float(corners[:, 1].min()), float(corners[:, 1].max())
     gap = lateral_body_gap(y_min, y_max, cfg.path_half_width_m)
     # Toward the corridor: the side the body lies on (a body overlapping the corridor has no side).
@@ -476,9 +526,13 @@ def forward_gap(prediction: "_Prediction", cfg: SemanticsConfig, vel_std_mps: fl
               and ego_speed >= cfg.critical_forward_min_speed_mps)
     time_gap, time_gap_distance, required = safe_following_distance(ego_speed, cfg)
     unsafe = leader and clearance < required
-    released = not leader or clearance > cfg.critical_forward_release_factor * required
-    return ForwardGap(leader=leader, region=region, longitudinal_clearance_m=clearance, lateral_body_gap_m=gap,
-                      lateral_approach_mps=approach,
+    # Release (point 5): geometric hysteresis, never the start gate failing by a hair.
+    released = (ego_speed < cfg.critical_forward_min_speed_mps
+                or clearance > cfg.critical_forward_release_factor * required
+                or front_clearance <= 0.0
+                or (gap > cfg.path_hysteresis_m and approach <= vel_std_mps))
+    return ForwardGap(leader=leader, region=region, longitudinal_clearance_m=clearance,
+                      front_clearance_m=front_clearance, lateral_body_gap_m=gap, lateral_approach_mps=approach,
                       time_headway_s=clearance / ego_speed if ego_speed > 0.1 and clearance > 0.0 else None,
                       minimum_time_gap_s=time_gap, time_gap_distance_m=time_gap_distance,
                       required_distance_m=required, unsafe=unsafe, released=released)
@@ -519,10 +573,13 @@ def _collision_course(prediction: "_Prediction", sample: TrackSample, cfg: Seman
                       result: ConflictAssessment) -> None:
     """Points 1-2 of the module docstring: overlap, TTC and the deceleration that removes it."""
     overlap = prediction.overlaps()
+    result.inside_envelope = bool(overlap[0])
     if not overlap.any():
         return
     if overlap[0] and sample.closing_speed_mps < cfg.closing_speed_threshold_mps:
-        return  # already inside the envelope, but no longer closing in
+        # Already inside the envelope, but no longer closing in: no new collision course.  It is
+        # not a release either (inside_envelope holds the state, point 5).
+        return
     times = prediction.times[overlap]
     result.collision_course = True
     result.ttc_s = round(float(times[0]), 3)

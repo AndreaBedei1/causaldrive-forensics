@@ -84,8 +84,9 @@ class RadarTransitionTests(unittest.TestCase):
         self.assertIn(("CRITICAL_TTC_END", 3.6), events)
 
     def test_critical_ttc_never_outlasts_closing(self):
-        # Closing slows to 0.3 m/s at 0.5 m: inside the envelope but no longer closing in, so no
-        # collision course remains and the critical state ends with CLOSING.
+        # Closing slows to 0.3 m/s at 0.5 m while the recorder creeps at 0.3 m/s toward the standing
+        # target: inside the envelope, which the closing speed alone would not release, but both now
+        # stand still (below 1 m/s), so the critical state ends with CLOSING.
         def profile(t):
             if t < 3.0:
                 return 10.0 - 4.0 * (t - 1.0), 0.0, 4.0

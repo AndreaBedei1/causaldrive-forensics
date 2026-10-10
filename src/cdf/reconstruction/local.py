@@ -31,7 +31,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
-from .conflict import ConflictAssessment, assess_conflict, occluded_by
+from .conflict import UNSAFE_FORWARD_GAP, ConflictAssessment, assess_conflict, occluded_by
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
 from .tracking import (EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount, RadarStream,
@@ -45,10 +45,8 @@ MOVING_SPEED_MPS = 1.0
 # Track states (closing, critical TTC) shorter than this are flicker, unless
 # they are still active when the track ends.
 MIN_EPISODE_S = 0.3
-# A critical TTC must clear for this long before it ends.
+# A critical TTC must stay clearly resolved this long, without interruption, before it ends.
 CRITICAL_RELEASE_DEBOUNCE_S = 0.2
-# A track must leave the path corridor by this margin before EGO_PATH_EXIT.
-PATH_HYSTERESIS_M = 0.5
 # The camera sign tracker ends a track after this gap without a detection
 # (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
 DEFAULT_SIGN_TRACK_GAP_S = 0.6
@@ -590,6 +588,47 @@ def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cf
             for sample in samples]
 
 
+def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAssessment],
+                       release_deceleration_mps2: float,
+                       release_debounce_s: float = CRITICAL_RELEASE_DEBOUNCE_S) -> List[Span]:
+    """(start, end) sample indices of the CRITICAL_TTC intervals (``conflict`` module docstring, point 5).
+
+    The state turns on at the first critical sample.  It ends only after a run of
+    clearly resolved samples (``ConflictAssessment.released``) lasting
+    ``release_debounce_s``; ``end`` is the run's first sample.  Any sample that is
+    not clearly resolved -- critical, an uncertain estimate, occluded while the
+    forward gap was a reason, near contact, a required deceleration within the
+    hysteresis band -- interrupts the run: unknown is not safe.  The forward-gap
+    release counts only when that reason was active in the episode, so a reason
+    that never applied cannot hold the state.  ``end`` is None while still active
+    at the last sample.
+    """
+    spans: List[Span] = []
+    start: Optional[int] = None
+    release: Optional[int] = None
+    forward_engaged = False
+    for index, assessment in enumerate(assessments):
+        if assessment.critical:
+            if start is None:
+                start, forward_engaged = index, False
+            forward_engaged = forward_engaged or UNSAFE_FORWARD_GAP in (assessment.critical_reason or "")
+            release = None
+            continue
+        if start is None:
+            continue
+        if not assessment.released(release_deceleration_mps2, forward_engaged):
+            release = None
+            continue
+        if release is None:
+            release = index
+        if times[index] - times[release] >= release_debounce_s - 1e-6:
+            spans.append((start, release))
+            start = release = None
+    if start is not None:
+        spans.append((start, None))
+    return spans
+
+
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
                  cfg: SemanticsConfig, body_gaps: Sequence[float]) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
@@ -680,11 +719,11 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     # Inside: ahead of the recorder's front edge and within the corridor.  Out
     # again only when clearly beside or behind that edge (at contact the target
     # sits right at it).
-    corridor = cfg.path_half_width_m
+    corridor, hysteresis = cfg.path_half_width_m, cfg.path_hysteresis_m
     path = active_intervals(times, samples,
                             lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
-                            lambda s: (s.ahead_m < -PATH_HYSTERESIS_M
-                                       or abs(s.lateral_m) > corridor + PATH_HYSTERESIS_M))
+                            lambda s: (s.ahead_m < -hysteresis
+                                       or abs(s.lateral_m) > corridor + hysteresis))
     # A track first seen inside the corridor has no observed entry.
     events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
                            times, path, announce_initial=False)
@@ -698,19 +737,14 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
 
     # A critical TTC (``conflict.assess_conflict``): a predicted collision course that
     # braking cannot avoid with the available deceleration (PREDICTED_OVERLAP), or a
-    # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  It ends once
-    # both reasons are clearly off (hysteresis, debounced): no collision course or a
-    # required deceleration below ``critical_release_ratio`` of the available one, and
-    # no leader or a clearance beyond ``critical_forward_release_factor`` x the safe
-    # distance.  The reason is in the TRACK_STATE facts (``critical_reason``).
+    # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  It ends only
+    # once the conflict is clearly resolved for the release debounce (``critical_intervals``):
+    # no collision course or a required deceleration below ``critical_release_ratio`` of
+    # the available one, no near contact, and a leader of the episode clearly gone.  The
+    # reason is in the TRACK_STATE facts (``critical_reason``).
     assessments = _critical_assessments(samples, ego, cfg, footprint)
     release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
-
-    def critical_off(a: ConflictAssessment) -> bool:
-        # An uncertain estimate is no evidence either way: it neither starts nor ends the state.
-        return a.released(release)
-
-    spans = active_intervals(times, assessments, lambda a: a.critical, critical_off, CRITICAL_RELEASE_DEBOUNCE_S)
+    spans = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S)
     critical_spans = _lasting(spans, times)
     first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
@@ -819,7 +853,7 @@ def track_state_fact(owner: str, track_id: str, sample: TrackSample, t_local: fl
             braking_margin_mps2=_rounded(conflict.braking_margin_mps2, 2),
             unavoidable_by_braking=required is not None and math.isinf(required),
             estimate_known=conflict.known, critical=conflict.critical, critical_reason=conflict.critical_reason,
-            line_of_sight_occluded=conflict.occluded)
+            line_of_sight_occluded=conflict.occluded, inside_safety_envelope=conflict.inside_envelope)
         forward = conflict.forward
         if forward is not None:
             attributes.update(
