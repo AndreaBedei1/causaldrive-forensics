@@ -445,7 +445,7 @@ telemetry:
 | SPEED_LIMIT_EXCEEDED_START / _END | above limit + 1 km/h, back at or below limit - 1 km/h (nested inside MOVING) |
 | TRACK_APPEARED_FRONT / _LEFT / _RIGHT, TRACK_LOST | lifetime of an anonymous radar track; the appearance names where the track entered the radars' field: its bearing at the first detection within 5 deg of the recorder's heading (FRONT), else its side (negative = LEFT; a car closing in from behind appears on a side, out of the rear blind zone) |
 | CLOSING_START / _END | closing at 1 m/s or more; ends below 0.5 m/s |
-| CRITICAL_TTC_START / _END | either a 2-D collision course that braking can no longer avoid with the available deceleration (PREDICTED_OVERLAP), or a leader ahead closer than the safe following distance (UNSAFE_FORWARD_GAP), see below; ends only after 0.2 s of clearly resolved samples (geometric hysteresis; near contact, uncertain and occluded samples never end it) |
+| CRITICAL_TTC_START / _END | either a 2-D collision course that braking can no longer avoid with the available deceleration (PREDICTED_OVERLAP), or a leader ahead closer than the safe following distance (UNSAFE_FORWARD_GAP), see below; ends only after 0.2 s of clearly resolved samples (geometric hysteresis; near contact, uncertain and occluded samples never end it), or at the recorder's collision with that road user (no new episode during the contact) |
 | EGO_PATH_ENTRY / EXIT | track enters / clearly leaves the straight-ahead 1.5 m corridor beyond the recorder's front edge (not a lane change) |
 | CUT_IN_FROM_LEFT / _RIGHT_START / _END | a car ahead, moving within 25 deg of the recorder's heading, its body already within 1 m of the corridor, closes on the corridor from that side (see below); ends when the lateral motion settles |
 | STOP_SIGN_DETECTED_START / _END, YIELD_... | camera sign track confirmed / last detected |
@@ -550,6 +550,8 @@ CRITICAL_TTC_END    <=>  0.2 s without interruption of clearly resolved samples
                                or body > path_hysteresis_m = 0.5 m outside the
                                   corridor and not moving back toward it
                                   (lateral approach <= its velocity std)
+                     or  the recorder's collision with that track: END at the
+                         COLLISION's own timestamp (listed after it)
 ```
 
 The start conditions are gates, the end conditions a geometric hysteresis: a
@@ -560,8 +562,24 @@ the safety envelope that momentarily closes in below 1 m/s starts no new
 collision course but does not end one either (S17: B about A, formerly ended
 0.05 s before the contact, closing at 0.96 m/s, 0.16 m away); only separation, or
 both vehicles at rest, does.  An uncertain or occluded sample is no evidence of
-safety: it interrupts the release.  After a crash the state therefore usually
-ends when the vehicles separate or come to rest, not at the impact.
+safety: it interrupts the release.
+
+CRITICAL_TTC describes the pre-collision threat episode.  If the recorder
+collides with the road user of an active episode, that episode terminates at the
+collision timestamp: COLLISION and CRITICAL_TTC_END share the instant, the
+COLLISION listed first (never END = collision - epsilon).  A continuing physical
+contact is a post-impact state, not a new TTC episode: no CRITICAL_TTC starts for
+that pair while the contact lasts (to the last callback of the contact, as the
+collision segmentation already groups them), nor afterwards until the conflict
+has been clearly resolved by the release above.  A new CRITICAL_TTC for the same
+pair is possible only after the contact has ended and a genuinely new conflict
+develops.  The termination is pair-specific: the recorder's other tracks keep
+their episodes (S17: A's state about the unrecorded C continues after A hits B).
+The collision sensor names no partner; it is read from the recorder's own tracks
+(`local.contact_partners`): the only track CLOSING and touching the recorder
+(near surface within `fusion.touching_clearance_m` = 1 m of its body) at the
+contact.  With none (a car striking from the rear blind zone) or several, nothing
+is attributed and the release alone ends the state.  Ground truth is never read.
 
 No claim either way (UNKNOWN) while the track's estimate is not known: position
 or velocity std above 1 m / 1 m/s, or the track younger than

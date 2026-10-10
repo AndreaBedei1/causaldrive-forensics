@@ -220,16 +220,14 @@ class S17Tests(unittest.TestCase):
         return next(t for name, t in self.nodes(owner) if name == "COLLISION")
 
     def test_b_stays_critical_about_a_until_the_collision(self):  # F
+        # Held through the near contact (0.96 m/s closing at 0.16 m), ended by the collision itself
+        # (tests/test_critical_collision.py), not by a release just before it.
         collision = self.collision("B")
         events = self.nodes("B", "track_001")
         starts, ends = _of(events, "CRITICAL_TTC_START"), _of(events, "CRITICAL_TTC_END")
         self.assertEqual(len(starts), 1)
         self.assertLess(starts[0], collision)
-        self.assertTrue(all(end > collision for end in ends), (ends, collision))
-        for end in ends:  # resolved by geometry: out of the envelope, or both standing still
-            assessment, _ = self.assessment_at("B", "track_001", end)
-            self.assertTrue(assessment.released(RELEASE, False))
-            self.assertTrue(assessment.at_rest or not assessment.inside_envelope)
+        self.assertEqual(ends, [collision])
 
     def test_a_ends_the_episode_about_c_only_once_c_is_clearly_aside(self):  # G
         collision = self.collision("A")

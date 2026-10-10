@@ -151,10 +151,11 @@ def _gaps(spans: Sequence[Span], count: int) -> List[Span]:
     return gaps
 
 
-def _lasting(spans: Sequence[Span], times: Sequence[float]) -> List[Span]:
-    """Drop flicker: intervals shorter than MIN_EPISODE_S, unless still active at the end."""
+def _lasting(spans: Sequence[Span], times: Sequence[float], keep: Sequence[Span] = ()) -> List[Span]:
+    """Drop flicker: intervals shorter than MIN_EPISODE_S, unless still active at the end
+    or listed in ``keep`` (a critical episode ended by a collision is no flicker)."""
     return [(start, end) for start, end in spans
-            if end is None or times[end] - times[start] >= MIN_EPISODE_S - 1e-6]
+            if end is None or (start, end) in keep or times[end] - times[start] >= MIN_EPISODE_S - 1e-6]
 
 
 # --------------------------------------------------------------------------
@@ -316,9 +317,38 @@ def impact_direction_angle(ego: EgoTrajectory, contact_t: float, burst_t: float,
     return abs(math.degrees(math.remainder(second[1] - first[1], 2.0 * math.pi)))
 
 
+@dataclass
+class Contact:
+    """One contact of the recorder's own collision sensor (``collision_contacts``)."""
+
+    first: float  # its first callback: the COLLISION's t_local
+    last: float  # its last callback, absorbed bursts included: the bodies touch until then
+    peak: float
+    attributes: Dict[str, Any]
+    merged: List[Dict[str, Any]]
+
+
 def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_origin: float,
                      cfg: CollisionConfig, ego: EgoTrajectory) -> List[SemanticEvent]:
-    """One COLLISION per contact, from the recorder's own collision sensor.
+    """One COLLISION per contact of the recorder's own collision sensor (``collision_contacts``)."""
+    return contact_events(owner, collision_contacts(collisions, clock_origin, cfg, ego))
+
+
+def contact_events(owner: str, contacts: Sequence[Contact]) -> List[SemanticEvent]:
+    """The COLLISION of each contact, at its first callback, with its peak impulse."""
+    events = []
+    for contact in contacts:
+        attributes = dict({"peak_impulse": round(contact.peak, 2)}, **contact.attributes)
+        if contact.merged:
+            attributes["merged_bursts"] = [[round(b["first"], 3), round(b["peak"], 2)] for b in contact.merged]
+        events.append(SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact.first,
+                                    attributes=attributes, source="collision_sensor", confidence=1.0))
+    return events
+
+
+def collision_contacts(collisions: Sequence[Mapping[str, Any]], clock_origin: float,
+                       cfg: CollisionConfig, ego: EgoTrajectory) -> List[Contact]:
+    """The contacts of the recorder's own collision sensor.
 
     The sensor calls back once per sample while the bodies touch and reports
     the impulse magnitude only (no partner).  Callbacks without a missing
@@ -343,7 +373,8 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
     one also states why.  A contact that absorbed later bursts lists them
     (``merged_bursts``: local time, peak impulse): another recorder may have
     reported one of them as a contact of its own (struck again by a third body
-    within the same contact, as B in S06).  Every callback stays in the raw log.
+    within the same contact, as B in S06).  The contact lasts until its last
+    callback (``Contact.last``).  Every callback stays in the raw log.
     """
     period = sample_period(ego)
     bursts: List[Dict[str, Any]] = []
@@ -385,14 +416,8 @@ def collision_events(owner: str, collisions: Sequence[Mapping[str, Any]], clock_
             if angle is not None:
                 attributes["new_contact"]["reversal_deg"] = round(angle)
         contacts.append(dict(burst, attributes=attributes, merged=[]))
-    events = []
-    for contact in contacts:
-        attributes = dict({"peak_impulse": round(contact["peak"], 2)}, **contact["attributes"])
-        if contact["merged"]:
-            attributes["merged_bursts"] = [[round(b["first"], 3), round(b["peak"], 2)] for b in contact["merged"]]
-        events.append(SemanticEvent(type="COLLISION", kind=OUTCOME, actor_id=owner, t_local=contact["first"],
-                                    attributes=attributes, source="collision_sensor", confidence=1.0))
-    return events
+    return [Contact(first=contact["first"], last=contact["last"], peak=contact["peak"],
+                    attributes=contact["attributes"], merged=contact["merged"]) for contact in contacts]
 
 
 SIGN_STATES = {"STOP": "STOP_SIGN_DETECTED", "YIELD": "YIELD_SIGN_DETECTED"}
@@ -588,10 +613,52 @@ def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cf
             for sample in samples]
 
 
+def closing_spans(times: Sequence[float], samples: Sequence[TrackSample], cfg: SemanticsConfig) -> List[Span]:
+    """CLOSING: the clearance shrinks at ``closing_speed_threshold_mps`` or more, until below half of it."""
+    closing = cfg.closing_speed_threshold_mps
+    spans = active_intervals(times, samples, lambda s: s.closing_speed_mps >= closing,
+                             lambda s: s.closing_speed_mps < closing / 2.0)
+    return _lasting(spans, times)
+
+
+def contact_partners(contacts: Sequence[Contact], tracks: Sequence[LocalTrack], period: float,
+                     cfg: SemanticsConfig, touching_clearance_m: float) -> Dict[str, List[Tuple[float, float]]]:
+    """(first, last) callbacks of the recorder's contacts, per local track that is their partner.
+
+    The collision sensor names no partner, so it is read from the recorder's own
+    tracks: the partner of a contact is its only track that was CLOSING at its
+    last sample before the first callback (within one sample period) and touches
+    the recorder at the contact: near surface within ``touching_clearance_m`` of
+    its body at a sample within one sample period of the first callback (the
+    fusion's touching distance: a body in contact is at the recorder's skin, the
+    radar clearance being biased high).  No such track (a car striking from the
+    rear blind zone, a track lost before the contact) or several: no partner,
+    nothing is attributed.  A track touching the recorder without closing in (one
+    still pressed against it after an earlier contact) is not the partner of a
+    new contact.  Own data only: no other recorder, no fusion, no ground truth.
+    """
+    closing = {track.track_id: span_values(len(track.samples), closing_spans(
+        [round(sample.t_local, 4) for sample in track.samples], track.samples, cfg)) for track in tracks}
+    partners: Dict[str, List[Tuple[float, float]]] = {}
+    for contact in contacts:
+        found = []
+        for track in tracks:
+            near = [index for index, sample in enumerate(track.samples)
+                    if contact.first - period - 1e-6 <= sample.t_local <= contact.first + 1e-6]
+            before = [index for index in near if track.samples[index].t_local < contact.first - 1e-6]
+            if (before and closing[track.track_id][before[-1]] is True
+                    and min(track.samples[index].clearance_m for index in near) <= touching_clearance_m + 1e-9):
+                found.append(track.track_id)
+        if len(found) == 1:
+            partners.setdefault(found[0], []).append((contact.first, contact.last))
+    return partners
+
+
 def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAssessment],
-                       release_deceleration_mps2: float,
-                       release_debounce_s: float = CRITICAL_RELEASE_DEBOUNCE_S) -> List[Span]:
-    """(start, end) sample indices of the CRITICAL_TTC intervals (``conflict`` module docstring, point 5).
+                       release_deceleration_mps2: float, release_debounce_s: float = CRITICAL_RELEASE_DEBOUNCE_S,
+                       contacts: Sequence[Tuple[float, float]] = ()) -> Tuple[List[Span], List[Span]]:
+    """(intervals, those a collision ended): sample indices (start, end) of CRITICAL_TTC
+    (``conflict`` module docstring, points 5 and 6).
 
     The state turns on at the first critical sample.  It ends only after a run of
     clearly resolved samples (``ConflictAssessment.released``) lasting
@@ -602,12 +669,46 @@ def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAss
     release counts only when that reason was active in the episode, so a reason
     that never applied cannot hold the state.  ``end`` is None while still active
     at the last sample.
+
+    ``contacts``: (first, last) callbacks of the recorder's contacts with this
+    track (``contact_partners``).  CRITICAL_TTC is the pre-collision threat: a
+    contact ends the current episode at its first callback (``end`` is the first
+    sample at or after it: the radar sweeps and the collision sensor share the
+    simulation tick, so it is the contact's own instant), whatever the release
+    says.  The pair is then in a post-impact state, which is no TTC episode: none
+    starts while the contact lasts (to its last callback), nor afterwards until
+    the conflict has been clearly resolved, by the same release as an END, for
+    the release debounce.  Then the pair is free again: a genuinely new conflict
+    starts a new episode.  A contact without an episode starts nothing.
     """
     spans: List[Span] = []
+    collided: List[Span] = []
     start: Optional[int] = None
     release: Optional[int] = None
     forward_engaged = False
+    pending = sorted((float(first), float(last)) for first, last in contacts)
+    held, held_forward = False, False  # post-impact; the forward gap was a reason of the ended episode
+    contact_until = -math.inf
+    resolved: Optional[int] = None
     for index, assessment in enumerate(assessments):
+        while pending and pending[0][0] <= times[index] + 1e-6:
+            _, last = pending.pop(0)
+            if start is not None:
+                spans.append((start, index))
+                collided.append((start, index))
+                held_forward, start, release = forward_engaged, None, None
+            elif not held:
+                held_forward = False
+            held, resolved, contact_until = True, None, max(contact_until, last)
+        if held:
+            if (times[index] <= contact_until + 1e-6
+                    or not assessment.released(release_deceleration_mps2, held_forward)):
+                resolved = None
+            else:
+                resolved = index if resolved is None else resolved
+                if times[index] - times[resolved] >= release_debounce_s - 1e-6:
+                    held = False
+            continue
         if assessment.critical:
             if start is None:
                 start, forward_engaged = index, False
@@ -626,7 +727,7 @@ def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAss
             start = release = None
     if start is not None:
         spans.append((start, None))
-    return spans
+    return spans, collided
 
 
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
@@ -697,7 +798,8 @@ def _stationary_ego() -> EgoTrajectory:
 
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
                  ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None,
-                 footprint: Optional[EgoFootprint] = None) -> List[SemanticEvent]:
+                 footprint: Optional[EgoFootprint] = None,
+                 contacts: Sequence[Tuple[float, float]] = ()) -> List[SemanticEvent]:
     """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
@@ -707,6 +809,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     TRACK_STATE facts.
     ``ego`` is the recorder's own trajectory (relative motion needs its
     velocity); without it the recorder is taken as standing still.
+    ``contacts``: (first, last) callbacks of the recorder's collisions with this
+    track (``contact_partners``): each ends the CRITICAL_TTC episode then active.
     """
     ego = ego or _stationary_ego()
     samples = track.samples
@@ -728,24 +832,21 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
                            times, path, announce_initial=False)
 
-    closing = cfg.closing_speed_threshold_mps
-    spans = active_intervals(times, samples, lambda s: s.closing_speed_mps >= closing,
-                             lambda s: s.closing_speed_mps < closing / 2.0)
-    closing_spans = _lasting(spans, times)
-    events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar",
-                           times, closing_spans)
+    closing = closing_spans(times, samples, cfg)
+    events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar", times, closing)
 
     # A critical TTC (``conflict.assess_conflict``): a predicted collision course that
     # braking cannot avoid with the available deceleration (PREDICTED_OVERLAP), or a
     # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  It ends only
     # once the conflict is clearly resolved for the release debounce (``critical_intervals``):
     # no collision course or a required deceleration below ``critical_release_ratio`` of
-    # the available one, no near contact, and a leader of the episode clearly gone.  The
+    # the available one, no near contact, and a leader of the episode clearly gone; or at
+    # the recorder's collision with this track, the end of the pre-collision threat.  The
     # reason is in the TRACK_STATE facts (``critical_reason``).
     assessments = _critical_assessments(samples, ego, cfg, footprint)
     release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
-    spans = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S)
-    critical_spans = _lasting(spans, times)
+    spans, collided = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S, contacts)
+    critical_spans = _lasting(spans, times, keep=collided)
     first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
                            times, critical_spans)
@@ -766,7 +867,7 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     if world is not None:
         count = len(times)
         world.add_track(subject, times, {
-            "CLOSING": span_values(count, closing_spans),
+            "CLOSING": span_values(count, closing),
             "CRITICAL_TTC": span_values(count, critical_spans, first_known_critical),
             "IN_EGO_PATH": span_values(count, path),
             "CUT_IN_FROM_LEFT": span_values(count, from_left, first_known),
@@ -1006,10 +1107,14 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     events += control_events(owner, controls, clock_origin, semantics, world)
     events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"), world)
     events += turn_events(owner, ego, semantics, world)
-    events += collision_events(owner, collisions, clock_origin, cfg.collision, ego)
+    contacts = collision_contacts(collisions, clock_origin, cfg.collision, ego)
+    events += contact_events(owner, contacts)
     events += sign_events(owner, signs, clock_origin, ego.end, _sign_track_gap(vehicle_dir), ego, world)
+    # The recorder's own track in each contact, if any: its CRITICAL_TTC episode ends there.
+    partners = contact_partners(contacts, tracks, sample_period(ego), semantics, cfg.fusion.touching_clearance_m)
     for track in tracks:
-        events += track_events(owner, track, ego.end, semantics, ego, world, footprint)
+        events += track_events(owner, track, ego.end, semantics, ego, world, footprint,
+                               partners.get(track.track_id, ()))
     events = number_events(owner, events)
 
     trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world,

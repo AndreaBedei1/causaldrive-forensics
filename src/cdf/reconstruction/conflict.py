@@ -119,6 +119,21 @@ recorder's envelope is not on a collision course, whatever its range rate.
      leader conditions of point 4 are a start gate: failing one of them by a
      centimetre (a body 0.01 m outside the corridor) does not end the state.
 
+6. COLLISION (``local.contact_partners``, ``local.critical_intervals``).
+   CRITICAL_TTC describes the pre-collision threat.  When the recorder's own
+   collision sensor reports a contact with the track of an active episode, the
+   episode ends at the collision's timestamp (COLLISION first, then
+   CRITICAL_TTC_END, at the same instant), whatever the release says: the
+   separation, the stop or the boxes leaving the envelope belong to the
+   post-impact dynamics.  The continuing contact is a post-impact state, not a
+   new episode: none starts for that track while the contact lasts (to its last
+   callback), nor afterwards until the conflict has been clearly resolved as in
+   point 5; a genuinely new conflict can then start a new episode.  The
+   collision ends only its own pair: the recorder's other tracks keep their
+   episodes.  The sensor names no partner; it is the recorder's only track
+   CLOSING and touching it at the contact (``contact_partners``), otherwise no
+   track (a car striking from the rear blind zone) and nothing ends early.
+
 The safe distance follows the idea of art. 149 of the Italian Highway Code (keep
 a distance that lets the recorder stop in time and avoid a collision with the
 vehicle ahead) and of Directive 2006/126/EC (adequate distance to the vehicles
