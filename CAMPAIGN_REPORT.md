@@ -377,7 +377,7 @@ Every recorder's own pose stream places its radar tracks, their near surfaces an
 
 | | before (phase 0) | after (phase 1) |
 |---|---|---|
-| S07 recorder C | UNALIGNED (no collision) | UNALIGNED: offsets -5.95 and -5.60 s both fit (C nearly at rest); B:track_001 (C) is U1 |
+| S07 recorder C | UNALIGNED (no collision) | UNALIGNED: offsets -5.95 and -5.60 s both fit (C nearly at rest); B:track_001 (C) is U1.  Since phase 3: ALIGNED (section 5.15) |
 | S08 recorder C | UNALIGNED | ALIGNED by observed trajectories at -4.10 s (true -4.10 s, interval [-4.20, -3.75] s); A:track_001 and B:track_001 -> C, C:track_001 -> A; C:track_002 (B until the A-B contact, then the A-B pair) stays anonymous (U1) |
 | S10 B:track_001 | anonymous | -> A (common frame) |
 | S15 C:track_002 | anonymous | -> B; B:track_001 (C, then A after the A-B contact) stays anonymous (U1) |
@@ -389,9 +389,21 @@ Against ground truth (privileged, `scripts/fusion_metrics.py`, traces/fusion_met
 
 ### 5.14 Paper-readiness phase 2: the definitive replay (2026-10-10)
 
-The replay (`cdf.replay.model`, the CARLA viewer `scripts/replay_run.py`, the headless top-down export `cdf.replay.topdown`) now shows the reconstruction of phase 1: it runs on t_global only -- a recorder without a global clock is not replayed and the replay says so (S07's C); the source clock is a fallback only when no recorder is aligned -- every recorder is drawn at the poses of its pose source (the recorded stream by default, a perturbed one in the robustness study) and every radar track from its vehicle-frame measurement through its observer's pose; every anonymous road user of the fusion is drawn once, a box of its fitted footprint at the fused position and heading with its position uncertainty (a dotted 2-sigma circle beyond 0.3 m; +-sigma in the viewer's label), labelled with the tracks it fuses and their observers, those tracks being radar dots.  QA checks added: road-user speed, jumps and turns; two road users drawn in one place; a road user on a recorder's own body.
+The replay (`cdf.replay.model`, the CARLA viewer `scripts/replay_run.py`, the headless top-down export `cdf.replay.topdown`) now shows the reconstruction of phase 1: it runs on t_global only -- a recorder without a global clock is not replayed and the replay says so (S07's C, until phase 3); the source clock is a fallback only when no recorder is aligned -- every recorder is drawn at the poses of its pose source (the recorded stream by default, a perturbed one in the robustness study) and every radar track from its vehicle-frame measurement through its observer's pose; every anonymous road user of the fusion is drawn once, a box of its fitted footprint at the fused position and heading with its position uncertainty (a dotted 2-sigma circle beyond 0.3 m; +-sigma in the viewer's label), labelled with the tracks it fuses and their observers, those tracks being radar dots.  QA checks added: road-user speed, jumps and turns; two road users drawn in one place; a road user on a recorder's own body.
 
 Visual audit of the 17 runs (151 keyframes, every frame inspected; traces/visual_audit_phase2.md, verdicts in docs/audit/visual_audit_phase2_verdicts.json): **10 PASS, 7 WARN, 0 FAIL**.  Resolved since phase 0: S17 (C drawn once as U1 instead of three ghosts), S10 (no second body on A), S08 (C on t_global, no ghosts of C), S16 (no ghosts of the van C), S15 (no ghost of B).  Remaining WARNs: S07 (C unaligned: not replayed; B's track of it is U1), S08 and S15 (a track that switched body at a contact stays anonymous and is drawn as U1 on a recorder), S16 (a 0.3 s post-contact fragment of the van; C's episode on A open at TRACK_LOST, unchanged), S18 abreast / passing / platoon (C and D never fused; fragments; in abreast and passing A's first track starts on D -- the two cars 1.4 m apart side to side are one return cluster for A's radar -- and settles on C, which the local graph reports as a CUT_IN_FROM_RIGHT and an EGO_PATH_ENTRY that did not happen: false positives for the phase-5 semantic evaluation).
+
+### 5.15 Paper-readiness phases 3-6: sweeps, robustness, semantic evaluation, paper results (2026-10-11)
+
+**Reconstruction changes (phase 3, no ground truth).**  The observed alignment now compares each observed near surface with where its own line of sight enters the other recorder's footprint (a point the body would hide is off by its depth), instead of with the nearest point of the whole outline.  S07's C, nearly at rest, is now aligned at -5.95 s (true -5.90 s, one radar period; interval [-5.95, -5.90] s) and B:track_001 is linked to the recorder C; S08's interval narrows to [-4.20, -4.00] s (true -4.10 s).  With no matched collision at all (a near miss) the first recorder's own clock is the global one and the others are aligned to it by observation.  Fusion metrics over the canonical runs (traces/fusion_metrics.md): 42 correct recorder links, 0 wrong, 3 missed (two identity switches at contacts, one 0.3 s fragment); merges 15 correct, 0 false, 10 missed; 14 anonymous entities; fused centre error median 0.45 m over 925 instants (box fit 0.27 m) against 0.62 m for the single-track nominal box (S07's well-placed U1 left the set); declared uncertainty 0.55 / 0.91 / 0.96 of the errors within 1 / 2 / 3 sigma.
+
+**Sweeps (phase 3).**  Six families x 40 runs (configs/sweeps, scripts/run_sweep.py; N from a 5-run pilot, docs/experiment_size.md; raw data under sweeps/, 3.15 GB, outside the repository).  Outcomes crash / borderline / no crash: rear_end 8/4/28, cut_in 17/2/21, crossing 18/7/15, unobserved_cut_in 32/0/8, the two S18 families 40/0/0 (they crash by design).  Every recorder of every run on t_global, event times within 0.05 s of the truth in all 240 runs; every true collision between recorders reconstructed.  The sweeps exposed one flaw, fixed: in five crossing near misses each car ran into roadside objects with impulses within 3-8 % of each other and the impulse test matched the two single-vehicle contacts as one A-B collision; a match now also needs the two bodies to touch at the reports (each from its own pose stream: every genuine match within 0.06 m, the rejected ones 54-73 m apart).  Identities 397/397 correct; recorder links 0 wrong in 464 trials; 67 tracks of a recorder left anonymous (55 in crossing near misses: the tracker's velocity of a crossing target is about 1 m/s off).  Road users that recorded nothing: 3 false merges in 503 trials (side by side, where a tracker mixes two cars 1.4 m apart); fused centre error against the single-track box, paired per run: S17 family 0.12 vs 0.51 m (fused better in 39/40 runs), crossing 0.54 vs 0.79 m, side by side 0.32 vs 0.40 m, platoon 0.44 vs 0.39 m (no gain when every observer sees only rear faces).
+
+**Robustness (phase 4, results/robustness/summary.md).**  Baseline copies identical; constant clock offsets leave all 17 graphs identical.  Radar low / nominal noise is harmless; the high profile (30 clutter returns per sweep) adds clutter entities and spurious events.  Consumer-grade GNSS (1.66 m) keeps identities and collisions but raises the fused centre error to 3.0 m with 19 false merges per draw, 2.0 m and 8.6 with the mutual refinement; degraded GNSS (5.43 m) costs identities (0.95).  CARLA gives both bodies of a contact the same impulse magnitude (results/robustness/impulse_symmetry.md): 10 % independent impulse error per report leaves 41 % of the collisions matched.  Collision-report latency shifts the lagging recorder's events by the latency; from 0.25 s the contact gate also refuses some genuine matches (collisions 0.86 / 0.82 at 0.25 / 0.5 s).
+
+**Semantic evaluation (phase 5, results/semantics/).**  Definitions and thresholds with their sources: docs/event_definitions.md.  Against the ground-truth event oracle, before each recorder's first contact: hazard onsets (CRITICAL_TTC_START) against what the radars could see: precision 0.93, recall 0.94, median +0.05 s over the 240 sweep runs (canonical 0.975 / 0.951); the radars' fields of view hide 13 % of the onsets an all-seeing sensor would establish.  Path entries and cut-ins are tested on the radar track's point: that convention alone keeps 56 % of the true path entries, and against it the reconstruction finds 86 % of them (98 % / 66 % of the cut-ins from the left / right).  One threshold at a time, the hazard agreement stays at 0.93-0.95 for every threshold but a 1.75 m corridor; the reference itself moves with the definition (reaction time 0.7 / 1.5 s: 529 / 580 onsets against 552).  S17 worked example: A's sensors established C's hazard 0.3 s after ground truth (2.60 s against 2.30 s).
+
+**Paper results and inspection (phase 6).**  results/tables, results/figures (index results/README.md), checked by scripts/results_qa.py.  Visual audit of the 17 runs with the current reconstruction (traces/visual_audit_phase6.md): 11 PASS, 6 WARN, 0 FAIL; S07 is now a PASS (C aligned and replayed), 144 of the 151 frames are pixel-identical to the phase-2 frames inspected then.
 
 ## 6. Compared with the 360-degree campaign
 
@@ -677,14 +689,17 @@ Forensic packets exported for every run (reconstruction/llm/; the leak guard pas
 ### S07/run_0_crash
 
 ```
--5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,U1)
+-5.95 MOVING_START(C); THROTTLE_START(C)
+-5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
 -5.40 CRITICAL_TTC_START(A,B)
--2.70 CLOSING_START(B,U1)
--2.50 CRITICAL_TTC_START(B,U1)
+-3.00 THROTTLE_END(C); BRAKE_START(C)
+-2.70 CLOSING_START(B,C)
+-2.50 CRITICAL_TTC_START(B,C)
 -2.25 THROTTLE_END(B); BRAKE_START(B)
 -2.05 CLOSING_START(A,B)
--1.55 CRITICAL_TTC_END(B,U1)
--1.05 CLOSING_END(B,U1); MOVING_END(B); STOP_START(B)
+-1.60 MOVING_END(C); STOP_START(C)
+-1.55 CRITICAL_TTC_END(B,C)
+-1.05 CLOSING_END(B,C); MOVING_END(B); STOP_START(B)
 -0.65 THROTTLE_END(A); BRAKE_START(A)
 +0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
 +0.10 MOVING_END(A); STOP_START(A)

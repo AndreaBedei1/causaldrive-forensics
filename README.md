@@ -354,7 +354,13 @@ Rules the code follows:
   merges that burst into its contact with C (0.17 of its peak), A reports it as
   its second contact.
 - No log is synchronised. Two COLLISION nodes of different graphs are the same
-  contact when their peak impulses agree (equal and opposite impulses). A match
+  contact when their peak impulses agree (equal and opposite impulses) and the
+  two bodies touch: each recorder at its own report time, from its own pose
+  stream, its footprint within `contact_consistency_m` = 1.0 m (plus 3 sigma of
+  the pose sources' declared accuracy) of the other's.  Without that check two
+  single-vehicle contacts with similar impulses -- both cars into roadside
+  objects after a near miss, 54-73 m apart in five crossing sweep runs -- were
+  matched as one A-B collision; genuine matches lie within 0.06 m.  A match
   also fixes the clock offset between its two graphs, so matches must agree in
   time: one between graphs already linked by other matches must imply the same
   offset within `clock_tolerance_s` = 0.1 s, or it is rejected
@@ -395,12 +401,19 @@ Rules the code follows:
   (`tracking.measurement_std_m`, `radial_speed_std_mps`,
   `acceleration_std_mps2`) and the pose sources' declared accuracy:
   - Observed alignment: a recorder that no matched collision aligned gets the
-    clock offset at which the near surfaces observed of it (or by it) lie on a
-    footprint outline, pooled over every comparison that fits somewhere, on
-    samples of a target moving at least 2 m/s.  It is accepted only when the
-    offsets within `max(3 x best, 2 sigma)` form one interval (the
-    uncertainty); a second interval -- a target at rest or moving along its own
-    outline -- leaves the recorder UNALIGNED (`method` in `alignment.json`).
+    clock offset at which what the aligned recorders observed of it, or what it
+    observed of them, lies on the observed body.  Each observed near surface is
+    compared, along its own line of sight from the observing radar, with where
+    that ray enters the other recorder's footprint (a point the body would hide
+    is off by its depth; a ray that misses the body gives its distance to it),
+    pooled over every comparison that fits somewhere, on samples of a target
+    moving at least 2 m/s.  It is accepted only when the offsets within
+    `max(3 x best, 2 sigma)` form one interval (the uncertainty); a second
+    interval -- a target at rest or moving along its own outline -- leaves the
+    recorder UNALIGNED (`method` in `alignment.json`).  With no matched
+    collision at all (a near miss) the first recorder's own clock is the global
+    one (`method` `reference_recorder`, offset 0) and the others are aligned to
+    it this way.
   - Recorder links: an anonymous track whose returns lie on another recorder's
     own footprint (inside counts: no other body can be there) at that
     recorder's own velocity -- median within 2 sigma, 80 % of at least 10
@@ -436,6 +449,18 @@ Rules the code follows:
     per entity its source tracks and segments, observers, time span,
     association links and confidence, fusion method, footprint and fused
     trajectory with uncertainty.
+  - Mutual refinement of the pose sources (`fusion.mutual_refinement`, off by
+    default; used by the robustness study).  The tracks identified with a
+    recorder show its surface where the observers' pose streams put it; the
+    depth of those returns behind the faces of its box, where its own pose
+    stream puts it, measures the difference of the two streams' position errors
+    along each face's normal.  A face says nothing along itself and the part of
+    the errors common to all recorders is not observable, so the offsets are
+    the maximum a posteriori estimate with each source's declared accuracy as a
+    zero-mean prior: what no face constrains stays uncorrected, and each
+    corrected source declares its posterior accuracy.  The returns are assigned
+    to the faces from a scan-matched start, before any contact of the observed
+    body (`anonymous.mutual_offsets`; the record in `anonymous_entities.json`).
   - `python scripts/fusion_metrics.py traces/*/run_*` (privileged, after the
     reconstruction) writes `reconstruction/evaluation/fusion_metrics.json|md`
     per run and `traces/fusion_metrics.json|md`: identity decisions (correct,
@@ -966,6 +991,58 @@ lateral speed are compared with the true ones.
 The paper's core view (`cdf.reconstruction.models.PAPER_CORE_EVENTS`) is
 COLLISION, BRAKE, CUT_IN, EGO_PATH_ENTRY, CRITICAL_TTC, TRACK_APPEARED and
 TRACK_LOST; the other events stay in the graphs.
+
+## Scenario sweeps
+
+`scripts/run_sweep.py configs/sweeps/<sweep>.yaml [...] --runs N --carla-python <python of the carla env>`
+records N variants of a scenario on a CARLA server (`--port`; `simulation.real_time_pacing` stays on: unpaced
+runs hung the engine on this machine) and analyses each one.  Each sweep file names a scenario, a base
+variant, a seed and the parameters to vary (ranges, decimals, parameters that follow another, ranges relative
+to another participant); run k takes the k-th point of a Halton sequence shifted by a SHA-256 of the sweep's
+seed, so every prefix of the runs covers the ranges and runs never change once recorded.  Runs go to
+`sweeps/<sweep>/<scenario>/run_<k>_<variant>/` (never into `traces/`); each has a `sweep_manifest.json`
+(parameters, seed, recording and reconstruction commit and code hashes, wall times, outcome from ground
+truth: crash, borderline under 1 m, no crash; status).  The batch resumes: complete runs are skipped, an
+incomplete one is set aside (never deleted) and recorded again, failures are logged, and
+`--reconstruct-only` redoes the reconstruction and evaluation of every recorded run after a code change.
+Summaries with provenance: `results/sweeps/<sweep>.{json,md,csv}`.  `scripts/experiment_size.py
+results/sweeps/*.json` sizes N from a pilot by bootstrap (`docs/experiment_size.md`).
+
+## Robustness study
+
+`python scripts/robustness.py traces/S*/run_* [--families ...] [--workers 12]` applies each perturbation of
+`cdf.robustness.perturb` to a copy of every run (hard links for whatever does not change; the copy is deleted
+after its job, never in `traces/`): radar noise, missed detections and clutter (ideal / low / nominal / high);
+GNSS errors through the pose source (ideal / RTK / consumer / degraded), also with the mutual refinement;
+collision-report impulse noise and latency; constant clock offsets; downsampling; one recorder missing; a 1 s
+radar outage.  Profiles and their sources: `docs/robustness_profiles.md`.  Stochastic conditions draw seeds
+until the standard error of every pooled metric is below its tolerance (3 to 8).  The unchanged
+reconstruction runs on each copy; the evaluation compares it with ground truth and its core events with the
+unperturbed reconstruction's.  Results: `results/robustness/summary.{json,md,csv}`, `figures/`.
+`python scripts/impulse_symmetry.py traces/S*/run_*` documents that CARLA reports one impulse magnitude to both
+bodies of a contact and what the alignment's impulse test survives (`results/robustness/impulse_symmetry.md`).
+
+## Semantic evaluation
+
+The core events, their thresholds and the sources or engineering assumptions behind them are in
+`docs/event_definitions.md`.  `python scripts/event_oracle.py <runs> --label <label>` (privileged) compares
+each recorder's core events with a ground-truth event oracle: the same event definitions applied to an ideal
+track of every other vehicle built from ground truth, all-seeing (PERFECT), within the recorder's radar
+coverage (COVERAGE, `cdf.evaluation.visibility`), and within it with the point a radar track reports instead of
+the true nearest point (COVERAGE_TRACKED); per run `reconstruction/evaluation/event_oracle.json`,
+pooled `results/semantics/event_oracle_<label>.{json,md,csv}` (whole recording and before each recorder's
+first contact).  `python scripts/semantic_sensitivity.py <runs> --label <label>` varies each threshold one at
+a time and reports the agreement with the oracle and how the oracle's own events move
+(`results/semantics/sensitivity_<label>.*`).  The S17 worked example (`scripts/worked_example.py`) reports
+observed vehicle response delays (never human reaction times) and, in its privileged part, when ground truth
+puts the same hazards.
+
+## Paper results
+
+`python scripts/paper_results.py` builds the paper's tables (`results/tables/*.{csv,md,tex}`) and figures
+(`results/figures/*.{svg,pdf}`) from the result files above, with an index and provenance in
+`results/README.md`; `python scripts/results_qa.py` checks them (formats agree, one-page PDFs within the IEEE
+text width, TrueType fonts, no Type 3, text >= 6 pt, provenance on every study record).
 
 ## LLM abductive forensics
 

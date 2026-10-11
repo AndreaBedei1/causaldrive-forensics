@@ -474,8 +474,9 @@ perception.
 - `cdf.evaluation.event_oracle`: per recorder and other vehicle an ideal radar track from ground truth (true
   near surface, velocity, acceleration, size; uncertainty 0.05 m / 0.05 m/s) at the recorder's sweep times, run
   through the reconstruction's own `track_events` with the recorder's own ego trajectory and footprint and its
-  true contacts: PERFECT (all-seeing) and COVERAGE (only where the vehicle is in view; pieces split and dropped as
-  the tracker does).  The reconstruction's local events, their subject the true identity of the track, are
+  true contacts: PERFECT (all-seeing), COVERAGE (only where the vehicle is in view; pieces split and dropped as
+  the tracker does) and COVERAGE_TRACKED (COVERAGE with the point a radar track reports, the median of the
+  outline the radars see, instead of the true nearest point).  The reconstruction's local events, their subject the true identity of the track, are
   matched one to one per recorder, event type and true subject within 2 s; whole recording and before each
   recorder's first contact.  `scripts/event_oracle.py` (per-run `event_oracle.json`, pooled results and a
   figure), `scripts/semantic_sensitivity.py` (12 thresholds x 2 values: the reconstruction's tracks are tracked
@@ -489,11 +490,12 @@ definition is right) and tests the true body's nearest point; coverage is geomet
 counts as perceivable although the moving-target tracker ignores it); the match window is 2 s; the pre-contact
 window ends at the recorder's first true contact.
 
-**Tests.**  `tests/test_event_oracle.py` (9): ideal clearances equal the true box gaps (an independent
-implementation); the ideal track agrees with the radar track of the same vehicle; S17's hazards where ground
-truth puts them; coverage never adds an event to perfect perception; the reconstruction's events carry the
-true identity of their track; one-to-one nearest-first matching, type and subject must agree, unknown subjects
-never match; sensitivity variants change one threshold only.  `tests/test_worked_example.py` passes with the
+**Tests.**  `tests/test_event_oracle.py` (10): ideal clearances equal the true box gaps (an independent
+implementation); the ideal track agrees with the radar track of the same vehicle; the tracked point lies on the
+faces the radars see; S17's hazards where ground truth puts them; coverage never adds an event to perfect
+perception; the reconstruction's events carry the true identity of their track; one-to-one nearest-first
+matching, type and subject must agree, unknown subjects never match; every comparison is reported; sensitivity
+variants change one threshold only.  `tests/test_worked_example.py` passes with the
 new sections.
 
 **Results.**  Before each recorder's first contact (`results/semantics/event_oracle_*.md`, tables T4 and T6):
@@ -564,3 +566,192 @@ seven study figures); `results_qa.py`: 10 tables, 10 figures, 13 study records, 
 
 **Gate.**  PASS: tables and figures with provenance in `results/`, automatic QA green, every canonical run
 inspected.
+
+## Phase 7 -- documentation and positioning
+
+**Objective.**  README, CAMPAIGN_REPORT and this report brought up to date; the paper's framing; the logging
+prerequisites against the regulations (UNECE R157 / DSSAD, EU GSR / EDR with UN R160 / R169, US Part 563);
+related work from verified sources only; the limitations in one place; the decision on STOP / YIELD and the
+depth camera.
+
+**Implementation.**
+- README: the rules now describe the observed alignment along the lines of sight, the reference recorder of a
+  near miss, the contact gate of the collision matching and the mutual refinement of the pose sources; new
+  sections on the scenario sweeps, the robustness study, the semantic evaluation and the paper results
+  (commands, outputs, provenance).
+- CAMPAIGN_REPORT: section 5.15 (phases 3-6: reconstruction changes, sweeps, robustness, semantic evaluation,
+  paper results and inspection); S07's row of the fusion table points to its alignment.
+- This report: the sections below.  Every citation comes from `docs/bibliography.md`: DOIs resolved on
+  Crossref, regulatory texts read in the official journals; its Appendix B lists what could not be read in full
+  (the paywalled SAE J3197 and IEEE 1616.1 are cited for their scope only).
+- Provenance check of the committed results: all 13 study records in `results/` carry the code hash
+  `b5cbbff6ceb04c12...` (`cdf.evaluation.provenance.code_hash`, over `src/cdf` and `configs/*.yaml`), which is
+  the hash of the committed code from `ea0ccb1` (phase 5) to this commit.  Their git field names the phase-2
+  commit with uncommitted changes because the phases were committed after the runs: the case the code hash
+  exists for.  After `d6ebdfd` (phase 3) only evaluation and perturbation modules were added or changed, so the
+  reconstruction, fusion and replay code behind every number is that of phase 3.
+
+### Framing
+
+The work reconstructs a multi-vehicle accident from the partial onboard recordings of the vehicles involved.
+Each recording vehicle contributes its own pose stream, controls, collision reports and radars, on its own
+clock; a vehicle that recorded nothing is reconstructed only from what the recorders' radars saw of it.  The
+method aligns the recorders in time on the collisions they share (without one, on what they observed of each
+other), associates identities between recorders, fuses the observations of road users that recorded nothing
+into anonymous entities (U1, U2, ...), builds a global semantic event trace and a replay from the
+reconstruction alone, and shows per vehicle when a hazard became perceivable from its onboard sensors and when
+the vehicle responded (an observed vehicle response delay).  These are inputs to an expert's avoidability
+analysis: the method decides neither avoidability nor liability, and a hazard perceivable by a vehicle's
+sensors is not a hazard perceived by its driver.  Every quantitative claim comes from CARLA simulations (17
+canonical runs, 240 sweep runs, 1389 robustness jobs) whose ground truth is used for evaluation only.
+
+### Logging prerequisites
+
+What each recording vehicle must log for the method, against what the regulations require (sources:
+`docs/bibliography.md`, Regulatory facts, instruments R1-R9).
+
+| Data (per vehicle, own clock) | Used for | Required by regulation? |
+|---|---|---|
+| Absolute pose (GNSS/INS position and heading) with a declared accuracy | common frame, recorder links, fusion of road users that recorded nothing, replay | No.  GSR Art. 6(4)(a) names the vehicle's position and tilt on the road among the EDR data, but the technical acts it relies on exclude location/positioning data (UN R160 / R169 section 1.3); the R157 DSSAD has no position; only the ADS log of fully automated vehicles stores a GPS position, per occurrence (Reg. (EU) 2022/1426, Annex II section 9.3) |
+| Own motion (speed, accelerations, yaw rate) | local motion events, the conflict model | Partly: R160 pre-crash speed, longitudinal and lateral acceleration, yaw rate, -5 to 0 s at 2 Hz |
+| Controls (accelerator, brake, steering) | BRAKE events, observed vehicle response delays | Partly: R160 pre-crash accelerator, service brake and steering input, -5 to 0 s at 2 Hz; R169 service brake and accelerator at 10 Hz (-20 to +10 s); US Part 563 accelerator and service brake -20 to 0 s at 10 Hz after its phase-in, only if an EDR is fitted |
+| Collision reports with impulse magnitude and time | collision-anchored alignment, contact gate | Partly: R160 delta-V at 100 Hz over 0-250 ms from the event's time zero; the R157 DSSAD flags an "involvement in a detected collision" with a timestamp accurate to +-1.0 s |
+| Radar detections or tracks, with mounts and fields of view | perceivability, road users that recorded nothing | No instrument requires raw or tracked perception data (Regulatory facts G.1); R157 01 series logs distances and relative speeds of other vehicles only during type-approval public-road testing (Annex 6) |
+| Own footprint (bounding box) | clearances, recorder links, contact gate | Indirectly: the EDR data identify the exact type, variant and version (GSR Art. 6(4); Reg. (EU) 2022/545 Art. 4(3)), from which the dimensions follow |
+| Clock | nothing common: each vehicle's own | EDR timestamps are relative to the event's time zero (pre-crash sample timing -0.1 / +1.0 s); R157 01 series section 8.4.5.3 (where national or regional law requires it) and Reg. (EU) 2022/1426 Annex II section 9.7.3 replace the DSSAD / ADS timestamps by the time difference to the EDR trigger: a regulatory precedent for anchoring time on the crash |
+
+Rates and accuracies, from the robustness study: the campaign logs poses, controls and radar at 20 Hz;
+downsampling all of them to 10 Hz is nearly free (core events 0.99 found again), to 5 Hz costs identities
+(0.976), collisions (0.955) and core events (0.91).  Production-grade radar noise (the nominal profile) keeps
+every identity, collision and alignment (fused centre error 0.51 m against 0.41 m, core events 0.97 found
+again); an RTK-grade pose changes nothing (0.43 m); a consumer-grade pose (1.66 m per axis) keeps identities and
+collisions but raises the fused centre error to 2.99 m (2.00 m with the mutual refinement).  A 10 % impulse error
+per collision report keeps 41 % of the collision matches.  Recorders like the campaign's therefore go beyond
+today's regulated content, in line with proposals for richer automated-vehicle data ([B19], SAE J3197 [B21],
+IEEE 1616.1 [B22]).
+
+### Related work (verified sources, `docs/bibliography.md`)
+
+- **Accident reconstruction.**  Physics- and simulation-based reconstruction from scene evidence (PC-Crash
+  [B1], Brach [B2], the Burg-Moser handbook with its avoidability chapter [B3]), EDR-based checks [B4], video
+  reconstruction from a single dashcam [B6, B7], counterfactual re-simulation of reconstructed crashes [B8, B15,
+  B17].  The closest precedent [B5] stores in each EDR the states of its neighbours received over V2V
+  cooperative collision warning; the NTSB Tempe report [B9] built a perceivable-versus-reacted timeline from one
+  vehicle's perception record.  Here the recordings of several vehicles are combined after the fact, without
+  V2V, and road users that recorded nothing are reconstructed from the recorders' own perception.
+- **Cooperative perception** (OPV2V [B23], V2X-Sim [B24], DAIR-V2X with its time-compensated late fusion [B25],
+  V2X-ViT [B26], Where2comm [B27], CoBEVT [B28], track-level Car2X fusion [B29], alignment of shared tracks
+  [B30], cooperative tracking [B31], ETSI collective perception [B32]) shares perception online, over
+  communication, with synchronised or compensated clocks.  Here the fusion is offline and post hoc, without
+  communication or a shared clock.
+- **Track-to-track association and fusion** (correlation test [B33], common process noise [B34], estimation
+  [B35], covariance intersection [B36], fusion architectures [B37], extended objects [B38, B41], asynchronous
+  automotive fusion [B40], assignment [B39], CLEAR MOT [B42]): the cross-observer test here explains the faces
+  both observers see with one rigid box, refuses ambiguous links, and falls back on covariance intersection.
+- **Common frame and relative pose** (Umeyama [B43], ICP [B44], decentralised fusion [B45], VANET relative
+  positioning [B46], consistent cooperative localisation [B47], learned pose-error correction [B48]): the
+  optional mutual refinement is a point-to-face registration with the pose sources' declared accuracies as
+  priors, which leaves unobservable directions alone.
+- **Time synchronisation** (reference broadcasts [B49], PTP [B50], gPTP [B51], intra-vehicle timestamping
+  [B52, B53], sequence alignment [B54], flashes [B55], event-based synchronisation [B56]): here the common event
+  is the collision itself, with the observed trajectories as a fallback.
+- **Data recorders** (EDR and DSSAD regulations R1-R9, [B18-B22]); **criticality and reaction** (TTC [B65],
+  headway against TTC [B67], extended TTC [B66], a review of criticality metrics [B68], RSS [B64], the R157
+  driver models [B16, B69]; reaction and response times [B10-B14]); **simulation and digital twins** (CARLA
+  [B63]; digital twins for the replay [B57-B59]).
+
+### Limitations (consolidated)
+
+- Simulation only, no real multi-vehicle recordings: CARLA vehicle dynamics and contacts; CARLA 0.9.15's radar
+  models no measurement noise, no false alarms and no range, angle or Doppler resolution, and the poses are
+  exact (`docs/robustness_profiles.md`).  The robustness study quantifies noisier sensors one perturbation
+  family at a time, not in combination.  CARLA reports one impulse magnitude to both bodies of a contact, which
+  makes collision matching easier than with real recorders.
+- Alignment: it needs a shared collision, or observed trajectories that fix one clock offset (otherwise the
+  recorder stays UNALIGNED); per-report impulse errors of 5 / 10 % keep a true pair with probability 0.86 / 0.54
+  (41 % of the collisions matched at 10 % in the study); from 0.25 s of collision-report latency the contact
+  gate refuses some genuine matches; clock offsets are constant within a recording (no drift modelled or
+  tested).
+- Radar-only perception of road users that recorded nothing: their size is fitted only where the recorders see
+  different faces (otherwise a nominal box); standing vehicles are not tracked; two cars 1.4 m apart side by
+  side were merged by one recorder's tracker (S18: 3 false merges in 503 sweep trials); identity switches at
+  contacts and short fragments leave some tracks anonymous; heavy clutter creates spurious tracks and events.
+- Recorder links: tracks of crossing targets whose tracked velocity is about 1 m/s off stay anonymous (55 of the
+  67 missed links in the sweeps).
+- Pose errors: the mutual refinement estimates translations only (heading errors remain) and does not reduce
+  the false merges of the degraded GNSS profile; the part of the pose errors common to all recorders stays in
+  every absolute position.
+- Event semantics: thresholds with sources where they exist and engineering assumptions elsewhere
+  (`docs/event_definitions.md`); path entries and cut-ins are tested on the radar track's point, which enters a
+  corridor later than the true body at close range (that convention alone keeps 56 % of the true path
+  entries); the oracle validates perception against the definitions, not the definitions against human
+  judgement; the sensitivity varies one threshold at a time.
+- Responses in the campaign are scripted: observed vehicle response delays describe the scenario logic, not
+  drivers; sensor perceivability is not driver perception.
+- Scope: motor vehicles only (cars and one van; no pedestrians, cyclists, motorcycles or infrastructure
+  sensors); 17 canonical runs and six sweep families of 40 runs (N capped by the recording budget; borderline
+  outcomes are rare in some families); the LLM pipeline and the temporal-logic verifier are out of the paper.
+
+### STOP / YIELD and the depth camera
+
+Out of the main paper (the default).  The camera-based STOP / YIELD detector runs on board and gives
+STOP_SIGN_DETECTED / YIELD events, but the campaign has four confirmed STOP tracks, all on real signs (S10 A,
+S12 A, S12 B, S15 B), and no YIELD sign on its routes (the YIELD detector is validated on the Town10HD yield
+sign only): too little to evaluate rule-related events, and rule compliance is not one of the contributions.
+The depth camera is recorded but used by nothing in the reconstruction (it also misses frames on the second
+and third vehicle when three cameras render per tick).  Both stay in the repository, documented, as future
+work.
+
+**Assumptions.**  None new (documentation only).
+
+**Tests.**  No code changed since phase 6.  Full suite for this gate: Python 3.14, 464 passed (and 17 subtests)
+in 131 s; Python 3.8 (the CARLA environment), 464 passed in 508 s.  `scripts/results_qa.py` on the committed
+results: 10 tables, 10 figures, 13 study records, PASS.
+
+**Regressions.**  None.
+
+**Limitations.**  Consolidated above.
+
+**Commit.**  Phase 6: `eac620ccd2338c8cd0e4730b24d320f98cff0bbf`.  Phase 7: `phase7: ...`, the last commit of
+the program (head of `main`; nothing pushed).
+
+**Gate.**  PASS: README, CAMPAIGN_REPORT and this report current; framing within the program's limits (no
+avoidability, liability or driver-perception claim); logging prerequisites tied to the regulatory texts;
+related work from verified sources only; limitations consolidated; STOP / YIELD and the depth camera out of the
+main paper, with reasons; tests green on both Pythons.
+
+## Final status
+
+| Phase | Commit | Gate |
+|---|---|---|
+| 0 -- baseline / regression audit | `9ad719f` | PASS |
+| 1 -- fusion of road users that recorded nothing | `c79b1e6` | PASS |
+| 2 -- definitive replay | `c80eab4` | PASS |
+| 3 -- scenario sweeps | `d6ebdfd` | PASS |
+| 4 -- robustness | `3fa907c` | PASS |
+| 5 -- semantic evaluation of the core events | `ea0ccb1` | PASS |
+| 6 -- paper results and inspection | `eac620c` | PASS |
+| 7 -- documentation and positioning | `phase7: ...` | PASS |
+
+Headline results (tables T1-T8, index `results/README.md`):
+- Alignment: every recorder of the 240 sweep runs on t_global, event times within 0.05 s (one radar period) of
+  the truth; no fabricated collision once the contact gate is in.
+- Identities: 397/397 decided tracks correct; recorder links 0 wrong in 464 trials (95 % upper bound 0.65 %).
+- Road users that recorded nothing: 3 false merges in 503 trials; fused centre error 0.12 m against 0.51 m for
+  the single-track box in the unobserved cut-in family (better in 39/40 runs).
+- Semantics: hazard onsets against what the radars could see, before the first contact: precision 0.93, recall
+  0.94, median +0.05 s (sweeps); 0.975 / 0.951 on the canonical runs.
+- Robustness: production-grade radar noise keeps every identity, collision and alignment; RTK poses change
+  nothing; consumer-grade poses keep identities and collisions at 2.99 m fused centre error (2.00 m refined);
+  10 % impulse noise keeps 41 % of the collision matches.
+
+Open before submission (documented where measured; none blocks a gate):
+- Validation on real recordings (simulation only so far).
+- Recorder links of crossing targets: a velocity test split along and across the line of sight recovers 16
+  missed links with no wrong one in an offline what-if (phase 3).
+- Path entries and cut-ins tested on the estimated body instead of the radar track's point (phase 5).
+- A collision-impulse gate scaled by a declared impulse accuracy, combined perturbations, clock drift, headings
+  in the mutual refinement (phase 4).
+
+Over the whole program: reconstruction ground-truth access NO; fusion ground-truth access NO; replay
+ground-truth access NO; ground truth used for evaluation only YES; LLM API calls ZERO.
