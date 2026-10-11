@@ -755,3 +755,16 @@ Open before submission (documented where measured; none blocks a gate):
 
 Over the whole program: reconstruction ground-truth access NO; fusion ground-truth access NO; replay
 ground-truth access NO; ground truth used for evaluation only YES; LLM API calls ZERO.
+
+## Final technical hardening (2026-10-11)
+
+The phase reports above retain their historical measurements. Final hardening
+refreshes saved reconstruction/semantic outputs, baseline/impulse robustness and
+replay presentation. S18 adjacent false merge pairs 3→0 (missed 51→83); all
+sweeps 3→0 (missed 187→239). At 10% impulse noise collision recall is now
+100% on 66 contacts across three seeds, with zero false matches. Other robustness
+families and threshold sensitivity retain historical provenance. There are
+143 reviewed canonical keyframes: 11 PASS, 6 documented WARN, 0 FAIL.
+See [technical hardening](docs/audit/technical_hardening.md),
+[final visual audit](traces/visual_audit_final.md), and
+[manual replay checklist](docs/manual_replay_checklist.md). No new acquisition or paper.

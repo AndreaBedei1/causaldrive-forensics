@@ -1,6 +1,6 @@
 {
   "run": "S18/run_0_abreast",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 5; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 7; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 488.62503729760647,
       "peak_impulse": 1079.5610551393547,
-      "reconstructed_as": "g29",
+      "reconstructed_as": "g30",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,29 +49,65 @@
     }
   ],
   "event_timing": {
-    "nodes": 48,
+    "nodes": 49,
     "max_abs_error_s": 0.0,
-    "order_pairs": 1035,
-    "order_concordant": 1035
+    "order_pairs": 1083,
+    "order_concordant": 1083
   },
   "tracks": [
     {
-      "track": "A:track_001",
+      "track": "A:track_001#segment_1",
       "decision": "U1",
+      "status": "ANONYMOUS",
+      "true_identity": "D",
+      "median_box_distance_m": {
+        "B": 23.2,
+        "C": 1.94,
+        "D": 0.0
+      },
+      "verdict": "correctly left anonymous",
+      "samples": 3,
+      "raw_rmse_to_surface_m": 0.33,
+      "smoothed_rmse_to_surface_m": 0.308,
+      "smoothed_rmse_to_centre_m": 1.974,
+      "raw_difference_speed_rmse_mps": 0.614,
+      "speed_rmse_mps": 0.143
+    },
+    {
+      "track": "A:track_001#segment_2",
+      "decision": "U4",
+      "status": "ANONYMOUS",
+      "true_identity": "D",
+      "median_box_distance_m": {
+        "B": 20.96,
+        "C": 1.77,
+        "D": 0.0
+      },
+      "verdict": "correctly left anonymous",
+      "samples": 32,
+      "raw_rmse_to_surface_m": 1.194,
+      "smoothed_rmse_to_surface_m": 1.134,
+      "smoothed_rmse_to_centre_m": 2.575,
+      "raw_difference_speed_rmse_mps": 2.267,
+      "speed_rmse_mps": 0.369
+    },
+    {
+      "track": "A:track_001#segment_3",
+      "decision": "U2",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "B": 20.69,
+        "B": 18.74,
         "C": 0.0,
-        "D": 2.58
+        "D": 2.62
       },
       "verdict": "correctly left anonymous",
-      "samples": 97,
-      "raw_rmse_to_surface_m": 1.046,
-      "smoothed_rmse_to_surface_m": 1.031,
-      "smoothed_rmse_to_centre_m": 2.45,
-      "raw_difference_speed_rmse_mps": 2.501,
-      "speed_rmse_mps": 0.172
+      "samples": 62,
+      "raw_rmse_to_surface_m": 0.507,
+      "smoothed_rmse_to_surface_m": 0.524,
+      "smoothed_rmse_to_centre_m": 1.88,
+      "raw_difference_speed_rmse_mps": 2.699,
+      "speed_rmse_mps": 0.067
     },
     {
       "track": "A:track_002",

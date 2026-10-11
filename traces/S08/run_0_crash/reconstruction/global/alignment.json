@@ -32,7 +32,7 @@
       "offset_to_global": -4.1,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.55 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001#segment_1 on A, C:track_001#segment_2 on A, C:track_001#segment_3 on B, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.62 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
@@ -60,12 +60,15 @@
         "B": 12137.11
       },
       "impulse_similarity": 1.0,
+      "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
         "peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
-        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)"
+        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
+        "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
+        "pre-contact radar trajectory checked against the candidate partner pose stream where observed"
       ]
     }
   ],
@@ -75,15 +78,17 @@
       "recorder": "C",
       "method": "observed_trajectories",
       "accepted": true,
-      "comparisons": 6,
+      "comparisons": 10,
       "pooled": [
         "A:track_001",
         "B:track_001",
-        "C:track_001 on A",
+        "C:track_001#segment_1 on A",
+        "C:track_001#segment_2 on A",
+        "C:track_001#segment_3 on B",
         "C:track_002 on B"
       ],
       "offset_to_global": -4.1,
-      "median_distance_sigma": 0.548,
+      "median_distance_sigma": 0.62,
       "interval": [
         -4.2,
         -4.0

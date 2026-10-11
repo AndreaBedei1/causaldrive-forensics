@@ -956,6 +956,8 @@
   "tracks": [
     {
       "track_id": "track_001",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 10.95,
       "duration_s": 10.95,
@@ -977,6 +979,8 @@
     },
     {
       "track_id": "track_002",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 5.7,
       "duration_s": 5.7,
@@ -997,6 +1001,8 @@
     },
     {
       "track_id": "track_003",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 6.4,
       "last_seen_t_local": 7.0,
       "duration_s": 0.6,

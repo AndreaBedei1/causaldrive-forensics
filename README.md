@@ -354,7 +354,7 @@ Rules the code follows:
   merges that burst into its contact with C (0.17 of its peak), A reports it as
   its second contact.
 - No log is synchronised. Two COLLISION nodes of different graphs are the same
-  contact when their peak impulses agree (equal and opposite impulses) and the
+  contact when their impulses pass a declared uncertainty gate and the
   two bodies touch: each recorder at its own report time, from its own pose
   stream, its footprint within `contact_consistency_m` = 1.0 m (plus 3 sigma of
   the pose sources' declared accuracy) of the other's.  Without that check two
@@ -375,6 +375,13 @@ Rules the code follows:
   contacts (`merged_bursts`): the same impulse, between graphs already linked,
   at their clock offset, is the same contact (`merged_burst_of`).  It fixes no
   clock.  S06 `a_front_pushed` thus has its three contacts A-B, B-C, A-B.
+  With contact geometry, the impulse residual is divided by
+  `impulse_relative_std * hypot(I1,I2)` (default 0.10 per report), with a
+  configurable 3-sigma gate. This is an engineering budget, not a sensor
+  specification. Pre-contact radar/body compatibility and feasible one-to-one
+  assignments constrain identity; equally supported partners stay unmatched.
+  Without geometry the legacy relative gate remains. See
+  [hardening assumptions](docs/audit/hardening_assumptions.md).
 - A local track is named after another recorder only at fusion. Every matched
   collision of the recorder names a partner; for that contact the track must
   be its recorder's only track that is persistent (tracked at least 1 s before
@@ -913,10 +920,11 @@ in the scene, each track from its own samples through its own observer's pose
   many tracks of however many recorders saw it: a wireframe box of its fitted
   footprint (else the 4.6 x 1.9 m prior; drawn 1.5 m high) at the fused position
   and heading, with an arrow along its motion (none while no heading is known),
-  solid while measured, dashed and `PREDICTED` while only predicted, labelled
-  `U1 / ANONYMOUS`, the tracks it fuses (`A:track_001 + B:track_002 + ...`), its
-  position uncertainty (`+-0.36 m`) and its observers; each of those tracks is a
-  radar dot in its observer's colour;
+   solid while measured and dashed while predicted, labelled only `U1`.
+   The side panel says `U1  seen by A,B`; member tracks remain radar dots in
+   their observers' colours. Dimensions, uncertainty, method and sources remain
+   in `anonymous_entities.json`. An identity-ambiguous segment retains its
+   observations but supports no physical ghost box or path/hazard assertion;
 - a track ASSOCIATED with a recorder is that recorder's replayed vehicle and
   gets no second body: a radar dot at the track estimate, a thin line from its
   observer and `A:track_002 → B`;
@@ -950,10 +958,9 @@ python scripts/gt_audit.py traces/S*/run_*                                     #
 
 `--export` draws the replay headlessly as top-down frames (`cdf.replay.topdown`,
 no CARLA server): the recorders at the poses of their pose source with their own
-footprints, every anonymous road user once (its fitted box at the fused position,
-a dotted circle of twice its position uncertainty when that exceeds 0.3 m, the
-radar points of the tracks it fuses as dots in their observers' colours, and a
-panel line `U1 = A:track_001 + B:track_002 + ...`), associated tracks as dots, the
+ footprints, every anonymous road user once (its fitted box at the fused position,
+ labelled `U1`, member radar points in their observers' colours, and a
+ panel line `U1  seen by A,B`), associated tracks as dots, the
 states of the paper's core view
 (CRITICAL_TTC red, CUT_IN orange, IN_EGO_PATH yellow, BRAKE), exact at event
 instants (from the local graphs' START/END events), the core events of the last
@@ -1106,3 +1113,9 @@ Model policy (`configs/llm.yaml`):
   (ignored by git; copy `.env.example`); a provider without its key is reported
   unavailable.  `--oracle-identities` (privileged, evaluation only) writes under
   `reconstruction/evaluation/llm_oracle/`.
+
+## Final hardening and manual handoff
+
+[Final technical audit](docs/audit/technical_hardening.md) records before/after fusion, semantic, impulse, tests and provenance.
+[143 reviewed keyframes](traces/visual_audit_final.md): 11 PASS, 6 known WARN, 0 FAIL.
+[Andrea's short checklist](docs/manual_replay_checklist.md) covers all 17 replay commands and moments.

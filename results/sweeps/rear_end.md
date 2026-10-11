@@ -3,7 +3,7 @@
 A follows B in one lane at the same speed; B brakes hard at 4.0 s; A brakes after a reaction that varies, at a gap and speed that vary.  Spans rear-end crashes, near misses and safe stops.
 
 Runs complete: 40; failed: none.  Outcomes: crash 8, borderline 4, no crash 28.
-Provenance: code `b5cbbff6ceb04c12`, configuration `767c7dbb12167da9`, commit `c80eab47ec83dcc66909751b0514f1bcb4d5066e` (uncommitted changes), 2026-10-11T03:23:07Z.
+Provenance: code `c76d72a3965907b6`, configuration `50f7dc9e35556156`, commit `fd8d2baed644db4a32c2eb502a2eeb9b32f70887` (uncommitted changes), 2026-10-11T09:35:36Z.
 
 Totals: collisions_reconstructed 8, associations_correct 41, associations_decided 41, anonymous_tracks 2, links_correct 41, links_wrong 0, links_missed 2, merges_correct 0, merges_false 0, merges_missed 0, entities 2
 
@@ -15,8 +15,8 @@ Totals: collisions_reconstructed 8, associations_correct 41, associations_decide
 | fused_centre_error_median_m | 2 | 0.539 | 0.501 | 0.578 | 0.609 | 0.616 |
 | single_track_centre_error_median_m | 2 | 0.527 | 0.497 | 0.556 | 0.580 | 0.586 |
 | record_wall_s | 40 | 29.175 | 28.040 | 31.218 | 75.262 | 169.800 |
-| reconstruct_wall_s | 40 | 1.865 | 1.657 | 1.982 | 2.272 | 2.520 |
-| evaluate_wall_s | 40 | 0.120 | 0.100 | 0.163 | 1.129 | 1.390 |
+| reconstruct_wall_s | 40 | 1.545 | 1.380 | 1.893 | 2.393 | 2.760 |
+| evaluate_wall_s | 40 | 2.470 | 2.263 | 2.897 | 3.355 | 4.630 |
 
 | k | outcome | min gap [m] | contacts | aligned | assoc. | links c/w/m | merges c/f/m | fused centre [m] |
 |--:|---|--:|---|--:|--:|---|---|--:|

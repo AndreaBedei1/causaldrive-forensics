@@ -39,6 +39,7 @@
       "gap_s": null,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": null,
       "score": 1.925
     },
     {
@@ -53,6 +54,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 7.593
     },
     {
@@ -67,6 +69,7 @@
       "gap_s": 0.7,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": 3.698,
       "score": 2.156
     }
   ],
@@ -74,6 +77,7 @@
     {
       "id": "U1",
       "anonymous": true,
+      "identity_ambiguous": false,
       "source_tracks": [
         "A:track_001",
         "B:track_002",
@@ -127,6 +131,7 @@
             "gap_s": null,
             "accepted": true,
             "refused": null,
+            "lateral_chi2": null,
             "score": 1.925
           },
           {
@@ -141,6 +146,7 @@
             "gap_s": 0.7,
             "accepted": true,
             "refused": null,
+            "lateral_chi2": 3.698,
             "score": 2.156
           }
         ],

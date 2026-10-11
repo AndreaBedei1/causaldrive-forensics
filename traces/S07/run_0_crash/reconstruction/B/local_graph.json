@@ -549,6 +549,8 @@
   "tracks": [
     {
       "track_id": "track_001",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 13.65,
       "duration_s": 13.65,

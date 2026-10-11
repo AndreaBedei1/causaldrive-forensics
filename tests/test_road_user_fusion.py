@@ -170,6 +170,18 @@ class AssociationTests(unittest.TestCase):
         other = track('A', 'track_001', TIMES[:30], motion, following(40.0, -3.5, 12.0))
         self.assertTrue(pair_evidence(before, other, CFG).accepted)
 
+    def test_parallel_bodies_cannot_stitch_across_an_unobserved_lane_jump(self):
+        radar = following(0.0, 0.0, 12.0)
+        before = track('B', 'track_001', TIMES[:30], straight(30.0, 0.0, 12.0), radar)
+        after = track('B', 'track_002', [round(t + 1.0, 4) for t in TIMES[30:]],
+                      straight(30.0, 3.5, 12.0), radar)
+        evidence = stitch_evidence(before, after, CFG)
+        # The old isotropic acceleration allowance admitted this same-speed
+        # lane jump. Independent lateral face support must reject it.
+        self.assertLess(evidence.median_box_chi2, chi2_2dof(CFG.fusion.anonymous_gate_probability))
+        self.assertGreater(evidence.lateral_chi2, chi2_2dof(CFG.fusion.anonymous_gate_probability))
+        self.assertFalse(evidence.accepted)
+
     def test_a_track_with_two_possible_successors_is_stitched_to_neither(self):
         tracks = {name: CommonTrack(name.split(":")[0], name.split(":")[1],
                                     [observe(t, np.zeros(2), 0.0, 5.0, np.array([-20.0, 0.0])) for t in times])

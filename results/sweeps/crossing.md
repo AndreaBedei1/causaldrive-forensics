@@ -3,20 +3,20 @@
 A drives straight through a junction; B, on the crossing road, fails to yield and speeds up.  A's speed, B's distance to the junction and B's final speed vary: side impacts, near misses, clear passes.
 
 Runs complete: 40; failed: none.  Outcomes: crash 18, borderline 7, no crash 15.
-Provenance: code `b5cbbff6ceb04c12`, configuration `767c7dbb12167da9`, commit `c80eab47ec83dcc66909751b0514f1bcb4d5066e` (uncommitted changes), 2026-10-11T03:24:11Z.
+Provenance: code `c76d72a3965907b6`, configuration `50f7dc9e35556156`, commit `fd8d2baed644db4a32c2eb502a2eeb9b32f70887` (uncommitted changes), 2026-10-11T09:35:35Z.
 
-Totals: collisions_reconstructed 19, associations_correct 38, associations_decided 38, anonymous_tracks 55, links_correct 38, links_wrong 0, links_missed 55, merges_correct 12, merges_false 0, merges_missed 0, entities 43
+Totals: collisions_reconstructed 19, associations_correct 40, associations_decided 40, anonymous_tracks 57, links_correct 40, links_wrong 0, links_missed 57, merges_correct 11, merges_false 0, merges_missed 1, entities 46
 
 | quantity | n | median | q25 | q75 | p95 | max |
 |---|--:|--:|--:|--:|--:|--:|
 | min_gap_m | 40 | 0.362 | 0.000 | 2.104 | 4.406 | 10.076 |
 | max_abs_t_global_error_s | 40 | 0.050 | 0.000 | 0.050 | 0.050 | 0.050 |
 | max_abs_relative_offset_error_s | 40 | 0.050 | 0.000 | 0.050 | 0.050 | 0.050 |
-| fused_centre_error_median_m | 23 | 0.540 | 0.479 | 0.616 | 0.658 | 1.645 |
-| single_track_centre_error_median_m | 23 | 0.793 | 0.627 | 0.883 | 0.933 | 3.633 |
+| fused_centre_error_median_m | 25 | 0.560 | 0.487 | 0.637 | 0.889 | 1.645 |
+| single_track_centre_error_median_m | 25 | 0.793 | 0.654 | 0.904 | 0.932 | 3.633 |
 | record_wall_s | 40 | 37.725 | 35.803 | 40.852 | 45.776 | 51.140 |
-| reconstruct_wall_s | 40 | 2.765 | 2.410 | 3.047 | 3.354 | 3.660 |
-| evaluate_wall_s | 40 | 0.220 | 0.140 | 2.053 | 2.734 | 2.850 |
+| reconstruct_wall_s | 40 | 1.960 | 1.720 | 2.377 | 2.963 | 5.050 |
+| evaluate_wall_s | 40 | 2.925 | 2.490 | 3.453 | 3.784 | 4.590 |
 
 | k | outcome | min gap [m] | contacts | aligned | assoc. | links c/w/m | merges c/f/m | fused centre [m] |
 |--:|---|--:|---|--:|--:|---|---|--:|
@@ -32,7 +32,7 @@ Totals: collisions_reconstructed 19, associations_correct 38, associations_decid
 | 9 | borderline | 0.716 | - | 2 | 0/0 | 0/0/3 | 1/0/0 | 0.604 |
 | 10 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
 | 11 | crash | 0.02 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
-| 12 | no_crash | 2.299 | - | 2 | 0/0 | 0/0/3 | 1/0/0 | 0.403 |
+| 12 | no_crash | 2.299 | - | 2 | 0/0 | 0/0/3 | 0/0/1 | 0.401 |
 | 13 | no_crash | 2.297 | - | 2 | 0/0 | 0/0/2 | 0/0/0 | 0.540 |
 | 14 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
 | 15 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
@@ -50,7 +50,7 @@ Totals: collisions_reconstructed 19, associations_correct 38, associations_decid
 | 27 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
 | 28 | borderline | 0.213 | - | 2 | 0/0 | 0/0/3 | 1/0/0 | 0.435 |
 | 29 | no_crash | 1.255 | - | 2 | 0/0 | 0/0/3 | 1/0/0 | 0.656 |
-| 30 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
+| 30 | crash | 0.0 | A-B | 2 | 3/3 | 3/0/1 | 0/0/0 | 0.667 |
 | 31 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
 | 32 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
 | 33 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
@@ -59,4 +59,4 @@ Totals: collisions_reconstructed 19, associations_correct 38, associations_decid
 | 36 | no_crash | 3.021 | - | 2 | 0/0 | 0/0/2 | 0/0/0 | 0.410 |
 | 37 | no_crash | 1.502 | - | 2 | 0/0 | 0/0/2 | 0/0/0 | 0.610 |
 | 38 | no_crash | 4.256 | - | 2 | 0/0 | 0/0/2 | 0/0/0 | 0.471 |
-| 39 | crash | 0.0 | A-B | 2 | 2/2 | 2/0/0 | 0/0/0 | - |
+| 39 | crash | 0.0 | A-B | 2 | 3/3 | 3/0/1 | 0/0/0 | 0.945 |

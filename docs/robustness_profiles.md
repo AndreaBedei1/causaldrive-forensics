@@ -119,6 +119,16 @@ In `ideal` every amplitude is zero.  The study's unperturbed baseline uses the r
 
 ## Collision reports
 
+Final hardening uses `impulse_relative_std = 0.10` per report and
+`impulse_sigma_gate = 3` with body geometry: `abs(I1-I2)/(0.10*hypot(I1,I2))`.
+This configurable uncertainty budget is an engineering assumption; it is not a
+specification for a real crash-impulse sensor. Contact, pre-contact approach and
+clock/assignment consistency constrain the pairing. Ambiguous partners remain
+unmatched. The legacy 10% relative gate applies without geometry.
+The symmetry Monte Carlo report is retained as a historical diagnosis of that
+legacy gate. Only baseline/impulse were refreshed; see
+[final audit](audit/technical_hardening.md) and `summary.json.family_provenance`.
+
 `CollisionPerturbation` rewrites each recorder's `collisions.jsonl`.  Each callback is dropped with probability `p_drop`; its impulse is multiplied by max(0, 1 + N(0, eps^2)); its timestamp is delayed by `latency_s` if the recorder is in `latency_recorders`.  The draws are made per callback, separately for each recorder.
 
 | Family: value | Justification |

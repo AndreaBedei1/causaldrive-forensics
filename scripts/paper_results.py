@@ -302,7 +302,8 @@ def table_robustness(t: Tables) -> None:
                      None if errors is None else round(errors, 1),
                      None if row.get("identical_graphs") is None else "{0:.0f}/{1}".format(row["identical_graphs"], row["runs"])])
     t.write("T5_robustness", "Robustness of the reconstruction on the canonical runs (docs/robustness_profiles.md): mean "
-            "+- SD over seeds of the metrics pooled over the runs.",
+             "+- SD over seeds of the metrics pooled over the runs. Baseline/impulse refreshed in final hardening; "
+             "other families retain the historical implementation (see family_provenance in summary.json).",
             ["family", "level", "seeds", "identity acc.", "collisions", "runs aligned", "core events", "event dt p95 [s]",
              "centre err. [m]", "wrong links + false merges", "identical graphs"], rows,
             "Core events: the unperturbed reconstruction's instant core events found again (same type, actor, subject "
@@ -327,7 +328,7 @@ def table_sensitivity(t: Tables) -> None:
                 cells.append("{0}/{1}".format(s["varied"], s["nominal"]))
             rows.append(cells)
         t.write("T6_sensitivity_{0}".format(label),
-                "One-at-a-time sensitivity of the core events to their thresholds before the first contact ({0} runs, "
+                "Historical one-at-a-time sensitivity of the core events to their thresholds before the first contact ({0} runs, "
                 "{1}).".format(record["runs"], label),
                 ["setting", "CTTC start: recall / precision", "CTTC start: oracle events", "path entry: recall / precision",
                  "path entry: oracle events", "cut-in R: recall / precision", "cut-in R: oracle events"], rows,
@@ -345,11 +346,12 @@ def table_impulse(t: Tables) -> None:
     events = [e for r in record["runs"] for e in r["matched_events"]]
     rows = [["{0:.0%}".format(float(level)), record["mean_survival"][level],
              min(e["survival"][level] for e in events) if events else None] for level in record["mean_survival"]]
-    t.write("T7_impulse", "Collision-report impulses: probability that the two reports of a matched contact still pass "
-            "the alignment's impulse test when each carries an independent relative error (Monte Carlo).",
+    t.write("T7_impulse", "Historical collision-report impulses: probability that the two reports of a matched contact pass "
+            "the legacy fixed relative gate under independent report errors (Monte Carlo).",
             ["relative error per report", "mean P(pass)", "min P(pass)"], rows,
             "CARLA gives both bodies of a contact the same impulse magnitude (largest relative difference {0}); the "
-            "alignment pairs reports within {1:.0%} (engineering assumption).".format(
+             "legacy gate paired reports within {1:.0%} (engineering assumption). The final geometry-supported "
+             "uncertainty gate is evaluated in T5 and docs/audit/technical_hardening.md.".format(
                 record["max_relative_difference"], record["impulse_tolerance"]),
             [0, 2, 2])
 
@@ -560,6 +562,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         digest.update(source.read_bytes().replace(b'\r\n', b'\n') + b'\0')
     prov['analysis_scripts_sha256'] = digest.hexdigest()
     prov['scope'] = 'Rendering of tables/figures; each input study retains its own execution provenance'
+    inputs = sorted({p for folder in ('sweeps', 'semantics', 'robustness')
+                     for p in (ROOT / 'results' / folder).glob('*.json')}
+                    | {ROOT / 'traces' / 'fusion_metrics.json'}
+                    | {p for run in _canonical_runs() for p in (run / 'reconstruction').rglob('*')
+                       if p.suffix in ('.json', '.jsonl')})
+    prov['inputs'] = {}
+    for path in inputs:
+        item = {'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        if path.suffix == '.json':
+            record = _read(path)
+            if isinstance(record, dict):
+                for key in ('provenance', 'family_provenance', 'scope'):
+                    if key in record:
+                        item[key] = record[key]
+        prov['inputs'][path.relative_to(ROOT).as_posix()] = item
+    # Matplotlib writes whitespace after SVG path coordinates; normalize it
+    # before hashing the deliverables, without changing the vector geometry.
+    for path in args.out.rglob('*.svg'):
+        path.write_text('\n'.join(line.rstrip() for line in path.read_text(encoding='utf-8').splitlines()) + '\n',
+                        encoding='utf-8')
+    prov['artifacts'] = {p.relative_to(args.out).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                         for p in sorted(args.out.rglob('*'))
+                         if p.is_file() and (p.suffix in ('.pdf', '.svg') or p.parent.name == 'tables')}
     (args.out / 'artifact_provenance.json').write_text(json.dumps(prov,indent=2)+'\n',encoding='utf-8')
     index = ["# Paper results", "",
              "Generated by `scripts/paper_results.py` from the campaign's result files (privileged evaluation; nothing "

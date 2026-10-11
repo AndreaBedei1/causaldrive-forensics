@@ -91,3 +91,5 @@ Over all 240 runs of the sweeps: wrong links 0 in 464 trials (95 % upper bound 0
   Settling: n=5: median 0.0, IQR 0.0, p95 0.0; n=10: median 0.0, IQR 0.0, p95 0.0; n=15: median 0.0, IQR 0.0, p95 0.0; n=20: median 0.0, IQR 0.0, p95 0.0; n=25: median 0.0, IQR 0.0, p95 0.0; n=30: median 0.0, IQR 0.0, p95 0.0; n=40: median 0.0, IQR 0.0, p95 0.0.
 - wrong links: 0 in 81 trials (95 % upper bound 0.037); 2.0 trials per run in the pilot -> 30 runs for a 5 % bound.
 - false merges: 0 in 65 trials (95 % upper bound 0.0462); 1.8 trials per run in the pilot -> 34 runs for a 5 % bound.
+
+Final hardening reanalyses the same saved 240 recordings. The original sample-size study and its execution provenance are retained; segmentation changes pair-trial denominators. See [final audit](audit/technical_hardening.md).

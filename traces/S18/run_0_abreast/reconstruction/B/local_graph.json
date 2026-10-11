@@ -1275,6 +1275,8 @@
   "tracks": [
     {
       "track_id": "track_001",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 11.45,
       "duration_s": 11.45,
@@ -1296,6 +1298,8 @@
     },
     {
       "track_id": "track_002",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 8.95,
       "duration_s": 8.95,
@@ -1316,6 +1320,8 @@
     },
     {
       "track_id": "track_003",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 8.95,
       "duration_s": 8.95,
@@ -1337,6 +1343,8 @@
     },
     {
       "track_id": "track_004",
+      "parent_track": null,
+      "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
       "last_seen_t_local": 4.55,
       "duration_s": 4.55,

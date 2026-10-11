@@ -1,0 +1,369 @@
+{
+  "S01/run_0_crash": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm005.35.png",
+      "02_tgm002.35.png",
+      "03_tgm000.20.png",
+      "04_tgp000.00.png",
+      "05_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S02/run_0_crash": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.65.png",
+      "02_tgm002.85.png",
+      "03_tgm002.55.png",
+      "04_tgm001.40.png",
+      "05_tgm000.20.png",
+      "06_tgp000.00.png",
+      "07_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S02/run_0_critical_before_cut_in": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.10.png",
+      "02_tgm001.50.png",
+      "03_tgm001.40.png",
+      "04_tgm001.15.png",
+      "05_tgm000.45.png",
+      "06_tgm000.20.png",
+      "07_tgp000.00.png",
+      "08_tgp000.50.png",
+      "09_tgp000.80.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S03/run_0_crash": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.10.png",
+      "02_tgm001.55.png",
+      "03_tgm001.50.png",
+      "04_tgm000.20.png",
+      "05_tgp000.00.png",
+      "06_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S06/run_0_a_front_pushed": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.80.png",
+      "02_tgm004.30.png",
+      "03_tgm000.20.png",
+      "04_tgp000.00.png",
+      "05_tgp000.30.png",
+      "06_tgp000.45.png",
+      "07_tgp000.50.png",
+      "08_tgp000.65.png",
+      "09_tgp001.00.png",
+      "10_tgp001.15.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S06/run_0_b_rear_first": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm006.25.png",
+      "02_tgm005.75.png",
+      "03_tgm001.75.png",
+      "04_tgm001.55.png",
+      "05_tgm001.05.png",
+      "06_tgm000.20.png",
+      "07_tgp000.00.png",
+      "08_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S07/run_0_crash": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm005.95.png",
+      "02_tgm005.40.png",
+      "03_tgm002.50.png",
+      "04_tgm001.55.png",
+      "05_tgm000.20.png",
+      "06_tgp000.00.png",
+      "07_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S08/run_0_crash": {
+    "verdict": "WARN",
+    "summary": "Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN.",
+    "findings": [
+      {
+        "verdict": "WARN",
+        "time": -2.0,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "02_tgm001.55.png",
+        "solution": "Known limitation: Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN."
+      },
+      {
+        "verdict": "WARN",
+        "time": 1.0,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "08_tgp000.55.png",
+        "solution": "Known limitation: Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN."
+      },
+      {
+        "verdict": "WARN",
+        "time": 1.0,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "08_tgp000.55.png",
+        "solution": "Known limitation: Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN."
+      },
+      {
+        "verdict": "WARN",
+        "time": 1.0,
+        "problem": "road_users_overlap: drawn bodies overlap from here",
+        "frame": "08_tgp000.55.png",
+        "solution": "Known limitation: Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN."
+      },
+      {
+        "verdict": "WARN",
+        "time": 1.1,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "08_tgp000.55.png",
+        "solution": "Known limitation: Residual contact handoff C:track_002; overlap and heading uncertainty after impact. Wide-support segment is UNKNOWN."
+      }
+    ],
+    "reviewed_frames": [
+      "01_tgm004.10.png",
+      "02_tgm001.55.png",
+      "03_tgm001.50.png",
+      "04_tgm000.20.png",
+      "05_tgp000.00.png",
+      "06_tgp000.05.png",
+      "07_tgp000.50.png",
+      "08_tgp000.55.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S09/run_0_merge_conflict": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm007.95.png",
+      "02_tgm004.95.png",
+      "03_tgm003.60.png",
+      "04_tgm003.35.png",
+      "05_tgm000.20.png",
+      "06_tgp000.00.png",
+      "07_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S10/run_0_rolls_through": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm005.00.png",
+      "02_tgm002.00.png",
+      "03_tgm001.80.png",
+      "04_tgm000.20.png",
+      "05_tgm000.15.png",
+      "06_tgm000.10.png",
+      "07_tgp000.00.png",
+      "08_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S12/run_0_near_simultaneous": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.25.png",
+      "02_tgm001.25.png",
+      "03_tgm001.10.png",
+      "04_tgm000.40.png",
+      "05_tgm000.20.png",
+      "06_tgp000.00.png",
+      "07_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S15/run_0_deflected_into_c": {
+    "verdict": "WARN",
+    "summary": "Contact handoff may begin before wide support is confirmed; post-impact fragments remain anonymous.",
+    "findings": [
+      {
+        "verdict": "WARN",
+        "time": 2.2,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "11_tgp001.40.png",
+        "solution": "Known limitation: Contact handoff may begin before wide support is confirmed; post-impact fragments remain anonymous."
+      },
+      {
+        "verdict": "WARN",
+        "time": 2.2,
+        "problem": "road_user_on_recorder: drawn bodies overlap from here",
+        "frame": "11_tgp001.40.png",
+        "solution": "Known limitation: Contact handoff may begin before wide support is confirmed; post-impact fragments remain anonymous."
+      }
+    ],
+    "reviewed_frames": [
+      "01_tgm003.80.png",
+      "02_tgm001.30.png",
+      "03_tgm001.25.png",
+      "04_tgm000.20.png",
+      "05_tgm000.05.png",
+      "06_tgp000.00.png",
+      "07_tgp000.50.png",
+      "08_tgp000.55.png",
+      "09_tgp000.70.png",
+      "10_tgp000.90.png",
+      "11_tgp001.40.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S16/run_0_consequential": {
+    "verdict": "WARN",
+    "summary": "Short post-contact van fragment and C losing A before their contact remain documented limitations.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm005.55.png",
+      "02_tgm005.05.png",
+      "03_tgm000.35.png",
+      "04_tgm000.20.png",
+      "05_tgm000.15.png",
+      "06_tgm000.10.png",
+      "07_tgp000.00.png",
+      "08_tgp000.05.png",
+      "09_tgp000.20.png",
+      "10_tgp000.50.png",
+      "11_tgp000.85.png",
+      "12_tgp001.05.png",
+      "13_tgp001.30.png",
+      "14_tgp001.55.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S17/run_0_crash": {
+    "verdict": "PASS",
+    "summary": "Reconstruction-only QA: no anomaly.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm004.95.png",
+      "02_tgm002.35.png",
+      "03_tgm002.20.png",
+      "04_tgm001.60.png",
+      "05_tgm001.15.png",
+      "06_tgm000.85.png",
+      "07_tgm000.80.png",
+      "08_tgm000.20.png",
+      "09_tgp000.00.png",
+      "10_tgp000.50.png",
+      "11_tgp000.55.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S18/run_0_abreast": {
+    "verdict": "WARN",
+    "summary": "Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box.",
+    "findings": [
+      {
+        "verdict": "WARN",
+        "time": -6.2,
+        "problem": "road_users_overlap: drawn bodies overlap from here",
+        "frame": "01_tgm005.25.png",
+        "solution": "Known limitation: Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box."
+      },
+      {
+        "verdict": "WARN",
+        "time": -6.2,
+        "problem": "road_users_overlap: drawn bodies overlap from here",
+        "frame": "01_tgm005.25.png",
+        "solution": "Known limitation: Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box."
+      },
+      {
+        "verdict": "WARN",
+        "time": -6.0,
+        "problem": "road_users_overlap: drawn bodies overlap from here",
+        "frame": "01_tgm005.25.png",
+        "solution": "Known limitation: Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box."
+      },
+      {
+        "verdict": "WARN",
+        "time": -5.7,
+        "problem": "road_user_box_jump: box moved 4.5 m at 11.9 m/s",
+        "frame": "01_tgm005.25.png",
+        "solution": "Known limitation: Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box."
+      }
+    ],
+    "reviewed_frames": [
+      "01_tgm005.25.png",
+      "02_tgm002.25.png",
+      "03_tgm001.05.png",
+      "04_tgm000.65.png",
+      "05_tgm000.45.png",
+      "06_tgm000.20.png",
+      "07_tgp000.00.png",
+      "08_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S18/run_0_passing": {
+    "verdict": "WARN",
+    "summary": "Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box.",
+    "findings": [],
+    "reviewed_frames": [
+      "01_tgm006.20.png",
+      "02_tgm005.55.png",
+      "03_tgm001.40.png",
+      "04_tgm001.05.png",
+      "05_tgm000.65.png",
+      "06_tgm000.45.png",
+      "07_tgm000.20.png",
+      "08_tgp000.00.png",
+      "09_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  },
+  "S18/run_0_platoon": {
+    "verdict": "WARN",
+    "summary": "Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box.",
+    "findings": [
+      {
+        "verdict": "WARN",
+        "time": -6.2,
+        "problem": "road_users_overlap: drawn bodies overlap from here",
+        "frame": "01_tgm006.20.png",
+        "solution": "Known limitation: Radar identity ambiguity and conservative fragmentation; no C/D fusion. Mixed-body support is points only, not an asserted ghost box."
+      }
+    ],
+    "reviewed_frames": [
+      "01_tgm006.20.png",
+      "02_tgm005.70.png",
+      "03_tgm001.05.png",
+      "04_tgm000.65.png",
+      "05_tgm000.35.png",
+      "06_tgm000.20.png",
+      "07_tgp000.00.png",
+      "08_tgp000.50.png"
+    ],
+    "review_method": "Every exported PNG inspected in 33 contact sheets; reconstruction-only visual review. Andrea interactive replay remains pending."
+  }
+}

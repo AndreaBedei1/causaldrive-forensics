@@ -1,0 +1,50 @@
+{
+  "scope": "Evaluation-only diagnostic ablations of main prediction, not the independent checker",
+  "rows": [
+    {
+      "run": "S02/run_0_crash",
+      "observer": "B",
+      "target": "A",
+      "main": 1.25,
+      "straight": 1.6,
+      "body": 1.4,
+      "straight_body": 1.9
+    },
+    {
+      "run": "S17/run_0_crash",
+      "observer": "A",
+      "target": "B",
+      "main": 3.85,
+      "straight": 4.1,
+      "body": 3.8,
+      "straight_body": 4.1
+    },
+    {
+      "run": "S17/run_0_crash",
+      "observer": "B",
+      "target": "A",
+      "main": 4.05,
+      "straight": 4.05,
+      "body": 4.05,
+      "straight_body": 4.05
+    },
+    {
+      "run": "S18/run_0_passing",
+      "observer": "A",
+      "target": "B",
+      "main": 5.2,
+      "straight": 5.45,
+      "body": 5.2,
+      "straight_body": 5.45
+    },
+    {
+      "run": "S18/run_0_passing",
+      "observer": "B",
+      "target": "A",
+      "main": 5.4,
+      "straight": 5.4,
+      "body": 5.4,
+      "straight_body": 5.4
+    }
+  ]
+}

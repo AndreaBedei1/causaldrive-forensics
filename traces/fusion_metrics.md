@@ -1,12 +1,12 @@
 # Road-user fusion against ground truth (campaign)
 
-Privileged evaluation: ground truth is read only here, after the reconstruction was written. Provenance: commit `c80eab47ec83dcc66909751b0514f1bcb4d5066e` (uncommitted changes), code `b5cbbff6ceb04c12`, configuration `767c7dbb12167da9`, 2026-10-11T03:24:28Z.
+Privileged evaluation: ground truth is read only here, after the reconstruction was written. Provenance: commit `fd8d2baed644db4a32c2eb502a2eeb9b32f70887` (uncommitted changes), code `c76d72a3965907b6`, configuration `50f7dc9e35556156`, 2026-10-11T09:29:44Z.
 
 ## Identity decisions (tracks of aligned recorders)
 
-anonymous: 22, correct link: 42, missed link: 3
+anonymous: 26, correct link: 44, missed link: 7
 
-Merges over pairs of anonymous tracks: correct 15, false 0, missed 10. Anonymous entities: 14 (purity median 1.000, min 0.632); entities per true road user: median 1.000, max 2.000.
+Merges over pairs of anonymous tracks: correct 23, false 0, missed 16. Anonymous entities: 19 (purity median 1.000, min 0.609); entities per true road user: median 1.500, max 3.000.
 
 ## Per run
 
@@ -19,52 +19,52 @@ Merges over pairs of anonymous tracks: correct 15, false 0, missed 10. Anonymous
 | S06/run_0_a_front_pushed | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S06/run_0_b_rear_first | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S07/run_0_crash | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
-| S08/run_0_crash | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | B->U1 | 0.337 | 0.897 |
+| S08/run_0_crash | 5 correct link, 3 missed link | 0/0/1 | 3 | 3 | A->U3, B->U1/U2 | 1.122 | 1.345 |
 | S09/run_0_merge_conflict | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
 | S10/run_0_rolls_through | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
-| S12/run_0_near_simultaneous | 2 correct link | 0/0/0 | 0 | 0 | - | - | - |
-| S15/run_0_deflected_into_c | 5 correct link, 1 missed link | 0/0/0 | 1 | 1 | A->U1 | 1.468 | 1.409 |
+| S12/run_0_near_simultaneous | 3 correct link, 1 missed link | 0/0/0 | 1 | 1 | A->U1 | 0.827 | 0.964 |
+| S15/run_0_deflected_into_c | 6 correct link, 2 missed link | 0/0/1 | 2 | 2 | A->U1/U2 | 0.983 | 1.921 |
 | S16/run_0_consequential | 6 correct link, 1 missed link | 0/0/0 | 1 | 1 | C->U1 | 3.303 | 3.307 |
 | S17/run_0_crash | 3 anonymous, 2 correct link | 3/0/0 | 1 | 0 | C->U1 | 0.106 | 0.690 |
-| S18/run_0_abreast | 5 anonymous, 2 correct link | 2/0/2 | 3 | 0 | C->U1/U2, D->U3 | 0.401 | 0.616 |
-| S18/run_0_passing | 7 anonymous, 2 correct link | 6/0/3 | 3 | 0 | C->U1/U2, D->U3 | 0.411 | 0.525 |
+| S18/run_0_abreast | 7 anonymous, 2 correct link | 4/0/5 | 4 | 0 | C->U2, D->U1/U3/U4 | 0.402 | 0.605 |
+| S18/run_0_passing | 9 anonymous, 2 correct link | 12/0/4 | 3 | 0 | C->U2, D->U1/U3 | 0.378 | 0.492 |
 | S18/run_0_platoon | 7 anonymous, 2 correct link | 4/0/5 | 4 | 0 | C->U3/U4, D->U1/U2 | 0.616 | 0.522 |
 
 ## Pooled fused-state errors
 
-Against the entity's majority identity, at the 925 instants every source track was on it; 107 impure instants (a source track on another body: an association error) are excluded.
+Against the entity's majority identity, at the 958 instants every source track was on it; 49 impure instants (a source track on another body: an association error) are excluded.
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 925 | 0.447 | 0.236 | 0.846 | 0.609 | 1.456 | 1.525 | 6.588 |
-| coverage_s | 14 | 8.950 | 3.925 | 10.200 | 6.275 | 10.485 | 11.113 | 12.250 |
-| heading_error_deg | 835 | 0.572 | 0.287 | 1.068 | 0.780 | 1.830 | 3.053 | 176.769 |
-| length_error_m | 14 | 0.192 | 0.113 | 0.192 | 0.080 | 0.351 | 0.733 | 1.315 |
-| normalised_centre_error | 925 | 0.925 | 0.506 | 1.303 | 0.797 | 1.953 | 2.591 | 16.108 |
-| single_track_nominal_centre_error_m | 1402 | 0.618 | 0.337 | 1.216 | 0.880 | 3.434 | 3.535 | 5.283 |
-| speed_error_mps | 925 | 0.051 | 0.022 | 0.103 | 0.081 | 0.182 | 0.281 | 4.472 |
-| velocity_error_mps | 925 | 0.142 | 0.078 | 0.250 | 0.172 | 0.430 | 0.826 | 10.357 |
-| width_error_m | 14 | 0.263 | 0.107 | 0.263 | 0.156 | 0.263 | 0.263 | 0.263 |
+| centre_error_m | 958 | 0.530 | 0.267 | 0.983 | 0.716 | 1.176 | 1.429 | 3.777 |
+| coverage_s | 19 | 3.700 | 1.375 | 9.875 | 8.500 | 10.250 | 10.455 | 10.500 |
+| heading_error_deg | 766 | 0.589 | 0.291 | 1.181 | 0.890 | 2.407 | 4.597 | 164.969 |
+| length_error_m | 19 | 0.192 | 0.086 | 0.192 | 0.106 | 0.419 | 0.509 | 1.315 |
+| normalised_centre_error | 958 | 0.838 | 0.462 | 1.332 | 0.870 | 1.999 | 2.735 | 6.893 |
+| single_track_nominal_centre_error_m | 1557 | 0.637 | 0.348 | 1.353 | 1.005 | 3.311 | 3.526 | 3.674 |
+| speed_error_mps | 958 | 0.062 | 0.022 | 0.127 | 0.105 | 0.253 | 0.457 | 4.472 |
+| velocity_error_mps | 958 | 0.140 | 0.073 | 0.268 | 0.195 | 0.545 | 1.190 | 8.197 |
+| width_error_m | 19 | 0.107 | 0.107 | 0.263 | 0.156 | 0.263 | 0.263 | 0.263 |
 
 ### Method: box_fit
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 390 | 0.271 | 0.142 | 0.380 | 0.238 | 0.665 | 1.007 | 6.588 |
-| heading_error_deg | 374 | 0.599 | 0.289 | 1.069 | 0.779 | 1.680 | 2.460 | 158.576 |
-| speed_error_mps | 390 | 0.052 | 0.023 | 0.113 | 0.090 | 0.248 | 0.402 | 4.472 |
-| velocity_error_mps | 390 | 0.147 | 0.081 | 0.258 | 0.177 | 0.390 | 1.077 | 10.357 |
+| centre_error_m | 477 | 0.286 | 0.171 | 0.425 | 0.255 | 0.721 | 0.920 | 2.305 |
+| heading_error_deg | 460 | 0.563 | 0.281 | 1.058 | 0.776 | 1.791 | 3.599 | 89.859 |
+| speed_error_mps | 477 | 0.058 | 0.025 | 0.113 | 0.088 | 0.232 | 0.378 | 4.472 |
+| velocity_error_mps | 477 | 0.138 | 0.081 | 0.253 | 0.172 | 0.447 | 1.070 | 8.197 |
 
 ### Method: covariance_intersection
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 535 | 0.675 | 0.417 | 1.135 | 0.718 | 1.505 | 2.118 | 4.036 |
-| heading_error_deg | 461 | 0.551 | 0.281 | 1.065 | 0.784 | 2.013 | 3.253 | 176.769 |
-| speed_error_mps | 535 | 0.050 | 0.021 | 0.097 | 0.076 | 0.165 | 0.244 | 3.828 |
-| velocity_error_mps | 535 | 0.136 | 0.075 | 0.241 | 0.167 | 0.441 | 0.790 | 8.736 |
+| centre_error_m | 481 | 0.973 | 0.639 | 1.109 | 0.469 | 1.250 | 2.447 | 3.777 |
+| heading_error_deg | 306 | 0.667 | 0.310 | 1.450 | 1.139 | 3.299 | 6.505 | 164.969 |
+| speed_error_mps | 481 | 0.069 | 0.015 | 0.141 | 0.127 | 0.264 | 0.494 | 3.510 |
+| velocity_error_mps | 481 | 0.146 | 0.060 | 0.291 | 0.231 | 0.637 | 1.336 | 7.825 |
 
-Calibration of the declared position uncertainty over 925 states: within 1/2/3 sigma 0.547/0.908/0.963 (a Gaussian would give 0.393/0.865/0.989).
+Calibration of the declared position uncertainty over 958 states: within 1/2/3 sigma 0.636/0.900/0.955 (a Gaussian would give 0.393/0.865/0.989).
 
 ## Observed-trajectory alignment
 

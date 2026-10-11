@@ -39,6 +39,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 1.491
     },
     {
@@ -53,6 +54,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 26.881
     },
     {
@@ -67,6 +69,7 @@
       "gap_s": null,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": null,
       "score": 0.223
     },
     {
@@ -81,6 +84,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 21.31
     },
     {
@@ -95,6 +99,7 @@
       "gap_s": null,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": null,
       "score": 0.554
     },
     {
@@ -109,6 +114,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 24.562
     },
     {
@@ -123,6 +129,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 6.068
     },
     {
@@ -137,6 +144,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 10.416
     },
     {
@@ -151,6 +159,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 1.841
     },
     {
@@ -165,6 +174,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 25.854
     },
     {
@@ -179,6 +189,7 @@
       "gap_s": null,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": null,
       "score": 0.697
     },
     {
@@ -193,6 +204,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 23.705
     },
     {
@@ -207,6 +219,7 @@
       "gap_s": null,
       "accepted": true,
       "refused": null,
+      "lateral_chi2": null,
       "score": 0.792
     },
     {
@@ -221,6 +234,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 22.779
     },
     {
@@ -235,6 +249,7 @@
       "gap_s": null,
       "accepted": false,
       "refused": null,
+      "lateral_chi2": null,
       "score": 9.769
     }
   ],
@@ -242,6 +257,7 @@
     {
       "id": "U1",
       "anonymous": true,
+      "identity_ambiguous": false,
       "source_tracks": [
         "A:track_001",
         "B:track_002",
@@ -295,6 +311,7 @@
             "gap_s": null,
             "accepted": true,
             "refused": null,
+            "lateral_chi2": null,
             "score": 0.223
           },
           {
@@ -309,6 +326,7 @@
             "gap_s": null,
             "accepted": true,
             "refused": null,
+            "lateral_chi2": null,
             "score": 0.554
           }
         ],
@@ -2634,6 +2652,7 @@
     {
       "id": "U2",
       "anonymous": true,
+      "identity_ambiguous": false,
       "source_tracks": [
         "A:track_003"
       ],
@@ -2963,6 +2982,7 @@
     {
       "id": "U3",
       "anonymous": true,
+      "identity_ambiguous": false,
       "source_tracks": [
         "B:track_003"
       ],
@@ -3912,6 +3932,7 @@
     {
       "id": "U4",
       "anonymous": true,
+      "identity_ambiguous": false,
       "source_tracks": [
         "A:track_004",
         "B:track_005"
@@ -3956,6 +3977,7 @@
             "gap_s": null,
             "accepted": true,
             "refused": null,
+            "lateral_chi2": null,
             "score": 0.697
           }
         ],

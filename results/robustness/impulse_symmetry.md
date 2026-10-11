@@ -1,5 +1,9 @@
 # Collision impulses: symmetry and noise margin
 
+Historical diagnosis of the fixed 10% relative gate. Its measurements and
+execution provenance are retained. The final geometry-supported uncertainty
+gate is evaluated in [technical hardening](../../docs/audit/technical_hardening.md).
+
 CARLA's collision sensor gives both bodies of a contact the magnitude of the same contact impulse (ground-truth log: largest relative difference between the two reports of one contact, over all runs: 0.0).  The alignment pairs reports whose peak impulses agree within 10% (`fusion.impulse_tolerance`, an engineering assumption); a real recorder would estimate the impulse from its own sensors, with errors.  Per matched contact: its similarity, the most similar report of another contact (above 1 - tolerance it competes, and only the clock consistency of the earlier matches separates the two), and the probability that the pair still passes the test when every report carries an independent multiplicative Gaussian error (Monte Carlo, 20000 draws).
 
 | run | contact | recorders | peaks [N s] | similarity | nearest other contact | P(pass) at 2% | P(pass) at 5% | P(pass) at 10% | P(pass) at 20% |

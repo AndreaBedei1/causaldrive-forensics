@@ -27,7 +27,10 @@
   "perturbation_profile": null,
   "seed": 20261011,
   "generated_utc": "2026-10-11T03:24:44Z",
-  "python": "3.14.2"
+  "python": "3.14.2",
+  "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+  "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+  "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
  },
  "impulse_tolerance": 0.1,
  "noise_levels": [

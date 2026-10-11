@@ -1928,7 +1928,8 @@
       "measurement_std_m": 0.5,
       "radial_speed_std_mps": 0.3,
       "acceleration_std_mps2": 6.0,
-      "min_slowdown_returns": 3
+      "min_slowdown_returns": 3,
+      "identity_body_width_m": 2.5
     },
     "semantics": {
       "brake_onset_threshold": 0.1,
@@ -2010,6 +2011,8 @@
     },
     "fusion": {
       "impulse_tolerance": 0.1,
+      "impulse_relative_std": 0.1,
+      "impulse_sigma_gate": 3.0,
       "contact_consistency_m": 1.0,
       "clock_tolerance_s": 0.1,
       "contact_window_s": 1.0,

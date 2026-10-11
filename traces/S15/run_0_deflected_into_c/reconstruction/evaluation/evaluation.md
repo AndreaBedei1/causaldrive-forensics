@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 5/5; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 2; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -11,7 +11,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
 | A + B | 208.047 | 10358.2 | g31 | yes | 0.0 s |
-| A + C | 208.947 | 1880.3 | g46 | yes | 0.0 s |
+| A + C | 208.947 | 1880.3 | g49 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -33,7 +33,7 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-62 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1804/1804 pairs.
+66 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 2057/2057 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
@@ -41,7 +41,9 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | C | C | correct | 140 | 0.197 / 0.228 m | 1.845 m | 3.117 / 0.241 m/s |
 | A:track_002 | B | B | correct | 119 | 0.15 / 0.271 m | 1.06 m | 2.829 / 0.683 m/s |
-| B:track_001 | U1 | A | left anonymous (true identity A) | 121 | 12.894 / 12.772 m | 13.925 m | 2.734 / 2.223 m/s |
+| B:track_001#segment_1 | C | C | correct | 30 | 0.208 / 0.274 m | 1.313 m | 4.603 / 0.593 m/s |
+| B:track_001#segment_2 | U1 | A | left anonymous (true identity A) | 11 | 0.661 / 0.677 m | 1.343 m | 3.923 / 1.375 m/s |
+| B:track_001#segment_3 | U2 | A | left anonymous (true identity A) | 80 | 0.184 / 0.177 m | 2.259 m | 0.672 / 0.004 m/s |
 | B:track_002 | A | A | correct | 36 | 0.304 / 0.466 m | 1.266 m | 5.18 / 0.956 m/s |
 | C:track_001 | A | A | correct | 140 | 0.401 / 0.439 m | 1.908 m | 2.889 / 0.145 m/s |
 | C:track_002 | B | B | correct | 134 | 0.146 / 0.207 m | 1.738 m | 4.05 / 0.509 m/s |

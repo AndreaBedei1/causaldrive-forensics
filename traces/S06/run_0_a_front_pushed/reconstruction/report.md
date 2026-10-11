@@ -26,11 +26,11 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 10281.41 vs 10281.41 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
+Matched `collision_001`: A and B both recorded a collision; peak impulses 10281.41 vs 10281.41 N*s (similarity 1.000, tolerance 0.10); 2 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
 
-Matched `collision_002`: A recorded a collision; B recorded the same impulse as a burst within its contact B:e10, merged there by its own sensor; peak impulses 1509.76 vs 1509.76 N*s (similarity 1.000, tolerance 0.10); consistent with the clock offset between A and B that earlier matches fix (+0.000 s, tolerance 0.10 s)
+Matched `collision_002`: A recorded a collision; B recorded the same impulse as a burst within its contact B:e10, merged there by its own sensor; peak impulses 1509.76 vs 1509.76 N*s (similarity 1.000, tolerance 0.10); consistent with the clock offset between A and B that earlier matches fix (+0.000 s, tolerance 0.10 s); pre-contact radar trajectory checked against the candidate partner pose stream where observed
 
-Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.05 vs 8788.05 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
+Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.05 vs 8788.05 N*s (similarity 1.000, tolerance 0.10); 2 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
 
 ## Identity associations
 
@@ -197,7 +197,8 @@ C:
     "measurement_std_m": 0.5,
     "radial_speed_std_mps": 0.3,
     "acceleration_std_mps2": 6.0,
-    "min_slowdown_returns": 3
+    "min_slowdown_returns": 3,
+    "identity_body_width_m": 2.5
   },
   "semantics": {
     "brake_onset_threshold": 0.1,
@@ -279,6 +280,8 @@ C:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "impulse_relative_std": 0.1,
+    "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,

@@ -63,12 +63,15 @@
         "B": 4243.51
       },
       "impulse_similarity": 1.0,
+      "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
         "peak impulses 4243.51 vs 4243.51 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
-        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)"
+        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
+        "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
+        "pre-contact radar trajectory checked against the candidate partner pose stream where observed"
       ]
     },
     {
@@ -90,12 +93,15 @@
         "C": 322.1
       },
       "impulse_similarity": 1.0,
+      "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and C both recorded a collision",
         "peak impulses 322.1 vs 322.1 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
-        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)"
+        "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
+        "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
+        "pre-contact radar trajectory checked against the candidate partner pose stream where observed"
       ]
     }
   ],

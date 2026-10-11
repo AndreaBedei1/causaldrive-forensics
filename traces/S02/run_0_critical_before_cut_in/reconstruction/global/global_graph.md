@@ -22,7 +22,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
+Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
 
 ## Identity associations
 

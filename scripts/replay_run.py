@@ -20,8 +20,8 @@ reconstruction's global time; a recorder it could not align is not replayed.
 Every anonymous road user of the fusion (U1, U2, ...: a road user that recorded
 nothing) is drawn once, in grey: a wireframe box of its fitted footprint at the
 fused position and heading with an arrow along its motion, solid while measured,
-dashed while only PREDICTED, labelled with the tracks it fuses and its position
-uncertainty; each of those tracks is a radar dot in its observer's colour.  A
+dashed while predicted, labelled only U1; scientific dimensions, uncertainty,
+method and sources remain in the reconstruction files. Member tracks are radar dots. A
 track associated with a recorder is a radar dot, a line from its observer and
 ``A:track_002 → B``, never a second body.  A track that is neither (none after
 the fusion) is drawn as before: a ghost box of the nominal size in its

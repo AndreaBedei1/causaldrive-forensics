@@ -23,6 +23,9 @@ These are general engineering assumptions, not calibrated sensor specifications.
   gate using face/velocity uncertainty, without the isotropic unobserved-acceleration
   allowance. It refuses an unseen lateral identity jump and can fragment a real
   lane change across a gap. No scenario id, true identity or GT state enters it.
+  A segment endpoint created by detected identity ambiguity cannot participate
+  in a motion-only stitch, even with a different track id. Actual simultaneous
+  body observations can still link its stable portions across observers.
 
 The full-sweep before/after audit measures the costs of these choices. Historical
 robustness and threshold-sensitivity families retain their original execution
