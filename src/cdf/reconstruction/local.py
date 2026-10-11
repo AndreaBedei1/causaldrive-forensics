@@ -557,7 +557,8 @@ def relative_motion(sample: TrackSample, own: EgoState, cfg: SemanticsConfig,
             fraction = min(max(t_cpa / horizon, 0.0), 1.0)
             miss = math.hypot(start[0] + fraction * (end[0] - start[0]), start[1] + fraction * (end[1] - start[1]))
         d_cpa_clearance = max(miss - sample.surface_offset_m, 0.0)
-    known = sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
+    known = (not sample.identity_ambiguous and sample.pos_std_m <= cfg.max_position_std_m
+             and sample.vel_std_mps <= cfg.max_velocity_std_mps)
     return RelativeMotion(v_long, v_lat, heading, t_cpa, d_cpa, known, d_cpa_clearance)
 
 
@@ -824,7 +825,7 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     # again only when clearly beside or behind that edge (at contact the target
     # sits right at it).
     corridor, hysteresis = cfg.path_half_width_m, cfg.path_hysteresis_m
-    path = active_intervals(times, samples,
+    path = [] if track.identity_ambiguous else active_intervals(times, samples,
                             lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
                             lambda s: (s.ahead_m < -hysteresis
                                        or abs(s.lateral_m) > corridor + hysteresis))
@@ -869,7 +870,7 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
         world.add_track(subject, times, {
             "CLOSING": span_values(count, closing),
             "CRITICAL_TTC": span_values(count, critical_spans, first_known_critical),
-            "IN_EGO_PATH": span_values(count, path),
+            "IN_EGO_PATH": span_values(count, path, count if track.identity_ambiguous else 0),
             "CUT_IN_FROM_LEFT": span_values(count, from_left, first_known),
             "CUT_IN_FROM_RIGHT": span_values(count, from_right, first_known),
         }, lost_at)

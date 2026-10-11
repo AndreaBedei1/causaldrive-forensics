@@ -323,7 +323,10 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertLessEqual(decision["interval"][0], -4.1)
         self.assertGreaterEqual(decision["interval"][1], -4.1)
         names = {(a.local_graph + ":" + a.local_track): a.global_entity for a in result.associations}
-        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"]), ("C", "C", "A"))
+        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001#segment_1"]), ("C", "C", "A"))
+        switched = next(t for local in result.locals if local.owner == 'C' for t in local.tracks
+                        if t.track_id == 'track_001#segment_2')
+        self.assertTrue(switched.identity_ambiguous)
 
     def test_s07_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
         # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with

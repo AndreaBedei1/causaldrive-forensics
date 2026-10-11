@@ -235,6 +235,8 @@ def associate_tracks(locals_: Sequence[LocalReconstruction], alignment: Alignmen
 
         for track in local.tracks:
             fits = [event for event in contacts if track.track_id in compatible[event["event_id"]]]
+            if track.identity_ambiguous:
+                fits = []
             partners = sorted({_partner(event, owner) for event in fits})
             unique = [event for event in fits if compatible[event["event_id"]] == [track.track_id]
                       or touching.get(event["event_id"]) == track.track_id]

@@ -571,7 +571,7 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
     """
     prediction = _Prediction(sample, own, footprint, cfg)
     available = cfg.critical_deceleration_mps2
-    known = (sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
+    known = (not sample.identity_ambiguous and sample.pos_std_m <= cfg.max_position_std_m and sample.vel_std_mps <= cfg.max_velocity_std_mps
              and (track_age_s is None or track_age_s >= cfg.critical_min_track_age_s - 1e-9))
     result = ConflictAssessment(encounter=prediction.encounter, collision_course=False, ttc_s=None, overlap_s=None,
                                 required_deceleration_mps2=None, avoidance_by=None,

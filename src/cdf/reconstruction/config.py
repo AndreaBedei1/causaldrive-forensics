@@ -77,6 +77,10 @@ class TrackingConfig:
     # more whose speed lies between standstill and the predicted one, when its
     # previous sweep was free of foreign returns (tracking._slowdown_gate).
     min_slowdown_returns: int = 3
+    # Engineering envelope for a single road vehicle's transverse radar support:
+    # 2.5 m (car/van width) plus one measurement standard deviation. Persistent
+    # violations signal mixed bodies or unreliable heading, never a named switch.
+    identity_body_width_m: float = 2.5
 
 
 @dataclass
@@ -197,6 +201,11 @@ class FusionConfig:
     # Two collision reports are the same contact if their peak impulses differ
     # by at most this fraction (equal and opposite impulses).
     impulse_tolerance: float = 0.10
+    # Engineering assumption, not a collision-sensor specification: independent
+    # per-report relative 1-sigma uncertainty. Used only with body-contact evidence;
+    # without geometry the conservative legacy tolerance still applies.
+    impulse_relative_std: float = 0.10
+    impulse_sigma_gate: float = 3.0
     # A match must also put the two recorders in contact: their footprints, each at its own report time and
     # from its own pose stream, at most this far apart plus 3 sigma of the two pose sources' declared position
     # accuracy (two single-vehicle contacts with similar impulses, far apart, are not one contact).

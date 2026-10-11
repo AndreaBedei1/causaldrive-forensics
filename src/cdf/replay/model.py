@@ -614,6 +614,7 @@ class EntityPath:
     states: List[EntityState]
     max_gap: float = 0.5
     times: List[float] = field(init=False, repr=False)
+    identity_ambiguous: bool = False
 
     def __post_init__(self) -> None:
         self.states = sorted(self.states, key=lambda state: state.time)
@@ -679,7 +680,7 @@ def load_entities(path: Path, run_start: float, max_gap: float = 0.5) -> List[En
             entities.append(EntityPath(str(item["id"]), [str(name) for name in item.get("source_tracks", [])],
                                        [str(name) for name in item.get("observers", [])],
                                        float(footprint.get("length_m") or 4.6), float(footprint.get("width_m") or 1.9),
-                                       states, max_gap))
+                                       states, max_gap, identity_ambiguous=bool(item.get('identity_ambiguous', False))))
     return entities
 
 
@@ -950,6 +951,8 @@ class ReplayRun:
         """The anonymous road users present at ``t``, with their fused state."""
         out = []
         for entity in self.entities:
+            if entity.identity_ambiguous:
+                continue  # retain its points/diagnostics; no asserted physical box
             state = entity.state_at(t)
             if state is not None:
                 out.append((entity, state))

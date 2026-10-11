@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .alignment import align_graphs
 from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
-from .common_frame import PoseSource, RecordedPoseSource, contact_check
+from .common_frame import PoseSource, RecordedPoseSource, contact_check, common_track, outline_distances
 from .config import ReconstructionConfig, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .local import LocalReconstruction, reconstruct_vehicle
@@ -95,9 +95,50 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
     poses = {local.owner: pose_factory(Path(run_dir) / "vehicles" / local.owner, local.clock_origin)
              for local in locals_}
     # Matched collisions, each checked against the recorders' own pose streams (the two bodies must touch).
-    alignment = align_graphs([local.graph for local in locals_], cfg.fusion,
-                             contact_check(poses, {local.owner: local.footprint for local in locals_},
-                                           cfg.fusion.contact_consistency_m))
+    geometry = contact_check(poses, {local.owner: local.footprint for local in locals_},
+                             cfg.fusion.contact_consistency_m)
+    # Before fixing clocks, a candidate itself maps the last approach second:
+    # t_partner = t_observer - report_observer + report_partner. A radar body
+    # located on the partner must also move as that partner's own recorder says.
+    # This excludes a chain impact's earlier moving partner from a later report
+    # of that same body at rest, even if both contact poses occupy the same place.
+    import numpy as np
+    by_owner = {local.owner: local for local in locals_}
+    common = {local.owner: [common_track(t, local.owner, local.ego, poses[local.owner], local.footprint, 0.0)
+                            for t in local.tracks if not t.identity_ambiguous] for local in locals_}
+
+    def approach_check(a: str, ta: float, b: str, tb: float) -> Optional[bool]:
+        for observer, contact, partner, partner_contact in ((a, ta, b, tb), (b, tb, a, ta)):
+            located, compatible = False, False
+            for track in common[observer]:
+                samples = [s for s in track.samples if s.measured and contact - cfg.fusion.approach_window_s <= s.t_local < contact]
+                if len(samples) < cfg.fusion.link_min_samples:
+                    continue
+                times = np.array([s.t_local - contact + partner_contact for s in samples])
+                distance, valid = outline_distances(poses[partner], by_owner[partner].footprint, times,
+                                                    np.array([s.point for s in samples]), inside_zero=True)
+                if valid.sum() < cfg.fusion.link_min_samples:
+                    continue
+                # A body near the report but incompatible through the approach
+                # cannot be rescued by matching a different local time.
+                latest = track.state_at(contact - 0.05, tolerance=0.10)
+                if latest is None:
+                    continue
+                end_gap, end_valid = outline_distances(poses[partner], by_owner[partner].footprint,
+                                                      np.array([latest.t_local - contact + partner_contact]),
+                                                      np.array([latest.point]), inside_zero=True)
+                if not end_valid[0] or end_gap[0] > 3.0 * cfg.tracking.measurement_std_m:
+                    continue
+                located = True
+                if np.median(distance[valid]) <= 3.0 * cfg.tracking.measurement_std_m:
+                    compatible = True
+            if located and not compatible:
+                return False
+        return None
+
+    alignment = align_graphs([local.graph for local in locals_], cfg.fusion, geometry, approach_check)
+    for event in alignment.matched_events:
+        event['evidence'].append('pre-contact radar trajectory checked against the candidate partner pose stream where observed')
     associations = associate_tracks(locals_, alignment, cfg.fusion)
     # A recorder no matched collision aligned: the clock offset its observed trajectory fixes, if unique,
     # in the common frame of the recorders' own pose streams (then the association is redone).

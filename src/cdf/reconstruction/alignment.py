@@ -32,6 +32,7 @@ chain of matched contacts links to the reference stay UNALIGNED.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from .config import FusionConfig
@@ -46,6 +47,20 @@ def impulse_similarity(first: GraphNode, second: GraphNode) -> float:
     a = float(first.attributes["peak_impulse"])
     b = float(second.attributes["peak_impulse"])
     return 1.0 - abs(a - b) / max(a, b, 1e-9)
+
+
+def impulse_z(a: float, b: float, cfg: FusionConfig) -> float:
+    """Difference in combined declared standard deviations (independent reports)."""
+    sigma = cfg.impulse_relative_std * math.hypot(a, b)
+    return abs(a - b) / max(sigma, 1e-9)
+
+
+def _impulse_pass(a: float, b: float, cfg: FusionConfig, has_geometry: bool) -> bool:
+    if a <= 0 or b <= 0 or not math.isfinite(a + b):
+        return False
+    if has_geometry and cfg.impulse_relative_std > 0:
+        return impulse_z(a, b, cfg) <= cfg.impulse_sigma_gate
+    return abs(a - b) / max(a, b) <= cfg.impulse_tolerance + 1e-9
 
 
 class _Clocks:
@@ -85,6 +100,49 @@ class _Clocks:
 ContactCheck = Callable[[str, float, str, float], Optional[Tuple[float, float]]]
 
 
+def _forced_pairs(candidates, consistent, cfg, clocks, used) -> set:
+    """Edges in every maximum-cardinality feasible report assignment.
+
+    Equal coverage with different partners is ambiguous. Impulse magnitude does
+    not break that tie. The bounded search is for the small set of contact reports;
+    on search exhaustion no extra identity is asserted.
+    """
+    import copy
+    edges = [c for c in candidates if c[1] not in used and c[2] not in used
+             and _apart(consistent, c[3], c[4].t_local, c[5], c[6].t_local)[0] is None]
+    visits, best, common = 0, -1, set()
+
+    def walk(remaining, state, chosen):
+        nonlocal visits, best, common
+        visits += 1
+        if visits > 10000:
+            raise OverflowError
+        if not remaining:
+            n = len(chosen)
+            if n > best:
+                best, common = n, set(chosen)
+            elif n == best:
+                common.intersection_update(chosen)
+            return
+        report = remaining[0][1]
+        walk([c for c in remaining if report not in (c[1], c[2])], state, chosen)
+        for c in remaining:
+            if report not in (c[1], c[2]):
+                continue
+            _, ia, ib, a, na, b, nb = c
+            if state.linked(a, b) and abs(state.residual(a, na.t_local, b, nb.t_local)) > cfg.clock_tolerance_s + 1e-9:
+                continue
+            nxt = copy.deepcopy(state)
+            if not nxt.linked(a, b):
+                nxt.link(a, na.t_local, b, nb.t_local)
+            walk([other for other in remaining if not ({ia, ib} & {other[1], other[2]})], nxt, chosen + [(ia, ib)])
+    try:
+        walk(edges, clocks, [])
+    except OverflowError:
+        return set()
+    return common
+
+
 def _apart(consistent: Optional[ContactCheck], first: str, t_first: float, second: str,
            t_second: float) -> Tuple[Optional[str], Optional[str]]:
     """(reason to reject, evidence) of the contact-consistency check."""
@@ -99,13 +157,17 @@ def _apart(consistent: Optional[ContactCheck], first: str, t_first: float, secon
 
 
 def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
-                     consistent: Optional[ContactCheck] = None) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    """Greedy one-to-one, time-consistent matching of collision reports across graphs.
+                     consistent: Optional[ContactCheck] = None,
+                     clock_check: Optional[Callable[[str, float, str, float], Optional[bool]]] = None
+                     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """One-to-one, time-consistent matching of collision reports across graphs.
 
-    Report pairs within ``impulse_tolerance`` are candidates, best similarity
-    first.  A candidate is accepted when neither report is matched yet, its two
-    bodies touch (``consistent``, when given) and its clock offset agrees with the
-    matches already accepted.  Returns (matched events, rejected candidates).
+    With contact geometry, declared independent impulse uncertainties gate candidates.
+    Without geometry the legacy relative tolerance applies. A candidate is accepted when neither report is matched yet, its two
+    bodies touch (``consistent``, when given), its approach agrees where observed,
+    and its clock offset agrees with the matches already accepted. Competing
+    anchors require a forced edge in every maximum feasible assignment, otherwise
+    remain unmatched. Returns (matched events, rejected candidates).
     """
     reports = [(graph.owner, node) for graph in sorted(graphs, key=lambda item: item.owner)
                for node in graph.nodes if node.event_type == "COLLISION"]
@@ -114,8 +176,12 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
         for second_owner, second in reports[index + 1:]:
             if first_owner == second_owner:
                 continue
+            if clock_check is not None and clock_check(first_owner, first.t_local, second_owner, second.t_local) is False:
+                continue
             similarity = impulse_similarity(first, second)
-            if similarity >= 1.0 - cfg.impulse_tolerance:
+            geometry = None if consistent is None else consistent(first_owner, first.t_local, second_owner, second.t_local)
+            if _impulse_pass(float(first.attributes['peak_impulse']), float(second.attributes['peak_impulse']),
+                             cfg, geometry is not None):
                 candidates.append((-similarity, first.node_id, second.node_id,
                                    first_owner, first, second_owner, second))
     candidates.sort(key=lambda item: item[:3])
@@ -152,7 +218,28 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
             timing = "consistent with the clock offset between {0} and {1} that earlier matches fix " \
                      "({2:+.3f} s, tolerance {3:.2f} s)".format(first_owner, second_owner, residual,
                                                                 cfg.clock_tolerance_s)
-        else:
+    else:
+            # Impulse uncertainty must not turn a competing contact into a guessed
+            # clock anchor. Only geometry-compatible, time-compatible rivals count.
+            rivals = []
+            if consistent is not None:
+                for rival in candidates:
+                    _, rid_a, rid_b, ro_a, rn_a, ro_b, rn_b = rival
+                    if (rid_a, rid_b) == (first_id, second_id) or rid_a in used or rid_b in used:
+                        continue
+                    if not ({rid_a, rid_b} & {first_id, second_id}):
+                        continue
+                    if _apart(consistent, ro_a, rn_a.t_local, ro_b, rn_b.t_local)[0] is not None:
+                        continue
+                    if clocks.linked(ro_a, ro_b) and abs(clocks.residual(ro_a, rn_a.t_local, ro_b, rn_b.t_local)) > cfg.clock_tolerance_s + 1e-9:
+                        continue
+                    rivals.append((rid_a, rid_b))
+            if rivals and (first_id, second_id) not in _forced_pairs(candidates, consistent, cfg, clocks, used):
+                rejected.append({'nodes': {first_owner: first_id, second_owner: second_id},
+                                 't_local': {first_owner: first.t_local, second_owner: second.t_local},
+                                 'peak_impulse': peaks, 'impulse_similarity': similarity,
+                                 'reason': 'ambiguous geometry-compatible collision reports; no independent clock anchor'})
+                continue
             clocks.link(first_owner, first.t_local, second_owner, second.t_local)
         used.update((first_id, second_id))
         evidence = ["{0} and {1} both recorded a collision".format(first_owner, second_owner),
@@ -165,10 +252,15 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
             evidence.append(touching)
         if timing is not None:
             evidence.append(timing)
+        z = impulse_z(float(peaks[first_owner]), float(peaks[second_owner]), cfg)
+        if touching is not None:
+            evidence.append('independent relative impulse std {0:.3f}; combined z {1:.3f} (gate {2:.1f}); engineering assumption'.format(
+                cfg.impulse_relative_std, z, cfg.impulse_sigma_gate))
         matched.append({"event_id": None, "graphs": [first_owner, second_owner],
                         "nodes": {first_owner: first_id, second_owner: second_id},
                         "t_local": {first_owner: first.t_local, second_owner: second.t_local},
                         "peak_impulse": peaks, "impulse_similarity": similarity,
+                        "impulse_z": round(z, 4),
                         "confidence": similarity, "evidence": evidence})
     matched += _match_merged_bursts(reports, used, clocks, cfg, consistent)
     # Numbering needs no common clock: order by first graph, then its local time.
@@ -196,7 +288,8 @@ def _match_merged_bursts(reports, used, clocks: "_Clocks", cfg: FusionConfig,
                     continue
                 similarity = 1.0 - abs(peak - burst_peak) / max(peak, burst_peak, 1e-9)
                 residual = clocks.residual(owner, node.t_local, other_owner, t_burst)
-                if similarity >= 1.0 - cfg.impulse_tolerance and abs(residual) <= cfg.clock_tolerance_s + 1e-9:
+                geometry = None if consistent is None else consistent(owner, node.t_local, other_owner, t_burst)
+                if _impulse_pass(peak, burst_peak, cfg, geometry is not None) and abs(residual) <= cfg.clock_tolerance_s + 1e-9:
                     if _apart(consistent, owner, node.t_local, other_owner, t_burst)[0] is not None:
                         continue
                     if best is None or similarity > best[0]:
@@ -228,10 +321,11 @@ def _strength(event: Dict[str, Any]) -> float:
 
 
 def align_graphs(graphs: Sequence[LocalGraph], cfg: FusionConfig,
-                 consistent: Optional[ContactCheck] = None) -> Alignment:
+                 consistent: Optional[ContactCheck] = None,
+                 clock_check: Optional[Callable[[str, float, str, float], Optional[bool]]] = None) -> Alignment:
     """t_global = 0 at the strongest matched collision; every match extends the common clock.  ``consistent``
     (``common_frame.contact_check`` on the recorders' pose streams) rejects matches whose bodies do not touch."""
-    matched, rejected = match_collisions(graphs, cfg, consistent)
+    matched, rejected = match_collisions(graphs, cfg, consistent, clock_check)
     clocks = {}
     for graph in graphs:
         has_collision = any(node.event_type == "COLLISION" for node in graph.nodes)

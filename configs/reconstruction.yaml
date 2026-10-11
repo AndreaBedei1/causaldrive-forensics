@@ -31,6 +31,7 @@ reconstruction:
     radial_speed_std_mps: 0.3         # Kalman: median Doppler speed noise
     acceleration_std_mps2: 6.0        # Kalman: unmodelled acceleration (emergency braking)
     min_slowdown_returns: 3           # a target that stops abruptly (crash) is followed on this many slowed returns
+    identity_body_width_m: 2.5        # engineering car/van envelope + measurement std; persistent wider support is ambiguous
 
   semantics:
     brake_onset_threshold: 0.1        # BRAKE_START at or above, BRAKE_END below (0.2 s release debounce)
@@ -113,6 +114,8 @@ reconstruction:
 
   fusion:
     impulse_tolerance: 0.10           # same contact if peak impulses differ by <= 10 %
+    impulse_relative_std: 0.10        # engineering assumption: per-report 1-sigma; only with contact geometry
+    impulse_sigma_gate: 3.0          # combined uncertainty gate; competing contacts remain unmatched
     contact_consistency_m: 1.0        # a match's two bodies must touch: footprints within this + 3 sigma of the declared pose accuracy
     clock_tolerance_s: 0.1            # matches between graphs already linked must agree on the clock offset
     contact_window_s: 1.0             # a partner track may be lost up to this long before the contact (association only)

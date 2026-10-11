@@ -463,7 +463,7 @@ def link_to_recorders(view: CommonView, cfg: ReconstructionConfig) -> List[Recor
     fusion = cfg.fusion
     links = []
     for track in view.tracks:
-        if track.status == ASSOCIATED:
+        if track.status == ASSOCIATED or track.identity_ambiguous:
             continue
         observer = view.bodies[track.recorder]
         candidates = []
@@ -524,6 +524,7 @@ class PairEvidence:
     gap_s: Optional[float] = None  # stitch: time between the two tracks
     accepted: bool = False
     refused: Optional[str] = None  # why an otherwise acceptable link was refused
+    lateral_chi2: Optional[float] = None
 
     @property
     def score(self) -> float:
@@ -534,7 +535,7 @@ class PairEvidence:
         return {"a": self.a, "b": self.b, "kind": self.kind, "compared": self.compared, "passed": self.passed,
                 "median_box_chi2": self.median_box_chi2, "median_velocity_chi2": self.median_velocity_chi2,
                 "centre_gap_m": self.centre_gap_m, "gap_s": self.gap_s, "accepted": self.accepted,
-                "refused": self.refused}
+                "refused": self.refused, "lateral_chi2": self.lateral_chi2}
 
 
 def _heading(samples: Sequence[CommonSample], cfg: ReconstructionConfig) -> Optional[float]:
@@ -555,6 +556,8 @@ def pair_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> 
     without a fit.  Accepted when at least ``anonymous_min_shared_samples`` instants were compared and at
     least ``anonymous_pass_fraction`` of them pass both."""
     fusion, semantics = cfg.fusion, cfg.semantics
+    if a.identity_ambiguous or b.identity_ambiguous:
+        return None
     gate = chi2_2dof(fusion.anonymous_gate_probability)
     if min(a.end, b.end) < max(a.start, b.start):
         return None
@@ -624,6 +627,9 @@ def stitch_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -
     fusion = cfg.fusion
     if a.recorder != b.recorder:
         return None
+    if (a.identity_ambiguous or b.identity_ambiguous
+            or (a.parent_track is not None and a.parent_track == b.parent_track)):
+        return None  # do not undo a detected handoff with a motion-only stitch
     last = next((s for s in reversed(a.samples) if s.measured), None)
     first = next((s for s in b.samples if s.measured), None)
     if last is None or first is None:
@@ -638,12 +644,23 @@ def stitch_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -
     covariance = pa + pb + np.eye(2) * ((sigma_a * gap ** 2 / 2.0) ** 2 + (last.vel_std * gap) ** 2)
     miss = cb - predicted
     d_pos = float(miss @ np.linalg.solve(covariance, miss))
+    # An unseen longitudinal acceleration is plausible; an unseen lateral body
+    # jump with parallel velocity on both sides is not positive identity evidence.
+    # Keep lateral uncertainty from the faces/velocity, without granting a lane
+    # change solely because the gap's isotropic acceleration allowance is large.
+    heading = _heading([last, first], cfg)
+    lateral_chi2 = 0.0
+    if heading is not None:
+        normal = np.array([-math.sin(heading), math.cos(heading)])
+        lateral_cov = pa + pb + np.eye(2) * (last.vel_std * gap) ** 2
+        lateral_chi2 = float(normal @ miss) ** 2 / max(float(normal @ lateral_cov @ normal), 1e-9)
     dv = first.velocity - last.velocity
     d_vel = float(dv @ dv) / (_velocity_sigma(cfg, first.vel_std, last.vel_std) ** 2 + (sigma_a * gap) ** 2)
     gate = chi2_2dof(fusion.anonymous_gate_probability)
-    ok = d_pos <= gate and d_vel <= gate
+    ok = d_pos <= gate and d_vel <= gate and lateral_chi2 <= gate
     return PairEvidence(a.name, b.name, STITCH, 1, 1.0 if ok else 0.0, round(d_pos, 3), round(d_vel, 3),
-                        round(float(np.hypot(*miss)), 3), round(gap, 3), accepted=ok)
+                        round(float(np.hypot(*miss)), 3), round(gap, 3), accepted=ok,
+                        lateral_chi2=round(lateral_chi2,3))
 
 
 def _overlap(a: CommonTrack, b: CommonTrack) -> bool:
@@ -1193,6 +1210,7 @@ def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Assoc
         confidence = round(min(e.passed for e in joins), 3) if joins else None
         names.update({(t.recorder, t.track_id): entity_id for t in group})
         entities.append({"id": entity_id, "anonymous": True,
+                         "identity_ambiguous": any(t.identity_ambiguous for t in group),
                          "source_tracks": [t.name for t in group],
                          "source_track_segments": [{"track": t.name, "observer": t.recorder,
                                                     "t_global": [round(t.start, 3), round(t.end, 3)]} for t in group],

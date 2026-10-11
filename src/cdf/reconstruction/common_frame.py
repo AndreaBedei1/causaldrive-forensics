@@ -162,6 +162,8 @@ class CommonTrack:
     samples: List[CommonSample]
     status: str = "ANONYMOUS"  # as the collision-based association left it
     entity: Optional[str] = None  # the recorder it was associated with, if any
+    identity_ambiguous: bool = False
+    parent_track: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -386,7 +388,8 @@ def common_track(track: LocalTrack, recorder: str, ego: EgoTrajectory, poses: Po
             heading=math.atan2(velocity[1], velocity[0]) if speed >= HEADING_MIN_SPEED_MPS else None,
             returns=world_returns, origins=world_origins,
             pose_var=poses.position_std_m ** 2 + (poses.yaw_std_rad * reach) ** 2))
-    return CommonTrack(recorder=recorder, track_id=track.track_id, samples=samples, status=status, entity=entity)
+    return CommonTrack(recorder=recorder, track_id=track.track_id, samples=samples, status=status, entity=entity,
+                       identity_ambiguous=track.identity_ambiguous, parent_track=track.parent_track)
 
 
 def _local_to_world(points: np.ndarray, local: Any, pose: WorldPose) -> np.ndarray:

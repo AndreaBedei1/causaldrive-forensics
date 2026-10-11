@@ -735,6 +735,7 @@ class TrackSample:
     # Seen past another track of the same recorder (set by the local reconstruction,
     # conflict.occluded_by): its returns may be hidden by or mixed with that vehicle's.
     occluded: bool = False
+    identity_ambiguous: bool = False
 
     def __post_init__(self) -> None:
         if self.clearance_m is None:
@@ -756,6 +757,8 @@ class LocalTrack:
     # Per sample, the returns its sweep claimed (local frame points, radar positions), None when only
     # predicted.  In memory only (``TrackMeasurement.points``): the outputs never carry them.
     returns: List[Optional[Tuple[np.ndarray, np.ndarray]]] = field(default_factory=list, repr=False, compare=False)
+    parent_track: Optional[str] = None
+    identity_ambiguous: bool = False
 
     @property
     def first_t(self) -> float:
@@ -774,6 +777,7 @@ class LocalTrack:
         closest = min(self.samples, key=lambda sample: sample.range_m)
         nearest = min(self.samples, key=lambda sample: sample.clearance_m)
         return {"track_id": self.track_id,
+                "parent_track": self.parent_track, "identity_ambiguous": self.identity_ambiguous,
                 "first_seen_t_local": self.first_t, "last_seen_t_local": self.last_t,
                 "duration_s": round(self.last_t - self.first_t, 3),
                 "measured_sweeps": len(measured),
@@ -895,6 +899,40 @@ def accelerations(times: Sequence[float], states: np.ndarray, filtered: Optional
     return out
 
 
+def identity_segments(measurements: Sequence[TrackMeasurement], states: np.ndarray,
+                      cfg: TrackingConfig) -> List[Tuple[int, int, bool]]:
+    """Half-open segments separated by sustained incompatible transverse support.
+
+    Five-sweep confirmation and the existing track-gap padding avoid single-return
+    outliers and smoothing across a suspected handoff. This detects ambiguity,
+    not a physical identity: post-impact heading errors can trigger it too.
+    """
+    wide = []
+    for i, (m, state) in enumerate(zip(measurements, states)):
+        speed = float(np.hypot(*state[2:]))
+        if m.points is None or len(m.points) < cfg.min_track_frames or speed < cfg.moving_speed_mps:
+            continue
+        transverse = m.points @ (np.array([-state[3], state[2]]) / speed)
+        extent = float(np.percentile(transverse, 95) - np.percentile(transverse, 5))
+        if extent > cfg.identity_body_width_m + cfg.measurement_std_m:
+            wide.append(i)
+    groups: List[List[int]] = []
+    for i in wide:
+        if not groups or measurements[i].t_local - measurements[groups[-1][-1]].t_local > cfg.max_track_gap_s:
+            groups.append([])
+        groups[-1].append(i)
+    ambiguous = np.zeros(len(measurements), dtype=bool)
+    times = np.array([m.t_local for m in measurements])
+    for group in groups:
+        if len(group) < cfg.min_track_frames:
+            continue
+        lo = measurements[group[0]].t_local - cfg.max_track_gap_s
+        hi = measurements[group[-1]].t_local + cfg.max_track_gap_s
+        ambiguous |= (times >= lo - 1e-9) & (times <= hi + 1e-9)
+    cuts = [0] + [i for i in range(1, len(measurements)) if ambiguous[i] != ambiguous[i-1]] + [len(measurements)]
+    return [(lo, hi, bool(ambiguous[lo])) for lo, hi in zip(cuts, cuts[1:])]
+
+
 def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock_origin: float,
                        cfg: TrackingConfig, footprint: Optional[EgoFootprint] = None,
                        stats: Optional[Dict[str, Any]] = None) -> List[LocalTrack]:
@@ -913,16 +951,29 @@ def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock
         measurements = list(raw.measurements)
         while measurements[-1].xy is None:  # drop the prediction-only tail
             measurements.pop()
-        states, covariances, filtered = filter_and_smooth(measurements, cfg)
-        offsets = surface_offsets(measurements) if footprint is not None else [0.0] * len(measurements)
-        acceleration = accelerations([m.t_local for m in measurements], states, filtered)
-        samples = []
-        returns = []
-        radar = None
-        for m, state, covariance, offset, accel in zip(measurements, states, covariances, offsets, acceleration):
-            radar = m.radar or radar
-            samples.append(_relative_sample(m.t_local, state, covariance, m, ego, mounts.get(radar), footprint,
-                                            offset, accel))
-            returns.append(None if m.points is None else (m.points, m.origins))
-        tracks.append(LocalTrack(track_id=raw.track_id, samples=samples, returns=returns))
+        initial, initial_covariances, initial_filtered = filter_and_smooth(measurements, cfg)
+        pieces = identity_segments(measurements, initial, cfg)
+        for number, (lo, hi, ambiguous) in enumerate(pieces, 1):
+            part = list(measurements[lo:hi])
+            while part and part[0].xy is None:
+                part.pop(0)
+            while part and part[-1].xy is None:
+                part.pop()
+            if not part:
+                continue
+            states, covariances, filtered = ((initial, initial_covariances, initial_filtered) if len(pieces) == 1
+                                            else filter_and_smooth(part, cfg))
+            offsets = surface_offsets(part) if footprint is not None else [0.0] * len(part)
+            acceleration = accelerations([m.t_local for m in part], states, filtered)
+            samples, returns, radar = [], [], None
+            for m, state, covariance, offset, accel in zip(part, states, covariances, offsets, acceleration):
+                radar = m.radar or radar
+                sample = _relative_sample(m.t_local, state, covariance, m, ego, mounts.get(radar), footprint, offset, accel)
+                sample.identity_ambiguous = ambiguous
+                samples.append(sample)
+                returns.append(None if m.points is None else (m.points, m.origins))
+            track_id = raw.track_id if len(pieces) == 1 else raw.track_id + '#segment_' + str(number)
+            tracks.append(LocalTrack(track_id=track_id, samples=samples, returns=returns,
+                                     parent_track=raw.track_id if len(pieces) > 1 else None,
+                                     identity_ambiguous=ambiguous))
     return tracks

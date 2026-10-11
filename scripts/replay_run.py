@@ -538,6 +538,8 @@ class ReplayApp:
         if seen:
             for entity_id in seen:
                 entity = self.run.entity(entity_id)
+                if entity is not None and entity.identity_ambiguous:
+                    continue
                 state = entity.state_at(t) if entity is not None else None
                 lines.append((anonymous_row(entity_id, state.observers if state else [pid]),
                               (220, 220, 220), self.font_small))
@@ -643,8 +645,8 @@ class ReplayApp:
 
     def _draw_road_user(self, entity: EntityPath, state: EntityState, corners: List[Vector], yaw: float) -> Any:
         """An anonymous road user of the fusion: its fitted box, an arrow along its motion (none while its
-        heading is unknown), solid while measured, dashed while only predicted, and a label naming the
-        tracks it fuses and its position uncertainty.  Returns the deferred label drawing."""
+        heading is unknown), solid while measured, dashed while only predicted, and its compact U label.
+        Returns the deferred label drawing."""
         dashed = not state.measured
         for i, j in BOX_EDGES:
             self._line3d(corners[i], corners[j], ROAD_USER_RGB, 2, dashed)
