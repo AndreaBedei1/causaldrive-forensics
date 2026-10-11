@@ -10,6 +10,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Sequence
@@ -42,6 +43,39 @@ def code_hash() -> str:
     return digest.hexdigest()
 
 
+@lru_cache(maxsize=None)
+def commit_code_hash(commit: str) -> Optional[str]:
+    """Verify the same path/content digest directly from immutable Git objects."""
+    listing = _git('ls-tree', '-r', '--name-only', commit, '--', 'src/cdf', 'configs')
+    if listing is None:
+        return None
+    names = sorted(name for name in listing.splitlines()
+                   if (name.startswith('src/cdf/') and name.endswith('.py'))
+                   or (name.startswith('configs/') and name.count('/') == 1 and name.endswith('.yaml')))
+    digest = hashlib.sha256()
+    for name in names:
+        proc = subprocess.run(['git', 'show', commit + ':' + name], cwd=str(ROOT), capture_output=True)
+        if proc.returncode:
+            return None
+        digest.update(name.encode('utf-8') + b'\0')
+        digest.update(proc.stdout.replace(b'\r\n', b'\n') + b'\0')
+    return digest.hexdigest()
+
+
+def verify_equivalence(record: Mapping[str, Any], commits: Sequence[str]) -> Dict[str, Any]:
+    """Annotate historical execution; never change its commit or dirty flag."""
+    result = dict(record)
+    value = result.get('code_sha256')
+    result['analysis_code_sha256'] = value
+    for commit in commits:
+        full = _git('rev-parse', commit)
+        if full and value is not None and commit_code_hash(full) == value:
+            result['equivalent_clean_commit'] = full
+            result['equivalence_verified'] = 'SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml'
+            break
+    return result
+
+
 def provenance(config: Optional[Mapping[str, Any]] = None, runs: Sequence[str] = (),
                perturbation: Optional[str] = None, seed: Optional[int] = None,
                extra: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
@@ -58,6 +92,10 @@ def provenance(config: Optional[Mapping[str, Any]] = None, runs: Sequence[str] =
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "python": sys.version.split()[0],
     }
+    record['analysis_code_sha256'] = record['code_sha256']
+    if record['git_commit'] and commit_code_hash(record['git_commit']) == record['code_sha256']:
+        record['equivalent_clean_commit'] = record['git_commit']
+        record['final_analysis_commit'] = record['git_commit']
     if extra:
         record.update(extra)
     return record

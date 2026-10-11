@@ -310,6 +310,9 @@ def process_run(args: argparse.Namespace, sweep: Dict[str, Any], sweep_path: Pat
 
 def analyse_run(run_dir: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
     """Reconstruction (no ground truth), then its privileged evaluation and the run's outcome."""
+    if manifest.get('reconstruction'):
+        manifest.setdefault('analysis_history', []).append({key: manifest[key] for key in
+                                                          ('reconstruction','evaluation','metrics') if key in manifest})
     for key in ("reconstruction", "evaluation", "outcome", "metrics"):
         manifest.pop(key, None)
     try:

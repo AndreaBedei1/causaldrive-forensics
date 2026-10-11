@@ -183,6 +183,7 @@ def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
     return {"runs": len(done), "failed": len(results) - len(done),
             "association_accuracy": ratio("associations_correct", "associations_decided"),
             "collision_recall": ratio("collisions_reconstructed", "collisions_true"),
+            "false_collision_matches": sum(m.get('false_collision_matches', 0) for m in with_metrics),
             "runs_aligned": (sum(1 for m in with_metrics if m["recorders_aligned"] == m["recorders"]) / len(with_metrics)
                              if with_metrics else None),
             "wrong_links": sum(m["links_wrong"] for m in with_metrics) if with_metrics else None,

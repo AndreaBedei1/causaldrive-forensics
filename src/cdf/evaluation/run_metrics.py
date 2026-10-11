@@ -36,6 +36,8 @@ def run_metrics(run_dir: Path, evaluation: Dict[str, Any], fusion: Dict[str, Any
             "alignment_methods": sorted({clock.get("method") for clock in alignment["graphs"].values() if clock.get("method")}),
             "collisions_reconstructed": sum(bool(row["participants_correct"]) for row in between),
             "collisions_true": len(between),
+            "false_collision_matches": sum(len(row.get('participants', [])) > 1
+                                           for row in evaluation.get('extra_collisions', [])),
             "associations_correct": sum(row["verdict"] == "correct" for row in decided),
             "associations_decided": len(decided),
             "anonymous_tracks": sum(row["status"] != "ASSOCIATED" for row in evaluation["tracks"]),
