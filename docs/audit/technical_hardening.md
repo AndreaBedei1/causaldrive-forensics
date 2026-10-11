@@ -59,16 +59,16 @@ the completed visual inspection here is of exported replay frames.
 
 There were **three erroneous pairs in two sweep runs**, seeds 16 and 28,
 not three runs. Seed 16's C track stitched to a D successor, creating two
-false pairs through a correct cross-observer link. Seed 28's local Dâ†’C
+false pairs through a correct cross-observer link. Seed 28's local D→C
 contamination made an early D overlap apply to the whole track. Exact parameters,
 intervals, sources and evidence are in [s18_false_merges.md](s18_false_merges.md).
 
-| scope | correct / false / missed before | after | entities before â†’ after |
+| scope | correct / false / missed before | after | entities before → after |
 |---|---|---|---|
-| S18 adjacent (40) | 143 / 3 / 51 | 159 / 0 / 83 | 98 â†’ 107 |
-| S18 platoon (40) | 101 / 0 / 128 | 103 / 0 / 126 | 144 â†’ 145 |
-| all saved sweeps (240) | 313 / 3 / 187 | 335 / 0 / 239 | 348 â†’ 381 |
-| canonical (17) | 15 / 0 / 10 | 23 / 0 / 16 | 14 â†’ 19 |
+| S18 adjacent (40) | 143 / 3 / 51 | 159 / 0 / 83 | 98 → 107 |
+| S18 platoon (40) | 101 / 0 / 128 | 103 / 0 / 126 | 144 → 145 |
+| all saved sweeps (240) | 313 / 3 / 187 | 335 / 0 / 239 | 348 → 381 |
+| canonical (17) | 15 / 0 / 10 | 23 / 0 / 16 | 14 → 19 |
 
 The general policy adds lateral face/velocity consistency to stitching, segments
 persistently incompatible transverse return support, and refuses motion-only
@@ -77,14 +77,14 @@ is used. The first complete audit exposed two new pairs in a non-crash S17 sweep
 the endpoint veto removed both before acceptance. Final false pairs=0 everywhere.
 
 There is a real cost: +32 adjacent missed pairs and +52 across sweeps. New
-segments increase total pair trials 503â†’574; correct-merge recall among true
-pairs is 62.6%â†’58.4%, and entity count rises 9.5%. Evaluated impure fused states
-fall 412/23502â†’202/23242 (sweeps), 107/925â†’49/958 (canonical). This tradeoff is
+segments increase total pair trials 503→574; correct-merge recall among true
+pairs is 62.6%→58.4%, and entity count rises 9.5%. Evaluated impure fused states
+fall 412/23502→202/23242 (sweeps), 107/925→49/958 (canonical). This tradeoff is
 retained explicitly; zero majority-pair false merges does not prove all samples
 pure. S17 still has one U1, three correct pairs, zero false/missed and unchanged
 events. S16's known short fragment/events are unchanged. S08's C alignment and
 all true canonical contacts are preserved. Canonical recorder links: 42 correct,
-0 wrong, 3 missed â†’ 44 correct, 0 wrong, 7 missed (segmented-track units).
+0 wrong, 3 missed → 44 correct, 0 wrong, 7 missed (segmented-track units).
 
 ## Identity switches and semantics
 
@@ -93,17 +93,17 @@ times, innovations, return changes, segment limits and residual failures.
 S08 C:track_002 still lacks sufficient independent switch evidence and remains
 anonymous; C:track_001 is partially segmented. S15 B:track_001 is segmented around
 contact, but the handoff begins just before detectable wide support. S18 early
-Dâ†’C ambiguity is segmented; ambiguous state is UNKNOWN, not a cut-in/path entry.
+D→C ambiguity is segmented; ambiguous state is UNKNOWN, not a cut-in/path entry.
 
 For the four targeted cases (S08, S15, S18 abreast/passing), whole-recording extra
-cut-in/path/critical-start/end events against COVERAGE fall **9â†’4**; missed events
-remain **21â†’21**. S18 false cut-in/path-entry starts disappear in both variants.
-Canonical pre-contact path extras 5â†’3, cut-in extras 2â†’0; their missed counts stay
-8 and 4. Critical onset extras/misses change 1/2â†’2/3 due to one delayed abreast
+cut-in/path/critical-start/end events against COVERAGE fall **9→4**; missed events
+remain **21→21**. S18 false cut-in/path-entry starts disappear in both variants.
+Canonical pre-contact path extras 5→3, cut-in extras 2→0; their missed counts stay
+8 and 4. Critical onset extras/misses change 1/2→2/3 due to one delayed abreast
 onset; whole-recording onset matches remain 39/44. TRACK_APPEARED extras increase
-23â†’33 as segments are local tracks. These costs remain in the metric.
-Across sweeps, pre-contact path extras/misses 15/121â†’5/122; right cut-in
-11/76â†’5/76; critical onset 37/34â†’36/37. The unchanged oracle window is 2 s,
+23→33 as segments are local tracks. These costs remain in the metric.
+Across sweeps, pre-contact path extras/misses 15/121→5/122; right cut-in
+11/76→5/76; critical onset 37/34→36/37. The unchanged oracle window is 2 s,
 and majority track identity is a privileged attribution approximation, not
 an event-time proof. Complete counts: [hardening_before_after.json](hardening_before_after.json).
 
@@ -170,7 +170,7 @@ Separate direct GT oriented-body geometry, outline sampling, SAT and explicit
 braking/cut-in/path predicates; no reconstruction/oracle event-generator import.
 Six stratified runs: S01 rear-end, S02 cut-in, S03 crossing, S17, S18 passing,
 non-crash crossing sweep seed 0. Of 23 first onsets, 17 are exact; one path
-entry differs 0.05 s; five critical onsets differ 0.10â€“0.50 s. All first onsets
+entry differs 0.05 s; five critical onsets differ 0.10–0.50 s. All first onsets
 are found. Evaluation-only ablations diagnose yaw-rate vs straight forecast,
 surface placement and braking conventions; no definition is tuned to agree.
 See [event_oracle_independent_check.md](event_oracle_independent_check.md).
@@ -185,7 +185,7 @@ WARN only S08, S15, S16 and three S18 variants, for the documented handoff,
 post-impact heading/fragment and startup duplication modes. Each finding links
 to a frame. [Final visual audit](../../traces/visual_audit_final.md) and
 [Andrea's short checklist](../manual_replay_checklist.md) give all commands and
-2â€“4 t_global moments per run. Andrea's interactive check remains pending.
+2–4 t_global moments per run. Andrea's interactive check remains pending.
 
 SHA-256 verification covers **8,342 raw files**, unchanged; all **240 recording
 manifest objects** unchanged. Initial/final raw manifest digests are identical.
