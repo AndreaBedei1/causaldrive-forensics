@@ -55,6 +55,7 @@ from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNO
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
                               project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
+from cdf.replay.presentation import HELP_LINES, anonymous_row, subject_label  # noqa: E402
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -70,12 +71,6 @@ COLLISION_WINDOW_S = 1.5
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
 TRACK_DOT_HEIGHT_M = 0.8  # radar dots above the road (tracks are planar)
 OPENDRIVE_DIR = Path("CarlaUE4") / "Content" / "Carla" / "Maps" / "OpenDrive"
-HELP = ("SPACE play/pause   R restart   ←/→ ±0.5 s (SHIFT ±0.05 s)   N/P next/prev event   "
-        "1-4 speed   C camera   TAB recorder   T tracks   G ghost boxes/dots   H help   ESC exit")
-LEGEND = ("grey box = anonymous road user U1, U2, ... (fused; fitted footprint, about {0:.1f} x {1:.1f} x {2:.1f} m "
-          "nominal): solid measured, dashed PREDICTED   dot = a radar track   dot + line = track associated with "
-          "a recorder")
-FREE_HELP = "free camera: W/A/S/D/Q/E move (SHIFT faster), drag to look, wheel to move"
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
@@ -538,12 +533,16 @@ class ReplayApp:
         if anonymous:
             names = ", ".join(track.name + ("" if state.measured else " (PREDICTED)") for track, state in anonymous)
             lines.append(("anonymous tracks: " + names, (200, 200, 255), self.font_small))
-        seen = sorted({"{0} ({1})".format(track.road_user, track.track_id) for track in self.run.tracks.get(pid, [])
+        seen = sorted({track.road_user for track in self.run.tracks.get(pid, [])
                        if track.road_user is not None and track.state_at(t) is not None})
         if seen:
-            lines.append(("sees road users: " + ", ".join(seen), (220, 220, 220), self.font_small))
+            for entity_id in seen:
+                entity = self.run.entity(entity_id)
+                state = entity.state_at(t) if entity is not None else None
+                lines.append((anonymous_row(entity_id, state.observers if state else [pid]),
+                              (220, 220, 220), self.font_small))
         for event in reversed(self.run.recent_events(pid, t, EVENT_WINDOW_S)):
-            subject = self.run.subject_name(pid, event.subject)
+            subject = subject_label(self.run, pid, event.subject)
             lines.append(("» " + event.event_type + (" → " + subject if subject else ""),
                           (255, 214, 10), self.font_bold))
         return lines
@@ -661,24 +660,12 @@ class ReplayApp:
         anchor = self._project((state.centre[0], state.centre[1], roof + 0.3))
         if anchor is None:
             return None
-        detail = ["+-{0:.2f} m".format(state.pos_std), "seen by " + ", ".join(state.observers)]
-        if not state.measured:
-            detail.append("PREDICTED")
-        if state.heading == HEADING_HELD:
-            detail.append("heading held")
-        lines = [entity.label, entity.sources, "  ".join(detail)]
+        lines = [entity.entity_id]
         return lambda: self._label(anchor, lines, ROAD_USER_RGB, len(self.ids), above=True)
 
     def _track_lines(self, track: TrackPath, state: TrackPoint) -> List[str]:
         """``A:track_001 / ANONYMOUS`` and ``[seen by A]`` with what the sample is (PREDICTED, heading)."""
-        detail = ["[seen by {0}]".format(track.recorder)]
-        if not state.measured:
-            detail.append("PREDICTED")
-        if state.heading == HEADING_HELD:
-            detail.append("heading held")
-        elif state.heading == HEADING_UNKNOWN:
-            detail.append("heading unknown")
-        return [track.label, "  ".join(detail)]
+        return [subject_label(self.run, track.recorder, track.track_id)]
 
     def _draw_ghost(self, track: TrackPath, state: TrackPoint, corners: List[Vector], index: int) -> Any:
         """An anonymous track as a ghost: the reconstruction's nominal box where its CRITICAL_TTC model
@@ -722,6 +709,8 @@ class ReplayApp:
             pg.draw.circle(self.screen, (255, 255, 255), uv, 6, width=2)
         else:
             pg.draw.circle(self.screen, color, uv, 6, width=2)  # hollow: predicted
+        if track.road_user is not None:
+            return None  # the body's U label already names all its radar dots
         lines = self._track_lines(track, state) if track.ghost else [
             track.label + ("  PREDICTED" if not state.measured else "")]
         return lambda: self._label(uv, lines, color, index, above=False)
@@ -848,9 +837,7 @@ class ReplayApp:
     def _help_lines(self) -> List[str]:
         if not self.show_help:
             return []
-        size = self.run.geometry
-        return [HELP, LEGEND.format(size.length, size.width, size.height)] + (
-            [FREE_HELP] if self.camera_mode == "free" else [])
+        return list(HELP_LINES)
 
     def _bottom_bar_top(self) -> int:
         """Top of the help lines and timeline at the bottom of the window."""

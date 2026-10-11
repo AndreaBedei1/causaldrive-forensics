@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ..reconstruction.models import PAPER_CORE_EVENTS
 from .model import DEFAULT_FOOTPRINT, HEADING_UNKNOWN, ReplayRun, rotate
+from .presentation import anonymous_row, subject_label
 
 RECORDER_COLOURS = ("#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#8c564b", "#e377c2", "#17becf", "#bcbd22")
 ROAD_USER_COLOUR = "#3a3a3a"  # an anonymous road user belongs to no observer
@@ -233,9 +234,6 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
                                  edgecolor="none", zorder=3))
         ax.add_patch(Polygon(item["box"], closed=True, fill=False, edgecolor=edge,
                              lw=3.0 if edge != ROAD_USER_COLOUR else 1.8, ls="-" if state.measured else "--", zorder=4))
-        if 2.0 * state.pos_std >= UNCERTAINTY_MIN_M:
-            ax.add_patch(Circle(state.centre, 2.0 * state.pos_std, fill=False, edgecolor=ROAD_USER_COLOUR, lw=0.8,
-                                ls=":", alpha=0.8, zorder=4))
         if state.heading != HEADING_UNKNOWN and state.yaw is not None:
             hx, hy = rotate(entity.length / 2.0 + 1.2, 0.0, state.yaw)
             ax.annotate("", xy=(state.centre[0] + hx, state.centre[1] + hy), xytext=state.centre,
@@ -281,18 +279,14 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
                    if g["observer"] == pid and g["states"]]
         lines.append(("{0}: {1}".format(pid, ", ".join(states) or "-"), recorder["colour"], "bold"))
         for track_id, states_of in tracked:
-            lines.append(("   {0}: {1}".format(run.subject_name(pid, track_id), ", ".join(states_of)),
+            lines.append(("   {0}: {1}".format(subject_label(run, pid, track_id), ", ".join(states_of)),
                           STATE_COLOURS["CRITICAL_TTC"] if "CRITICAL_TTC" in states_of else "black", "normal"))
     if items["entities"]:
         lines.append(("", "black", "normal"))
-        lines.append(("anonymous road users (recorded nothing):", ROAD_USER_COLOUR, "bold"))
+        lines.append(("anonymous road users:", ROAD_USER_COLOUR, "bold"))
         for item in items["entities"]:
             entity, state = item["entity"], item["state"]
-            lines.append(("  {0} = {1}".format(entity.entity_id, entity.sources), ROAD_USER_COLOUR, "normal"))
-            lines.append(("     {0} x {1:.1f} m, {2:.1f} m/s, +-{3:.2f} m ({4}{5})".format(
-                "{0:.1f}".format(entity.length), entity.width, state.speed, state.pos_std,
-                state.method.replace("covariance_intersection", "CI").replace("box_fit", "box fit"),
-                "" if state.measured else ", predicted"), ROAD_USER_COLOUR, "normal"))
+            lines.append((anonymous_row(entity.entity_id, state.observers), ROAD_USER_COLOUR, "normal"))
     if run.hidden:
         lines.append(("not on the global timeline: " + ", ".join(run.hidden), "#555555", "normal"))
     recent = [event for event in run.all_events()
@@ -301,7 +295,7 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
         lines.append(("", "black", "normal"))
         lines.append(("core events of the last {0:.1f} s:".format(EVENT_WINDOW_S), "black", "bold"))
         for event in recent[-12:]:
-            subject = run.subject_name(event.actor, event.subject)
+            subject = subject_label(run, event.actor, event.subject)
             lines.append(("  {0:+.2f} {1} {2}{3}".format(run.display_time(event.time), event.event_type, event.actor,
                                                          " -> " + subject if subject else ""), "black", "normal"))
     y = 1.0
