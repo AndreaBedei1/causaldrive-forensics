@@ -218,7 +218,7 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
             timing = "consistent with the clock offset between {0} and {1} that earlier matches fix " \
                      "({2:+.3f} s, tolerance {3:.2f} s)".format(first_owner, second_owner, residual,
                                                                 cfg.clock_tolerance_s)
-    else:
+        else:
             # Impulse uncertainty must not turn a competing contact into a guessed
             # clock anchor. Only geometry-compatible, time-compatible rivals count.
             rivals = []
