@@ -68,7 +68,7 @@ Track identities known to the reconstruction (associations.json):
 
 ### 1.3 Observed vehicle response delays
 
-From a hazard the recorder's sensors established to the recorder's own steering command (controls.jsonl, abs(steer) >= 0.001 held 0.2 s).  These are observed vehicle response delays, not human reaction times: the sensors say when the hazard was perceivable by the vehicle, not when a driver perceived it.
+From a hazard the recorder's sensors established to the recorder's own steering command (controls.jsonl, abs(steer) >= 0.001 held 0.2 s).  These are observed vehicle response delays, not human reaction times: the sensors say when the hazard was perceivable by the vehicle, not when a driver perceived it.  A human driver can perceive cues the radar does not measure (turn indicators, the other driver's gaze, the lane-change intent shown by a drift) and can miss what it measures (inattention, blind spots); an automated driving system perceives through its own sensors and adds its own processing and planning time.  These delays are inputs for an expert's analysis, to be read against perception-reaction time distributions chosen for the right expectation level and kinematic context (docs/event_definitions.md), never a verdict on avoidability or responsibility.
 
 | interval | s |
 |---|---|
@@ -125,5 +125,16 @@ C relative to A (centres, A's heading; bumper gap along it):
 Factual run: collisions {"A-B": {"first_s": 4.95, "last_s": 5.75, "peak_impulse_Ns": 1576.9}}; smallest box gaps {"A-B": {"at_s": 4.9, "min_box_gap_m": 0.0}, "A-C": {"at_s": 5.2, "min_box_gap_m": 0.59}, "B-C": {"at_s": 5.2, "min_box_gap_m": 3.13}}.
 Counterfactual swerve_disabled: collisions {"A-C": {"first_s": 5.95, "last_s": 6.1, "peak_impulse_Ns": 477.8}}.
 Counterfactual without_C: collisions {}.
+
+### 2.1 Hazard perceivability against the ground-truth event oracle
+
+First core events of A per true subject before A's first contact (t_local 4.95): the reconstruction (part 1), and the reconstruction's own event definitions applied to ground truth within A's radar coverage (COVERAGE) and with an all-seeing sensor (PERFECT); `cdf.evaluation.event_oracle`.  The difference is what sensing and tracking cost: when the sensors established each hazard against when it was geometrically present.
+
+| subject (true) | event | reconstruction t_local | COVERAGE t_local | PERFECT t_local |
+|---|---|---|---|---|
+| B | CRITICAL_TTC_START | 3.80 | 3.85 | 3.85 |
+| C | CRITICAL_TTC_START | 2.60 | 2.30 | 2.30 |
+| C | CUT_IN_FROM_RIGHT_START | 2.75 | 3.00 | 3.00 |
+| C | EGO_PATH_ENTRY | 3.35 | 3.20 | 3.20 |
 
 Evaluation headline: collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 3; max |t_global error| 0.0 s

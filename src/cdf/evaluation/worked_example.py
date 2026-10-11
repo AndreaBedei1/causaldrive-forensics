@@ -399,9 +399,25 @@ def privileged_part(run_dir: Path, part: ReconstructionPart) -> Dict[str, Any]:
         ("reconstructed clearance at the critical start vs true bumper gap",
          critical is not None and truth_gap is not None and abs((critical.clearance_m or 0.0) - truth_gap) <= 0.3,
          "{0} m reconstructed, {1} m true".format(None if critical is None else critical.clearance_m, truth_gap))]
+    # When the hazards were perceivable per ground truth: the event oracle (cdf.evaluation.event_oracle) under
+    # the reconstruction's own definitions, all-seeing (PERFECT) and within the observer's radar coverage.
+    from ..reconstruction.config import load_config
+    from .event_oracle import compare_run
+    oracle = compare_run(run_dir, load_config())
+    first: Dict[Tuple[str, str], Dict[str, Optional[float]]] = {}
+    cut = oracle["first_contact_t_local"].get(part.observer, math.inf)
+    for source in ("RECONSTRUCTION", "COVERAGE", "PERFECT"):
+        for event in oracle["events"][source].get(part.observer, []):
+            if event["subject"] is None or event["t_local"] >= cut or event["type"] == "TRACK_APPEARED":
+                continue
+            key = (event["subject"], event["type"])
+            row = first.setdefault(key, {"RECONSTRUCTION": None, "COVERAGE": None, "PERFECT": None})
+            if row[source] is None or event["t_local"] < row[source]:
+                row[source] = event["t_local"]
     return {"identities": identities, "unrecorded": unrecorded, "collision_pairs": pairs, "triggers": triggers,
             "counterfactuals": counterfactuals, "relative_to_observer": lateral, "hidden": hidden,
-            "headline": evaluation.get("headline"), "checks": checks}
+            "headline": evaluation.get("headline"), "checks": checks, "oracle_first_events": first,
+            "first_contact_t_local": None if cut == math.inf else cut}
 
 
 # --------------------------------------------------------------------------
@@ -471,7 +487,13 @@ def render(run_dir: Path, part: ReconstructionPart, isolation: Dict[str, Any], t
             "From a hazard the recorder's sensors established to the recorder's own steering command "
             "(controls.jsonl, abs(steer) >= {0} held {1} s).  These are observed vehicle response delays, not human "
             "reaction times: the sensors say when the hazard was perceivable by the vehicle, not when a driver "
-            "perceived it.".format(STEER_ONSET, STEER_HOLD_S), "", "| interval | s |", "|---|---|"]
+            "perceived it.  A human driver can perceive cues the radar does not measure (turn indicators, the other "
+            "driver's gaze, the lane-change intent shown by a drift) and can miss what it measures (inattention, "
+            "blind spots); an automated driving system perceives through its own sensors and adds its own "
+            "processing and planning time.  These delays are inputs for an expert's analysis, to be read against "
+            "perception-reaction time distributions chosen for the right expectation level and kinematic context "
+            "(docs/event_definitions.md), never a verdict on avoidability or responsibility.".format(
+                STEER_ONSET, STEER_HOLD_S), "", "| interval | s |", "|---|---|"]
     for label, value in part.delays.items():
         out.append("| {0} | {1} |".format(label, _f(value)))
     out += ["", "### 1.4 Cut-ins established by each recorder", ""]
@@ -520,6 +542,21 @@ def render(run_dir: Path, part: ReconstructionPart, isolation: Dict[str, Any], t
             json.dumps(factual.get("collisions")), json.dumps(factual.get("box_gaps")))]
     for label, cf in sorted(((truth["counterfactuals"] or {}).get("counterfactuals") or {}).items()):
         out.append("Counterfactual {0}: collisions {1}.".format(label, json.dumps(cf.get("collisions") or {})))
+    if truth.get("oracle_first_events"):
+        out += ["", "### 2.1 Hazard perceivability against the ground-truth event oracle", "",
+                "First core events of {0} per true subject before {0}'s first contact (t_local {1}): the "
+                "reconstruction (part 1), and the reconstruction's own event definitions applied to ground truth "
+                "within {0}'s radar coverage (COVERAGE) and with an all-seeing sensor (PERFECT); "
+                "`cdf.evaluation.event_oracle`.  The difference is what sensing and tracking cost: when the sensors "
+                "established each hazard against when it was geometrically present.".format(
+                    part.observer, _f(truth.get("first_contact_t_local"))), "",
+                "| subject (true) | event | reconstruction t_local | COVERAGE t_local | PERFECT t_local |",
+                "|---|---|---|---|---|"]
+        for (subject, event_type), row in sorted(truth["oracle_first_events"].items(),
+                                                 key=lambda item: (item[0][0], min(v for v in item[1].values()
+                                                                                    if v is not None))):
+            out.append("| {0} | {1} | {2} | {3} | {4} |".format(subject, event_type, _f(row["RECONSTRUCTION"]),
+                                                               _f(row["COVERAGE"]), _f(row["PERFECT"])))
     if truth.get("headline"):
         out += ["", "Evaluation headline: " + truth["headline"]]
     return "\n".join(out) + "\n"

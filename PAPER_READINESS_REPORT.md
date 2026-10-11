@@ -454,3 +454,82 @@ clutter defeats the tracker's confirmation rule (spurious entities and events).
 **Gate.**  PASS: sourced or flagged profiles; non-destructive copies; seeded draws with a stopping rule;
 metrics against level with plots; CARLA's impulse symmetry documented and checked on S06, S15, S16; the
 refinement measured against the plain reconstruction; tests green on both Pythons (phase gate run).
+
+## Phase 5 -- semantic evaluation of the core events
+
+**Objective.**  Every core event defined with its thresholds and their sources or engineering assumptions; an
+independent ground-truth event oracle; one-at-a-time sensitivity of the thresholds; the S17 worked example with
+observed vehicle response delays (never human reaction times) and the caveat on human against automated
+perception.
+
+**Implementation.**
+- `docs/event_definitions.md`: COLLISION, BRAKE, TRACK_APPEARED / TRACK_LOST, EGO_PATH, CUT_IN, CRITICAL_TTC
+  (both reasons, release, collision), each threshold with a verified source (UN R157 time-gap table and 2 m
+  floor; Hayward's TTC; headway against TTC; reaction-time literature as context for the 1.0 s braking model;
+  UN R157's 5 m/s^2 emergency manoeuvre and 0.72 s cut-in visibility as context) or "engineering assumption"
+  with its reason; the observed vehicle response delay and its caveats; references from `docs/bibliography.md`
+  (verified bibliography, now in the repository).
+- `cdf.evaluation.visibility`: the ground-truth radar coverage of the visibility audit as a module (field of
+  view, range, and a line of sight to any visible surface point not crossing another vehicle's box).
+- `cdf.evaluation.event_oracle`: per recorder and other vehicle an ideal radar track from ground truth (true
+  near surface, velocity, acceleration, size; uncertainty 0.05 m / 0.05 m/s) at the recorder's sweep times, run
+  through the reconstruction's own `track_events` with the recorder's own ego trajectory and footprint and its
+  true contacts: PERFECT (all-seeing) and COVERAGE (only where the vehicle is in view; pieces split and dropped as
+  the tracker does).  The reconstruction's local events, their subject the true identity of the track, are
+  matched one to one per recorder, event type and true subject within 2 s; whole recording and before each
+  recorder's first contact.  `scripts/event_oracle.py` (per-run `event_oracle.json`, pooled results and a
+  figure), `scripts/semantic_sensitivity.py` (12 thresholds x 2 values: the reconstruction's tracks are tracked
+  once and re-evented through the same calls as the local reconstruction; definitional thresholds change the
+  oracle too).
+- Worked example (`cdf.evaluation.worked_example`): the caveat now separates what a driver and what an
+  automated system perceive, and its privileged part gives when ground truth puts the same hazards.
+
+**Assumptions.**  The oracle shares the definitions (it measures what perception costs, not whether a
+definition is right) and tests the true body's nearest point; coverage is geometric (a standing vehicle in view
+counts as perceivable although the moving-target tracker ignores it); the match window is 2 s; the pre-contact
+window ends at the recorder's first true contact.
+
+**Tests.**  `tests/test_event_oracle.py` (9): ideal clearances equal the true box gaps (an independent
+implementation); the ideal track agrees with the radar track of the same vehicle; S17's hazards where ground
+truth puts them; coverage never adds an event to perfect perception; the reconstruction's events carry the
+true identity of their track; one-to-one nearest-first matching, type and subject must agree, unknown subjects
+never match; sensitivity variants change one threshold only.  `tests/test_worked_example.py` passes with the
+new sections.
+
+**Results.**  Before each recorder's first contact (`results/semantics/event_oracle_*.md`, tables T4 and T6):
+- Hazard onset (CRITICAL_TTC_START) against what the radars could see (COVERAGE): canonical runs precision
+  0.975, recall 0.951; sweeps (240 runs, 552 onsets) 0.933 / 0.938, time difference median +0.05 s (one radar
+  sweep; p5 -0.10, p95 +0.46 s).  CRITICAL_TTC_END: sweeps 0.78 / 0.84, median 0.00 s.
+- Sensor coverage: the radars' fields of view hide 13 % of the hazard onsets an all-seeing sensor would
+  establish (552 of 631 in the sweeps) and 22 % of the ends; no path entry or cut-in is lost to coverage.
+- The tracked-point convention (path and cut-in tested on the radar track's point, the median of its returns):
+  on its own it keeps only 56 % of the true path entries, 70 % / 43 % of the cut-ins from the left / right
+  (COVERAGE_TRACKED against COVERAGE) and adds 68 hazard onsets; against that convention the reconstruction
+  finds 86 % of the path entries (precision 0.86, +0.20 s), 98 % of the cut-ins from the left (precision 0.95,
+  -0.20 s) and 66 % of those from the right (precision 0.83, -0.15 s).  Against the true body: path entries
+  0.51 recall at 0.89 precision, cut-ins 0.72 / 0.44.  Testing the estimated body instead of the tracked point
+  is the improvement this points to.
+- Track appearance: precision 0.17 (a fragmented track appears again), recall 0.44 (a standing or briefly seen
+  vehicle is never tracked).
+- Sensitivity, one threshold at a time (sweeps): the agreement on hazard onsets stays at 0.93-0.95 recall and
+  0.93-0.94 precision for every threshold but a 1.75 m corridor half-width (0.82); the reference itself moves
+  with the definition: reaction time 0.7 / 1.5 s give 529 / 580 onsets (nominal 552, 0.05 s earlier at 1.5 s),
+  time gaps x0.8 507, deceleration 5 / 8 m/s^2 561 / 538, corridor 1.25 / 1.75 m 550 / 628, cut-in persistence
+  0.8 s 103 cut-ins from the right (nominal 136).  The perception thresholds (nominal target box, estimate
+  gates) change nothing measurable.
+- S17 worked example: A's sensors established C's hazard at t_local 2.60 s against 2.30 s with perfect
+  perception, the cut-in at 2.75 s (3.00 s), the path entry at 3.35 s (3.20 s); observed vehicle response
+  delays to A's steering command: 1.05 s from the hazard onset, 0.90 s from the cut-in, 0.30 s from the path
+  entry -- a scripted trigger on the corridor clearance plus its latency, not a driver.
+
+**Regressions.**  None in the reconstruction (evaluation-side additions only).
+
+**Limitations.**  The oracle validates perception against the definitions, not the definitions against human
+judgement; the tracked-point convention costs path entries and cut-ins; the sensitivity is one threshold at a
+time (no interactions).
+
+**Commit.**  Phase 4: `3fa907cd6369afb2f8cea8eca5c61c1cc05249ab`.  Phase 5: `phase5: ...` (SHA in the phase 6 section).
+
+**Gate.**  PASS: definitions with sources or flagged assumptions; an oracle independent of the radar pipeline;
+sensitivity per threshold; the worked example worded as observed vehicle response delays with the perception
+caveat; the full suite passes on both Pythons.
