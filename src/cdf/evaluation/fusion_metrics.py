@@ -59,7 +59,9 @@ def _yaw_error(a: float, b: float) -> float:
     return abs((a - b + 180.0) % 360.0 - 180.0)
 
 
-def evaluate_fusion(run_dir: Path, write: bool = True) -> Dict[str, Any]:
+def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None) -> Dict[str, Any]:
+    """The fusion metrics of a reconstructed run (module docstring); ``pose_factory`` is the pose source the
+    reconstruction used (the robustness study's perturbed GNSS), for the no-fusion baseline boxes."""
     run_dir = Path(run_dir)
     rec = run_dir / "reconstruction"
     alignment = _read_json(rec / "global" / "alignment.json")
@@ -69,16 +71,18 @@ def evaluate_fusion(run_dir: Path, write: bool = True) -> Dict[str, Any]:
     origins = {name: _read_json(rec / name / "local_graph.json")["recorder"]["clock"]["origin_source_timestamp"]
                for name in recorders}
     first_poses = {name: _read_jsonl(run_dir / "vehicles" / name / "ego.jsonl")[0] for name in recorders}
-    replay = ReplayRun.load(run_dir)  # the phase-0 ghosts: one nominal box per track (no fusion)
+    replay = ReplayRun.load(run_dir, pose_factory=pose_factory)  # phase-0 ghosts: one nominal box per track
     paths = {(pid, path.track_id): path for pid, items in replay.tracks.items() for path in items}
     truth, _ = truth_of(run_dir)
     aligned = {name for name, clock in alignment["graphs"].items() if clock["status"] == "ALIGNED"}
 
-    # Simulator time of t_global = 0: the reference recorder's own report of the reference collision.
+    # Simulator time of t_global = 0: the reference recorder's own report of the reference collision, or,
+    # without a matched collision, the reference recorder's own clock origin.
     reference_sim = None
     for name in recorders:
         clock = alignment["graphs"][name]
-        if clock["status"] == "ALIGNED" and clock.get("method", "matched_collisions") == "matched_collisions":
+        if clock["status"] == "ALIGNED" and clock.get("method", "matched_collisions") in ("matched_collisions",
+                                                                                         "reference_recorder"):
             reference_sim = -clock["offset_to_global"] + origins[name]
             break
 
@@ -233,6 +237,8 @@ def evaluate_fusion(run_dir: Path, write: bool = True) -> Dict[str, Any]:
     # 5. Recorders aligned through observed trajectories.
     observed_alignment = []
     for item in road_users.get("observed_alignment", []):
+        if item.get("method") != "observed_trajectories":
+            continue
         name = item["recorder"]
         clock = alignment["graphs"][name]
         true_offset = None

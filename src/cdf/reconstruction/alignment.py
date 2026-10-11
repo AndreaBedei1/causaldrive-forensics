@@ -7,6 +7,11 @@ graphs are only read; their timestamps are never changed.
 Two COLLISION nodes of different graphs are the same physical contact when
 their peak impulses agree: the two bodies of one contact receive equal and
 opposite impulses, so the test needs neither a common clock nor a common frame.
+When the recorders' pose streams are given (``consistent``), the two bodies must
+also touch: each recorder at its own report time, from its own pose stream, its
+footprint within ``contact_consistency_m`` (plus 3 sigma of the pose sources'
+declared accuracy) of the other's -- two single-vehicle contacts with similar
+impulses, far apart, are not one contact.
 Each match also fixes the clock offset between its two graphs, so the matches
 must agree in time: a match between two graphs that earlier matches already
 link (directly or through a third graph) must imply the same clock offset,
@@ -27,7 +32,7 @@ chain of matched contacts links to the reference stay UNALIGNED.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from .config import FusionConfig
 from .models import Alignment, GraphClock, GraphNode, LocalGraph
@@ -76,14 +81,31 @@ class _Clocks:
         return self.root(first)[0] == self.root(second)[0]
 
 
-def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[List[Dict[str, Any]],
-                                                                               List[Dict[str, Any]]]:
+# (first graph, its report time, second graph, its report time) -> (gap between the two bodies, tolerance)
+ContactCheck = Callable[[str, float, str, float], Optional[Tuple[float, float]]]
+
+
+def _apart(consistent: Optional[ContactCheck], first: str, t_first: float, second: str,
+           t_second: float) -> Tuple[Optional[str], Optional[str]]:
+    """(reason to reject, evidence) of the contact-consistency check."""
+    measured = None if consistent is None else consistent(first, t_first, second, t_second)
+    if measured is None:
+        return None, None
+    gap, tolerance = measured
+    if gap > tolerance:
+        return ("the two bodies are {0:.1f} m apart at their reports (their pose streams; tolerance {1:.1f} m): "
+                "two separate contacts".format(gap, tolerance), None)
+    return None, "the two bodies touch at their reports ({0:.2f} m apart, tolerance {1:.1f} m)".format(gap, tolerance)
+
+
+def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig,
+                     consistent: Optional[ContactCheck] = None) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Greedy one-to-one, time-consistent matching of collision reports across graphs.
 
     Report pairs within ``impulse_tolerance`` are candidates, best similarity
-    first.  A candidate is accepted when neither report is matched yet and its
-    clock offset agrees with the matches already accepted.  Returns
-    (matched events, rejected time-inconsistent candidates).
+    first.  A candidate is accepted when neither report is matched yet, its two
+    bodies touch (``consistent``, when given) and its clock offset agrees with the
+    matches already accepted.  Returns (matched events, rejected candidates).
     """
     reports = [(graph.owner, node) for graph in sorted(graphs, key=lambda item: item.owner)
                for node in graph.nodes if node.event_type == "COLLISION"]
@@ -110,6 +132,12 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[L
             continue
         similarity = round(-negative_similarity, 4)
         peaks = {first_owner: first.attributes["peak_impulse"], second_owner: second.attributes["peak_impulse"]}
+        apart, touching = _apart(consistent, first_owner, first.t_local, second_owner, second.t_local)
+        if apart is not None:
+            rejected.append({"nodes": {first_owner: first_id, second_owner: second_id},
+                             "t_local": {first_owner: first.t_local, second_owner: second.t_local},
+                             "peak_impulse": peaks, "impulse_similarity": similarity, "reason": apart})
+            continue
         timing = None
         if clocks.linked(first_owner, second_owner):
             residual = clocks.residual(first_owner, first.t_local, second_owner, second.t_local)
@@ -133,6 +161,8 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[L
         alternatives = max(per_report[first_id], per_report[second_id]) - 1
         evidence.append("no competing report within tolerance" if alternatives == 0
                         else "{0} competing report(s) within tolerance; best match kept".format(alternatives))
+        if touching is not None:
+            evidence.append(touching)
         if timing is not None:
             evidence.append(timing)
         matched.append({"event_id": None, "graphs": [first_owner, second_owner],
@@ -140,7 +170,7 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[L
                         "t_local": {first_owner: first.t_local, second_owner: second.t_local},
                         "peak_impulse": peaks, "impulse_similarity": similarity,
                         "confidence": similarity, "evidence": evidence})
-    matched += _match_merged_bursts(reports, used, clocks, cfg)
+    matched += _match_merged_bursts(reports, used, clocks, cfg, consistent)
     # Numbering needs no common clock: order by first graph, then its local time.
     matched.sort(key=lambda event: (event["graphs"][0], event["t_local"][event["graphs"][0]]))
     for number, event in enumerate(matched, 1):
@@ -148,7 +178,8 @@ def match_collisions(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Tuple[L
     return matched, rejected
 
 
-def _match_merged_bursts(reports, used, clocks: "_Clocks", cfg: FusionConfig) -> List[Dict[str, Any]]:
+def _match_merged_bursts(reports, used, clocks: "_Clocks", cfg: FusionConfig,
+                         consistent: Optional[ContactCheck] = None) -> List[Dict[str, Any]]:
     """Unmatched reports against the bursts other recorders merged into their contacts (see module docstring)."""
     matched = []
     taken = set()
@@ -166,6 +197,8 @@ def _match_merged_bursts(reports, used, clocks: "_Clocks", cfg: FusionConfig) ->
                 similarity = 1.0 - abs(peak - burst_peak) / max(peak, burst_peak, 1e-9)
                 residual = clocks.residual(owner, node.t_local, other_owner, t_burst)
                 if similarity >= 1.0 - cfg.impulse_tolerance and abs(residual) <= cfg.clock_tolerance_s + 1e-9:
+                    if _apart(consistent, owner, node.t_local, other_owner, t_burst)[0] is not None:
+                        continue
                     if best is None or similarity > best[0]:
                         best = (similarity, other_owner, other, t_burst, burst_peak, residual)
         if best is None:
@@ -194,9 +227,11 @@ def _strength(event: Dict[str, Any]) -> float:
     return max(float(value) for value in event["peak_impulse"].values())
 
 
-def align_graphs(graphs: Sequence[LocalGraph], cfg: FusionConfig) -> Alignment:
-    """t_global = 0 at the strongest matched collision; every match extends the common clock."""
-    matched, rejected = match_collisions(graphs, cfg)
+def align_graphs(graphs: Sequence[LocalGraph], cfg: FusionConfig,
+                 consistent: Optional[ContactCheck] = None) -> Alignment:
+    """t_global = 0 at the strongest matched collision; every match extends the common clock.  ``consistent``
+    (``common_frame.contact_check`` on the recorders' pose streams) rejects matches whose bodies do not touch."""
+    matched, rejected = match_collisions(graphs, cfg, consistent)
     clocks = {}
     for graph in graphs:
         has_collision = any(node.event_type == "COLLISION" for node in graph.nodes)

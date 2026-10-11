@@ -44,11 +44,11 @@ Reconstruction result vs ground truth; the reconstruction never reads these file
 - {"participants": ["A", "C"], "participants_correct": true, "peak_impulse": 322.104643689845, "reconstructed_as": "g48", "report_timing_error_s": 0.0, "sim_time": 230.87582647055387}
 - extra reconstructed collisions: 0
 - A:track_001: C (ASSOCIATED), true identity C
-- A:track_002: A:track_002 (ANONYMOUS), true identity C
+- A:track_002: C (ASSOCIATED), true identity C
 - B:track_001: A (ASSOCIATED), true identity A
-- B:track_002: B:track_002 (ANONYMOUS), true identity C
-- B:track_003: B:track_003 (ANONYMOUS), true identity C
-- B:track_004: B:track_004 (ANONYMOUS), true identity C
+- B:track_002: C (ASSOCIATED), true identity C
+- B:track_003: C (ASSOCIATED), true identity C
+- B:track_004: U1 (ANONYMOUS), true identity C
 - C:track_001: A (ASSOCIATED), true identity A
 
-Reconstruction commit: `215170a1d7f1a87cc455eb85d718183c1fcee7b9`.
+Reconstruction commit: `c80eab47ec83dcc66909751b0514f1bcb4d5066e`.

@@ -8,3 +8,7 @@ venv/
 *.log
 # Local secrets (API keys for the LLM providers): never committed; see .env.example.
 .env
+# Scenario sweeps: raw recordings and their reconstructions stay local (summaries go to results/sweeps/).
+/sweeps/
+# Robustness study: scratch copies of the perturbed runs (deleted after each job; results go to results/robustness/).
+/robustness/

@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 
 from src.cdf.reconstruction.anonymous import (CROSS, STITCH, PairEvidence, chi2_2dof, cluster,
-                                              covariance_intersection, fit_box, pair_evidence, refuse_ambiguous,
-                                              stitch_evidence)
+                                              covariance_intersection, fit_box, offset_decision, pair_evidence,
+                                              refuse_ambiguous, stitch_evidence)
 from src.cdf.reconstruction.common_frame import CommonSample, CommonTrack, RecordedPoseSource, shifted
 from src.cdf.reconstruction.config import ReconstructionConfig
 from src.cdf.reconstruction.models import is_anonymous_entity
@@ -325,16 +325,40 @@ class LinkAndAlignmentTests(unittest.TestCase):
         names = {(a.local_graph + ":" + a.local_track): a.global_entity for a in result.associations}
         self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"]), ("C", "C", "A"))
 
-    def test_s07_a_recorder_that_barely_moves_stays_unaligned(self):
+    def test_s07_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
+        # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with
+        # where its line of sight enters C's body (not with C's whole outline) leaves one interval of offsets,
+        # within one radar period of the truth (-5.90 s, privileged; phase 1 refused it as not unique).
         with tempfile.TemporaryDirectory() as tmp:
             run = scratch_copy(TRACES / "S07" / "run_0_crash", Path(tmp))
             result = reconstruct_run(run, CFG)
             record = entities_of(run)
-        self.assertEqual(result.alignment.graphs["C"].status, "UNALIGNED")
+        clock = result.alignment.graphs["C"]
+        self.assertEqual((clock.status, clock.method), ("ALIGNED", "observed_trajectories"))
+        self.assertLessEqual(abs(clock.offset_to_global - (-5.90)), 0.051)
         decision = record["observed_alignment"][0]
-        self.assertFalse(decision["accepted"])
-        self.assertGreaterEqual(decision["other_intervals"], 1)
-        self.assertIn("not unique", decision["reason"])
+        self.assertTrue(decision["accepted"])
+        self.assertEqual(decision["other_intervals"], 0)
+        self.assertLessEqual(decision["interval"][1] - decision["interval"][0], 0.1 + 1e-9)
+        names = {(a.local_graph, a.local_track): (a.status, a.global_entity) for a in result.associations}
+        self.assertEqual(names[("B", "track_001")], ("ASSOCIATED", "C"))
+
+    def test_an_offset_is_refused_when_another_interval_fits(self):
+        grid = np.arange(0, 40)
+        one = np.full(40, 9.0)
+        one[10:13] = [1.5, 0.6, 1.5]
+        k, threshold, home, others = offset_decision(one, 3.0)
+        self.assertEqual((k, home, others), (11, (10, 12), []))  # one sharp minimum: accepted
+        two = one.copy()
+        two[30:32] = [1.1, 1.2]  # a second place where the observations fit (a target at rest)
+        k, threshold, home, others = offset_decision(two, 3.0)
+        self.assertEqual(k, 11)
+        self.assertEqual(len(others), 1)  # refused: not unique
+        far = np.full(40, 9.0)
+        far[20] = 2.5
+        k, threshold, home, others = offset_decision(far, 3.0)
+        self.assertGreater(float(far[k]), 2.0)  # refused: beyond 2 sigma
+        self.assertEqual(len(grid), 40)
 
     def test_pose_sources_declare_their_accuracy(self):
         rows = [{"timestamp": t, "x": t, "y": 0.0, "yaw_deg": 0.0, "velocity": {"x": 1.0, "y": 0.0}} for t in (0.0, 1.0)]

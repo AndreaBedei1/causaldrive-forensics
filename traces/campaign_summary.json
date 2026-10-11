@@ -2596,12 +2596,12 @@
   },
   "global": [
    29,
-   42
+   60
   ],
   "alignment": {
    "A": "ALIGNED",
    "B": "ALIGNED",
-   "C": "UNALIGNED"
+   "C": "ALIGNED"
   },
   "alignment_chain": {
    "A": [
@@ -2616,7 +2616,7 @@
   "rejected_matches": 0,
   "associations": [
    "A:track_001->B ASSOCIATED 1.00",
-   "B:track_001->U1 ANONYMOUS"
+   "B:track_001->C ASSOCIATED 1.00"
   ],
   "pairs": {
    "BRAKE": [
@@ -2752,7 +2752,7 @@
   },
   "temporal_safety_relations": [
    "A:track_001 (B): CRITICAL_TTC_START 0.50, COLLISION with B 5.90 (+5.40 s)",
-   "B:track_001 (U1): CRITICAL_TTC_START 3.40, COLLISION 5.90 (+2.50 s)"
+   "B:track_001 (C): CRITICAL_TTC_START 3.40"
   ],
   "lost_while_active": {
    "A": [],
@@ -2760,27 +2760,33 @@
    "C": []
   },
   "simultaneous": [
-   "MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,U1)",
+   "MOVING_START(C); THROTTLE_START(C)",
+   "MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)",
+   "THROTTLE_END(C); BRAKE_START(C)",
    "THROTTLE_END(B); BRAKE_START(B)",
-   "CLOSING_END(B,U1); MOVING_END(B); STOP_START(B)",
+   "MOVING_END(C); STOP_START(C)",
+   "CLOSING_END(B,C); MOVING_END(B); STOP_START(B)",
    "THROTTLE_END(A); BRAKE_START(A)",
    "COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)",
    "MOVING_END(A); STOP_START(A)"
   ],
   "sequence": [
-   "-5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,U1)",
+   "-5.95 MOVING_START(C); THROTTLE_START(C)",
+   "-5.90 MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)",
    "-5.40 CRITICAL_TTC_START(A,B)",
-   "-2.70 CLOSING_START(B,U1)",
-   "-2.50 CRITICAL_TTC_START(B,U1)",
+   "-3.00 THROTTLE_END(C); BRAKE_START(C)",
+   "-2.70 CLOSING_START(B,C)",
+   "-2.50 CRITICAL_TTC_START(B,C)",
    "-2.25 THROTTLE_END(B); BRAKE_START(B)",
    "-2.05 CLOSING_START(A,B)",
-   "-1.55 CRITICAL_TTC_END(B,U1)",
-   "-1.05 CLOSING_END(B,U1); MOVING_END(B); STOP_START(B)",
+   "-1.60 MOVING_END(C); STOP_START(C)",
+   "-1.55 CRITICAL_TTC_END(B,C)",
+   "-1.05 CLOSING_END(B,C); MOVING_END(B); STOP_START(B)",
    "-0.65 THROTTLE_END(A); BRAKE_START(A)",
    "+0.00 COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)",
    "+0.10 MOVING_END(A); STOP_START(A)"
   ],
-  "unaligned_nodes": 6,
+  "unaligned_nodes": 0,
   "local_sequences": {
    "A": [
     "0.00 MOVING_START*",
@@ -3031,7 +3037,7 @@
     "track": null
    }
   ],
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.05 s",
   "extra_collisions": [],
   "clock_shift_identical": true
  },

@@ -1,0 +1,26 @@
+sweep:
+  name: rear_end
+  scenario: S01
+  base_variant: crash
+  seed: 101
+  description: >
+    A follows B in one lane at the same speed; B brakes hard at 4.0 s; A brakes after a reaction that
+    varies, at a gap and speed that vary.  Spans rear-end crashes, near misses and safe stops.
+  parameters:
+  - path: participants.A.initial_speed
+    low: 11.0
+    high: 16.0
+    decimals: 1
+    also: [participants.A.target_speed, participants.B.initial_speed, participants.B.target_speed]
+  - path: participants.B.spawn.forward_m
+    low: 22.0
+    high: 36.0
+    decimals: 1
+  - path: participants.A.actions.A_late_brake.t_start
+    low: 4.2
+    high: 6.2
+    decimals: 2
+  - path: participants.B.actions.B_emergency_brake.params.intensity
+    low: 0.6
+    high: 1.0
+    decimals: 2

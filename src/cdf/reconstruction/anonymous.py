@@ -9,7 +9,9 @@ pose sources declare; nothing depends on a scenario.
 1. OBSERVED ALIGNMENT (``align_by_observations``) of a recorder that no matched collision aligned: the
    clock offset at which the near surfaces the aligned recorders observed lie on its own footprint
    outline, or the near surfaces it observed lie on theirs.  Accepted only with a sharp, unique minimum:
-   a target at rest gives no time information and leaves the recorder unaligned.
+   a target at rest gives no time information and leaves the recorder unaligned.  When no collision was
+   matched at all (a near miss), the first recorder's own clock is the global one (t_global = its t_local)
+   and the others are aligned to it this way.
 2. RECORDER LINKS (``link_to_recorders``): an anonymous track whose observed near surface lies on another
    recorder's own footprint outline, moving at that recorder's own velocity, over most of its life, is
    that recorder.  The footprint and the pose are the recorder's own: no face ambiguity.
@@ -24,6 +26,11 @@ pose sources declare; nothing depends on a scenario.
    partners of one observer that are not one body) is refused.  The remaining links join tracks into
    entities, best first, never putting two simultaneous tracks of one observer into one entity unless a
    link showed them to be one body (``cluster``): U1, U2, ... by first appearance.
+Optionally (``fusion.mutual_refinement``) the pose sources are refined first (``mutual_offsets``): the tracks
+   identified with a recorder show its surface where its observers put it, against the faces of its box
+   where its own pose stream puts it; the position offsets this fixes (only along the faces' normals, with
+   the declared accuracies as priors) are removed and steps 2-4 are redone.
+
 4. FUSED STATE of each entity (``entity_trajectory``): one box fitted to the faces the returns of all its
    observers show (``fit_box``: each visible face is a linear constraint on the centre and one half
    dimension); when the returns fix no box at an instant (one face of one observer, no heading), the
@@ -41,13 +48,15 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .common_frame import CommonSample, CommonTrack, PoseSource, RecorderBody, common_track, outline_distances
+from .common_frame import (DEFAULT_BODY, CommonSample, CommonTrack, PoseSource, RecorderBody, WorldPose,
+                           common_track, entry_distances, outline_distances)
 from .config import ReconstructionConfig
 from .models import Alignment, Association, GraphClock
 
 ASSOCIATED = "ASSOCIATED"
 ANONYMOUS = "ANONYMOUS"
 OBSERVED = "observed_trajectories"
+REFERENCE = "reference_recorder"
 CROSS, SPLIT, STITCH = "cross_observer", "same_observer", "stitch"
 
 
@@ -89,6 +98,8 @@ def _initial_centre(sample: CommonSample, heading: Optional[float], halves: Tupl
     along = abs(line[0] * math.cos(heading) + line[1] * math.sin(heading))
     across = abs(-line[0] * math.sin(heading) + line[1] * math.cos(heading))
     depth = min(halves[0] / along if along > 1e-6 else math.inf, halves[1] / across if across > 1e-6 else math.inf)
+    if not math.isfinite(depth):  # no line of sight (the near surface on the observer's own outline)
+        depth = 0.5 * (halves[0] + halves[1])
     return sample.near + line * depth
 
 
@@ -289,10 +300,12 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
                           poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> List[Dict[str, Any]]:
     """Give each unaligned recorder the clock offset its observations fix, when they fix one.
 
-    Comparisons: every anonymous track of an aligned recorder against the recorder's own footprint
-    outline (at t_global - delta), and every own track of the recorder against an aligned recorder's
-    outline (at t_local + delta), on samples of a target moving at least ``observed_alignment_min_speed_mps``
-    (only motion fixes time).  A comparison's curve is the median normalised outline distance
+    Comparisons: every anonymous track of an aligned recorder against the recorder's own footprint (at
+    t_global - delta), and every own track of the recorder against an aligned recorder's footprint (at
+    t_local + delta), on samples of a target moving at least ``observed_alignment_min_speed_mps`` (only
+    motion fixes time).  Each observed near surface is compared with where its line of sight enters the
+    body at that offset (``entry_distances``: the surface that observer could see; a point that would lie
+    inside the body is off by its depth).  A comparison's curve is the median normalised distance
     (``_position_sigma``) over its samples the two recordings both cover, defined where at least
     ``observed_alignment_min_samples`` and half of its samples are covered.  The comparisons whose curve
     reaches 2 sigma somewhere could be the same body; their samples are pooled, and the pooled median is
@@ -305,6 +318,15 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
     fusion = cfg.fusion
     by_owner = {local.owner: local for local in locals_}
     decisions: List[Dict[str, Any]] = []
+    if alignment.graphs and not any(clock.status == "ALIGNED" for clock in alignment.graphs.values()):
+        # No matched collision anchors a global clock: the first recorder's own clock is it (its zero is
+        # arbitrary, as the reference collision's is), and the others are aligned to it by observation.
+        reference = sorted(alignment.graphs)[0]
+        alignment.graphs[reference] = GraphClock(
+            graph=reference, status="ALIGNED", offset_to_global=0.0, method=REFERENCE,
+            reason="no matched collision: its own clock defines t_global (t_global = its t_local)")
+        decisions.append({"recorder": reference, "method": REFERENCE, "accepted": True, "offset_to_global": 0.0,
+                          "reason": "no matched collision: the first recorder's clock is the global one"})
     pending = sorted(owner for owner, clock in alignment.graphs.items() if clock.status != "ALIGNED")
     progress = True
     while pending and progress:
@@ -314,7 +336,8 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
             break
         for recorder in list(pending):
             local, source = by_owner[recorder], poses[recorder]
-            # (name, outline pose source, its footprint, sample times, sign of delta, outline clock offset, near, sigma)
+            # (name, body pose source, its footprint, sample times, sign of delta, body clock offset, near surfaces,
+            #  their observers, sigma)
             comparisons = []
             for track in view.tracks:
                 if track.status == ASSOCIATED:
@@ -323,6 +346,7 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
                 if len(samples) >= fusion.observed_alignment_min_samples:
                     comparisons.append((track.name, source, local.footprint, np.array([s.t_global for s in samples]),
                                         -1.0, 0.0, np.array([s.near for s in samples]),
+                                        np.array([s.observer for s in samples]),
                                         np.array([_position_sigma(cfg, s, source) for s in samples])))
             for track in local.tracks:
                 own = common_track(track, recorder, local.ego, source, local.footprint, 0.0)
@@ -332,17 +356,18 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
                 for body in view.bodies.values():
                     comparisons.append(("{0} on {1}".format(own.name, body.recorder), body.poses, body.footprint,
                                         np.array([s.t_local for s in samples]), 1.0, body.offset_to_global,
-                                        np.array([s.near for s in samples]),
+                                        np.array([s.near for s in samples]), np.array([s.observer for s in samples]),
                                         np.array([_position_sigma(cfg, s, body.poses) for s in samples])))
             lows = [body.poses.start + body.offset_to_global - source.end for body in view.bodies.values()]
             highs = [body.poses.end + body.offset_to_global - source.start for body in view.bodies.values()]
             grid = np.arange(min(lows), max(highs) + 1e-9, fusion.observed_alignment_step_s)
             curves: Dict[str, List[Optional[np.ndarray]]] = {}
-            for name, outline, footprint, times, sign, offset, near, sigma in comparisons:
+            for name, outline, footprint, times, sign, offset, near, observers, sigma in comparisons:
                 need = max(fusion.observed_alignment_min_samples, 0.5 * len(times))
                 row: List[Optional[np.ndarray]] = []
                 for delta in grid:
-                    distance, valid = outline_distances(outline, footprint, times + sign * delta - offset, near)
+                    distance, valid = entry_distances(outline, footprint, times + sign * delta - offset, near,
+                                                      observers)
                     row.append((distance / sigma)[valid] if valid.sum() >= need else None)
                 if any(values is not None and float(np.median(values)) <= 2.0 for values in row):
                     curves[name] = row
@@ -354,27 +379,23 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
                 if pooled and sum(len(values) for values in pooled) >= fusion.observed_alignment_min_samples:
                     scores[k] = float(np.median(np.concatenate(pooled)))
             if not np.isfinite(scores).any():
-                decision["reason"] = "no observation of a moving target lies on a footprint outline"
+                decision["reason"] = "no observation of a moving target lies where its line of sight enters a body"
                 decisions.append(decision)
                 pending.remove(recorder)
                 continue
-            k = int(np.argmin(scores))
-            threshold = max(fusion.observed_alignment_uniqueness_ratio * scores[k], 2.0)
-            intervals = _components(scores <= threshold)
-            home = next(run for run in intervals if run[0] <= k <= run[1])
-            others = [float(np.min(scores[a:b + 1])) for a, b in intervals if (a, b) != home]
-            decision.update(offset_to_global=round(float(grid[k]), 4), median_distance_sigma=round(float(scores[k]), 3),
-                            interval=[round(float(grid[home[0]]), 4), round(float(grid[home[1]]), 4)],
+            k, threshold, home, others = offset_decision(scores, fusion.observed_alignment_uniqueness_ratio)
+            decision.update(offset_to_global=round(float(grid[k]), 4) + 0.0, median_distance_sigma=round(float(scores[k]), 3),
+                            interval=[round(float(grid[home[0]]), 4) + 0.0, round(float(grid[home[1]]), 4) + 0.0],
                             other_intervals=len(others),
                             best_elsewhere_sigma=round(min(others), 3) if others else None,
                             candidates=len(grid))
-            if scores[k] <= 2.0 and not others:
+            if scores[k] <= 2.0 and not others:  # one sharp minimum within 2 sigma
                 decision["accepted"] = True
                 alignment.graphs[recorder] = GraphClock(
-                    graph=recorder, status="ALIGNED", offset_to_global=round(float(grid[k]), 4), method=OBSERVED,
-                    reason="aligned through observed trajectories: the near surfaces of {0} lie on a footprint outline "
-                           "(pooled median {1:.2f} sigma) at this offset; offsets within {2:.2f} sigma span "
-                           "[{3:+.2f}, {4:+.2f}] s and nothing else fits".format(
+                    graph=recorder, status="ALIGNED", offset_to_global=round(float(grid[k]), 4) + 0.0, method=OBSERVED,
+                    reason="aligned through observed trajectories: the near surfaces of {0} lie where their lines of "
+                           "sight enter the body (pooled median {1:.2f} sigma) at this offset; offsets within {2:.2f} "
+                           "sigma span [{3:+.2f}, {4:+.2f}] s and nothing else fits".format(
                                ", ".join(sorted(curves)), scores[k], threshold, grid[home[0]], grid[home[1]]))
                 progress = True
             else:
@@ -386,7 +407,20 @@ def align_by_observations(locals_: Sequence[Any], alignment: Alignment, associat
             if progress:
                 break  # a newly aligned recorder may observe the remaining ones
     alignment.observed = decisions
-    return decisions
+    return [decision for decision in decisions if decision["method"] == OBSERVED]
+
+
+def offset_decision(scores: np.ndarray, uniqueness_ratio: float) -> Tuple[int, float, Tuple[int, int], List[float]]:
+    """The candidate clock offsets of one recorder against its pooled score (median normalised distance per
+    candidate): (best index, the threshold max(ratio x best, 2 sigma), the interval of candidates within it
+    around the best, the best score of every other such interval).  The offset is accepted only when the best
+    score is within 2 sigma and no other interval exists."""
+    k = int(np.argmin(scores))
+    threshold = max(uniqueness_ratio * float(scores[k]), 2.0)
+    intervals = _components(scores <= threshold)
+    home = next(run for run in intervals if run[0] <= k <= run[1])
+    others = [float(np.min(scores[a:b + 1])) for a, b in intervals if (a, b) != home]
+    return k, threshold, home, others
 
 
 # --------------------------------------------------------------------------
@@ -775,6 +809,286 @@ FUSION_PARAMETERS = ("observed_alignment_step_s", "observed_alignment_min_sample
                      "box_width_std_m", "entity_output_rate_hz")
 
 
+class OffsetPoseSource(PoseSource):
+    """A pose source moved by a constant translation (the mutual refinement's correction), declaring the
+    accuracy left after it."""
+
+    def __init__(self, base: PoseSource, dx: float, dy: float, position_std_m: float) -> None:
+        self.base, self.dx, self.dy = base, float(dx), float(dy)
+        self.name = getattr(base, "name", "recorded") + "+mutual"
+        self.position_std_m = float(position_std_m)
+        self.yaw_std_rad = getattr(base, "yaw_std_rad", 0.0)
+        self.velocity_std_mps = getattr(base, "velocity_std_mps", 0.0)
+
+    @property
+    def start(self) -> float:
+        return self.base.start
+
+    @property
+    def end(self) -> float:
+        return self.base.end
+
+    def pose_at(self, t_local: float) -> WorldPose:
+        pose = self.base.pose_at(t_local)
+        return WorldPose(pose.x + self.dx, pose.y + self.dy, pose.yaw, pose.vx, pose.vy)
+
+    def poses_at(self, times: Sequence[float]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        x, y, yaw = self.base.poses_at(times)
+        return x + self.dx, y + self.dy, yaw
+
+
+# Mutual refinement (``mutual_offsets``).
+MUTUAL_HEADING_BIN_RAD = math.radians(10.0)  # one equation per bin of a face's heading
+MUTUAL_DECORRELATION_S = 1.0  # depths within one second are not independent errors (engineering assumption)
+MUTUAL_SCAN_TRUNCATION_M = 1.0  # coarse scan: a return farther than this from the outline counts as this far
+MUTUAL_SCAN_STEP_M = 0.5
+MUTUAL_SCAN_MAX_HALF_WIDTH_M = 30.0
+MUTUAL_SCAN_MAX_POINTS = 2000
+
+
+def _body_faces(fp: Any) -> List[Tuple[np.ndarray, float, Tuple[float, float], str]]:
+    """(outward normal, plane offset n . l, extent along the face, name) of the faces of a footprint, in the
+    vehicle frame."""
+    return [(np.array([1.0, 0.0]), fp.x_max, (fp.y_min, fp.y_max), "front"),
+            (np.array([-1.0, 0.0]), -fp.x_min, (fp.y_min, fp.y_max), "rear"),
+            (np.array([0.0, 1.0]), fp.y_max, (fp.x_min, fp.x_max), "right"),
+            (np.array([0.0, -1.0]), -fp.y_min, (fp.x_min, fp.x_max), "left")]
+
+
+def _sample_returns(sample: CommonSample) -> Tuple[np.ndarray, np.ndarray]:
+    """A sample's claimed returns and their radars' positions; without returns its observed near surface."""
+    if sample.returns is not None and sample.origins is not None and len(sample.returns):
+        return sample.returns, sample.origins
+    return sample.near[None, :], sample.observer[None, :]
+
+
+def face_depths(body: RecorderBody, sample: CommonSample) -> List[Tuple[str, np.ndarray, float, int]]:
+    """Where one observer's returns on a recorder lie against the recorder's own box (its pose stream and
+    footprint): each return goes to the nearest face (as a segment) among those its radar sees (the radar
+    on the outer side of the face's plane); per face (name, outward normal in the common frame, median
+    depth of the returns behind the face plane in m, returns).  With position errors b of the two pose
+    streams the depth is n . (b_recorder - b_observer), plus how far the body's surface lies inside its box."""
+    pose, fp = body.pose_at_global(sample.t_global), body.footprint or DEFAULT_BODY
+    points, origins = _sample_returns(sample)
+    c, s = math.cos(pose.yaw), math.sin(pose.yaw)
+
+    def local(world: np.ndarray) -> np.ndarray:
+        dx, dy = world[:, 0] - pose.x, world[:, 1] - pose.y
+        return np.column_stack([c * dx + s * dy, -s * dx + c * dy])
+
+    lp, lo = local(points), local(origins)
+    # A radar inside the box (bodies in contact) sees no face from outside: its returns say nothing here.
+    outside = ~((lo[:, 0] > fp.x_min) & (lo[:, 0] < fp.x_max) & (lo[:, 1] > fp.y_min) & (lo[:, 1] < fp.y_max))
+    faces = _body_faces(fp)
+    best, best_gap = np.full(len(lp), -1), np.full(len(lp), np.inf)
+    for index, (normal, offset, (low, high), _) in enumerate(faces):
+        along = lp[:, 1] if abs(normal[0]) > 0.5 else lp[:, 0]
+        gap = np.hypot(lp @ normal - offset, np.maximum(0.0, np.maximum(low - along, along - high)))
+        better = outside & (lo @ normal > offset) & (gap < best_gap)
+        best[better], best_gap[better] = index, gap[better]
+    out = []
+    for index, (normal, offset, _, name) in enumerate(faces):
+        chosen = best == index
+        if chosen.any():
+            world = np.array([c * normal[0] - s * normal[1], s * normal[0] + c * normal[1]])
+            out.append((name, world, float(np.median(offset - lp[chosen] @ normal)), int(chosen.sum())))
+    return out
+
+
+def scan_relative_offset(body: RecorderBody, samples: Sequence[CommonSample], spread_m: float) -> np.ndarray:
+    """Coarse b_R - b_O from one observer's track of a recorder R (correlative scan matching): the
+    translation of R's box (its own footprint and pose stream) that puts the observer's returns on its
+    outline, searched over +-3 ``spread_m`` (the prior standard deviation of the relative offset) on a grid
+    refined twice; squared distances truncated at MUTUAL_SCAN_TRUNCATION_M, with a slight pull towards zero
+    so that along a direction no face fixes the search stays near it.  Only the starting point of
+    ``mutual_offsets``, so that returns are assigned to the faces of a box already near them."""
+    fp = body.footprint or DEFAULT_BODY
+    parts = []
+    for sample in samples:
+        points, _ = _sample_returns(sample)
+        pose = body.pose_at_global(sample.t_global)
+        c, s = math.cos(pose.yaw), math.sin(pose.yaw)
+        dx, dy = points[:, 0] - pose.x, points[:, 1] - pose.y
+        parts.append(np.column_stack([c * dx + s * dy, -s * dx + c * dy, np.full(len(points), c),
+                                      np.full(len(points), s)]))
+    data = np.vstack(parts)
+    if len(data) > MUTUAL_SCAN_MAX_POINTS:
+        data = data[np.linspace(0, len(data) - 1, MUTUAL_SCAN_MAX_POINTS).astype(int)]
+    lx, ly, cs, sn = (data[:, k][None, :] for k in range(4))
+
+    def cost(candidates: np.ndarray) -> np.ndarray:
+        out = np.empty(len(candidates))
+        for first in range(0, len(candidates), 256):
+            d = candidates[first:first + 256]
+            # b_R - b_O = d: the returns move by +d in R's frame.
+            px = lx + cs * d[:, :1] + sn * d[:, 1:]
+            py = ly - sn * d[:, :1] + cs * d[:, 1:]
+            gx, gy = np.maximum(fp.x_min - px, px - fp.x_max), np.maximum(fp.y_min - py, py - fp.y_max)
+            gap = np.maximum(gx, gy)
+            distance = np.where(gap > 0.0, np.hypot(np.maximum(gx, 0.0), np.maximum(gy, 0.0)), -gap)
+            out[first:first + 256] = np.mean(np.minimum(distance, MUTUAL_SCAN_TRUNCATION_M) ** 2, axis=1)
+        return out + 1e-4 * MUTUAL_SCAN_TRUNCATION_M ** 2 * np.sum(candidates ** 2, axis=1) / max(spread_m, 0.1) ** 2
+
+    centre = np.zeros(2)
+    half, step = min(3.0 * spread_m, MUTUAL_SCAN_MAX_HALF_WIDTH_M), MUTUAL_SCAN_STEP_M
+    for _ in range(3):
+        axis = np.arange(-half, half + 1e-9, step)
+        grid = np.array([(centre[0] + a, centre[1] + b) for a in axis for b in axis])
+        centre = grid[int(np.argmin(cost(grid)))]
+        half, step = step, step / 5.0
+    return centre
+
+
+def mutual_offsets(locals_: Sequence[Any], alignment: Alignment, associations: Sequence[Association],
+                   poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> Dict[str, Any]:
+    """Position offsets of the recorders' pose sources from their observations of each other.
+
+    Every track of an observer O identified with a recorder R (by a matched collision or in the common
+    frame), on its measured samples before R's first contact with anything, shows R's surface where O's pose
+    stream puts it; the depth of those returns behind the faces of R's box, where R's own pose stream puts
+    it (``face_depths``), measures n . (b_R - b_O) along each face's outward normal n, b being the position
+    errors of the two streams.  A face says nothing along itself (a car seen alongside does not fix the
+    along-track offset) and the part of the errors common to all recorders is not observable, so the
+    offsets are the maximum a posteriori estimate with each source's declared position accuracy as a
+    zero-mean prior: what no face constrains stays uncorrected, and the posterior covariance says how well
+    each correction is known.  A source declaring no error is not corrected (it anchors the others).
+
+    The returns are assigned to the faces of boxes moved by the best guess of the offsets: first a coarse
+    scan match of each observer's returns on each recorder (``scan_relative_offset``; with errors larger
+    than half a car the nearest face is often the wrong one), then the estimate where the faces inform it
+    and the scan match where they do not.  Each depth is converted back to what the uncorrected streams
+    imply (it is linear in the offsets), so the estimate depends on that guess only through the assignment.
+    One equation per (observer, recorder, face, 10-degree bin of the face's heading): the median depth over
+    the samples, with variance ``fusion.box_face_std_m``^2 times the number of bins of that face (its
+    systematic part, the body's surface against its box, is shared by its bins) plus the squared spread of
+    the per-sample depths (1.4826 MAD) over the number of distinct seconds they cover.  The posterior
+    covariance is inflated by the reduced chi-square of the equations when it exceeds one (the equations
+    disagree more than their variances say).  The corrected source declares its marginal posterior accuracy
+    in its worst direction, never above what it declared before."""
+    sigma = {name: float(getattr(source, "position_std_m", 0.0)) for name, source in poses.items()}
+    unknown = sorted(name for name, value in sigma.items() if value > 1e-6)
+    if not unknown:
+        return {"applied": False, "reason": "the pose sources declare no position error", "offsets_m": {}}
+    index = {name: 2 * i for i, name in enumerate(unknown)}
+    size = 2 * len(unknown)
+    prior = np.diag(np.repeat([1.0 / sigma[name] ** 2 for name in unknown], 2))
+
+    def part(vector: np.ndarray, name: str) -> np.ndarray:
+        return vector[index[name]:index[name] + 2] if name in index else np.zeros(2)
+
+    def identified(view: CommonView) -> Dict[Tuple[str, str], List[CommonSample]]:
+        out: Dict[Tuple[str, str], List[CommonSample]] = {}
+        for track in view.tracks:
+            if track.status != ASSOCIATED or track.entity not in view.bodies or track.entity == track.recorder:
+                continue
+            if track.recorder not in index and track.entity not in index:
+                continue
+            body, observer = view.bodies[track.entity], view.bodies[track.recorder]
+            # Only the surface of a body not yet in contact with anything (in contact, the boxes overlap).
+            cut = min([t for t, _ in body.contacts] + [t for t, partners in observer.contacts if body.recorder in partners]
+                      + [math.inf])
+            samples = [s for s in track.samples if s.measured and body.covers(s.t_global) and s.t_global < cut]
+            if len(samples) >= cfg.fusion.link_min_samples:
+                out.setdefault((track.recorder, track.entity), []).extend(samples)
+        return out
+
+    def row_for(observer: str, target: str, vector: np.ndarray) -> np.ndarray:
+        row = np.zeros(size)
+        if target in index:
+            row[index[target]:index[target] + 2] += vector
+        if observer in index:
+            row[index[observer]:index[observer] + 2] -= vector
+        return row
+
+    # Coarse start: one scan match per (observer, recorder).
+    view = build_common_view(locals_, alignment, associations, poses)
+    pairs = identified(view)
+    if not pairs:
+        return {"applied": False, "reason": "no track identified with another recorder", "offsets_m": {}}
+    rows, values, scans = [], [], []
+    for (observer, target), samples in sorted(pairs.items()):
+        spread = math.hypot(sigma[observer], sigma[target])
+        offset = scan_relative_offset(view.bodies[target], samples, spread)
+        scans.append({"observer": observer, "recorder": target, "samples": len(samples),
+                      "offset_m": [round(float(offset[0]), 3), round(float(offset[1]), 3)]})
+        for axis in (0, 1):
+            unit = np.zeros(2)
+            unit[axis] = 1.0
+            rows.append(row_for(observer, target, unit))
+            values.append(float(offset[axis]))
+    A, e = np.array(rows), np.array(values)
+    scanned = np.linalg.solve(A.T @ A / MUTUAL_SCAN_STEP_M ** 2 + prior, A.T @ e / MUTUAL_SCAN_STEP_M ** 2)
+
+    # Fine: b (the errors; the correction is -b) from the face depths, the boxes moved by ``guess``.
+    guess, estimate = scanned, np.zeros(size)
+    equations: List[Dict[str, Any]] = []
+    covariance, reduced, iterations = np.linalg.inv(prior), None, 0
+    for _ in range(max(1, cfg.fusion.mutual_refinement_iterations)):
+        iterations += 1
+        moved = {name: OffsetPoseSource(source, *(-part(guess, name)), sigma[name]) for name, source in poses.items()}
+        view = build_common_view(locals_, alignment, associations, moved)
+        groups: Dict[Tuple[str, str, str, int], List[Tuple[float, np.ndarray, float]]] = {}
+        for (observer, target), samples in identified(view).items():
+            shift = part(guess, target) - part(guess, observer)
+            for sample in samples:
+                for face, normal, depth, _ in face_depths(view.bodies[target], sample):
+                    heading = math.atan2(normal[1], normal[0]) + math.pi
+                    groups.setdefault((observer, target, face, int(heading // MUTUAL_HEADING_BIN_RAD)), []).append(
+                        (sample.t_global, normal, depth + float(normal @ shift)))
+        if not groups:
+            return {"applied": False, "reason": "no face of a recorder observed", "offsets_m": {}}
+        bins: Dict[Tuple[str, str, str], int] = {}
+        for observer, target, face, _ in groups:
+            bins[(observer, target, face)] = bins.get((observer, target, face), 0) + 1
+        rows, values, weights, equations = [], [], [], []
+        for (observer, target, face, _), items in sorted(groups.items()):
+            depths = np.array([item[2] for item in items])
+            normal = np.mean([item[1] for item in items], axis=0)
+            normal = normal / max(float(np.hypot(*normal)), 1e-9)
+            median = float(np.median(depths))
+            spread = 1.4826 * float(np.median(np.abs(depths - median)))
+            seconds = len({int(math.floor(item[0] / MUTUAL_DECORRELATION_S)) for item in items})
+            variance = bins[(observer, target, face)] * cfg.fusion.box_face_std_m ** 2 + spread ** 2 / seconds
+            rows.append(row_for(observer, target, normal))
+            values.append(median)
+            weights.append(1.0 / variance)
+            equations.append({"observer": observer, "recorder": target, "face": face, "samples": len(items),
+                              "seconds": seconds, "normal_deg": round(math.degrees(math.atan2(normal[1], normal[0])), 1),
+                              "median_depth_m": round(median, 3), "std_m": round(math.sqrt(variance), 3)})
+        A, e, w = np.array(rows), np.array(values), np.array(weights)
+        covariance = np.linalg.inv(A.T @ (A * w[:, None]) + prior)
+        estimate = covariance @ (A.T @ (w * e))
+        residual = e - A @ estimate
+        dof = max(1, len(e) - int(np.linalg.matrix_rank(A)))
+        reduced = float(np.sum(w * residual ** 2)) / dof
+        # The next assignment: the estimate where the faces inform it (share 1), the scan match where not (0).
+        share = np.eye(size) - covariance @ prior
+        following = scanned + share @ (estimate - scanned)
+        if float(np.max(np.abs(following - guess))) < 1e-3:
+            break
+        guess = following
+    if reduced is not None and reduced > 1.0:
+        covariance = covariance * reduced
+    offsets, declared, posterior = {}, {}, {}
+    for name in sorted(poses):
+        offsets[name] = [round(float(-v), 3) + 0.0 for v in part(estimate, name)]
+        if name not in index:
+            declared[name] = round(sigma[name], 3)
+            continue
+        block = covariance[index[name]:index[name] + 2, index[name]:index[name] + 2]
+        eigen, vectors = np.linalg.eigh(block)
+        posterior[name] = {"std_major_m": round(math.sqrt(max(eigen[1], 0.0)), 3),
+                           "std_minor_m": round(math.sqrt(max(eigen[0], 0.0)), 3),
+                           "minor_axis_deg": round(math.degrees(math.atan2(vectors[1, 0], vectors[0, 0])) % 180.0, 1)}
+        declared[name] = round(min(sigma[name], math.sqrt(max(eigen[1], 0.0))), 3)
+    return {"applied": True, "method": "point-to-face maximum a posteriori from a scan-matched start, the "
+                                       "declared accuracies as priors",
+            "offsets_m": offsets, "declared_position_std_m": declared, "posterior": posterior,
+            "unknowns": unknown, "covariance_m2": [[round(float(v), 5) for v in row] for row in covariance],
+            "reduced_chi2": None if reduced is None else round(reduced, 3), "scans": scans,
+            "equations": equations, "iterations": iterations}
+
+
 @dataclass
 class RoadUserFusion:
     """What the fusion of road users decided (``global/anonymous_entities.json``)."""
@@ -784,6 +1098,7 @@ class RoadUserFusion:
     entities: List[Dict[str, Any]]
     pose_sources: Dict[str, str]
     names: Dict[Tuple[str, str], str] = field(default_factory=dict)  # (recorder, local track) -> entity id
+    refinement: Optional[Dict[str, Any]] = None  # mutual refinement of the pose sources, when applied
 
     def to_dict(self, cfg: ReconstructionConfig, alignment: Alignment) -> Dict[str, Any]:
         return {"definition": "road users in the common frame of the recorders' own pose streams; a road user "
@@ -796,6 +1111,7 @@ class RoadUserFusion:
                                    radial_speed_std_mps=cfg.tracking.radial_speed_std_mps,
                                    acceleration_std_mps2=cfg.tracking.acceleration_std_mps2),
                 "observed_alignment": list(alignment.observed),
+                "mutual_refinement": self.refinement,
                 "recorder_links": [dict(link.__dict__) for link in self.links],
                 "association_evidence": [dict(e.to_dict(), score=round(e.score, 3) if math.isfinite(e.score) else None)
                                          for e in self.evidence],
@@ -806,7 +1122,34 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
                     poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> RoadUserFusion:
     """Steps 2-4 of the module docstring (step 1 runs before the collision-based association is redone).
     ``associations`` are updated in place: recorder links become ASSOCIATED with the recorder, every other
-    anonymous track of an aligned recorder gets its entity's name (U1, U2, ...)."""
+    anonymous track of an aligned recorder gets its entity's name (U1, U2, ...).  With
+    ``fusion.mutual_refinement`` a first pass on a copy finds the recorder links, ``mutual_offsets`` corrects
+    the pose sources, and the fusion runs on the corrected ones."""
+    refinement = None
+    if cfg.fusion.mutual_refinement:
+        import copy as _copy
+
+        def corrected(record: Dict[str, Any]) -> Dict[str, PoseSource]:
+            if not record.get("applied"):
+                return poses
+            return {name: OffsetPoseSource(source, *record["offsets_m"][name], record["declared_position_std_m"][name])
+                    for name, source in poses.items()}
+        # Stage 1: the tracks a matched collision identified (independent of the pose sources).
+        first = mutual_offsets(locals_, alignment, associations, poses, cfg)
+        # Stage 2: every track identified on the corrected poses (links are then less ambiguous).
+        trial = _copy.deepcopy(list(associations))
+        _fuse(locals_, alignment, trial, corrected(first), cfg)
+        refinement = mutual_offsets(locals_, alignment, trial, poses, cfg)
+        refinement["first_stage"] = {key: first.get(key) for key in ("applied", "offsets_m", "declared_position_std_m",
+                                                                      "posterior", "reason") if key in first}
+        poses = corrected(refinement)
+    result = _fuse(locals_, alignment, associations, poses, cfg)
+    result.refinement = refinement
+    return result
+
+
+def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Association],
+          poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> RoadUserFusion:
     view = build_common_view(locals_, alignment, associations, poses)
     links = link_to_recorders(view, cfg)
     by_key = {(a.local_graph, a.local_track): a for a in associations}

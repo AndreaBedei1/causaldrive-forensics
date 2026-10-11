@@ -22,11 +22,11 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 |-------|--------|-------------|------------------:|-----------------:|------|
 | A | ALIGNED | A:e08 | 4.10 | -4.10 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e08 | 4.10 | -4.10 | reported the reference collision collision_001 |
-| C | ALIGNED | - | - | -4.10 | aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie on a footprint outline (pooled median 0.48 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -3.75] s and nothing else fits |
+| C | ALIGNED | - | - | -4.10 | aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.55 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits |
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance
+Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
 
 ## Identity associations
 
@@ -41,7 +41,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 
 ## Road users in the common frame
 
-- Observed-trajectory alignment of C: accepted (offset -4.10, pooled median 0.47 sigma, interval [-4.2, -3.75]).
+- Observed-trajectory alignment of C: accepted (offset -4.10, pooled median 0.55 sigma, interval [-4.2, -4.0]).
 - A:track_001 is C: its returns lie on C's own footprint (median 0.00 m over 303 samples, 100% within 3 sigma) at C's velocity.
 - B:track_001 is C: its returns lie on C's own footprint (median 0.00 m over 262 samples, 94% within 3 sigma) at C's velocity.
 - C:track_001 is A: its returns lie on A's own footprint (median 0.00 m over 77 samples, 92% within 3 sigma) at A's velocity.
@@ -309,6 +309,7 @@ C:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "contact_consistency_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,
@@ -331,7 +332,9 @@ C:
     "box_face_std_m": 0.25,
     "box_length_std_m": 0.7,
     "box_width_std_m": 0.2,
-    "entity_output_rate_hz": 10.0
+    "entity_output_rate_hz": 10.0,
+    "mutual_refinement": false,
+    "mutual_refinement_iterations": 3
   }
 }
 ```

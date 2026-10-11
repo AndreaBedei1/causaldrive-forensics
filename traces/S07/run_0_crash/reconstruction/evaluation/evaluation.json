@@ -1,6 +1,6 @@
 {
   "run": "S07/run_0_crash",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.05 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 132.15217785164714,
       "peak_impulse": 22183.348832025982,
-      "reconstructed_as": "g19",
+      "reconstructed_as": "g25",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -41,12 +41,12 @@
     },
     {
       "graph": "C",
-      "status": "UNALIGNED",
-      "method": null,
+      "status": "ALIGNED",
+      "method": "observed_trajectories",
       "chain": [],
-      "estimated_reference_t_local": null,
+      "estimated_reference_t_local": 5.95,
       "true_reference_t_local": 5.9,
-      "error_s": null
+      "error_s": 0.05
     }
   ],
   "relative_clock_offsets": [
@@ -55,13 +55,25 @@
       "estimated_s": 0.0,
       "true_s": 0.0,
       "error_s": 0.0
+    },
+    {
+      "pair": "C - A",
+      "estimated_s": 0.05,
+      "true_s": 0.0,
+      "error_s": 0.05
+    },
+    {
+      "pair": "C - B",
+      "estimated_s": 0.05,
+      "true_s": 0.0,
+      "error_s": 0.05
     }
   ],
   "event_timing": {
-    "nodes": 23,
-    "max_abs_error_s": 0.0,
-    "order_pairs": 229,
-    "order_concordant": 229
+    "nodes": 29,
+    "max_abs_error_s": 0.05,
+    "order_pairs": 365,
+    "order_concordant": 365
   },
   "tracks": [
     {
@@ -83,14 +95,14 @@
     },
     {
       "track": "B:track_001",
-      "decision": "U1",
-      "status": "ANONYMOUS",
+      "decision": "C",
+      "status": "ASSOCIATED",
       "true_identity": "C",
       "median_box_distance_m": {
         "A": 18.45,
         "C": 0.0
       },
-      "verdict": "left anonymous (true identity C)",
+      "verdict": "correct",
       "samples": 136,
       "raw_rmse_to_surface_m": 0.449,
       "smoothed_rmse_to_surface_m": 0.438,
@@ -124,8 +136,8 @@
     "shift_s": 0.73,
     "shifted_local_collision_times": [],
     "global_graph_identical": true,
-    "offset_to_global_before": null,
-    "offset_to_global_after": null,
-    "offset_change_s": null
+    "offset_to_global_before": -5.95,
+    "offset_to_global_after": -6.68,
+    "offset_change_s": -0.73
   }
 }

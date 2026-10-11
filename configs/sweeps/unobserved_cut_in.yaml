@@ -1,0 +1,27 @@
+sweep:
+  name: unobserved_cut_in
+  scenario: S17
+  base_variant: crash
+  seed: 404
+  description: >
+    The non-recording C cuts into A's lane ahead of A; A swerves (privileged corridor trigger) when C is
+    close, into B catching up in the left lane.  C's distance, speed and cut-in moment and B's distance
+    vary: A-B crashes, swerves without contact, no swerve.
+  parameters:
+  - path: participants.C.spawn.forward_m
+    low: 27.75
+    high: 34.75
+    decimals: 2
+  - path: participants.C.initial_speed
+    low: 10.0
+    high: 12.0
+    decimals: 1
+    also: [participants.C.target_speed]
+  - path: participants.C.actions.C_cut_in_left.t_start
+    low: 1.5
+    high: 3.0
+    decimals: 2
+  - path: participants.B.spawn.forward_m
+    low: 10.0
+    high: 15.0
+    decimals: 1

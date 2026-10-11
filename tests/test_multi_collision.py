@@ -14,6 +14,7 @@ from pathlib import Path
 
 from src.cdf.evaluation.reconstruction import _truth_contacts
 from src.cdf.reconstruction.alignment import align_graphs
+from src.cdf.reconstruction.common_frame import WorldPose, footprint_gap
 from src.cdf.reconstruction.config import CollisionConfig, FusionConfig, ReconstructionConfig
 from src.cdf.reconstruction.fusion import associate_tracks, fuse_graphs, global_temporal_relations
 from src.cdf.reconstruction.local import collision_events, number_events, read_jsonl, reconstruct_vehicle
@@ -162,6 +163,26 @@ class MultiHopAlignmentTests(unittest.TestCase):
         self.assertEqual(alignment.rejected_matches, [])
         self.assertTrue(any("consistent with the clock offset" in line
                             for event in alignment.matched_events for line in event["evidence"]))
+
+    def test_two_contacts_far_apart_are_not_one_contact(self):
+        # A and B each hit a roadside object with similar impulses (sweep S03 near misses): the impulse test
+        # alone would pair them; their pose streams put the two bodies tens of metres apart at the reports.
+        graphs = [_graph("A", [(13.95, 14006.0)]), _graph("B", [(9.50, 15249.0)])]
+        self.assertEqual(len(align_graphs(graphs, FusionConfig()).matched_events), 1)  # without the pose streams
+        apart = align_graphs(graphs, FusionConfig(), lambda a, ta, b, tb: (72.5, 1.0))
+        self.assertEqual(apart.matched_events, [])
+        self.assertIn("72.5 m apart", apart.rejected_matches[0]["reason"])
+        self.assertEqual({c.status for c in apart.graphs.values()}, {"UNALIGNED"})
+        touching = align_graphs(graphs, FusionConfig(), lambda a, ta, b, tb: (0.02, 1.0))
+        self.assertEqual(len(touching.matched_events), 1)
+        self.assertTrue(any("touch" in line for line in touching.matched_events[0]["evidence"]))
+
+    def test_the_gap_between_two_footprints(self):
+        a = WorldPose(0.0, 0.0, 0.0)
+        self.assertAlmostEqual(footprint_gap(a, None, WorldPose(4.6, 0.0, 0.0), None), 0.0, places=6)  # bumpers touch
+        self.assertAlmostEqual(footprint_gap(a, None, WorldPose(10.0, 0.0, 0.0), None), 10.0 - 4.6, places=6)
+        self.assertAlmostEqual(footprint_gap(a, None, WorldPose(0.0, 5.0, 0.0), None), 5.0 - 1.9, places=6)
+        self.assertEqual(footprint_gap(a, None, WorldPose(1.0, 0.5, 0.3), None), 0.0)  # overlapping
 
     def test_graphs_linked_to_no_aligned_graph_stay_unaligned(self):
         graphs = [_graph("A", [(5.0, 900.0)]), _graph("B", [(6.0, 900.0)]),

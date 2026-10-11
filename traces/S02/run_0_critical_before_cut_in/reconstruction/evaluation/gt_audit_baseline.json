@@ -155,15 +155,15 @@
  },
  "pooled_track_errors": {
   "centre_error_m": {
-   "iqr": 2.4108,
+   "iqr": 2.4109,
    "max": 3.712,
    "mean": 2.2218,
-   "median": 2.0718,
+   "median": 2.0717,
    "n": 206,
-   "p90": 3.6521,
-   "p95": 3.6622,
-   "q25": 1.2374,
-   "q75": 3.6482
+   "p90": 3.6518,
+   "p95": 3.6621,
+   "q25": 1.2375,
+   "q75": 3.6483
   },
   "heading_error_deg": {
    "iqr": 4.1953,
@@ -211,20 +211,20 @@
   }
  },
  "privileged": "ground truth used for evaluation only",
- "reconstruction_commit": "215170a1d7f1a87cc455eb85d718183c1fcee7b9",
+ "reconstruction_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
  "run": "S02/run_0_critical_before_cut_in",
  "tracks": [
   {
    "centre_error_m": {
-    "iqr": 1.2083,
-    "max": 2.1244,
+    "iqr": 1.2085,
+    "max": 2.1249,
     "mean": 1.6053,
     "median": 2.0603,
     "n": 113,
-    "p90": 2.0936,
-    "p95": 2.1005,
-    "q25": 0.871,
-    "q75": 2.0792
+    "p90": 2.0941,
+    "p95": 2.1006,
+    "q25": 0.8706,
+    "q75": 2.0791
    },
    "heading_error_deg": {
     "iqr": 4.4778,
@@ -282,15 +282,15 @@
   },
   {
    "centre_error_m": {
-    "iqr": 1.8301,
+    "iqr": 1.8299,
     "max": 3.712,
-    "mean": 2.9708,
-    "median": 3.6489,
+    "mean": 2.9709,
+    "median": 3.6491,
     "n": 93,
-    "p90": 3.6636,
-    "p95": 3.691,
-    "q25": 1.8217,
-    "q75": 3.6518
+    "p90": 3.664,
+    "p95": 3.6912,
+    "q25": 1.8219,
+    "q75": 3.6517
    },
    "heading_error_deg": {
     "iqr": 4.0135,

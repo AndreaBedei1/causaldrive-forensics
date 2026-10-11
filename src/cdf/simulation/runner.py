@@ -223,9 +223,12 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                             and scenario_timestamp >= scheduled_end
                             and scenario_timestamp >= last_collision_t + POST_IMPACT_RECORDING_S):
                         break
-                remaining_wall_time = wall_clock_start + scenario_timestamp - time.monotonic()
-                if remaining_wall_time > 0.0:
-                    time.sleep(remaining_wall_time)
+                # Real-time pacing lets a person watch; in synchronous mode it changes no sample, so a
+                # batch of runs (scripts/run_sweep.py) may switch it off.
+                if bool(cfg.get("simulation.real_time_pacing", True)):
+                    remaining_wall_time = wall_clock_start + scenario_timestamp - time.monotonic()
+                    if remaining_wall_time > 0.0:
+                        time.sleep(remaining_wall_time)
             for agent in agents:
                 agent.flush_sensor_queues()
     finally:

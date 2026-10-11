@@ -21,11 +21,11 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 |-------|--------|-------------|------------------:|-----------------:|------|
 | A | ALIGNED | A:e08 | 4.10 | -4.10 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e08 | 4.10 | -4.10 | reported the reference collision collision_001 |
-| C | ALIGNED | - | - | -4.10 | aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie on a footprint outline (pooled median 0.48 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -3.75] s and nothing else fits |
+| C | ALIGNED | - | - | -4.10 | aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.55 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits |
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance
+Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
 
 ## Identity associations
 

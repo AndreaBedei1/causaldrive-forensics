@@ -250,8 +250,98 @@ t_global without C (phase 0: source clock with C).
 drawn); with a perturbed pose source the recorded headings still orient the track velocities in the vehicle
 frame (exact odometry assumption); an unaligned recorder cannot be shown at all.
 
-**Commit.**  Phase 1: `c79b1e627cbfaa5c042749291876597e922509f7`.  Phase 2: `phase2: ...` (SHA recorded in the
-phase 3 section).
+**Commit.**  Phase 1: `c79b1e627cbfaa5c042749291876597e922509f7`.  Phase 2:
+`c80eab47ec83dcc66909751b0514f1bcb4d5066e`.
 
 **Gate.**  PASS: t_global only; poses from the pose source; one body per road user with its uncertainty;
 anti-leak tests green; visual audit of every run with no FAIL; tests green on both Pythons.
+
+## Phase 3 -- scenario sweeps
+
+**Objective.**  Scale the evaluation beyond the canonical runs without overwriting them: parameterised sweeps
+of six scenario families with a per-run manifest, a batch runner that resumes, logs failures and never
+overwrites, a pilot that sizes N from data, and a balance of crash, borderline and no-crash outcomes.
+
+**Implementation.**
+- `configs/sweeps/*.yaml`: rear_end (S01: speeds, gap, A's brake time, B's brake intensity), cut_in (S02),
+  crossing (S03), unobserved_cut_in (S17), anonymous_pair_adjacent and anonymous_pair_platoon (S18: D's
+  position relative to C and its speed, B's spawn).
+- `scripts/run_sweep.py`: run k takes the k-th Halton point shifted by a SHA-256 of the sweep's seed (every
+  prefix covers the ranges; runs never change once recorded); variants through `--override`, recorded by the
+  unchanged `run_scenario.py` on a private CARLA (port 3000, real-time pacing on) into `sweeps/` (git-ignored),
+  never `traces/`; `sweep_manifest.json` per run (sweep, scenario, variants, k, seed, parameters, code at
+  recording and at reconstruction: commit, dirty flag, code hash; wall times; outcome from ground truth: crash,
+  borderline under 1 m checked at every simulator frame, no crash; metrics; status); a completed run is
+  skipped, an incomplete one set aside, failures logged; `--reconstruct-only` redoes the analysis of every
+  recorded run; summaries with provenance in `results/sweeps/<sweep>.{json,md,csv}`.
+- `scripts/experiment_size.py`: per paper metric a bootstrap (2000 replicates) of the campaign statistic from
+  the first 5 runs at N = 5 ... 100, the rule of three for errors never seen, a cap of 40 runs (recording
+  budget), settling tables over all runs, campaign totals (`docs/experiment_size.md`).
+- Reconstruction, no ground truth:
+  - The observed alignment compares each observed near surface with where its own line of sight enters the
+    other recorder's footprint (entry distances) instead of with the nearest point of the whole outline (an
+    "inside" degeneracy had biased it by 0.3 s): S07's C is aligned (-5.95 s, true -5.90 s), S08's interval
+    narrows to [-4.20, -4.00] s.
+  - With no matched collision at all (a near miss) the first recorder's own clock is the global one
+    (`reference_recorder`) and the others are aligned to it by observation.
+  - Contact gate of the collision matching (found by the sweeps): in five crossing near misses each car ran into
+    roadside objects with impulses within 3-8 % of each other, and the impulse test matched the two
+    single-vehicle contacts as one A-B collision -- a fabricated collision and clocks off by 0.25-4.9 s.  A
+    match now also needs the two bodies to touch, each at its own report time from its own pose stream:
+    footprints within `contact_consistency_m` = 1.0 m + 3 sigma of the declared pose accuracy.  Over the
+    campaign every genuine match lies within 0.06 m, the rejected ones 54-73 m apart.
+  - A guard against a NaN start of the box fit; `offset_decision` extracted (tested on synthetic score curves).
+- Evaluation: event times and alignment against the reference recorder's clock in near misses (the pilot
+  reported errors of thousands of seconds); `cdf.evaluation.run_metrics`.
+- Operations: unpaced runs hung the engine, so pacing is on by default; the private engine still crashed (a
+  C++ runtime dialog) every few runs whenever heavy analysis ran in parallel: a supervisor outside the
+  repository restarted it and resumed the batch, stopping only processes with `-carla-rpc-port=3000`.  The
+  user's server on port 2000 was never touched.
+
+**Assumptions.**  Parameter ranges are engineering choices that keep each scenario's question; outcome classes
+from ground truth (evaluation only); the S18 sweeps crash by design (A drifts into B to give the alignment an
+anchor; the question there is the fusion of C and D).
+
+**Tests.**  `tests/test_sweeps.py` (13: Halton determinism and coverage, seed shifts, ranges, decimals, `also`
+and `relative_to`, variant overrides, the variant builds a valid scenario, run naming, set-aside never deletes,
+outcomes from ground truth, entry distances, the reference recorder, near-miss evaluation on its clock);
+`tests/test_multi_collision.py` (contact gate: two contacts far apart are not one; footprint gap);
+`tests/test_road_user_fusion.py` (S07 aligned along the lines of sight; refusal of non-unique offsets).
+
+**Results** (`results/sweeps/`, `docs/experiment_size.md`, table T2).
+- 240 runs, 6 x 40, all complete after the reconstruct-only refresh with the final code (one reconstruction
+  code hash over the 240 manifests).  Outcomes crash / borderline / no crash: rear_end 8/4/28, cut_in
+  17/2/21, crossing 18/7/15, unobserved_cut_in 32/0/8, the two S18 sweeps 40/0/0.
+- N from the pilot: 40 (capped) for four sweeps, 30 for cut_in, 34 for unobserved_cut_in (40 recorded each);
+  the binding needs are the rule of three for errors never seen and the median fused centre error, whose
+  five-value bootstrap cannot narrow.
+- Alignment: every recorder of every run on t_global; event times within 0.05 s (one radar period) of the truth
+  in all 240 runs; relative clock offsets within 0.05 s.  Every true collision between recorders reconstructed;
+  no fabricated collision once the contact gate is in.
+- Identities: 397/397 decided tracks correct; recorder links 0 wrong in 464 trials (95 % upper bound 0.65 %);
+  67 tracks of a recorder left anonymous, 55 of them in crossing near misses, where the tracker's velocity of a
+  crossing target is about 1 m/s off (twice its declared RMS uncertainty) and the link test refuses them.  An
+  offline what-if testing the velocity separately along the line of sight (Doppler) and across it would recover
+  16 of the 68 with no wrong link: left as an improvement.
+- Road users that recorded nothing: 3 false merges in 503 trials, all in the side-by-side S18 configuration
+  where a recorder's tracker mixes the returns of the two cars 1.4 m apart into one track.  Fused centre error
+  against the single-track nominal box, paired per run: unobserved_cut_in 0.12 m vs 0.51 m (fused better in
+  39/40 runs), crossing 0.54 vs 0.79 m (22/23), side-by-side pair 0.32 vs 0.40 m (36/40), platoon 0.44 vs 0.39 m
+  (19/40: no gain when every observer sees only rear faces).
+- Cost: recording 29-38 s per run (median per sweep), reconstruction 1.7-9.3 s, evaluation 0.1-9.0 s; storage
+  3.15 GB of raw recordings (12.1 MB per run) and 0.28 GB of reconstructions, outside the repository; the
+  canonical traces are regenerated with the final code (substantive outputs unchanged since the start of phase
+  3 except S07 / S08, as intended).
+
+**Regressions.**  Canonical: S07 and S08 change as intended; every other canonical reconstruction is unchanged
+(only configuration keys and evidence text).  Canonical fusion metrics: 42 correct links (was 41), 3 missed
+(was 4), merges unchanged.
+
+**Limitations.**  Borderline outcomes are rare in some families; the S18 sweeps cannot test near misses; the
+recording budget caps N at 40 and several metrics are reported at the precision 40 runs give.
+
+**Commit.**  `phase3: ...` (SHA in the phase 4 section).
+
+**Gate.**  PASS: canonical runs untouched by the sweeps; manifests with provenance; resumable batch with
+failure logging and no overwrite; N chosen from data; outcomes balanced where the scenario allows; the full
+suite passes on both Pythons (464 tests at the end of the program).

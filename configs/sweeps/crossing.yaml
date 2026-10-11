@@ -1,0 +1,22 @@
+sweep:
+  name: crossing
+  scenario: S03
+  base_variant: crash
+  seed: 303
+  description: >
+    A drives straight through a junction; B, on the crossing road, fails to yield and speeds up.  A's
+    speed, B's distance to the junction and B's final speed vary: side impacts, near misses, clear passes.
+  parameters:
+  - path: participants.A.initial_speed
+    low: 8.0
+    high: 12.0
+    decimals: 1
+    also: [participants.A.target_speed]
+  - path: participants.B.spawn.back_m
+    low: 40.0
+    high: 60.0
+    decimals: 1
+  - path: participants.B.actions.B_fail_to_yield.params.target_speed
+    low: 10.0
+    high: 14.0
+    decimals: 1

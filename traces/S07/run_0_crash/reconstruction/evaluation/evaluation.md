@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 1/1; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.05 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 132.152 | 22183.3 | g19 | yes | 0.0 s |
+| A + B | 132.152 | 22183.3 | g25 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -22,20 +22,24 @@ Local time at which each graph reads t_global = 0, against the true local time o
 |-------|--------|-------|------------------:|-------------:|------:|
 | A | ALIGNED | collision_001 | 5.9 | 5.9 | 0.0 s |
 | B | ALIGNED | collision_001 | 5.9 | 5.9 | 0.0 s |
-| C | UNALIGNED | - | - | 5.9 | - s |
+| C | ALIGNED | - | 5.95 | 5.9 | 0.05 s |
 
 Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
+Relative clock offset C - A: estimated +0.050 s, true +0.000 s (error +0.050 s).
+
+Relative clock offset C - B: estimated +0.050 s, true +0.000 s (error +0.050 s).
+
 ## Global event times
 
-23 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 229/229 pairs.
+29 timed global nodes; max |t_global - true global time| = 0.05 s; event order agrees with the truth for 365/365 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | B | B | correct | 136 | 0.186 / 0.178 m | 1.935 m | 1.727 / 0.075 m/s |
-| B:track_001 | U1 | C | left anonymous (true identity C) | 136 | 0.449 / 0.438 m | 1.96 m | 2.193 / 0.071 m/s |
+| B:track_001 | C | C | correct | 136 | 0.449 / 0.438 m | 1.96 m | 2.193 / 0.071 m/s |
 
 ## Clearance at the true contacts
 
@@ -50,4 +54,4 @@ Surface distance = distance from a track point to the outline of the true vehicl
 
 ## Clock-shift check (uses no ground truth)
 
-Recorder C was rebuilt with its local clock reading +0.73 s later (its collision is then at local time -), and alignment and fusion were rerun. Global graph identical: **yes**. C's offset_to_global changed by - s (expected -0.73 s).
+Recorder C was rebuilt with its local clock reading +0.73 s later (its collision is then at local time -), and alignment and fusion were rerun. Global graph identical: **yes**. C's offset_to_global changed by -0.73 s (expected -0.73 s).

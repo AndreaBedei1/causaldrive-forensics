@@ -113,15 +113,15 @@
  },
  "pooled_track_errors": {
   "centre_error_m": {
-   "iqr": 0.1382,
-   "max": 0.7119,
+   "iqr": 0.1388,
+   "max": 0.7124,
    "mean": 0.5598,
-   "median": 0.5454,
+   "median": 0.5461,
    "n": 120,
-   "p90": 0.6803,
-   "p95": 0.6939,
+   "p90": 0.6808,
+   "p95": 0.6934,
    "q25": 0.5227,
-   "q75": 0.661
+   "q75": 0.6615
   },
   "heading_error_deg": {
    "iqr": 0.2128,
@@ -169,20 +169,20 @@
   }
  },
  "privileged": "ground truth used for evaluation only",
- "reconstruction_commit": "215170a1d7f1a87cc455eb85d718183c1fcee7b9",
+ "reconstruction_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
  "run": "S01/run_0_crash",
  "tracks": [
   {
    "centre_error_m": {
-    "iqr": 0.1382,
-    "max": 0.7119,
+    "iqr": 0.1388,
+    "max": 0.7124,
     "mean": 0.5598,
-    "median": 0.5454,
+    "median": 0.5461,
     "n": 120,
-    "p90": 0.6803,
-    "p95": 0.6939,
+    "p90": 0.6808,
+    "p95": 0.6934,
     "q25": 0.5227,
-    "q75": 0.661
+    "q75": 0.6615
    },
    "heading_error_deg": {
     "iqr": 0.2128,

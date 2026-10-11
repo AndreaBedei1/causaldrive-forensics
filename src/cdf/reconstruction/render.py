@@ -532,6 +532,9 @@ def _road_user_lines(road_users: Optional[Mapping[str, Any]]) -> List[str]:
         return ["Not computed."]
     lines = []
     for item in road_users.get("observed_alignment", []):
+        if item.get("method") == "reference_recorder":
+            lines.append("- No matched collision: {0}'s own clock defines t_global.".format(item["recorder"]))
+            continue
         lines.append("- Observed-trajectory alignment of {0}: {1} (offset {2}, pooled median {3} sigma{4}){5}.".format(
             item["recorder"], "accepted" if item["accepted"] else "refused", _cell(item.get("offset_to_global")),
             _cell(item.get("median_distance_sigma")),

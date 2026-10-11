@@ -26,9 +26,9 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 4243.51 vs 4243.51 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance
+Matched `collision_001`: A and B both recorded a collision; peak impulses 4243.51 vs 4243.51 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
 
-Matched `collision_002`: A and C both recorded a collision; peak impulses 322.1 vs 322.1 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance
+Matched `collision_002`: A and C both recorded a collision; peak impulses 322.1 vs 322.1 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)
 
 ## Identity associations
 
@@ -341,6 +341,7 @@ C:
   },
   "fusion": {
     "impulse_tolerance": 0.1,
+    "contact_consistency_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,
@@ -363,7 +364,9 @@ C:
     "box_face_std_m": 0.25,
     "box_length_std_m": 0.7,
     "box_width_std_m": 0.2,
-    "entity_output_rate_hz": 10.0
+    "entity_output_rate_hz": 10.0,
+    "mutual_refinement": false,
+    "mutual_refinement_iterations": 3
   }
 }
 ```

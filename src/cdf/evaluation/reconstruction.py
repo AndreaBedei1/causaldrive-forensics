@@ -198,6 +198,17 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
         candidates = [c for c in contacts if c["participants"] == sorted(reference_node["participants"])]
         if candidates:
             reference_truth = min(candidates, key=lambda c: abs(c["sim_time"] - reported_at))
+    # Simulator time of the true t_global = 0: the true contact behind the reference collision node or,
+    # when no collision was matched (a near miss), the reference recorder's own clock origin (its clock is
+    # the global one by definition); None when nothing is on a global clock.
+    reference_recorder = next((name for name in recorders
+                               if alignment["graphs"][name].get("method") == "reference_recorder"), None)
+    if reference_truth is not None:
+        zero_sim: Optional[float] = reference_truth["sim_time"]
+    elif reference_recorder is not None:
+        zero_sim = origins[reference_recorder]
+    else:
+        zero_sim = None
 
     # 1. Collisions: each true contact against the COLLISION node of the same participants
     #    reported closest to it (within TRUTH_CONTACT_GAP_S); every node is used once.
@@ -229,7 +240,7 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     alignment_rows = []
     for name in recorders:
         clock = alignment["graphs"][name]
-        true_reference = None if reference_truth is None else round(reference_truth["sim_time"] - origins[name], 4)
+        true_reference = None if zero_sim is None else round(zero_sim - origins[name], 4)
         estimated = None if clock["offset_to_global"] is None else round(-clock["offset_to_global"], 4)
         error = None if estimated is None or true_reference is None else round(estimated - true_reference, 4)
         alignment_rows.append({"graph": name, "status": clock["status"], "method": clock.get("method"),
@@ -247,12 +258,12 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     timed = [node for node in graph["nodes"] if node["t_global"] is not None]
     time_errors = []
     true_times = []
-    for node in timed:
+    for node in timed if zero_sim is not None else []:
         observation = node["observations"][0]
-        true_global = (observation["t_local"] + origins[observation["graph"]]
-                       - (reference_truth["sim_time"] if reference_truth else 0.0))
+        true_global = observation["t_local"] + origins[observation["graph"]] - zero_sim
         true_times.append(true_global)
         time_errors.append(node["t_global"] - true_global)
+    timed = timed if zero_sim is not None else []
     concordant = total = 0
     for i in range(len(timed)):
         for j in range(i + 1, len(timed)):

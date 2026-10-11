@@ -62,4 +62,4 @@ Calibration of pos_std_m over 24 states: within 1/2/3 sigma 0.792/0.958/0.958 (G
 
 | Recorder | Accepted | Estimated offset | True offset | Error | Interval |
 |----------|----------|-----------------:|------------:|------:|----------|
-| C | True | -4.100 | -4.100 | 0.000 | [-4.2, -3.75] |
+| C | True | -4.100 | -4.100 | 0.000 | [-4.2, -4.0] |

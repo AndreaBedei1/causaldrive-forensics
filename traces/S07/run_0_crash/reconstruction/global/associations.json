@@ -25,11 +25,11 @@
   {
     "local_graph": "B",
     "local_track": "track_001",
-    "global_entity": "U1",
-    "status": "ANONYMOUS",
-    "confidence": null,
-    "candidate": "A",
-    "collision_event": "collision_001",
+    "global_entity": "C",
+    "status": "ASSOCIATED",
+    "confidence": 0.996,
+    "candidate": "C",
+    "collision_event": null,
     "evidence": [
       "B and A both reported collision_001 (peak impulse 22183.35 vs 22183.35 N*s)",
       "tracked for 5.90 s before the matched collision",
@@ -37,14 +37,13 @@
       "approaching before the contact: clearance 14.2 m -> 14.1 m over the last 1.0 s",
       "track speed disagrees with A's own speed: RMSE 9.87 m/s over 3.0 s (> 1.50)",
       "clearance at the contact 14.08 m (beyond 3.50 m: confidence factor 0.00)",
-      "anonymous road user U1: B:track_001"
+      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 272 samples; 100% within 3 sigma) at C's own velocity (median difference 0.05 m/s)"
     ],
-    "blocking": [
-      "track speed disagrees with A's own speed: RMSE 9.87 m/s over 3.0 s (> 1.50)"
-    ],
+    "blocking": [],
     "source_graphs": [
+      "A",
       "B",
-      "A"
+      "C"
     ]
   }
 ]

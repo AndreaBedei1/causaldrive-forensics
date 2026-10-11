@@ -197,6 +197,10 @@ class FusionConfig:
     # Two collision reports are the same contact if their peak impulses differ
     # by at most this fraction (equal and opposite impulses).
     impulse_tolerance: float = 0.10
+    # A match must also put the two recorders in contact: their footprints, each at its own report time and
+    # from its own pose stream, at most this far apart plus 3 sigma of the two pose sources' declared position
+    # accuracy (two single-vehicle contacts with similar impulses, far apart, are not one contact).
+    contact_consistency_m: float = 1.0
     # A match also fixes the clock offset between its two graphs: a further
     # match between graphs already linked (directly or through other matches)
     # must imply the same offset within this (two sensor samples at 20 Hz).
@@ -255,6 +259,11 @@ class FusionConfig:
     box_width_std_m: float = 0.2
     # Rate of the fused trajectories written to global/anonymous_entities.json.
     entity_output_rate_hz: float = 10.0
+    # Mutual refinement of the pose sources (off by default): the recorders' observations of each other
+    # (tracks identified with a recorder) give their relative position offsets, removed before the
+    # road-user fusion is redone; iterations of the estimate.
+    mutual_refinement: bool = False
+    mutual_refinement_iterations: int = 3
 
 
 @dataclass

@@ -17,246 +17,32 @@
     },
     {
       "track": "B:track_001",
-      "decision": "U1",
-      "status": "ANONYMOUS",
-      "by": null,
+      "decision": "C",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
       "true_identity": "C",
       "purity": 1.0,
-      "verdict": "missed link (true identity C)"
+      "verdict": "correct link"
     }
   ],
   "decision_counts": {
-    "correct link": 1,
-    "missed link": 1
+    "correct link": 2
   },
-  "entities": [
-    {
-      "id": "U1",
-      "source_tracks": [
-        "B:track_001"
-      ],
-      "observers": [
-        "B"
-      ],
-      "true_identity": "C",
-      "identity_is_recorder": true,
-      "purity": 1.0,
-      "track_identities": {
-        "B:track_001": "C"
-      }
-    }
-  ],
+  "entities": [],
   "merges": {
     "correct": 0,
     "false": 0,
     "missed": 0
   },
-  "fragmentation": {
-    "C": [
-      "U1"
-    ]
-  },
-  "state_errors": {
-    "centre_error_m": {
-      "n": 137,
-      "median": 0.2781,
-      "q25": 0.2463,
-      "q75": 0.351,
-      "p90": 0.5259,
-      "p95": 0.6941,
-      "max": 1.4836,
-      "mean": 0.3372,
-      "iqr": 0.1048
-    },
-    "coverage_s": {
-      "n": 1,
-      "median": 13.65,
-      "q25": 13.65,
-      "q75": 13.65,
-      "p90": 13.65,
-      "p95": 13.65,
-      "max": 13.65,
-      "mean": 13.65,
-      "iqr": 0.0
-    },
-    "heading_error_deg": {
-      "n": 43,
-      "median": 0.1269,
-      "q25": 0.0717,
-      "q75": 0.2719,
-      "p90": 0.3872,
-      "p95": 0.5279,
-      "max": 0.747,
-      "mean": 0.1862,
-      "iqr": 0.2002
-    },
-    "length_error_m": {
-      "n": 1,
-      "median": 0.192,
-      "q25": 0.192,
-      "q75": 0.192,
-      "p90": 0.192,
-      "p95": 0.192,
-      "max": 0.192,
-      "mean": 0.192,
-      "iqr": 0.0
-    },
-    "normalised_centre_error": {
-      "n": 137,
-      "median": 0.5071,
-      "q25": 0.4476,
-      "q75": 0.639,
-      "p90": 0.9055,
-      "p95": 1.3804,
-      "max": 2.7562,
-      "mean": 0.6086,
-      "iqr": 0.1915
-    },
-    "single_track_nominal_centre_error_m": {
-      "n": 137,
-      "median": 0.2137,
-      "q25": 0.1701,
-      "q75": 0.282,
-      "p90": 0.3141,
-      "p95": 0.3433,
-      "max": 0.3798,
-      "mean": 0.2183,
-      "iqr": 0.1119
-    },
-    "speed_error_mps": {
-      "n": 137,
-      "median": 0.0436,
-      "q25": 0.0262,
-      "q75": 0.061,
-      "p90": 0.1,
-      "p95": 0.1252,
-      "max": 0.4055,
-      "mean": 0.0528,
-      "iqr": 0.0348
-    },
-    "velocity_error_mps": {
-      "n": 137,
-      "median": 0.0531,
-      "q25": 0.0316,
-      "q75": 0.0699,
-      "p90": 0.1101,
-      "p95": 0.1275,
-      "max": 0.4097,
-      "mean": 0.059,
-      "iqr": 0.0383
-    },
-    "width_error_m": {
-      "n": 1,
-      "median": 0.263,
-      "q25": 0.263,
-      "q75": 0.263,
-      "p90": 0.263,
-      "p95": 0.263,
-      "max": 0.263,
-      "mean": 0.263,
-      "iqr": 0.0
-    }
-  },
-  "state_errors_by_method": {
-    "box_fit": {
-      "centre_error_m": {
-        "n": 3,
-        "median": 0.6468,
-        "q25": 0.6006,
-        "q75": 0.8871,
-        "p90": 1.0312,
-        "p95": 1.0792,
-        "max": 1.1273,
-        "mean": 0.7761,
-        "iqr": 0.2865
-      },
-      "heading_error_deg": {
-        "n": 1,
-        "median": 0.1137,
-        "q25": 0.1137,
-        "q75": 0.1137,
-        "p90": 0.1137,
-        "p95": 0.1137,
-        "max": 0.1137,
-        "mean": 0.1137,
-        "iqr": 0.0
-      },
-      "speed_error_mps": {
-        "n": 3,
-        "median": 0.032,
-        "q25": 0.0292,
-        "q75": 0.0356,
-        "p90": 0.0378,
-        "p95": 0.0386,
-        "max": 0.0393,
-        "mean": 0.0325,
-        "iqr": 0.0065
-      },
-      "velocity_error_mps": {
-        "n": 3,
-        "median": 0.0331,
-        "q25": 0.0326,
-        "q75": 0.0362,
-        "p90": 0.038,
-        "p95": 0.0387,
-        "max": 0.0393,
-        "mean": 0.0348,
-        "iqr": 0.0036
-      }
-    },
-    "covariance_intersection": {
-      "centre_error_m": {
-        "n": 134,
-        "median": 0.2776,
-        "q25": 0.2455,
-        "q75": 0.3452,
-        "p90": 0.4665,
-        "p95": 0.5969,
-        "max": 1.4836,
-        "mean": 0.3274,
-        "iqr": 0.0997
-      },
-      "heading_error_deg": {
-        "n": 42,
-        "median": 0.1298,
-        "q25": 0.0716,
-        "q75": 0.2733,
-        "p90": 0.3902,
-        "p95": 0.5284,
-        "max": 0.747,
-        "mean": 0.188,
-        "iqr": 0.2017
-      },
-      "speed_error_mps": {
-        "n": 134,
-        "median": 0.0443,
-        "q25": 0.0258,
-        "q75": 0.0611,
-        "p90": 0.1005,
-        "p95": 0.1255,
-        "max": 0.4055,
-        "mean": 0.0533,
-        "iqr": 0.0352
-      },
-      "velocity_error_mps": {
-        "n": 134,
-        "median": 0.0546,
-        "q25": 0.0301,
-        "q75": 0.0702,
-        "p90": 0.1101,
-        "p95": 0.1278,
-        "max": 0.4097,
-        "mean": 0.0596,
-        "iqr": 0.0401
-      }
-    }
-  },
+  "fragmentation": {},
+  "state_errors": {},
+  "state_errors_by_method": {},
   "calibration": {
-    "states": 137,
+    "states": 0,
     "observed_within": {
-      "1_sigma": 0.92,
-      "2_sigma": 0.993,
-      "3_sigma": 1.0
+      "1_sigma": 0.0,
+      "2_sigma": 0.0,
+      "3_sigma": 0.0
     },
     "expected_within_gaussian": {
       "1_sigma": 0.393,
@@ -264,69 +50,11 @@
       "3_sigma": 0.989
     }
   },
-  "entity_errors": [
-    {
-      "id": "U1",
-      "true_identity": "C",
-      "coverage_s": 13.65,
-      "states": 137,
-      "impure_states": 0,
-      "centre_error_m": {
-        "n": 137,
-        "median": 0.2781,
-        "q25": 0.2463,
-        "q75": 0.351,
-        "p90": 0.5259,
-        "p95": 0.6941,
-        "max": 1.4836,
-        "mean": 0.3372,
-        "iqr": 0.1048
-      },
-      "velocity_error_mps": {
-        "n": 137,
-        "median": 0.0531,
-        "q25": 0.0316,
-        "q75": 0.0699,
-        "p90": 0.1101,
-        "p95": 0.1275,
-        "max": 0.4097,
-        "mean": 0.059,
-        "iqr": 0.0383
-      },
-      "speed_error_mps": {
-        "n": 137,
-        "median": 0.0436,
-        "q25": 0.0262,
-        "q75": 0.061,
-        "p90": 0.1,
-        "p95": 0.1252,
-        "max": 0.4055,
-        "mean": 0.0528,
-        "iqr": 0.0348
-      },
-      "heading_error_deg": {
-        "n": 43,
-        "median": 0.1269,
-        "q25": 0.0717,
-        "q75": 0.2719,
-        "p90": 0.3872,
-        "p95": 0.5279,
-        "max": 0.747,
-        "mean": 0.1862,
-        "iqr": 0.2002
-      },
-      "length_error_m": -0.192,
-      "width_error_m": -0.263,
-      "length_source": "prior",
-      "width_source": "prior",
-      "true_length_m": 4.792,
-      "true_width_m": 2.163
-    }
-  ],
+  "entity_errors": [],
   "observed_alignment": [
     {
       "recorder": "C",
-      "accepted": false,
+      "accepted": true,
       "estimated_offset_s": -5.95,
       "true_offset_s": -5.9,
       "error_s": -0.05,
@@ -334,9 +62,9 @@
         -5.95,
         -5.9
       ],
-      "status": "UNALIGNED"
+      "status": "ALIGNED"
     }
   ],
-  "states_compared": 137,
+  "states_compared": 0,
   "impure_states": 0
 }

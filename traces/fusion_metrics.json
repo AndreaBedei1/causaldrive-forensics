@@ -1,10 +1,10 @@
 {
   "definition": "road-user fusion against ground truth: identity decisions of the aligned recorders' tracks, merges over pairs of anonymous tracks, fragmentation of each true road user over anonymous entities, pooled fused-state errors against the entity's majority identity, observed-trajectory alignments",
   "provenance": {
-    "git_commit": "c79b1e627cbfaa5c042749291876597e922509f7",
+    "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
     "git_dirty": true,
-    "code_sha256": "1c410466c184df92496f94e6d3383798296759c21788f388d823436f27a0cadb",
-    "config_sha256": "87109d249a009c15ac4c0aad3cfe9c7a9d02d434b84b9b34e9b7514ca85253b9",
+    "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+    "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
     "runs": [
       "S01/run_0_crash",
       "S02/run_0_crash",
@@ -26,245 +26,245 @@
     ],
     "perturbation_profile": null,
     "seed": null,
-    "generated_utc": "2026-10-10T21:47:54Z",
+    "generated_utc": "2026-10-11T03:24:28Z",
     "python": "3.14.2"
   },
   "decision_counts": {
     "anonymous": 22,
-    "correct link": 41,
-    "missed link": 4
+    "correct link": 42,
+    "missed link": 3
   },
   "merges": {
     "correct": 15,
     "false": 0,
     "missed": 10
   },
-  "entities": 15,
+  "entities": 14,
   "entity_purity": {
-    "n": 15,
+    "n": 14,
     "median": 1.0,
-    "q25": 0.874,
+    "q25": 0.817,
     "q75": 1.0,
     "p90": 1.0,
     "p95": 1.0,
     "max": 1.0,
-    "mean": 0.9174,
-    "iqr": 0.126
+    "mean": 0.9115,
+    "iqr": 0.183
   },
   "entities_per_true_road_user": {
-    "n": 11,
+    "n": 10,
     "median": 1.0,
     "q25": 1.0,
     "q75": 2.0,
     "p90": 2.0,
     "p95": 2.0,
     "max": 2.0,
-    "mean": 1.3636,
+    "mean": 1.4,
     "iqr": 1.0
   },
-  "states_compared": 1062,
+  "states_compared": 925,
   "impure_states": 107,
   "pooled_state_errors": {
     "centre_error_m": {
-      "n": 1062,
-      "median": 0.3917,
-      "q25": 0.2403,
-      "q75": 0.7813,
-      "p90": 1.417,
-      "p95": 1.5145,
+      "n": 925,
+      "median": 0.4467,
+      "q25": 0.2362,
+      "q75": 0.8456,
+      "p90": 1.456,
+      "p95": 1.5252,
       "max": 6.588,
-      "mean": 0.6112,
-      "iqr": 0.541
+      "mean": 0.6518,
+      "iqr": 0.6094
     },
     "coverage_s": {
-      "n": 15,
+      "n": 14,
       "median": 8.95,
-      "q25": 4.15,
-      "q75": 10.325,
-      "p90": 11.55,
-      "p95": 12.67,
-      "max": 13.65,
-      "mean": 7.7333,
-      "iqr": 6.175
+      "q25": 3.925,
+      "q75": 10.2,
+      "p90": 10.485,
+      "p95": 11.1125,
+      "max": 12.25,
+      "mean": 7.3107,
+      "iqr": 6.275
     },
     "heading_error_deg": {
-      "n": 878,
-      "median": 0.5339,
-      "q25": 0.2529,
-      "q75": 1.046,
-      "p90": 1.7978,
-      "p95": 2.799,
+      "n": 835,
+      "median": 0.572,
+      "q25": 0.2872,
+      "q75": 1.0677,
+      "p90": 1.8304,
+      "p95": 3.0528,
       "max": 176.7686,
-      "mean": 1.7041,
-      "iqr": 0.7931
+      "mean": 1.7823,
+      "iqr": 0.7805
     },
     "length_error_m": {
-      "n": 15,
+      "n": 14,
       "median": 0.192,
-      "q25": 0.139,
+      "q25": 0.1125,
       "q75": 0.192,
-      "p90": 0.3282,
-      "p95": 0.6878,
+      "p90": 0.3509,
+      "p95": 0.7326,
       "max": 1.315,
-      "mean": 0.2537,
-      "iqr": 0.053
+      "mean": 0.2581,
+      "iqr": 0.0795
     },
     "normalised_centre_error": {
-      "n": 1062,
-      "median": 0.829,
-      "q25": 0.479,
-      "q75": 1.2281,
-      "p90": 1.8456,
-      "p95": 2.282,
+      "n": 925,
+      "median": 0.925,
+      "q25": 0.5065,
+      "q75": 1.3033,
+      "p90": 1.9526,
+      "p95": 2.5912,
       "max": 16.1075,
-      "mean": 1.0612,
-      "iqr": 0.7491
+      "mean": 1.1282,
+      "iqr": 0.7968
     },
     "single_track_nominal_centre_error_m": {
-      "n": 1539,
-      "median": 0.5714,
-      "q25": 0.3059,
-      "q75": 1.0824,
-      "p90": 3.372,
-      "p95": 3.5281,
+      "n": 1402,
+      "median": 0.6177,
+      "q25": 0.3366,
+      "q75": 1.2163,
+      "p90": 3.434,
+      "p95": 3.5346,
       "max": 5.2831,
-      "mean": 0.9495,
-      "iqr": 0.7765
+      "mean": 1.0209,
+      "iqr": 0.8797
     },
     "speed_error_mps": {
-      "n": 1062,
-      "median": 0.0486,
-      "q25": 0.0226,
-      "q75": 0.0967,
-      "p90": 0.1659,
-      "p95": 0.2699,
+      "n": 925,
+      "median": 0.0506,
+      "q25": 0.0221,
+      "q75": 0.1028,
+      "p90": 0.1819,
+      "p95": 0.2814,
       "max": 4.4724,
-      "mean": 0.1112,
-      "iqr": 0.0742
+      "mean": 0.1198,
+      "iqr": 0.0807
     },
     "velocity_error_mps": {
-      "n": 1062,
-      "median": 0.1191,
-      "q25": 0.0641,
-      "q75": 0.2328,
-      "p90": 0.3997,
-      "p95": 0.6855,
+      "n": 925,
+      "median": 0.1423,
+      "q25": 0.0777,
+      "q75": 0.25,
+      "p90": 0.4302,
+      "p95": 0.8258,
       "max": 10.3575,
-      "mean": 0.2675,
-      "iqr": 0.1686
+      "mean": 0.2983,
+      "iqr": 0.1723
     },
     "width_error_m": {
-      "n": 15,
+      "n": 14,
       "median": 0.263,
       "q25": 0.107,
       "q75": 0.263,
       "p90": 0.263,
       "p95": 0.263,
       "max": 0.263,
-      "mean": 0.1985,
+      "mean": 0.1939,
       "iqr": 0.156
     }
   },
   "pooled_state_errors_by_method": {
     "box_fit": {
       "centre_error_m": {
-        "n": 393,
-        "median": 0.2715,
+        "n": 390,
+        "median": 0.271,
         "q25": 0.1416,
-        "q75": 0.3853,
-        "p90": 0.6672,
-        "p95": 1.0377,
+        "q75": 0.3797,
+        "p90": 0.665,
+        "p95": 1.0067,
         "max": 6.588,
-        "mean": 0.352,
-        "iqr": 0.2437
+        "mean": 0.3488,
+        "iqr": 0.2381
       },
       "heading_error_deg": {
-        "n": 375,
-        "median": 0.5911,
-        "q25": 0.288,
-        "q75": 1.0678,
-        "p90": 1.6782,
-        "p95": 2.4541,
+        "n": 374,
+        "median": 0.5987,
+        "q25": 0.2892,
+        "q75": 1.0685,
+        "p90": 1.6796,
+        "p95": 2.4602,
         "max": 158.5763,
-        "mean": 1.501,
-        "iqr": 0.7798
+        "mean": 1.5047,
+        "iqr": 0.7793
       },
       "speed_error_mps": {
-        "n": 393,
-        "median": 0.0517,
-        "q25": 0.023,
-        "q75": 0.1127,
-        "p90": 0.2461,
-        "p95": 0.3933,
+        "n": 390,
+        "median": 0.0524,
+        "q25": 0.0229,
+        "q75": 0.1128,
+        "p90": 0.2476,
+        "p95": 0.4017,
         "max": 4.4724,
-        "mean": 0.1359,
-        "iqr": 0.0897
+        "mean": 0.1367,
+        "iqr": 0.0898
       },
       "velocity_error_mps": {
-        "n": 393,
-        "median": 0.1462,
-        "q25": 0.0799,
-        "q75": 0.2575,
-        "p90": 0.3893,
-        "p95": 1.0555,
+        "n": 390,
+        "median": 0.1475,
+        "q25": 0.0805,
+        "q75": 0.258,
+        "p90": 0.3904,
+        "p95": 1.0773,
         "max": 10.3575,
-        "mean": 0.3167,
-        "iqr": 0.1776
+        "mean": 0.3188,
+        "iqr": 0.1775
       }
     },
     "covariance_intersection": {
       "centre_error_m": {
-        "n": 669,
-        "median": 0.5667,
-        "q25": 0.2972,
-        "q75": 0.9718,
-        "p90": 1.487,
-        "p95": 1.5581,
+        "n": 535,
+        "median": 0.6755,
+        "q25": 0.4167,
+        "q75": 1.1347,
+        "p90": 1.5054,
+        "p95": 2.118,
         "max": 4.0362,
-        "mean": 0.7635,
-        "iqr": 0.6747
+        "mean": 0.8727,
+        "iqr": 0.718
       },
       "heading_error_deg": {
-        "n": 503,
-        "median": 0.483,
-        "q25": 0.2301,
-        "q75": 1.0336,
-        "p90": 1.88,
-        "p95": 3.1043,
+        "n": 461,
+        "median": 0.5511,
+        "q25": 0.2808,
+        "q75": 1.0649,
+        "p90": 2.0131,
+        "p95": 3.2534,
         "max": 176.7686,
-        "mean": 1.8556,
-        "iqr": 0.8035
+        "mean": 2.0075,
+        "iqr": 0.7841
       },
       "speed_error_mps": {
-        "n": 669,
-        "median": 0.0484,
-        "q25": 0.0222,
-        "q75": 0.0907,
-        "p90": 0.1541,
-        "p95": 0.21,
+        "n": 535,
+        "median": 0.0499,
+        "q25": 0.0206,
+        "q75": 0.0966,
+        "p90": 0.1651,
+        "p95": 0.2442,
         "max": 3.828,
-        "mean": 0.0967,
-        "iqr": 0.0685
+        "mean": 0.1076,
+        "iqr": 0.076
       },
       "velocity_error_mps": {
-        "n": 669,
-        "median": 0.109,
-        "q25": 0.0575,
-        "q75": 0.2196,
-        "p90": 0.4028,
-        "p95": 0.5545,
+        "n": 535,
+        "median": 0.1363,
+        "q25": 0.075,
+        "q75": 0.2415,
+        "p90": 0.4414,
+        "p95": 0.7898,
         "max": 8.7357,
-        "mean": 0.2386,
-        "iqr": 0.1622
+        "mean": 0.2834,
+        "iqr": 0.1665
       }
     }
   },
   "calibration": {
-    "states": 1062,
+    "states": 925,
     "observed_within": {
-      "1_sigma": 0.595,
-      "2_sigma": 0.919,
-      "3_sigma": 0.968
+      "1_sigma": 0.547,
+      "2_sigma": 0.908,
+      "3_sigma": 0.963
     },
     "expected_within_gaussian": {
       "1_sigma": 0.393,
@@ -275,7 +275,7 @@
   "observed_alignment": [
     {
       "recorder": "C",
-      "accepted": false,
+      "accepted": true,
       "estimated_offset_s": -5.95,
       "true_offset_s": -5.9,
       "error_s": -0.05,
@@ -283,7 +283,7 @@
         -5.95,
         -5.9
       ],
-      "status": "UNALIGNED",
+      "status": "ALIGNED",
       "run": "S07/run_0_crash"
     },
     {
@@ -294,7 +294,7 @@
       "error_s": 0.0,
       "interval": [
         -4.2,
-        -3.75
+        -4.0
       ],
       "status": "ALIGNED",
       "run": "S08/run_0_crash"
@@ -400,23 +400,18 @@
     {
       "run": "S07/run_0_crash",
       "decision_counts": {
-        "correct link": 1,
-        "missed link": 1
+        "correct link": 2
       },
       "merges": {
         "correct": 0,
         "false": 0,
         "missed": 0
       },
-      "entities": 1,
-      "false_entities_of_recorders": 1,
-      "fragmentation": {
-        "C": [
-          "U1"
-        ]
-      },
-      "centre_error_median_m": 0.2781,
-      "single_track_centre_error_median_m": 0.2137
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
     },
     {
       "run": "S08/run_0_crash",

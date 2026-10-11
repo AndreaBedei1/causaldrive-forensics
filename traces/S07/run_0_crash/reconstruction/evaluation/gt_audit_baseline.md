@@ -33,9 +33,9 @@ Reconstruction result vs ground truth; the reconstruction never reads these file
 
 ## Collisions and associations (from evaluation.json)
 
-- {"participants": ["A", "B"], "participants_correct": true, "peak_impulse": 22183.348832025982, "reconstructed_as": "g19", "report_timing_error_s": 0.0, "sim_time": 132.15217785164714}
+- {"participants": ["A", "B"], "participants_correct": true, "peak_impulse": 22183.348832025982, "reconstructed_as": "g25", "report_timing_error_s": 0.0, "sim_time": 132.15217785164714}
 - extra reconstructed collisions: 0
 - A:track_001: B (ASSOCIATED), true identity B
-- B:track_001: B:track_001 (ANONYMOUS), true identity C
+- B:track_001: C (ASSOCIATED), true identity C
 
-Reconstruction commit: `215170a1d7f1a87cc455eb85d718183c1fcee7b9`.
+Reconstruction commit: `c80eab47ec83dcc66909751b0514f1bcb4d5066e`.

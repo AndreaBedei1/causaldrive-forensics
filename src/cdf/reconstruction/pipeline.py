@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .alignment import align_graphs
 from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
-from .common_frame import PoseSource, RecordedPoseSource
+from .common_frame import PoseSource, RecordedPoseSource, contact_check
 from .config import ReconstructionConfig, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .local import LocalReconstruction, reconstruct_vehicle
@@ -92,13 +92,17 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
     """The cross-recorder steps on finished local reconstructions: alignment, identity association,
     road users in the common frame, global graph (nothing is written)."""
     pose_factory = pose_factory or RecordedPoseSource.from_vehicle_dir
-    alignment = align_graphs([local.graph for local in locals_], cfg.fusion)
+    poses = {local.owner: pose_factory(Path(run_dir) / "vehicles" / local.owner, local.clock_origin)
+             for local in locals_}
+    # Matched collisions, each checked against the recorders' own pose streams (the two bodies must touch).
+    alignment = align_graphs([local.graph for local in locals_], cfg.fusion,
+                             contact_check(poses, {local.owner: local.footprint for local in locals_},
+                                           cfg.fusion.contact_consistency_m))
     associations = associate_tracks(locals_, alignment, cfg.fusion)
     # A recorder no matched collision aligned: the clock offset its observed trajectory fixes, if unique,
     # in the common frame of the recorders' own pose streams (then the association is redone).
-    poses = {local.owner: pose_factory(Path(run_dir) / "vehicles" / local.owner, local.clock_origin)
-             for local in locals_}
-    if any(item["accepted"] for item in align_by_observations(locals_, alignment, associations, poses, cfg)):
+    align_by_observations(locals_, alignment, associations, poses, cfg)
+    if alignment.observed:
         associations = associate_tracks(locals_, alignment, cfg.fusion)
     # Anonymous tracks that are recorders, and the road users that recorded nothing (U1, U2, ...).
     road_users = fuse_road_users(locals_, alignment, associations, poses, cfg)

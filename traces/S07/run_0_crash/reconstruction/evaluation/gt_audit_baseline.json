@@ -18,7 +18,7 @@
    "verdict": "correct"
   },
   {
-   "decision": "B:track_001",
+   "decision": "C",
    "median_box_distance_m": {
     "A": 18.45,
     "C": 0.0
@@ -29,10 +29,10 @@
    "smoothed_rmse_to_centre_m": 1.96,
    "smoothed_rmse_to_surface_m": 0.438,
    "speed_rmse_mps": 0.071,
-   "status": "ANONYMOUS",
+   "status": "ASSOCIATED",
    "track": "B:track_001",
    "true_identity": "C",
-   "verdict": "left anonymous (true identity C)"
+   "verdict": "correct"
   }
  ],
  "collisions": [
@@ -43,7 +43,7 @@
    ],
    "participants_correct": true,
    "peak_impulse": 22183.348832025982,
-   "reconstructed_as": "g19",
+   "reconstructed_as": "g25",
    "report_timing_error_s": 0.0,
    "sim_time": 132.15217785164714
   }
@@ -80,80 +80,80 @@
  ],
  "cut_in_starts": [],
  "event_timing": {
-  "max_abs_error_s": 0.0,
-  "nodes": 23,
-  "order_concordant": 229,
-  "order_pairs": 229
+  "max_abs_error_s": 0.05,
+  "nodes": 29,
+  "order_concordant": 365,
+  "order_pairs": 365
  },
  "extra_collisions": [],
  "pooled_anonymous_track_errors": {
   "centre_error_m": {
-   "iqr": 0.1116,
-   "max": 0.3798,
-   "mean": 0.2183,
-   "median": 0.2139,
-   "n": 137,
-   "p90": 0.3143,
-   "p95": 0.3432,
-   "q25": 0.1701,
-   "q75": 0.2817
+   "iqr": null,
+   "max": null,
+   "mean": null,
+   "median": null,
+   "n": 0,
+   "p90": null,
+   "p95": null,
+   "q25": null,
+   "q75": null
   },
   "heading_error_deg": {
-   "iqr": 0.2016,
-   "max": 0.7441,
-   "mean": 0.1869,
-   "median": 0.1269,
-   "n": 43,
-   "p90": 0.3826,
-   "p95": 0.5344,
-   "q25": 0.0708,
-   "q75": 0.2724
+   "iqr": null,
+   "max": null,
+   "mean": null,
+   "median": null,
+   "n": 0,
+   "p90": null,
+   "p95": null,
+   "q25": null,
+   "q75": null
   },
   "speed_error_mps": {
-   "iqr": 0.0346,
-   "max": 0.4046,
-   "mean": 0.0528,
-   "median": 0.0435,
-   "n": 137,
-   "p90": 0.1,
-   "p95": 0.1245,
-   "q25": 0.0263,
-   "q75": 0.061
+   "iqr": null,
+   "max": null,
+   "mean": null,
+   "median": null,
+   "n": 0,
+   "p90": null,
+   "p95": null,
+   "q25": null,
+   "q75": null
   },
   "surface_error_m": {
-   "iqr": 0.083,
-   "max": 0.5176,
-   "mean": 0.437,
-   "median": 0.4179,
-   "n": 137,
-   "p90": 0.4975,
-   "p95": 0.5089,
-   "q25": 0.4009,
-   "q75": 0.4839
+   "iqr": null,
+   "max": null,
+   "mean": null,
+   "median": null,
+   "n": 0,
+   "p90": null,
+   "p95": null,
+   "q25": null,
+   "q75": null
   },
   "velocity_error_mps": {
-   "iqr": 0.0383,
-   "max": 0.4088,
-   "mean": 0.059,
-   "median": 0.0531,
-   "n": 137,
-   "p90": 0.1101,
-   "p95": 0.1275,
-   "q25": 0.0316,
-   "q75": 0.0699
+   "iqr": null,
+   "max": null,
+   "mean": null,
+   "median": null,
+   "n": 0,
+   "p90": null,
+   "p95": null,
+   "q25": null,
+   "q75": null
   }
  },
  "pooled_track_errors": {
   "centre_error_m": {
-   "iqr": 0.121,
-   "max": 0.4858,
+   "iqr": 0.1214,
+   "max": 0.4856,
    "mean": 0.2854,
-   "median": 0.2936,
+   "median": 0.2935,
    "n": 274,
    "p90": 0.4184,
-   "p95": 0.4604,
-   "q25": 0.2146,
-   "q75": 0.3357
+   "p95": 0.4603,
+   "q25": 0.2145,
+   "q75": 0.3358
   },
   "heading_error_deg": {
    "iqr": 0.2473,
@@ -201,20 +201,20 @@
   }
  },
  "privileged": "ground truth used for evaluation only",
- "reconstruction_commit": "215170a1d7f1a87cc455eb85d718183c1fcee7b9",
+ "reconstruction_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
  "run": "S07/run_0_crash",
  "tracks": [
   {
    "centre_error_m": {
-    "iqr": 0.1162,
-    "max": 0.4858,
+    "iqr": 0.1165,
+    "max": 0.4856,
     "mean": 0.3525,
-    "median": 0.3188,
+    "median": 0.3186,
     "n": 137,
-    "p90": 0.4605,
-    "p95": 0.4686,
-    "q25": 0.2948,
-    "q75": 0.411
+    "p90": 0.4604,
+    "p95": 0.4691,
+    "q25": 0.2947,
+    "q75": 0.4112
    },
    "heading_error_deg": {
     "iqr": 0.4848,
@@ -272,15 +272,15 @@
   },
   {
    "centre_error_m": {
-    "iqr": 0.1116,
+    "iqr": 0.1119,
     "max": 0.3798,
     "mean": 0.2183,
-    "median": 0.2139,
+    "median": 0.2137,
     "n": 137,
-    "p90": 0.3143,
-    "p95": 0.3432,
+    "p90": 0.3141,
+    "p95": 0.3433,
     "q25": 0.1701,
-    "q75": 0.2817
+    "q75": 0.282
    },
    "heading_error_deg": {
     "iqr": 0.2016,

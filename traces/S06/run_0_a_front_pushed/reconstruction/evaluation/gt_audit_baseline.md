@@ -40,4 +40,4 @@ Reconstruction result vs ground truth; the reconstruction never reads these file
 - A:track_001: B (ASSOCIATED), true identity B
 - B:track_001: C (ASSOCIATED), true identity C
 
-Reconstruction commit: `215170a1d7f1a87cc455eb85d718183c1fcee7b9`.
+Reconstruction commit: `c80eab47ec83dcc66909751b0514f1bcb4d5066e`.

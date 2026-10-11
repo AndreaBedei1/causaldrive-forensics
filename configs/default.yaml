@@ -25,6 +25,9 @@ simulation:
   launch_throttle: 0.5
   min_spawn_gap_m: 5.0
   max_duration_s: 45.0
+  # Sleep between ticks to play the run at wall-clock speed (someone may be watching).  Synchronous
+  # mode makes the samples independent of it; batches of runs switch it off (scripts/run_sweep.py).
+  real_time_pacing: true
   gpu: auto
   # Rendering quality of the CARLA server.  Not Low: CARLA 0.9.15 in Low mode
   # crashes deterministically in some scenarios (S05, S08, S13) while a camera

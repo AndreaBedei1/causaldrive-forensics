@@ -239,6 +239,49 @@ class RecorderBody:
         return float(math.hypot(max(fp.x_min - x, 0.0, x - fp.x_max), max(fp.y_min - y, 0.0, y - fp.y_max)))
 
 
+def _outline_points(pose: WorldPose, footprint: EgoFootprint, step: float = 0.05) -> np.ndarray:
+    xs = np.arange(footprint.x_min, footprint.x_max + 1e-9, step)
+    ys = np.arange(footprint.y_min, footprint.y_max + 1e-9, step)
+    local = np.vstack([np.column_stack([xs, np.full(len(xs), footprint.y_min)]),
+                       np.column_stack([xs, np.full(len(xs), footprint.y_max)]),
+                       np.column_stack([np.full(len(ys), footprint.x_min), ys]),
+                       np.column_stack([np.full(len(ys), footprint.x_max), ys])])
+    c, s = math.cos(pose.yaw), math.sin(pose.yaw)
+    return np.column_stack([pose.x + c * local[:, 0] - s * local[:, 1], pose.y + s * local[:, 0] + c * local[:, 1]])
+
+
+def _rect_distance(points: np.ndarray, pose: WorldPose, footprint: EgoFootprint) -> np.ndarray:
+    c, s = math.cos(pose.yaw), math.sin(pose.yaw)
+    dx, dy = points[:, 0] - pose.x, points[:, 1] - pose.y
+    lx, ly = c * dx + s * dy, -s * dx + c * dy
+    gx = np.maximum(np.maximum(footprint.x_min - lx, 0.0), lx - footprint.x_max)
+    gy = np.maximum(np.maximum(footprint.y_min - ly, 0.0), ly - footprint.y_max)
+    return np.hypot(gx, gy)
+
+
+def footprint_gap(pose_a: WorldPose, footprint_a: Optional[EgoFootprint], pose_b: WorldPose,
+                  footprint_b: Optional[EgoFootprint]) -> float:
+    """Distance between two vehicles' footprints (0 when they touch or overlap), to about 0.05 m."""
+    fa, fb = footprint_a or DEFAULT_BODY, footprint_b or DEFAULT_BODY
+    return float(min(_rect_distance(_outline_points(pose_a, fa), pose_b, fb).min(),
+                     _rect_distance(_outline_points(pose_b, fb), pose_a, fa).min()))
+
+
+def contact_check(poses: Mapping[str, "PoseSource"], footprints: Mapping[str, Optional[EgoFootprint]],
+                  contact_consistency_m: float):
+    """For the collision matching (``alignment.match_collisions``): (gap, tolerance) between two recorders'
+    footprints, each at its own report time (its own clock) from its own pose stream; None when a recorder
+    has no pose stream.  The tolerance grows with the pose sources' declared accuracy."""
+    def check(first: str, t_first: float, second: str, t_second: float) -> Optional[Tuple[float, float]]:
+        if first not in poses or second not in poses:
+            return None
+        sigma = math.hypot(getattr(poses[first], "position_std_m", 0.0), getattr(poses[second], "position_std_m", 0.0))
+        gap = footprint_gap(poses[first].pose_at(t_first), footprints.get(first), poses[second].pose_at(t_second),
+                            footprints.get(second))
+        return gap, contact_consistency_m + 3.0 * sigma
+    return check
+
+
 def outline_distances(poses: PoseSource, footprint: Optional[EgoFootprint], t_local: Sequence[float],
                       points: np.ndarray, inside_zero: bool = False) -> Tuple[np.ndarray, np.ndarray]:
     """``RecorderBody.outline_distance`` for many (instant of the recorder's clock, point) pairs at once:
@@ -258,6 +301,52 @@ def outline_distances(poses: PoseSource, footprint: Optional[EgoFootprint], t_lo
     outside = np.hypot(np.maximum(np.maximum(fp.x_min - lx, zero), lx - fp.x_max),
                        np.maximum(np.maximum(fp.y_min - ly, zero), ly - fp.y_max))
     return np.where(inside, 0.0 if inside_zero else edge, outside), valid
+
+
+def entry_distances(poses: PoseSource, footprint: Optional[EgoFootprint], t_local: Sequence[float],
+                    points: np.ndarray, origins: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """How far an observed near surface lies from where its line of sight enters the recorder's body.
+
+    For each (instant of the recorder's clock, observed near surface ``points``, observing radar side
+    ``origins``): the ray from the origin through the point meets the body's footprint first at its entry
+    point -- the surface that observer can see; the distance is between the point and that entry point
+    (a point beyond it, inside the body, is that far off: the body would have hidden it).  A ray that
+    misses the body gives the point's distance to the footprint.  Returns (distances, mask of the instants
+    the pose source covers)."""
+    t = np.asarray(t_local, dtype=float)
+    points = np.asarray(points, dtype=float).reshape(-1, 2)
+    origins = np.asarray(origins, dtype=float).reshape(-1, 2)
+    valid = (t >= poses.start - 1e-6) & (t <= poses.end + 1e-6)
+    x, y, yaw = poses.poses_at(t)
+    c, s = np.cos(yaw), np.sin(yaw)
+    fp = footprint or DEFAULT_BODY
+
+    def body_frame(xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        dx, dy = xy[:, 0] - x, xy[:, 1] - y
+        return c * dx + s * dy, -s * dx + c * dy
+
+    px, py = body_frame(points)
+    ox, oy = body_frame(origins)
+    dx, dy = px - ox, py - oy
+    reach = np.hypot(dx, dy)
+    ux, uy = dx / np.maximum(reach, 1e-9), dy / np.maximum(reach, 1e-9)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        tx1, tx2 = (fp.x_min - ox) / ux, (fp.x_max - ox) / ux
+        ty1, ty2 = (fp.y_min - oy) / uy, (fp.y_max - oy) / uy
+    # A ray parallel to a pair of faces: inside that slab for every s, or never.
+    inside_x = (ox >= fp.x_min) & (ox <= fp.x_max)
+    inside_y = (oy >= fp.y_min) & (oy <= fp.y_max)
+    tx_low = np.where(np.abs(ux) < 1e-12, np.where(inside_x, -np.inf, np.inf), np.minimum(tx1, tx2))
+    tx_high = np.where(np.abs(ux) < 1e-12, np.where(inside_x, np.inf, -np.inf), np.maximum(tx1, tx2))
+    ty_low = np.where(np.abs(uy) < 1e-12, np.where(inside_y, -np.inf, np.inf), np.minimum(ty1, ty2))
+    ty_high = np.where(np.abs(uy) < 1e-12, np.where(inside_y, np.inf, -np.inf), np.maximum(ty1, ty2))
+    enter, leave = np.maximum(tx_low, ty_low), np.minimum(tx_high, ty_high)
+    hit = (enter <= leave) & (leave >= 0.0)
+    zero = np.zeros_like(px)
+    outside = np.hypot(np.maximum(np.maximum(fp.x_min - px, zero), px - fp.x_max),
+                       np.maximum(np.maximum(fp.y_min - py, zero), py - fp.y_max))
+    distance = np.where(hit, np.abs(reach - np.maximum(enter, 0.0)), outside)
+    return distance, valid
 
 
 def common_track(track: LocalTrack, recorder: str, ego: EgoTrajectory, poses: PoseSource,
