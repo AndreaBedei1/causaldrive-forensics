@@ -345,3 +345,112 @@ recording budget caps N at 40 and several metrics are reported at the precision 
 **Gate.**  PASS: canonical runs untouched by the sweeps; manifests with provenance; resumable batch with
 failure logging and no overwrite; N chosen from data; outcomes balanced where the scenario allows; the full
 suite passes on both Pythons (464 tests at the end of the program).
+
+## Phase 4 -- robustness
+
+**Objective.**  A non-destructive perturbation layer and a robustness study: radar noise, missed detections
+and clutter from sourced profiles; GNSS errors that reach the common frame, the fusion and the replay;
+collision-report impulse noise and latency, with CARLA's symmetric impulses documented and checked on the
+multi-vehicle runs; constant clock offsets; downsampling; a missing recorder; a radar outage; seeded draws
+with a stopping rule; metrics against the level of each perturbation with plots; and the optional mutual
+refinement of the pose sources measured against the plain reconstruction.
+
+**Implementation.**
+- `cdf.robustness.perturb`: `perturbed_copy` writes a new folder (an existing one is refused), hard-links
+  every file it does not change and records the condition (`perturbation.json`, never read by the
+  reconstruction).  Radar (`RadarProfile`, `perturb_sweeps`): per-detection drop, Gaussian range / azimuth /
+  elevation / radial-velocity noise, Poisson clutter uniform in the field of view with a static-world or a
+  mirrored Doppler.  GNSS (`GnssProfile`, `PerturbedPoseSource`): per axis a run bias, a first-order
+  Gauss-Markov term and white noise drawn at a receiver rate, a heading error with the same terms and a
+  velocity noise; the source declares its accuracy (root sum of squares) and enters through the
+  reconstruction's `pose_factory`.  Collision reports (`CollisionPerturbation`): multiplicative impulse noise
+  per callback, latency of one recorder, drops.  Constant clock offsets of every time a recorder wrote,
+  downsampling of ego, controls and radar, a recorder left out, a radar outage.  Every random quantity has its
+  own SHA-256-seeded stream.
+- Profiles with their sources or engineering assumptions: `docs/robustness_profiles.md` (drafted from the
+  research notes by a sub-agent, reviewed; two incomplete references completed from their DOIs; three source
+  comments in the code corrected).
+- `scripts/robustness.py`: families x levels x runs, `ProcessPoolExecutor`, seeds 0, 1, 2, ... until the
+  standard error over seeds of every pooled metric is below its tolerance (3 to 8 seeds); per job the
+  unchanged reconstruction, the privileged evaluation, the fusion metrics and the core-event diff against the
+  unperturbed reconstruction (`cdf.evaluation.run_metrics.core_event_diff`, which first removes a shift of
+  the clock origin); `results/robustness/jobs.jsonl`, `summary.{json,md,csv}`, `figures/` (one per family,
+  plain and refined GNSS overlaid).
+- `scripts/impulse_symmetry.py` (privileged): the two reports of every true contact in the ground-truth log,
+  the matched pairs with their nearest competing report, and the Monte Carlo survival of the alignment's
+  impulse test under per-report noise (`results/robustness/impulse_symmetry.md`).
+- Mutual refinement (`fusion.mutual_refinement`, off by default; `anonymous.mutual_offsets`), rebuilt after a
+  first version corrected only one component and declared far too small an uncertainty.  The returns of every
+  track identified with a recorder, before that recorder's first contact (in contact the boxes overlap and a
+  radar can sit inside the other body), are assigned to the faces of its box that their radar can see (the
+  radar on the outer side of the face plane) by segment distance; each face gives n . (b_R - b_O) = its median
+  depth, with a systematic variance shared by the face's heading bins plus the spread over the distinct
+  seconds; the offsets are the maximum a posteriori estimate with each source's declared accuracy as a
+  zero-mean prior (unobservable directions stay uncorrected), the posterior inflated by the reduced
+  chi-square above one.  The face assignment starts from a correlative scan match of each observer's returns
+  on each recorder and then uses the estimate where the faces inform it and the scan match where they do not
+  (a pull-back to the prior along an unobserved direction had recreated the biased geometry).  Two stages:
+  the collision-identified tracks, then every link found on the corrected poses.
+- `cdf.evaluation.figures`: the paper's figure style (IEEE widths, TrueType fonts, text as text).
+
+**Assumptions.**  Vendor accuracies read as 1 sigma; radar errors independent per detection, clutter uniform;
+GNSS errors are a translation plus a heading error, independent between vehicles, stationary over a run, with
+exact odometry; the refinement estimates translations only; the impulse tolerance of the alignment
+(`fusion.impulse_tolerance` = 0.10) is an engineering assumption.  All in `docs/robustness_profiles.md`.
+
+**Tests.**  `tests/test_robustness.py` (16): radar drop rate, noise sigmas and Poisson clutter in the field of
+view with its Doppler model; ideal changes nothing and the profiles are ordered; GNSS bias, Gauss-Markov and
+white spreads; a perturbed source declares its accuracy and is reproducible; streams independent of the order
+of drawing; the copy hard-links what it does not change and never overwrites; clock offsets shift every time a
+recorder wrote (signs included), downsampling, dropout, collision latency; constant clock offsets leave the
+global graph unchanged; the refinement recovers a 3.5 m relative bias seen from two directions (S17), leaves
+the unobservable lateral of a rear-end follow untouched with its prior uncertainty (S01) and does nothing to
+exact sources; face depths, face visibility from the radar's side, a radar inside the box, the scan match of
+a 3.8 m offset.
+
+**Results** (`results/robustness/summary.md`, final code with the phase-3 contact gate: 1389 jobs, 0 failed, 4.3 CPU
+hours, median 5.7 s per job; the copies are deleted, so storage stays at the results: 2.6 MB).
+- Baseline copies reproduce the canonical reconstruction exactly.  Constant clock offsets (+7.31, -14.62,
+  +21.93 s ...) leave all 17 global graphs identical, once the traffic-sign stream's own time fields were
+  shifted too: the first run found 14/17, the three others differing only in their STOP_SIGN events.
+- Radar: low and nominal noise keep every identity, collision and alignment (core events 0.97 found again,
+  centre error 0.41 / 0.51 m against 0.41 m); the high profile (30 clutter returns per sweep) costs 1.3 % of
+  the identities and 2 % of the alignments, adds about 800 clutter entities and 236 spurious core events per
+  draw over the 17 runs, and 15 false merges; centre error 1.27 m.
+- GNSS: RTK changes nothing (centre error 0.43 m).  Consumer (1.66 m per axis): identities and collisions
+  intact, 96 % of the runs fully aligned, centre error 2.99 m, 19 false merges per draw; with the mutual
+  refinement 2.00 m and 8.6 false merges.  Degraded (5.43 m): identity accuracy 0.950 (refined 0.964), centre
+  error 6.58 m (refined 5.24 m), false merges 19.5 (refined 21.5: no gain).  The common part of the errors
+  stays in the map frame and in every absolute position.
+- Refinement alone (pure 2 m biases, 17 runs x 3 seeds, 87 recorder pairs): no pair inconsistent with its
+  posterior (largest Mahalanobis^2 10.3, none above the 99.9 % bound 13.8); where both directions are seen (53
+  pairs) the median relative bias falls from 2.80 m to 0.18 m; 84/87 pairs improve; the others keep the prior.
+- Collision reports: CARLA gives both bodies of a contact the same impulse magnitude (largest relative
+  difference 0.0 over all runs).  The alignment's 10 % impulse test keeps a pair with probability 1.00 / 0.86 /
+  0.54 / 0.29 at 2 / 5 / 10 / 20 % independent error per report; in the study 10 % noise leaves 41 % of the
+  collisions matched and 87 % of the runs fully aligned (the observed-trajectory alignment recovers part), 20 %
+  29 % and 84 %.  S06's two contacts of B have peaks 14.5 % apart: noise can make them compete, and only the
+  clock consistency of earlier matches separates them.  A report latency on one recorder shifts its events by
+  the latency (event time p95 = latency) and degrades the fused positions from 0.05 s on (0.76 m at 0.05 s,
+  1.09 m at 0.10 s); at 0.25-0.5 s the recorder links fail (11-20 missed) instead of linking wrongly, and the
+  contact gate refuses some genuine matches (the late report puts the two bodies 1.7 m apart): collisions 0.86 /
+  0.82, runs fully aligned 0.88 / 0.94.  The alignment assumes report times within its 0.1 s clock tolerance;
+  without the gate those matches went through with clocks off by the latency.
+- Downsampling to 10 Hz is nearly free (core events 0.99); 5 Hz costs identities (0.976), collisions
+  (0.955) and core events (0.91).  A missing recorder costs 2.5 % of the alignments; a 1 s radar outage before
+  the contact 1.2 % of the core events.
+
+**Regressions.**  None: the refinement is off by default and the baseline copies are identical.  Found and
+fixed on the way: the clock perturbation did not shift the traffic-sign stream (no effect on the other
+families).
+
+**Limitations.**  Each condition perturbs one family; the refinement estimates translations only (heading
+errors and drifts remain) and does not help the degraded profile's false merges; a collision-impulse gate
+scaled by a declared impulse accuracy (as the pose sources declare theirs) is left for future work; heavy
+clutter defeats the tracker's confirmation rule (spurious entities and events).
+
+**Commit.**  Phase 3: `d6ebdfd9a84e034795ac3513f0049a7a42dfd84a`.  Phase 4: `phase4: ...` (SHA in the phase 5 section).
+
+**Gate.**  PASS: sourced or flagged profiles; non-destructive copies; seeded draws with a stopping rule;
+metrics against level with plots; CARLA's impulse symmetry documented and checked on S06, S15, S16; the
+refinement measured against the plain reconstruction; tests green on both Pythons (phase gate run).

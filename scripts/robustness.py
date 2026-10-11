@@ -1,0 +1,436 @@
+#!/usr/bin/env python3
+"""Robustness of the reconstruction to sensor, pose, timing and data-loss perturbations.
+
+    python scripts/robustness.py traces/S*/run_* [--families radar,gnss,...] [--workers 12]
+           [--work robustness] [--results results/robustness] [--keep]
+
+For every condition (``cdf.robustness.perturb``) and run: a perturbed copy of the run's own files (hard links
+for whatever does not change), the unchanged reconstruction on it (a perturbed GNSS enters as its pose
+source), the privileged evaluation, and a comparison of its core events with those of the unperturbed
+reconstruction (``traces/<run>/reconstruction``).  The copy is deleted afterwards (``--keep`` keeps it): raw
+data are not duplicated.  Stochastic conditions draw seeds 0, 1, 2, ... until the standard error over
+seeds of every pooled metric is below its tolerance (at most ``--max-seeds``).  Results:
+``<results>/jobs.jsonl`` (one line per run and condition), ``summary.json|md|csv`` and ``figures/``.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import shutil
+import statistics
+import sys
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+# Condition families: name -> (levels, stochastic).  A level is a label and its parameter.
+FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
+    "baseline": ([("none", None)], False),  # the copy unchanged: must reproduce the canonical reconstruction
+    "radar": ([("low", "low"), ("nominal", "nominal"), ("high", "high")], True),
+    "gnss": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
+    # The same GNSS errors with the mutual refinement of the pose sources (fusion.mutual_refinement).
+    "gnss_refined": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
+    "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
+    "latency": ([("0.05 s", 0.05), ("0.10 s", 0.10), ("0.25 s", 0.25), ("0.50 s", 0.50)], False),
+    "clock": ([("offsets", None)], False),
+    "downsample": ([("10 Hz", 2), ("5 Hz", 4)], False),
+    "dropout": ([("one recorder", None)], False),
+    "outage": ([("1 s radar outage", 1.0)], False),
+}
+# Pooled metrics and the standard error over seeds below which no further seed is drawn.
+TOLERANCES = {"association_accuracy": 0.02, "collision_recall": 0.02, "event_recall": 0.02,
+              "fused_centre_error_m": 0.05, "runs_aligned": 0.02}
+
+
+def _read_json(path: Path) -> Any:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _recorders(run_dir: Path) -> List[str]:
+    return sorted(p.name for p in (run_dir / "vehicles").iterdir() if (p / "ego.jsonl").exists())
+
+
+def _first_collision_t_local(run_dir: Path, recorder: str) -> Optional[float]:
+    """The recorder's own first collision callback, in its local time (its own files only)."""
+    ego = (run_dir / "vehicles" / recorder / "ego.jsonl").read_text(encoding="utf-8").splitlines()
+    origin = json.loads(ego[0])["timestamp"]
+    lines = [json.loads(line) for line in (run_dir / "vehicles" / recorder / "collisions.jsonl")
+             .read_text(encoding="utf-8").splitlines() if line.strip()]
+    return None if not lines else float(lines[0]["timestamp"]) - float(origin)
+
+
+def jobs_for(run_dir: Path, family: str, seeds: Sequence[int]) -> List[Dict[str, Any]]:
+    levels, stochastic = FAMILIES[family]
+    recorders = _recorders(run_dir)
+    out = []
+    for label, parameter in levels:
+        variants: List[Dict[str, Any]] = [{}]
+        if family in ("dropout", "outage"):
+            variants = [{"recorder": recorder} for recorder in recorders if family == "outage" or len(recorders) > 1]
+        for variant in variants:
+            for seed in (seeds if stochastic else [0]):
+                out.append(dict(variant, run=str(run_dir), family=family, level=label, parameter=parameter, seed=seed))
+    return out
+
+
+def build(job: Dict[str, Any]):
+    from cdf.robustness.perturb import (GNSS_PROFILES, RADAR_PROFILES, CollisionPerturbation, Perturbation,
+                                        PerturbedPoseSource)
+    run_dir, family, parameter = Path(job["run"]), job["family"], job["parameter"]
+    recorders = _recorders(run_dir)
+    name = "{0}_{1}".format(family, job["level"]).replace(" ", "_").replace("%", "pct")
+    pose = None
+    if family == "baseline":
+        perturbation = Perturbation(name)
+    elif family == "radar":
+        perturbation = Perturbation(name, radar=RADAR_PROFILES[parameter])
+    elif family in ("gnss", "gnss_refined"):
+        perturbation = Perturbation(name, gnss=GNSS_PROFILES[parameter])
+        pose = PerturbedPoseSource.factory(GNSS_PROFILES[parameter], int(job["seed"]))
+    elif family == "impulse":
+        perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
+    elif family == "latency":
+        perturbation = Perturbation(name, collisions=CollisionPerturbation(latency_s=parameter,
+                                                                          latency_recorders=tuple(recorders[1:2])))
+    elif family == "clock":
+        # Arbitrary, large, different offsets for every recorder (no drift).
+        perturbation = Perturbation(name, clock_offsets_s=tuple((r, round(7.31 * (i + 1) * (-1) ** i, 2))
+                                                                 for i, r in enumerate(recorders)))
+    elif family == "downsample":
+        perturbation = Perturbation(name, downsample=int(parameter))
+    elif family == "dropout":
+        perturbation = Perturbation(name, drop_recorders=(job["recorder"],))
+    elif family == "outage":
+        recorder = job["recorder"]
+        t = _first_collision_t_local(run_dir, recorder)
+        if t is None:
+            ego = (run_dir / "vehicles" / recorder / "ego.jsonl").read_text(encoding="utf-8").splitlines()
+            t = (json.loads(ego[-1])["timestamp"] - json.loads(ego[0])["timestamp"]) / 2.0 + 1.0
+        perturbation = Perturbation(name, radar_outage=(recorder, round(t - 1.0 - float(parameter), 3), round(t - 1.0, 3)))
+    else:
+        raise ValueError(family)
+    return perturbation, pose
+
+
+def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
+    """One run under one condition: copy, reconstruct, evaluate, compare with the unperturbed reconstruction."""
+    from cdf.evaluation.fusion_metrics import evaluate_fusion
+    from cdf.evaluation.reconstruction import evaluate_run
+    from cdf.evaluation.run_metrics import core_event_diff, graph_signature, run_metrics
+    from cdf.reconstruction.pipeline import reconstruct_run
+    from cdf.robustness.perturb import perturbed_copy
+    run_dir = Path(job["run"])
+    perturbation, pose = build(job)
+    tag = perturbation.name + ("_" + job["recorder"] if job.get("recorder") else "")
+    target = Path(work) / tag / "seed{0}".format(job["seed"]) / run_dir.parent.name / run_dir.name
+    if target.exists():
+        shutil.rmtree(str(target))  # a stale scratch copy of an interrupted job (never a recording)
+    result = {k: v for k, v in job.items()}
+    result["perturbation"] = perturbation.to_dict()
+    start = time.monotonic()
+    try:
+        perturbed_copy(run_dir, target, perturbation, int(job["seed"]))
+        cfg = None
+        if job["family"] == "gnss_refined":
+            import dataclasses
+            from cdf.reconstruction.config import load_config
+            base = load_config()
+            cfg = dataclasses.replace(base, fusion=dataclasses.replace(base.fusion, mutual_refinement=True))
+        reconstruct_run(target, cfg, pose_factory=pose)
+        base = _read_json(run_dir / "reconstruction" / "global" / "global_graph.json")
+        new = _read_json(target / "reconstruction" / "global" / "global_graph.json")
+        keep_recorders = [r for r in _recorders(run_dir) if r not in perturbation.drop_recorders]
+        result["events"] = core_event_diff(base, new, keep_recorders)
+        if job["family"] == "clock":
+            # Raw clocks shifted: the privileged truth mapping no longer holds; the claim is identity.
+            result["identical_graph"] = graph_signature(base) == graph_signature(new)
+        else:
+            evaluation = evaluate_run(target, clock_shift_check=False)
+            fusion = evaluate_fusion(target, write=True, pose_factory=pose)
+            fusion.pop("_raw", None)
+            result["metrics"] = run_metrics(target, evaluation, fusion)
+        result["status"] = "complete"
+    except Exception as exc:  # recorded, the study goes on
+        import traceback
+        result["status"] = "failed"
+        result["error"] = repr(exc)
+        result["trace"] = traceback.format_exc()[-3000:]
+    result["wall_s"] = round(time.monotonic() - start, 2)
+    if not keep and target.exists():
+        shutil.rmtree(str(target), ignore_errors=True)
+    return result
+
+
+def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
+    """Campaign-level numbers of one condition and seed, pooled over runs."""
+    done = [r for r in results if r.get("status") == "complete"]
+    with_metrics = [r["metrics"] for r in done if "metrics" in r]
+
+    def ratio(num: str, den: str) -> Optional[float]:
+        total = sum(m[den] for m in with_metrics)
+        return None if not total else sum(m[num] for m in with_metrics) / total
+
+    events_base = sum(r["events"]["base_events"] for r in done)
+    centre = [m["fused_centre_error_median_m"] for m in with_metrics if m.get("fused_centre_error_median_m") is not None]
+    deltas = [abs(d) for r in done for d in r["events"]["time_deltas_s"]]
+    return {"runs": len(done), "failed": len(results) - len(done),
+            "association_accuracy": ratio("associations_correct", "associations_decided"),
+            "collision_recall": ratio("collisions_reconstructed", "collisions_true"),
+            "runs_aligned": (sum(1 for m in with_metrics if m["recorders_aligned"] == m["recorders"]) / len(with_metrics)
+                             if with_metrics else None),
+            "wrong_links": sum(m["links_wrong"] for m in with_metrics) if with_metrics else None,
+            "missed_links": sum(m["links_missed"] for m in with_metrics) if with_metrics else None,
+            "false_merges": sum(m["merges_false"] for m in with_metrics) if with_metrics else None,
+            "entities_without_vehicle": sum(m["entities_without_vehicle"] for m in with_metrics) if with_metrics else None,
+            "fused_centre_error_m": statistics.median(centre) if centre else None,
+            "event_recall": (sum(r["events"]["matched"] for r in done) / events_base) if events_base else None,
+            "extra_events": sum(len(r["events"]["extra"]) for r in done),
+            "event_time_delta_median_s": statistics.median(deltas) if deltas else None,
+            "event_time_delta_p95_s": sorted(deltas)[int(0.95 * (len(deltas) - 1))] if deltas else None,
+            "max_relative_offset_error_s": max((m["max_abs_relative_offset_error_s"] or 0.0) for m in with_metrics)
+            if with_metrics else None,
+            "identical_graphs": (sum(1 for r in done if r.get("identical_graph")) if any("identical_graph" in r for r in done)
+                                 else None)}
+
+
+def summarize(all_results: Sequence[Dict[str, Any]], results_dir: Path) -> Dict[str, Any]:
+    from cdf.evaluation.provenance import provenance
+    from cdf.reconstruction.config import load_config
+    groups: Dict[Tuple[str, str], Dict[int, List[Dict[str, Any]]]] = {}
+    for r in all_results:
+        groups.setdefault((r["family"], r["level"]), {}).setdefault(int(r["seed"]), []).append(r)
+    rows = []
+    for (family, level), by_seed in sorted(groups.items(), key=lambda item: (list(FAMILIES).index(item[0][0]),
+                                                                              [l for l, _ in FAMILIES[item[0][0]][0]].index(item[0][1]))):
+        per_seed = {seed: pooled(results) for seed, results in sorted(by_seed.items())}
+        keys = [k for k in next(iter(per_seed.values())) if k not in ("runs", "failed")]
+        row: Dict[str, Any] = {"family": family, "level": level, "seeds": len(per_seed),
+                               "runs": sum(p["runs"] for p in per_seed.values()),
+                               "failed": sum(p["failed"] for p in per_seed.values())}
+        for key in keys:
+            values = [p[key] for p in per_seed.values() if p[key] is not None]
+            row[key] = round(statistics.fmean(values), 4) if values else None
+            row[key + "_sd"] = round(statistics.stdev(values), 4) if len(values) > 1 else None
+        rows.append(row)
+    record = {"definition": "robustness of the reconstruction: every condition applied to every run (seeds for "
+                            "stochastic ones), pooled per seed over runs, then mean and SD over seeds",
+              "provenance": provenance(load_config().to_dict(), sorted({Path(r["run"]).parent.name + "/" +
+                                                                        Path(r["run"]).name for r in all_results})),
+              "tolerances_for_seeds": TOLERANCES, "rows": rows}
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "summary.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+    columns = list(rows[0].keys()) if rows else []
+    with (results_dir / "summary.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(rows)
+    (results_dir / "summary.md").write_text(markdown(record), encoding="utf-8")
+    figures(record, results_dir / "figures")
+    return record
+
+
+# Columns of the summary table: (key, header, decimals).
+TABLE = [("association_accuracy", "assoc. acc.", 3), ("collision_recall", "coll. recall", 3),
+         ("runs_aligned", "runs aligned", 3), ("event_recall", "event recall", 3), ("extra_events", "extra events", 1),
+         ("event_time_delta_p95_s", "event dt p95 [s]", 3), ("fused_centre_error_m", "centre err. [m]", 3),
+         ("wrong_links", "wrong links", 1), ("missed_links", "missed links", 1), ("false_merges", "false merges", 1),
+         ("entities_without_vehicle", "spurious U", 1)]
+
+
+def _cell(row: Dict[str, Any], key: str, decimals: int) -> str:
+    value = row.get(key)
+    if value is None:
+        return "-"
+    sd = row.get(key + "_sd")
+    text = "{0:.{1}f}".format(value, decimals)
+    return text if not sd else "{0} +- {1:.{2}f}".format(text, sd, decimals)
+
+
+def markdown(record: Dict[str, Any]) -> str:
+    prov = record["provenance"]
+    lines = ["# Robustness of the reconstruction", "",
+             "Every condition applied to every canonical run (`scripts/robustness.py`, `cdf.robustness.perturb`); "
+             "stochastic conditions over seeds (3 at least, more until the standard error of every pooled metric is "
+             "below its tolerance, 8 at most).  Per seed the metrics are pooled over the runs (counts: sums over the "
+             "runs of one draw); the table gives the mean over seeds +- their standard deviation.  Ground truth is "
+             "used only here, for the evaluation; the reconstruction under test never sees it.", "",
+             "Columns: identity association accuracy over the decided tracks; true vehicle-vehicle collisions "
+             "reconstructed; share of runs with every recorder on the global clock; core instant events of the "
+             "unperturbed reconstruction found again (same type, actor and subject class within 1 s, after removing "
+             "a shift of the clock origin) and those added; 95th percentile of their time differences; median fused "
+             "centre error of the anonymous road users (map frame of the pose streams: a GNSS error common to all "
+             "recorders stays in it); recorder links wrong or missed; false merges of anonymous tracks; anonymous "
+             "entities that are no vehicle (clutter).", "",
+             "Provenance: code `{0}`, configuration `{1}`, commit `{2}`{3}, {4}.".format(
+                 prov["code_sha256"][:16], (prov.get("config_sha256") or "")[:16], prov["git_commit"],
+                 " (uncommitted changes)" if prov["git_dirty"] else "", prov["generated_utc"]), "",
+             "| family | level | seeds | runs | failed | " + " | ".join(h for _, h, _ in TABLE) + " | identical graphs |",
+             "|---|---|--:|--:|--:|" + "---:|" * len(TABLE) + "---:|"]
+    for row in record["rows"]:
+        lines.append("| {0} | {1} | {2} | {3} | {4} | {5} | {6} |".format(
+            row["family"], row["level"], row["seeds"], row["runs"], row["failed"],
+            " | ".join(_cell(row, key, decimals) for key, _, decimals in TABLE),
+            "-" if row.get("identical_graphs") is None else "{0:.0f}/{1}".format(row["identical_graphs"], row["runs"])))
+    return "\n".join(lines) + "\n"
+
+
+# Families plotted against their level, the unperturbed baseline first (its label in that family).
+PLOTS = {"radar": "ideal", "gnss": "ideal", "impulse": "0%", "latency": "0 s", "downsample": "20 Hz"}
+GENERAL = [("association_accuracy", "association accuracy"), ("event_recall", "core event recall"),
+           ("fused_centre_error_m", "fused centre error [m]"), ("errors", "wrong links + false merges")]
+# The metrics each family degrades first.
+PANELS = {"radar": GENERAL, "gnss": GENERAL,
+          "impulse": [("collision_recall", "collisions reconstructed"), ("runs_aligned", "runs fully aligned"),
+                      ("event_recall", "core event recall"), ("fused_centre_error_m", "fused centre error [m]")],
+          "latency": [("runs_aligned", "runs fully aligned"), ("event_recall", "core event recall"),
+                      ("event_time_delta_p95_s", "event time difference p95 [s]"),
+                      ("fused_centre_error_m", "fused centre error [m]")],
+          "downsample": [("collision_recall", "collisions reconstructed"), ("association_accuracy", "association accuracy"),
+                         ("event_recall", "core event recall"), ("fused_centre_error_m", "fused centre error [m]")]}
+RATIOS = ("association_accuracy", "event_recall", "collision_recall", "runs_aligned")
+
+
+def figures(record: Dict[str, Any], out_dir: Path) -> List[Path]:
+    """Metrics against the level of each family (SVG and PDF); the GNSS figure overlays the plain and the
+    mutually refined reconstruction."""
+    from cdf.evaluation.figures import DOUBLE_COLUMN_IN, paper_style
+    plt = paper_style()
+    rows = record["rows"]
+    baseline = next((row for row in rows if row["family"] == "baseline"), None)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written = []
+
+    def series(family: str) -> List[Dict[str, Any]]:
+        own = [row for row in rows if row["family"] == family]
+        return ([dict(baseline, level=PLOTS.get(family.replace("_refined", ""), "none"))] if baseline else []) + own
+
+    def value(row: Dict[str, Any], key: str) -> Tuple[Optional[float], float]:
+        if key == "errors":
+            parts = [row.get("wrong_links"), row.get("false_merges")]
+            if all(part is None for part in parts):
+                return None, 0.0
+            sds = [row.get("wrong_links_sd") or 0.0, row.get("false_merges_sd") or 0.0]
+            return sum(part or 0.0 for part in parts), math.sqrt(sum(sd * sd for sd in sds))
+        return row.get(key), row.get(key + "_sd") or 0.0
+
+    for family in PLOTS:
+        groups = [(family, series(family))]
+        if family == "gnss" and any(row["family"] == "gnss_refined" for row in rows):
+            groups.append(("gnss_refined", series("gnss_refined")))
+        if len(groups[0][1]) < 2:
+            continue
+        panels = PANELS[family]
+        fig, grid = plt.subplots(2, 2, figsize=(DOUBLE_COLUMN_IN, 4.2))
+        axes = list(grid.flat)
+        for axis, (key, title) in zip(axes, panels):
+            for index, (name, items) in enumerate(groups):
+                xs = list(range(len(items)))
+                points = [value(row, key) for row in items]
+                ys = [math.nan if v is None else v for v, _ in points]
+                es = [e for _, e in points]
+                axis.errorbar([x + 0.08 * index for x in xs], ys, yerr=es, marker="os"[index % 2], capsize=3,
+                              linewidth=1.2, markersize=4,
+                              label={"gnss": "plain", "gnss_refined": "mutual refinement"}.get(name, name))
+            axis.set_xticks(range(len(groups[0][1])))
+            axis.set_xticklabels([row["level"] for row in groups[0][1]], rotation=30)
+            axis.set_title(title)
+            axis.grid(alpha=0.3)
+            if key in RATIOS:
+                axis.set_ylim(-0.02, 1.02)
+        if len(groups) > 1:
+            axes[0].legend()
+        fig.suptitle({"radar": "Radar noise, missed detections and clutter", "gnss": "GNSS position and heading errors",
+                      "impulse": "Collision impulse noise", "latency": "Collision report latency (one recorder)",
+                      "downsample": "Recording rate"}[family])
+        fig.tight_layout()
+        for suffix in ("svg", "pdf"):
+            path = out_dir / "{0}.{1}".format(family, suffix)
+            fig.savefig(str(path))
+            written.append(path)
+        plt.close(fig)
+    return written
+
+
+def need_more_seeds(results: Sequence[Dict[str, Any]], family: str, level: str) -> bool:
+    by_seed: Dict[int, List[Dict[str, Any]]] = {}
+    for r in results:
+        if r["family"] == family and r["level"] == level:
+            by_seed.setdefault(int(r["seed"]), []).append(r)
+    per_seed = [pooled(rs) for rs in by_seed.values()]
+    for key, tolerance in TOLERANCES.items():
+        values = [p[key] for p in per_seed if p.get(key) is not None]
+        if len(values) >= 2 and statistics.stdev(values) / math.sqrt(len(values)) > tolerance:
+            return True
+    return False
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description="Robustness study over saved recordings (non-destructive)")
+    parser.add_argument("runs", nargs="+", type=Path)
+    parser.add_argument("--families", default=",".join(FAMILIES))
+    parser.add_argument("--work", default=str(ROOT / "robustness"))
+    parser.add_argument("--results", type=Path, default=ROOT / "results" / "robustness")
+    parser.add_argument("--workers", type=int, default=12)
+    parser.add_argument("--min-seeds", type=int, default=3)
+    parser.add_argument("--max-seeds", type=int, default=8)
+    parser.add_argument("--keep", action="store_true", help="keep the perturbed copies and their reconstructions")
+    parser.add_argument("--summarize", action="store_true", help="only rewrite the summary from jobs.jsonl")
+    args = parser.parse_args(argv)
+    if Path(args.work).resolve() == (ROOT / "traces").resolve():
+        parser.error("perturbed copies never go into traces/")
+    args.results.mkdir(parents=True, exist_ok=True)
+    jobs_file = args.results / "jobs.jsonl"
+    done: List[Dict[str, Any]] = []
+    if jobs_file.exists():
+        done = [json.loads(line) for line in jobs_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if not args.summarize:
+        runs = [run for run in args.runs if (run / "reconstruction" / "global" / "global_graph.json").exists()]
+        families = [f for f in args.families.split(",") if f]
+
+        def key(job: Dict[str, Any]) -> Tuple[Any, ...]:
+            return (job["run"], job["family"], job["level"], job.get("recorder"), int(job["seed"]))
+        finished = {key(r) for r in done if r.get("status") == "complete"}
+        seeds = {(f, label): list(range(args.min_seeds)) for f in families for label, _ in FAMILIES[f][0]}
+        while True:
+            pending = [job for f in families for run in runs for job in jobs_for(run, f, sorted({s for (ff, _), ss in seeds.items()
+                                                                                                  if ff == f for s in ss}))
+                       if job["seed"] in seeds[(f, job["level"])] and key(job) not in finished]
+            if not pending:
+                more = False
+                for (f, label), ss in seeds.items():
+                    if FAMILIES[f][1] and len(ss) < args.max_seeds and need_more_seeds(done, f, label):
+                        ss.append(len(ss))
+                        more = True
+                if not more:
+                    break
+                continue
+            print("{0} jobs ({1} workers)".format(len(pending), args.workers), flush=True)
+            with ProcessPoolExecutor(max_workers=args.workers) as pool, jobs_file.open("a", encoding="utf-8") as handle:
+                futures = [pool.submit(run_job, job, args.work, args.keep) for job in pending]
+                for future in as_completed(futures):
+                    result = future.result()
+                    handle.write(json.dumps(result) + "\n")
+                    handle.flush()
+                    done.append(result)
+                    if result.get("status") == "complete":
+                        finished.add(key(result))
+                    else:
+                        print("FAILED", result["family"], result["level"], result["run"], result.get("error"), flush=True)
+    record = summarize(done, args.results)
+    for row in record["rows"]:
+        print("{0:10s} {1:16s} seeds {2} runs {3:3d} assoc {4} coll {5} aligned {6} events {7} centre {8} false merges {9}".format(
+            row["family"], row["level"], row["seeds"], row["runs"], row.get("association_accuracy"),
+            row.get("collision_recall"), row.get("runs_aligned"), row.get("event_recall"),
+            row.get("fused_centre_error_m"), row.get("false_merges")))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,607 @@
+{
+ "definition": "    python scripts/impulse_symmetry.py traces/S*/run_* [--out results/robustness/impulse_symmetry]",
+ "provenance": {
+  "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+  "git_dirty": true,
+  "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+  "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+  "runs": [
+   "S01/run_0_crash",
+   "S02/run_0_crash",
+   "S02/run_0_critical_before_cut_in",
+   "S03/run_0_crash",
+   "S06/run_0_a_front_pushed",
+   "S06/run_0_b_rear_first",
+   "S07/run_0_crash",
+   "S08/run_0_crash",
+   "S09/run_0_merge_conflict",
+   "S10/run_0_rolls_through",
+   "S12/run_0_near_simultaneous",
+   "S15/run_0_deflected_into_c",
+   "S16/run_0_consequential",
+   "S17/run_0_crash",
+   "S18/run_0_abreast",
+   "S18/run_0_passing",
+   "S18/run_0_platoon"
+  ],
+  "perturbation_profile": null,
+  "seed": 20261011,
+  "generated_utc": "2026-10-11T03:24:44Z",
+  "python": "3.14.2"
+ },
+ "impulse_tolerance": 0.1,
+ "noise_levels": [
+  0.02,
+  0.05,
+  0.1,
+  0.2
+ ],
+ "max_relative_difference": 0.0,
+ "mean_survival": {
+  "0.02": 0.9998,
+  "0.05": 0.8632,
+  "0.1": 0.5434,
+  "0.2": 0.2896
+ },
+ "runs": [
+  {
+   "run": "S01/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 1,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 14394.11,
+      "B": 14394.11
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8641,
+      "0.1": 0.5472,
+      "0.2": 0.2878
+     }
+    }
+   ]
+  },
+  {
+   "run": "S02/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 1,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 2900.23,
+      "B": 2900.23
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9999,
+      "0.05": 0.8626,
+      "0.1": 0.5424,
+      "0.2": 0.2903
+     }
+    }
+   ]
+  },
+  {
+   "run": "S02/run_0_critical_before_cut_in",
+   "true_vehicle_contacts_with_two_reports": 11,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 604.48,
+      "B": 604.48
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8604,
+      "0.1": 0.5515,
+      "0.2": 0.2883
+     }
+    }
+   ]
+  },
+  {
+   "run": "S03/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 7,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 12137.59,
+      "B": 12137.59
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.863,
+      "0.1": 0.5431,
+      "0.2": 0.2848
+     }
+    }
+   ]
+  },
+  {
+   "run": "S06/run_0_a_front_pushed",
+   "true_vehicle_contacts_with_two_reports": 12,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 10281.41,
+      "B": 10281.41
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.8548,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8608,
+      "0.1": 0.5443,
+      "0.2": 0.2888
+     }
+    },
+    {
+     "event": "collision_002",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1509.76,
+      "B": 1509.76
+     },
+     "similarity": 1.0,
+     "merged_burst": true,
+     "nearest_competitor_similarity": 0.1468,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8618,
+      "0.1": 0.5421,
+      "0.2": 0.2938
+     }
+    },
+    {
+     "event": "collision_003",
+     "graphs": [
+      "B",
+      "C"
+     ],
+     "peak_impulse": {
+      "B": 8788.05,
+      "C": 8788.05
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.8548,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8643,
+      "0.1": 0.5377,
+      "0.2": 0.292
+     }
+    }
+   ]
+  },
+  {
+   "run": "S06/run_0_b_rear_first",
+   "true_vehicle_contacts_with_two_reports": 2,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 31706.27,
+      "B": 31706.27
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.6889,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8667,
+      "0.1": 0.543,
+      "0.2": 0.294
+     }
+    },
+    {
+     "event": "collision_002",
+     "graphs": [
+      "B",
+      "C"
+     ],
+     "peak_impulse": {
+      "B": 21842.46,
+      "C": 21842.46
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.6889,
+     "survival": {
+      "0.02": 0.9999,
+      "0.05": 0.864,
+      "0.1": 0.5392,
+      "0.2": 0.2897
+     }
+    }
+   ]
+  },
+  {
+   "run": "S07/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 1,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 22183.35,
+      "B": 22183.35
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8622,
+      "0.1": 0.5424,
+      "0.2": 0.289
+     }
+    }
+   ]
+  },
+  {
+   "run": "S08/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 7,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 12137.11,
+      "B": 12137.11
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8634,
+      "0.1": 0.5427,
+      "0.2": 0.2933
+     }
+    }
+   ]
+  },
+  {
+   "run": "S09/run_0_merge_conflict",
+   "true_vehicle_contacts_with_two_reports": 26,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1904.84,
+      "B": 1904.84
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 1.0,
+      "0.05": 0.8605,
+      "0.1": 0.5414,
+      "0.2": 0.2922
+     }
+    }
+   ]
+  },
+  {
+   "run": "S10/run_0_rolls_through",
+   "true_vehicle_contacts_with_two_reports": 1,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 12940.27,
+      "B": 12940.27
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9999,
+      "0.05": 0.8621,
+      "0.1": 0.5412,
+      "0.2": 0.2836
+     }
+    }
+   ]
+  },
+  {
+   "run": "S12/run_0_near_simultaneous",
+   "true_vehicle_contacts_with_two_reports": 1,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 7661.46,
+      "B": 7661.46
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8639,
+      "0.1": 0.5429,
+      "0.2": 0.2889
+     }
+    }
+   ]
+  },
+  {
+   "run": "S15/run_0_deflected_into_c",
+   "true_vehicle_contacts_with_two_reports": 187,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 10358.22,
+      "B": 10358.22
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.1815,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8615,
+      "0.1": 0.5452,
+      "0.2": 0.2875
+     }
+    },
+    {
+     "event": "collision_002",
+     "graphs": [
+      "A",
+      "C"
+     ],
+     "peak_impulse": {
+      "A": 1880.32,
+      "C": 1880.32
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.1815,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8682,
+      "0.1": 0.5476,
+      "0.2": 0.2888
+     }
+    }
+   ]
+  },
+  {
+   "run": "S16/run_0_consequential",
+   "true_vehicle_contacts_with_two_reports": 36,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 4243.51,
+      "B": 4243.51
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0759,
+     "survival": {
+      "0.02": 0.9998,
+      "0.05": 0.8645,
+      "0.1": 0.5407,
+      "0.2": 0.2883
+     }
+    },
+    {
+     "event": "collision_002",
+     "graphs": [
+      "A",
+      "C"
+     ],
+     "peak_impulse": {
+      "A": 322.1,
+      "C": 322.1
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0759,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8612,
+      "0.1": 0.5417,
+      "0.2": 0.2912
+     }
+    }
+   ]
+  },
+  {
+   "run": "S17/run_0_crash",
+   "true_vehicle_contacts_with_two_reports": 15,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1576.92,
+      "B": 1576.92
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9999,
+      "0.05": 0.8669,
+      "0.1": 0.5405,
+      "0.2": 0.2908
+     }
+    }
+   ]
+  },
+  {
+   "run": "S18/run_0_abreast",
+   "true_vehicle_contacts_with_two_reports": 5,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1079.56,
+      "B": 1079.56
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9996,
+      "0.05": 0.86,
+      "0.1": 0.5492,
+      "0.2": 0.289
+     }
+    }
+   ]
+  },
+  {
+   "run": "S18/run_0_passing",
+   "true_vehicle_contacts_with_two_reports": 5,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1092.43,
+      "B": 1092.43
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9999,
+      "0.05": 0.8638,
+      "0.1": 0.5435,
+      "0.2": 0.2914
+     }
+    }
+   ]
+  },
+  {
+   "run": "S18/run_0_platoon",
+   "true_vehicle_contacts_with_two_reports": 5,
+   "max_relative_difference_between_the_two_reports": 0.0,
+   "matched_events": [
+    {
+     "event": "collision_001",
+     "graphs": [
+      "A",
+      "B"
+     ],
+     "peak_impulse": {
+      "A": 1097.53,
+      "B": 1097.53
+     },
+     "similarity": 1.0,
+     "merged_burst": false,
+     "nearest_competitor_similarity": 0.0,
+     "survival": {
+      "0.02": 0.9997,
+      "0.05": 0.8637,
+      "0.1": 0.5446,
+      "0.2": 0.2883
+     }
+    }
+   ]
+  }
+ ]
+}
