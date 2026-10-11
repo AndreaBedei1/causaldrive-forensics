@@ -163,6 +163,9 @@ ignored staging directory, verified, then copied into `results/` and committed.
 rendering commit and input-study provenance. Clean rendering does not relabel the
 historical scientific executions. Tables explicitly identify mixed/historical
 studies; the old impulse-survival table is labelled legacy.
+Historical robustness plots use the retained baseline of their own code version;
+the mixed table shows both baseline versions explicitly. Figure QA verifies
+these comparators as well as output hashes, fonts and visual layout.
 
 ## Independent oracle subset
 

@@ -292,7 +292,12 @@ def table_robustness(t: Tables) -> None:
         return "{0:.{2}f}".format(value, sd, decimals) + ("" if not sd else " +- {0:.{1}f}".format(sd, decimals))
 
     rows = []
-    for row in record["rows"]:
+    displayed = list(record['rows'])
+    past_baseline = next((row for past in record.get('analysis_history', []) for row in past.get('rows', [])
+                          if row['family'] == 'baseline'), None)
+    if past_baseline is not None:
+        displayed.insert(1, dict(past_baseline, family='baseline historical'))
+    for row in displayed:
         errors = None
         if row.get("wrong_links") is not None or row.get("false_merges") is not None:
             errors = (row.get("wrong_links") or 0.0) + (row.get("false_merges") or 0.0)
@@ -303,7 +308,7 @@ def table_robustness(t: Tables) -> None:
                      None if row.get("identical_graphs") is None else "{0:.0f}/{1}".format(row["identical_graphs"], row["runs"])])
     t.write("T5_robustness", "Robustness of the reconstruction on the canonical runs (docs/robustness_profiles.md): mean "
              "+- SD over seeds of the metrics pooled over the runs. Baseline/impulse refreshed in final hardening; "
-             "other families retain the historical implementation (see family_provenance in summary.json).",
+             "other families retain the historical implementation and its baseline (see family_provenance in summary.json).",
             ["family", "level", "seeds", "identity acc.", "collisions", "runs aligned", "core events", "event dt p95 [s]",
              "centre err. [m]", "wrong links + false merges", "identical graphs"], rows,
             "Core events: the unperturbed reconstruction's instant core events found again (same type, actor, subject "
@@ -532,7 +537,7 @@ def figure_fusion(out: Path, written: List[Tuple[str, str]]) -> None:
     ax.set_ylabel("centre error, run median [m]")
     from matplotlib.patches import Patch
     ax.legend(handles=[Patch(color="tab:blue", label="fused"), Patch(color="0.7", label="single-track nominal box")],
-              loc="upper left")
+              loc="lower left", bbox_to_anchor=(0.0, 1.02), ncol=2)
     ax.grid(axis="y", alpha=0.3)
     _save(fig, out, "F3_fusion_centre_error", written,
           "Centre error of the road users that recorded nothing, per sweep run: fused estimate against the single-track "

@@ -298,17 +298,33 @@ PANELS = {"radar": GENERAL, "gnss": GENERAL,
 RATIOS = ("association_accuracy", "event_recall", "collision_recall", "runs_aligned")
 
 
+def baseline_for_family(record: Dict[str, Any], family: str) -> Optional[Dict[str, Any]]:
+    """Use the baseline executed by the same version as the family's study."""
+    baseline = next((r for r in record['rows'] if r['family'] == 'baseline'), None)
+    versions = record.get('family_provenance', {})
+    family_hash = versions.get(family, {}).get('code_sha256')
+    baseline_hash = versions.get('baseline', {}).get('code_sha256')
+    if family_hash and baseline_hash and family_hash != baseline_hash:
+        for past in record.get('analysis_history', []):
+            if past.get('provenance', {}).get('code_sha256') == family_hash:
+                historical = next((r for r in past.get('rows', []) if r['family'] == 'baseline'), None)
+                if historical is not None:
+                    return historical
+        raise ValueError('No version-compatible baseline retained for ' + family)
+    return baseline
+
+
 def figures(record: Dict[str, Any], out_dir: Path) -> List[Path]:
     """Metrics against the level of each family (SVG and PDF); the GNSS figure overlays the plain and the
     mutually refined reconstruction."""
     from cdf.evaluation.figures import DOUBLE_COLUMN_IN, paper_style
     plt = paper_style()
     rows = record["rows"]
-    baseline = next((row for row in rows if row["family"] == "baseline"), None)
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
 
     def series(family: str) -> List[Dict[str, Any]]:
+        baseline = baseline_for_family(record, family)
         own = [row for row in rows if row["family"] == family]
         return ([dict(baseline, level=PLOTS.get(family.replace("_refined", ""), "none"))] if baseline else []) + own
 
@@ -347,9 +363,12 @@ def figures(record: Dict[str, Any], out_dir: Path) -> List[Path]:
                 axis.set_ylim(-0.02, 1.02)
         if len(groups) > 1:
             axes[0].legend()
-        fig.suptitle({"radar": "Radar noise, missed detections and clutter", "gnss": "GNSS position and heading errors",
-                      "impulse": "Collision impulse noise", "latency": "Collision report latency (one recorder)",
-                      "downsample": "Recording rate"}[family])
+        title = {"radar": "Radar noise, missed detections and clutter", "gnss": "GNSS position and heading errors",
+                       "impulse": "Collision impulse noise", "latency": "Collision report latency (one recorder)",
+                       "downsample": "Recording rate"}[family]
+        if record.get('family_provenance', {}).get(family) != record.get('family_provenance', {}).get('baseline'):
+            title += ' (historical study)'
+        fig.suptitle(title)
         fig.tight_layout()
         for suffix in ("svg", "pdf"):
             path = out_dir / "{0}.{1}".format(family, suffix)
