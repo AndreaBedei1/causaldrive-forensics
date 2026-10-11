@@ -159,6 +159,17 @@ class AssociationTests(unittest.TestCase):
         late = track("B", "track_004", [round(t + 3.0, 4) for t in TIMES[30:]], straight(30.0, 0.0, 12.0), radar)
         self.assertIsNone(stitch_evidence(before, late, CFG))
 
+    def test_a_detected_identity_boundary_cannot_stitch_to_a_different_track(self):
+        motion, radar = straight(30.0, 0.0, 12.0), following(0.0, 0.0, 12.0)
+        before = track('B', 'track_001#segment_1', TIMES[:30], motion, radar)
+        after = track('B', 'track_003', [round(t + 0.7, 4) for t in TIMES[30:]], motion, radar)
+        self.assertTrue(stitch_evidence(before, after, CFG).accepted)
+        before.parent_track = 'track_001'
+        self.assertIsNone(stitch_evidence(before, after, CFG))
+        # Actual simultaneous evidence is still usable on the stable part.
+        other = track('A', 'track_001', TIMES[:30], motion, following(40.0, -3.5, 12.0))
+        self.assertTrue(pair_evidence(before, other, CFG).accepted)
+
     def test_a_track_with_two_possible_successors_is_stitched_to_neither(self):
         tracks = {name: CommonTrack(name.split(":")[0], name.split(":")[1],
                                     [observe(t, np.zeros(2), 0.0, 5.0, np.array([-20.0, 0.0])) for t in times])

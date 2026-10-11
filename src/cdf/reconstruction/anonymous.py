@@ -628,8 +628,12 @@ def stitch_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -
     if a.recorder != b.recorder:
         return None
     if (a.identity_ambiguous or b.identity_ambiguous
-            or (a.parent_track is not None and a.parent_track == b.parent_track)):
-        return None  # do not undo a detected handoff with a motion-only stitch
+            or a.parent_track is not None or b.parent_track is not None):
+        # A segmented endpoint is a detected identity boundary, not an ordinary
+        # lost detection. Extrapolation alone cannot bridge that boundary to
+        # either its sibling or a different local track. Shared measured body
+        # support from another observer can still associate stable segments.
+        return None
     last = next((s for s in reversed(a.samples) if s.measured), None)
     first = next((s for s in b.samples if s.measured), None)
     if last is None or first is None:
