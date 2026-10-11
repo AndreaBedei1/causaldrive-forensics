@@ -1,4 +1,4 @@
-**T6_sensitivity_canonical.**  One-at-a-time sensitivity of the core events to their thresholds before the first contact (17 runs, canonical).
+**T6_sensitivity_canonical.**  Historical one-at-a-time sensitivity of the core events to their thresholds before the first contact (17 runs, canonical).
 
 | setting | CTTC start: recall / precision | CTTC start: oracle events | path entry: recall / precision | path entry: oracle events | cut-in R: recall / precision | cut-in R: oracle events |
 |---|---|---|---|---|---|---|

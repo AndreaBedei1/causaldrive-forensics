@@ -1,0 +1,2797 @@
+{
+  "git_commit": "f79deb86ff28127d696761fb858b04fd59f13f6d",
+  "git_dirty": false,
+  "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+  "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+  "runs": [],
+  "perturbation_profile": null,
+  "seed": null,
+  "generated_utc": "2026-10-11T09:52:19Z",
+  "python": "3.14.2",
+  "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+  "equivalent_clean_commit": "f79deb86ff28127d696761fb858b04fd59f13f6d",
+  "final_analysis_commit": "f79deb86ff28127d696761fb858b04fd59f13f6d",
+  "analysis_scripts_sha256": "8bd4d54a0edc10d669bc9d8c755fd6049a60728d4bdab4e3a447033e59a06eab",
+  "scope": "Rendering of tables/figures; each input study retains its own execution provenance",
+  "inputs": {
+    "results/robustness/impulse_symmetry.json": {
+      "sha256": "5c14f9fdae4f66df57cc3119a6e19e50069bc0c259181c0ac516d6bc5e2d3dc9",
+      "provenance": {
+        "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+        "git_dirty": true,
+        "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+        "runs": [
+          "S01/run_0_crash",
+          "S02/run_0_crash",
+          "S02/run_0_critical_before_cut_in",
+          "S03/run_0_crash",
+          "S06/run_0_a_front_pushed",
+          "S06/run_0_b_rear_first",
+          "S07/run_0_crash",
+          "S08/run_0_crash",
+          "S09/run_0_merge_conflict",
+          "S10/run_0_rolls_through",
+          "S12/run_0_near_simultaneous",
+          "S15/run_0_deflected_into_c",
+          "S16/run_0_consequential",
+          "S17/run_0_crash",
+          "S18/run_0_abreast",
+          "S18/run_0_passing",
+          "S18/run_0_platoon"
+        ],
+        "perturbation_profile": null,
+        "seed": 20261011,
+        "generated_utc": "2026-10-11T03:24:44Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+        "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+      }
+    },
+    "results/robustness/summary.json": {
+      "sha256": "38a86d66306f10cc741de970d895489bddf3e0d754ebf9d0c7b55023150561fb",
+      "provenance": {
+        "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+        "git_dirty": true,
+        "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+        "runs": [
+          "S01/run_0_crash",
+          "S02/run_0_crash",
+          "S02/run_0_critical_before_cut_in",
+          "S03/run_0_crash",
+          "S06/run_0_a_front_pushed",
+          "S06/run_0_b_rear_first",
+          "S07/run_0_crash",
+          "S08/run_0_crash",
+          "S09/run_0_merge_conflict",
+          "S10/run_0_rolls_through",
+          "S12/run_0_near_simultaneous",
+          "S15/run_0_deflected_into_c",
+          "S16/run_0_consequential",
+          "S17/run_0_crash",
+          "S18/run_0_abreast",
+          "S18/run_0_passing",
+          "S18/run_0_platoon"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T04:07:37Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+        "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+      },
+      "family_provenance": {
+        "baseline": {
+          "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+          "git_dirty": true,
+          "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+          "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T09:33:25Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+          "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+          "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887"
+        },
+        "radar": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "gnss": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "gnss_refined": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "impulse": {
+          "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+          "git_dirty": true,
+          "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+          "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T09:33:25Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+          "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+          "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887"
+        },
+        "latency": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "clock": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "downsample": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "dropout": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        },
+        "outage": {
+          "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+          "git_dirty": true,
+          "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+          "runs": [
+            "S01/run_0_crash",
+            "S02/run_0_crash",
+            "S02/run_0_critical_before_cut_in",
+            "S03/run_0_crash",
+            "S06/run_0_a_front_pushed",
+            "S06/run_0_b_rear_first",
+            "S07/run_0_crash",
+            "S08/run_0_crash",
+            "S09/run_0_merge_conflict",
+            "S10/run_0_rolls_through",
+            "S12/run_0_near_simultaneous",
+            "S15/run_0_deflected_into_c",
+            "S16/run_0_consequential",
+            "S17/run_0_crash",
+            "S18/run_0_abreast",
+            "S18/run_0_passing",
+            "S18/run_0_platoon"
+          ],
+          "perturbation_profile": null,
+          "seed": null,
+          "generated_utc": "2026-10-11T04:07:37Z",
+          "python": "3.14.2",
+          "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+          "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+          "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+        }
+      },
+      "scope": "Baseline/impulse refreshed; all other families historical. Use family_provenance, not a single current-code claim. Most refreshed jobs executed the committed 64bce83 source; 13 passing jobs executed fd8d2ba after its stitch-only patch. Collision matching source was unchanged by that patch."
+    },
+    "results/semantics/event_oracle_canonical.json": {
+      "sha256": "c88306bd80e3e4e01ce131ae47f8186cf803b5453bf3ee971fc765fbad39e5d1",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "traces/S01/run_0_crash",
+          "traces/S02/run_0_crash",
+          "traces/S02/run_0_critical_before_cut_in",
+          "traces/S03/run_0_crash",
+          "traces/S06/run_0_a_front_pushed",
+          "traces/S06/run_0_b_rear_first",
+          "traces/S07/run_0_crash",
+          "traces/S08/run_0_crash",
+          "traces/S09/run_0_merge_conflict",
+          "traces/S10/run_0_rolls_through",
+          "traces/S12/run_0_near_simultaneous",
+          "traces/S15/run_0_deflected_into_c",
+          "traces/S16/run_0_consequential",
+          "traces/S17/run_0_crash",
+          "traces/S18/run_0_abreast",
+          "traces/S18/run_0_passing",
+          "traces/S18/run_0_platoon"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T09:35:15Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887"
+      }
+    },
+    "results/semantics/event_oracle_sweeps.json": {
+      "sha256": "287f36229bab3b98a0e824a8e5ac194af8110ddb945af6abc3fd722101b38eba",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "sweeps/anonymous_pair_adjacent/S18/run_0_anonymous_pair_adjacent_000",
+          "sweeps/anonymous_pair_adjacent/S18/run_10_anonymous_pair_adjacent_010",
+          "sweeps/anonymous_pair_adjacent/S18/run_11_anonymous_pair_adjacent_011",
+          "sweeps/anonymous_pair_adjacent/S18/run_12_anonymous_pair_adjacent_012",
+          "sweeps/anonymous_pair_adjacent/S18/run_13_anonymous_pair_adjacent_013",
+          "sweeps/anonymous_pair_adjacent/S18/run_14_anonymous_pair_adjacent_014",
+          "sweeps/anonymous_pair_adjacent/S18/run_15_anonymous_pair_adjacent_015",
+          "sweeps/anonymous_pair_adjacent/S18/run_16_anonymous_pair_adjacent_016",
+          "sweeps/anonymous_pair_adjacent/S18/run_17_anonymous_pair_adjacent_017",
+          "sweeps/anonymous_pair_adjacent/S18/run_18_anonymous_pair_adjacent_018",
+          "sweeps/anonymous_pair_adjacent/S18/run_19_anonymous_pair_adjacent_019",
+          "sweeps/anonymous_pair_adjacent/S18/run_1_anonymous_pair_adjacent_001",
+          "sweeps/anonymous_pair_adjacent/S18/run_20_anonymous_pair_adjacent_020",
+          "sweeps/anonymous_pair_adjacent/S18/run_21_anonymous_pair_adjacent_021",
+          "sweeps/anonymous_pair_adjacent/S18/run_22_anonymous_pair_adjacent_022",
+          "sweeps/anonymous_pair_adjacent/S18/run_23_anonymous_pair_adjacent_023",
+          "sweeps/anonymous_pair_adjacent/S18/run_24_anonymous_pair_adjacent_024",
+          "sweeps/anonymous_pair_adjacent/S18/run_25_anonymous_pair_adjacent_025",
+          "sweeps/anonymous_pair_adjacent/S18/run_26_anonymous_pair_adjacent_026",
+          "sweeps/anonymous_pair_adjacent/S18/run_27_anonymous_pair_adjacent_027",
+          "sweeps/anonymous_pair_adjacent/S18/run_28_anonymous_pair_adjacent_028",
+          "sweeps/anonymous_pair_adjacent/S18/run_29_anonymous_pair_adjacent_029",
+          "sweeps/anonymous_pair_adjacent/S18/run_2_anonymous_pair_adjacent_002",
+          "sweeps/anonymous_pair_adjacent/S18/run_30_anonymous_pair_adjacent_030",
+          "sweeps/anonymous_pair_adjacent/S18/run_31_anonymous_pair_adjacent_031",
+          "sweeps/anonymous_pair_adjacent/S18/run_32_anonymous_pair_adjacent_032",
+          "sweeps/anonymous_pair_adjacent/S18/run_33_anonymous_pair_adjacent_033",
+          "sweeps/anonymous_pair_adjacent/S18/run_34_anonymous_pair_adjacent_034",
+          "sweeps/anonymous_pair_adjacent/S18/run_35_anonymous_pair_adjacent_035",
+          "sweeps/anonymous_pair_adjacent/S18/run_36_anonymous_pair_adjacent_036",
+          "sweeps/anonymous_pair_adjacent/S18/run_37_anonymous_pair_adjacent_037",
+          "sweeps/anonymous_pair_adjacent/S18/run_38_anonymous_pair_adjacent_038",
+          "sweeps/anonymous_pair_adjacent/S18/run_39_anonymous_pair_adjacent_039",
+          "sweeps/anonymous_pair_adjacent/S18/run_3_anonymous_pair_adjacent_003",
+          "sweeps/anonymous_pair_adjacent/S18/run_4_anonymous_pair_adjacent_004",
+          "sweeps/anonymous_pair_adjacent/S18/run_5_anonymous_pair_adjacent_005",
+          "sweeps/anonymous_pair_adjacent/S18/run_6_anonymous_pair_adjacent_006",
+          "sweeps/anonymous_pair_adjacent/S18/run_7_anonymous_pair_adjacent_007",
+          "sweeps/anonymous_pair_adjacent/S18/run_8_anonymous_pair_adjacent_008",
+          "sweeps/anonymous_pair_adjacent/S18/run_9_anonymous_pair_adjacent_009",
+          "sweeps/anonymous_pair_platoon/S18/run_0_anonymous_pair_platoon_000",
+          "sweeps/anonymous_pair_platoon/S18/run_10_anonymous_pair_platoon_010",
+          "sweeps/anonymous_pair_platoon/S18/run_11_anonymous_pair_platoon_011",
+          "sweeps/anonymous_pair_platoon/S18/run_12_anonymous_pair_platoon_012",
+          "sweeps/anonymous_pair_platoon/S18/run_13_anonymous_pair_platoon_013",
+          "sweeps/anonymous_pair_platoon/S18/run_14_anonymous_pair_platoon_014",
+          "sweeps/anonymous_pair_platoon/S18/run_15_anonymous_pair_platoon_015",
+          "sweeps/anonymous_pair_platoon/S18/run_16_anonymous_pair_platoon_016",
+          "sweeps/anonymous_pair_platoon/S18/run_17_anonymous_pair_platoon_017",
+          "sweeps/anonymous_pair_platoon/S18/run_18_anonymous_pair_platoon_018",
+          "sweeps/anonymous_pair_platoon/S18/run_19_anonymous_pair_platoon_019",
+          "sweeps/anonymous_pair_platoon/S18/run_1_anonymous_pair_platoon_001",
+          "sweeps/anonymous_pair_platoon/S18/run_20_anonymous_pair_platoon_020",
+          "sweeps/anonymous_pair_platoon/S18/run_21_anonymous_pair_platoon_021",
+          "sweeps/anonymous_pair_platoon/S18/run_22_anonymous_pair_platoon_022",
+          "sweeps/anonymous_pair_platoon/S18/run_23_anonymous_pair_platoon_023",
+          "sweeps/anonymous_pair_platoon/S18/run_24_anonymous_pair_platoon_024",
+          "sweeps/anonymous_pair_platoon/S18/run_25_anonymous_pair_platoon_025",
+          "sweeps/anonymous_pair_platoon/S18/run_26_anonymous_pair_platoon_026",
+          "sweeps/anonymous_pair_platoon/S18/run_27_anonymous_pair_platoon_027",
+          "sweeps/anonymous_pair_platoon/S18/run_28_anonymous_pair_platoon_028",
+          "sweeps/anonymous_pair_platoon/S18/run_29_anonymous_pair_platoon_029",
+          "sweeps/anonymous_pair_platoon/S18/run_2_anonymous_pair_platoon_002",
+          "sweeps/anonymous_pair_platoon/S18/run_30_anonymous_pair_platoon_030",
+          "sweeps/anonymous_pair_platoon/S18/run_31_anonymous_pair_platoon_031",
+          "sweeps/anonymous_pair_platoon/S18/run_32_anonymous_pair_platoon_032",
+          "sweeps/anonymous_pair_platoon/S18/run_33_anonymous_pair_platoon_033",
+          "sweeps/anonymous_pair_platoon/S18/run_34_anonymous_pair_platoon_034",
+          "sweeps/anonymous_pair_platoon/S18/run_35_anonymous_pair_platoon_035",
+          "sweeps/anonymous_pair_platoon/S18/run_36_anonymous_pair_platoon_036",
+          "sweeps/anonymous_pair_platoon/S18/run_37_anonymous_pair_platoon_037",
+          "sweeps/anonymous_pair_platoon/S18/run_38_anonymous_pair_platoon_038",
+          "sweeps/anonymous_pair_platoon/S18/run_39_anonymous_pair_platoon_039",
+          "sweeps/anonymous_pair_platoon/S18/run_3_anonymous_pair_platoon_003",
+          "sweeps/anonymous_pair_platoon/S18/run_4_anonymous_pair_platoon_004",
+          "sweeps/anonymous_pair_platoon/S18/run_5_anonymous_pair_platoon_005",
+          "sweeps/anonymous_pair_platoon/S18/run_6_anonymous_pair_platoon_006",
+          "sweeps/anonymous_pair_platoon/S18/run_7_anonymous_pair_platoon_007",
+          "sweeps/anonymous_pair_platoon/S18/run_8_anonymous_pair_platoon_008",
+          "sweeps/anonymous_pair_platoon/S18/run_9_anonymous_pair_platoon_009",
+          "sweeps/crossing/S03/run_0_crossing_000",
+          "sweeps/crossing/S03/run_10_crossing_010",
+          "sweeps/crossing/S03/run_11_crossing_011",
+          "sweeps/crossing/S03/run_12_crossing_012",
+          "sweeps/crossing/S03/run_13_crossing_013",
+          "sweeps/crossing/S03/run_14_crossing_014",
+          "sweeps/crossing/S03/run_15_crossing_015",
+          "sweeps/crossing/S03/run_16_crossing_016",
+          "sweeps/crossing/S03/run_17_crossing_017",
+          "sweeps/crossing/S03/run_18_crossing_018",
+          "sweeps/crossing/S03/run_19_crossing_019",
+          "sweeps/crossing/S03/run_1_crossing_001",
+          "sweeps/crossing/S03/run_20_crossing_020",
+          "sweeps/crossing/S03/run_21_crossing_021",
+          "sweeps/crossing/S03/run_22_crossing_022",
+          "sweeps/crossing/S03/run_23_crossing_023",
+          "sweeps/crossing/S03/run_24_crossing_024",
+          "sweeps/crossing/S03/run_25_crossing_025",
+          "sweeps/crossing/S03/run_26_crossing_026",
+          "sweeps/crossing/S03/run_27_crossing_027",
+          "sweeps/crossing/S03/run_28_crossing_028",
+          "sweeps/crossing/S03/run_29_crossing_029",
+          "sweeps/crossing/S03/run_2_crossing_002",
+          "sweeps/crossing/S03/run_30_crossing_030",
+          "sweeps/crossing/S03/run_31_crossing_031",
+          "sweeps/crossing/S03/run_32_crossing_032",
+          "sweeps/crossing/S03/run_33_crossing_033",
+          "sweeps/crossing/S03/run_34_crossing_034",
+          "sweeps/crossing/S03/run_35_crossing_035",
+          "sweeps/crossing/S03/run_36_crossing_036",
+          "sweeps/crossing/S03/run_37_crossing_037",
+          "sweeps/crossing/S03/run_38_crossing_038",
+          "sweeps/crossing/S03/run_39_crossing_039",
+          "sweeps/crossing/S03/run_3_crossing_003",
+          "sweeps/crossing/S03/run_4_crossing_004",
+          "sweeps/crossing/S03/run_5_crossing_005",
+          "sweeps/crossing/S03/run_6_crossing_006",
+          "sweeps/crossing/S03/run_7_crossing_007",
+          "sweeps/crossing/S03/run_8_crossing_008",
+          "sweeps/crossing/S03/run_9_crossing_009",
+          "sweeps/cut_in/S02/run_0_cut_in_000",
+          "sweeps/cut_in/S02/run_10_cut_in_010",
+          "sweeps/cut_in/S02/run_11_cut_in_011",
+          "sweeps/cut_in/S02/run_12_cut_in_012",
+          "sweeps/cut_in/S02/run_13_cut_in_013",
+          "sweeps/cut_in/S02/run_14_cut_in_014",
+          "sweeps/cut_in/S02/run_15_cut_in_015",
+          "sweeps/cut_in/S02/run_16_cut_in_016",
+          "sweeps/cut_in/S02/run_17_cut_in_017",
+          "sweeps/cut_in/S02/run_18_cut_in_018",
+          "sweeps/cut_in/S02/run_19_cut_in_019",
+          "sweeps/cut_in/S02/run_1_cut_in_001",
+          "sweeps/cut_in/S02/run_20_cut_in_020",
+          "sweeps/cut_in/S02/run_21_cut_in_021",
+          "sweeps/cut_in/S02/run_22_cut_in_022",
+          "sweeps/cut_in/S02/run_23_cut_in_023",
+          "sweeps/cut_in/S02/run_24_cut_in_024",
+          "sweeps/cut_in/S02/run_25_cut_in_025",
+          "sweeps/cut_in/S02/run_26_cut_in_026",
+          "sweeps/cut_in/S02/run_27_cut_in_027",
+          "sweeps/cut_in/S02/run_28_cut_in_028",
+          "sweeps/cut_in/S02/run_29_cut_in_029",
+          "sweeps/cut_in/S02/run_2_cut_in_002",
+          "sweeps/cut_in/S02/run_30_cut_in_030",
+          "sweeps/cut_in/S02/run_31_cut_in_031",
+          "sweeps/cut_in/S02/run_32_cut_in_032",
+          "sweeps/cut_in/S02/run_33_cut_in_033",
+          "sweeps/cut_in/S02/run_34_cut_in_034",
+          "sweeps/cut_in/S02/run_35_cut_in_035",
+          "sweeps/cut_in/S02/run_36_cut_in_036",
+          "sweeps/cut_in/S02/run_37_cut_in_037",
+          "sweeps/cut_in/S02/run_38_cut_in_038",
+          "sweeps/cut_in/S02/run_39_cut_in_039",
+          "sweeps/cut_in/S02/run_3_cut_in_003",
+          "sweeps/cut_in/S02/run_4_cut_in_004",
+          "sweeps/cut_in/S02/run_5_cut_in_005",
+          "sweeps/cut_in/S02/run_6_cut_in_006",
+          "sweeps/cut_in/S02/run_7_cut_in_007",
+          "sweeps/cut_in/S02/run_8_cut_in_008",
+          "sweeps/cut_in/S02/run_9_cut_in_009",
+          "sweeps/rear_end/S01/run_0_rear_end_000",
+          "sweeps/rear_end/S01/run_10_rear_end_010",
+          "sweeps/rear_end/S01/run_11_rear_end_011",
+          "sweeps/rear_end/S01/run_12_rear_end_012",
+          "sweeps/rear_end/S01/run_13_rear_end_013",
+          "sweeps/rear_end/S01/run_14_rear_end_014",
+          "sweeps/rear_end/S01/run_15_rear_end_015",
+          "sweeps/rear_end/S01/run_16_rear_end_016",
+          "sweeps/rear_end/S01/run_17_rear_end_017",
+          "sweeps/rear_end/S01/run_18_rear_end_018",
+          "sweeps/rear_end/S01/run_19_rear_end_019",
+          "sweeps/rear_end/S01/run_1_rear_end_001",
+          "sweeps/rear_end/S01/run_20_rear_end_020",
+          "sweeps/rear_end/S01/run_21_rear_end_021",
+          "sweeps/rear_end/S01/run_22_rear_end_022",
+          "sweeps/rear_end/S01/run_23_rear_end_023",
+          "sweeps/rear_end/S01/run_24_rear_end_024",
+          "sweeps/rear_end/S01/run_25_rear_end_025",
+          "sweeps/rear_end/S01/run_26_rear_end_026",
+          "sweeps/rear_end/S01/run_27_rear_end_027",
+          "sweeps/rear_end/S01/run_28_rear_end_028",
+          "sweeps/rear_end/S01/run_29_rear_end_029",
+          "sweeps/rear_end/S01/run_2_rear_end_002",
+          "sweeps/rear_end/S01/run_30_rear_end_030",
+          "sweeps/rear_end/S01/run_31_rear_end_031",
+          "sweeps/rear_end/S01/run_32_rear_end_032",
+          "sweeps/rear_end/S01/run_33_rear_end_033",
+          "sweeps/rear_end/S01/run_34_rear_end_034",
+          "sweeps/rear_end/S01/run_35_rear_end_035",
+          "sweeps/rear_end/S01/run_36_rear_end_036",
+          "sweeps/rear_end/S01/run_37_rear_end_037",
+          "sweeps/rear_end/S01/run_38_rear_end_038",
+          "sweeps/rear_end/S01/run_39_rear_end_039",
+          "sweeps/rear_end/S01/run_3_rear_end_003",
+          "sweeps/rear_end/S01/run_4_rear_end_004",
+          "sweeps/rear_end/S01/run_5_rear_end_005",
+          "sweeps/rear_end/S01/run_6_rear_end_006",
+          "sweeps/rear_end/S01/run_7_rear_end_007",
+          "sweeps/rear_end/S01/run_8_rear_end_008",
+          "sweeps/rear_end/S01/run_9_rear_end_009",
+          "sweeps/unobserved_cut_in/S17/run_0_unobserved_cut_in_000",
+          "sweeps/unobserved_cut_in/S17/run_10_unobserved_cut_in_010",
+          "sweeps/unobserved_cut_in/S17/run_11_unobserved_cut_in_011",
+          "sweeps/unobserved_cut_in/S17/run_12_unobserved_cut_in_012",
+          "sweeps/unobserved_cut_in/S17/run_13_unobserved_cut_in_013",
+          "sweeps/unobserved_cut_in/S17/run_14_unobserved_cut_in_014",
+          "sweeps/unobserved_cut_in/S17/run_15_unobserved_cut_in_015",
+          "sweeps/unobserved_cut_in/S17/run_16_unobserved_cut_in_016",
+          "sweeps/unobserved_cut_in/S17/run_17_unobserved_cut_in_017",
+          "sweeps/unobserved_cut_in/S17/run_18_unobserved_cut_in_018",
+          "sweeps/unobserved_cut_in/S17/run_19_unobserved_cut_in_019",
+          "sweeps/unobserved_cut_in/S17/run_1_unobserved_cut_in_001",
+          "sweeps/unobserved_cut_in/S17/run_20_unobserved_cut_in_020",
+          "sweeps/unobserved_cut_in/S17/run_21_unobserved_cut_in_021",
+          "sweeps/unobserved_cut_in/S17/run_22_unobserved_cut_in_022",
+          "sweeps/unobserved_cut_in/S17/run_23_unobserved_cut_in_023",
+          "sweeps/unobserved_cut_in/S17/run_24_unobserved_cut_in_024",
+          "sweeps/unobserved_cut_in/S17/run_25_unobserved_cut_in_025",
+          "sweeps/unobserved_cut_in/S17/run_26_unobserved_cut_in_026",
+          "sweeps/unobserved_cut_in/S17/run_27_unobserved_cut_in_027",
+          "sweeps/unobserved_cut_in/S17/run_28_unobserved_cut_in_028",
+          "sweeps/unobserved_cut_in/S17/run_29_unobserved_cut_in_029",
+          "sweeps/unobserved_cut_in/S17/run_2_unobserved_cut_in_002",
+          "sweeps/unobserved_cut_in/S17/run_30_unobserved_cut_in_030",
+          "sweeps/unobserved_cut_in/S17/run_31_unobserved_cut_in_031",
+          "sweeps/unobserved_cut_in/S17/run_32_unobserved_cut_in_032",
+          "sweeps/unobserved_cut_in/S17/run_33_unobserved_cut_in_033",
+          "sweeps/unobserved_cut_in/S17/run_34_unobserved_cut_in_034",
+          "sweeps/unobserved_cut_in/S17/run_35_unobserved_cut_in_035",
+          "sweeps/unobserved_cut_in/S17/run_36_unobserved_cut_in_036",
+          "sweeps/unobserved_cut_in/S17/run_37_unobserved_cut_in_037",
+          "sweeps/unobserved_cut_in/S17/run_38_unobserved_cut_in_038",
+          "sweeps/unobserved_cut_in/S17/run_39_unobserved_cut_in_039",
+          "sweeps/unobserved_cut_in/S17/run_3_unobserved_cut_in_003",
+          "sweeps/unobserved_cut_in/S17/run_4_unobserved_cut_in_004",
+          "sweeps/unobserved_cut_in/S17/run_5_unobserved_cut_in_005",
+          "sweeps/unobserved_cut_in/S17/run_6_unobserved_cut_in_006",
+          "sweeps/unobserved_cut_in/S17/run_7_unobserved_cut_in_007",
+          "sweeps/unobserved_cut_in/S17/run_8_unobserved_cut_in_008",
+          "sweeps/unobserved_cut_in/S17/run_9_unobserved_cut_in_009"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T09:35:33Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887"
+      }
+    },
+    "results/semantics/sensitivity_canonical.json": {
+      "sha256": "760acbbc5fb4bcbd1dacff8d6e40eeb3811934e2ab6fa63bd92f92486c43e5ea",
+      "provenance": {
+        "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+        "git_dirty": true,
+        "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+        "runs": [
+          "traces\\S01\\run_0_crash",
+          "traces\\S02\\run_0_crash",
+          "traces\\S02\\run_0_critical_before_cut_in",
+          "traces\\S03\\run_0_crash",
+          "traces\\S06\\run_0_a_front_pushed",
+          "traces\\S06\\run_0_b_rear_first",
+          "traces\\S07\\run_0_crash",
+          "traces\\S08\\run_0_crash",
+          "traces\\S09\\run_0_merge_conflict",
+          "traces\\S10\\run_0_rolls_through",
+          "traces\\S12\\run_0_near_simultaneous",
+          "traces\\S15\\run_0_deflected_into_c",
+          "traces\\S16\\run_0_consequential",
+          "traces\\S17\\run_0_crash",
+          "traces\\S18\\run_0_abreast",
+          "traces\\S18\\run_0_passing",
+          "traces\\S18\\run_0_platoon"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T03:56:50Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+        "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+      }
+    },
+    "results/semantics/sensitivity_sweeps.json": {
+      "sha256": "fbc7dd109f7bdad080dd978befd98bdf4e88d98cd0b21564da5a6801a7a43cee",
+      "provenance": {
+        "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+        "git_dirty": true,
+        "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+        "runs": [
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_0_anonymous_pair_adjacent_000",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_10_anonymous_pair_adjacent_010",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_11_anonymous_pair_adjacent_011",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_12_anonymous_pair_adjacent_012",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_13_anonymous_pair_adjacent_013",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_14_anonymous_pair_adjacent_014",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_15_anonymous_pair_adjacent_015",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_16_anonymous_pair_adjacent_016",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_17_anonymous_pair_adjacent_017",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_18_anonymous_pair_adjacent_018",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_19_anonymous_pair_adjacent_019",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_1_anonymous_pair_adjacent_001",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_20_anonymous_pair_adjacent_020",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_21_anonymous_pair_adjacent_021",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_22_anonymous_pair_adjacent_022",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_23_anonymous_pair_adjacent_023",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_24_anonymous_pair_adjacent_024",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_25_anonymous_pair_adjacent_025",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_26_anonymous_pair_adjacent_026",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_27_anonymous_pair_adjacent_027",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_28_anonymous_pair_adjacent_028",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_29_anonymous_pair_adjacent_029",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_2_anonymous_pair_adjacent_002",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_30_anonymous_pair_adjacent_030",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_31_anonymous_pair_adjacent_031",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_32_anonymous_pair_adjacent_032",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_33_anonymous_pair_adjacent_033",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_34_anonymous_pair_adjacent_034",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_35_anonymous_pair_adjacent_035",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_36_anonymous_pair_adjacent_036",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_37_anonymous_pair_adjacent_037",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_38_anonymous_pair_adjacent_038",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_39_anonymous_pair_adjacent_039",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_3_anonymous_pair_adjacent_003",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_4_anonymous_pair_adjacent_004",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_5_anonymous_pair_adjacent_005",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_6_anonymous_pair_adjacent_006",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_7_anonymous_pair_adjacent_007",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_8_anonymous_pair_adjacent_008",
+          "sweeps\\anonymous_pair_adjacent\\S18\\run_9_anonymous_pair_adjacent_009",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_0_anonymous_pair_platoon_000",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_10_anonymous_pair_platoon_010",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_11_anonymous_pair_platoon_011",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_12_anonymous_pair_platoon_012",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_13_anonymous_pair_platoon_013",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_14_anonymous_pair_platoon_014",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_15_anonymous_pair_platoon_015",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_16_anonymous_pair_platoon_016",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_17_anonymous_pair_platoon_017",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_18_anonymous_pair_platoon_018",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_19_anonymous_pair_platoon_019",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_1_anonymous_pair_platoon_001",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_20_anonymous_pair_platoon_020",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_21_anonymous_pair_platoon_021",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_22_anonymous_pair_platoon_022",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_23_anonymous_pair_platoon_023",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_24_anonymous_pair_platoon_024",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_25_anonymous_pair_platoon_025",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_26_anonymous_pair_platoon_026",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_27_anonymous_pair_platoon_027",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_28_anonymous_pair_platoon_028",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_29_anonymous_pair_platoon_029",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_2_anonymous_pair_platoon_002",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_30_anonymous_pair_platoon_030",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_31_anonymous_pair_platoon_031",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_32_anonymous_pair_platoon_032",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_33_anonymous_pair_platoon_033",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_34_anonymous_pair_platoon_034",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_35_anonymous_pair_platoon_035",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_36_anonymous_pair_platoon_036",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_37_anonymous_pair_platoon_037",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_38_anonymous_pair_platoon_038",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_39_anonymous_pair_platoon_039",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_3_anonymous_pair_platoon_003",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_4_anonymous_pair_platoon_004",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_5_anonymous_pair_platoon_005",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_6_anonymous_pair_platoon_006",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_7_anonymous_pair_platoon_007",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_8_anonymous_pair_platoon_008",
+          "sweeps\\anonymous_pair_platoon\\S18\\run_9_anonymous_pair_platoon_009",
+          "sweeps\\crossing\\S03\\run_0_crossing_000",
+          "sweeps\\crossing\\S03\\run_10_crossing_010",
+          "sweeps\\crossing\\S03\\run_11_crossing_011",
+          "sweeps\\crossing\\S03\\run_12_crossing_012",
+          "sweeps\\crossing\\S03\\run_13_crossing_013",
+          "sweeps\\crossing\\S03\\run_14_crossing_014",
+          "sweeps\\crossing\\S03\\run_15_crossing_015",
+          "sweeps\\crossing\\S03\\run_16_crossing_016",
+          "sweeps\\crossing\\S03\\run_17_crossing_017",
+          "sweeps\\crossing\\S03\\run_18_crossing_018",
+          "sweeps\\crossing\\S03\\run_19_crossing_019",
+          "sweeps\\crossing\\S03\\run_1_crossing_001",
+          "sweeps\\crossing\\S03\\run_20_crossing_020",
+          "sweeps\\crossing\\S03\\run_21_crossing_021",
+          "sweeps\\crossing\\S03\\run_22_crossing_022",
+          "sweeps\\crossing\\S03\\run_23_crossing_023",
+          "sweeps\\crossing\\S03\\run_24_crossing_024",
+          "sweeps\\crossing\\S03\\run_25_crossing_025",
+          "sweeps\\crossing\\S03\\run_26_crossing_026",
+          "sweeps\\crossing\\S03\\run_27_crossing_027",
+          "sweeps\\crossing\\S03\\run_28_crossing_028",
+          "sweeps\\crossing\\S03\\run_29_crossing_029",
+          "sweeps\\crossing\\S03\\run_2_crossing_002",
+          "sweeps\\crossing\\S03\\run_30_crossing_030",
+          "sweeps\\crossing\\S03\\run_31_crossing_031",
+          "sweeps\\crossing\\S03\\run_32_crossing_032",
+          "sweeps\\crossing\\S03\\run_33_crossing_033",
+          "sweeps\\crossing\\S03\\run_34_crossing_034",
+          "sweeps\\crossing\\S03\\run_35_crossing_035",
+          "sweeps\\crossing\\S03\\run_36_crossing_036",
+          "sweeps\\crossing\\S03\\run_37_crossing_037",
+          "sweeps\\crossing\\S03\\run_38_crossing_038",
+          "sweeps\\crossing\\S03\\run_39_crossing_039",
+          "sweeps\\crossing\\S03\\run_3_crossing_003",
+          "sweeps\\crossing\\S03\\run_4_crossing_004",
+          "sweeps\\crossing\\S03\\run_5_crossing_005",
+          "sweeps\\crossing\\S03\\run_6_crossing_006",
+          "sweeps\\crossing\\S03\\run_7_crossing_007",
+          "sweeps\\crossing\\S03\\run_8_crossing_008",
+          "sweeps\\crossing\\S03\\run_9_crossing_009",
+          "sweeps\\cut_in\\S02\\run_0_cut_in_000",
+          "sweeps\\cut_in\\S02\\run_10_cut_in_010",
+          "sweeps\\cut_in\\S02\\run_11_cut_in_011",
+          "sweeps\\cut_in\\S02\\run_12_cut_in_012",
+          "sweeps\\cut_in\\S02\\run_13_cut_in_013",
+          "sweeps\\cut_in\\S02\\run_14_cut_in_014",
+          "sweeps\\cut_in\\S02\\run_15_cut_in_015",
+          "sweeps\\cut_in\\S02\\run_16_cut_in_016",
+          "sweeps\\cut_in\\S02\\run_17_cut_in_017",
+          "sweeps\\cut_in\\S02\\run_18_cut_in_018",
+          "sweeps\\cut_in\\S02\\run_19_cut_in_019",
+          "sweeps\\cut_in\\S02\\run_1_cut_in_001",
+          "sweeps\\cut_in\\S02\\run_20_cut_in_020",
+          "sweeps\\cut_in\\S02\\run_21_cut_in_021",
+          "sweeps\\cut_in\\S02\\run_22_cut_in_022",
+          "sweeps\\cut_in\\S02\\run_23_cut_in_023",
+          "sweeps\\cut_in\\S02\\run_24_cut_in_024",
+          "sweeps\\cut_in\\S02\\run_25_cut_in_025",
+          "sweeps\\cut_in\\S02\\run_26_cut_in_026",
+          "sweeps\\cut_in\\S02\\run_27_cut_in_027",
+          "sweeps\\cut_in\\S02\\run_28_cut_in_028",
+          "sweeps\\cut_in\\S02\\run_29_cut_in_029",
+          "sweeps\\cut_in\\S02\\run_2_cut_in_002",
+          "sweeps\\cut_in\\S02\\run_30_cut_in_030",
+          "sweeps\\cut_in\\S02\\run_31_cut_in_031",
+          "sweeps\\cut_in\\S02\\run_32_cut_in_032",
+          "sweeps\\cut_in\\S02\\run_33_cut_in_033",
+          "sweeps\\cut_in\\S02\\run_34_cut_in_034",
+          "sweeps\\cut_in\\S02\\run_35_cut_in_035",
+          "sweeps\\cut_in\\S02\\run_36_cut_in_036",
+          "sweeps\\cut_in\\S02\\run_37_cut_in_037",
+          "sweeps\\cut_in\\S02\\run_38_cut_in_038",
+          "sweeps\\cut_in\\S02\\run_39_cut_in_039",
+          "sweeps\\cut_in\\S02\\run_3_cut_in_003",
+          "sweeps\\cut_in\\S02\\run_4_cut_in_004",
+          "sweeps\\cut_in\\S02\\run_5_cut_in_005",
+          "sweeps\\cut_in\\S02\\run_6_cut_in_006",
+          "sweeps\\cut_in\\S02\\run_7_cut_in_007",
+          "sweeps\\cut_in\\S02\\run_8_cut_in_008",
+          "sweeps\\cut_in\\S02\\run_9_cut_in_009",
+          "sweeps\\rear_end\\S01\\run_0_rear_end_000",
+          "sweeps\\rear_end\\S01\\run_10_rear_end_010",
+          "sweeps\\rear_end\\S01\\run_11_rear_end_011",
+          "sweeps\\rear_end\\S01\\run_12_rear_end_012",
+          "sweeps\\rear_end\\S01\\run_13_rear_end_013",
+          "sweeps\\rear_end\\S01\\run_14_rear_end_014",
+          "sweeps\\rear_end\\S01\\run_15_rear_end_015",
+          "sweeps\\rear_end\\S01\\run_16_rear_end_016",
+          "sweeps\\rear_end\\S01\\run_17_rear_end_017",
+          "sweeps\\rear_end\\S01\\run_18_rear_end_018",
+          "sweeps\\rear_end\\S01\\run_19_rear_end_019",
+          "sweeps\\rear_end\\S01\\run_1_rear_end_001",
+          "sweeps\\rear_end\\S01\\run_20_rear_end_020",
+          "sweeps\\rear_end\\S01\\run_21_rear_end_021",
+          "sweeps\\rear_end\\S01\\run_22_rear_end_022",
+          "sweeps\\rear_end\\S01\\run_23_rear_end_023",
+          "sweeps\\rear_end\\S01\\run_24_rear_end_024",
+          "sweeps\\rear_end\\S01\\run_25_rear_end_025",
+          "sweeps\\rear_end\\S01\\run_26_rear_end_026",
+          "sweeps\\rear_end\\S01\\run_27_rear_end_027",
+          "sweeps\\rear_end\\S01\\run_28_rear_end_028",
+          "sweeps\\rear_end\\S01\\run_29_rear_end_029",
+          "sweeps\\rear_end\\S01\\run_2_rear_end_002",
+          "sweeps\\rear_end\\S01\\run_30_rear_end_030",
+          "sweeps\\rear_end\\S01\\run_31_rear_end_031",
+          "sweeps\\rear_end\\S01\\run_32_rear_end_032",
+          "sweeps\\rear_end\\S01\\run_33_rear_end_033",
+          "sweeps\\rear_end\\S01\\run_34_rear_end_034",
+          "sweeps\\rear_end\\S01\\run_35_rear_end_035",
+          "sweeps\\rear_end\\S01\\run_36_rear_end_036",
+          "sweeps\\rear_end\\S01\\run_37_rear_end_037",
+          "sweeps\\rear_end\\S01\\run_38_rear_end_038",
+          "sweeps\\rear_end\\S01\\run_39_rear_end_039",
+          "sweeps\\rear_end\\S01\\run_3_rear_end_003",
+          "sweeps\\rear_end\\S01\\run_4_rear_end_004",
+          "sweeps\\rear_end\\S01\\run_5_rear_end_005",
+          "sweeps\\rear_end\\S01\\run_6_rear_end_006",
+          "sweeps\\rear_end\\S01\\run_7_rear_end_007",
+          "sweeps\\rear_end\\S01\\run_8_rear_end_008",
+          "sweeps\\rear_end\\S01\\run_9_rear_end_009",
+          "sweeps\\unobserved_cut_in\\S17\\run_0_unobserved_cut_in_000",
+          "sweeps\\unobserved_cut_in\\S17\\run_10_unobserved_cut_in_010",
+          "sweeps\\unobserved_cut_in\\S17\\run_11_unobserved_cut_in_011",
+          "sweeps\\unobserved_cut_in\\S17\\run_12_unobserved_cut_in_012",
+          "sweeps\\unobserved_cut_in\\S17\\run_13_unobserved_cut_in_013",
+          "sweeps\\unobserved_cut_in\\S17\\run_14_unobserved_cut_in_014",
+          "sweeps\\unobserved_cut_in\\S17\\run_15_unobserved_cut_in_015",
+          "sweeps\\unobserved_cut_in\\S17\\run_16_unobserved_cut_in_016",
+          "sweeps\\unobserved_cut_in\\S17\\run_17_unobserved_cut_in_017",
+          "sweeps\\unobserved_cut_in\\S17\\run_18_unobserved_cut_in_018",
+          "sweeps\\unobserved_cut_in\\S17\\run_19_unobserved_cut_in_019",
+          "sweeps\\unobserved_cut_in\\S17\\run_1_unobserved_cut_in_001",
+          "sweeps\\unobserved_cut_in\\S17\\run_20_unobserved_cut_in_020",
+          "sweeps\\unobserved_cut_in\\S17\\run_21_unobserved_cut_in_021",
+          "sweeps\\unobserved_cut_in\\S17\\run_22_unobserved_cut_in_022",
+          "sweeps\\unobserved_cut_in\\S17\\run_23_unobserved_cut_in_023",
+          "sweeps\\unobserved_cut_in\\S17\\run_24_unobserved_cut_in_024",
+          "sweeps\\unobserved_cut_in\\S17\\run_25_unobserved_cut_in_025",
+          "sweeps\\unobserved_cut_in\\S17\\run_26_unobserved_cut_in_026",
+          "sweeps\\unobserved_cut_in\\S17\\run_27_unobserved_cut_in_027",
+          "sweeps\\unobserved_cut_in\\S17\\run_28_unobserved_cut_in_028",
+          "sweeps\\unobserved_cut_in\\S17\\run_29_unobserved_cut_in_029",
+          "sweeps\\unobserved_cut_in\\S17\\run_2_unobserved_cut_in_002",
+          "sweeps\\unobserved_cut_in\\S17\\run_30_unobserved_cut_in_030",
+          "sweeps\\unobserved_cut_in\\S17\\run_31_unobserved_cut_in_031",
+          "sweeps\\unobserved_cut_in\\S17\\run_32_unobserved_cut_in_032",
+          "sweeps\\unobserved_cut_in\\S17\\run_33_unobserved_cut_in_033",
+          "sweeps\\unobserved_cut_in\\S17\\run_34_unobserved_cut_in_034",
+          "sweeps\\unobserved_cut_in\\S17\\run_35_unobserved_cut_in_035",
+          "sweeps\\unobserved_cut_in\\S17\\run_36_unobserved_cut_in_036",
+          "sweeps\\unobserved_cut_in\\S17\\run_37_unobserved_cut_in_037",
+          "sweeps\\unobserved_cut_in\\S17\\run_38_unobserved_cut_in_038",
+          "sweeps\\unobserved_cut_in\\S17\\run_39_unobserved_cut_in_039",
+          "sweeps\\unobserved_cut_in\\S17\\run_3_unobserved_cut_in_003",
+          "sweeps\\unobserved_cut_in\\S17\\run_4_unobserved_cut_in_004",
+          "sweeps\\unobserved_cut_in\\S17\\run_5_unobserved_cut_in_005",
+          "sweeps\\unobserved_cut_in\\S17\\run_6_unobserved_cut_in_006",
+          "sweeps\\unobserved_cut_in\\S17\\run_7_unobserved_cut_in_007",
+          "sweeps\\unobserved_cut_in\\S17\\run_8_unobserved_cut_in_008",
+          "sweeps\\unobserved_cut_in\\S17\\run_9_unobserved_cut_in_009"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T04:27:36Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+        "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+      }
+    },
+    "results/sweeps/anonymous_pair_adjacent.json": {
+      "sha256": "0985eb2b4dd5388a001319c3ee4f69c08e4b05e23082aff54cc27038ce2b6b44",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "anonymous_pair_adjacent_000",
+          "anonymous_pair_adjacent_001",
+          "anonymous_pair_adjacent_002",
+          "anonymous_pair_adjacent_003",
+          "anonymous_pair_adjacent_004",
+          "anonymous_pair_adjacent_005",
+          "anonymous_pair_adjacent_006",
+          "anonymous_pair_adjacent_007",
+          "anonymous_pair_adjacent_008",
+          "anonymous_pair_adjacent_009",
+          "anonymous_pair_adjacent_010",
+          "anonymous_pair_adjacent_011",
+          "anonymous_pair_adjacent_012",
+          "anonymous_pair_adjacent_013",
+          "anonymous_pair_adjacent_014",
+          "anonymous_pair_adjacent_015",
+          "anonymous_pair_adjacent_016",
+          "anonymous_pair_adjacent_017",
+          "anonymous_pair_adjacent_018",
+          "anonymous_pair_adjacent_019",
+          "anonymous_pair_adjacent_020",
+          "anonymous_pair_adjacent_021",
+          "anonymous_pair_adjacent_022",
+          "anonymous_pair_adjacent_023",
+          "anonymous_pair_adjacent_024",
+          "anonymous_pair_adjacent_025",
+          "anonymous_pair_adjacent_026",
+          "anonymous_pair_adjacent_027",
+          "anonymous_pair_adjacent_028",
+          "anonymous_pair_adjacent_029",
+          "anonymous_pair_adjacent_030",
+          "anonymous_pair_adjacent_031",
+          "anonymous_pair_adjacent_032",
+          "anonymous_pair_adjacent_033",
+          "anonymous_pair_adjacent_034",
+          "anonymous_pair_adjacent_035",
+          "anonymous_pair_adjacent_036",
+          "anonymous_pair_adjacent_037",
+          "anonymous_pair_adjacent_038",
+          "anonymous_pair_adjacent_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 505,
+        "generated_utc": "2026-10-11T09:35:34Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "03a595674c931ee3392fac9a3e1b5fd9a8c73573320169258f1d16fd7c55b2c7",
+          "bdbedd77945256fdc793e39793a32d9774810fda3a33fe2b2c4a6568560f906c"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce",
+          "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812"
+        ]
+      }
+    },
+    "results/sweeps/anonymous_pair_platoon.json": {
+      "sha256": "df80f74dfc85101b129a68b5cd117cbf02c804d00956f7623f315e720f9cfb75",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "anonymous_pair_platoon_000",
+          "anonymous_pair_platoon_001",
+          "anonymous_pair_platoon_002",
+          "anonymous_pair_platoon_003",
+          "anonymous_pair_platoon_004",
+          "anonymous_pair_platoon_005",
+          "anonymous_pair_platoon_006",
+          "anonymous_pair_platoon_007",
+          "anonymous_pair_platoon_008",
+          "anonymous_pair_platoon_009",
+          "anonymous_pair_platoon_010",
+          "anonymous_pair_platoon_011",
+          "anonymous_pair_platoon_012",
+          "anonymous_pair_platoon_013",
+          "anonymous_pair_platoon_014",
+          "anonymous_pair_platoon_015",
+          "anonymous_pair_platoon_016",
+          "anonymous_pair_platoon_017",
+          "anonymous_pair_platoon_018",
+          "anonymous_pair_platoon_019",
+          "anonymous_pair_platoon_020",
+          "anonymous_pair_platoon_021",
+          "anonymous_pair_platoon_022",
+          "anonymous_pair_platoon_023",
+          "anonymous_pair_platoon_024",
+          "anonymous_pair_platoon_025",
+          "anonymous_pair_platoon_026",
+          "anonymous_pair_platoon_027",
+          "anonymous_pair_platoon_028",
+          "anonymous_pair_platoon_029",
+          "anonymous_pair_platoon_030",
+          "anonymous_pair_platoon_031",
+          "anonymous_pair_platoon_032",
+          "anonymous_pair_platoon_033",
+          "anonymous_pair_platoon_034",
+          "anonymous_pair_platoon_035",
+          "anonymous_pair_platoon_036",
+          "anonymous_pair_platoon_037",
+          "anonymous_pair_platoon_038",
+          "anonymous_pair_platoon_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 606,
+        "generated_utc": "2026-10-11T09:35:35Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "03a595674c931ee3392fac9a3e1b5fd9a8c73573320169258f1d16fd7c55b2c7",
+          "bdbedd77945256fdc793e39793a32d9774810fda3a33fe2b2c4a6568560f906c",
+          "dd07beb3a2b1e04f052cfb05a0551503adc6b5cfa6a31c431d2f948eadbce204"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce",
+          "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812"
+        ]
+      }
+    },
+    "results/sweeps/crossing.json": {
+      "sha256": "f2738e509c25d3b624b3fd49500e83e17bcd739e1ebade9e269ba3765e8d86eb",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "crossing_000",
+          "crossing_001",
+          "crossing_002",
+          "crossing_003",
+          "crossing_004",
+          "crossing_005",
+          "crossing_006",
+          "crossing_007",
+          "crossing_008",
+          "crossing_009",
+          "crossing_010",
+          "crossing_011",
+          "crossing_012",
+          "crossing_013",
+          "crossing_014",
+          "crossing_015",
+          "crossing_016",
+          "crossing_017",
+          "crossing_018",
+          "crossing_019",
+          "crossing_020",
+          "crossing_021",
+          "crossing_022",
+          "crossing_023",
+          "crossing_024",
+          "crossing_025",
+          "crossing_026",
+          "crossing_027",
+          "crossing_028",
+          "crossing_029",
+          "crossing_030",
+          "crossing_031",
+          "crossing_032",
+          "crossing_033",
+          "crossing_034",
+          "crossing_035",
+          "crossing_036",
+          "crossing_037",
+          "crossing_038",
+          "crossing_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 303,
+        "generated_utc": "2026-10-11T09:35:35Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "1c679b8c05671d22328dd4a366cdc3b37c49abd1e770d0d3be5b5a7736195dc1",
+          "9bdac5cb778c6874c52ad89c9acaa0bc2e79924b3621e22b608cd25206d643e4",
+          "bdbedd77945256fdc793e39793a32d9774810fda3a33fe2b2c4a6568560f906c"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce"
+        ]
+      }
+    },
+    "results/sweeps/cut_in.json": {
+      "sha256": "d45685295ec7b35b78a71368da96e5e89d85a1ec5e15f0fdeb21e737a81a35c1",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "cut_in_000",
+          "cut_in_001",
+          "cut_in_002",
+          "cut_in_003",
+          "cut_in_004",
+          "cut_in_005",
+          "cut_in_006",
+          "cut_in_007",
+          "cut_in_008",
+          "cut_in_009",
+          "cut_in_010",
+          "cut_in_011",
+          "cut_in_012",
+          "cut_in_013",
+          "cut_in_014",
+          "cut_in_015",
+          "cut_in_016",
+          "cut_in_017",
+          "cut_in_018",
+          "cut_in_019",
+          "cut_in_020",
+          "cut_in_021",
+          "cut_in_022",
+          "cut_in_023",
+          "cut_in_024",
+          "cut_in_025",
+          "cut_in_026",
+          "cut_in_027",
+          "cut_in_028",
+          "cut_in_029",
+          "cut_in_030",
+          "cut_in_031",
+          "cut_in_032",
+          "cut_in_033",
+          "cut_in_034",
+          "cut_in_035",
+          "cut_in_036",
+          "cut_in_037",
+          "cut_in_038",
+          "cut_in_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 202,
+        "generated_utc": "2026-10-11T09:35:36Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "1c679b8c05671d22328dd4a366cdc3b37c49abd1e770d0d3be5b5a7736195dc1",
+          "2d351c7f57c9cd503523fef7e51fb28888bad45e105c91b2ff907978270dddbf",
+          "5272c06b974b27b83275b55b72de198d670d868815db204d10617b58f701dc28",
+          "755ea196029307d9cdd15a19f8d3d407af80e41bb74084070bea0f47d419a4f4",
+          "bdbedd77945256fdc793e39793a32d9774810fda3a33fe2b2c4a6568560f906c",
+          "cd08841537b869ea5250888f449e3371d35c2a1a6e34e3d3064a11630c7f78f4",
+          "f38a14b26d2e1f63542d2c9ba7ab5dfbda6c55d43bd6a43d83b29a7915876e02"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce"
+        ]
+      }
+    },
+    "results/sweeps/experiment_size.json": {
+      "sha256": "f2015fd8d4c52a49999608a64f69e2b3031e9eafe84b16b741d1872e766e9215",
+      "provenance": {
+        "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+        "git_dirty": true,
+        "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "config_sha256": null,
+        "runs": [
+          "anonymous_pair_adjacent",
+          "anonymous_pair_platoon",
+          "crossing",
+          "cut_in",
+          "rear_end",
+          "unobserved_cut_in"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T03:48:00Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
+        "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
+        "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+      }
+    },
+    "results/sweeps/rear_end.json": {
+      "sha256": "ccbfadcb2745513bbcb7ab6b27c11930cc6eb261e586f53a7a15208b6cc4337e",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "rear_end_000",
+          "rear_end_001",
+          "rear_end_002",
+          "rear_end_003",
+          "rear_end_004",
+          "rear_end_005",
+          "rear_end_006",
+          "rear_end_007",
+          "rear_end_008",
+          "rear_end_009",
+          "rear_end_010",
+          "rear_end_011",
+          "rear_end_012",
+          "rear_end_013",
+          "rear_end_014",
+          "rear_end_015",
+          "rear_end_016",
+          "rear_end_017",
+          "rear_end_018",
+          "rear_end_019",
+          "rear_end_020",
+          "rear_end_021",
+          "rear_end_022",
+          "rear_end_023",
+          "rear_end_024",
+          "rear_end_025",
+          "rear_end_026",
+          "rear_end_027",
+          "rear_end_028",
+          "rear_end_029",
+          "rear_end_030",
+          "rear_end_031",
+          "rear_end_032",
+          "rear_end_033",
+          "rear_end_034",
+          "rear_end_035",
+          "rear_end_036",
+          "rear_end_037",
+          "rear_end_038",
+          "rear_end_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 101,
+        "generated_utc": "2026-10-11T09:35:36Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "416cabc3979e99e9a58d5c2c23442ccca59a6232109306e1b925f15610fdcf62",
+          "755ea196029307d9cdd15a19f8d3d407af80e41bb74084070bea0f47d419a4f4",
+          "93fc6bebde012d5567972639ddfd5c004a4bacb8fb4c2382ca69a64cab1fd4da",
+          "964c62e7d9d153431b8d914bb2121e7c8fbfaac496e0e89da059178525d24056",
+          "cd08841537b869ea5250888f449e3371d35c2a1a6e34e3d3064a11630c7f78f4",
+          "d6f9693145cc0abeefa19a1dd1cbc7b9c1b70be0765a17526dbdb1771fbc8eca",
+          "e0c098fc285e92cb4db0f09c4ea078614433de9e9cfd7f39f6bd0783c430cc8e"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce"
+        ]
+      }
+    },
+    "results/sweeps/unobserved_cut_in.json": {
+      "sha256": "85f11abe998e0151febe7880107e75f752cf3afeb98bdd74008e9c570d40a637",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "unobserved_cut_in_000",
+          "unobserved_cut_in_001",
+          "unobserved_cut_in_002",
+          "unobserved_cut_in_003",
+          "unobserved_cut_in_004",
+          "unobserved_cut_in_005",
+          "unobserved_cut_in_006",
+          "unobserved_cut_in_007",
+          "unobserved_cut_in_008",
+          "unobserved_cut_in_009",
+          "unobserved_cut_in_010",
+          "unobserved_cut_in_011",
+          "unobserved_cut_in_012",
+          "unobserved_cut_in_013",
+          "unobserved_cut_in_014",
+          "unobserved_cut_in_015",
+          "unobserved_cut_in_016",
+          "unobserved_cut_in_017",
+          "unobserved_cut_in_018",
+          "unobserved_cut_in_019",
+          "unobserved_cut_in_020",
+          "unobserved_cut_in_021",
+          "unobserved_cut_in_022",
+          "unobserved_cut_in_023",
+          "unobserved_cut_in_024",
+          "unobserved_cut_in_025",
+          "unobserved_cut_in_026",
+          "unobserved_cut_in_027",
+          "unobserved_cut_in_028",
+          "unobserved_cut_in_029",
+          "unobserved_cut_in_030",
+          "unobserved_cut_in_031",
+          "unobserved_cut_in_032",
+          "unobserved_cut_in_033",
+          "unobserved_cut_in_034",
+          "unobserved_cut_in_035",
+          "unobserved_cut_in_036",
+          "unobserved_cut_in_037",
+          "unobserved_cut_in_038",
+          "unobserved_cut_in_039"
+        ],
+        "perturbation_profile": null,
+        "seed": 404,
+        "generated_utc": "2026-10-11T09:35:37Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "recording_commits": [
+          "c80eab47ec83dcc66909751b0514f1bcb4d5066e"
+        ],
+        "recording_code_sha256": [
+          "03a595674c931ee3392fac9a3e1b5fd9a8c73573320169258f1d16fd7c55b2c7",
+          "bdbedd77945256fdc793e39793a32d9774810fda3a33fe2b2c4a6568560f906c"
+        ],
+        "reconstruction_code_sha256": [
+          "02da9538fca9a05da77ecd1035fffc285f927b491bbc1a68a70996ae7e730fce",
+          "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812"
+        ]
+      }
+    },
+    "traces/fusion_metrics.json": {
+      "sha256": "f9abe0be9b9b5492e33e364b86ad1bc940fcd4d173e95b968c719fa0f3c2e22a",
+      "provenance": {
+        "git_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "git_dirty": true,
+        "code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "config_sha256": "50f7dc9e35556156f73f06fedcb2efa1b33151cdac93a1c3b258840ebe037659",
+        "runs": [
+          "S01/run_0_crash",
+          "S02/run_0_crash",
+          "S02/run_0_critical_before_cut_in",
+          "S03/run_0_crash",
+          "S06/run_0_a_front_pushed",
+          "S06/run_0_b_rear_first",
+          "S07/run_0_crash",
+          "S08/run_0_crash",
+          "S09/run_0_merge_conflict",
+          "S10/run_0_rolls_through",
+          "S12/run_0_near_simultaneous",
+          "S15/run_0_deflected_into_c",
+          "S16/run_0_consequential",
+          "S17/run_0_crash",
+          "S18/run_0_abreast",
+          "S18/run_0_passing",
+          "S18/run_0_platoon"
+        ],
+        "perturbation_profile": null,
+        "seed": null,
+        "generated_utc": "2026-10-11T09:29:44Z",
+        "python": "3.14.2",
+        "analysis_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+        "equivalent_clean_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887",
+        "final_analysis_commit": "fd8d2baed644db4a32c2eb502a2eeb9b32f70887"
+      }
+    },
+    "traces/S01/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "15fdf04bb39746668bfc77e6573d10d5f8cae1ec8a099eb295d1de002f68b2c4"
+    },
+    "traces/S01/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "9e66945709e982a5e4b21d933f11ac8e5ec5063a82e7878b9c25d1f05597a48d"
+    },
+    "traces/S01/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "b7012868592d8b6a2d868cdc968c53e945875a4c19ead7b7053a608172a68bd6"
+    },
+    "traces/S01/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "4a40a0395f61be035d14fc8a73b1123cf2417a4d2ff4e3a26d5512d6121e5dbd"
+    },
+    "traces/S01/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "eb104ad579f2850f8ee685d0e6d84d95e08c0ae5b71242c04ddcbc7724e1b763"
+    },
+    "traces/S01/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "b121ad11463f3f91b7758164fe7efe04963e2147407cf97c845e033f0731c125"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "b5305a22889b3c931b54622a505084d76c5abaa1f28cfc21965f9c91f6369641"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "6f8dfd9233d8da22c0b36bab0561dcd625675953ba794621c21150c5c154435b"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "2c359a04cd5691b9903be3deb0899d0c5525908bb2054cbd49f0e98cacffec59"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "cb7fde7e93866698b58b247c2bf5a2c1eb168e296c19f7d23b2d61bf00a61aea"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "3c904f14d2f5cb47ef9f985fdc0bbc12bc6f697298946c7840e828f8ab6c7ec5"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "33a9cbec0be769ddc190192f1f8c79015750e253f238a68116924f74e257c96d"
+    },
+    "traces/S01/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "5cc91122d9be1c35a2cf1be757c2269f3a045c3060a480b1254a4e13bdccd4b2"
+    },
+    "traces/S01/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "5df4aa9024ac5fdf776ae29cf66a02567dbfb4b50b7ce1a4b017af3b5b7b6aae"
+    },
+    "traces/S01/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413"
+    },
+    "traces/S01/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "279ec4fd412b8b855e46d72433087de3f90a6769883e97150da5eee0ccda9f03"
+    },
+    "traces/S01/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "153a417ab3f1047a00a62e78534ff38765a0ebe2b330bc4cfbc08727d061d00f"
+    },
+    "traces/S01/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "242e02de1bbf4d64c663c9010718b8fd4ab9c25b9bbae85672ada6f8c475ed60"
+    },
+    "traces/S01/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "8f6c3f26978c4e36f8900f25c3401d741fd99e956184bb8c79d04e0183b7e510"
+    },
+    "traces/S01/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "b1363b54681832b8201061f13fef894e2399919f1aa6be9bed89d3ad8c2c3669"
+    },
+    "traces/S01/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "40dcd113f83efe2807dcd0fdc46f4953f5d03f0d6c74294ca876f309992f57cf"
+    },
+    "traces/S02/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "e56c966fd189933c9e21910cbfbf16a4a4206a590bafeff6e2a19c6d05a86509"
+    },
+    "traces/S02/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "4d654d57b466d7b2ad98cf2cc5f84031ac1b67e0d1a6f619ec3432293c3b81f7"
+    },
+    "traces/S02/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "e681a9f3eb65c8f95311b31a07c941e28d13a5b357fd156d54f7357bf0991bdd"
+    },
+    "traces/S02/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "44524a3e15cec67194f077cef449fde0ecb4f8f59f7e07d4378d7fb2bb4ce112"
+    },
+    "traces/S02/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "8b6c9e6a3dc8f6f31434dd15bcb2920976994b588987c53f46e521a40f3b363b"
+    },
+    "traces/S02/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "6c9e6ab527673d7d0cf75097c2adaae219cab347decfb95d00cd45a7e33a7824"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "8d5c7fc90f335247254393171484cca266695ae025da49168db7aa95184f9213"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "46239d82a13ad246645fade130328f18c7fb6f791dc0f90e0d81908f692f8b05"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "8ba29aa2874087a61bc6209c2450155a323dee282976e343e2bc25c09b65ce99"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "0adca562fb6aeca823b3fbf1176ace0d31150980c6d841c6498ba0a3ea7e2ed3"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "3e125c79d5c11b7b4f2bcc61905a463694ed8b6ce8fb3454a772adbc4b8e8f04"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "169d541d67f66da6e68910248845c5105d7056043969e83790dd95ec517ef434"
+    },
+    "traces/S02/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "db81097da7aee9d3484bcb2e48738360cc56d760ef6a40b8572ab52d102526e9"
+    },
+    "traces/S02/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "1d07f980823a485a57a3ceeb3f8cb42545c016b4b7604a5c4ceeb79c807f88bb"
+    },
+    "traces/S02/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413"
+    },
+    "traces/S02/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "c6aa03d3615d16bc9d09f2961e5e79561d2d422f53dd4ec0a4c350d22e245118"
+    },
+    "traces/S02/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "e1f63a6c0f36f24ae808834a7c639d217d6f6a22a121ffd63ea28b15bd530691"
+    },
+    "traces/S02/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "97dee4334da0f4d016ad695196cc5cbd2c569931a46ca72c56720ae12b064e06"
+    },
+    "traces/S02/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "4ee2e99aeca4e64384ac90008d29a5fab4d0e1c99d33bb2e2783b3a416a5dc68"
+    },
+    "traces/S02/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "8290f1486414cc5ad38229fc19f172b35098e5a15b6a86ec49e377d19fe4f5c2"
+    },
+    "traces/S02/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "50c95ea14b78985e6a7f7257ed35b8e8b3141d4bfc6c39d8a9b284f842b986c2"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/A/local_graph.json": {
+      "sha256": "f9a7f1d2efc24e06975d257228c06e6aabb8a16badbd6cf8b0c6961cd5c85490"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/A/local_trace.jsonl": {
+      "sha256": "dfb333524691933167d4a146be0afa5ee5c55beeb482ae673ba9c4b49391ce45"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "53614b6ff212468dddfbc7b57fd86eb97478a3519978565c1844df40438b70b5"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/B/local_graph.json": {
+      "sha256": "182fcb6ff883aa069f12c3522b53eb99c46a1bf60a8e1c6a47df759891c5e27c"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/B/local_trace.jsonl": {
+      "sha256": "b78646d4331e87933e92e30e2e3193c40725e933b0d8fe15518af2364c4b180a"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "3bf8959db0e1ac1081150e31f8ee8588d53cc53533fc0422dd131753fe5c3708"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/evaluation.json": {
+      "sha256": "80b9788b21a091621604cc2603d685a2e07a97d4672b74c6ab317cbf36a4ebe8"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "88ae47f35953fc692ed60b8b2faebdad5383f9c3b81ddd05b2b37beb9c3e037f"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "a8bbc0608d022fdac7fd3c44278627befd4692aeb4556c360f2359c1c3c2bc80"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "c548b706f689fb28356747e608786d57efe6da2b5d128e875890926dc2354c68"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "88480a1a60cfd06a629f574a868dec75f0088e8e2f44902c4166c8724abf0028"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "380c353ef5c976d2689c007c15a31dac9e1189b17b65e85ed9fa0ecbd693c45e"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "296c1dfd447269440a8d1b3ad66d75f66b85cc3f78bfed3d1cafacf2ca7ed8c3"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "edd7f3af4f7a5fbe22ff7fdd37f626e40243fbcd889622fc6f7e8d91cd741337"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/global/alignment.json": {
+      "sha256": "20b7f0a7394e56531c3af08e6d97286adfaae948e77de7482dc9ac4563985024"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/global/anonymous_entities.json": {
+      "sha256": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/global/associations.json": {
+      "sha256": "35e324ddb781f5211b112c84e3e25da4037f44e798676ef2f7904ad155e42c98"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/global/global_graph.json": {
+      "sha256": "579d5a3f35010d71540e6448a1f489e5d4abe025a76feec011b7946c57ddb99d"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/global/global_trace.jsonl": {
+      "sha256": "a6f429e0fbb991055c6ff675a99c498bd487ecd9cf7875ee609e40cf7d698737"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/llm/export_manifest.json": {
+      "sha256": "55b5a920dbb76f349c33d12b558b0e0fab572899d0168784ec295e5e8db65274"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "e929987604aac2f857792704e51adec218d074a3e68c1d67f20efceb98e5b848"
+    },
+    "traces/S02/run_0_critical_before_cut_in/reconstruction/llm/forensic_packet.json": {
+      "sha256": "d6c9b77cfa8ad9a5f5ee882b169af3b6fae8039a4f4c07ff02e9470c05d69a0d"
+    },
+    "traces/S03/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "9d4dc29207f46a01094f6fc5b5498bd280a13e4a7b957297cd51630b8c866a6e"
+    },
+    "traces/S03/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "36fddc0bd2c12df6268b4e6722391ce92a17654fdd3aef3ee4008a2db5c63fa8"
+    },
+    "traces/S03/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "085385cc9223742618d786472af34a6cf4d5d8a7f6ed0a42c4bdf787cad64ccc"
+    },
+    "traces/S03/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "8a154ab9691cdea297ad896b0c48f2b5cbcbe3f72feeec19c0b096b3028c2ddb"
+    },
+    "traces/S03/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "321fb01fe0408fda731f08e5407651b6746f124366fe50bc5571dea583e2b002"
+    },
+    "traces/S03/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "5507e59f8f851890361e38410b3c29e3e556277aa9362ade580883e1e6e11bcc"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "2dcaedc39ad47db256c882b090871149ca7d301c3d0509362266bf0c57936c05"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "73882dcbcf1e7b78e308351636e97d2607066853d1f63c23c43133114cf33c51"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "6c6ca8c613834d4638bcfc902f8fd7580bcf9a30ff1f9f2d6f148dc621138b30"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "fbc90bb49d9529e4fd618d4b438393457ccdd71327b95aa6142afd7c7029b8b6"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "9e2f48f524f537c2d18b5e6cf5d69f6cb01518c27193c2c1b6b8cfc0480f0f57"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "f8297649e041e0de053073d5810fbe83bf87bcf5f9e48879f72263bf016dad8c"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "95426aa961427f42eb1ad0e2fab8b0e8fc7cb15126e4cd4e0e69e7441599e9eb"
+    },
+    "traces/S03/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "f4e10183dd59812f904ca59e27ad597e80d53f12b898d1234bab6414831367e5"
+    },
+    "traces/S03/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "01d83dcb7db8ebc8c3109c5938acbc29472040ad50bd2b87fe43fbfb9ef48e8c"
+    },
+    "traces/S03/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413"
+    },
+    "traces/S03/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "c7cc5b9c22d41ff58048daa00904abb5e466fa38743161234bfc5a4456212b7f"
+    },
+    "traces/S03/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "e1be4c1287586029aba62bc0bc0b69981ba3d4710d09461cdb2dc34b420e69c4"
+    },
+    "traces/S03/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "1064481b61217246dba61c3b0097055625dad76f181392df37b87a1b60eadfaa"
+    },
+    "traces/S03/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "809dc95237195e16bbf66f4493f4b5732532a2231f05bdbcceea826e1ac94828"
+    },
+    "traces/S03/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "ea3ad0073c3fd73c650b6ad978b6ed611ce3d974d51ecd0ea763d0a9fb3d11e4"
+    },
+    "traces/S03/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "7278425772977252277773fa75763b620164cafe8dc7051572cf62237f441625"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/A/local_graph.json": {
+      "sha256": "23bf3bebe37cde5a6774c0b5aafc9189e449443013c957e38b395c80be0bc161"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/A/local_trace.jsonl": {
+      "sha256": "fa49b7f33cd19231e289bcaea70f2b507bb31037c8d497fd3201d6ba36699274"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "3ed9fffe27a2bce0286fbb7cacb1f1499a0870aa1e2afbabeb162cb79f51fea4"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/B/local_graph.json": {
+      "sha256": "116d37e91988a9a6500d459a0f9e39743bf54c2e47da650ba1e23debb4ab9200"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/B/local_trace.jsonl": {
+      "sha256": "343f1d96f820508b6a2d3ea3489bae0ae7be00e3869b08dee514db499f07a42e"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "e6240d317219e60f4dda383ea800398ea39ac8e8e0f143b47045ad20b0a832c6"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/C/local_graph.json": {
+      "sha256": "7d4f2d8594983bd0026e1aa211795106e97542920bd46699de7ef2efa10f0f62"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/C/local_trace.jsonl": {
+      "sha256": "235f337a9413b2ca7955c8e574c60d4d03624f50455a414cefdc638f79258cc2"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/evaluation.json": {
+      "sha256": "ba79d87769486be946ab7371f598350fc8fad03afa078f84081e100fc79d2514"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "60386b7cdc7df52f1d513d8e1d626847229024343a63b589db576564b0d11648"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "d852b041e67fb413941792020e0572aea49c3aca361d37b462d0c047458da489"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "d3cfa51b75e4eb28d8d03676e1edf0efa86650cadba4a123b3bf1035ac877f83"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "c9f961f9cd6417c70a4046e1568bb39aed488595c701a63d1cc09cc1b84e1c9b"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "d3b8e0324181ff6e996d188b6f90d6ea8423837b80b2db718efa20cdb7236cdf"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "a30adc7304d79a5a9a37298a417a44ace23278c5e0bfc46d0b89625a07ac6cfe"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "05b527e19c88e9822ed33f0e05fda524e8e91a8db6e3299a1fbc17a73b175e0d"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/global/alignment.json": {
+      "sha256": "813880fd9112e1b79f983c65d588475c0cfc95ceb1cbc261731a40188beec721"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/global/anonymous_entities.json": {
+      "sha256": "505ef4f8a28600c152ea5b60b8e83757b8c1c351a4aeeca1dd76737d2f82027c"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/global/associations.json": {
+      "sha256": "2a2402fbaa6835eca3d1f4fb5161ff4f2a6901a28dc4c7c69047139b970e6bcb"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/global/global_graph.json": {
+      "sha256": "5d0138d15d1ec72045d1fcc2b5b1d201931b22c60db6d870c0cfb36e1eb5d727"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/global/global_trace.jsonl": {
+      "sha256": "5a542da7571e101f71ef2a08c2e7853ff30a4d555862b9abe8dd752e478727b3"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/llm/export_manifest.json": {
+      "sha256": "851cac9c5f48bc8e6b9a2fc14cb234bcda9644fbf1c6afc9ee7e68d50a4e9b21"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "aa479f9f5f04afd49491e6d66c41d68400f59203e4c75f873f40c0a65940f7ea"
+    },
+    "traces/S06/run_0_a_front_pushed/reconstruction/llm/forensic_packet.json": {
+      "sha256": "5e83cb3fbb01266f6e58c047b49d14c884fc30eddd60fe1fb2375f5cdb568887"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/A/local_graph.json": {
+      "sha256": "34ee8f447e11ddec15202067de8b1634847bbf637058398a3fad322f8697369f"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/A/local_trace.jsonl": {
+      "sha256": "471267fd69ce3376fe9879ce418e0c68989540141e9e6e7c971b154952e483a2"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "56a4129f989d3df89f7b939a46bf9a9ae80ed0e524d13356ccd21c3e78f646c7"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/B/local_graph.json": {
+      "sha256": "8838a0dfd3b11a277c3341e993321e677b607e4209cf19f4f66002038708bb49"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/B/local_trace.jsonl": {
+      "sha256": "20981058f7e62fb6b38e69adb5ac8432b0ac9616ee4f9864c3f7ebca0e20889b"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "2c0334aaebf312de3bfa6401d3e7884fb4531c0b3fb74ede3ff3dada62c034ac"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/C/local_graph.json": {
+      "sha256": "1ec0eeb822c13e27b54760f8def4eb66ef87ac4660c60868a0582d5f260daa12"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/C/local_trace.jsonl": {
+      "sha256": "a0bbfc3ade75a551995d9859876259479e212086d98db3adcbd4159a007b0379"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/evaluation.json": {
+      "sha256": "319d24b7d94bffe618d5baedc7c428b7d4d467849c85670e8ccd05af44c69d09"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "c3258ac67697bfd22f24641f2510bb51f2c24a603a3bf8360f3a04b7551100bb"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "da5ff984a1d7f87dd4151e4dc4d4c0cdd75e1916ea724e1b4c6ba313dde69729"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "0a455b8adb1df1c22b6c7d2a71b8e4719b7528044080e472519dea3eb2667309"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "f52a2e98016029962b9db982120869cb9aa6b875be9729f9fe772fbd901f4b88"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "084cea84e950e571ab1ac2e53ff0152e3ea6dc47c936bb48f63322f1fd8d3aad"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "54fa3c3dc9b41bc20d6ee7504ba2020cb584b25a8312d94037d645a9db19dfdc"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "ac76c526236e945250dff79d0c62f44618bda8daa67a986fdef30ff8b5362834"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/global/alignment.json": {
+      "sha256": "f31635d03f32789fcb71907483a863ca81661fae9a6241be3392c804c225c3b2"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/global/anonymous_entities.json": {
+      "sha256": "505ef4f8a28600c152ea5b60b8e83757b8c1c351a4aeeca1dd76737d2f82027c"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/global/associations.json": {
+      "sha256": "eaa693286abd7c063b15c64bc5373518f762f86315711984ab7afdcc6c7458ce"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/global/global_graph.json": {
+      "sha256": "a4e6d12c37a1e230cf02b77d43e46017d24be504f62fed9bc7e51ce014a800ff"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/global/global_trace.jsonl": {
+      "sha256": "65414c8c1e175c625215481a5c1804d5c4d1b5b0d2ebfe4219a4f53a7b18fe4b"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/llm/export_manifest.json": {
+      "sha256": "4e88b8135d2c64c595ebcc2952165ead38c8f2f0d979db468d3b4235e6d540cc"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "38c42bfdda9417b2840472ed1b662b63f3c390e7660022d7f16b9944012d9b6b"
+    },
+    "traces/S06/run_0_b_rear_first/reconstruction/llm/forensic_packet.json": {
+      "sha256": "8b5e1fd7a3165a8f1a0a4a90077484bdc62171818d6ba42e054e31ca06ccf994"
+    },
+    "traces/S07/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "4dbdf45e50e45977967f4e33ce453e00511bd36ed0f8e4c9a16e099b96c27b7e"
+    },
+    "traces/S07/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "e1a17d738dbcbe1fb3514c8fd59d6a5867a3b0c958dc10e4ca33f28e22db9d2d"
+    },
+    "traces/S07/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "a7b53e8515c70ddbba7aad4b38ef24d897a3d2eafe64fdcfffef8316d099d719"
+    },
+    "traces/S07/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "d07b63306ec7b6195c669fc56e2007710dc57e2e0b24c998bf9ec36ddc28c471"
+    },
+    "traces/S07/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "97b5bf743bb51f590e4bb48ad6d33bb100f22f341c1297e64c99127be16b9430"
+    },
+    "traces/S07/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "1f3493e44cb540c483b6affbfb259f247dddf3658f072ab812ff7e7ac050540b"
+    },
+    "traces/S07/run_0_crash/reconstruction/C/local_graph.json": {
+      "sha256": "2421c569edb1ed4096ae1e74a0f73561c9f0849ff6c4912f5c566c83a437163d"
+    },
+    "traces/S07/run_0_crash/reconstruction/C/local_trace.jsonl": {
+      "sha256": "c9dba26b7bdbcea575f127e122826221acaa2f32ad2bdf56ce5b469dfbad22c5"
+    },
+    "traces/S07/run_0_crash/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "d6ce567d15cd7394c8c4290a4a235ecf4ed6adc43059d8731a3090841fa704d9"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "9cacf01638c49c1f3ef84bc55a909320b713f1e212c40f9e977e2924c8ae6155"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "c48079769a27dea921a3e59f6b80db1e28d68712ae22da7a7d70b2cbe6131b2c"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "6c1f7cfd72d3e1199ca5127fde75f611f03734306233104ba76d7123deef731b"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "4dcdeabd86d37d33947d729f3f1c6f6911f8c07da927eb648799cd71ed0c236f"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "fdffd7fafbb3e1a266ee889a33053f45f2946bb573057fa8c3088bd0684b757e"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "7f5e72ec2485223aa4e6c1019dd9cb37ac62226c3a94f00649ab6f7ab8832ac2"
+    },
+    "traces/S07/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "48994b0f87c520dc1dec21830f7bfe41181b2be0402f85a4cdbc795f6a291bda"
+    },
+    "traces/S07/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "01c54b003d730ac02015e40933f3268717754819b403747981ea72722ba9e9ca"
+    },
+    "traces/S07/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "3daf8b8cfbf4e16e6d32ce192e2e45cf82d35cbcac8a2d05521a363cd75395b2"
+    },
+    "traces/S07/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "88d45e935c57e1a5eab9acc166c22513c409662adf2bd64552da329850a529d5"
+    },
+    "traces/S07/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "efa7e2f3e1ac1a7abde94735ded2ec06e7336e67cb5041f468b97cd8e04df867"
+    },
+    "traces/S07/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "5948d9ab739f92ebf7790820214bf377aab69a40a0e94dd41bc184b4b1a5e405"
+    },
+    "traces/S07/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "9dc6a789040239fdd4182a713e1e6eb7964f67ff6706ac21f4648e5084ca4498"
+    },
+    "traces/S07/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "4b7cd354a7140e33dcd037575895a06aa7ee5df80212a7b858152b1e53558246"
+    },
+    "traces/S07/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "5f56b2532b83c97f064cd408b10439b11c27c5d10e0f113719f4ec49cd9bda6d"
+    },
+    "traces/S08/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "db0f4047db1218dec551ef9a8a0e7c813a2bcea97b0ea62121eab8c796e531ad"
+    },
+    "traces/S08/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "db5e8eb7936c0c1b7912bf6402b366112cb5de56248d59721f887b3262fabd65"
+    },
+    "traces/S08/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "7848b2ba4c87b58d6c930860ddbf7642c071322883cde54d29dde7a8c98c433c"
+    },
+    "traces/S08/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "afbd172501d71471930d11e8aba8cac9b20ae9d97c05fb9c8bb0db79aed0c5c6"
+    },
+    "traces/S08/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "858fe08b8aab8276b3300ce2a02770b94bbb266161ae050ac4fe5e72f19c1d1f"
+    },
+    "traces/S08/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "943e537e7b174a1fcb4eef7bc103493b3d2202d8b400e3a6e3f9844f97a14432"
+    },
+    "traces/S08/run_0_crash/reconstruction/C/local_graph.json": {
+      "sha256": "6c12b825d550f9ee1ddffd26cddd79836d428c1f6744f0d1317641fa877577cc"
+    },
+    "traces/S08/run_0_crash/reconstruction/C/local_trace.jsonl": {
+      "sha256": "83a2f6a1792d163d93649de5d477bf9a87d9746cf9d40891fa5a7fcfada1a3bc"
+    },
+    "traces/S08/run_0_crash/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "9b61caa03f9ba8846c0174e466affdcad43b91721a38f1d0d68915548378376d"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "ef88b5b761731c4d924558e47ad09c149d200bd7f139ea00e1164aa405f7fa8e"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "eee98f7e564a1575b5a7fc60fe2a97d69bb36cb1e91b1d0e2db6bba487690ffa"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "387359771b07f8546b33d8656fa8af4b4bc36a314bdb75fe0ef4315bfa6f514d"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "5fc369ea2e4cfa94c0c31177cbbb4682aa396404b5e700c23acb975f922475d7"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "214b46ceda582eaef528f42563d87e729a808d222e0a05b7a5575ec141cae78d"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "af47630231fb2405cd7fdc1164d09656a8bfc6cf5e414ad7ffe60373f076c11b"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "d5827c8770f2a2cefad86249c72d724424e20d5a0e0cb19483841c5f9d61e397"
+    },
+    "traces/S08/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "b38b7b9898487bda553996fc7d46d8bb7e36f895e031592797d777606885bb22"
+    },
+    "traces/S08/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "a9fe822499ba3306bada18b9195b669622e65c0b04eee0ad097c12289ae37627"
+    },
+    "traces/S08/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "79a402ee9919ff9a77be76fd9f543590886bcee83fd0887c4825549449b6c90e"
+    },
+    "traces/S08/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "68d0fe9b08630c64deb47b1aff7d2e17ce9bbe8f1ae573cdd3bc6ddcc17c38e1"
+    },
+    "traces/S08/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "1e0db0e22815e0d398dfe9a1ea82d0555f6f36979df544c0051caf1854619c54"
+    },
+    "traces/S08/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "c456b5412d576637d766e218e29e6ca9ccb13fcab1c5fae920f7004b82fd4afa"
+    },
+    "traces/S08/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "4b4d7ed5334d1a9097cf0806abf60494373827928281bf0178f1e41f53369137"
+    },
+    "traces/S08/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "134de7d7f38122592e4e26337407402f52e83b2a4c7836ccad87371a08e3d78a"
+    },
+    "traces/S08/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "86eaa57d133ad5f8a688103cd144149e1995d4d6116cbc3cc79021f7d70bfee9"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/A/local_graph.json": {
+      "sha256": "c473ff6d485eb1323f74f8f4bcf59c88d6f21eba9398aa43722aa1593bda619c"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/A/local_trace.jsonl": {
+      "sha256": "ae32b51904ffafa3188f0cc10dc5fa5661e24c726822e8528713d52456d5a928"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "446f209de0bc0afbaaad5241eb23a71ffb815c2ca25206291e4a8fd973f61ddb"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/B/local_graph.json": {
+      "sha256": "4ce0c8bce85c7072f4df5f6a123e522a450b5872bcd8dc20b8010c6563672953"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/B/local_trace.jsonl": {
+      "sha256": "af1dec1ded9284a2410bffaf44769bac4e78fb118c17a48a39dbd5093c7bd3c8"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "b46ff18b45cf360aa6f1c90bd915e6768b4687f7fdfe920ef68335397dc1f942"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/evaluation.json": {
+      "sha256": "0a0417057cd432224a471f0faf34aad24e1ad9b2dec37282717513cd2e69cb74"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "03188788bb7674eae1a50aed62d57206d7b79750e1c3ced554fc4a65073fbc91"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "ded315b8a8afba744e1e02fb4a8d2f9643282e71ee8c77e50ce95802bdb42048"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "1b555e2b0d258eb61868a7c0c6148eee9747271d9fc3d16ce041e2f0c4e5c700"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "f829017583fd26d688832c1bcc433b24c61bd632b93d1740bad463e5457ed013"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "7164229414c6a5995cec93aff337faf81f942d8af144ea6cfaea312e36fe7c2e"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "c78aea94e809e4d3583978fd166ca1c9b9d0eeed4f3193c767f90f7792bd2792"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "2593ada8dfee3772bb83e815d8d4fbba3b0cdf9e0c624297bc5683dd9a7f9f01"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/global/alignment.json": {
+      "sha256": "1609943e835bf10065941d3fe218482b4328e3ad870f7f72878a263a3bba0a9a"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/global/anonymous_entities.json": {
+      "sha256": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/global/associations.json": {
+      "sha256": "50a57ff8e23d919d04dcf003e85c1524e4f5332462bf725e1fb222dc26335e96"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/global/global_graph.json": {
+      "sha256": "a8a5e4dce7329d09f9dd64fc6e0e34691d4e5f884bb5f6c76e3803641663dfd5"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/global/global_trace.jsonl": {
+      "sha256": "85e78610f0c613d82253e948ba7e826802d35641ce59519c88acdf04e5b06971"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/llm/export_manifest.json": {
+      "sha256": "53ca4eaffa1252261e41597bc16bfb93e1a2ded67620f05735c729fe42424ff5"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "fee1bb727763f988751aa4b6e1c5226ca2f334bdae67fecf36d9c8867e593b04"
+    },
+    "traces/S09/run_0_merge_conflict/reconstruction/llm/forensic_packet.json": {
+      "sha256": "4ff3e8afaaafb4dfe25cb661b22300a27b4c47f6165648404a69213ca32c3ec1"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/A/local_graph.json": {
+      "sha256": "a0b5744d138c7f7db0b43553e3f188e8990974e367905e567ed6c24bc6102803"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/A/local_trace.jsonl": {
+      "sha256": "07f1e7cd5359ef0cc2acb3853894e6494ea8f1c17038d92ca604d17a17b858de"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "dc5c6c2dcc1e61c9ac3fe0704221f4cd4665a661639d9ec9c2defbddc2f822f9"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/B/local_graph.json": {
+      "sha256": "38d57796f19a3681dee1c85bc35e1ed2cda53aef80d9ea95ae0408e87bdba7ac"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/B/local_trace.jsonl": {
+      "sha256": "38b80783cd486605d45a6160bb8053e5362b4731f3f4a6e39f2053f08a0efbb0"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "6e4266aca87381900d063bba45d72bac181875526a7b2ea277fd419fa8dca0da"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/evaluation.json": {
+      "sha256": "40dbd3c945a11c30d856eb2687737e3462b6241e15a3d181183878d571dc0baa"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "0a0b3fa48bd7f5bcb0dc71337a2c098f74e7d97c4367a78ac1a5a3ba76d354a8"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "591dcb96f420880a2d7aa2778d01b9be45e9eca2835b5cf0306f14e020006c30"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "46a0135edb32daf6ebbc1e976b7d37db08e278cecadff14fb045d40e08815110"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "63bdb0b8ef4f54074736f19369cb654dd88416e8c23b6fe015285723d3636475"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "e89c8c82756e5708332fba8603c2e604c03df370df1fad0a494ec8501911d0bd"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "ffffe1cfa511a87e807318085139de8b871a6a33352931b8ee945d361ebd77c4"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "5ce3e3ed8153d7576f01490caeb87d24670023da66d50317927905662a626875"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/global/alignment.json": {
+      "sha256": "be0b9ee0a0408eccbd243e949866132a98a9be1e26bc1751bb23723579d77d6e"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/global/anonymous_entities.json": {
+      "sha256": "de7c59cb26760bff38ccc67ccc28b29304e8a7a14f45fa596570a43141036f9e"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/global/associations.json": {
+      "sha256": "13e252468d03762188da46c0efdf680856f6e9c643ddaa0914d26923bccfacd9"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/global/global_graph.json": {
+      "sha256": "47ceafb152673355d60653bc8b9a85571b243ca221551b614a336c87c7ef2e91"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/global/global_trace.jsonl": {
+      "sha256": "db6dfafc4666dfd9389e5bfe0fe38e76ac26870c5e0abb13893186655cd5cdb1"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/llm/export_manifest.json": {
+      "sha256": "aa284901b41ecf78ac6051f7a77ec0427f8c00a97d2b6713e9fe75a78139c959"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "aadc5cd25d3eb4d7b257b5f63dc691701aadf3de0a56f4aceeded2cf9d53dfa9"
+    },
+    "traces/S10/run_0_rolls_through/reconstruction/llm/forensic_packet.json": {
+      "sha256": "1c8f3cc0c86f4bf60b82471956dceccffa68bb790be5b2e4a6dc91250acbee6b"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/A/local_graph.json": {
+      "sha256": "f70577b5bb5e6c31d92bb5451a28e090acfa5d2cc526ec10bd86e948d4c3a686"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/A/local_trace.jsonl": {
+      "sha256": "588cad120ed46fb70cfb170d4aeb479cad2150b34e7d70fbc4f64630f5ed7794"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "95b8075b635a515dbd794c3fa5ba44f83a1927a05ad11955e8d1b2b4d29c1bd6"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/B/local_graph.json": {
+      "sha256": "056e1e4978a0e0d44a67a1e60ca42778b041609eede5b7ea78d51e6823e81633"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/B/local_trace.jsonl": {
+      "sha256": "f2be393c1b5cbf4d79d4deb5ef2365e859ba536bdd084bbd8782542515917620"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "028226b413ade0d63f1fadd1df77843ee27d0a93c9ef1f69228ce5c617f97279"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/evaluation.json": {
+      "sha256": "8f8dcfe892be48ace7c3a3ae50b5ce22fb0e3f32fc126e18bb0e2102aaae8924"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "324a404031fc993b49da4c4c2c831f41a69aa53c2af8325270ace799248c95e4"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "0c8399a9dedda3d1f62b608c0be85f5eea163a05fd4a69e5a89f8514bd2aa5c8"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "3129bd5ba0a254912cdc87e49ea81ee43b0c16cb911d253e72f62944baeb77c1"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "3898146ae58cd65ead829e0c472c83462a2491dc56931e3ed9aceae0719dd9e4"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "a0d68484f21e32061af7a7570c4530c5da58c5f7b4050f3bbc7566dc402ac6e0"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "e28e7f60d1e49520340c2ea59c4ca75ad34029b39afef74a100b62519d0fdbe1"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "9e1ddb251e11916064ba661407c86abb5c724e9812baea37dbcb95bbc92c6d27"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/global/alignment.json": {
+      "sha256": "8a7346e8d09b2fdfbeb4777ab9776e870b6fb295398224e7c560b41c8a742ad5"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/global/anonymous_entities.json": {
+      "sha256": "6935154fc3a050c2aa99d5b46dd86895a374611c2c16ae0371888c872bc4220f"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/global/associations.json": {
+      "sha256": "e9eca99d0fcdb874716c601edb284d85675f340490c990acb9c0ebf03a43e253"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/global/global_graph.json": {
+      "sha256": "869803e9c82d5e95cc62d8479c8bdf8b847eb19be91cbbcdfce856faf98a54b1"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/global/global_trace.jsonl": {
+      "sha256": "8f2862cbe9ef1496490a46ff9bde8969488f21ac1c2e8651fa092b7ffc4f22a0"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/llm/export_manifest.json": {
+      "sha256": "e8ea16e69cec1838616ffd43e6966316e5a04036e5b2160d555e7bbe11172af5"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "c97a6416c201ef54beef6abe9f0dcede6c20e88b749b0d15f07703e15b6c3da8"
+    },
+    "traces/S12/run_0_near_simultaneous/reconstruction/llm/forensic_packet.json": {
+      "sha256": "47fe29ff7ec864d2e3d62db0829fcd13f9c5a8a361b1025dcfc6276182a847e9"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/A/local_graph.json": {
+      "sha256": "6d9220c26c2ba5f9287c06fd48b79ed92ae7a508869774742ebed5322b9432d9"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/A/local_trace.jsonl": {
+      "sha256": "01c7a8e03f02d42c13ce663c716c108498e40505cb8ebd6154934d846b92d4ed"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "25c0f949aa1143aabacb203d360f79dda2b69d1b19b2affb4ca06abbbaafa270"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/B/local_graph.json": {
+      "sha256": "7858af2051be1c881824bdb9d07f49ef44f1bba2b24cee3a99d22edc4756b2fd"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/B/local_trace.jsonl": {
+      "sha256": "53d2006749eb791208d3ad553ec9b201c7920720748356b4435dd087c028d676"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "9d9a94edf60c4bb1842d7d0a0c93b91ca5ce69006aa05dea1858477ce10ff039"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/C/local_graph.json": {
+      "sha256": "3f51fafcc37a1673a4197ead05a7ef651bbd71932f0da2c02e682dd36ced8a74"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/C/local_trace.jsonl": {
+      "sha256": "e02cbfde037073709c17dca397e9300e23862271c180ae5ec63ef2b7143499a2"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "623df656cfc03df6bc4793eca827ce90e6db886af03fba9c005444ef42d81562"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/evaluation.json": {
+      "sha256": "a09ec9321e2ba62e8516b544865e31268a7f6511686fd5c86290e5461709bcc5"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "f26b9d008be884c399a684708d3fd381328f31113f628e944145e2a03203b678"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "e743093d417c51c3f5e891499c09423b6bc735d94b5264b83563662ef6ea0d42"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "71a78c24a70a44c35d9914abdc48ad012858dd62695cac06b0971652d9b615f5"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "3920f08ce3a0f55105fc99a21bf9445ebe070d76080b076c72990d0c7e3dadf3"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "20a9f5424b2f3a83cfb6fc0a523c09848a4563d105d404ec579e001cb83b7805"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "9af27db41d8169568fb9ba0ac8dc9c9b8cffea309b00317eaff3e0a4d77f5a0e"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "20ddcdfbc0de0c2e4eb6e8874d15c537860423b39ebe3b35173441a142e34297"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/global/alignment.json": {
+      "sha256": "307f9df07c279255ac8ca7befe312b716307a0a1bcd5b79637b0191e3bdada47"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/global/anonymous_entities.json": {
+      "sha256": "542c9d0a8ab0dc7366160b81482c38ae561d5e913c2b3c1f148256e545c9eac2"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/global/associations.json": {
+      "sha256": "7a86fb8b7a9f26b8c09adb286da0d86758bdd13886f0347d7917ad3a45810b8a"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/global/global_graph.json": {
+      "sha256": "2ca23b599677e308876b0e1d29e50af6a2233f07b23a39be7bcb5b758d4ad9b8"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/global/global_trace.jsonl": {
+      "sha256": "7a0e1a1cfd0a1d613bb2bb4af5237d6505309618fc004632f8bfed381696c121"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/llm/export_manifest.json": {
+      "sha256": "a3addc0e57d0b8e378f1f2e10c84d531ba1c8e67df31874d81a87a4abc3edfdd"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "50dfcbc9aacd11130cad905e2e2ae90f9655d09c7c08fe796d8b8b9edf85c7be"
+    },
+    "traces/S15/run_0_deflected_into_c/reconstruction/llm/forensic_packet.json": {
+      "sha256": "2ae78c26e3096d347347fffdca79f3407733b630b546af814c173ded69906060"
+    },
+    "traces/S16/run_0_consequential/reconstruction/A/local_graph.json": {
+      "sha256": "29cd5e76b5a1ffcd16e431786469245fbd5155b08652c2a338c2fcb25270d453"
+    },
+    "traces/S16/run_0_consequential/reconstruction/A/local_trace.jsonl": {
+      "sha256": "fe17e123c1f15b928fae9cfc4d6e34fd2bc1c544f519e01fc7a6fb92ddbaed3c"
+    },
+    "traces/S16/run_0_consequential/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "1ff1f3e78abbc53acee4573cc1e6838f7bffcf26206ddaacefa7c834b28db618"
+    },
+    "traces/S16/run_0_consequential/reconstruction/B/local_graph.json": {
+      "sha256": "09b77f7882ea533281d4e6ce0295bb3cfc4ece5d39b6b43a35a2d17bf52fdedf"
+    },
+    "traces/S16/run_0_consequential/reconstruction/B/local_trace.jsonl": {
+      "sha256": "6f1ff1da9c890d270aeb7c9086e1da8571b2330379a0b95d3b7d071bd57f69c3"
+    },
+    "traces/S16/run_0_consequential/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "49eb56e2a0f6321379edebdf605fb4c1ff6b0b1a40519d25f66301e0fca4cc4e"
+    },
+    "traces/S16/run_0_consequential/reconstruction/C/local_graph.json": {
+      "sha256": "d9d95741080c436c60343ce7d93d89c7155e828c608de2a306d881f725387958"
+    },
+    "traces/S16/run_0_consequential/reconstruction/C/local_trace.jsonl": {
+      "sha256": "e2e36aeef4fb840c99d2950eba2ea2bbb8430ee83b8d98225de5f65f395270dc"
+    },
+    "traces/S16/run_0_consequential/reconstruction/C/local_tracks.jsonl": {
+      "sha256": "37c30f28f4d922a0e2f1f68da7b9293d746a9c520c8a08fd9f866b3ad1ced6f3"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/evaluation.json": {
+      "sha256": "7d071b576e50ec0025b1b3dd5d60036858ad41304f078d21bd5dd4996ea98ffd"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "5f2f0e2dba85405c796a02ad14e2c132e4a93e979803621052936e72e4809db3"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "591052937aa0ab1753515814f9d46244da4e514ff104518e6d93f1ab3b23819c"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "84238cf2e11305478f1f82fb8bbd53329d5848e862784e8685b4aec11e03903e"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "a2bea559673dbb0c423761052ad96042fa72435ce54c25be206bbc56a4348c2c"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "8987d1cc1b50cfbff3cf1f0429158d3fab9dc8139ae8103b72acb5813a9c48ef"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "790947058bf71842a65dc2fb6e85e1f2f5397804ad3ac27215493d2e4e1cd15f"
+    },
+    "traces/S16/run_0_consequential/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "88d62d5f4e1fa87b613fc56a33b4a72f7bb51b3f3c8a34deba0859e9d05b34b3"
+    },
+    "traces/S16/run_0_consequential/reconstruction/global/alignment.json": {
+      "sha256": "881e8fec6a405b7807f4318ad953061fe049e796c45cd52a111fa7a0c6c8d696"
+    },
+    "traces/S16/run_0_consequential/reconstruction/global/anonymous_entities.json": {
+      "sha256": "7b3240c491ecf87c74cfad61bdf0cac302818fe1cead9c3b5383b9e33051e770"
+    },
+    "traces/S16/run_0_consequential/reconstruction/global/associations.json": {
+      "sha256": "606cbd656cd902bc0f9ebe578e0e380877c1d4fa0330004c04a363696fb57b43"
+    },
+    "traces/S16/run_0_consequential/reconstruction/global/global_graph.json": {
+      "sha256": "5b523c83952d2ba5b7af4155ea0957ac824a218de48304eef8ccb08f9f2aa045"
+    },
+    "traces/S16/run_0_consequential/reconstruction/global/global_trace.jsonl": {
+      "sha256": "e4387d9ca93018ed0dffd9320c86f2d7775414bf063ea04329dcd02040927d34"
+    },
+    "traces/S16/run_0_consequential/reconstruction/llm/export_manifest.json": {
+      "sha256": "1929f3ee321de31f63049adaa300a031c29f200b0ef4532660db69aceb6b95e8"
+    },
+    "traces/S16/run_0_consequential/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "d9f883ec351efd75a20e03957c2b86b44d89909e09c39a91f9de53ba4433549d"
+    },
+    "traces/S16/run_0_consequential/reconstruction/llm/forensic_packet.json": {
+      "sha256": "0c60f505b9c6218aa84add187796df0bcb7d841576efe50822c6f2ae88f35ec0"
+    },
+    "traces/S17/run_0_crash/reconstruction/A/local_graph.json": {
+      "sha256": "a348df56360a139159a67cde2de3a250096f8f12ed704f0f7828b0c2954112bf"
+    },
+    "traces/S17/run_0_crash/reconstruction/A/local_trace.jsonl": {
+      "sha256": "7b6d277ff1bd2e09e57c0f6443e1a9ff72a5de0dbac9b0a51d42f4c52acedb34"
+    },
+    "traces/S17/run_0_crash/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "bce1ee165823a39d233988c8a453973ec7e0939d0703c70ee6f013c63aff0adb"
+    },
+    "traces/S17/run_0_crash/reconstruction/B/local_graph.json": {
+      "sha256": "e0de81d995cfb10b940e40b2a246bd2d7f09910c6588f60fa28c7fa78725bb79"
+    },
+    "traces/S17/run_0_crash/reconstruction/B/local_trace.jsonl": {
+      "sha256": "272ed10d98a56653d798571d6f03c95f825bc36456e14ebf6778a6968c938dfe"
+    },
+    "traces/S17/run_0_crash/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "0b918e3b6dcacfa487b4073c1abdb13b1831873be6e4898ab34bb33e3572c628"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/evaluation.json": {
+      "sha256": "722100353a3f80e1b1272741a73d31483699fa027dba16ceb758a7a219036b23"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "c08049e585cbe19b91f47f1c0e004203e85dad48da71964d00ec941a669f7341"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "fe4dbacad853a9d163c218e800690685fd6f1db0e11620565f44d32b20814175"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "f024c6091bdba46f2ef63b5160568d756bb00f8d7ab6986c69a2e3ddf0f5c189"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.json": {
+      "sha256": "518587ff2ac3a5ad7f92f30f75346f6512c33adbbdccc731b15e32f80eaf1634"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/visual_audit_baseline/audit.json": {
+      "sha256": "2f60ea4dd8174a565d8b1ba65e73582fed6456b2775aa85ab451394a4c341792"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "605d9256265c6c0d57ff36d689bd12b78af6daed6b12bbd217b953a15f221ca4"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "a2657cabfd006e491cee9bcae63aacc6735462354326575c2f9c7797c6a6c49c"
+    },
+    "traces/S17/run_0_crash/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "cfdf127a6c858646735bc1ec22ea7a32ab69fbb6061cbc4f5d538fd68a6d3c8c"
+    },
+    "traces/S17/run_0_crash/reconstruction/global/alignment.json": {
+      "sha256": "d7d3c7d99c10d25ee0e7e6ef389df074607e812e9fece3aea4b3c34aa36aea0a"
+    },
+    "traces/S17/run_0_crash/reconstruction/global/anonymous_entities.json": {
+      "sha256": "5cc3de54fda488bdb25524cb48383a4c736ec23c5cd257d7f97d4b66a84ee748"
+    },
+    "traces/S17/run_0_crash/reconstruction/global/associations.json": {
+      "sha256": "1bcd16e735a5948d537917d564574387189dcfbc67332411ad39cbbd6911a144"
+    },
+    "traces/S17/run_0_crash/reconstruction/global/global_graph.json": {
+      "sha256": "0553fb5d453b9ab4b600dd185ac2da9862706f7c0546aa4470bea8dd7b5fdb8d"
+    },
+    "traces/S17/run_0_crash/reconstruction/global/global_trace.jsonl": {
+      "sha256": "b78c5d1e6c4f52c8a6eb7478d3ccb20dc3e1e0106e2607193bbb309dace06138"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/export_manifest.json": {
+      "sha256": "19878d329ca0afe90ecb93b7922c9fec8b5c55a6272185de43cb3d5acdb77070"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/forensic_facts.jsonl": {
+      "sha256": "fd9e35804e364b31a6cbaaaede862e47e51e318f2fedc7fcb2030e729253074d"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/forensic_packet.json": {
+      "sha256": "fd82a9b373153536bbae3232fe772bd57e0cc1e0c7c605f8a33b24f1a3a54281"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195632Z_dryrun/payload_audit.json": {
+      "sha256": "22e48c71fb4c84cbd778fd394b27a3b452023d92eb8f2d35d815ef4233f3d241"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195632Z_dryrun/request_metadata.json": {
+      "sha256": "0bb078a9432ad412fda437d6e955c904f3ebdb1c47755e100baa7d924ce4ab1a"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195632Z_dryrun/request_preview.json": {
+      "sha256": "947826e551d253680e611b1b61972f3cc54a0bf5aa6e0bf7770dc4cb715603ba"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/evaluation.json": {
+      "sha256": "b64d74eb98763c6c3b2cb44b4505b2ce8fe89614de71756b41482282443dde90"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/payload_audit.json": {
+      "sha256": "0359729f7a90b3a74d3ba61f85e457949813233c51bbcef970a91efd3ebd5d86"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/request_metadata.json": {
+      "sha256": "d41a3a561d6117eea698cd4edb0b0596bd5f5dcc21a459fef3968a660b94adc3"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/reverification_20261009/evaluation.json": {
+      "sha256": "e989db73e3fb56244bfe2501f07012c91305eb1c41242fc4f4efac13d72f9094"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/reverification_20261009/verification.json": {
+      "sha256": "21cd95620da664b393bfae1813e029a9a65402e918bb880e01f45756f9fd04d0"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/stage1_explanation.json": {
+      "sha256": "717c166fd2f2618b8b09ee1aaae7bea324cf1171cafd12d2603f90df347a0dff"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/stage2_formula.json": {
+      "sha256": "725febdce22b2eeb272b5d2ae72fff2896b6dcc194f60cbbf869d611d0e9873a"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.5-flash-lite_20261008T195821Z/verification.json": {
+      "sha256": "4353e6b45de0bb6dc6b2e86c2d3e6e303577cdb68c570f3e367104a9f97b7723"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195631Z_dryrun/payload_audit.json": {
+      "sha256": "71bb7a123513207bdd80127f8cf5e9da8e975c4314ee33cd518337f572790c2a"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195631Z_dryrun/request_metadata.json": {
+      "sha256": "0a306630e95191b759481e2afcaee962d5c796372f2478f714bc4445623d5243"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195631Z_dryrun/request_preview.json": {
+      "sha256": "508cf1f25e569a589e3116249421d9c925671bd11f2d44711092e36c075b98bc"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195647Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195647Z/request_metadata.json": {
+      "sha256": "40abd36993f8fa46734d4b69698a502eb823ef7450664675ab24d0a151790634"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195920Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T195920Z/request_metadata.json": {
+      "sha256": "7611927b9df78f7721b13b47876921a46de424ebf856325842eef392c06abf75"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T200203Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T200203Z/request_metadata.json": {
+      "sha256": "0d9b6872a0dd63bf7c79ae6bcd1598e3a44a518a27ddee5d71123d77c7318ce0"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T200442Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T200442Z/request_metadata.json": {
+      "sha256": "71efad79418121728bc6242cbf54fa667b7e935ee51bf57d18f0f2c978a760cc"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T202105Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T202105Z/request_metadata.json": {
+      "sha256": "bcd6cd0b165bbd5d33fb1f20f6577ec0e6725dd2b9cb7cb8c1ade1eb6802f60c"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T204317Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T204317Z/request_metadata.json": {
+      "sha256": "6d29621b05b7361742843427e2ae3805afc84c38f66de4d07ad0e8d5ee39ecc9"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T211403Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261008T211403Z/request_metadata.json": {
+      "sha256": "f8f0c4aaaaae110947e9b4150defb9089af991e7947d41f6f5e16e2c25926e92"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261009T000501Z/payload_audit.json": {
+      "sha256": "b018676b2f2dbb0dcac371af6c18829d4864da5ca6ecb74fd7ebe406daa48580"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/gemini_gemini-3.8-flash_20261009T000501Z/request_metadata.json": {
+      "sha256": "1beac3c915c98c39d7a88311d8bd609d15135dad65e0ff5522f40299783c7637"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195633Z_dryrun/payload_audit.json": {
+      "sha256": "312def9bb6a6ce26531ec6cb14a3a1105354dc2163fe378d37e741c57a82bbc3"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195633Z_dryrun/request_metadata.json": {
+      "sha256": "9815df3c3172010fe42fc98f88fe9931b4d36e5dd1dd8a60be95a7c1e9211128"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195633Z_dryrun/request_preview.json": {
+      "sha256": "8fe15382cd3218d3f44b0c03a3718d66d3b82a8e90f42c8adac541b7d461fcfd"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/evaluation.json": {
+      "sha256": "05bff869e00366528898c7b221b16831223508992c47e58e41395b743d1c9bd4"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/payload_audit.json": {
+      "sha256": "71a7ff7eb7253c420be76b2523cc604b9fec0aa86bd6dd34edb8dc45ae38dc67"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/request_metadata.json": {
+      "sha256": "e5c18f982f127b5aa720bdd91cd795394e9cf1f2b7dda672c8afea3dbfb3812c"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/reverification_20261009/evaluation.json": {
+      "sha256": "5b5581f0608441fc3d339fcea04f845f4289fad0ab2fe12f64b728fc9c42bdca"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/reverification_20261009/verification.json": {
+      "sha256": "783ecc828d89a4e582fd6d3435b6290557b458c4f5c04aacf60f1b8b8f841654"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/stage1_explanation.json": {
+      "sha256": "21c89647a33eea29af3ec089d6b5b60da0c750f41e80f3f59a2fee2a917b7e8f"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/stage2_formula.json": {
+      "sha256": "616feac093f0dd8059a4ee3188c013aa26332d8d61f6fb011c4ac525c4358c38"
+    },
+    "traces/S17/run_0_crash/reconstruction/llm/runs/openai_gpt-6-luna_20261008T195958Z/verification.json": {
+      "sha256": "2f9050de2219aac7360966a6d06ebdc77615b734d84817cfa00f9b3e13de2fb2"
+    },
+    "traces/S18/run_0_abreast/reconstruction/A/local_graph.json": {
+      "sha256": "cb7bb78233505dfcbbb358e040fe37e1228179473515683eeda67945cab6e510"
+    },
+    "traces/S18/run_0_abreast/reconstruction/A/local_trace.jsonl": {
+      "sha256": "e9a362445199515f3a5d79fe8a3d3f4f81adafb6e69f69ad78de6efb01ffc96a"
+    },
+    "traces/S18/run_0_abreast/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "d6c6b8910d94100c8d59db2ef89eef43c73c5739e7f9c5c52cbfdb07ec27d085"
+    },
+    "traces/S18/run_0_abreast/reconstruction/B/local_graph.json": {
+      "sha256": "1a33bf822e607201f2547a2e99396c401921d41c4c886bf9ae4e85f3146123f7"
+    },
+    "traces/S18/run_0_abreast/reconstruction/B/local_trace.jsonl": {
+      "sha256": "061c1162d0758eed9da3071b8fd1bdc88d380857850f1b8499b3d0efc695206c"
+    },
+    "traces/S18/run_0_abreast/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "bafa8eee4e63365ac835fa6ba3126412177ec63d48793ac50705d9561a5fcf19"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/evaluation.json": {
+      "sha256": "c39d5a6c6e8cefdc65c26ee3ce5ac27a6d583c1882e7be30c290a0249f2d363a"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "d4937c32ae3fa78b28ae050711d83fd8acfe2e5c0a5a70eb8c3a119c3c7247bc"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "467d2cea9768b3ea732e4f0f4774cf5c915efc2686c3416d35643bef6f359123"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "838657aad23d9c14c24b662cf47d14e8a56c412584b5f1571438d8e13ddab35d"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "6fefd4dd2e85a38da0728bda6bd83aa71de284c71bf296657535ee7658f232ec"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "9318ba7c75394a05e16b54c05ae4a72f0f13b17d632d6d8df5eb5260691e05b6"
+    },
+    "traces/S18/run_0_abreast/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "62c46575cbb9be05b5ca29d00a6f2bca80f742ab436fc90fd13a820f9c24dd05"
+    },
+    "traces/S18/run_0_abreast/reconstruction/global/alignment.json": {
+      "sha256": "ba7083cf471be9a49c4c33ac4c0acba80d6b190e144aab735b028eba67e98a41"
+    },
+    "traces/S18/run_0_abreast/reconstruction/global/anonymous_entities.json": {
+      "sha256": "1246f55fab430750b41c1dfbee21e5f8eb3852f26a5753080496025b4bd8eff1"
+    },
+    "traces/S18/run_0_abreast/reconstruction/global/associations.json": {
+      "sha256": "9a7630977ca1c7695dca5aac74a01febf65fcb7b95e2578ec6f1d56955ff4c3a"
+    },
+    "traces/S18/run_0_abreast/reconstruction/global/global_graph.json": {
+      "sha256": "252cb6de549ed94b8fecc6779ccfc5552c60444a0fca0f1ffa3365dda7f11bcb"
+    },
+    "traces/S18/run_0_abreast/reconstruction/global/global_trace.jsonl": {
+      "sha256": "c7cc0fcff5b350c56a1b8fe07479e6cb71344647b1ca0ae768ec66f12e87b4d3"
+    },
+    "traces/S18/run_0_passing/reconstruction/A/local_graph.json": {
+      "sha256": "96649d71d9edb73e5ed2f2787a103a8119211f7188cb45aff95cb15800e01b6e"
+    },
+    "traces/S18/run_0_passing/reconstruction/A/local_trace.jsonl": {
+      "sha256": "22564b64776bbc01f802ec11a224bab3b17c0926c35aeefb637ef7f8875ffd5e"
+    },
+    "traces/S18/run_0_passing/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "4c0a9920e70c9cfd6b99a380347e9c8840fb0cad728740b5c6d50b0c07d11e93"
+    },
+    "traces/S18/run_0_passing/reconstruction/B/local_graph.json": {
+      "sha256": "09fce5077d6df51690e9ebc5c94f082bd1861bead84df07a0b6286c0433f8d5c"
+    },
+    "traces/S18/run_0_passing/reconstruction/B/local_trace.jsonl": {
+      "sha256": "8ef4a5bee01a9f4766ca12c5d3754ba3678b2f07bcc4fbad0b921f21888efb83"
+    },
+    "traces/S18/run_0_passing/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "9db879c43ee0553c4149eaa3ec279c3c7f1f7dd733bea9d83366ec776ed43e31"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/evaluation.json": {
+      "sha256": "7275a680f50f5ed283a2ff876e6e5beff0e825c1056bc986504f659278dce3f2"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "5d595e92ce85d6b2685c984cfd4eedfbdcd49ccccfe8b625e7e763f06e1fd4be"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "eef5bae473f8d752eb697a5dd003f93321c957977cd0686174e75c79d9d05ac6"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "7a4457edcf41225fb755a39f8f8f88aac4140fbe277bdb997cbbd765b37e7175"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "79188ea866c620ba86ba71b888da9f8fd2282133e47acea829ab323c69cc8734"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "26e4d41b9de855bc3456392c2a446d81178a0b79f8aab80419684c568b0d39ff"
+    },
+    "traces/S18/run_0_passing/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "2038bb94782dee936f7fad51a951e6c8f4be4fd90f3285231b9b2a82d8fb8ac8"
+    },
+    "traces/S18/run_0_passing/reconstruction/global/alignment.json": {
+      "sha256": "062bff6a4a6f86072a1dd36ff491df9e6f90864f5f7351702157087ef87ecdbf"
+    },
+    "traces/S18/run_0_passing/reconstruction/global/anonymous_entities.json": {
+      "sha256": "788e66ed499c847d6a0b2f70047fc594979bfdee09ce2c12193492db57727173"
+    },
+    "traces/S18/run_0_passing/reconstruction/global/associations.json": {
+      "sha256": "8363e9d4806de3ba10b8f5072c96c332a252f9057489380b013ca65fc9d6637c"
+    },
+    "traces/S18/run_0_passing/reconstruction/global/global_graph.json": {
+      "sha256": "b65711387208d87775df62dc843dfe69985e76d5245a5364f1092bfc07b761f5"
+    },
+    "traces/S18/run_0_passing/reconstruction/global/global_trace.jsonl": {
+      "sha256": "7ff35e296261786f20b68874beaee02a9023fa2172d28a069b89bc630f437d48"
+    },
+    "traces/S18/run_0_platoon/reconstruction/A/local_graph.json": {
+      "sha256": "cef52981d0e2602aee795dc64950967557c71852dead3f792a2f03819eb1e504"
+    },
+    "traces/S18/run_0_platoon/reconstruction/A/local_trace.jsonl": {
+      "sha256": "2af6d7d47a84cefad43fb6a1f11103861d8040292070295bec3bb9c8517d37aa"
+    },
+    "traces/S18/run_0_platoon/reconstruction/A/local_tracks.jsonl": {
+      "sha256": "13328092be8cd19249a7c985be17d80b0d977f1873a0e07505e4a23809f731a8"
+    },
+    "traces/S18/run_0_platoon/reconstruction/B/local_graph.json": {
+      "sha256": "120ec52525f0d0667e5f5a157e555a67a84ad776e008321f967eeeb582622dda"
+    },
+    "traces/S18/run_0_platoon/reconstruction/B/local_trace.jsonl": {
+      "sha256": "f82da3f3c4d6eeb81cde963414f9c72b7e028f7a710bde3e5412f85646a4c795"
+    },
+    "traces/S18/run_0_platoon/reconstruction/B/local_tracks.jsonl": {
+      "sha256": "5af15bc3f4a52a5a8e3190aa3a54a09131fbcedd1ee3e733b3b4b1df3c72ff44"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/evaluation.json": {
+      "sha256": "6c1f7ec2bb3a617893418100a3891188b4ea511e9a09c870ac64697982d648f5"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/event_oracle.json": {
+      "sha256": "d82320c1d029f38da66ddd20a087bc66c26b0c4a7490c2a064f6aeb7e8a789af"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/fusion_metrics.json": {
+      "sha256": "42572cf62eb7db39f2049f7927039baaa5cf9d90fc5fed294ee2c843bf2b6496"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/gt_audit_baseline.json": {
+      "sha256": "b15e0f0a56e79aac2e7326b255a49fd8b31917aec88ec29cdbed4c42bc2e2abc"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/visual_audit_final/audit.json": {
+      "sha256": "8047707048179309e92fc52f39e5e10bdcf3b703a9b1f5110e4fe105baab69c8"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/visual_audit_phase2/audit.json": {
+      "sha256": "91f08d5db04076431e07e3849573cee771e57fd9fe3922913db4829ba797f302"
+    },
+    "traces/S18/run_0_platoon/reconstruction/evaluation/visual_audit_phase6/audit.json": {
+      "sha256": "cc15ef4b299ee315bbacebb9bc7e74975448a506605d836eb43d6f2094e8fbae"
+    },
+    "traces/S18/run_0_platoon/reconstruction/global/alignment.json": {
+      "sha256": "81f7cacd5bfddba9a41b17de5c834752a6766cb73f4af506e4205c6c4c2fd79f"
+    },
+    "traces/S18/run_0_platoon/reconstruction/global/anonymous_entities.json": {
+      "sha256": "41255a16014c1fc74f5f0a2b1c8b0e4cbca00cf1f6a44591915bc6a74e5303ab"
+    },
+    "traces/S18/run_0_platoon/reconstruction/global/associations.json": {
+      "sha256": "1c80bff65d988b3fa44ae935fa3bc67b0b9995a4fab1efc5ae5e779ab14a4405"
+    },
+    "traces/S18/run_0_platoon/reconstruction/global/global_graph.json": {
+      "sha256": "57496e705b84c1dfe3ce477d27eb56c26ef5edce50417cacedf2b0e5520af06c"
+    },
+    "traces/S18/run_0_platoon/reconstruction/global/global_trace.jsonl": {
+      "sha256": "d482d51530e266087b97acad5814a7bc539887e46a197610509882b70fe9b9c8"
+    }
+  },
+  "artifacts": {
+    "figures/F1_event_timeline_s17.pdf": "a4ddb2452974c2bbfa10f5982f6e6abb8b2d0ab398b7612847e2c0f4305852bf",
+    "figures/F1_event_timeline_s17.svg": "d69721dec7ea9091157b9bcdf3fd4df7348bf1df8e87c21df36396b329494edd",
+    "figures/F2_alignment_errors.pdf": "6296c504259bd5dbc2606ee3bbde0bede317bc72e6ec8bc3f8db205f7e0ecb1f",
+    "figures/F2_alignment_errors.svg": "33249fe526f74e16573361feb973d312cd7fcd08ba4109fb432fd317e3185092",
+    "figures/F3_fusion_centre_error.pdf": "729abb58309c93dfa883fc690fae094b5db35243c80a15d76ce0f274da5eb4de",
+    "figures/F3_fusion_centre_error.svg": "1e5d7e74dab608e0654afb98631fc4c94e742df928dd11970beba14b416702a9",
+    "robustness/figures/downsample.pdf": "7517a73c1fd65a1a32c31d0d351376556abae679afdd211dd8c43199cfab7133",
+    "robustness/figures/downsample.svg": "ec85d3ac0df883a0da9120b5b1a570e60bb36319c56b818dd9921ccc502c8a45",
+    "robustness/figures/gnss.pdf": "86b656b78f61e66190f63ae3aa74891704f8b792377dfcc691df2c5d7a038ef9",
+    "robustness/figures/gnss.svg": "b32437c9ed92f2b480d229ac19cd8ba4c100336d17e85197c2608419000a8a4b",
+    "robustness/figures/impulse.pdf": "13d033a7845a4138d4216038e3ee9773f782ebe3538d48c4a2f4627382b55c2a",
+    "robustness/figures/impulse.svg": "dbb14c85c941c51a943e20236a85a9bf4ed92c567f8e73a985b05159514288de",
+    "robustness/figures/latency.pdf": "470d1deedd61077d3e1c31de09a0dee0ef4a1dc28b6a95ca9349929a7af0486f",
+    "robustness/figures/latency.svg": "402ac42783a21496eb2351db767b7e1824212de48415d9e8d1f538dc370dcd79",
+    "robustness/figures/radar.pdf": "f9e533e16096d1cc161e678f64e92b8323ad7f353863afcf426a9f9f9fd85be7",
+    "robustness/figures/radar.svg": "1c544f45ebbf91805d58188c57fa04651256a307ba0690211720d949bb048dea",
+    "semantics/figures/event_oracle_canonical.pdf": "f382570659c22b6b910c23b80df9e1499a626a378a07d5e48cd3829236aa0e1e",
+    "semantics/figures/event_oracle_canonical.svg": "2fce0dc694f5bed365ea0aa4d3c2f298f8dda8d9e818c1474fe43be9286d2242",
+    "semantics/figures/event_oracle_sweeps.pdf": "0b6f92915049e41f5590de206f8598c6247c9970d306a8baddc5d579fe931277",
+    "semantics/figures/event_oracle_sweeps.svg": "46c4873f3923b971d8aac80bf24f6c8b111b2ab2b513275bcd40f4ea8b5c2a98",
+    "tables/T1_canonical_runs.csv": "1e7982d2e474074aa06c15a7fa6cf752a559275cd9d1e793c2179604799e66ff",
+    "tables/T1_canonical_runs.md": "ee0cbfedfaf4d2594b184e3f3b8db78e67a9785e9e3b21aa08e2be542fc160a0",
+    "tables/T1_canonical_runs.tex": "5580af35b82efda4c7eb346de5b2a14a5d6484524966216d325e0f05b0531d2b",
+    "tables/T2_sweeps.csv": "8aff4534acdda0cafa5cb391857626417593d2cb4ff70ee1c7c5abe71156da5a",
+    "tables/T2_sweeps.md": "c8bc8311d7d9c44cae99dc88eb403796c60b4c6be04072661e2d85bebfe19af6",
+    "tables/T2_sweeps.tex": "af6781691c22ba6f96c9f6afded637b7ea866a52263acb06fc7faccf994d9dda",
+    "tables/T3_fusion.csv": "38e62355e6077abd5c6a8012ec7758cec069c8d23318dccf0ca4de3c05dc6173",
+    "tables/T3_fusion.md": "2f425b68cb2c018e3021964cfaedddeda9c4614b8e9581425dab3a0d5d399d05",
+    "tables/T3_fusion.tex": "e6c6942ea088f1e4bde0f50741e4ffb5d670ff57fcf5e207f1be9f20985f30c0",
+    "tables/T4_event_oracle_canonical.csv": "46f8b13b76cea4a697540572e7b008f425bb3028e499f0c8bb07462cb8d3a794",
+    "tables/T4_event_oracle_canonical.md": "723dea6bd198d210bbe316f674831099b6f2adadf3e262cd5bd4eb60b58e342e",
+    "tables/T4_event_oracle_canonical.tex": "e6d07da4c31c0e14a02360065f869a8084f4740a9cfca9c0ce687125f4045ce1",
+    "tables/T4_event_oracle_sweeps.csv": "13f94308f2b345b131f799fb3dd5914e78a227759275436918b76fe29a1d5da9",
+    "tables/T4_event_oracle_sweeps.md": "ab138d275fc4db112f60f48185fa5ac271666cd75d74bf9260fd5cec13f601d3",
+    "tables/T4_event_oracle_sweeps.tex": "84fdfbdc2ba4e74f8310fcfee2e91c05006cbe9c5c1b28526dcbd72219ce783b",
+    "tables/T5_robustness.csv": "8efff707ff2ee75b5a7a58f345f3f3029f96d0fad23517803c0f52e500735e4d",
+    "tables/T5_robustness.md": "a91697d73118703e583556a3ac7d42284886ca45964c2352cdcd1112d1846a40",
+    "tables/T5_robustness.tex": "0c6a304ec9915d25d4151a8ef9728b4168fc9ed6ee3f6aaacb1a1e21586182b8",
+    "tables/T6_sensitivity_canonical.csv": "cc0e24e460d02809caaf0153920c08eca1313fd49657d04e91f1bc3e198b78c8",
+    "tables/T6_sensitivity_canonical.md": "a9d3e4001784449af33288535a7ac2d5a92a3315f4ae410e25291c3624bbcbc4",
+    "tables/T6_sensitivity_canonical.tex": "f6b6784eb4d760d46d05427d06b0df4f2c3fdbd1826d1851eff1ab1ed1fc7222",
+    "tables/T6_sensitivity_sweeps.csv": "56c757f67331f53e807f5b901742ce3fb86eda6cc5e5fd610630399cbde6d938",
+    "tables/T6_sensitivity_sweeps.md": "6696db4fab3519f5c50cddb79eb9e97f76eb595b1fd525932d337447e515c165",
+    "tables/T6_sensitivity_sweeps.tex": "ca86e01ee2d8afa8a711142c868b7df75fff88696c532219858a879298ad1abb",
+    "tables/T7_impulse.csv": "ef541d7b603cc42b2211cb7fe48ba53dd095ef2c1a26c9bef696a65550a94801",
+    "tables/T7_impulse.md": "7b94c1327391878315f16f6d638feeca6591718350685af544a4ac0048a7ed7a",
+    "tables/T7_impulse.tex": "61b8f9914e23cabb0fc0122996b269c300bde6287b5ca93e2947a641f63d4740",
+    "tables/T8_fusion_sweeps.csv": "ccf690ba9be5ae6244ab631dfbfeb33b39f7485ac72565c5447cef1ef5301f4d",
+    "tables/T8_fusion_sweeps.md": "e6f6958d9aa6ebb58609c95733b7f48b67976de435ba413701525229c4518c04",
+    "tables/T8_fusion_sweeps.tex": "ad302c3dd52da5b15132ff1f4b8d263f0e14d818c4a41d438e0f3d1ad87dded5"
+  }
+}

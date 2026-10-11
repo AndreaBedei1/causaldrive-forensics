@@ -2,17 +2,17 @@
 
 | comparison | event | expected | found | matched | precision | recall | dt median [s] | dt p5 / p95 [s] |
 |---|---|---|---|---|---|---|---|---|
-| reconstruction vs. COVERAGE | track appeared | 96 | 250 | 42 | 0.168 | 0.438 | 0.15 | -0.54 / +0.45 |
-| reconstruction vs. COVERAGE | ego-path entry | 246 | 140 | 125 | 0.893 | 0.508 | 0.20 | -0.14 / +0.35 |
+| reconstruction vs. COVERAGE | track appeared | 96 | 281 | 42 | 0.149 | 0.438 | 0.15 | -0.54 / +0.45 |
+| reconstruction vs. COVERAGE | ego-path entry | 246 | 129 | 124 | 0.961 | 0.504 | 0.20 | -0.14 / +0.35 |
 | reconstruction vs. COVERAGE | cut-in from left | 57 | 41 | 41 | 1.000 | 0.719 | -0.30 | -0.45 / -0.05 |
-| reconstruction vs. COVERAGE | cut-in from right | 136 | 71 | 60 | 0.845 | 0.441 | -0.25 | -0.30 / -0.10 |
-| reconstruction vs. COVERAGE | CRITICAL_TTC start | 552 | 555 | 518 | 0.933 | 0.938 | 0.05 | -0.10 / +0.46 |
+| reconstruction vs. COVERAGE | cut-in from right | 136 | 65 | 60 | 0.923 | 0.441 | -0.25 | -0.30 / -0.10 |
+| reconstruction vs. COVERAGE | CRITICAL_TTC start | 552 | 551 | 515 | 0.935 | 0.933 | 0.05 | -0.10 / +0.45 |
 | reconstruction vs. COVERAGE | CRITICAL_TTC end | 145 | 156 | 122 | 0.782 | 0.841 | 0.00 | -0.05 / +0.05 |
-| reconstruction vs. COVERAGE_TRACKED | track appeared | 96 | 250 | 42 | 0.168 | 0.438 | 0.15 | -0.54 / +0.45 |
-| reconstruction vs. COVERAGE_TRACKED | ego-path entry | 139 | 140 | 120 | 0.857 | 0.863 | 0.20 | -0.05 / +0.50 |
+| reconstruction vs. COVERAGE_TRACKED | track appeared | 96 | 281 | 42 | 0.149 | 0.438 | 0.15 | -0.54 / +0.45 |
+| reconstruction vs. COVERAGE_TRACKED | ego-path entry | 139 | 129 | 119 | 0.922 | 0.856 | 0.20 | -0.05 / +0.50 |
 | reconstruction vs. COVERAGE_TRACKED | cut-in from left | 40 | 41 | 39 | 0.951 | 0.975 | -0.20 | -0.35 / +0.05 |
-| reconstruction vs. COVERAGE_TRACKED | cut-in from right | 89 | 71 | 59 | 0.831 | 0.663 | -0.15 | -0.30 / +1.31 |
-| reconstruction vs. COVERAGE_TRACKED | CRITICAL_TTC start | 620 | 555 | 520 | 0.937 | 0.839 | 0.05 | -0.10 / +0.55 |
+| reconstruction vs. COVERAGE_TRACKED | cut-in from right | 89 | 65 | 59 | 0.908 | 0.663 | -0.15 | -0.30 / +1.31 |
+| reconstruction vs. COVERAGE_TRACKED | CRITICAL_TTC start | 620 | 551 | 517 | 0.938 | 0.834 | 0.05 | -0.10 / +0.51 |
 | reconstruction vs. COVERAGE_TRACKED | CRITICAL_TTC end | 150 | 156 | 123 | 0.788 | 0.820 | -0.10 | -0.20 / +0.05 |
 | COVERAGE_TRACKED vs. COVERAGE | track appeared | 96 | 96 | 96 | 1.000 | 1.000 | 0.00 | +0.00 / +0.00 |
 | COVERAGE_TRACKED vs. COVERAGE | ego-path entry | 246 | 139 | 137 | 0.986 | 0.557 | -0.10 | -0.20 / +0.15 |

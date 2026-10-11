@@ -1,4 +1,4 @@
-**T6_sensitivity_sweeps.**  One-at-a-time sensitivity of the core events to their thresholds before the first contact (240 runs, sweeps).
+**T6_sensitivity_sweeps.**  Historical one-at-a-time sensitivity of the core events to their thresholds before the first contact (240 runs, sweeps).
 
 | setting | CTTC start: recall / precision | CTTC start: oracle events | path entry: recall / precision | path entry: oracle events | cut-in R: recall / precision | cut-in R: oracle events |
 |---|---|---|---|---|---|---|

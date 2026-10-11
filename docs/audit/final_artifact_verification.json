@@ -1,0 +1,15 @@
+{
+  "render_commit": "f79deb86ff28127d696761fb858b04fd59f13f6d",
+  "render_git_dirty": false,
+  "artifact_hashes_verified": 50,
+  "input_hashes_verified": 436,
+  "tables_checked": 10,
+  "pdf_figures_checked": 10,
+  "study_records_checked": 13,
+  "results_qa": "PASS",
+  "pdf_visual_review": "All 10 final PDFs rendered with pdftoppm at 160 dpi and visually inspected; legends/readable labels verified",
+  "historical_family_baselines": "Actual comparator selection checked on Python 3.14 and 3.8",
+  "runtime_code_sha256": "c76d72a3965907b67e768dd7ff3699ce9f82ae9d8eace084018740f53405a812",
+  "sweep_false_merge_pairs": 0,
+  "sweep_false_collision_matches": 0
+}
