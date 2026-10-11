@@ -1,0 +1,12 @@
+**T8_fusion_sweeps.**  Road users that recorded nothing in the sweeps: fused against single-track centre error, paired per run (privileged evaluation).
+
+| sweep | runs with entities | fused median [m] | single-track median [m] | fused better | paired difference median [m] | merges correct/false/missed |
+|---|---|---|---|---|---|---|
+| rear end | 2 | 0.54 | 0.53 | 1/2 | 0.013 | 0/0/0 |
+| cut in | 4 | 1.18 | 1.32 | 2/4 | 0.005 | 0/0/0 |
+| crossing | 23 | 0.54 | 0.79 | 22/23 | -0.213 | 12/0/0 |
+| unobserved cut in | 40 | 0.12 | 0.51 | 39/40 | -0.350 | 57/0/8 |
+| anonymous pair adjacent | 40 | 0.32 | 0.40 | 36/40 | -0.085 | 143/3/51 |
+| anonymous pair platoon | 40 | 0.44 | 0.39 | 19/40 | 0.008 | 101/0/128 |
+
+Per run: the median over the instants every source track was on the entity's own road user.  Fusion gains where observers see different faces of the road user (cut-in by a non-recorder, crossing, side by side), not when every observer sees the same rear faces (platoon).

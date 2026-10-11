@@ -1,0 +1,69 @@
+{
+ "run": "S06/run_0_a_front_pushed",
+ "clock": "t_global",
+ "frames": [
+  {
+   "file": "01_tgm004.80.png",
+   "label": "lead-in",
+   "replay_time": 0.0,
+   "display_time": -4.8
+  },
+  {
+   "file": "02_tgm004.30.png",
+   "label": "CRITICAL_TTC_START(A,track_001 (B)); CRITICAL_TTC_START(B,track_001 (C))",
+   "replay_time": 0.5,
+   "display_time": -4.3
+  },
+  {
+   "file": "03_tgm000.20.png",
+   "label": "before COLLISION(A,B)",
+   "replay_time": 4.6,
+   "display_time": -0.2
+  },
+  {
+   "file": "04_tgp000.00.png",
+   "label": "CRITICAL_TTC_END(A,track_001 (B)); COLLISION(A,B)",
+   "replay_time": 4.8,
+   "display_time": 0.0
+  },
+  {
+   "file": "05_tgp000.30.png",
+   "label": "before COLLISION(B,C)",
+   "replay_time": 5.1,
+   "display_time": 0.3
+  },
+  {
+   "file": "06_tgp000.45.png",
+   "label": "before COLLISION(A,B)",
+   "replay_time": 5.25,
+   "display_time": 0.45
+  },
+  {
+   "file": "07_tgp000.50.png",
+   "label": "CRITICAL_TTC_END(B,track_001 (C)); after COLLISION(A,B); COLLISION(B,C)",
+   "replay_time": 5.3,
+   "display_time": 0.5
+  },
+  {
+   "file": "08_tgp000.65.png",
+   "label": "COLLISION(A,B)",
+   "replay_time": 5.45,
+   "display_time": 0.65
+  },
+  {
+   "file": "09_tgp001.00.png",
+   "label": "after COLLISION(B,C)",
+   "replay_time": 5.8,
+   "display_time": 1.0
+  },
+  {
+   "file": "10_tgp001.15.png",
+   "label": "after COLLISION(A,B)",
+   "replay_time": 5.95,
+   "display_time": 1.15
+  }
+ ],
+ "flags": [],
+ "reconstruction_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
+ "note": "frames and flags are reconstruction-only (ReplayRun inputs); verdicts by the reviewer"
+}

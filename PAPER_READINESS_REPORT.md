@@ -533,3 +533,34 @@ time (no interactions).
 **Gate.**  PASS: definitions with sources or flagged assumptions; an oracle independent of the radar pipeline;
 sensitivity per threshold; the worked example worded as observed vehicle response delays with the perception
 caveat; the full suite passes on both Pythons.
+
+## Phase 6 -- paper results and inspection
+
+**Objective.**  The paper's tables (CSV, Markdown, LaTeX) and figures (SVG, PDF) in `results/`, automatic
+checks of them, and a full inspection of the canonical runs.
+
+**Implementation.**
+- `scripts/paper_results.py`: T1 canonical runs, T2 sweeps, T3 fusion of road users that recorded nothing, T4
+  event oracle (canonical and sweeps), T5 robustness, T6 sensitivity (canonical and sweeps), T7 impulse
+  symmetry; F1 the per-vehicle event graph of S17 on t_global (what each recorder's sensors established about
+  each road user, its own actions, and where ground truth puts each CRITICAL_TTC start), F2 alignment errors per
+  run, F3 fused against single-track centre errors per sweep run; an index with provenance
+  (`results/README.md`).  The study figures (robustness, oracle) use the same style (`cdf.evaluation.figures`).
+- `scripts/results_qa.py`: the three formats of every table agree cell by cell; every figure is one PDF page
+  within the IEEE text width with TrueType fonts (no Type 3) and an SVG with text >= 6 pt; every study record has
+  its provenance; the index names everything.  It caught the first study figures (10-12 in wide, Type 3 fonts,
+  text as paths): fixed.
+- Full inspection: the phase-6 visual audit re-rendered the 151 keyframes of the 17 canonical runs with the
+  current reconstruction (the CARLA Python is needed for the OpenDRIVE lanes: the first render under Python 3.14
+  had none); 144 are pixel-identical to the phase-2 frames inspected then, S07's 7 changed and were inspected
+  one by one (`docs/audit/visual_audit_phase6_verdicts.json`, `traces/visual_audit_phase6.md`).
+
+**Results.**  Visual audit: 11 PASS, 6 WARN, 0 FAIL (S07 now PASS: C aligned and replayed; the WARNs are the
+documented limitations: identity switches at contacts, a post-contact fragment, C and D merged by A's radar in
+S18).  Ten tables (T1-T8; T4 and T6 for the canonical runs and the sweeps) and ten figures (F1-F3 and the
+seven study figures); `results_qa.py`: 10 tables, 10 figures, 13 study records, PASS.
+
+**Commit.**  Phase 5: `ea0ccb148fa02a7ab96053d0d28d3d56a3256c68`.  Phase 6: `phase6: ...` (SHA in the phase 7 section).
+
+**Gate.**  PASS: tables and figures with provenance in `results/`, automatic QA green, every canonical run
+inspected.
