@@ -1,3 +1,5 @@
+> **Snapshot storico.** Per i sette run aggiornati vedere [follow-up](visual_audit_replay_followup.md); gli altri run non sono stati rigenerati.
+
 # Visual audit (visual_audit_final)
 
 One row per run: the reviewer's verdict on the reconstruction-only replay frames (details and frames in each run's reconstruction/evaluation/visual_audit_final.md).

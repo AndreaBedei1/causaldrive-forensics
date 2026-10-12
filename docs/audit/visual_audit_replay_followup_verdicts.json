@@ -1,0 +1,96 @@
+{
+ "S02/run_0_crash": {
+  "verdict": "PASS",
+  "summary": "CUT_IN visibile a -3.65; a -3.55/-3.45 CRITICAL ancora assente, poi attivo a -3.40. Contatto posteriore A-B a 0. Nessun anonimo.",
+  "findings": [],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 10
+ },
+ "S08/run_0_crash": {
+  "verdict": "PASS",
+  "summary": "C mantiene A/B distinti attraverso -0.45, il contatto e fino a +11. Nessun ghost anonimo duplicato. PASS visivo; EGO_PATH_ENTRY su A a +0.50 resta extra rispetto all’oracle.",
+  "findings": [],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 17
+ },
+ "S15/run_0_deflected_into_c": {
+  "verdict": "PASS",
+  "summary": "Sei associazioni nominate, A-B poi A-C: punti e corpi coerenti, senza il precedente frammento anonimo duplicato.",
+  "findings": [],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 11
+ },
+ "S16/run_0_consequential": {
+  "verdict": "WARN",
+  "summary": "Resta un breve U1 con box van sovrapposto a C dopo l’urto e la perdita di A da C.",
+  "findings": [
+   {
+    "verdict": "WARN",
+    "time": 1.35,
+    "problem": "Frammento U1 nato a +1.25 e perso a +1.55; C→A termina a +0.90, A→C a +1.20.",
+    "solution": "Limite residuo dichiarato; nessuna ulteriore modifica fuori dagli obiettivi S02/S08.",
+    "frame": "13_tgp001.35.png"
+   }
+  ],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 14
+ },
+ "S18/run_0_abreast": {
+  "verdict": "WARN",
+  "summary": "Due corpi finali distinti, nessun falso merge; restano duplicazioni iniziali e rinumerazione dei frammenti.",
+  "findings": [
+   {
+    "verdict": "WARN",
+    "time": -6.2,
+    "problem": "U1/U3 duplicati all’inizio, ancora visibili a -6.00.",
+    "solution": "Frammentazione conservativa residua.",
+    "frame": "01_tgm006.20.png"
+   },
+   {
+    "verdict": "WARN",
+    "time": -5.7,
+    "problem": "Cambio di box/identità U durante il passaggio tra frammenti.",
+    "solution": "Successivamente U2/U3 distinti; false merge 0.",
+    "frame": "03_tgm005.70.png"
+   }
+  ],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 11
+ },
+ "S18/run_0_passing": {
+  "verdict": "PASS",
+  "summary": "Due corpi anonimi U1/U2 distinti in tutti gli otto frame; nessun collasso C/D e nessun flag QA.",
+  "findings": [],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 8
+ },
+ "S18/run_0_platoon": {
+  "verdict": "WARN",
+  "summary": "Corpi distinti e nessun falso merge; restano duplicazione iniziale, perdita e rinumerazione dopo il contatto.",
+  "findings": [
+   {
+    "verdict": "WARN",
+    "time": -6.2,
+    "problem": "Duplicazione U2/U1 iniziale, poi U3 a -5.70.",
+    "solution": "Frammentazione conservativa residua.",
+    "frame": "01_tgm006.20.png"
+   },
+   {
+    "verdict": "WARN",
+    "time": 0.5,
+    "problem": "Perdita del corpo anteriore e successivo frammento U4.",
+    "solution": "Limite esplicito; nessun merge spurio.",
+    "frame": "08_tgp000.50.png"
+   }
+  ],
+  "all_frames_inspected": true,
+  "review_method": "contact sheets; every final exported frame inspected",
+  "frame_count": 8
+ }
+}

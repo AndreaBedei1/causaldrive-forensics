@@ -8,11 +8,11 @@ digraph "local_B" {
   "B:e04" [label="BRAKE_START\nB\nt=3.15", fillcolor="#fde68a"];
   "B:e05" [label="BRAKE_END\nB\nt=3.65", fillcolor="#fde68a"];
   "B:e06" [label="THROTTLE_START\nB\nt=3.75", fillcolor="#fde68a"];
-  "B:e07" [label="COLLISION\nB\nt=4.65", fillcolor="#fca5a5"];
-  "B:e08" [label="THROTTLE_END\nB\nt=4.65", fillcolor="#fde68a"];
-  "B:e09" [label="BRAKE_START\nB\nt=4.65", fillcolor="#fde68a"];
-  "B:e10" [label="MOVING_END\nB\nt=5.20", fillcolor="#e5e7eb"];
-  "B:e11" [label="STOP_START\nB\nt=5.20", fillcolor="#e5e7eb"];
+  "B:e07" [label="COLLISION\nB\nt=5.30", fillcolor="#fca5a5"];
+  "B:e08" [label="THROTTLE_END\nB\nt=5.30", fillcolor="#fde68a"];
+  "B:e09" [label="BRAKE_START\nB\nt=5.30", fillcolor="#fde68a"];
+  "B:e10" [label="MOVING_END\nB\nt=5.85", fillcolor="#e5e7eb"];
+  "B:e11" [label="STOP_START\nB\nt=5.85", fillcolor="#e5e7eb"];
   {rank=same; "B:e01"; "B:e02";}
   {rank=same; "B:e03"; "B:e04";}
   {rank=same; "B:e07"; "B:e08"; "B:e09";}

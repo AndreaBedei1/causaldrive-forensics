@@ -72,6 +72,9 @@ class TrackingConfig:
     measurement_std_m: float = 0.5
     radial_speed_std_mps: float = 0.3
     acceleration_std_mps2: float = 6.0
+    # After competing return gates, an unexpected Doppler update must not bend
+    # the earlier trajectory backwards (e.g. lateral deflection at an impact).
+    smoothing_innovation_sigma: float = 3.0
     # A confirmed track whose target stops abruptly (a crash: tens of m/s^2, the
     # Doppler speed leaves the gate in one sweep) may take this many returns or
     # more whose speed lies between standstill and the predicted one, when its

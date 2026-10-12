@@ -12,10 +12,10 @@
       "tracked for 6.60 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 1.3 m -> 0.1 m over the last 1.0 s",
-      "track speed agrees with C's own speed: RMSE 0.16 m/s over 3.0 s",
-      "clearance at the contact 0.07 m",
-      "the only compatible track of A touching it at the contact (clearance 0.07 m; track_002 at 3.00 m)",
-      "collision_001 with B at 5.55 s: not compatible (track speed disagrees with B's own speed: RMSE 3.42 m/s over 3.0 s (> 1.50))"
+      "track speed agrees with C's own speed: RMSE 0.15 m/s over 3.0 s",
+      "clearance at the contact 0.06 m",
+      "the only compatible track of A touching it at the contact (clearance 0.06 m; track_002 at 2.01 m)",
+      "collision_001 with B at 5.55 s: not compatible (track speed disagrees with B's own speed: RMSE 3.43 m/s over 3.0 s (> 1.50))"
     ],
     "blocking": [],
     "source_graphs": [
@@ -35,12 +35,12 @@
       "A and C both reported collision_002 at 6.60 s (peak impulse 322.1 vs 322.1 N*s)",
       "tracked for 6.55 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 4.4 m -> 3.0 m over the last 1.0 s",
-      "track speed agrees with C's own speed: RMSE 0.04 m/s over 3.0 s",
-      "clearance at the contact 2.99 m",
-      "collision_001 with B at 5.55 s: not compatible (not approaching before the contact: clearance 3.9 m -> 4.5 m over the last 1.0 s; track speed disagrees with B's own speed: RMSE 3.49 m/s over 3.0 s (> 1.50))",
+      "approaching before the contact: clearance 3.4 m -> 2.0 m over the last 1.0 s",
+      "track speed agrees with C's own speed: RMSE 0.10 m/s over 3.0 s",
+      "clearance at the contact 2.01 m",
+      "collision_001 with B at 5.55 s: not compatible (not approaching before the contact: clearance 3.0 m -> 3.5 m over the last 1.0 s; track speed disagrees with B's own speed: RMSE 3.58 m/s over 3.0 s (> 1.50))",
       "ambiguous: 2 persistent tracks of A are compatible with the contact collision_002 (track_001, track_002)",
-      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 134 samples; 100% within 3 sigma) at C's own velocity (median difference 0.06 m/s)"
+      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 135 samples; 100% within 3 sigma) at C's own velocity (median difference 0.12 m/s)"
     ],
     "blocking": [],
     "source_graphs": [
@@ -84,8 +84,8 @@
       "tracked for 5.55 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 9.1 m -> 6.0 m over the last 1.0 s",
-      "track speed disagrees with A's own speed: RMSE 2.30 m/s over 3.0 s (> 1.50)",
-      "clearance at the contact 6.02 m (beyond 3.50 m: confidence factor 0.70)",
+      "track speed disagrees with A's own speed: RMSE 2.31 m/s over 3.0 s (> 1.50)",
+      "clearance at the contact 6.04 m (beyond 3.50 m: confidence factor 0.70)",
       "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 123 samples before C's contact with a third body at +1.05 s; 100% within 3 sigma) at C's own velocity (median difference 0.20 m/s)"
     ],
     "blocking": [],
@@ -106,11 +106,11 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 4243.51 vs 4243.51 N*s)",
       "tracked for 4.70 s before the matched collision",
-      "continuous up to the contact: last observed 0.70 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 14.9 m -> 11.4 m over the last 1.0 s",
-      "track speed disagrees with A's own speed: RMSE 2.55 m/s over 2.3 s (> 1.50)",
-      "clearance at the contact 11.44 m (beyond 3.50 m: confidence factor 0.03)",
-      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 41 samples before C's contact with a third body at +1.05 s; 100% within 3 sigma) at C's own velocity (median difference 0.08 m/s)"
+      "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
+      "approaching before the contact: clearance 11.3 m -> 7.7 m over the last 1.0 s",
+      "track speed disagrees with A's own speed: RMSE 2.38 m/s over 3.0 s (> 1.50)",
+      "clearance at the contact 7.70 m (beyond 3.50 m: confidence factor 0.38)",
+      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 53 samples before C's contact with a third body at +1.05 s; 100% within 3 sigma) at C's own velocity (median difference 0.12 m/s)"
     ],
     "blocking": [],
     "source_graphs": [

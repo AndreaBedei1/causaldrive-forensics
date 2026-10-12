@@ -2,7 +2,7 @@
 
 raw detections of every radar of the recorder (front, left, right)
   -> each return placed in the recorder's own local odometric frame from ITS radar's mount
-  -> each active track claims the returns inside its gate (gated association)
+  -> gated tracks compete for returns by position and Doppler compatibility
   -> left-over *moving* returns are clustered and start tentative tracks
   -> a tentative track that keeps receiving moving returns is confirmed and
      gets an anonymous id: track_001, track_002, ...
@@ -466,6 +466,7 @@ class TrackMeasurement:
     # for the multi-observer box fit of the anonymous-entity fusion (never written).
     points: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
     origins: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
+    competing: bool = False  # at least one claimed gate overlaps a confirmed rival's gate
 
 
 def _transition(dt: float) -> np.ndarray:
@@ -518,6 +519,8 @@ def filter_and_smooth(measurements: Sequence[TrackMeasurement], cfg: TrackingCon
     Returns (smoothed states, smoothed covariances, filtered states), one row
     per measurement record; missed sweeps are prediction-only steps.
     """
+    boundaries = set()
+    last_competing = measurements[0].t_local if measurements[0].competing else -math.inf
     x, P = _initial_state(measurements[0], cfg)
     predicted_x, predicted_P, filtered_x, filtered_P = [x], [P], [x], [P]
     for previous, current in zip(measurements, measurements[1:]):
@@ -526,6 +529,17 @@ def filter_and_smooth(measurements: Sequence[TrackMeasurement], cfg: TrackingCon
         predicted_P.append(P)
         if current.xy is not None:
             H, z, R = _measurement_model(current, cfg)
+            if current.competing:
+                last_competing = current.t_local
+            # Preserve the causal history before an unexpected velocity update.
+            # Forward filtering and identity stay continuous; only RTS propagation
+            # across this innovation is stopped. Position-only noise still smooths.
+            if (current.t_local - last_competing <= cfg.max_track_gap_s
+                    and len(filtered_x) >= cfg.min_track_frames and len(z) > 2):
+                innovation = z[2:] - H[2:] @ x
+                variance = np.diag(H[2:] @ P @ H[2:].T + R[2:, 2:])
+                if np.any(np.abs(innovation) > cfg.smoothing_innovation_sigma * np.sqrt(variance)):
+                    boundaries.add(len(filtered_x))
             x, P = kf_update(x, P, z, H, R)
         filtered_x.append(x)
         filtered_P.append(P)
@@ -533,6 +547,8 @@ def filter_and_smooth(measurements: Sequence[TrackMeasurement], cfg: TrackingCon
     smoothed_x = list(filtered_x)
     smoothed_P = list(filtered_P)
     for k in range(len(measurements) - 2, -1, -1):
+        if k + 1 in boundaries:
+            continue
         F = _transition(measurements[k + 1].t_local - measurements[k].t_local)
         gain = filtered_P[k] @ F.T @ np.linalg.inv(predicted_P[k + 1])
         smoothed_x[k] = filtered_x[k] + gain @ (smoothed_x[k + 1] - predicted_x[k + 1])
@@ -651,12 +667,31 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig) -> List
     confirmed = 0
     for sweep in sweeps:
         free = np.ones(len(sweep.points), dtype=bool)
-        # 1. Existing tracks claim returns: confirmed tracks first, older first.
-        for track in sorted(active, key=lambda item: (item.track_id is None, item.birth_order)):
+        # 1. Predict all tracks before any updates. An older track must not
+        # consume a rival's better-supported returns merely because it ran first.
+        # Keep confirmed-over-tentative priority; age only resolves exact ties.
+        ordered = sorted(active, key=lambda item: (item.track_id is None, item.birth_order))
+        masks, scores = [], []
+        for track in ordered:
             track.predict(sweep.t_local, cfg)
             mask = _slowdown_gate(track, sweep, free, _gate(track, sweep, free, cfg), cfg)
+            masks.append(mask)
+            distance = np.linalg.norm(sweep.points - track.x[:2], axis=1)
+            residual = np.abs(sweep.radial_speed - _unit_lines(sweep.points, sweep.origins) @ track.x[2:])
+            # Each normalised residual is <= 1 inside its gate. A penalty
+            # greater than 2 therefore preserves the confirmation priority.
+            scores.append(np.where(mask, (distance / cfg.max_association_distance_m) ** 2
+                                   + (residual / cfg.max_velocity_mismatch_mps) ** 2
+                                   + (3.0 if track.track_id is None else 0.0), np.inf))
+        winners = np.argmin(scores, axis=0) if scores else np.zeros(len(sweep.points), dtype=int)
+        confirmed_support = sum((mask.astype(int) for track, mask in zip(ordered, masks)
+                                 if track.track_id is not None), np.zeros(len(sweep.points), dtype=int))
+        for k, track in enumerate(ordered):
+            mask = masks[k] & (winners == k)
             if mask.any():
-                track.update(_measurement_from_returns(sweep, mask), cfg)
+                measurement = _measurement_from_returns(sweep, mask)
+                measurement.competing = bool((masks[k] & (confirmed_support > 1)).any())
+                track.update(measurement, cfg)
                 free &= ~mask
             else:
                 track.miss(sweep)

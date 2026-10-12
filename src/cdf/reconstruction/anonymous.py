@@ -439,6 +439,7 @@ class RecorderLink:
     accepted: bool
     until: Optional[float] = None  # the evidence stops at this contact with a third body (t_global)
     refused: Optional[str] = None
+    reacquired: bool = False
 
 
 def _third_body_contact(observer: RecorderBody, target: RecorderBody) -> float:
@@ -466,6 +467,10 @@ def link_to_recorders(view: CommonView, cfg: ReconstructionConfig) -> List[Recor
         if track.status == ASSOCIATED or track.identity_ambiguous:
             continue
         observer = view.bodies[track.recorder]
+        if (track.parent_track is not None
+                and any(track.start >= _third_body_contact(observer, body)
+                        for name, body in view.bodies.items() if name != track.recorder)):
+            continue  # later segments require the fresh, rival-checked pass below
         candidates = []
         for name, body in view.bodies.items():
             if name == track.recorder:
@@ -504,6 +509,57 @@ def link_to_recorders(view: CommonView, cfg: ReconstructionConfig) -> List[Recor
             candidates.append(link)
         accepted = sorted((c for c in candidates if c.accepted), key=lambda c: c.median_distance_sigma)
         links += accepted[:1]
+    # A stable segment born after a third-body contact has no pre-contact
+    # samples. Permit fresh identity evidence, never inheritance across the
+    # ambiguous segment or anonymous motion stitching.
+    known = {link.track: link.recorder for link in links}
+    known.update({t.name: t.entity for t in view.tracks if t.status == ASSOCIATED})
+    for track in view.tracks:
+        if track.name in known or track.identity_ambiguous or track.parent_track is None:
+            continue
+        previous = [t for t in view.tracks if t.recorder == track.recorder
+                    and t.parent_track == track.parent_track and t.name in known
+                    and 0.0 < track.start - t.end <= fusion.stitch_max_gap_s]
+        targets = {known[t.name] for t in previous}
+        if len(targets) != 1:
+            continue
+        target = next(iter(targets))
+        body = view.bodies[target]
+        cut = _third_body_contact(view.bodies[track.recorder], body)
+        samples = [s for s in track.samples if s.measured and body.covers(s.t_global)]
+        if (track.start < cut or len(samples) < fusion.link_min_samples
+                or any(b.t_global - a.t_global > cfg.tracking.max_track_gap_s for a, b in zip(samples, samples[1:]))):
+            continue
+        evidence = {}
+        for name, rival in view.bodies.items():
+            if name == track.recorder or not all(rival.covers(s.t_global) for s in samples):
+                continue
+            distance, _ = outline_distances(rival.poses, rival.footprint,
+                np.array([s.t_global for s in samples]) - rival.offset_to_global,
+                np.array([s.point for s in samples]), inside_zero=True)
+            sigma = np.array([_position_sigma(cfg, s, rival.poses) for s in samples])
+            speed_gap = np.array([np.linalg.norm(s.velocity - np.array([rival.pose_at_global(s.t_global).vx,
+                                                                     rival.pose_at_global(s.t_global).vy]))
+                                  for s in samples])
+            speed_sigma = np.array([_velocity_sigma(cfg, s.vel_std, rival.poses.velocity_std_mps) for s in samples])
+            within = (distance <= 3.0 * sigma) & (speed_gap <= 3.0 * speed_sigma)
+            evidence[name] = (distance, sigma, speed_gap, speed_sigma, within)
+        if target not in evidence:
+            continue
+        distance, sigma, speed_gap, speed_sigma, within = evidence[target]
+        # Require persistence throughout the segment, including its beginning:
+        # a long clean suffix must not name an earlier contaminated prefix.
+        width = fusion.link_min_samples
+        persistent = all(float(np.mean(within[i:i + width])) >= fusion.link_min_fraction
+                         for i in range(len(within) - width + 1))
+        rival_supported = any(np.any(np.convolve(values[-1].astype(int), np.ones(width, dtype=int), mode='valid')
+                                    >= math.ceil(width * fusion.link_min_fraction))
+                              for name, values in evidence.items() if name != target)
+        if (persistent and not rival_supported and float(np.median(distance / sigma)) <= 1.0
+                and float(np.median(speed_gap / speed_sigma)) <= 1.0):
+            links.append(RecorderLink(track.name, target, len(samples), round(float(np.median(distance)), 3),
+                         round(float(np.median(distance / sigma)), 3), round(float(np.median(speed_gap)), 3),
+                         round(float(np.mean(within)), 3), True, reacquired=True))
     return links
 
 
@@ -1189,6 +1245,9 @@ def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Assoc
                 "" if link.until is None else " before {0}'s contact with a third body at {1:+.2f} s".format(
                     link.recorder, link.until))]
         item.source_graphs = sorted(set(item.source_graphs) | {recorder, link.recorder})
+        if link.reacquired:
+            item.evidence.append('reacquired after an identity boundary: persistent fresh geometry and velocity '
+                                 'throughout the stable segment, continuous with the earlier named segment; no supported rival')
     linked = {link.track for link in links}
     anonymous = [t for t in view.tracks if t.status != ASSOCIATED and t.name not in linked]
     by_name = {t.name: t for t in anonymous}

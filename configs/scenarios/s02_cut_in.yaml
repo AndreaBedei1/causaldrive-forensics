@@ -57,7 +57,35 @@ scenario:
       params:
         target_speed: 6.5
   variants:
-    crash: {}
+    crash:
+      # Measured scratch trials: earlier cut-in alone left CRITICAL before
+      # CUT_IN; extra separation needed a correspondingly later reaction by A.
+      # Overrides keep critical_before_cut_in's physical configuration intact.
+      participant_overrides:
+        A:
+          actions:
+          - action_id: A_late_brake
+            kind: brake
+            t_start: 4.5
+            duration: 6.0
+            params:
+              intensity: 0.85
+        B:
+          spawn:
+            forward_m: 35.0
+          actions:
+          - action_id: B_cut_in
+            kind: lane_shift
+            t_start: 0.2
+            duration: 2.2
+            params:
+              lateral_m: 3.5
+          - action_id: B_slow_after_cut_in
+            kind: set_speed
+            t_start: 3.2
+            duration: 12.0
+            params:
+              target_speed: 6.5
     critical_before_cut_in:
       description: 'B drives much slower in the lane to A''s left. A closes on it so fast that
         its time-to-contact with B is already critical before B starts moving into A''s

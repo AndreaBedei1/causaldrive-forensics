@@ -1,0 +1,73 @@
+{
+ "run": "S18/run_0_passing",
+ "clock": "t_global",
+ "frames": [
+  {
+   "file": "01_tgm006.20.png",
+   "label": "lead-in",
+   "replay_time": 0.0,
+   "display_time": -6.2
+  },
+  {
+   "file": "02_tgm005.55.png",
+   "label": "CRITICAL_TTC_START(A,track_003 (U2))",
+   "replay_time": 0.65,
+   "display_time": -5.55
+  },
+  {
+   "file": "03_tgm001.05.png",
+   "label": "CRITICAL_TTC_START(A,track_002 (B))",
+   "replay_time": 5.15,
+   "display_time": -1.05
+  },
+  {
+   "file": "04_tgm000.65.png",
+   "label": "CRITICAL_TTC_START(B,track_001 (A))",
+   "replay_time": 5.55,
+   "display_time": -0.65
+  },
+  {
+   "file": "05_tgm000.45.png",
+   "label": "CRITICAL_TTC_END(A,track_003 (U2))",
+   "replay_time": 5.75,
+   "display_time": -0.45
+  },
+  {
+   "file": "06_tgm000.20.png",
+   "label": "before COLLISION(A,B)",
+   "replay_time": 6.0,
+   "display_time": -0.2
+  },
+  {
+   "file": "07_tgp000.00.png",
+   "label": "CRITICAL_TTC_END(A,track_002 (B)); CRITICAL_TTC_END(B,track_001 (A)); COLLISION(A,B)",
+   "replay_time": 6.2,
+   "display_time": 0.0
+  },
+  {
+   "file": "08_tgp000.50.png",
+   "label": "after COLLISION(A,B)",
+   "replay_time": 6.7,
+   "display_time": 0.5
+  }
+ ],
+ "flags": [],
+ "reconstruction_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "reconstruction_provenance": {
+  "git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+  "git_dirty": true,
+  "code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b",
+  "config_sha256": "0b5c899acef9146cc85f97d72625a2d0790996c98250a7d263ea45eb4f2fd2fd",
+  "runs": [
+   "traces/S18/run_0_passing"
+  ],
+  "perturbation_profile": null,
+  "seed": null,
+  "generated_utc": "2026-10-11T13:02:43Z",
+  "python": "3.14.2",
+  "analysis_code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b"
+ },
+ "map": "Town05",
+ "lanes_drawn": true,
+ "note": "Reconstruction-only keyframes. No GT. Review verdict recorded separately."
+}

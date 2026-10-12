@@ -1,18 +1,18 @@
 {
-  "callbacks_received": 335,
+  "callbacks_received": 334,
   "columns": [
     "depth_m",
     "azimuth_rad",
     "altitude_rad",
     "radial_velocity_mps"
   ],
-  "first_frame": 1173,
+  "first_frame": 712099,
   "frame": "azimuth and altitude in this radar's own frame; returns beyond range_m (radial) dropped",
   "frames_delivered": 304,
   "frames_without_measurement": 0,
   "frames_written": 304,
   "horizontal_fov_deg": 140.0,
-  "last_frame": 1476,
+  "last_frame": 712402,
   "missing_frame_count": 0,
   "mount": {
     "anchor": "left",
@@ -24,7 +24,7 @@
   "radial_velocity_sign": "positive_away_from_sensor",
   "radial_velocity_status": "measured",
   "range_m": 90.0,
-  "returns_beyond_range_dropped": 3183,
+  "returns_beyond_range_dropped": 3704,
   "schema_version": 1,
   "sensor_id": "left",
   "sensor_tick_s": 0.05,

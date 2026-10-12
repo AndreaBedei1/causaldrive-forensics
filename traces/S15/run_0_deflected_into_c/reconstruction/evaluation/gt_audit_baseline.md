@@ -1,3 +1,5 @@
+> **Snapshot storico precedente al follow-up.** Per il run corrente vedere [visual_audit_replay_followup](visual_audit_replay_followup.md) e `gt_audit_replay_followup.md`. Immagini e giudizi qui sotto conservati come storia.
+
 # Ground-truth audit (privileged, evaluation only): S15/run_0_deflected_into_c
 
 Reconstruction result vs ground truth; the reconstruction never reads these files.

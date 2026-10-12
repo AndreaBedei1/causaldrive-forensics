@@ -36,14 +36,14 @@
     "evidence": [
       "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
       "tracked for 5.90 s before the matched collision",
-      "lost 2.80 s before the matched collision (window 1.00 s)",
-      "not approaching before the contact: clearance 15.2 m -> 15.3 m over the last 1.0 s",
-      "track speed agrees with B's own speed: RMSE 0.81 m/s over 0.2 s",
+      "lost 2.10 s before the matched collision (window 1.00 s)",
+      "not approaching before the contact: clearance 15.1 m -> 15.2 m over the last 1.0 s",
+      "track speed agrees with B's own speed: RMSE 0.53 m/s over 0.9 s",
       "anonymous road user U4: A:track_001#segment_2"
     ],
     "blocking": [
-      "lost 2.80 s before the matched collision (window 1.00 s)",
-      "not approaching before the contact: clearance 15.2 m -> 15.3 m over the last 1.0 s"
+      "lost 2.10 s before the matched collision (window 1.00 s)",
+      "not approaching before the contact: clearance 15.1 m -> 15.2 m over the last 1.0 s"
     ],
     "source_graphs": [
       "A",
@@ -60,15 +60,15 @@
     "collision_event": "collision_001",
     "evidence": [
       "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
-      "tracked for 2.75 s before the matched collision",
+      "tracked for 2.05 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "not approaching before the contact: clearance 15.1 m -> 15.3 m over the last 1.0 s",
-      "track speed agrees with B's own speed: RMSE 0.91 m/s over 2.8 s",
-      "clearance at the contact 15.14 m (beyond 3.50 m: confidence factor 0.00)",
+      "not approaching before the contact: clearance 15.2 m -> 15.4 m over the last 1.0 s",
+      "track speed agrees with B's own speed: RMSE 0.93 m/s over 2.0 s",
+      "clearance at the contact 15.19 m (beyond 3.50 m: confidence factor 0.00)",
       "anonymous road user U2: B:track_002, B:track_004, A:track_001#segment_3"
     ],
     "blocking": [
-      "not approaching before the contact: clearance 15.1 m -> 15.3 m over the last 1.0 s"
+      "not approaching before the contact: clearance 15.2 m -> 15.4 m over the last 1.0 s"
     ],
     "source_graphs": [
       "A",
@@ -110,13 +110,13 @@
       "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
       "tracked for 5.95 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "not approaching before the contact: clearance 15.5 m -> 15.7 m over the last 1.0 s",
-      "track speed agrees with B's own speed: RMSE 1.37 m/s over 3.0 s",
-      "clearance at the contact 15.39 m (beyond 3.50 m: confidence factor 0.00)",
+      "not approaching before the contact: clearance 15.4 m -> 15.7 m over the last 1.0 s",
+      "track speed agrees with B's own speed: RMSE 1.36 m/s over 3.0 s",
+      "clearance at the contact 15.38 m (beyond 3.50 m: confidence factor 0.00)",
       "anonymous road user U3: B:track_003, A:track_003"
     ],
     "blocking": [
-      "not approaching before the contact: clearance 15.5 m -> 15.7 m over the last 1.0 s"
+      "not approaching before the contact: clearance 15.4 m -> 15.7 m over the last 1.0 s"
     ],
     "source_graphs": [
       "A",
@@ -138,7 +138,7 @@
       "approaching before the contact: clearance 1.6 m -> 0.5 m over the last 1.0 s",
       "track speed agrees with A's own speed: RMSE 0.49 m/s over 3.0 s",
       "clearance at the contact 0.52 m",
-      "the only compatible track of B touching it at the contact (clearance 0.52 m; track_002, track_003 at 16.50 m, 17.18 m)"
+      "the only compatible track of B touching it at the contact (clearance 0.52 m; track_002, track_003, track_004 at 16.71 m, 17.18 m, 18.06 m)"
     ],
     "blocking": [],
     "source_graphs": [
@@ -158,14 +158,14 @@
       "B and A both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 17.6 m -> 16.5 m over the last 1.0 s",
-      "track speed agrees with A's own speed: RMSE 0.15 m/s over 3.0 s",
-      "clearance at the contact 16.50 m (beyond 3.50 m: confidence factor 0.00)",
-      "ambiguous: 3 persistent tracks of B are compatible with the contact (track_001, track_002, track_003)",
+      "approaching before the contact: clearance 17.6 m -> 16.7 m over the last 1.0 s",
+      "track speed agrees with A's own speed: RMSE 0.12 m/s over 3.0 s",
+      "clearance at the contact 16.71 m (beyond 3.50 m: confidence factor 0.00)",
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)",
       "anonymous road user U2: B:track_002, B:track_004, A:track_001#segment_3"
     ],
     "blocking": [
-      "ambiguous: 3 persistent tracks of B are compatible with the contact (track_001, track_002, track_003)"
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)"
     ],
     "source_graphs": [
       "B",
@@ -187,11 +187,11 @@
       "approaching before the contact: clearance 18.0 m -> 17.1 m over the last 1.0 s",
       "track speed agrees with A's own speed: RMSE 0.10 m/s over 3.0 s",
       "clearance at the contact 17.14 m (beyond 3.50 m: confidence factor 0.00)",
-      "ambiguous: 3 persistent tracks of B are compatible with the contact (track_001, track_002, track_003)",
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)",
       "anonymous road user U3: B:track_003, A:track_003"
     ],
     "blocking": [
-      "ambiguous: 3 persistent tracks of B are compatible with the contact (track_001, track_002, track_003)"
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)"
     ],
     "source_graphs": [
       "B",
@@ -209,13 +209,15 @@
     "evidence": [
       "B and A both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
       "tracked for 6.20 s before the matched collision",
-      "lost 1.65 s before the matched collision (window 1.00 s)",
-      "approaching before the contact: clearance 21.9 m -> 20.9 m over the last 1.0 s",
-      "track speed agrees with A's own speed: RMSE 0.06 m/s over 1.3 s",
+      "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
+      "approaching before the contact: clearance 19.1 m -> 18.1 m over the last 1.0 s",
+      "track speed agrees with A's own speed: RMSE 0.18 m/s over 3.0 s",
+      "clearance at the contact 18.06 m (beyond 3.50 m: confidence factor 0.00)",
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)",
       "anonymous road user U2: B:track_002, B:track_004, A:track_001#segment_3"
     ],
     "blocking": [
-      "lost 1.65 s before the matched collision (window 1.00 s)"
+      "ambiguous: 4 persistent tracks of B are compatible with the contact (track_001, track_002, track_003, track_004)"
     ],
     "source_graphs": [
       "B",

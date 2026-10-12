@@ -30,14 +30,15 @@
     {
       "track": "A:track_002",
       "recorder": "C",
-      "samples": 134,
+      "samples": 135,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.063,
+      "median_velocity_difference_mps": 0.123,
       "fraction_within": 1.0,
       "accepted": true,
       "until": null,
-      "refused": null
+      "refused": null,
+      "reacquired": false
     },
     {
       "track": "B:track_002",
@@ -45,23 +46,25 @@
       "samples": 123,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.205,
+      "median_velocity_difference_mps": 0.197,
       "fraction_within": 1.0,
       "accepted": true,
       "until": 1.05,
-      "refused": null
+      "refused": null,
+      "reacquired": false
     },
     {
       "track": "B:track_003",
       "recorder": "C",
-      "samples": 41,
+      "samples": 53,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.083,
+      "median_velocity_difference_mps": 0.118,
       "fraction_within": 1.0,
       "accepted": true,
       "until": 1.05,
-      "refused": null
+      "refused": null,
+      "reacquired": false
     }
   ],
   "association_evidence": [],

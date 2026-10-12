@@ -333,14 +333,14 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_FRONT",
      "subject": "C",
-     "t_local": 3.45,
+     "t_local": 4.15,
      "track": "track_001#segment_3"
     },
     {
      "type": "CRITICAL_TTC_START",
      "side": "CRITICAL_TTC_START",
      "subject": "C",
-     "t_local": 3.95,
+     "t_local": 4.65,
      "track": "track_001#segment_3"
     },
     {
@@ -406,7 +406,7 @@
     "extra": [
      "A/D@0.25",
      "A/D@0.30",
-     "A/C@3.45"
+     "A/C@4.15"
     ]
    },
    "EGO_PATH_ENTRY": {
@@ -448,19 +448,17 @@
    "CRITICAL_TTC_START": {
     "found": 3,
     "expected": 4,
-    "matched": 2,
+    "matched": 3,
     "deltas": [
      -0.05,
+     -1.7,
      0.15
     ],
-    "side_agree": 2,
+    "side_agree": 3,
     "missed": [
-     "A/C@0.50",
-     "A/C@6.35"
+     "A/C@0.50"
     ],
-    "extra": [
-     "A/C@3.95"
-    ]
+    "extra": []
    },
    "CRITICAL_TTC_END": {
     "found": 3,
@@ -489,7 +487,7 @@
     "extra": [
      "A/D@0.25",
      "A/D@0.30",
-     "A/C@3.45"
+     "A/C@4.15"
     ]
    },
    "EGO_PATH_ENTRY": {
@@ -529,20 +527,18 @@
    "CRITICAL_TTC_START": {
     "found": 3,
     "expected": 5,
-    "matched": 2,
+    "matched": 3,
     "deltas": [
      -0.05,
+     -1.7,
      0.15
     ],
-    "side_agree": 2,
+    "side_agree": 3,
     "missed": [
      "A/C@0.50",
-     "A/C@6.35",
      "B/C@3.25"
     ],
-    "extra": [
-     "A/C@3.95"
-    ]
+    "extra": []
    },
    "CRITICAL_TTC_END": {
     "found": 3,
@@ -610,19 +606,17 @@
    "CRITICAL_TTC_START": {
     "found": 3,
     "expected": 4,
-    "matched": 2,
+    "matched": 3,
     "deltas": [
      -0.05,
+     -1.7,
      0.15
     ],
-    "side_agree": 2,
+    "side_agree": 3,
     "missed": [
-     "A/C@0.50",
-     "A/C@6.35"
+     "A/C@0.50"
     ],
-    "extra": [
-     "A/C@3.95"
-    ]
+    "extra": []
    },
    "CRITICAL_TTC_END": {
     "found": 3,
@@ -807,7 +801,7 @@
     "extra": [
      "A/D@0.25",
      "A/D@0.30",
-     "A/C@3.45"
+     "A/C@4.15"
     ]
    },
    "EGO_PATH_ENTRY": {
@@ -854,7 +848,7 @@
      "A/C@0.50"
     ],
     "extra": [
-     "A/C@3.95"
+     "A/C@4.65"
     ]
    },
    "CRITICAL_TTC_END": {
@@ -880,7 +874,7 @@
     "extra": [
      "A/D@0.25",
      "A/D@0.30",
-     "A/C@3.45"
+     "A/C@4.15"
     ]
    },
    "EGO_PATH_ENTRY": {
@@ -924,7 +918,7 @@
      "B/C@3.25"
     ],
     "extra": [
-     "A/C@3.95"
+     "A/C@4.65"
     ]
    },
    "CRITICAL_TTC_END": {
@@ -993,7 +987,7 @@
      "A/C@0.50"
     ],
     "extra": [
-     "A/C@3.95"
+     "A/C@4.65"
     ]
    },
    "CRITICAL_TTC_END": {

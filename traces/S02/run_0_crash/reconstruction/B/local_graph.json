@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 30.641471683979034,
+      "origin_source_timestamp": 1771.4966107942164,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -235,9 +235,9 @@
       "kind": "OUTCOME",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 4.65,
+      "t_local": 5.3,
       "attributes": {
-        "peak_impulse": 2900.23
+        "peak_impulse": 2460.67
       },
       "source": "collision_sensor",
       "confidence": 1.0,
@@ -253,7 +253,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 4.6
+        "facts_t_local": 5.2
       }
     },
     {
@@ -262,7 +262,7 @@
       "kind": "ACTION",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 4.65,
+      "t_local": 5.3,
       "attributes": {},
       "source": "controls",
       "confidence": null,
@@ -278,7 +278,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 4.6
+        "facts_t_local": 5.2
       }
     },
     {
@@ -287,7 +287,7 @@
       "kind": "ACTION",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 4.65,
+      "t_local": 5.3,
       "attributes": {},
       "source": "controls",
       "confidence": null,
@@ -303,7 +303,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 4.6
+        "facts_t_local": 5.2
       }
     },
     {
@@ -312,7 +312,7 @@
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 5.2,
+      "t_local": 5.85,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -328,7 +328,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 5.1
+        "facts_t_local": 5.8
       }
     },
     {
@@ -337,7 +337,7 @@
       "kind": "FACT",
       "actor_id": "B",
       "subject_id": null,
-      "t_local": 5.2,
+      "t_local": 5.85,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -353,7 +353,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 5.1
+        "facts_t_local": 5.8
       }
     }
   ],

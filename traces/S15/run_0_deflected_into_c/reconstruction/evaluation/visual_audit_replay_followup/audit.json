@@ -1,0 +1,91 @@
+{
+ "run": "S15/run_0_deflected_into_c",
+ "clock": "t_global",
+ "frames": [
+  {
+   "file": "01_tgm003.80.png",
+   "label": "lead-in",
+   "replay_time": 0.0,
+   "display_time": -3.8
+  },
+  {
+   "file": "02_tgm001.30.png",
+   "label": "CRITICAL_TTC_START(B,track_002 (A))",
+   "replay_time": 2.5,
+   "display_time": -1.3
+  },
+  {
+   "file": "03_tgm001.25.png",
+   "label": "CRITICAL_TTC_START(A,track_002 (B))",
+   "replay_time": 2.55,
+   "display_time": -1.25
+  },
+  {
+   "file": "04_tgm000.20.png",
+   "label": "before COLLISION(A,B)",
+   "replay_time": 3.6,
+   "display_time": -0.2
+  },
+  {
+   "file": "05_tgm000.05.png",
+   "label": "CRITICAL_TTC_START(A,track_001 (C)); CRITICAL_TTC_START(C,track_001 (A))",
+   "replay_time": 3.75,
+   "display_time": -0.05
+  },
+  {
+   "file": "06_tgp000.00.png",
+   "label": "CRITICAL_TTC_END(A,track_002 (B)); CRITICAL_TTC_END(B,track_002 (A)); EGO_PATH_ENTRY(B,track_002 (A)); COLLISION(A,B)",
+   "replay_time": 3.8,
+   "display_time": 0.0
+  },
+  {
+   "file": "07_tgp000.50.png",
+   "label": "after COLLISION(A,B)",
+   "replay_time": 4.3,
+   "display_time": 0.5
+  },
+  {
+   "file": "08_tgp000.55.png",
+   "label": "EGO_PATH_ENTRY(A,track_001 (C))",
+   "replay_time": 4.35,
+   "display_time": 0.55
+  },
+  {
+   "file": "09_tgp000.70.png",
+   "label": "before COLLISION(A,C)",
+   "replay_time": 4.5,
+   "display_time": 0.7
+  },
+  {
+   "file": "10_tgp000.90.png",
+   "label": "CRITICAL_TTC_END(A,track_001 (C)); CRITICAL_TTC_END(C,track_001 (A)); COLLISION(A,C)",
+   "replay_time": 4.7,
+   "display_time": 0.9
+  },
+  {
+   "file": "11_tgp001.40.png",
+   "label": "after COLLISION(A,C)",
+   "replay_time": 5.2,
+   "display_time": 1.4
+  }
+ ],
+ "flags": [],
+ "reconstruction_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "reconstruction_provenance": {
+  "git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+  "git_dirty": true,
+  "code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b",
+  "config_sha256": "0b5c899acef9146cc85f97d72625a2d0790996c98250a7d263ea45eb4f2fd2fd",
+  "runs": [
+   "traces/S15/run_0_deflected_into_c"
+  ],
+  "perturbation_profile": null,
+  "seed": null,
+  "generated_utc": "2026-10-11T13:02:10Z",
+  "python": "3.14.2",
+  "analysis_code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b"
+ },
+ "map": "Town05",
+ "lanes_drawn": true,
+ "note": "Reconstruction-only keyframes. No GT. Review verdict recorded separately."
+}

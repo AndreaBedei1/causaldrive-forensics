@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 35.291471753269434,
-      "peak_impulse": 2900.2340186474003,
-      "reconstructed_as": "g16",
+      "sim_time": 1776.7966108731925,
+      "peak_impulse": 2460.669927422933,
+      "reconstructed_as": "g17",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -24,8 +24,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 4.65,
-      "true_reference_t_local": 4.65,
+      "estimated_reference_t_local": 5.3,
+      "true_reference_t_local": 5.3,
       "error_s": 0.0
     },
     {
@@ -35,8 +35,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 4.65,
-      "true_reference_t_local": 4.65,
+      "estimated_reference_t_local": 5.3,
+      "true_reference_t_local": 5.3,
       "error_s": 0.0
     }
   ],
@@ -51,8 +51,8 @@
   "event_timing": {
     "nodes": 25,
     "max_abs_error_s": 0.0,
-    "order_pairs": 274,
-    "order_concordant": 274
+    "order_pairs": 283,
+    "order_concordant": 283
   },
   "tracks": [
     {
@@ -64,12 +64,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 150,
-      "raw_rmse_to_surface_m": 0.204,
-      "smoothed_rmse_to_surface_m": 0.217,
-      "smoothed_rmse_to_centre_m": 1.935,
-      "raw_difference_speed_rmse_mps": 1.741,
-      "speed_rmse_mps": 0.136
+      "samples": 147,
+      "raw_rmse_to_surface_m": 0.2,
+      "smoothed_rmse_to_surface_m": 0.264,
+      "smoothed_rmse_to_centre_m": 1.929,
+      "raw_difference_speed_rmse_mps": 1.784,
+      "speed_rmse_mps": 0.267
     }
   ],
   "contact_clearances": [
@@ -78,11 +78,11 @@
       "recorder": "A",
       "partner": "B",
       "track": "A:track_001",
-      "seen_s_before_contact": -0.05,
-      "clearance_m": 0.204,
+      "seen_s_before_contact": 0.0,
+      "clearance_m": 0.127,
       "true_gap_m": 0.0,
-      "error_m": 0.204,
-      "range_m": 0.234,
+      "error_m": 0.127,
+      "range_m": 0.082,
       "ttc_s": null
     },
     {
@@ -96,11 +96,11 @@
     "shifted_recorder": "B",
     "shift_s": 0.73,
     "shifted_local_collision_times": [
-      5.38
+      6.03
     ],
     "global_graph_identical": true,
-    "offset_to_global_before": -4.65,
-    "offset_to_global_after": -5.38,
+    "offset_to_global_before": -5.3,
+    "offset_to_global_after": -6.03,
     "offset_change_s": -0.73
   }
 }

@@ -1,0 +1,15 @@
+{
+ "initial_head": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "initial_git_status": "clean",
+ "python_314": {
+  "passed": 481,
+  "subtests": 17,
+  "duration_s": 206.8
+ },
+ "python_38": {
+  "passed": 481,
+  "duration_s": 723.02
+ },
+ "command": "python -X utf8 -m pytest -q",
+ "runtime_changed_only_after_both_baselines_finished": true
+}

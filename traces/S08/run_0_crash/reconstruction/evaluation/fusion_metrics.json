@@ -43,7 +43,7 @@
       "verdict": "correct link"
     },
     {
-      "track": "C:track_001#segment_1",
+      "track": "C:track_001",
       "decision": "A",
       "status": "ASSOCIATED",
       "by": "common_frame",
@@ -52,299 +52,33 @@
       "verdict": "correct link"
     },
     {
-      "track": "C:track_001#segment_2",
-      "decision": "U2",
-      "status": "ANONYMOUS",
-      "by": null,
-      "true_identity": "B",
-      "purity": 0.643,
-      "verdict": "missed link (true identity B)"
-    },
-    {
-      "track": "C:track_001#segment_3",
-      "decision": "U3",
-      "status": "ANONYMOUS",
-      "by": null,
-      "true_identity": "A",
-      "purity": 0.921,
-      "verdict": "missed link (true identity A)"
-    },
-    {
       "track": "C:track_002",
-      "decision": "U1",
-      "status": "ANONYMOUS",
-      "by": null,
+      "decision": "B",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
       "true_identity": "B",
-      "purity": 0.632,
-      "verdict": "missed link (true identity B)"
+      "purity": 1.0,
+      "verdict": "correct link"
     }
   ],
   "decision_counts": {
-    "correct link": 5,
-    "missed link": 3
+    "correct link": 6
   },
-  "entities": [
-    {
-      "id": "U1",
-      "source_tracks": [
-        "C:track_002"
-      ],
-      "observers": [
-        "C"
-      ],
-      "true_identity": "B",
-      "identity_is_recorder": true,
-      "purity": 0.632,
-      "track_identities": {
-        "C:track_002": "B"
-      }
-    },
-    {
-      "id": "U2",
-      "source_tracks": [
-        "C:track_001#segment_2"
-      ],
-      "observers": [
-        "C"
-      ],
-      "true_identity": "B",
-      "identity_is_recorder": true,
-      "purity": 0.643,
-      "track_identities": {
-        "C:track_001#segment_2": "B"
-      }
-    },
-    {
-      "id": "U3",
-      "source_tracks": [
-        "C:track_001#segment_3"
-      ],
-      "observers": [
-        "C"
-      ],
-      "true_identity": "A",
-      "identity_is_recorder": true,
-      "purity": 0.921,
-      "track_identities": {
-        "C:track_001#segment_3": "A"
-      }
-    }
-  ],
+  "entities": [],
   "merges": {
     "correct": 0,
     "false": 0,
-    "missed": 1
+    "missed": 0
   },
-  "fragmentation": {
-    "A": [
-      "U3"
-    ],
-    "B": [
-      "U1",
-      "U2"
-    ]
-  },
-  "state_errors": {
-    "centre_error_m": {
-      "n": 126,
-      "median": 1.1219,
-      "q25": 1.0268,
-      "q75": 1.1921,
-      "p90": 1.2761,
-      "p95": 1.5385,
-      "max": 2.305,
-      "mean": 1.0575,
-      "iqr": 0.1653
-    },
-    "coverage_s": {
-      "n": 3,
-      "median": 3.7,
-      "q25": 2.525,
-      "q75": 6.875,
-      "p90": 8.78,
-      "p95": 9.415,
-      "max": 10.05,
-      "mean": 5.0333,
-      "iqr": 4.35
-    },
-    "heading_error_deg": {
-      "n": 28,
-      "median": 2.3319,
-      "q25": 0.9264,
-      "q75": 3.9957,
-      "p90": 74.6121,
-      "p95": 80.8743,
-      "max": 89.8591,
-      "mean": 13.5396,
-      "iqr": 3.0693
-    },
-    "length_error_m": {
-      "n": 3,
-      "median": 0.419,
-      "q25": 0.3055,
-      "q75": 0.419,
-      "p90": 0.419,
-      "p95": 0.419,
-      "max": 0.419,
-      "mean": 0.3433,
-      "iqr": 0.1135
-    },
-    "normalised_centre_error": {
-      "n": 126,
-      "median": 0.8597,
-      "q25": 0.799,
-      "q75": 0.9063,
-      "p90": 1.1777,
-      "p95": 3.1858,
-      "max": 5.6358,
-      "mean": 1.0924,
-      "iqr": 0.1073
-    },
-    "single_track_nominal_centre_error_m": {
-      "n": 126,
-      "median": 1.3447,
-      "q25": 1.2195,
-      "q75": 1.3866,
-      "p90": 1.4188,
-      "p95": 1.4508,
-      "max": 2.1921,
-      "mean": 1.2422,
-      "iqr": 0.1671
-    },
-    "speed_error_mps": {
-      "n": 126,
-      "median": 0.169,
-      "q25": 0.0922,
-      "q75": 0.3134,
-      "p90": 0.8062,
-      "p95": 1.7159,
-      "max": 4.4724,
-      "mean": 0.3846,
-      "iqr": 0.2212
-    },
-    "velocity_error_mps": {
-      "n": 126,
-      "median": 0.1802,
-      "q25": 0.0971,
-      "q75": 0.4458,
-      "p90": 1.4251,
-      "p95": 3.3827,
-      "max": 8.1971,
-      "mean": 0.6432,
-      "iqr": 0.3487
-    },
-    "width_error_m": {
-      "n": 3,
-      "median": 0.094,
-      "q25": 0.094,
-      "q75": 0.1785,
-      "p90": 0.2292,
-      "p95": 0.2461,
-      "max": 0.263,
-      "mean": 0.1503,
-      "iqr": 0.0845
-    }
-  },
-  "state_errors_by_method": {
-    "box_fit": {
-      "centre_error_m": {
-        "n": 25,
-        "median": 0.3377,
-        "q25": 0.2899,
-        "q75": 1.3148,
-        "p90": 1.9563,
-        "p95": 2.1786,
-        "max": 2.305,
-        "mean": 0.8046,
-        "iqr": 1.025
-      },
-      "heading_error_deg": {
-        "n": 20,
-        "median": 1.3354,
-        "q25": 0.7342,
-        "q75": 2.7976,
-        "p90": 75.3093,
-        "p95": 84.2171,
-        "max": 89.8591,
-        "mean": 13.5932,
-        "iqr": 2.0634
-      },
-      "speed_error_mps": {
-        "n": 25,
-        "median": 0.2783,
-        "q25": 0.0878,
-        "q75": 0.4084,
-        "p90": 0.9783,
-        "p95": 1.139,
-        "max": 4.4724,
-        "mean": 0.4866,
-        "iqr": 0.3206
-      },
-      "velocity_error_mps": {
-        "n": 25,
-        "median": 0.3824,
-        "q25": 0.2254,
-        "q75": 0.8202,
-        "p90": 3.999,
-        "p95": 7.3011,
-        "max": 8.1971,
-        "mean": 1.3227,
-        "iqr": 0.5948
-      }
-    },
-    "covariance_intersection": {
-      "centre_error_m": {
-        "n": 101,
-        "median": 1.1377,
-        "q25": 1.069,
-        "q75": 1.1908,
-        "p90": 1.2542,
-        "p95": 1.2791,
-        "max": 1.8865,
-        "mean": 1.1201,
-        "iqr": 0.1218
-      },
-      "heading_error_deg": {
-        "n": 8,
-        "median": 4.3805,
-        "q25": 3.4963,
-        "q75": 6.2269,
-        "p90": 29.0886,
-        "p95": 52.1531,
-        "max": 75.2177,
-        "mean": 13.4057,
-        "iqr": 2.7306
-      },
-      "speed_error_mps": {
-        "n": 101,
-        "median": 0.1657,
-        "q25": 0.0949,
-        "q75": 0.2683,
-        "p90": 0.6105,
-        "p95": 1.7379,
-        "max": 3.4786,
-        "mean": 0.3594,
-        "iqr": 0.1734
-      },
-      "velocity_error_mps": {
-        "n": 101,
-        "median": 0.1664,
-        "q25": 0.095,
-        "q75": 0.2836,
-        "p90": 0.9003,
-        "p95": 2.0153,
-        "max": 6.667,
-        "mean": 0.475,
-        "iqr": 0.1886
-      }
-    }
-  },
+  "fragmentation": {},
+  "state_errors": {},
+  "state_errors_by_method": {},
   "calibration": {
-    "states": 126,
+    "states": 0,
     "observed_within": {
-      "1_sigma": 0.865,
-      "2_sigma": 0.921,
-      "3_sigma": 0.937
+      "1_sigma": 0.0,
+      "2_sigma": 0.0,
+      "3_sigma": 0.0
     },
     "expected_within_gaussian": {
       "1_sigma": 0.393,
@@ -352,168 +86,7 @@
       "3_sigma": 0.989
     }
   },
-  "entity_errors": [
-    {
-      "id": "U1",
-      "true_identity": "B",
-      "coverage_s": 3.7,
-      "states": 24,
-      "impure_states": 14,
-      "centre_error_m": {
-        "n": 24,
-        "median": 0.3365,
-        "q25": 0.2633,
-        "q75": 0.481,
-        "p90": 1.0422,
-        "p95": 1.761,
-        "max": 1.9369,
-        "mean": 0.523,
-        "iqr": 0.2177
-      },
-      "velocity_error_mps": {
-        "n": 24,
-        "median": 0.5955,
-        "q25": 0.2318,
-        "q75": 0.982,
-        "p90": 3.8512,
-        "p95": 4.5151,
-        "max": 6.667,
-        "mean": 1.2267,
-        "iqr": 0.7502
-      },
-      "speed_error_mps": {
-        "n": 24,
-        "median": 0.3097,
-        "q25": 0.0928,
-        "q75": 0.6985,
-        "p90": 2.9003,
-        "p95": 3.4084,
-        "max": 4.4724,
-        "mean": 0.8429,
-        "iqr": 0.6058
-      },
-      "heading_error_deg": {
-        "n": 24,
-        "median": 1.7723,
-        "q25": 0.7742,
-        "q75": 3.3722,
-        "p90": 4.6884,
-        "p95": 5.1893,
-        "max": 9.319,
-        "mean": 2.3234,
-        "iqr": 2.598
-      },
-      "length_error_m": 0.419,
-      "width_error_m": -0.094,
-      "length_source": "prior",
-      "width_source": "prior",
-      "true_length_m": 4.181,
-      "true_width_m": 1.994
-    },
-    {
-      "id": "U2",
-      "true_identity": "B",
-      "coverage_s": 1.35,
-      "states": 9,
-      "impure_states": 5,
-      "centre_error_m": {
-        "n": 9,
-        "median": 1.5094,
-        "q25": 1.2674,
-        "q75": 1.5648,
-        "p90": 2.2457,
-        "p95": 2.2754,
-        "max": 2.305,
-        "mean": 1.555,
-        "iqr": 0.2974
-      },
-      "velocity_error_mps": {
-        "n": 9,
-        "median": 1.4199,
-        "q25": 0.4974,
-        "q75": 5.0114,
-        "p90": 8.0197,
-        "p95": 8.1084,
-        "max": 8.1971,
-        "mean": 3.0625,
-        "iqr": 4.514
-      },
-      "speed_error_mps": {
-        "n": 9,
-        "median": 0.3565,
-        "q25": 0.3108,
-        "q75": 0.4973,
-        "p90": 0.8867,
-        "p95": 1.0197,
-        "max": 1.1528,
-        "mean": 0.4659,
-        "iqr": 0.1865
-      },
-      "heading_error_deg": {
-        "n": 4,
-        "median": 79.5689,
-        "q25": 75.0014,
-        "q75": 85.4049,
-        "p90": 88.0774,
-        "p95": 88.9682,
-        "max": 89.8591,
-        "mean": 80.8374,
-        "iqr": 10.4035
-      },
-      "length_error_m": 0.419,
-      "width_error_m": -0.094,
-      "length_source": "prior",
-      "width_source": "prior",
-      "true_length_m": 4.181,
-      "true_width_m": 1.994
-    },
-    {
-      "id": "U3",
-      "true_identity": "A",
-      "coverage_s": 10.05,
-      "states": 93,
-      "impure_states": 8,
-      "centre_error_m": {
-        "n": 93,
-        "median": 1.144,
-        "q25": 1.0867,
-        "q75": 1.1911,
-        "p90": 1.2537,
-        "p95": 1.2756,
-        "max": 1.9692,
-        "mean": 1.1473,
-        "iqr": 0.1044
-      },
-      "velocity_error_mps": {
-        "n": 93,
-        "median": 0.1465,
-        "q25": 0.0906,
-        "q75": 0.239,
-        "p90": 0.5127,
-        "p95": 0.9191,
-        "max": 2.2212,
-        "mean": 0.2585,
-        "iqr": 0.1484
-      },
-      "speed_error_mps": {
-        "n": 93,
-        "median": 0.1465,
-        "q25": 0.0906,
-        "q75": 0.239,
-        "p90": 0.5127,
-        "p95": 0.9191,
-        "max": 2.2212,
-        "mean": 0.2585,
-        "iqr": 0.1484
-      },
-      "length_error_m": -0.192,
-      "width_error_m": -0.263,
-      "length_source": "prior",
-      "width_source": "prior",
-      "true_length_m": 4.792,
-      "true_width_m": 2.163
-    }
-  ],
+  "entity_errors": [],
   "observed_alignment": [
     {
       "recorder": "C",
@@ -528,6 +101,6 @@
       "status": "ALIGNED"
     }
   ],
-  "states_compared": 126,
-  "impure_states": 27
+  "states_compared": 0,
+  "impure_states": 0
 }

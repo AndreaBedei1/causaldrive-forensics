@@ -1,0 +1,928 @@
+{
+ "initial_head": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "source_trial": "scratch/followup_s02_trials/refine_start_0.2_forward_35_brake_4.5/S02/run_0_crash",
+ "original_backup": "scratch/followup_s02_original_complete/S02/run_0_crash",
+ "original_hashes": {
+  "incident_context.json": "640d739b28dfac973980e30fd667d556dbcf69ca2383ea8abf73d5eebe97e473",
+  "metadata.json": "b0ee3b9d80060db75f14bc9f4f15a8cf1596846cc3d05f1d7384617bac3e8ebf",
+  "ground_truth/collisions.jsonl": "257313ebec04b64a94dac0eadaf847e0a10d1a560bbc02bd0a19a6d4dea006e7",
+  "ground_truth/controls.jsonl": "c285037e62a3a99413d05877af094f1ae467bc7ba7156140ebb1db3710612e48",
+  "ground_truth/metadata.json": "68fb55f64c0781eb47fdc531aa4dc6da983672947125d7c31c91923a15a9bc25",
+  "ground_truth/states.jsonl": "4cb311fe2b53ee7bb5784ecabcd9b4ac37a84e4d6091085b1d0efa8f8913ab47",
+  "reconstruction/report.md": "120b661aaa5ee7397ec6a768daa44c48a12a6d6aa896ee6ef95c2ba8657464aa",
+  "vehicles/A/collisions.jsonl": "a4d1a525b24052c820987197ddabb2ec046eea71ba6375e353154af5a63f802b",
+  "vehicles/A/controls.jsonl": "e6034f27811d89d974cde82a1c8ed55cba269e6d6ff8d21e0d3b98cd73067a34",
+  "vehicles/A/ego.jsonl": "fc4b61b69e953c49925e833e0c9c2292f8bbfe01de9904f5f9a69db76a549542",
+  "vehicles/A/metadata.json": "b876284f2d1a618931c92ae0fa3e0e353f746ded55bfe97aecd6897043b54d9c",
+  "vehicles/A/traffic_signs.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "vehicles/B/collisions.jsonl": "a4d1a525b24052c820987197ddabb2ec046eea71ba6375e353154af5a63f802b",
+  "vehicles/B/controls.jsonl": "cfcb159c8b6ddd81b47296cdc6691a5cf5e5c51ff79ef47a85353fb41b0180a7",
+  "vehicles/B/ego.jsonl": "edcf6fe1fb7ab75f32a048a67bb06a7ec0e0d3c05b9e99efc727667e437135a1",
+  "vehicles/B/metadata.json": "4fe855b26aedf7a9c88b3995bf4c64cadec036b31776cd0c50a34782ef50df57",
+  "vehicles/B/traffic_signs.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "vehicles/B/camera/metadata.json": "7d2774e255bff69be06ecfbffd4f3a0247446eb61088c629776f0f34989c1dd1",
+  "vehicles/B/depth/metadata.json": "ddd672e7d0904069ec4d26f815c94c25fde33b75c6c68913c531b204afacc4e5",
+  "vehicles/B/depth/observations.npz": "31178780d99a7b59a970c6e82e98978c2d262a2fac66144d807415c2aa327981",
+  "vehicles/B/radar/front/metadata.json": "4a9cb9dbdf0270c5dcc1d5725a0cf11f1f6798971e1e569dcb7acaf92b7a7632",
+  "vehicles/B/radar/front/observations.npz": "cb401105a936a8879ffa16517c67cf2722a2f1792437a44d1375662d0c1b0328",
+  "vehicles/B/radar/left/metadata.json": "52ba142239f1082b53e760d34dc9199515de07dbe457548eff77c59cdb4ebff6",
+  "vehicles/B/radar/left/observations.npz": "2bb68d69d49e1714e8ba37a994185cb124129fb1d275558937b5c64eb5dcd855",
+  "vehicles/B/radar/right/metadata.json": "d467be6acce73e4384eb520ab2a2e1a5ebbe398d3187ec1d8f68d70442712a96",
+  "vehicles/B/radar/right/observations.npz": "72f7d0aa827c10a2c0d4e5345210f4033c992090258ab05907db552c455dcdbb",
+  "vehicles/A/camera/metadata.json": "7d2774e255bff69be06ecfbffd4f3a0247446eb61088c629776f0f34989c1dd1",
+  "vehicles/A/depth/metadata.json": "0e065624d4527770cb235b31f88711720364be8e2c2ed174d9e942c0b5bb4931",
+  "vehicles/A/depth/observations.npz": "4adf61bff50280fecadc41cef0834619941c492e83b8fbff495e901ee2f9e6ad",
+  "vehicles/A/radar/front/metadata.json": "1544ab78e927e6cc32f172069b1addb11e14f4f62c63694c644a908bef70f7c0",
+  "vehicles/A/radar/front/observations.npz": "c01a3c45b665079075755fa66447e71ee718fca838ca67787dd1d269cf96f77a",
+  "vehicles/A/radar/left/metadata.json": "bdba083f9b52d1358efe01b9af7413ed42984b80e6be4a2d7e4df19989a47d7b",
+  "vehicles/A/radar/left/observations.npz": "cdf90ce4317336bf3bf096d6d376c3f7e218b53151a85d973defa652fb9a0827",
+  "vehicles/A/radar/right/metadata.json": "f5a21f2606d86103a271f0c0db8ca900ce2c2c1122f92651d144c43419ad88d7",
+  "vehicles/A/radar/right/observations.npz": "911aa0a7bc5d031f6b3260f77bd0d9c2429c7917a34592dae4bf686632db4b0e",
+  "reconstruction/A/local_graph.dot": "31b06125f113f291776f65a5dc81db8c38d5e0081653b36d043283ce7127937d",
+  "reconstruction/A/local_graph.json": "e56c966fd189933c9e21910cbfbf16a4a4206a590bafeff6e2a19c6d05a86509",
+  "reconstruction/A/local_graph.md": "5b157ad1552f2149919bd83c602dd0a98b9a8cae32ed0ffd6c1cee98f9b65b10",
+  "reconstruction/A/local_trace.jsonl": "4d654d57b466d7b2ad98cf2cc5f84031ac1b67e0d1a6f619ec3432293c3b81f7",
+  "reconstruction/A/local_tracks.jsonl": "e681a9f3eb65c8f95311b31a07c941e28d13a5b357fd156d54f7357bf0991bdd",
+  "reconstruction/B/local_graph.dot": "cceec3f777b916b6ae769db93ef4415270ec6a10f46544cc4a633698585d8e87",
+  "reconstruction/B/local_graph.json": "44524a3e15cec67194f077cef449fde0ecb4f8f59f7e07d4378d7fb2bb4ce112",
+  "reconstruction/B/local_graph.md": "b7a84322c5c608550784c8f49fe5226247c3176e6b2d49b6324d1e13a5e34467",
+  "reconstruction/B/local_trace.jsonl": "8b6c9e6a3dc8f6f31434dd15bcb2920976994b588987c53f46e521a40f3b363b",
+  "reconstruction/B/local_tracks.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "reconstruction/evaluation/evaluation.json": "6c9e6ab527673d7d0cf75097c2adaae219cab347decfb95d00cd45a7e33a7824",
+  "reconstruction/evaluation/evaluation.md": "52b06c4286e4c0f8fe5c85dbde393a4da3a8a4f815224f6b81887be764afa68f",
+  "reconstruction/evaluation/event_oracle.json": "8d5c7fc90f335247254393171484cca266695ae025da49168db7aa95184f9213",
+  "reconstruction/evaluation/fusion_metrics.json": "46239d82a13ad246645fade130328f18c7fb6f791dc0f90e0d81908f692f8b05",
+  "reconstruction/evaluation/fusion_metrics.md": "1294b70904989d52c4f68f9ff7fc1809328a18cdbcdb6263857c0df7c9c21150",
+  "reconstruction/evaluation/gt_audit_baseline.json": "8ba29aa2874087a61bc6209c2450155a323dee282976e343e2bc25c09b65ce99",
+  "reconstruction/evaluation/gt_audit_baseline.md": "be655e9ad2a128277cdf37821fdcf9771ce14fa31d07c5ec1dcc283c99ce5150",
+  "reconstruction/evaluation/visual_audit_baseline.md": "32b9b2beb05f1bdfc0867119d893a6b953ed6adea10341373a404dc006764a1e",
+  "reconstruction/evaluation/visual_audit_final.md": "520e06651aba7ab583942172c49d6c1bb88445a1bce34425c7188a40553fa4ff",
+  "reconstruction/evaluation/visual_audit_phase2.md": "d08fcc70e6bfeebad9f6d4fc433205d02241621b12fb1c72529fadcf774b3ce8",
+  "reconstruction/evaluation/visual_audit_phase6.md": "38d873996d80894790b1cd6ab96aecfd1e6e1684b963645af0af32a2b85e6ab9",
+  "reconstruction/global/alignment.json": "1d07f980823a485a57a3ceeb3f8cb42545c016b4b7604a5c4ceeb79c807f88bb",
+  "reconstruction/global/anonymous_entities.json": "fbdbf415433f7a856538cf1c0a8edf377d4617c8ffd278a04d5fb3692fb9d413",
+  "reconstruction/global/associations.json": "c6aa03d3615d16bc9d09f2961e5e79561d2d422f53dd4ec0a4c350d22e245118",
+  "reconstruction/global/global_graph.dot": "fc69634ae9313fce65a22f0322b756ac40539ce364b3e84cab14e562f5486d00",
+  "reconstruction/global/global_graph.json": "e1f63a6c0f36f24ae808834a7c639d217d6f6a22a121ffd63ea28b15bd530691",
+  "reconstruction/global/global_graph.md": "4d1f5d146577fd19e63ad9d83bc08b270bfa45cbf1fdb91d8d6963fce5e57946",
+  "reconstruction/global/global_trace.jsonl": "97dee4334da0f4d016ad695196cc5cbd2c569931a46ca72c56720ae12b064e06",
+  "reconstruction/llm/export_manifest.json": "4ee2e99aeca4e64384ac90008d29a5fab4d0e1c99d33bb2e2783b3a416a5dc68",
+  "reconstruction/llm/forensic_facts.jsonl": "8290f1486414cc5ad38229fc19f172b35098e5a15b6a86ec49e377d19fe4f5c2",
+  "reconstruction/llm/forensic_packet.json": "50c95ea14b78985e6a7f7257ed35b8e8b3141d4bfc6c39d8a9b284f842b986c2",
+  "reconstruction/evaluation/visual_audit_baseline/01_tgm004.65.png": "67d173c18fa308a5fe609695f42156c5e6f98d1479445d054cbaed5d400704fd",
+  "reconstruction/evaluation/visual_audit_baseline/02_tgm002.85.png": "3840a6885c67fda929120d564167f65d6626dc74cd06c7e1bef69b6f0f93499b",
+  "reconstruction/evaluation/visual_audit_baseline/03_tgm002.55.png": "4805f110f03aac71ca822c1a2c7f03cfd74dfa63f22e7cfb70cbc9e4eca3d3bd",
+  "reconstruction/evaluation/visual_audit_baseline/04_tgm001.40.png": "ca78e912ec7c8c7c6e32d5b50d1b4b3e6f98f55ff94de269101e8bbb71f1ffe5",
+  "reconstruction/evaluation/visual_audit_baseline/05_tgm000.20.png": "289f1f5f1528712e5b9d9af97b89700c0788b5e91c90ab1a9164b036b9adfffa",
+  "reconstruction/evaluation/visual_audit_baseline/06_tgp000.00.png": "54003734c20618be7c5fe211d9a3536866715ce255b3a3a987a73673007a9462",
+  "reconstruction/evaluation/visual_audit_baseline/07_tgp000.50.png": "52f2eef5c705f97e35bec243ed168e795b4740b2d3e319ecbf052f8ff376b0c0",
+  "reconstruction/evaluation/visual_audit_baseline/audit.json": "0adca562fb6aeca823b3fbf1176ace0d31150980c6d841c6498ba0a3ea7e2ed3",
+  "reconstruction/evaluation/visual_audit_final/01_tgm004.65.png": "67d173c18fa308a5fe609695f42156c5e6f98d1479445d054cbaed5d400704fd",
+  "reconstruction/evaluation/visual_audit_final/02_tgm002.85.png": "f166a7fa6138ba87a4e03115dccb1e355edf43d0ec3a4a327b98c008ec193c33",
+  "reconstruction/evaluation/visual_audit_final/03_tgm002.55.png": "1be72df019906202c23756852e4cc55c9cddd74f6fef4dd5aab99b06feac177b",
+  "reconstruction/evaluation/visual_audit_final/04_tgm001.40.png": "4c4e354dbb6192a3122b792a326a0a43561ad56f018e84c85fca0839f12dce65",
+  "reconstruction/evaluation/visual_audit_final/05_tgm000.20.png": "a6e1aac7f8c8db098387211d3d8c25c3a83fcbe75507536bbc411f6ce0af03ad",
+  "reconstruction/evaluation/visual_audit_final/06_tgp000.00.png": "d114224cf91f2b51cca67d2582b326968d2243872ba27ba86562410f47191682",
+  "reconstruction/evaluation/visual_audit_final/07_tgp000.50.png": "da5189057e9295e719d49f171406899f6b82fc11f8e3efbc812b9ac62137e46d",
+  "reconstruction/evaluation/visual_audit_final/audit.json": "3e125c79d5c11b7b4f2bcc61905a463694ed8b6ce8fb3454a772adbc4b8e8f04",
+  "reconstruction/evaluation/visual_audit_phase2/01_tgm004.65.png": "67d173c18fa308a5fe609695f42156c5e6f98d1479445d054cbaed5d400704fd",
+  "reconstruction/evaluation/visual_audit_phase2/02_tgm002.85.png": "b90a6aa846a53d2c00f7495b4bb21b9b2ed97b9e5bd41c588bc0218e3a2a7372",
+  "reconstruction/evaluation/visual_audit_phase2/03_tgm002.55.png": "70ed239de1ef1983faae20e42c2f07b3e8522aaeb3f24fe4c321ed18432ebc70",
+  "reconstruction/evaluation/visual_audit_phase2/04_tgm001.40.png": "cbaad22b0a1df66e311bae0e3eeeb0e91cbee145340f63ba866cc73aaa9ba7e2",
+  "reconstruction/evaluation/visual_audit_phase2/05_tgm000.20.png": "7c1e6b92e93073312fb154c4016ffb88ea3db2891ee517afd8cfbb7343564748",
+  "reconstruction/evaluation/visual_audit_phase2/06_tgp000.00.png": "54003734c20618be7c5fe211d9a3536866715ce255b3a3a987a73673007a9462",
+  "reconstruction/evaluation/visual_audit_phase2/07_tgp000.50.png": "ead97f4ff135854b05547f6d52108980995b73025f326b254ddf5842365bd5a3",
+  "reconstruction/evaluation/visual_audit_phase2/audit.json": "169d541d67f66da6e68910248845c5105d7056043969e83790dd95ec517ef434",
+  "reconstruction/evaluation/visual_audit_phase6/01_tgm004.65.png": "67d173c18fa308a5fe609695f42156c5e6f98d1479445d054cbaed5d400704fd",
+  "reconstruction/evaluation/visual_audit_phase6/02_tgm002.85.png": "b90a6aa846a53d2c00f7495b4bb21b9b2ed97b9e5bd41c588bc0218e3a2a7372",
+  "reconstruction/evaluation/visual_audit_phase6/03_tgm002.55.png": "70ed239de1ef1983faae20e42c2f07b3e8522aaeb3f24fe4c321ed18432ebc70",
+  "reconstruction/evaluation/visual_audit_phase6/04_tgm001.40.png": "cbaad22b0a1df66e311bae0e3eeeb0e91cbee145340f63ba866cc73aaa9ba7e2",
+  "reconstruction/evaluation/visual_audit_phase6/05_tgm000.20.png": "7c1e6b92e93073312fb154c4016ffb88ea3db2891ee517afd8cfbb7343564748",
+  "reconstruction/evaluation/visual_audit_phase6/06_tgp000.00.png": "54003734c20618be7c5fe211d9a3536866715ce255b3a3a987a73673007a9462",
+  "reconstruction/evaluation/visual_audit_phase6/07_tgp000.50.png": "ead97f4ff135854b05547f6d52108980995b73025f326b254ddf5842365bd5a3",
+  "reconstruction/evaluation/visual_audit_phase6/audit.json": "db81097da7aee9d3484bcb2e48738360cc56d760ef6a40b8572ab52d102526e9"
+ },
+ "recorded_config": {
+  "simulation": {
+   "host": "127.0.0.1",
+   "port": 2000,
+   "timeout_s": 60.0,
+   "synchronous_mode": true,
+   "fixed_delta_seconds": 0.05,
+   "substepping": true,
+   "max_substep_delta_time": 0.01,
+   "max_substeps": 10,
+   "traffic_manager_enabled": true,
+   "traffic_manager_port": 8000,
+   "map_switch_settle_s": 60.0,
+   "spawn_z_offset": 0.3,
+   "warmup_ticks": 20,
+   "launch_ticks": 12,
+   "launch_throttle": 0.5,
+   "min_spawn_gap_m": 5.0,
+   "max_duration_s": 45.0,
+   "real_time_pacing": true,
+   "gpu": "auto",
+   "quality_level": "Epic",
+   "unattended": true
+  },
+  "sensors": {
+   "profile": "radar_baseline",
+   "camera": {
+    "enabled": true,
+    "sensor_id": "front_rgb",
+    "blueprint": "sensor.camera.rgb",
+    "width": 1280,
+    "height": 720,
+    "fov_deg": 110.0,
+    "sensor_tick_s": 0.1,
+    "mounts": {
+     "vehicle.tesla.model3": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 1.3
+     },
+     "vehicle.audi.tt": {
+      "x": 0.4,
+      "y": 0.0,
+      "z": 1.18
+     },
+     "vehicle.nissan.patrol": {
+      "x": 0.6,
+      "y": 0.0,
+      "z": 1.62
+     },
+     "vehicle.mercedes.sprinter": {
+      "x": 1.8,
+      "y": 0.0,
+      "z": 2.1
+     }
+    },
+    "mount_x": 0.5,
+    "mount_y": 0.0,
+    "mount_z": 1.3,
+    "mount_pitch_deg": 0.0,
+    "mount_yaw_deg": 0.0,
+    "mount_roll_deg": 0.0
+   },
+   "depth_camera": {
+    "enabled": true,
+    "sensor_id": "front_depth",
+    "blueprint": "sensor.camera.depth",
+    "width": 800,
+    "height": 600,
+    "fov_deg": 90.0,
+    "sensor_tick_s": 0.05,
+    "mount_x": 1.4,
+    "mount_y": 0.0,
+    "mount_z": 1.4,
+    "mount_pitch_deg": 0.0,
+    "mount_yaw_deg": 0.0,
+    "mount_roll_deg": 0.0
+   }
+  },
+  "depth_observations": {
+   "max_range_m": 90.0,
+   "horizontal_fov_deg": 90.0,
+   "vertical_fov_deg": 10.0,
+   "azimuth_bin_deg": 2.0,
+   "altitude_bin_deg": 2.0,
+   "suppress_ground": true,
+   "min_relative_height_m": -0.9
+  },
+  "traffic_signs": {
+   "min_area_px": 100,
+   "min_saturation": 90,
+   "min_value": 50,
+   "close_kernel_px": 5,
+   "border_margin_px": 2,
+   "max_centre_row_fraction": 0.56,
+   "approx_epsilon": 0.03,
+   "stop_aspect": [
+    0.7,
+    1.15
+   ],
+   "stop_min_compactness": 0.85,
+   "stop_min_vertices": 6,
+   "stop_small_px": 24,
+   "stop_red_fraction": [
+    0.55,
+    0.88
+   ],
+   "stop_min_letters": 0.3,
+   "yield_aspect": [
+    0.8,
+    1.4
+   ],
+   "yield_box_fill": [
+    0.38,
+    0.62
+   ],
+   "yield_min_solidity": 0.8,
+   "yield_red_fraction": [
+    0.3,
+    0.78
+   ],
+   "yield_min_white": 0.3,
+   "yield_top_bottom_ratio": 1.6,
+   "min_confidence": 0.0,
+   "max_centre_gap_fraction": 0.08,
+   "max_size_ratio": 1.8,
+   "max_time_gap_s": 0.6,
+   "min_detections_per_track": 3,
+   "max_aspect_spread": 0.35,
+   "relevance_bearing_deg": 30.0
+  },
+  "depth_radial_velocity": {
+   "enabled": true,
+   "max_dt_s": 0.2,
+   "max_azimuth_difference_deg": 6.0,
+   "max_altitude_difference_deg": 4.0,
+   "max_abs_radial_velocity_mps": 60.0,
+   "range_gate_margin_m": 0.5,
+   "require_mutual_match": true,
+   "max_velocity_jump_mps": 20.0
+  },
+  "radar": {
+   "profile_name": "baseline",
+   "sensors": [
+    {
+     "sensor_id": "front",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 150.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "front",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": 0.0,
+      "pitch_deg": 0.0
+     }
+    },
+    {
+     "sensor_id": "left",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 140.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "left",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": -90.0,
+      "pitch_deg": 0.0
+     }
+    },
+    {
+     "sensor_id": "right",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 140.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "right",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": 90.0,
+      "pitch_deg": 0.0
+     }
+    }
+   ]
+  },
+  "scenario": {
+   "scenario_id": "S02",
+   "name": "cut_in",
+   "description": "B starts in the lane to A's left, slightly ahead, then moves laterally into A's lane while travelling slower than A. A closes rapidly and reacts late.\n",
+   "map": "Town05",
+   "context": {
+    "road_environment": "urban road, two adjacent lanes",
+    "speed_limit_kmh": 50
+   },
+   "default_variant": "crash",
+   "max_duration_s": 26.0,
+   "participants": [
+    {
+     "id": "A",
+     "blueprint": "vehicle.tesla.model3",
+     "spawn": {
+      "anchor": "spawn_index",
+      "index": 265,
+      "forward_m": 0.0,
+      "lane_offset": 0
+     },
+     "route": {
+      "length_m": 150.0,
+      "step_m": 2.0
+     },
+     "initial_speed": 14.0,
+     "target_speed": 14.0,
+     "actions": [
+      {
+       "action_id": "A_late_brake",
+       "kind": "brake",
+       "t_start": 4.5,
+       "duration": 6.0,
+       "params": {
+        "intensity": 0.85
+       }
+      }
+     ]
+    },
+    {
+     "id": "B",
+     "blueprint": "vehicle.audi.tt",
+     "spawn": {
+      "anchor": "spawn_index",
+      "index": 265,
+      "forward_m": 35.0,
+      "lane_offset": -1
+     },
+     "route": {
+      "length_m": 130.0,
+      "step_m": 2.0
+     },
+     "initial_speed": 9.0,
+     "target_speed": 9.0,
+     "actions": [
+      {
+       "action_id": "B_cut_in",
+       "kind": "lane_shift",
+       "t_start": 0.2,
+       "duration": 2.2,
+       "params": {
+        "lateral_m": 3.5
+       }
+      },
+      {
+       "action_id": "B_slow_after_cut_in",
+       "kind": "set_speed",
+       "t_start": 3.2,
+       "duration": 12.0,
+       "params": {
+        "target_speed": 6.5
+       }
+      }
+     ]
+    }
+   ],
+   "variants": {
+    "crash": {},
+    "critical_before_cut_in": {
+     "description": "B drives much slower in the lane to A's left. A closes on it so fast that its time-to-contact with B is already critical before B starts moving into A's lane; A slows down too little and strikes B from behind.\n",
+     "participant_overrides": {
+      "A": {
+       "actions": [
+        {
+         "action_id": "A_slows_too_little",
+         "kind": "set_speed",
+         "t_start": 2.5,
+         "duration": 9.0,
+         "params": {
+          "target_speed": 9.0
+         }
+        }
+       ]
+      },
+      "B": {
+       "initial_speed": 6.0,
+       "target_speed": 6.0,
+       "actions": [
+        {
+         "action_id": "B_cut_in",
+         "kind": "lane_shift",
+         "t_start": 1.6,
+         "duration": 2.2,
+         "params": {
+          "lateral_m": 3.5
+         }
+        }
+       ]
+      }
+     }
+    }
+   }
+  }
+ },
+ "recorded_config_hash": "f3771f5fdd18fcae",
+ "canonical_config": {
+  "simulation": {
+   "host": "127.0.0.1",
+   "port": 2000,
+   "timeout_s": 60.0,
+   "synchronous_mode": true,
+   "fixed_delta_seconds": 0.05,
+   "substepping": true,
+   "max_substep_delta_time": 0.01,
+   "max_substeps": 10,
+   "traffic_manager_enabled": true,
+   "traffic_manager_port": 8000,
+   "map_switch_settle_s": 60.0,
+   "spawn_z_offset": 0.3,
+   "warmup_ticks": 20,
+   "launch_ticks": 12,
+   "launch_throttle": 0.5,
+   "min_spawn_gap_m": 5.0,
+   "max_duration_s": 45.0,
+   "real_time_pacing": true,
+   "gpu": "auto",
+   "quality_level": "Epic",
+   "unattended": true
+  },
+  "sensors": {
+   "profile": "radar_baseline",
+   "camera": {
+    "enabled": true,
+    "sensor_id": "front_rgb",
+    "blueprint": "sensor.camera.rgb",
+    "width": 1280,
+    "height": 720,
+    "fov_deg": 110.0,
+    "sensor_tick_s": 0.1,
+    "mounts": {
+     "vehicle.tesla.model3": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 1.3
+     },
+     "vehicle.audi.tt": {
+      "x": 0.4,
+      "y": 0.0,
+      "z": 1.18
+     },
+     "vehicle.nissan.patrol": {
+      "x": 0.6,
+      "y": 0.0,
+      "z": 1.62
+     },
+     "vehicle.mercedes.sprinter": {
+      "x": 1.8,
+      "y": 0.0,
+      "z": 2.1
+     }
+    },
+    "mount_x": 0.5,
+    "mount_y": 0.0,
+    "mount_z": 1.3,
+    "mount_pitch_deg": 0.0,
+    "mount_yaw_deg": 0.0,
+    "mount_roll_deg": 0.0
+   },
+   "depth_camera": {
+    "enabled": true,
+    "sensor_id": "front_depth",
+    "blueprint": "sensor.camera.depth",
+    "width": 800,
+    "height": 600,
+    "fov_deg": 90.0,
+    "sensor_tick_s": 0.05,
+    "mount_x": 1.4,
+    "mount_y": 0.0,
+    "mount_z": 1.4,
+    "mount_pitch_deg": 0.0,
+    "mount_yaw_deg": 0.0,
+    "mount_roll_deg": 0.0
+   }
+  },
+  "depth_observations": {
+   "max_range_m": 90.0,
+   "horizontal_fov_deg": 90.0,
+   "vertical_fov_deg": 10.0,
+   "azimuth_bin_deg": 2.0,
+   "altitude_bin_deg": 2.0,
+   "suppress_ground": true,
+   "min_relative_height_m": -0.9
+  },
+  "traffic_signs": {
+   "min_area_px": 100,
+   "min_saturation": 90,
+   "min_value": 50,
+   "close_kernel_px": 5,
+   "border_margin_px": 2,
+   "max_centre_row_fraction": 0.56,
+   "approx_epsilon": 0.03,
+   "stop_aspect": [
+    0.7,
+    1.15
+   ],
+   "stop_min_compactness": 0.85,
+   "stop_min_vertices": 6,
+   "stop_small_px": 24,
+   "stop_red_fraction": [
+    0.55,
+    0.88
+   ],
+   "stop_min_letters": 0.3,
+   "yield_aspect": [
+    0.8,
+    1.4
+   ],
+   "yield_box_fill": [
+    0.38,
+    0.62
+   ],
+   "yield_min_solidity": 0.8,
+   "yield_red_fraction": [
+    0.3,
+    0.78
+   ],
+   "yield_min_white": 0.3,
+   "yield_top_bottom_ratio": 1.6,
+   "min_confidence": 0.0,
+   "max_centre_gap_fraction": 0.08,
+   "max_size_ratio": 1.8,
+   "max_time_gap_s": 0.6,
+   "min_detections_per_track": 3,
+   "max_aspect_spread": 0.35,
+   "relevance_bearing_deg": 30.0
+  },
+  "depth_radial_velocity": {
+   "enabled": true,
+   "max_dt_s": 0.2,
+   "max_azimuth_difference_deg": 6.0,
+   "max_altitude_difference_deg": 4.0,
+   "max_abs_radial_velocity_mps": 60.0,
+   "range_gate_margin_m": 0.5,
+   "require_mutual_match": true,
+   "max_velocity_jump_mps": 20.0
+  },
+  "radar": {
+   "profile_name": "baseline",
+   "sensors": [
+    {
+     "sensor_id": "front",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 150.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "front",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": 0.0,
+      "pitch_deg": 0.0
+     }
+    },
+    {
+     "sensor_id": "left",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 140.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "left",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": -90.0,
+      "pitch_deg": 0.0
+     }
+    },
+    {
+     "sensor_id": "right",
+     "blueprint": "sensor.other.radar",
+     "horizontal_fov_deg": 140.0,
+     "vertical_fov_deg": 20.0,
+     "range_m": 90.0,
+     "points_per_second": 12000,
+     "sensor_tick_s": 0.05,
+     "mount": {
+      "anchor": "right",
+      "gap_m": 0.05,
+      "z": 0.6,
+      "yaw_deg": 90.0,
+      "pitch_deg": 0.0
+     }
+    }
+   ]
+  },
+  "scenario": {
+   "scenario_id": "S02",
+   "name": "cut_in",
+   "description": "B starts in the lane to A's left, slightly ahead, then moves laterally into A's lane while travelling slower than A. A closes rapidly and reacts late.\n",
+   "map": "Town05",
+   "context": {
+    "road_environment": "urban road, two adjacent lanes",
+    "speed_limit_kmh": 50
+   },
+   "default_variant": "crash",
+   "max_duration_s": 26.0,
+   "participants": [
+    {
+     "id": "A",
+     "blueprint": "vehicle.tesla.model3",
+     "spawn": {
+      "anchor": "spawn_index",
+      "index": 265,
+      "forward_m": 0.0,
+      "lane_offset": 0
+     },
+     "route": {
+      "length_m": 150.0,
+      "step_m": 2.0
+     },
+     "initial_speed": 14.0,
+     "target_speed": 14.0,
+     "actions": [
+      {
+       "action_id": "A_late_brake",
+       "kind": "brake",
+       "t_start": 3.9,
+       "duration": 6.0,
+       "params": {
+        "intensity": 0.85
+       }
+      }
+     ]
+    },
+    {
+     "id": "B",
+     "blueprint": "vehicle.audi.tt",
+     "spawn": {
+      "anchor": "spawn_index",
+      "index": 265,
+      "forward_m": 30.0,
+      "lane_offset": -1
+     },
+     "route": {
+      "length_m": 130.0,
+      "step_m": 2.0
+     },
+     "initial_speed": 9.0,
+     "target_speed": 9.0,
+     "actions": [
+      {
+       "action_id": "B_cut_in",
+       "kind": "lane_shift",
+       "t_start": 1.0,
+       "duration": 2.2,
+       "params": {
+        "lateral_m": 3.5
+       }
+      },
+      {
+       "action_id": "B_slow_after_cut_in",
+       "kind": "set_speed",
+       "t_start": 3.2,
+       "duration": 12.0,
+       "params": {
+        "target_speed": 6.5
+       }
+      }
+     ]
+    }
+   ],
+   "variants": {
+    "crash": {
+     "participant_overrides": {
+      "A": {
+       "actions": [
+        {
+         "action_id": "A_late_brake",
+         "kind": "brake",
+         "t_start": 4.5,
+         "duration": 6.0,
+         "params": {
+          "intensity": 0.85
+         }
+        }
+       ]
+      },
+      "B": {
+       "spawn": {
+        "forward_m": 35.0
+       },
+       "actions": [
+        {
+         "action_id": "B_cut_in",
+         "kind": "lane_shift",
+         "t_start": 0.2,
+         "duration": 2.2,
+         "params": {
+          "lateral_m": 3.5
+         }
+        },
+        {
+         "action_id": "B_slow_after_cut_in",
+         "kind": "set_speed",
+         "t_start": 3.2,
+         "duration": 12.0,
+         "params": {
+          "target_speed": 6.5
+         }
+        }
+       ]
+      }
+     }
+    },
+    "critical_before_cut_in": {
+     "description": "B drives much slower in the lane to A's left. A closes on it so fast that its time-to-contact with B is already critical before B starts moving into A's lane; A slows down too little and strikes B from behind.\n",
+     "participant_overrides": {
+      "A": {
+       "actions": [
+        {
+         "action_id": "A_slows_too_little",
+         "kind": "set_speed",
+         "t_start": 2.5,
+         "duration": 9.0,
+         "params": {
+          "target_speed": 9.0
+         }
+        }
+       ]
+      },
+      "B": {
+       "initial_speed": 6.0,
+       "target_speed": 6.0,
+       "actions": [
+        {
+         "action_id": "B_cut_in",
+         "kind": "lane_shift",
+         "t_start": 1.6,
+         "duration": 2.2,
+         "params": {
+          "lateral_m": 3.5
+         }
+        }
+       ]
+      }
+     }
+    }
+   }
+  }
+ },
+ "canonical_config_hash": "0f2fba766ffcaab3",
+ "effective_scenario": {
+  "scenario_id": "S02",
+  "name": "cut_in",
+  "description": "B starts in the lane to A's left, slightly ahead, then moves laterally into A's lane while travelling slower than A. A closes rapidly and reacts late.\n",
+  "map_name": "Town05",
+  "variant": "crash",
+  "participants": [
+   {
+    "participant_id": "A",
+    "blueprint": "vehicle.tesla.model3",
+    "spawn": {
+     "anchor": "spawn_index",
+     "index": 265,
+     "x": 0.0,
+     "y": 0.0,
+     "junction_x": 0.0,
+     "junction_y": 0.0,
+     "bearing_deg": 0.0,
+     "back_m": 40.0,
+     "forward_m": 0.0,
+     "lane_offset": 0
+    },
+    "route": {
+     "length_m": 150.0,
+     "step_m": 2.0,
+     "turns": [],
+     "turn_lookahead": false
+    },
+    "initial_speed": 14.0,
+    "target_speed": 14.0,
+    "sensor_profile": null,
+    "actions": [
+     {
+      "action_id": "A_late_brake",
+      "kind": "brake",
+      "t_start": 4.5,
+      "duration": 6.0,
+      "params": {
+       "intensity": 0.85
+      },
+      "enabled": true,
+      "trigger": null,
+      "fired_at": null
+     }
+    ],
+    "post_impact_stop": true,
+    "post_impact_mode": "",
+    "post_impact_lateral_m": 0.0,
+    "post_impact_deflect_s": 1.5,
+    "record": true
+   },
+   {
+    "participant_id": "B",
+    "blueprint": "vehicle.audi.tt",
+    "spawn": {
+     "anchor": "spawn_index",
+     "index": 265,
+     "x": 0.0,
+     "y": 0.0,
+     "junction_x": 0.0,
+     "junction_y": 0.0,
+     "bearing_deg": 0.0,
+     "back_m": 40.0,
+     "forward_m": 35.0,
+     "lane_offset": -1
+    },
+    "route": {
+     "length_m": 130.0,
+     "step_m": 2.0,
+     "turns": [],
+     "turn_lookahead": false
+    },
+    "initial_speed": 9.0,
+    "target_speed": 9.0,
+    "sensor_profile": null,
+    "actions": [
+     {
+      "action_id": "B_cut_in",
+      "kind": "lane_shift",
+      "t_start": 0.2,
+      "duration": 2.2,
+      "params": {
+       "lateral_m": 3.5
+      },
+      "enabled": true,
+      "trigger": null,
+      "fired_at": null
+     },
+     {
+      "action_id": "B_slow_after_cut_in",
+      "kind": "set_speed",
+      "t_start": 3.2,
+      "duration": 12.0,
+      "params": {
+       "target_speed": 6.5
+      },
+      "enabled": true,
+      "trigger": null,
+      "fired_at": null
+     }
+    ],
+    "post_impact_stop": true,
+    "post_impact_mode": "",
+    "post_impact_lateral_m": 0.0,
+    "post_impact_deflect_s": 1.5,
+    "record": true
+   }
+  ],
+  "max_duration_s": 26.0,
+  "context": {
+   "road_environment": "urban road, two adjacent lanes",
+   "speed_limit_kmh": 50
+  }
+ },
+ "effective_scenario_equality_verified": true,
+ "acquisition_runtime_code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b",
+ "acquisition_execution_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "acquisition_execution_git_dirty": true,
+ "unchanged_variant": "traces/S02/run_0_critical_before_cut_in",
+ "events": {
+  "CUT_IN_FROM_LEFT_START": [
+   1.65
+  ],
+  "CRITICAL_TTC_START": [
+   1.9
+  ],
+  "EGO_PATH_ENTRY": [
+   2.45
+  ],
+  "COLLISION": [
+   5.3
+  ]
+ },
+ "perfect_oracle": [
+  {
+   "type": "EGO_PATH_ENTRY",
+   "side": "EGO_PATH_ENTRY",
+   "subject": "B",
+   "t_local": 2.1,
+   "track": "B#all"
+  },
+  {
+   "type": "CRITICAL_TTC_START",
+   "side": "CRITICAL_TTC_START",
+   "subject": "B",
+   "t_local": 1.8,
+   "track": "B#all"
+  },
+  {
+   "type": "CRITICAL_TTC_END",
+   "side": "CRITICAL_TTC_END",
+   "subject": "B",
+   "t_local": 5.3,
+   "track": "B#all"
+  },
+  {
+   "type": "CUT_IN_FROM_LEFT_START",
+   "side": "CUT_IN_FROM_LEFT_START",
+   "subject": "B",
+   "t_local": 1.75,
+   "track": "B#all"
+  }
+ ],
+ "note": "Local CARLA acquisition in scratch; original complete run moved to backup before controlled replacement. No provider API calls."
+}
