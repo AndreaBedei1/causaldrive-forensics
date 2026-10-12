@@ -1,10 +1,10 @@
 {
  "definition": "    python scripts/impulse_symmetry.py traces/S*/run_* [--out results/robustness/impulse_symmetry]",
  "provenance": {
-  "git_commit": "c80eab47ec83dcc66909751b0514f1bcb4d5066e",
-  "git_dirty": true,
-  "code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
-  "config_sha256": "767c7dbb12167da9e1f2af592640c3fda69a414fe428874540296160b34a8d91",
+  "git_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "git_dirty": false,
+  "code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+  "config_sha256": "0b5c899acef9146cc85f97d72625a2d0790996c98250a7d263ea45eb4f2fd2fd",
   "runs": [
    "S01/run_0_crash",
    "S02/run_0_crash",
@@ -26,11 +26,13 @@
   ],
   "perturbation_profile": null,
   "seed": 20261011,
-  "generated_utc": "2026-10-11T03:24:44Z",
+  "generated_utc": "2026-10-12T12:33:55Z",
   "python": "3.14.2",
-  "analysis_code_sha256": "b5cbbff6ceb04c12b3e4c861b2fe78ab5b80f473fca09817e2b5af9bc2cf1dcf",
-  "equivalent_clean_commit": "ea0ccb148fa02a7ab96053d0d28d3d56a3256c68",
-  "equivalence_verified": "SHA-256 of Git path/content objects; src/cdf/**/*.py and configs/*.yaml"
+  "analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "analysis_started_from_clean_tree": true,
+  "analysis_code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+  "equivalent_clean_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "final_analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5"
  },
  "impulse_tolerance": 0.1,
  "noise_levels": [
@@ -86,8 +88,8 @@
       "B"
      ],
      "peak_impulse": {
-      "A": 2900.23,
-      "B": 2900.23
+      "A": 2460.67,
+      "B": 2460.67
      },
      "similarity": 1.0,
      "merged_burst": false,

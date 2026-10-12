@@ -1,7 +1,7 @@
 sweep,scenario,parameters,runs,crash/border./no,|t_global err.| median [s],p95 [s],identities correct/decided,links correct/wrong/missed,merges correct/false/missed,fused centre err. median [m],single-track median [m],recording [s]
 rear end,S01,4,40,8/4/28,0.050,0.050,41/41,41/0/2,0/0/0,0.54,0.53,29
 cut in,S02,4,40,17/2/21,0.050,0.050,83/83,83/0/12,0/0/1,0.63,0.67,34
-crossing,S03,3,40,18/7/15,0.050,0.050,40/40,40/0/57,11/0/1,0.56,0.79,38
-unobserved cut in,S17,4,40,32/0/8,0.000,0.000,78/78,78/0/4,62/0/28,0.12,0.49,30
-anonymous pair adjacent,S18,3,40,40/0/0,0.000,0.000,80/80,80/0/0,159/0/83,0.32,0.40,37
-anonymous pair platoon,S18,3,40,40/0/0,0.000,0.000,80/80,80/0/0,103/0/126,0.43,0.39,34
+crossing,S03,3,40,18/7/15,0.050,0.050,43/43,43/0/54,11/0/1,0.53,0.78,38
+unobserved cut in,S17,4,40,32/0/8,0.000,0.000,78/78,78/0/2,56/0/11,0.12,0.55,30
+anonymous pair adjacent,S18,3,40,40/0/0,0.000,0.550,80/80,80/0/0,155/0/59,0.32,0.47,37
+anonymous pair platoon,S18,3,40,40/0/0,0.000,0.400,80/80,80/0/0,107/0/122,0.43,0.48,34

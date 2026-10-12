@@ -1,15 +1,11 @@
 # Collision impulses: symmetry and noise margin
 
-Historical diagnosis of the fixed 10% relative gate. Its measurements and
-execution provenance are retained. The final geometry-supported uncertainty
-gate is evaluated in [technical hardening](../../docs/audit/technical_hardening.md).
-
 CARLA's collision sensor gives both bodies of a contact the magnitude of the same contact impulse (ground-truth log: largest relative difference between the two reports of one contact, over all runs: 0.0).  The alignment pairs reports whose peak impulses agree within 10% (`fusion.impulse_tolerance`, an engineering assumption); a real recorder would estimate the impulse from its own sensors, with errors.  Per matched contact: its similarity, the most similar report of another contact (above 1 - tolerance it competes, and only the clock consistency of the earlier matches separates the two), and the probability that the pair still passes the test when every report carries an independent multiplicative Gaussian error (Monte Carlo, 20000 draws).
 
 | run | contact | recorders | peaks [N s] | similarity | nearest other contact | P(pass) at 2% | P(pass) at 5% | P(pass) at 10% | P(pass) at 20% |
 |---|---|---|---|--:|--:|--:|--:|--:|--:|
 | S01/run_0_crash | collision_001 | A-B | 14394 / 14394 | 1.000 | 0.000 | 1.00 | 0.86 | 0.55 | 0.29 |
-| S02/run_0_crash | collision_001 | A-B | 2900 / 2900 | 1.000 | 0.000 | 1.00 | 0.86 | 0.54 | 0.29 |
+| S02/run_0_crash | collision_001 | A-B | 2461 / 2461 | 1.000 | 0.000 | 1.00 | 0.86 | 0.54 | 0.29 |
 | S02/run_0_critical_before_cut_in | collision_001 | A-B | 604 / 604 | 1.000 | 0.000 | 1.00 | 0.86 | 0.55 | 0.29 |
 | S03/run_0_crash | collision_001 | A-B | 12138 / 12138 | 1.000 | 0.000 | 1.00 | 0.86 | 0.54 | 0.28 |
 | S06/run_0_a_front_pushed | collision_001 | A-B | 10281 / 10281 | 1.000 | 0.855 | 1.00 | 0.86 | 0.54 | 0.29 |

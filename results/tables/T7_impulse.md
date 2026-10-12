@@ -7,4 +7,4 @@
 | 10% | 0.54 | 0.54 |
 | 20% | 0.29 | 0.28 |
 
-CARLA gives both bodies of a contact the same impulse magnitude (largest relative difference 0.0); the legacy gate paired reports within 10% (engineering assumption). The final geometry-supported uncertainty gate is evaluated in T5 and docs/audit/technical_hardening.md.
+CARLA gives both bodies of a contact the same impulse magnitude (largest relative difference 0.0); the legacy gate paired reports within 10% (engineering assumption). The final geometry-supported uncertainty gate is evaluated in T5 and docs/FINAL_VALIDATION_REPORT.md.

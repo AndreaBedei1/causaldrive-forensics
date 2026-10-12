@@ -3,20 +3,20 @@
 B, slower, cuts from the left lane into A's lane ahead of A, then slows; A brakes late.  The gap, B's speed, the moment of the cut-in and A's braking vary: rear-end crashes, near misses and safe stops.
 
 Runs complete: 40; failed: none.  Outcomes: crash 17, borderline 2, no crash 21.
-Provenance: code `c76d72a3965907b6`, configuration `50f7dc9e35556156`, commit `fd8d2baed644db4a32c2eb502a2eeb9b32f70887` (uncommitted changes), 2026-10-11T09:35:36Z.
+Provenance: code `b6bc47487dabcc94`, configuration `0b5c899acef9146c`, commit `8d7343d36cf3f3ebfc2baecb2fcb302273c698f5`, 2026-10-12T12:32:23Z.
 
 Totals: collisions_reconstructed 17, associations_correct 83, associations_decided 83, anonymous_tracks 24, links_correct 83, links_wrong 0, links_missed 12, merges_correct 0, merges_false 0, merges_missed 1, entities 24
 
 | quantity | n | median | q25 | q75 | p95 | max |
 |---|--:|--:|--:|--:|--:|--:|
 | min_gap_m | 40 | 2.110 | 0.000 | 6.411 | 12.393 | 13.574 |
-| max_abs_t_global_error_s | 40 | 0.050 | 0.000 | 0.050 | 0.050 | 0.050 |
+| max_abs_t_global_error_s | 40 | 0.050 | 0.000 | 0.050 | 0.050 | 0.250 |
 | max_abs_relative_offset_error_s | 40 | 0.050 | 0.000 | 0.050 | 0.050 | 0.050 |
 | fused_centre_error_median_m | 10 | 0.634 | 0.513 | 0.881 | 2.252 | 2.817 |
 | single_track_centre_error_median_m | 10 | 0.668 | 0.598 | 1.078 | 1.796 | 2.034 |
 | record_wall_s | 40 | 33.540 | 32.407 | 34.953 | 41.495 | 42.340 |
-| reconstruct_wall_s | 40 | 1.955 | 1.718 | 2.385 | 3.053 | 3.510 |
-| evaluate_wall_s | 40 | 3.245 | 2.533 | 4.080 | 4.466 | 5.100 |
+| reconstruct_wall_s | 40 | 2.685 | 2.400 | 3.275 | 4.642 | 4.890 |
+| evaluate_wall_s | 40 | 10.405 | 6.503 | 12.078 | 14.211 | 15.790 |
 
 | k | outcome | min gap [m] | contacts | aligned | assoc. | links c/w/m | merges c/f/m | fused centre [m] |
 |--:|---|--:|---|--:|--:|---|---|--:|

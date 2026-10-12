@@ -1,31 +1,31 @@
-**T6_sensitivity_canonical.**  Historical one-at-a-time sensitivity of the core events to their thresholds before the first contact (17 runs, canonical).
+**T6_sensitivity_canonical.**  One-at-a-time sensitivity of the core events to their thresholds before the first contact (17 runs, canonical).
 
 | setting | CTTC start: recall / precision | CTTC start: oracle events | path entry: recall / precision | path entry: oracle events | cut-in R: recall / precision | cut-in R: oracle events |
 |---|---|---|---|---|---|---|
-| nominal | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_reaction_time_s = 0.7 | 0.97 / 0.97 | 40/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_reaction_time_s = 1.5 | 0.83 / 0.97 | 47/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_deceleration_mps2 = 5.0 | 0.91 / 0.97 | 43/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_deceleration_mps2 = 8.0 | 0.97 / 0.97 | 40/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_release_ratio = 0.6 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_release_ratio = 0.9 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_min_following_distance_m = 1.0 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_min_following_distance_m = 3.0 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_time_gap_table = x0.8 | 0.95 / 1.00 | 39/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| critical_time_gap_table = x1.2 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| path_half_width_m = 1.25 | 0.95 / 0.97 | 41/41 | 0.44 / 0.64 | 16/16 | 0.20 / 0.33 | 5/5 |
-| path_half_width_m = 1.75 | 0.84 / 0.93 | 45/41 | 0.52 / 0.79 | 21/16 | 0.17 / 0.33 | 6/5 |
-| cut_in_lateral_speed_mps = 0.2 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_lateral_speed_mps = 0.5 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_persistence_s = 0.3 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_persistence_s = 0.8 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.25 / 0.33 | 4/5 |
-| cut_in_outside_margin_m = 0.3 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_outside_margin_m = 0.8 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_horizon_s = 2.0 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| cut_in_horizon_s = 4.0 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| target_length_m = 4.2 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| target_length_m = 5.0 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| max_position_std_m = 0.5 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
-| max_position_std_m = 1.5 | 0.95 / 0.97 | 41/41 | 0.50 / 0.62 | 16/16 | 0.20 / 0.33 | 5/5 |
+| nominal | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_reaction_time_s = 0.7 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_reaction_time_s = 1.5 | 0.84 / 0.95 | 45/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_deceleration_mps2 = 5.0 | 0.93 / 0.97 | 41/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_deceleration_mps2 = 8.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_release_ratio = 0.6 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_release_ratio = 0.9 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_min_following_distance_m = 1.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_min_following_distance_m = 3.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_time_gap_table = x0.8 | 0.97 / 1.00 | 38/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| critical_time_gap_table = x1.2 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| path_half_width_m = 1.25 | 0.95 / 0.97 | 40/40 | 0.62 / 0.87 | 21/21 | 0.40 / 1.00 | 5/5 |
+| path_half_width_m = 1.75 | 0.93 / 0.95 | 41/40 | 0.86 / 0.82 | 21/21 | 0.17 / 1.00 | 6/5 |
+| cut_in_lateral_speed_mps = 0.2 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| cut_in_lateral_speed_mps = 0.5 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| cut_in_persistence_s = 0.3 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.60 / 1.00 | 5/5 |
+| cut_in_persistence_s = 0.8 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| cut_in_outside_margin_m = 0.3 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| cut_in_outside_margin_m = 0.8 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.20 / 1.00 | 5/5 |
+| cut_in_horizon_s = 2.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| cut_in_horizon_s = 4.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| target_length_m = 4.2 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| target_length_m = 5.0 | 0.95 / 0.97 | 40/40 | 0.67 / 0.78 | 21/21 | 0.40 / 1.00 | 5/5 |
+| max_position_std_m = 0.5 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
+| max_position_std_m = 1.5 | 0.95 / 0.97 | 40/40 | 0.67 / 0.82 | 21/21 | 0.40 / 1.00 | 5/5 |
 
 Recall / precision: the reconstruction against the COVERAGE oracle under the same definition.  Oracle events: COVERAGE oracle events under the varied value / nominal value (what the threshold alone does to the reference).  Full table: results/semantics/sensitivity_canonical.md.

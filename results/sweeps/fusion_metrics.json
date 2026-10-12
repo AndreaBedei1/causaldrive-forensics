@@ -1,0 +1,6749 @@
+{
+  "definition": "road-user fusion against ground truth: identity decisions of the aligned recorders' tracks, merges over pairs of anonymous tracks, fragmentation of each true road user over anonymous entities, pooled fused-state errors against the entity's majority identity, observed-trajectory alignments",
+  "provenance": {
+    "git_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+    "git_dirty": false,
+    "code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+    "config_sha256": "0b5c899acef9146cc85f97d72625a2d0790996c98250a7d263ea45eb4f2fd2fd",
+    "runs": [
+      "S18/run_0_anonymous_pair_adjacent_000",
+      "S18/run_10_anonymous_pair_adjacent_010",
+      "S18/run_11_anonymous_pair_adjacent_011",
+      "S18/run_12_anonymous_pair_adjacent_012",
+      "S18/run_13_anonymous_pair_adjacent_013",
+      "S18/run_14_anonymous_pair_adjacent_014",
+      "S18/run_15_anonymous_pair_adjacent_015",
+      "S18/run_16_anonymous_pair_adjacent_016",
+      "S18/run_17_anonymous_pair_adjacent_017",
+      "S18/run_18_anonymous_pair_adjacent_018",
+      "S18/run_19_anonymous_pair_adjacent_019",
+      "S18/run_1_anonymous_pair_adjacent_001",
+      "S18/run_20_anonymous_pair_adjacent_020",
+      "S18/run_21_anonymous_pair_adjacent_021",
+      "S18/run_22_anonymous_pair_adjacent_022",
+      "S18/run_23_anonymous_pair_adjacent_023",
+      "S18/run_24_anonymous_pair_adjacent_024",
+      "S18/run_25_anonymous_pair_adjacent_025",
+      "S18/run_26_anonymous_pair_adjacent_026",
+      "S18/run_27_anonymous_pair_adjacent_027",
+      "S18/run_28_anonymous_pair_adjacent_028",
+      "S18/run_29_anonymous_pair_adjacent_029",
+      "S18/run_2_anonymous_pair_adjacent_002",
+      "S18/run_30_anonymous_pair_adjacent_030",
+      "S18/run_31_anonymous_pair_adjacent_031",
+      "S18/run_32_anonymous_pair_adjacent_032",
+      "S18/run_33_anonymous_pair_adjacent_033",
+      "S18/run_34_anonymous_pair_adjacent_034",
+      "S18/run_35_anonymous_pair_adjacent_035",
+      "S18/run_36_anonymous_pair_adjacent_036",
+      "S18/run_37_anonymous_pair_adjacent_037",
+      "S18/run_38_anonymous_pair_adjacent_038",
+      "S18/run_39_anonymous_pair_adjacent_039",
+      "S18/run_3_anonymous_pair_adjacent_003",
+      "S18/run_4_anonymous_pair_adjacent_004",
+      "S18/run_5_anonymous_pair_adjacent_005",
+      "S18/run_6_anonymous_pair_adjacent_006",
+      "S18/run_7_anonymous_pair_adjacent_007",
+      "S18/run_8_anonymous_pair_adjacent_008",
+      "S18/run_9_anonymous_pair_adjacent_009",
+      "S18/run_0_anonymous_pair_platoon_000",
+      "S18/run_10_anonymous_pair_platoon_010",
+      "S18/run_11_anonymous_pair_platoon_011",
+      "S18/run_12_anonymous_pair_platoon_012",
+      "S18/run_13_anonymous_pair_platoon_013",
+      "S18/run_14_anonymous_pair_platoon_014",
+      "S18/run_15_anonymous_pair_platoon_015",
+      "S18/run_16_anonymous_pair_platoon_016",
+      "S18/run_17_anonymous_pair_platoon_017",
+      "S18/run_18_anonymous_pair_platoon_018",
+      "S18/run_19_anonymous_pair_platoon_019",
+      "S18/run_1_anonymous_pair_platoon_001",
+      "S18/run_20_anonymous_pair_platoon_020",
+      "S18/run_21_anonymous_pair_platoon_021",
+      "S18/run_22_anonymous_pair_platoon_022",
+      "S18/run_23_anonymous_pair_platoon_023",
+      "S18/run_24_anonymous_pair_platoon_024",
+      "S18/run_25_anonymous_pair_platoon_025",
+      "S18/run_26_anonymous_pair_platoon_026",
+      "S18/run_27_anonymous_pair_platoon_027",
+      "S18/run_28_anonymous_pair_platoon_028",
+      "S18/run_29_anonymous_pair_platoon_029",
+      "S18/run_2_anonymous_pair_platoon_002",
+      "S18/run_30_anonymous_pair_platoon_030",
+      "S18/run_31_anonymous_pair_platoon_031",
+      "S18/run_32_anonymous_pair_platoon_032",
+      "S18/run_33_anonymous_pair_platoon_033",
+      "S18/run_34_anonymous_pair_platoon_034",
+      "S18/run_35_anonymous_pair_platoon_035",
+      "S18/run_36_anonymous_pair_platoon_036",
+      "S18/run_37_anonymous_pair_platoon_037",
+      "S18/run_38_anonymous_pair_platoon_038",
+      "S18/run_39_anonymous_pair_platoon_039",
+      "S18/run_3_anonymous_pair_platoon_003",
+      "S18/run_4_anonymous_pair_platoon_004",
+      "S18/run_5_anonymous_pair_platoon_005",
+      "S18/run_6_anonymous_pair_platoon_006",
+      "S18/run_7_anonymous_pair_platoon_007",
+      "S18/run_8_anonymous_pair_platoon_008",
+      "S18/run_9_anonymous_pair_platoon_009",
+      "S03/run_0_crossing_000",
+      "S03/run_10_crossing_010",
+      "S03/run_11_crossing_011",
+      "S03/run_12_crossing_012",
+      "S03/run_13_crossing_013",
+      "S03/run_14_crossing_014",
+      "S03/run_15_crossing_015",
+      "S03/run_16_crossing_016",
+      "S03/run_17_crossing_017",
+      "S03/run_18_crossing_018",
+      "S03/run_19_crossing_019",
+      "S03/run_1_crossing_001",
+      "S03/run_20_crossing_020",
+      "S03/run_21_crossing_021",
+      "S03/run_22_crossing_022",
+      "S03/run_23_crossing_023",
+      "S03/run_24_crossing_024",
+      "S03/run_25_crossing_025",
+      "S03/run_26_crossing_026",
+      "S03/run_27_crossing_027",
+      "S03/run_28_crossing_028",
+      "S03/run_29_crossing_029",
+      "S03/run_2_crossing_002",
+      "S03/run_30_crossing_030",
+      "S03/run_31_crossing_031",
+      "S03/run_32_crossing_032",
+      "S03/run_33_crossing_033",
+      "S03/run_34_crossing_034",
+      "S03/run_35_crossing_035",
+      "S03/run_36_crossing_036",
+      "S03/run_37_crossing_037",
+      "S03/run_38_crossing_038",
+      "S03/run_39_crossing_039",
+      "S03/run_3_crossing_003",
+      "S03/run_4_crossing_004",
+      "S03/run_5_crossing_005",
+      "S03/run_6_crossing_006",
+      "S03/run_7_crossing_007",
+      "S03/run_8_crossing_008",
+      "S03/run_9_crossing_009",
+      "S02/run_0_cut_in_000",
+      "S02/run_10_cut_in_010",
+      "S02/run_11_cut_in_011",
+      "S02/run_12_cut_in_012",
+      "S02/run_13_cut_in_013",
+      "S02/run_14_cut_in_014",
+      "S02/run_15_cut_in_015",
+      "S02/run_16_cut_in_016",
+      "S02/run_17_cut_in_017",
+      "S02/run_18_cut_in_018",
+      "S02/run_19_cut_in_019",
+      "S02/run_1_cut_in_001",
+      "S02/run_20_cut_in_020",
+      "S02/run_21_cut_in_021",
+      "S02/run_22_cut_in_022",
+      "S02/run_23_cut_in_023",
+      "S02/run_24_cut_in_024",
+      "S02/run_25_cut_in_025",
+      "S02/run_26_cut_in_026",
+      "S02/run_27_cut_in_027",
+      "S02/run_28_cut_in_028",
+      "S02/run_29_cut_in_029",
+      "S02/run_2_cut_in_002",
+      "S02/run_30_cut_in_030",
+      "S02/run_31_cut_in_031",
+      "S02/run_32_cut_in_032",
+      "S02/run_33_cut_in_033",
+      "S02/run_34_cut_in_034",
+      "S02/run_35_cut_in_035",
+      "S02/run_36_cut_in_036",
+      "S02/run_37_cut_in_037",
+      "S02/run_38_cut_in_038",
+      "S02/run_39_cut_in_039",
+      "S02/run_3_cut_in_003",
+      "S02/run_4_cut_in_004",
+      "S02/run_5_cut_in_005",
+      "S02/run_6_cut_in_006",
+      "S02/run_7_cut_in_007",
+      "S02/run_8_cut_in_008",
+      "S02/run_9_cut_in_009",
+      "S01/run_0_rear_end_000",
+      "S01/run_10_rear_end_010",
+      "S01/run_11_rear_end_011",
+      "S01/run_12_rear_end_012",
+      "S01/run_13_rear_end_013",
+      "S01/run_14_rear_end_014",
+      "S01/run_15_rear_end_015",
+      "S01/run_16_rear_end_016",
+      "S01/run_17_rear_end_017",
+      "S01/run_18_rear_end_018",
+      "S01/run_19_rear_end_019",
+      "S01/run_1_rear_end_001",
+      "S01/run_20_rear_end_020",
+      "S01/run_21_rear_end_021",
+      "S01/run_22_rear_end_022",
+      "S01/run_23_rear_end_023",
+      "S01/run_24_rear_end_024",
+      "S01/run_25_rear_end_025",
+      "S01/run_26_rear_end_026",
+      "S01/run_27_rear_end_027",
+      "S01/run_28_rear_end_028",
+      "S01/run_29_rear_end_029",
+      "S01/run_2_rear_end_002",
+      "S01/run_30_rear_end_030",
+      "S01/run_31_rear_end_031",
+      "S01/run_32_rear_end_032",
+      "S01/run_33_rear_end_033",
+      "S01/run_34_rear_end_034",
+      "S01/run_35_rear_end_035",
+      "S01/run_36_rear_end_036",
+      "S01/run_37_rear_end_037",
+      "S01/run_38_rear_end_038",
+      "S01/run_39_rear_end_039",
+      "S01/run_3_rear_end_003",
+      "S01/run_4_rear_end_004",
+      "S01/run_5_rear_end_005",
+      "S01/run_6_rear_end_006",
+      "S01/run_7_rear_end_007",
+      "S01/run_8_rear_end_008",
+      "S01/run_9_rear_end_009",
+      "S17/run_0_unobserved_cut_in_000",
+      "S17/run_10_unobserved_cut_in_010",
+      "S17/run_11_unobserved_cut_in_011",
+      "S17/run_12_unobserved_cut_in_012",
+      "S17/run_13_unobserved_cut_in_013",
+      "S17/run_14_unobserved_cut_in_014",
+      "S17/run_15_unobserved_cut_in_015",
+      "S17/run_16_unobserved_cut_in_016",
+      "S17/run_17_unobserved_cut_in_017",
+      "S17/run_18_unobserved_cut_in_018",
+      "S17/run_19_unobserved_cut_in_019",
+      "S17/run_1_unobserved_cut_in_001",
+      "S17/run_20_unobserved_cut_in_020",
+      "S17/run_21_unobserved_cut_in_021",
+      "S17/run_22_unobserved_cut_in_022",
+      "S17/run_23_unobserved_cut_in_023",
+      "S17/run_24_unobserved_cut_in_024",
+      "S17/run_25_unobserved_cut_in_025",
+      "S17/run_26_unobserved_cut_in_026",
+      "S17/run_27_unobserved_cut_in_027",
+      "S17/run_28_unobserved_cut_in_028",
+      "S17/run_29_unobserved_cut_in_029",
+      "S17/run_2_unobserved_cut_in_002",
+      "S17/run_30_unobserved_cut_in_030",
+      "S17/run_31_unobserved_cut_in_031",
+      "S17/run_32_unobserved_cut_in_032",
+      "S17/run_33_unobserved_cut_in_033",
+      "S17/run_34_unobserved_cut_in_034",
+      "S17/run_35_unobserved_cut_in_035",
+      "S17/run_36_unobserved_cut_in_036",
+      "S17/run_37_unobserved_cut_in_037",
+      "S17/run_38_unobserved_cut_in_038",
+      "S17/run_39_unobserved_cut_in_039",
+      "S17/run_3_unobserved_cut_in_003",
+      "S17/run_4_unobserved_cut_in_004",
+      "S17/run_5_unobserved_cut_in_005",
+      "S17/run_6_unobserved_cut_in_006",
+      "S17/run_7_unobserved_cut_in_007",
+      "S17/run_8_unobserved_cut_in_008",
+      "S17/run_9_unobserved_cut_in_009"
+    ],
+    "perturbation_profile": null,
+    "seed": null,
+    "generated_utc": "2026-10-12T12:33:32Z",
+    "python": "3.14.2",
+    "analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+    "analysis_started_from_clean_tree": true,
+    "analysis_code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+    "equivalent_clean_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+    "final_analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5"
+  },
+  "decision_counts": {
+    "anonymous": 549,
+    "correct link": 405,
+    "missed link": 70
+  },
+  "merges": {
+    "correct": 329,
+    "false": 0,
+    "missed": 194
+  },
+  "entities": 356,
+  "entity_purity": {
+    "n": 356,
+    "median": 1.0,
+    "q25": 1.0,
+    "q75": 1.0,
+    "p90": 1.0,
+    "p95": 1.0,
+    "max": 1.0,
+    "mean": 0.9856,
+    "iqr": 0.0
+  },
+  "entities_per_true_road_user": {
+    "n": 257,
+    "median": 1.0,
+    "q25": 1.0,
+    "q75": 1.0,
+    "p90": 2.0,
+    "p95": 3.0,
+    "max": 4.0,
+    "mean": 1.3307,
+    "iqr": 0.0
+  },
+  "states_compared": 22874,
+  "impure_states": 102,
+  "pooled_state_errors": {
+    "centre_error_m": {
+      "n": 22874,
+      "median": 0.3166,
+      "q25": 0.1744,
+      "q75": 0.6397,
+      "p90": 0.9783,
+      "p95": 1.2674,
+      "max": 4.148,
+      "mean": 0.47,
+      "iqr": 0.4653
+    },
+    "coverage_s": {
+      "n": 342,
+      "median": 4.825,
+      "q25": 3.9,
+      "q75": 10.65,
+      "p90": 11.595,
+      "p95": 11.95,
+      "max": 13.25,
+      "mean": 6.6883,
+      "iqr": 6.75
+    },
+    "heading_error_deg": {
+      "n": 22871,
+      "median": 0.5954,
+      "q25": 0.2603,
+      "q75": 1.2174,
+      "p90": 2.5019,
+      "p95": 4.45,
+      "max": 83.0873,
+      "mean": 1.2327,
+      "iqr": 0.9571
+    },
+    "length_error_m": {
+      "n": 342,
+      "median": 0.192,
+      "q25": 0.086,
+      "q75": 0.192,
+      "p90": 0.3432,
+      "p95": 0.419,
+      "max": 0.605,
+      "mean": 0.1845,
+      "iqr": 0.106
+    },
+    "normalised_centre_error": {
+      "n": 22874,
+      "median": 0.7193,
+      "q25": 0.4198,
+      "q75": 1.2413,
+      "p90": 1.7321,
+      "p95": 2.067,
+      "max": 8.0481,
+      "mean": 0.8966,
+      "iqr": 0.8214
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 22751,
+      "median": 0.4798,
+      "q25": 0.3226,
+      "q75": 0.7405,
+      "p90": 1.124,
+      "p95": 1.3941,
+      "max": 4.6595,
+      "mean": 0.6044,
+      "iqr": 0.4179
+    },
+    "speed_error_mps": {
+      "n": 22874,
+      "median": 0.0557,
+      "q25": 0.0235,
+      "q75": 0.1285,
+      "p90": 0.3,
+      "p95": 0.6227,
+      "max": 12.617,
+      "mean": 0.1679,
+      "iqr": 0.1049
+    },
+    "velocity_error_mps": {
+      "n": 22874,
+      "median": 0.1584,
+      "q25": 0.0802,
+      "q75": 0.3129,
+      "p90": 0.7152,
+      "p95": 1.2292,
+      "max": 12.8735,
+      "mean": 0.3283,
+      "iqr": 0.2327
+    },
+    "width_error_m": {
+      "n": 342,
+      "median": 0.263,
+      "q25": 0.107,
+      "q75": 0.263,
+      "p90": 0.263,
+      "p95": 0.263,
+      "max": 0.263,
+      "mean": 0.2002,
+      "iqr": 0.156
+    }
+  },
+  "pooled_state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 14372,
+        "median": 0.2147,
+        "q25": 0.1283,
+        "q75": 0.3321,
+        "p90": 0.5472,
+        "p95": 0.6882,
+        "max": 3.1468,
+        "mean": 0.2735,
+        "iqr": 0.2037
+      },
+      "heading_error_deg": {
+        "n": 14372,
+        "median": 0.5236,
+        "q25": 0.2299,
+        "q75": 1.0631,
+        "p90": 1.9955,
+        "p95": 3.5083,
+        "max": 26.7106,
+        "mean": 0.9979,
+        "iqr": 0.8332
+      },
+      "speed_error_mps": {
+        "n": 14372,
+        "median": 0.0453,
+        "q25": 0.0199,
+        "q75": 0.1059,
+        "p90": 0.2483,
+        "p95": 0.4608,
+        "max": 11.5878,
+        "mean": 0.1185,
+        "iqr": 0.086
+      },
+      "velocity_error_mps": {
+        "n": 14372,
+        "median": 0.1291,
+        "q25": 0.0657,
+        "q75": 0.2486,
+        "p90": 0.5157,
+        "p95": 0.8709,
+        "max": 11.6579,
+        "mean": 0.2444,
+        "iqr": 0.1829
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 8502,
+        "median": 0.6999,
+        "q25": 0.4597,
+        "q75": 0.9593,
+        "p90": 1.3534,
+        "p95": 2.0155,
+        "max": 4.148,
+        "mean": 0.8022,
+        "iqr": 0.4996
+      },
+      "heading_error_deg": {
+        "n": 8499,
+        "median": 0.7392,
+        "q25": 0.3297,
+        "q75": 1.5825,
+        "p90": 3.4351,
+        "p95": 5.7295,
+        "max": 83.0873,
+        "mean": 1.6298,
+        "iqr": 1.2528
+      },
+      "speed_error_mps": {
+        "n": 8502,
+        "median": 0.0821,
+        "q25": 0.034,
+        "q75": 0.1633,
+        "p90": 0.4293,
+        "p95": 1.3258,
+        "max": 12.617,
+        "mean": 0.2515,
+        "iqr": 0.1293
+      },
+      "velocity_error_mps": {
+        "n": 8502,
+        "median": 0.2221,
+        "q25": 0.1234,
+        "q75": 0.458,
+        "p90": 1.0382,
+        "p95": 1.8453,
+        "max": 12.8735,
+        "mean": 0.4701,
+        "iqr": 0.3346
+      }
+    }
+  },
+  "calibration": {
+    "states": 22874,
+    "observed_within": {
+      "1_sigma": 0.658,
+      "2_sigma": 0.943,
+      "3_sigma": 0.988
+    },
+    "expected_within_gaussian": {
+      "1_sigma": 0.393,
+      "2_sigma": 0.865,
+      "3_sigma": 0.989
+    }
+  },
+  "observed_alignment": [
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_0_crossing_000"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_12_crossing_012"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_13_crossing_013"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_18_crossing_018"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_19_crossing_019"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_1_crossing_001"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_20_crossing_020"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_21_crossing_021"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_22_crossing_022"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_23_crossing_023"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_26_crossing_026"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_28_crossing_028"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_29_crossing_029"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_2_crossing_002"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.2
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_34_crossing_034"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_36_crossing_036"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_37_crossing_037"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_38_crossing_038"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_5_crossing_005"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_7_crossing_007"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_8_crossing_008"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.05,
+      "true_offset_s": -0.0,
+      "error_s": 0.05,
+      "interval": [
+        -0.15,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S03/run_9_crossing_009"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_0_cut_in_000"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_11_cut_in_011"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_13_cut_in_013"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_14_cut_in_014"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_15_cut_in_015"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_18_cut_in_018"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_20_cut_in_020"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_22_cut_in_022"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_23_cut_in_023"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_27_cut_in_027"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_28_cut_in_028"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_29_cut_in_029"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_2_cut_in_002"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_30_cut_in_030"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_31_cut_in_031"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_34_cut_in_034"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_35_cut_in_035"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_36_cut_in_036"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_38_cut_in_038"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_3_cut_in_003"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_7_cut_in_007"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.15,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_8_cut_in_008"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.2,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S02/run_9_cut_in_009"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_10_rear_end_010"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_11_rear_end_011"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_12_rear_end_012"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_13_rear_end_013"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_15_rear_end_015"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_16_rear_end_016"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_17_rear_end_017"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_18_rear_end_018"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_19_rear_end_019"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_1_rear_end_001"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_20_rear_end_020"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_21_rear_end_021"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_22_rear_end_022"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_23_rear_end_023"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_24_rear_end_024"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_26_rear_end_026"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_27_rear_end_027"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_28_rear_end_028"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_2_rear_end_002"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_30_rear_end_030"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_31_rear_end_031"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_32_rear_end_032"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_33_rear_end_033"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_35_rear_end_035"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_36_rear_end_036"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_37_rear_end_037"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_38_rear_end_038"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_3_rear_end_003"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.05,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_4_rear_end_004"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.0
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_5_rear_end_005"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": -0.05,
+      "true_offset_s": -0.0,
+      "error_s": -0.05,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_6_rear_end_006"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.05,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S01/run_7_rear_end_007"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.15
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_10_unobserved_cut_in_010"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_11_unobserved_cut_in_011"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.25,
+        0.25
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_13_unobserved_cut_in_013"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.2,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_16_unobserved_cut_in_016"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_17_unobserved_cut_in_017"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_22_unobserved_cut_in_022"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_23_unobserved_cut_in_023"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.2
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_25_unobserved_cut_in_025"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_27_unobserved_cut_in_027"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_28_unobserved_cut_in_028"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_29_unobserved_cut_in_029"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_30_unobserved_cut_in_030"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.2
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_34_unobserved_cut_in_034"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.1,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_35_unobserved_cut_in_035"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.1
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_39_unobserved_cut_in_039"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_3_unobserved_cut_in_003"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.3,
+        0.2
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_4_unobserved_cut_in_004"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_8_unobserved_cut_in_008"
+    },
+    {
+      "recorder": "B",
+      "accepted": true,
+      "estimated_offset_s": 0.0,
+      "true_offset_s": -0.0,
+      "error_s": 0.0,
+      "interval": [
+        -0.35,
+        0.05
+      ],
+      "status": "ALIGNED",
+      "run": "S17/run_9_unobserved_cut_in_009"
+    }
+  ],
+  "runs": [
+    {
+      "run": "S18/run_0_anonymous_pair_adjacent_000",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.212,
+      "single_track_centre_error_median_m": 0.4732
+    },
+    {
+      "run": "S18/run_10_anonymous_pair_adjacent_010",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3127,
+      "single_track_centre_error_median_m": 0.4638
+    },
+    {
+      "run": "S18/run_11_anonymous_pair_adjacent_011",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3109,
+      "single_track_centre_error_median_m": 0.4711
+    },
+    {
+      "run": "S18/run_12_anonymous_pair_adjacent_012",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1",
+          "U3",
+          "U4"
+        ]
+      },
+      "centre_error_median_m": 0.3455,
+      "single_track_centre_error_median_m": 0.512
+    },
+    {
+      "run": "S18/run_13_anonymous_pair_adjacent_013",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2686,
+      "single_track_centre_error_median_m": 0.5285
+    },
+    {
+      "run": "S18/run_14_anonymous_pair_adjacent_014",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 8
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2",
+          "U3",
+          "U4"
+        ]
+      },
+      "centre_error_median_m": 0.383,
+      "single_track_centre_error_median_m": 0.3977
+    },
+    {
+      "run": "S18/run_15_anonymous_pair_adjacent_015",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3333,
+      "single_track_centre_error_median_m": 0.4442
+    },
+    {
+      "run": "S18/run_16_anonymous_pair_adjacent_016",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3764,
+      "single_track_centre_error_median_m": 0.4724
+    },
+    {
+      "run": "S18/run_17_anonymous_pair_adjacent_017",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.293,
+      "single_track_centre_error_median_m": 0.446
+    },
+    {
+      "run": "S18/run_18_anonymous_pair_adjacent_018",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2586,
+      "single_track_centre_error_median_m": 0.487
+    },
+    {
+      "run": "S18/run_19_anonymous_pair_adjacent_019",
+      "decision_counts": {
+        "anonymous": 8,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 16,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3825,
+      "single_track_centre_error_median_m": 0.4709
+    },
+    {
+      "run": "S18/run_1_anonymous_pair_adjacent_001",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2508,
+      "single_track_centre_error_median_m": 0.3943
+    },
+    {
+      "run": "S18/run_20_anonymous_pair_adjacent_020",
+      "decision_counts": {
+        "anonymous": 8,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 7,
+        "false": 0,
+        "missed": 9
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1",
+          "U3",
+          "U4"
+        ]
+      },
+      "centre_error_median_m": 0.3956,
+      "single_track_centre_error_median_m": 0.5711
+    },
+    {
+      "run": "S18/run_21_anonymous_pair_adjacent_021",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2733,
+      "single_track_centre_error_median_m": 0.44
+    },
+    {
+      "run": "S18/run_22_anonymous_pair_adjacent_022",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 6,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3962,
+      "single_track_centre_error_median_m": 0.4972
+    },
+    {
+      "run": "S18/run_23_anonymous_pair_adjacent_023",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2973,
+      "single_track_centre_error_median_m": 0.4055
+    },
+    {
+      "run": "S18/run_24_anonymous_pair_adjacent_024",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.271,
+      "single_track_centre_error_median_m": 0.4099
+    },
+    {
+      "run": "S18/run_25_anonymous_pair_adjacent_025",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2466,
+      "single_track_centre_error_median_m": 0.4991
+    },
+    {
+      "run": "S18/run_26_anonymous_pair_adjacent_026",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2",
+          "U3"
+        ]
+      },
+      "centre_error_median_m": 0.3778,
+      "single_track_centre_error_median_m": 0.5492
+    },
+    {
+      "run": "S18/run_27_anonymous_pair_adjacent_027",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2317,
+      "single_track_centre_error_median_m": 0.4715
+    },
+    {
+      "run": "S18/run_28_anonymous_pair_adjacent_028",
+      "decision_counts": {
+        "anonymous": 8,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 9
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1",
+          "U4",
+          "U5"
+        ]
+      },
+      "centre_error_median_m": 0.4039,
+      "single_track_centre_error_median_m": 0.7538
+    },
+    {
+      "run": "S18/run_29_anonymous_pair_adjacent_029",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2839,
+      "single_track_centre_error_median_m": 0.4122
+    },
+    {
+      "run": "S18/run_2_anonymous_pair_adjacent_002",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 7,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4186,
+      "single_track_centre_error_median_m": 0.5023
+    },
+    {
+      "run": "S18/run_30_anonymous_pair_adjacent_030",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3136,
+      "single_track_centre_error_median_m": 0.4224
+    },
+    {
+      "run": "S18/run_31_anonymous_pair_adjacent_031",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4179,
+      "single_track_centre_error_median_m": 0.4985
+    },
+    {
+      "run": "S18/run_32_anonymous_pair_adjacent_032",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3672,
+      "single_track_centre_error_median_m": 0.4381
+    },
+    {
+      "run": "S18/run_33_anonymous_pair_adjacent_033",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2311,
+      "single_track_centre_error_median_m": 0.3697
+    },
+    {
+      "run": "S18/run_34_anonymous_pair_adjacent_034",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3191,
+      "single_track_centre_error_median_m": 0.4817
+    },
+    {
+      "run": "S18/run_35_anonymous_pair_adjacent_035",
+      "decision_counts": {
+        "anonymous": 8,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 5,
+        "false": 0,
+        "missed": 11
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2",
+          "U3",
+          "U4"
+        ]
+      },
+      "centre_error_median_m": 0.3766,
+      "single_track_centre_error_median_m": 0.5653
+    },
+    {
+      "run": "S18/run_36_anonymous_pair_adjacent_036",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1",
+          "U3"
+        ]
+      },
+      "centre_error_median_m": 0.2813,
+      "single_track_centre_error_median_m": 0.4201
+    },
+    {
+      "run": "S18/run_37_anonymous_pair_adjacent_037",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2788,
+      "single_track_centre_error_median_m": 0.4108
+    },
+    {
+      "run": "S18/run_38_anonymous_pair_adjacent_038",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 5,
+        "false": 0,
+        "missed": 4
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2",
+          "U3"
+        ]
+      },
+      "centre_error_median_m": 0.3879,
+      "single_track_centre_error_median_m": 0.4783
+    },
+    {
+      "run": "S18/run_39_anonymous_pair_adjacent_039",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3207,
+      "single_track_centre_error_median_m": 0.455
+    },
+    {
+      "run": "S18/run_3_anonymous_pair_adjacent_003",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1",
+          "U3"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4417,
+      "single_track_centre_error_median_m": 0.6937
+    },
+    {
+      "run": "S18/run_4_anonymous_pair_adjacent_004",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 6
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1",
+          "U4",
+          "U5"
+        ]
+      },
+      "centre_error_median_m": 0.366,
+      "single_track_centre_error_median_m": 0.4459
+    },
+    {
+      "run": "S18/run_5_anonymous_pair_adjacent_005",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2684,
+      "single_track_centre_error_median_m": 0.4067
+    },
+    {
+      "run": "S18/run_6_anonymous_pair_adjacent_006",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.321,
+      "single_track_centre_error_median_m": 0.6595
+    },
+    {
+      "run": "S18/run_7_anonymous_pair_adjacent_007",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 7,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3861,
+      "single_track_centre_error_median_m": 0.4685
+    },
+    {
+      "run": "S18/run_8_anonymous_pair_adjacent_008",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2958,
+      "single_track_centre_error_median_m": 0.5139
+    },
+    {
+      "run": "S18/run_9_anonymous_pair_adjacent_009",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ],
+        "D": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2091,
+      "single_track_centre_error_median_m": 0.3699
+    },
+    {
+      "run": "S18/run_0_anonymous_pair_platoon_000",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 7
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "D": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2909,
+      "single_track_centre_error_median_m": 0.3459
+    },
+    {
+      "run": "S18/run_10_anonymous_pair_platoon_010",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3955,
+      "single_track_centre_error_median_m": 0.4182
+    },
+    {
+      "run": "S18/run_11_anonymous_pair_platoon_011",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3244,
+      "single_track_centre_error_median_m": 0.3565
+    },
+    {
+      "run": "S18/run_12_anonymous_pair_platoon_012",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4679,
+      "single_track_centre_error_median_m": 0.5109
+    },
+    {
+      "run": "S18/run_13_anonymous_pair_platoon_013",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3412,
+      "single_track_centre_error_median_m": 0.4317
+    },
+    {
+      "run": "S18/run_14_anonymous_pair_platoon_014",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4415,
+      "single_track_centre_error_median_m": 0.426
+    },
+    {
+      "run": "S18/run_15_anonymous_pair_platoon_015",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5103,
+      "single_track_centre_error_median_m": 0.4605
+    },
+    {
+      "run": "S18/run_16_anonymous_pair_platoon_016",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4649,
+      "single_track_centre_error_median_m": 0.5747
+    },
+    {
+      "run": "S18/run_17_anonymous_pair_platoon_017",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4597,
+      "single_track_centre_error_median_m": 0.4858
+    },
+    {
+      "run": "S18/run_18_anonymous_pair_platoon_018",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4762,
+      "single_track_centre_error_median_m": 0.522
+    },
+    {
+      "run": "S18/run_19_anonymous_pair_platoon_019",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 7
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "D": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.2763,
+      "single_track_centre_error_median_m": 0.3799
+    },
+    {
+      "run": "S18/run_1_anonymous_pair_platoon_001",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2838,
+      "single_track_centre_error_median_m": 0.3446
+    },
+    {
+      "run": "S18/run_20_anonymous_pair_platoon_020",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 6
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6467,
+      "single_track_centre_error_median_m": 0.5969
+    },
+    {
+      "run": "S18/run_21_anonymous_pair_platoon_021",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4182,
+      "single_track_centre_error_median_m": 0.4773
+    },
+    {
+      "run": "S18/run_22_anonymous_pair_platoon_022",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 5,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "D": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.7645,
+      "single_track_centre_error_median_m": 0.8349
+    },
+    {
+      "run": "S18/run_23_anonymous_pair_platoon_023",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3031,
+      "single_track_centre_error_median_m": 0.3523
+    },
+    {
+      "run": "S18/run_24_anonymous_pair_platoon_024",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3826,
+      "single_track_centre_error_median_m": 0.4813
+    },
+    {
+      "run": "S18/run_25_anonymous_pair_platoon_025",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3135,
+      "single_track_centre_error_median_m": 0.3616
+    },
+    {
+      "run": "S18/run_26_anonymous_pair_platoon_026",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6812,
+      "single_track_centre_error_median_m": 0.6555
+    },
+    {
+      "run": "S18/run_27_anonymous_pair_platoon_027",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3591,
+      "single_track_centre_error_median_m": 0.515
+    },
+    {
+      "run": "S18/run_28_anonymous_pair_platoon_028",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5584,
+      "single_track_centre_error_median_m": 0.5249
+    },
+    {
+      "run": "S18/run_29_anonymous_pair_platoon_029",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4792,
+      "single_track_centre_error_median_m": 0.5604
+    },
+    {
+      "run": "S18/run_2_anonymous_pair_platoon_002",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.547,
+      "single_track_centre_error_median_m": 0.7581
+    },
+    {
+      "run": "S18/run_30_anonymous_pair_platoon_030",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4322,
+      "single_track_centre_error_median_m": 0.4449
+    },
+    {
+      "run": "S18/run_31_anonymous_pair_platoon_031",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5586,
+      "single_track_centre_error_median_m": 0.5006
+    },
+    {
+      "run": "S18/run_32_anonymous_pair_platoon_032",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 4
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4116,
+      "single_track_centre_error_median_m": 0.4808
+    },
+    {
+      "run": "S18/run_33_anonymous_pair_platoon_033",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3643,
+      "single_track_centre_error_median_m": 0.3781
+    },
+    {
+      "run": "S18/run_34_anonymous_pair_platoon_034",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6123,
+      "single_track_centre_error_median_m": 0.6328
+    },
+    {
+      "run": "S18/run_35_anonymous_pair_platoon_035",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2859,
+      "single_track_centre_error_median_m": 0.3803
+    },
+    {
+      "run": "S18/run_36_anonymous_pair_platoon_036",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3494,
+      "single_track_centre_error_median_m": 0.4253
+    },
+    {
+      "run": "S18/run_37_anonymous_pair_platoon_037",
+      "decision_counts": {
+        "anonymous": 7,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 5
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3827,
+      "single_track_centre_error_median_m": 0.4949
+    },
+    {
+      "run": "S18/run_38_anonymous_pair_platoon_038",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.8127,
+      "single_track_centre_error_median_m": 0.548
+    },
+    {
+      "run": "S18/run_39_anonymous_pair_platoon_039",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5434,
+      "single_track_centre_error_median_m": 0.4747
+    },
+    {
+      "run": "S18/run_3_anonymous_pair_platoon_003",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.3462,
+      "single_track_centre_error_median_m": 0.3447
+    },
+    {
+      "run": "S18/run_4_anonymous_pair_platoon_004",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.425,
+      "single_track_centre_error_median_m": 0.57
+    },
+    {
+      "run": "S18/run_5_anonymous_pair_platoon_005",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2731,
+      "single_track_centre_error_median_m": 0.3289
+    },
+    {
+      "run": "S18/run_6_anonymous_pair_platoon_006",
+      "decision_counts": {
+        "anonymous": 6,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 4,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.498,
+      "single_track_centre_error_median_m": 0.4748
+    },
+    {
+      "run": "S18/run_7_anonymous_pair_platoon_007",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3",
+          "U4"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.9063,
+      "single_track_centre_error_median_m": 0.8171
+    },
+    {
+      "run": "S18/run_8_anonymous_pair_platoon_008",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4825,
+      "single_track_centre_error_median_m": 0.4317
+    },
+    {
+      "run": "S18/run_9_anonymous_pair_platoon_009",
+      "decision_counts": {
+        "anonymous": 5,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 2,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U2",
+          "U3"
+        ],
+        "D": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2982,
+      "single_track_centre_error_median_m": 0.3817
+    },
+    {
+      "run": "S03/run_0_crossing_000",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6228,
+      "single_track_centre_error_median_m": 0.7928
+    },
+    {
+      "run": "S03/run_10_crossing_010",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_11_crossing_011",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_12_crossing_012",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 1
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 3,
+      "fragmentation": {
+        "A": [
+          "U2",
+          "U3"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4005,
+      "single_track_centre_error_median_m": 0.6917
+    },
+    {
+      "run": "S03/run_13_crossing_013",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5405,
+      "single_track_centre_error_median_m": 0.9036
+    },
+    {
+      "run": "S03/run_14_crossing_014",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_15_crossing_015",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_16_crossing_016",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_17_crossing_017",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_18_crossing_018",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.3789,
+      "single_track_centre_error_median_m": 0.5922
+    },
+    {
+      "run": "S03/run_19_crossing_019",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6371,
+      "single_track_centre_error_median_m": 0.8585
+    },
+    {
+      "run": "S03/run_1_crossing_001",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6078,
+      "single_track_centre_error_median_m": 0.9345
+    },
+    {
+      "run": "S03/run_20_crossing_020",
+      "decision_counts": {
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5666,
+      "single_track_centre_error_median_m": 0.4124
+    },
+    {
+      "run": "S03/run_21_crossing_021",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6587,
+      "single_track_centre_error_median_m": 0.9066
+    },
+    {
+      "run": "S03/run_22_crossing_022",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4867,
+      "single_track_centre_error_median_m": 0.5631
+    },
+    {
+      "run": "S03/run_23_crossing_023",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4937,
+      "single_track_centre_error_median_m": 0.7937
+    },
+    {
+      "run": "S03/run_24_crossing_024",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_25_crossing_025",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_26_crossing_026",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.56,
+      "single_track_centre_error_median_m": 0.7575
+    },
+    {
+      "run": "S03/run_27_crossing_027",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_28_crossing_028",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4352,
+      "single_track_centre_error_median_m": 0.9218
+    },
+    {
+      "run": "S03/run_29_crossing_029",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6557,
+      "single_track_centre_error_median_m": 0.8633
+    },
+    {
+      "run": "S03/run_2_crossing_002",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.5084,
+      "single_track_centre_error_median_m": 0.7143
+    },
+    {
+      "run": "S03/run_30_crossing_030",
+      "decision_counts": {
+        "correct link": 4
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_31_crossing_031",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_32_crossing_032",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_33_crossing_033",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_34_crossing_034",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.5072,
+      "single_track_centre_error_median_m": 0.6537
+    },
+    {
+      "run": "S03/run_35_crossing_035",
+      "decision_counts": {
+        "correct link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_36_crossing_036",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4099,
+      "single_track_centre_error_median_m": 0.6001
+    },
+    {
+      "run": "S03/run_37_crossing_037",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.6096,
+      "single_track_centre_error_median_m": 0.8316
+    },
+    {
+      "run": "S03/run_38_crossing_038",
+      "decision_counts": {
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.4712,
+      "single_track_centre_error_median_m": 0.5628
+    },
+    {
+      "run": "S03/run_39_crossing_039",
+      "decision_counts": {
+        "correct link": 4
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_3_crossing_003",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_4_crossing_004",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_5_crossing_005",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6461,
+      "single_track_centre_error_median_m": 0.9116
+    },
+    {
+      "run": "S03/run_6_crossing_006",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S03/run_7_crossing_007",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ],
+        "B": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.5205,
+      "single_track_centre_error_median_m": 0.6826
+    },
+    {
+      "run": "S03/run_8_crossing_008",
+      "decision_counts": {
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "A": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2898,
+      "single_track_centre_error_median_m": 0.423
+    },
+    {
+      "run": "S03/run_9_crossing_009",
+      "decision_counts": {
+        "missed link": 3
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6035,
+      "single_track_centre_error_median_m": 0.8427
+    },
+    {
+      "run": "S02/run_0_cut_in_000",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_10_cut_in_010",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_11_cut_in_011",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_12_cut_in_012",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_13_cut_in_013",
+      "decision_counts": {
+        "correct link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_14_cut_in_014",
+      "decision_counts": {
+        "anonymous": 1,
+        "correct link": 3,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6699,
+      "single_track_centre_error_median_m": 0.6085
+    },
+    {
+      "run": "S02/run_15_cut_in_015",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 3,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.8066,
+      "single_track_centre_error_median_m": 0.6373
+    },
+    {
+      "run": "S02/run_16_cut_in_016",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_17_cut_in_017",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_18_cut_in_018",
+      "decision_counts": {
+        "anonymous": 1,
+        "correct link": 3,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5972,
+      "single_track_centre_error_median_m": 0.4827
+    },
+    {
+      "run": "S02/run_19_cut_in_019",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_1_cut_in_001",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_20_cut_in_020",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_21_cut_in_021",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_22_cut_in_022",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 3,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5359,
+      "single_track_centre_error_median_m": 0.7391
+    },
+    {
+      "run": "S02/run_23_cut_in_023",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_24_cut_in_024",
+      "decision_counts": {
+        "correct link": 2,
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 1
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "B": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 1.5627,
+      "single_track_centre_error_median_m": 1.1912
+    },
+    {
+      "run": "S02/run_25_cut_in_025",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_26_cut_in_026",
+      "decision_counts": {
+        "anonymous": 1,
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "A": [
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 2.8167,
+      "single_track_centre_error_median_m": 2.0341
+    },
+    {
+      "run": "S02/run_27_cut_in_027",
+      "decision_counts": {
+        "correct link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_28_cut_in_028",
+      "decision_counts": {
+        "correct link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_29_cut_in_029",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_2_cut_in_002",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_30_cut_in_030",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_31_cut_in_031",
+      "decision_counts": {
+        "anonymous": 1,
+        "correct link": 2,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4086,
+      "single_track_centre_error_median_m": 0.4275
+    },
+    {
+      "run": "S02/run_32_cut_in_032",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_33_cut_in_033",
+      "decision_counts": {
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.2852,
+      "single_track_centre_error_median_m": 0.5942
+    },
+    {
+      "run": "S02/run_34_cut_in_034",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_35_cut_in_035",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_36_cut_in_036",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_37_cut_in_037",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_38_cut_in_038",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.5058,
+      "single_track_centre_error_median_m": 0.6988
+    },
+    {
+      "run": "S02/run_39_cut_in_039",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 1,
+        "missed link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 4,
+      "false_entities_of_recorders": 2,
+      "fragmentation": {
+        "A": [
+          "U4"
+        ],
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.9057,
+      "single_track_centre_error_median_m": 1.5051
+    },
+    {
+      "run": "S02/run_3_cut_in_003",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_4_cut_in_004",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_5_cut_in_005",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_6_cut_in_006",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_7_cut_in_007",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_8_cut_in_008",
+      "decision_counts": {
+        "correct link": 3
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S02/run_9_cut_in_009",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_0_rear_end_000",
+      "decision_counts": {
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_10_rear_end_010",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_11_rear_end_011",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_12_rear_end_012",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_13_rear_end_013",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_14_rear_end_014",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_15_rear_end_015",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_16_rear_end_016",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_17_rear_end_017",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_18_rear_end_018",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_19_rear_end_019",
+      "decision_counts": {
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.6163,
+      "single_track_centre_error_median_m": 0.5861
+    },
+    {
+      "run": "S01/run_1_rear_end_001",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_20_rear_end_020",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_21_rear_end_021",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_22_rear_end_022",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_23_rear_end_023",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_24_rear_end_024",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_25_rear_end_025",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_26_rear_end_026",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_27_rear_end_027",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_28_rear_end_028",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_29_rear_end_029",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_2_rear_end_002",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_30_rear_end_030",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_31_rear_end_031",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_32_rear_end_032",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_33_rear_end_033",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_34_rear_end_034",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_35_rear_end_035",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_36_rear_end_036",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_37_rear_end_037",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_38_rear_end_038",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_39_rear_end_039",
+      "decision_counts": {
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.4627,
+      "single_track_centre_error_median_m": 0.4676
+    },
+    {
+      "run": "S01/run_3_rear_end_003",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_4_rear_end_004",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_5_rear_end_005",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_6_rear_end_006",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_7_rear_end_007",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_8_rear_end_008",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S01/run_9_rear_end_009",
+      "decision_counts": {
+        "correct link": 1
+      },
+      "merges": {
+        "correct": 0,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 0,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {},
+      "centre_error_median_m": null,
+      "single_track_centre_error_median_m": null
+    },
+    {
+      "run": "S17/run_0_unobserved_cut_in_000",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 3
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.1361,
+      "single_track_centre_error_median_m": 0.5568
+    },
+    {
+      "run": "S17/run_10_unobserved_cut_in_010",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0926,
+      "single_track_centre_error_median_m": 0.2459
+    },
+    {
+      "run": "S17/run_11_unobserved_cut_in_011",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1347,
+      "single_track_centre_error_median_m": 1.4003
+    },
+    {
+      "run": "S17/run_12_unobserved_cut_in_012",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1688,
+      "single_track_centre_error_median_m": 0.296
+    },
+    {
+      "run": "S17/run_13_unobserved_cut_in_013",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.092,
+      "single_track_centre_error_median_m": 0.2933
+    },
+    {
+      "run": "S17/run_14_unobserved_cut_in_014",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1217,
+      "single_track_centre_error_median_m": 0.7054
+    },
+    {
+      "run": "S17/run_15_unobserved_cut_in_015",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1288,
+      "single_track_centre_error_median_m": 0.4884
+    },
+    {
+      "run": "S17/run_16_unobserved_cut_in_016",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0851,
+      "single_track_centre_error_median_m": 0.247
+    },
+    {
+      "run": "S17/run_17_unobserved_cut_in_017",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1337,
+      "single_track_centre_error_median_m": 1.0297
+    },
+    {
+      "run": "S17/run_18_unobserved_cut_in_018",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.159,
+      "single_track_centre_error_median_m": 0.2964
+    },
+    {
+      "run": "S17/run_19_unobserved_cut_in_019",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1313,
+      "single_track_centre_error_median_m": 0.527
+    },
+    {
+      "run": "S17/run_1_unobserved_cut_in_001",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0886,
+      "single_track_centre_error_median_m": 0.6507
+    },
+    {
+      "run": "S17/run_20_unobserved_cut_in_020",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1437,
+      "single_track_centre_error_median_m": 0.3677
+    },
+    {
+      "run": "S17/run_21_unobserved_cut_in_021",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.1131,
+      "single_track_centre_error_median_m": 0.6148
+    },
+    {
+      "run": "S17/run_22_unobserved_cut_in_022",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0912,
+      "single_track_centre_error_median_m": 0.2585
+    },
+    {
+      "run": "S17/run_23_unobserved_cut_in_023",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1175,
+      "single_track_centre_error_median_m": 0.5338
+    },
+    {
+      "run": "S17/run_24_unobserved_cut_in_024",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0995,
+      "single_track_centre_error_median_m": 0.3404
+    },
+    {
+      "run": "S17/run_25_unobserved_cut_in_025",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0874,
+      "single_track_centre_error_median_m": 0.3386
+    },
+    {
+      "run": "S17/run_26_unobserved_cut_in_026",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0984,
+      "single_track_centre_error_median_m": 0.4348
+    },
+    {
+      "run": "S17/run_27_unobserved_cut_in_027",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1224,
+      "single_track_centre_error_median_m": 0.9316
+    },
+    {
+      "run": "S17/run_28_unobserved_cut_in_028",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0729,
+      "single_track_centre_error_median_m": 0.2859
+    },
+    {
+      "run": "S17/run_29_unobserved_cut_in_029",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1135,
+      "single_track_centre_error_median_m": 0.5593
+    },
+    {
+      "run": "S17/run_2_unobserved_cut_in_002",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.101,
+      "single_track_centre_error_median_m": 1.0202
+    },
+    {
+      "run": "S17/run_30_unobserved_cut_in_030",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1474,
+      "single_track_centre_error_median_m": 0.5517
+    },
+    {
+      "run": "S17/run_31_unobserved_cut_in_031",
+      "decision_counts": {
+        "anonymous": 4,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1579,
+      "single_track_centre_error_median_m": 0.5707
+    },
+    {
+      "run": "S17/run_32_unobserved_cut_in_032",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1044,
+      "single_track_centre_error_median_m": 0.9048
+    },
+    {
+      "run": "S17/run_33_unobserved_cut_in_033",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1365,
+      "single_track_centre_error_median_m": 0.5571
+    },
+    {
+      "run": "S17/run_34_unobserved_cut_in_034",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1125,
+      "single_track_centre_error_median_m": 0.5286
+    },
+    {
+      "run": "S17/run_35_unobserved_cut_in_035",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U2"
+        ],
+        "C": [
+          "U1",
+          "U3"
+        ]
+      },
+      "centre_error_median_m": 0.3734,
+      "single_track_centre_error_median_m": 0.8474
+    },
+    {
+      "run": "S17/run_36_unobserved_cut_in_036",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 2,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1",
+          "U2"
+        ]
+      },
+      "centre_error_median_m": 0.1056,
+      "single_track_centre_error_median_m": 0.6893
+    },
+    {
+      "run": "S17/run_37_unobserved_cut_in_037",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.103,
+      "single_track_centre_error_median_m": 0.329
+    },
+    {
+      "run": "S17/run_38_unobserved_cut_in_038",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1233,
+      "single_track_centre_error_median_m": 0.5448
+    },
+    {
+      "run": "S17/run_39_unobserved_cut_in_039",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0889,
+      "single_track_centre_error_median_m": 1.2963
+    },
+    {
+      "run": "S17/run_3_unobserved_cut_in_003",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1415,
+      "single_track_centre_error_median_m": 0.6193
+    },
+    {
+      "run": "S17/run_4_unobserved_cut_in_004",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.0878,
+      "single_track_centre_error_median_m": 0.2747
+    },
+    {
+      "run": "S17/run_5_unobserved_cut_in_005",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1139,
+      "single_track_centre_error_median_m": 1.0078
+    },
+    {
+      "run": "S17/run_6_unobserved_cut_in_006",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1172,
+      "single_track_centre_error_median_m": 0.2914
+    },
+    {
+      "run": "S17/run_7_unobserved_cut_in_007",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 3,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1081,
+      "single_track_centre_error_median_m": 0.5869
+    },
+    {
+      "run": "S17/run_8_unobserved_cut_in_008",
+      "decision_counts": {
+        "anonymous": 3,
+        "correct link": 1,
+        "missed link": 1
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 2
+      },
+      "entities": 3,
+      "false_entities_of_recorders": 1,
+      "fragmentation": {
+        "B": [
+          "U2"
+        ],
+        "C": [
+          "U1",
+          "U3"
+        ]
+      },
+      "centre_error_median_m": 0.2476,
+      "single_track_centre_error_median_m": 0.6011
+    },
+    {
+      "run": "S17/run_9_unobserved_cut_in_009",
+      "decision_counts": {
+        "anonymous": 2,
+        "correct link": 2
+      },
+      "merges": {
+        "correct": 1,
+        "false": 0,
+        "missed": 0
+      },
+      "entities": 1,
+      "false_entities_of_recorders": 0,
+      "fragmentation": {
+        "C": [
+          "U1"
+        ]
+      },
+      "centre_error_median_m": 0.1191,
+      "single_track_centre_error_median_m": 0.8239
+    }
+  ]
+}

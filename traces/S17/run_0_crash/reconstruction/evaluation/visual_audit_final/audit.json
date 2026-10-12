@@ -1,0 +1,129 @@
+{
+ "run": "S17/run_0_crash",
+ "clock": "t_global",
+ "frames": [
+  {
+   "file": "01_tgm004.95.png",
+   "label": "lead-in",
+   "replay_time": 0.0,
+   "display_time": -4.95
+  },
+  {
+   "file": "02_tgm002.35.png",
+   "label": "CRITICAL_TTC_START(A,U1)",
+   "replay_time": 2.6,
+   "display_time": -2.35
+  },
+  {
+   "file": "03_tgm002.20.png",
+   "label": "CUT_IN_FROM_RIGHT_START(A,U1)",
+   "replay_time": 2.75,
+   "display_time": -2.2
+  },
+  {
+   "file": "04_tgm002.05.png",
+   "label": "EGO_PATH_ENTRY(A,U1)",
+   "replay_time": 2.9,
+   "display_time": -2.05
+  },
+  {
+   "file": "05_tgm001.15.png",
+   "label": "CRITICAL_TTC_START(A,B)",
+   "replay_time": 3.8,
+   "display_time": -1.15
+  },
+  {
+   "file": "06_tgm000.80.png",
+   "label": "CRITICAL_TTC_START(B,A)",
+   "replay_time": 4.15,
+   "display_time": -0.8
+  },
+  {
+   "file": "07_tgm000.50.png",
+   "label": "CUT_IN_FROM_RIGHT_START(B,A)",
+   "replay_time": 4.45,
+   "display_time": -0.5
+  },
+  {
+   "file": "08_tgm000.40.png",
+   "label": "EGO_PATH_ENTRY(B,A)",
+   "replay_time": 4.55,
+   "display_time": -0.4
+  },
+  {
+   "file": "09_tgm000.20.png",
+   "label": "before COLLISION(A,B)",
+   "replay_time": 4.75,
+   "display_time": -0.2
+  },
+  {
+   "file": "10_tgp000.00.png",
+   "label": "CRITICAL_TTC_END(A,B); EGO_PATH_ENTRY(A,B); CRITICAL_TTC_END(B,A); COLLISION(A,B)",
+   "replay_time": 4.95,
+   "display_time": 0.0
+  },
+  {
+   "file": "11_tgp000.40.png",
+   "label": "CUT_IN_FROM_RIGHT_END(A,U1)",
+   "replay_time": 5.35,
+   "display_time": 0.4
+  },
+  {
+   "file": "12_tgp000.50.png",
+   "label": "after COLLISION(A,B)",
+   "replay_time": 5.45,
+   "display_time": 0.5
+  },
+  {
+   "file": "13_tgp000.55.png",
+   "label": "CRITICAL_TTC_END(A,U1)",
+   "replay_time": 5.5,
+   "display_time": 0.55
+  },
+  {
+   "file": "manual_01_tgm002.20.png",
+   "label": "manual review: t = -2.20 s",
+   "replay_time": 2.75,
+   "display_time": -2.2
+  },
+  {
+   "file": "manual_02_tgm002.05.png",
+   "label": "manual review: t = -2.05 s",
+   "replay_time": 2.9000000000000004,
+   "display_time": -2.05
+  },
+  {
+   "file": "manual_03_tgm000.50.png",
+   "label": "manual review: t = -0.50 s",
+   "replay_time": 4.45,
+   "display_time": -0.5
+  },
+  {
+   "file": "manual_04_tgp000.00.png",
+   "label": "manual review: t = +0.00 s",
+   "replay_time": 4.95,
+   "display_time": 0.0
+  }
+ ],
+ "flags": [],
+ "reconstruction_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+ "note": "frames and flags are reconstruction-only (ReplayRun inputs); verdicts by the reviewer",
+ "provenance": {
+  "git_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "git_dirty": false,
+  "code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+  "config_sha256": null,
+  "runs": [
+   "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\scratch\\final_analysis_v2\\traces\\S17\\run_0_crash"
+  ],
+  "perturbation_profile": null,
+  "seed": null,
+  "generated_utc": "2026-10-12T14:26:07Z",
+  "python": "3.8.20",
+  "analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "analysis_started_from_clean_tree": true,
+  "analysis_code_sha256": "b6bc47487dabcc94d44a52ba1486152fc77e0d59c4c6bb11ec66984bf04998f2",
+  "equivalent_clean_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5",
+  "final_analysis_commit": "8d7343d36cf3f3ebfc2baecb2fcb302273c698f5"
+ }
+}
