@@ -1,0 +1,279 @@
+{
+ "initial_head": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+ "verified_clean_analysis_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540",
+ "analysis_commit_title": "Preserve radar identity through competing returns and correct S02 crash order",
+ "runtime_code_sha256": "1667dea2979183efec90bb778763848d0bdc25d9d4d96544b1d5b0461493b56b",
+ "commit_code_hash_verified": true,
+ "complete_source_config_test_digest_sha256": "a8e200ca0ca3cc1e03886216168776fc4cd5d23578d322f4921945cc84ec8838",
+ "source_files_normalized_sha256": {
+  "configs/default.yaml": "13d4d816938fb056f0ed105207b3848d7596ed9cc09d3cb6d7ac37ce93627f9f",
+  "configs/llm.yaml": "5b2c98cd3fbbc2ed6b390c0380aa20356087958922bda296e1cb739eafd72c51",
+  "configs/reconstruction.yaml": "0bb15ce2d535a855f1c012ee23d6c6b612d6d9294892c98f697ec34ef260def1",
+  "configs/scenarios/s01_rear_end.yaml": "b56c342955b757250aeb675d79c14fb212968bb42415d83c686cbae1f684ee5b",
+  "configs/scenarios/s02_cut_in.yaml": "c07fc9225152fba4dae04989bd0a32c543a4aaee7c9152dd9f46f7e4ecde603a",
+  "configs/scenarios/s03_crossing.yaml": "5b389c848e6ae51ce49f69a6e5de08911c01d4b92ffece713380d09a74cf3c0c",
+  "configs/scenarios/s06_chain_collision.yaml": "5190e5e9b74e6597c50b54fb5890cc4a5ad27f2b21ab4ae9547f425a50370e93",
+  "configs/scenarios/s07_occluded_chain_stop.yaml": "302c5d2b01e64c140076ab1c31b76c02c978a24c472d99a7d8ecf5fb121c2939",
+  "configs/scenarios/s08_multidirection_crossing.yaml": "1471718b9d04d04d4c15e9ccf8763e2e84cf76b9158d36412008ea1d78d5d0e8",
+  "configs/scenarios/s09_roundabout.yaml": "335930787d439a7b8b7f6adfa2f84ca4d9fbac9db07619a91f423d0973e09b79",
+  "configs/scenarios/s10_single_stop_a.yaml": "e31aba3a73b306b0ca3282c71550680a7cfff54b8e588abd06b79b2a80736163",
+  "configs/scenarios/s12_all_way_stop.yaml": "e1cc1b668234c941f4a42ea95deca92895d444667a8f51b5212f961eb1542375",
+  "configs/scenarios/s15_intersection_pileup.yaml": "923478914cd54b23859a34de15b59bba6aebdbca768864e096d09b3817a4af54",
+  "configs/scenarios/s16_secondary_collision.yaml": "32ddb1ac8246cb5a305f09fcda57ae4d225e961fd0d4700997d94212b79ee7fb",
+  "configs/scenarios/s17_unobserved_causal_vehicle.yaml": "860abdd09d8baafa9488c81cb1c1eacba95d17c7da446362beaf6e36055b1bb9",
+  "configs/scenarios/s18_anonymous_pair.yaml": "f4a12f0968e3cd809651ee2e27dac5a399bfb61426bf141225a4d6d4c0cb4fe0",
+  "configs/semantic_vocabulary.yaml": "8a909076716ecc11b0b33ecbd8cc38865115af2c49a34b7a3b0f89c046ba64e2",
+  "configs/sensors/radar_baseline.yaml": "91f6f05bf6e35e997d26dc5b8970f4243f14a5030d993423e15b2685c77b473a",
+  "configs/sweeps/anonymous_pair_adjacent.yaml": "40da2203cd930ba04202b0699d8e8cc4f1484f7331094af542fd21a7c130f8f3",
+  "configs/sweeps/anonymous_pair_platoon.yaml": "f54a0d627a1f6f013190a13ff22fd217e269d921a54a5459f589c02e03989351",
+  "configs/sweeps/crossing.yaml": "6ebd3a6c7510c1f2b0d65e786cebede63ae956ea7905bce6efac019ad1a18d37",
+  "configs/sweeps/cut_in.yaml": "a0f08fda3586bebe70fa831e1ec9b082a725d3ba2b185128c4907dcd42eb1ef7",
+  "configs/sweeps/rear_end.yaml": "b1676f6fda00dc054f5e98da87223c6e81955a6f4addcb35b0c064fc8d28378c",
+  "configs/sweeps/unobserved_cut_in.yaml": "cef2b3ca71e8bc554f1bbc1e0b52cf2c34e07bfa201173cc16a0b2ebc123b30f",
+  "scripts/debug_track_loss.py": "1c2ab4dcefe56b2effc08f23c1aecee7b40767db1b57325998a3e2a49f8e47a5",
+  "src/cdf/__init__.py": "b4c62afc943ebf558c28a8570f8df90dac40c3b5f61b17f9f368f6b945e8710f",
+  "src/cdf/common/__init__.py": "f800db128ffb461d266b1e16dd93e767acf9ce9268886c8959c3012e8776d8f1",
+  "src/cdf/common/config.py": "dc3caa3b9b4ccacbaa70d09ec8f2e209247a7d706a39cee16eac44e9ab7165b3",
+  "src/cdf/common/geometry.py": "3958d3c140997c263ef430bb4428b0d2cc8e9f9b23f6aa13deb6e412e94fdfba",
+  "src/cdf/evaluation/__init__.py": "d73ecc2e4c276b1f61395884a714cb1e052a10e702fc733e30a3a4310f1f38fc",
+  "src/cdf/evaluation/event_oracle.py": "17530e8ce4d7df2f1c953a1fff4c754b356937f51ddce6d3a956566b121fa4c6",
+  "src/cdf/evaluation/figures.py": "41ccc143e4f891be37cbe88a32ddc0a241655b3f570df8411ae04f33972a42c4",
+  "src/cdf/evaluation/fusion_metrics.py": "1bd490c1aa72e45ae3a7aa69d5b716358b13701352a88d6be390f7b773db548a",
+  "src/cdf/evaluation/gt_audit.py": "420788594fc616ed1db04ed482fd5ea9086569b745cf988058c23e67a63dfe62",
+  "src/cdf/evaluation/provenance.py": "1d2f09b0e3a11e3b1d2b945d1f14d04ed2750941bddc5300b696b57457682a8e",
+  "src/cdf/evaluation/reconstruction.py": "08784493feddda3eb1c9135a44fb7f12fcf9d96866746a15b544bd6dbc78d448",
+  "src/cdf/evaluation/run_metrics.py": "95d99d0599c7080b5e74de22c96d1d6e38c8190dcfdcc74998db3a6e4988d61f",
+  "src/cdf/evaluation/visibility.py": "107b6cf69d7ca54e4d33236f34b0da3363f9d8d550fb49b9fe4d8a9282919d42",
+  "src/cdf/evaluation/worked_example.py": "3a961d4b4c939b885baff84a10570663d497155cfe4dcc108ae3845da2e35064",
+  "src/cdf/llm/__init__.py": "c12b40003d3b155a30fbc80defe1ec577c8d77d64efb896a5f2c0cc5af068c84",
+  "src/cdf/llm/evaluation.py": "71f9a51adb39a0f36f989df18b76783864412e47e21d1bf0c8a2479fa91a51cf",
+  "src/cdf/llm/facts.py": "62f78b1730fd10dd7104a2cee4fb217bd6ef6d435d231a100010f853920342be",
+  "src/cdf/llm/formal/__init__.py": "933d05077810d8d8af5afc55f5651ccb0eb469ed28d445ff3cba279ce51e76fc",
+  "src/cdf/llm/formal/grammar.py": "9263014d8d2ec0d31db3bd524bfe94b8c944c97a6384ddbef3ff35d27123d1d3",
+  "src/cdf/llm/formal/parser.py": "d27af3ad90582267e54eae1c84fbd96246b8776603243bbbdbf5a417b5bc0a32",
+  "src/cdf/llm/formal/verifier.py": "b5392f8ab2bdfaa9cb0fd950f513ad4d2b2c9789add9b9b20c2adced3ede9db3",
+  "src/cdf/llm/guard.py": "38a3535281fe6b406f2a87a2259ca18d31b33ecd2c273f7ea98c661af3f1afb5",
+  "src/cdf/llm/oracle.py": "5a161b42587a12805290f0b02d33c9ea2f033fd381c3cb93acd4b61cd7e2d015",
+  "src/cdf/llm/payload_audit.py": "ef6bd620f1fc4aba963361117030d943111c8f2bc07f021062f72cd3f25bab09",
+  "src/cdf/llm/pipeline.py": "cb5dc1c47f3ea6a3236b1a870699880861cbe3fa60d27e1a23dbd54396d5e219",
+  "src/cdf/llm/prompts.py": "d4354b9c946cc901ef8ff1746cff9cbaae2fbe58d4c95f9c7d11d165163ad55e",
+  "src/cdf/llm/providers/__init__.py": "c05f0b7a829ad67b505b510c8c8f192a071595684624c5e3414b06e1ff40d60f",
+  "src/cdf/llm/providers/base.py": "c4887fc92e31e3604aa25d79c8bf960f725d80debcd03da6f2e07739d135a479",
+  "src/cdf/llm/providers/gemini_provider.py": "575f3775e118b578bdbb71820e097756c765508a9916fbae989a1771d9bf70b5",
+  "src/cdf/llm/providers/openai_provider.py": "2203df8b3734aa0ed7d8f1bbcb117e3f80a8bdacab711d584188cd9c70529cc6",
+  "src/cdf/llm/schemas.py": "cbab645d8de075db8e346e68f42fbefaa13daec3a7cf874eb3058e210cab5bd2",
+  "src/cdf/llm/vocabulary.py": "09e6583d9bd4ca4aaa118261d95c3139a9c90109cc745a951f1d40914669427a",
+  "src/cdf/perception/__init__.py": "76115c37c2c3adb4c76563c77d78cd06da18c96908bad47354d4770419cb2cb9",
+  "src/cdf/perception/traffic_signs.py": "d473cec42746e768438f419a42498bcc6fd1526bf6a7fda2e4260e9a25bb6b8a",
+  "src/cdf/reconstruction/__init__.py": "0b843aab118281bfe10073db193c01259f5dba63ef9db0b66879cbd8e68246ba",
+  "src/cdf/reconstruction/alignment.py": "b8dc4423ba601c1169c095136592c1ccdffe656a839418ab4b927ad14c7a79af",
+  "src/cdf/reconstruction/anonymous.py": "5496c08a6360f507862e4c6250353838de2c3fa880db16138e0c8c2d51789f30",
+  "src/cdf/reconstruction/checks.py": "a3e5407dc7ccb91e69a371b457b553348526b327e521bc13498ce7f4ccaa907a",
+  "src/cdf/reconstruction/common_frame.py": "5fe93819c5a965bd91bcf76641093e34699cbd865955357e2e4213a883d2b1d3",
+  "src/cdf/reconstruction/config.py": "3acd7e26f8e29fd782d69e03d5826aedb9613fd490efc1d694c2e988f48bdf23",
+  "src/cdf/reconstruction/conflict.py": "8b9a64862b428b510adc794f6e7161b500756a46043199136f90ca5f20e0115e",
+  "src/cdf/reconstruction/fusion.py": "761da5d2ff8a8e6312ff099db1d02051710cbbedb0d30e1f3abc64579eedbaa2",
+  "src/cdf/reconstruction/local.py": "d19a4cd4cfb25dff908f68c214e6833cc01dca2270bc1e2e32237b209265b0a0",
+  "src/cdf/reconstruction/models.py": "03e42e3ac1fe9ad4e96cc4518cfa29fd180d0b89c8cc6faaa1e97ae6455552f8",
+  "src/cdf/reconstruction/pipeline.py": "b0de2719fce4fb13b5d8b730db8c827ef9185490a59ce8f7ced391935ed39e19",
+  "src/cdf/reconstruction/render.py": "3e7894394d0de0f372e6331527902ee4ea9f5b93ecf590012ec67d25e341a7de",
+  "src/cdf/reconstruction/tracking.py": "a97dd2f71be74234f3a61d01f211cfcfc5d6176d5a399329871841136e9643bd",
+  "src/cdf/reconstruction/world_state.py": "f8a9f90de005d6a68b7e1283bdccf23d00460d0cf4e3ee4da9f65e936be8005e",
+  "src/cdf/recording/__init__.py": "e4e2a38c7330ea42026b2a69eab1139c10c34b66c6b3236ef52fb377a2ad1057",
+  "src/cdf/recording/compact_observations.py": "300e739424a744c73666013283cf5b6e6910faca871159cc832b6c8f565911a7",
+  "src/cdf/recording/depth_velocity.py": "1183e52dc9577534bfc4639ea1c44ba76f7ac8e52148312c29a9cc07a3563d3f",
+  "src/cdf/recording/ground_truth_logger.py": "303437a11481c84d4b5e117097e63fd6315d2d6a2e8d1d75eacd3e23595f817d",
+  "src/cdf/recording/vehicle_logger.py": "11c506451055bd95e292a171dfe66f887ca45f4f6eca789cb819e1b5acc685c3",
+  "src/cdf/replay/__init__.py": "0f06ba4f313bef60a543867ef8b50aa14e474a2ee7b294343a9180794efad187",
+  "src/cdf/replay/model.py": "b9b8f6fb84aa1257aee10c73906a4016e57f77b49aa044b2f004f5e055125b6a",
+  "src/cdf/replay/presentation.py": "929dbcfa354654956f32e0938f135325d302191f438c2c6044005df2c37b6a98",
+  "src/cdf/replay/qa.py": "5e60b6e57267984e332bfe0778953ae2fc2a37aeef09e7d0d191f8f2fa332580",
+  "src/cdf/replay/topdown.py": "3c15fc8b0f87a3b4cc9f9cae813f1486e2a5eefc9bd301b0797c3bcc17e7416d",
+  "src/cdf/robustness/__init__.py": "7cbfa37b1d723145564768d813b6d9c3c575941cc0dbc1572e12823b8b48b421",
+  "src/cdf/robustness/perturb.py": "35acdf5950d12d8b60354b50760dee8b2d96c271de99070a45c2196e830c3cfe",
+  "src/cdf/simulation/__init__.py": "b5d95414d5d234b6fc9d2870e7a260161c9601cef1c7c4defc6d21b6ec7e4ef1",
+  "src/cdf/simulation/carla_client.py": "885454d991170bae33d875ba78faaac7bea119570008f9682946ea428a44bd38",
+  "src/cdf/simulation/controllers.py": "ba2311a3b5a5795830c08fc8d54849b74df6f2e322c33a7a0ef5073e91f068b0",
+  "src/cdf/simulation/runner.py": "d61af4decd78d15f9c5558fe3b28c3d9bc432682e65d37d9ed90daed4c319d17",
+  "src/cdf/simulation/scenario_base.py": "50b37e987dd0d27292abcd649a3f5b5ddd637422f818cffca0c803ff278883d1",
+  "src/cdf/simulation/scenarios/__init__.py": "7d27e2cd2b48ac01b64d3bbf7fe892859105509b757474974429b08b1477e707",
+  "src/cdf/simulation/sensors.py": "2323a17dd01ec8de83f01e20dcc3f3fe60f969e9cabdf0f0425badb87b520f8d",
+  "src/cdf/simulation/triggers.py": "11cea7ac5b233a2edc1b634b974d5a04fdce5752c84735a9cb7b1b7070da066e",
+  "src/cdf/simulation/vehicle_agent.py": "0e0c6eb9147af00ad515bebe363da464e64dbd2e7f5e1753faca77f179cb4479",
+  "src/cdf/simulation/world.py": "e2a719cc6d6df03f721012c7b1293d33eaa1b28051a5c647b31a942245c0d243",
+  "tests/test_replay_followup.py": "ca70aaaa2c0af0b18fdf047afddf45cbbc299937ff73394838bb7bf9c4092b8e",
+  "tests/test_road_user_fusion.py": "e107671208c6b0fdce1b7b7217479e5f77611c576c037d70c0a1e8a6f579a617"
+ },
+ "equivalent_analysis_artifacts": {
+  "traces/S02/run_0_crash/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S08/run_0_crash/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S15/run_0_deflected_into_c/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S16/run_0_consequential/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_abreast/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_passing/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_platoon/reconstruction/evaluation/visual_audit_replay_followup/audit.json": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S02/run_0_crash": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S08/run_0_crash": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S15/run_0_deflected_into_c": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S16/run_0_consequential": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_abreast": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_passing": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  },
+  "traces/S18/run_0_platoon": {
+   "execution_git_commit": "a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e",
+   "execution_git_dirty": true,
+   "equivalent_clean_commit": "568c7320de5ee9c8b23e63d5cdefb6910b469540"
+  }
+ },
+ "original_execution_fields_preserved": true,
+ "final_head_resolution": "git rev-parse HEAD after the documentation closure commit; exact hash in the final user report",
+ "closure_commit_scope": "this manifest and the report pointer only; no runtime, config, data or tests change",
+ "raw_integrity": {
+  "S02/run_0_crash": {
+   "unchanged": false,
+   "files": 34
+  },
+  "S02/run_0_critical_before_cut_in": {
+   "unchanged": true,
+   "files": 34
+  },
+  "S08/run_0_crash": {
+   "unchanged": true,
+   "files": 48
+  },
+  "S07/run_0_crash": {
+   "unchanged": true,
+   "files": 48
+  },
+  "S10/run_0_rolls_through": {
+   "unchanged": true,
+   "files": 34
+  },
+  "S17/run_0_crash": {
+   "unchanged": true,
+   "files": 36
+  },
+  "S18/run_0_abreast": {
+   "unchanged": true,
+   "files": 34
+  },
+  "S18/run_0_passing": {
+   "unchanged": true,
+   "files": 34
+  },
+  "S18/run_0_platoon": {
+   "unchanged": true,
+   "files": 34
+  }
+ },
+ "original_s02_backup_all_files_verified": true,
+ "tests": {
+  "py38": {
+   "python": "3.8.20 (default, Oct  3 2024, 15:19:54) [MSC v.1929 64 bit (AMD64)]",
+   "command": [
+    "C:\\Users\\andrea.bedei3\\.conda\\envs\\carla\\python.exe",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "-q"
+   ],
+   "exit_code": 0,
+   "wall_s": 510.47,
+   "log": "scratch/followup_tests_py38.txt",
+   "tail": [
+    "........................................................................ [ 14%]",
+    "........................................................................ [ 29%]",
+    "........................................................................ [ 44%]",
+    "........................................................................ [ 59%]",
+    "........................................................................ [ 73%]",
+    "........................................................................ [ 88%]",
+    "........................................................                 [100%]",
+    "488 passed in 509.25s (0:08:29)"
+   ]
+  },
+  "py314": {
+   "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+   "command": [
+    "C:\\Python314\\python.exe",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "-q"
+   ],
+   "exit_code": 0,
+   "wall_s": 160.52,
+   "log": "scratch/followup_tests_py314.txt",
+   "tail": [
+    "........................................................................ [ 14%]",
+    "........................................................................ [ 29%]",
+    "....................................................... [ 40%]",
+    "........................................................................ [ 55%]",
+    "........................................................................ [ 70%]",
+    "........................................................................ [ 85%]",
+    "........................................................................ [ 99%]",
+    ".                                                                        [100%]",
+    "488 passed, 17 subtests passed in 158.87s (0:02:38)"
+   ]
+  }
+ },
+ "reviewed_frames": 79,
+ "regressions": 98,
+ "false_merges": 0,
+ "wrong_links": 0,
+ "gt_runtime": false,
+ "llm_provider_calls": 0,
+ "push": false
+}

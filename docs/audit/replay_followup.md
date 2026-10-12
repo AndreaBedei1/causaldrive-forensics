@@ -2,9 +2,13 @@
 
 HEAD iniziale: `a095b4c3b8cc2e3d1fb0dd0abcdb53b3e859aa8e`, working tree pulito.
 `git status` e `git log -10 --oneline` verificati prima di lavorare. Nessun reset,
-remote usato come verità o push. HEAD finale e commit creati sono riportati nel
-messaggio finale; il manifest di chiusura registra il commit locale che contiene
-codice e dati verificati. Un commit non può incorporare il proprio hash nel suo
+remote usato come verità o push. Commit locale di codice/dati: **`568c7320de5ee9c8b23e63d5cdefb6910b469540`**
+(`Preserve radar identity through competing returns and correct S02 crash order`).
+Secondo commit: `Document verified replay follow-up closure`, contenente solo
+questo riferimento e il [manifest di chiusura](replay_followup_closure.json).
+HEAD finale e hash del secondo commit sono riportati nel messaggio finale.
+Il manifest verifica il runtime e tutti i source/config/test contro gli oggetti Git
+del commit pulito di codice/dati. Un commit non può incorporare il proprio hash nel suo
 contenuto senza cambiarlo.
 
 ## S08: perdita artificiale, evidenza radar presente
