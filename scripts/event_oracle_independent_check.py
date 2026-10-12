@@ -88,8 +88,8 @@ def independent_pair(rows, owner, target, origin, end, cfg):
         far=max(float(np.max(boundary[:,0]))+1.,ha[0]+1.)
         def in_path(front,half_width):
             centre=np.array([(front+far)/2,0.])
-            return bool(np.max(boundary[:,0])>front and overlaps(centre,0.,((far-front)/2,half_width),
-                                                               body_centre,yb-ya,hb))
+            return bool(np.max(boundary[:,0])>front and overlaps(centre[None],0.,((far-front)/2,half_width),
+                                                               body_centre[None],yb-ya,hb)[0])
         inside=in_path(ha[0],cfg['path_half_width_m'])
         outside=not in_path(ha[0]-cfg['path_hysteresis_m'],cfg['path_half_width_m']+cfg['path_hysteresis_m'])
         if path is None: path = inside

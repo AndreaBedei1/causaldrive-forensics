@@ -86,6 +86,25 @@ class HistoricalProvenanceTests(unittest.TestCase):
         record={'git_commit':'c80eab4','git_dirty':True,'code_sha256':'wrong'}
         self.assertNotIn('equivalent_clean_commit',verify_equivalence(record,['11dbc6d']))
 
+    def test_independent_checker_finds_a_body_path_entry(self):
+        # A target drifting from the next lane into the observer's corridor: its body enters the path once.
+        import sys, yaml
+        root=Path(__file__).resolve().parents[1]
+        sys.path.insert(0,str(root/'scripts'))
+        import event_oracle_independent_check as check
+        cfg=yaml.safe_load((root/'configs/reconstruction.yaml').read_text())['reconstruction']['semantics']
+        def state(t,x,y,vx,vy):
+            return {'timestamp':t,'transform':{'x':x,'y':y,'yaw_deg':0.0},'bbox_extent':{'x':2.3,'y':0.95},
+                    'velocity':{'x':vx,'y':vy},'acceleration':{'x':0.0,'y':0.0}}
+        rows=[{'A':state(0.05*k,0.05*k*10.0,0.0,10.0,0.0),
+               'B':state(0.05*k,30.0+0.05*k*10.0,max(4.5-0.05*k*1.0,0.0),10.0,-1.0 if 4.5-0.05*k>0 else 0.0)}
+              for k in range(120)]
+        events=check.independent_pair(rows,'A','B',0.0,float('inf'),cfg)
+        entries=[e['t_local'] for e in events if e['type']=='EGO_PATH_ENTRY']
+        self.assertEqual(len(entries),1)
+        # The body's near side (0.95 m from its centre) reaches the 1.5 m half-width first: centre at 2.45 m.
+        self.assertAlmostEqual(entries[0],4.5-2.45,delta=0.11)
+
     def test_independent_checker_never_imports_event_implementation(self):
         source=(Path(__file__).resolve().parents[1]/'scripts/event_oracle_independent_check.py').read_text()
         import ast
