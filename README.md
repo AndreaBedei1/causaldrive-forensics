@@ -24,7 +24,7 @@ replay additionally require the matching CARLA 0.9.15 Python API. The current va
 is entirely offline and needs no CARLA server or provider API.
 
 For a complete reproducible analysis, execute `scripts/final_validation.py` from a
-clean detached checkout of `ANALYSIS_FREEZE_COMMIT`, with `--original-root`, a separate
+clean detached checkout of `ANALYSIS_FREEZE_COMMIT` (`8d7343d`), with `--original-root`, a separate
 `--data-root`, `--analysis-commit` and the successive phases `stage`, `reconstruct`,
 `aggregate`, `sensitivity`, `robustness`, `visual`, `figures`, `qa`. All raw files are
 read or linked; only derived outputs are published. The script verifies the source
@@ -37,6 +37,7 @@ checkout is clean at that commit before and after every phase.
 - [Robustness profiles](docs/robustness_profiles.md): independent/correlated GNSS and combined impulse study.
 - [Fusion regression diagnosis](docs/audit/fusion_accuracy_regression.md): identical-instant historical comparisons.
 - [Acquisition and calibration](docs/campaign_acquisition.md): sensor geometry and recording prerequisites.
+- [Paper positioning](docs/paper_positioning.md): framing, logging prerequisites vs regulations, related work, limitations.
 - [Verified bibliography](docs/bibliography.md).
 - [Manual replay checklist](docs/manual_replay_checklist.md).
 

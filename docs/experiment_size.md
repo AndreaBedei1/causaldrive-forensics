@@ -92,4 +92,4 @@ Over all 240 runs of the sweeps: wrong links 0 in 464 trials (95 % upper bound 0
 - wrong links: 0 in 81 trials (95 % upper bound 0.037); 2.0 trials per run in the pilot -> 30 runs for a 5 % bound.
 - false merges: 0 in 65 trials (95 % upper bound 0.0462); 1.8 trials per run in the pilot -> 34 runs for a 5 % bound.
 
-Final hardening reanalyses the same saved 240 recordings. The original sample-size study and its execution provenance are retained; segmentation changes pair-trial denominators. See [final audit](audit/technical_hardening.md).
+Final hardening reanalyses the same saved 240 recordings. The original sample-size study and its execution provenance are retained; segmentation changes pair-trial denominators. Pilot record: `docs/audit/experiment_size_pilot.json`; final per-sweep results: [FINAL_VALIDATION_REPORT](FINAL_VALIDATION_REPORT.md).

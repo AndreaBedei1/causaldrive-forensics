@@ -1,0 +1,30 @@
+{
+ "tracked before the entry, body entry not detected": [
+  "sweeps/anonymous_pair_adjacent/S18/run_0_anonymous_pair_adjacent_000 A/B@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_10_anonymous_pair_adjacent_010 A/B@5.80",
+  "sweeps/anonymous_pair_adjacent/S18/run_13_anonymous_pair_adjacent_013 B/A@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_14_anonymous_pair_adjacent_014 A/B@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_17_anonymous_pair_adjacent_017 B/A@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_18_anonymous_pair_adjacent_018 A/B@6.15",
+  "sweeps/anonymous_pair_adjacent/S18/run_18_anonymous_pair_adjacent_018 B/A@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_19_anonymous_pair_adjacent_019 A/B@5.85",
+  "sweeps/anonymous_pair_adjacent/S18/run_23_anonymous_pair_adjacent_023 A/B@6.00",
+  "sweeps/anonymous_pair_adjacent/S18/run_23_anonymous_pair_adjacent_023 B/A@5.85"
+ ],
+ "first reconstructed event of the subject at or after the true entry (late identity/track)": [
+  "sweeps/anonymous_pair_adjacent/S18/run_22_anonymous_pair_adjacent_022 B/A@5.85",
+  "sweeps/anonymous_pair_platoon/S18/run_23_anonymous_pair_platoon_023 B/A@5.85",
+  "sweeps/unobserved_cut_in/S17/run_26_unobserved_cut_in_026 B/A@4.35"
+ ],
+ "entry reconstructed, but more than 2 s from the oracle": [
+  "sweeps/crossing/S03/run_19_crossing_019 B/A@12.65",
+  "sweeps/crossing/S03/run_21_crossing_021 B/A@11.50",
+  "sweeps/crossing/S03/run_22_crossing_022 A/B@12.10",
+  "sweeps/crossing/S03/run_29_crossing_029 B/A@12.80",
+  "sweeps/crossing/S03/run_29_crossing_029 B/A@16.70",
+  "sweeps/crossing/S03/run_2_crossing_002 A/B@12.90",
+  "sweeps/crossing/S03/run_34_crossing_034 A/B@12.95",
+  "sweeps/crossing/S03/run_37_crossing_037 B/A@11.20",
+  "sweeps/crossing/S03/run_7_crossing_007 A/B@11.45"
+ ]
+}

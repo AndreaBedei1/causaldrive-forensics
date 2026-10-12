@@ -198,7 +198,8 @@ python scripts/run_llm_analysis.py traces/S17/run_0_crash --provider openai --or
 - First real calls: 2026-10-08/09, S17 only: one analysis each with gpt-6-luna and gemini-3.5-flash-lite;
   gemini-3.8-flash gave no answer (HTTP 503 overload, then the free-tier daily quota; the 8 attempts are
   kept), so the 3.8 vs 3.5 Flash-Lite comparison is still to be run.  See
-  `traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.md`.  The automated tests never call
+  `traces/S17/run_0_crash/reconstruction/evaluation/llm_comparison_S17.md` in Git history (commit `11dbc6d`;
+  generated LLM outputs are no longer in the current tree).  The automated tests never call
   a provider: they use fake transports that reproduce the documented response formats.  One answer per
   model measures nothing about the variation between runs.
 - Re-verification: when the reconstruction changes but the packet does not (2026-10-09: CRITICAL_TTC with

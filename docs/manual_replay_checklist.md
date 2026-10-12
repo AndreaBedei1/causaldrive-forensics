@@ -2,7 +2,8 @@
 
 Tutti i tempi sono **t_global [s]**. Eseguire i comandi nell'ambiente CARLA.
 SPACE pausa; frecce seek; N/P evento; C camera; TAB recorder; T punti; G ghost; H help.
-Tutti i canonical vengono rigenerati nello stesso [visual audit finale](../traces/visual_audit_final.md).
+Tutti i canonical sono rigenerati nello stesso visual audit finale (`traces/*/run_*/reconstruction/evaluation/visual_audit_final/`,
+verdetti in [visual_audit_final_verdicts](audit/visual_audit_final_verdicts.json); fotogrammi `manual_*` per S12, S16, S17, S18).
 Tempi ed eventuali WARN definitivi sono nel [report finale](FINAL_VALIDATION_REPORT.md).
 
 | Comando | Momenti da guardare | Cosa verificare |
