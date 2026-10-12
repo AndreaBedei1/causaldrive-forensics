@@ -225,7 +225,9 @@
       "actor_id": "B",
       "subject_id": "track_001#segment_1",
       "t_local": 2.5,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": false
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -678,8 +680,28 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001#segment_1",
-      "t_local": 6.75,
-      "attributes": {},
+      "t_local": 6.65,
+      "attributes": {
+        "estimated_body_corners_vehicle_m": [
+          [
+            8.9899,
+            1.3843
+          ],
+          [
+            7.1861,
+            1.9814
+          ],
+          [
+            8.6316,
+            6.3483
+          ],
+          [
+            10.4354,
+            5.7513
+          ]
+        ],
+        "geometry": "estimated_body"
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -708,7 +730,7 @@
             "relevant_to_ego_path": true
           }
         },
-        "facts_t_local": 6.7
+        "facts_t_local": 6.6
       }
     },
     {
@@ -735,7 +757,7 @@
           "track_001#segment_1": {
             "CLOSING": true,
             "CRITICAL_TTC": true,
-            "IN_EGO_PATH": false,
+            "IN_EGO_PATH": true,
             "CUT_IN_FROM_LEFT": false,
             "CUT_IN_FROM_RIGHT": false
           }
@@ -757,7 +779,9 @@
       "actor_id": "B",
       "subject_id": "track_001#segment_2",
       "t_local": 6.8,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": false
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -1161,7 +1185,9 @@
       "actor_id": "B",
       "subject_id": "track_001#segment_3",
       "t_local": 8.05,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": true
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -1318,18 +1344,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "B:e17",
+      "from": "B:e18",
       "to": "B:e19",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e18",
-      "to": "B:e20",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "B:e18",
-      "to": "B:e21",
       "relation": "PRECEDES"
     },
     {

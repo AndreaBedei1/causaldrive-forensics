@@ -10,9 +10,9 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 21 | 48 | 2 | A:e08 @ 4.10 s |
-| B | 15.15 s | 153 | 19 | 42 | 2 | B:e08 @ 4.10 s |
-| C | 15.15 s | 153 | 13 | 27 | 2 | none |
+| A | 15.15 s | 153 | 22 | 47 | 2 | A:e08 @ 4.10 s |
+| B | 15.15 s | 153 | 20 | 47 | 2 | B:e08 @ 4.10 s |
+| C | 15.15 s | 153 | 17 | 34 | 2 | none |
 
 ## Graph alignment
 
@@ -49,7 +49,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 
 ## Global graph
 
-52 nodes, 166 edges; 1 merged node(s): g25 COLLISION(A,B) from A:e08 + B:e08.
+58 nodes, 162 edges; 14 merged node(s): g09 CLOSING_START(A,C) from A:e04 + A:e19, g10 CLOSING_START(C,A) from C:e04 + C:e14, g12 CLOSING_START(A,B) from A:e06 + A:e10, g16 CLOSING_START(B,A) from B:e06 + B:e10, g17 CLOSING_START(B,C) from B:e05 + B:e15, g18 CLOSING_START(C,B) from C:e06 + C:e12, g21 CRITICAL_TTC_START(A,B) from A:e07 + A:e09, g22 CRITICAL_TTC_START(B,A) from B:e07 + B:e09, g25 COLLISION(A,B) from A:e08 + B:e08, g32 EGO_PATH_ENTRY(A,C) from A:e12 + A:e16, g38 CLOSING_START(A,B) from A:e15 + A:e17, g39 CLOSING_START(B,A) from B:e14 + B:e19, g46 EGO_PATH_ENTRY(C,B) from C:e13 + C:e15, g57 EGO_PATH_ENTRY(C,B) from C:e16 + C:e17.
 
 ### Event sequence (global time)
 
@@ -60,13 +60,19 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 - `-1.55` CRITICAL_TTC_START(A,B)
 - `-1.50` CRITICAL_TTC_START(B,A)
 - `-1.20` MOVING_END(C); STOP_START(C)
-- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B)
-- `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); EGO_PATH_ENTRY(A,C)
-- `+0.15` EGO_PATH_EXIT(A,C); CLOSING_START(A,B); CLOSING_START(B,A)
-- `+0.50` CLOSING_END(B,C); CLOSING_END(C,B); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B); EGO_PATH_ENTRY(C,A)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B); EGO_PATH_ENTRY(A,C)
+- `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- `+0.10` EGO_PATH_ENTRY(C,A)
+- `+0.15` CLOSING_START(A,B); CLOSING_START(B,A)
+- `+0.20` EGO_PATH_EXIT(A,C)
+- `+0.50` CLOSING_END(B,C); CLOSING_END(C,B); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B); EGO_PATH_ENTRY(C,B)
 - `+0.55` CLOSING_END(A,B)
 - `+0.60` TURN_LEFT_END(A)
-- `+0.65` CLOSING_END(A,C); CLOSING_END(B,A); CLOSING_END(C,A); MOVING_END(A); STOP_START(A)
+- `+0.65` CLOSING_END(A,C); CLOSING_END(B,A); CLOSING_END(C,A); MOVING_END(A); STOP_START(A); EGO_PATH_ENTRY(B,A)
+- `+0.90` EGO_PATH_ENTRY(A,B)
+- `+1.30` EGO_PATH_EXIT(C,B)
+- `+1.40` EGO_PATH_ENTRY(C,B)
+- `+2.20` EGO_PATH_EXIT(C,B)
 
 ### What happened, in plain language
 
@@ -101,20 +107,21 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 - At the reference collision, B observed A stop closing in.
 - At the reference collision, A started turning left.
 - At the reference collision, B started turning right.
+- At the reference collision, A observed C enter its forward path corridor.
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.05 s after the reference collision, A started braking.
 - 0.05 s after the reference collision, B started braking.
-- 0.05 s after the reference collision, A observed C enter its forward path corridor.
-- 0.15 s after the reference collision, A observed C leave its forward path corridor.
+- 0.10 s after the reference collision, C observed A enter its forward path corridor.
 - 0.15 s after the reference collision, A observed B start closing in.
 - 0.15 s after the reference collision, B observed A start closing in.
+- 0.20 s after the reference collision, A observed C leave its forward path corridor.
 - 0.50 s after the reference collision, B observed C stop closing in.
 - 0.50 s after the reference collision, C observed B stop closing in.
 - 0.50 s after the reference collision, B stopped turning right.
 - 0.50 s after the reference collision, B stopped moving.
 - 0.50 s after the reference collision, B came to a stop.
-- 0.50 s after the reference collision, C observed A enter its forward path corridor.
+- 0.50 s after the reference collision, C observed B enter its forward path corridor.
 - 0.55 s after the reference collision, A observed B stop closing in.
 - 0.60 s after the reference collision, A stopped turning left.
 - 0.65 s after the reference collision, A observed C stop closing in.
@@ -122,15 +129,21 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 - 0.65 s after the reference collision, C observed A stop closing in.
 - 0.65 s after the reference collision, A stopped moving.
 - 0.65 s after the reference collision, A came to a stop.
+- 0.65 s after the reference collision, B observed A enter its forward path corridor.
+- 0.90 s after the reference collision, A observed B enter its forward path corridor.
+- 1.30 s after the reference collision, C observed B leave its forward path corridor.
+- 1.40 s after the reference collision, C observed B enter its forward path corridor.
+- 2.20 s after the reference collision, C observed B leave its forward path corridor.
 
 ### Temporal safety relations
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (C): EGO_PATH_ENTRY 4.15, no critical TTC [local times; t_global: ego_path_entry +0.05]
-- A's track_002 (B): CRITICAL_TTC_START 2.55, COLLISION with B 4.10 (+1.55 s) [local times; t_global: critical_ttc_start -1.55, collision +0.00]
-- B's track_002 (A): CRITICAL_TTC_START 2.60, COLLISION with A 4.10 (+1.50 s) [local times; t_global: critical_ttc_start -1.50, collision +0.00]
-- C's track_001 (A): EGO_PATH_ENTRY 4.60, no critical TTC [local times; t_global: ego_path_entry +0.50]
+- A's track_001 (C): EGO_PATH_ENTRY 4.10, no critical TTC [local times; t_global: ego_path_entry +0.00]
+- A's track_002 (B): CRITICAL_TTC_START 2.55, COLLISION with B 4.10 (+1.55 s); EGO_PATH_ENTRY 5.00 after critical TTC (+2.45 s) [local times; t_global: critical_ttc_start -1.55, ego_path_entry +0.90, collision +0.00]
+- B's track_002 (A): CRITICAL_TTC_START 2.60, COLLISION with A 4.10 (+1.50 s); EGO_PATH_ENTRY 4.75 after critical TTC (+2.15 s) [local times; t_global: critical_ttc_start -1.50, ego_path_entry +0.65, collision +0.00]
+- C's track_001 (A): EGO_PATH_ENTRY 4.20, no critical TTC [local times; t_global: ego_path_entry +0.10]
+- C's track_002 (B): EGO_PATH_ENTRY 4.60, no critical TTC [local times; t_global: ego_path_entry +0.50]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -139,24 +152,26 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - TRACK_APPEARED_LEFT(B,A); TRACK_APPEARED_LEFT(C,B); TRACK_APPEARED_RIGHT(B,C); CLOSING_START(B,A); CLOSING_START(B,C); CLOSING_START(C,B)
 - THROTTLE_END(C); BRAKE_START(C)
 - MOVING_END(C); STOP_START(C)
-- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B)
-- THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B); EGO_PATH_ENTRY(A,C)
-- EGO_PATH_EXIT(A,C); CLOSING_START(A,B); CLOSING_START(B,A)
-- CLOSING_END(B,C); CLOSING_END(C,B); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B); EGO_PATH_ENTRY(C,A)
-- CLOSING_END(A,C); CLOSING_END(B,A); CLOSING_END(C,A); MOVING_END(A); STOP_START(A)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B); EGO_PATH_ENTRY(A,C)
+- THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- CLOSING_START(A,B); CLOSING_START(B,A)
+- CLOSING_END(B,C); CLOSING_END(C,B); TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B); EGO_PATH_ENTRY(C,B)
+- CLOSING_END(A,C); CLOSING_END(B,A); CLOSING_END(C,A); MOVING_END(A); STOP_START(A); EGO_PATH_ENTRY(B,A)
 
 ### States still active when observation ended
 
 A:
-- BRAKE, since A:e13 (t = 4.15 s)
+- BRAKE, since A:e14 (t = 4.15 s)
 - STOP, since A:e21 (t = 4.75 s)
+- EGO_PATH of track_002, since A:e22 (t = 5.00 s)
 B:
 - BRAKE, since B:e13 (t = 4.15 s)
 - STOP, since B:e18 (t = 4.60 s)
+- EGO_PATH of track_002, since B:e20 (t = 4.75 s)
 C:
 - BRAKE, since C:e08 (t = 2.35 s)
 - STOP, since C:e10 (t = 2.90 s)
-- EGO_PATH of track_001, since C:e12 (t = 4.60 s)
+- EGO_PATH of track_001, since C:e11 (t = 4.20 s)
 
 ### Sign detection windows
 

@@ -43,10 +43,11 @@ class S17WorkedExampleTests(unittest.TestCase):
         self.assertEqual(critical.reason, "UNSAFE_FORWARD_GAP")
         self.assertLess(critical.clearance_m, critical.required_m)
 
-    def test_only_a_establishes_a_cut_in(self):
+    def test_a_establishes_u1_cutin_and_b_observes_a_lateral_manoeuvre(self):
         self.assertEqual(len(self.part.cut_ins["A"]), 1)
         self.assertIn("A:track_001", self.part.cut_ins["A"][0])
-        self.assertEqual(self.part.cut_ins["B"], [])
+        self.assertEqual(len(self.part.cut_ins['B']),1)
+        self.assertIn(' A (associated, B:track_001)',self.part.cut_ins['B'][0])
 
     def test_response_delays_are_measured_from_sensor_events_to_the_steering_command(self):
         delays = self.part.delays

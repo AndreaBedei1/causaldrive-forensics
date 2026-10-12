@@ -1,6 +1,6 @@
 {
   "run": "S18/run_0_platoon",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 7; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 7; max |t_global error| 0.6 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 503.78820499777794,
       "peak_impulse": 1097.5294421779033,
-      "reconstructed_as": "g24",
+      "reconstructed_as": "g22",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 45,
-    "max_abs_error_s": 0.0,
-    "order_pairs": 907,
-    "order_concordant": 907
+    "nodes": 43,
+    "max_abs_error_s": 0.6,
+    "order_pairs": 839,
+    "order_concordant": 839
   },
   "tracks": [
     {

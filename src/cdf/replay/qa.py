@@ -12,11 +12,13 @@ A flag is a reason to look, not a verdict: the visual audit decides.
 from __future__ import annotations
 
 import math
+import numpy as np
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .model import DEFAULT_FOOTPRINT, HEADING_FROM_VELOCITY, EntityPath, ReplayRun, TrackPath, rotate
 from .topdown import _box, _footprint_world
+from ..reconstruction.conflict import body_in_corridor
 
 MAX_SPEED_MPS = 70.0  # no road vehicle of the campaign: a faster track or recorder is an artefact
 BOX_JUMP_M = 2.5  # the ghost box moved this much more than the track point in one sample
@@ -297,13 +299,17 @@ def _geometry_of_events(run: ReplayRun) -> List[Flag]:
             if event.event_type.startswith("CUT_IN_FROM_") and event.event_type.endswith("_START"):
                 before = track.state_at(event.time - CUT_IN_WINDOW_S)
                 if before is not None:
-                    _, y0 = _in_vehicle_frame(participant.trajectory.pose_at(run.start + event.time - CUT_IN_WINDOW_S),
-                                              before.position)
-                    side_ok = (y > 0) if "RIGHT" in event.event_type else (y < 0)
-                    if not side_ok or abs(y0) - abs(y) < CUT_IN_MIN_APPROACH_M:
+                    anchor = participant.trajectory.pose_at(run.start+track.start)
+                    _, y0 = _in_vehicle_frame(anchor,before.position)
+                    _, stable_y = _in_vehicle_frame(anchor,now.position)
+                    side_ok = (y0 > 0) if "RIGHT" in event.event_type else (y0 < 0)
+                    if not side_ok or abs(y0) - abs(stable_y) < CUT_IN_MIN_APPROACH_M:
                         flags.append(_flag(run, "cut_in_without_lateral_approach", event.time, "{0}:{1}".format(pid, event.subject),
                                            "lateral {0:+.2f} -> {1:+.2f} m over {2:.1f} s".format(y0, y, CUT_IN_WINDOW_S)))
-            if event.event_type == "EGO_PATH_ENTRY" and (x < footprint.x_max - 0.5 or abs(y) > CORRIDOR_M):
+            body = event.attributes.get('estimated_body_corners_vehicle_m')
+            inside = (body_in_corridor(np.asarray(body),footprint.x_max-.5,CORRIDOR_M) if body
+                      else x >= footprint.x_max-.5 and abs(y) <= CORRIDOR_M)
+            if event.event_type == "EGO_PATH_ENTRY" and not inside:
                 flags.append(_flag(run, "path_entry_outside_corridor", event.time, "{0}:{1}".format(pid, event.subject),
                                    "track at {0:+.1f} m ahead, {1:+.1f} m lateral".format(x, y)))
     return flags

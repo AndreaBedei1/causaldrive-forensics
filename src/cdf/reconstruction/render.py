@@ -170,6 +170,9 @@ def _details(event_type: str, attributes: Dict[str, Any]) -> str:
     """The few attributes an event carries (most carry none)."""
     parts = []
     for key, value in attributes.items():
+        if key in ('estimated_body_corners_vehicle_m','path_frame_heading_rad','target_lateral_speed_mps',
+                   'source_local_nodes','semantic_state','initial_state_unannounced'):
+            continue  # complete numerical/provenance data remain in the graph JSON
         if isinstance(value, dict):
             value = ", ".join("{0} {1}".format(name, _cell(item)) for name, item in sorted(value.items()))
         parts.append("{0}={1}".format(key, _cell(value)))

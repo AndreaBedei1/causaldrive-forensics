@@ -38,15 +38,15 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 
 ## Global graph
 
-25 nodes, 42 edges; 1 merged node(s): g17 COLLISION(A,B) from A:e11 + B:e07.
+25 nodes, 42 edges; 4 merged node(s): g06 CLOSING_START(A,B) from A:e04 + A:e13, g07 CUT_IN_FROM_LEFT_START(A,B) from A:e05 + A:e10, g09 CRITICAL_TTC_START(A,B) from A:e07 + A:e12, g17 COLLISION(A,B) from A:e11 + B:e07.
 
 ### Event sequence (global time)
 
 - `-5.30` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - `-5.05` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
-- `-3.65` CUT_IN_FROM_LEFT_START(A,B)
+- `-3.85` CUT_IN_FROM_LEFT_START(A,B)
+- `-3.50` EGO_PATH_ENTRY(A,B)
 - `-3.40` CRITICAL_TTC_START(A,B)
-- `-2.85` EGO_PATH_ENTRY(A,B)
 - `-2.15` THROTTLE_END(B); BRAKE_START(B)
 - `-1.65` BRAKE_END(B)
 - `-1.55` THROTTLE_START(B)
@@ -65,9 +65,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 - 5.30 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 5.05 s before the reference collision, A's radar started tracking B, which appeared on its left.
 - 5.05 s before the reference collision, A observed B start closing in (already the case when first observed).
-- 3.65 s before the reference collision, A observed B cutting in from the left.
+- 3.85 s before the reference collision, A observed B cutting in from the left.
+- 3.50 s before the reference collision, A observed B enter its forward path corridor.
 - 3.40 s before the reference collision, A's time-to-contact with B became critical.
-- 2.85 s before the reference collision, A observed B enter its forward path corridor.
 - 2.15 s before the reference collision, B released the accelerator.
 - 2.15 s before the reference collision, B started braking.
 - 1.65 s before the reference collision, B released the brake.
@@ -89,7 +89,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 1.65 < CRITICAL_TTC_START 1.90 (+0.25 s) < COLLISION with B 5.30 (+3.40 s); EGO_PATH_ENTRY 2.45 after critical TTC (+0.55 s) [local times; t_global: cut_in -3.65, critical_ttc_start -3.40, ego_path_entry -2.85, collision +0.00]
+- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 1.45 < CRITICAL_TTC_START 1.90 (+0.45 s) < COLLISION with B 5.30 (+3.40 s); EGO_PATH_ENTRY 1.80 before critical TTC (-0.10 s) [local times; t_global: cut_in -3.85, critical_ttc_start -3.40, ego_path_entry -3.50, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -104,7 +104,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e07 (t = 2.45 s)
+- EGO_PATH of track_001, since A:e06 (t = 1.80 s)
 - BRAKE, since A:e09 (t = 4.45 s)
 - STOP, since A:e15 (t = 5.65 s)
 B:

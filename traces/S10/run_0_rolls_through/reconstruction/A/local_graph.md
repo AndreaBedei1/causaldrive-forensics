@@ -17,14 +17,14 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e03 | 1.15 | STOP_SIGN_DETECTED_START | A | sign-0 | camera | relevant_to_ego_path=True |
 | A:e04 | 1.95 | THROTTLE_END | A | - | controls |  |
 | A:e05 | 1.95 | BRAKE_START | A | - | controls |  |
-| A:e06 | 2.60 | TRACK_APPEARED_LEFT | A | track_001 | radar |  |
+| A:e06 | 2.60 | TRACK_APPEARED_LEFT | A | track_001 | radar | initial_in_ego_path=False |
 | A:e07 | 2.60 | CLOSING_START | A | track_001 | radar | active_at_first_observation=True |
 | A:e08 | 2.75 | STOP_SIGN_DETECTED_END | A | sign-0 | camera |  |
 | A:e09 | 2.85 | BRAKE_END | A | - | controls |  |
 | A:e10 | 2.85 | THROTTLE_START | A | - | controls |  |
 | A:e11 | 3.40 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e12 | 3.70 | TURN_LEFT_START | A | - | ego |  |
-| A:e13 | 5.30 | EGO_PATH_ENTRY | A | track_001 | radar |  |
+| A:e13 | 5.15 | EGO_PATH_ENTRY | A | track_001 | radar | geometry=estimated_body |
 | A:e14 | 5.40 | COLLISION | A | - | collision_sensor | peak_impulse=12940.27 |
 | A:e15 | 5.40 | CRITICAL_TTC_END | A | track_001 | radar |  |
 | A:e16 | 5.40 | TURN_LEFT_END | A | - | ego |  |
@@ -94,14 +94,14 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 2.85 | A:e09 BRAKE_END<br>A:e10 THROTTLE_START | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path | 2.80 |
 | 3.40 | A:e11 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 3.30 |
 | 3.70 | A:e12 TURN_LEFT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 3.60 |
-| 5.30 | A:e13 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 5.20 |
+| 5.15 | A:e13 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 5.10 |
 | 5.40 | A:e14 COLLISION<br>A:e15 CRITICAL_TTC_END track_001<br>A:e16 TURN_LEFT_END | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 5.30 |
 | 5.45 | A:e17 CLOSING_END track_001<br>A:e18 THROTTLE_END<br>A:e19 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 5.40 |
 | 5.50 | A:e20 MOVING_END<br>A:e21 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH<br>sign-0: STOP sign known, relevant to the path | 5.40 |
 
 ## States still active when observation ended
 
-- EGO_PATH of track_001, since A:e13 (t = 5.30 s)
+- EGO_PATH of track_001, since A:e13 (t = 5.15 s)
 - BRAKE, since A:e19 (t = 5.45 s)
 - STOP, since A:e21 (t = 5.50 s)
 
@@ -113,7 +113,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 3.40, COLLISION 5.40 (+2.00 s); EGO_PATH_ENTRY 5.30 after critical TTC (+1.90 s)
+- track_001: CRITICAL_TTC_START 3.40, COLLISION 5.40 (+2.00 s); EGO_PATH_ENTRY 5.15 after critical TTC (+1.75 s)
 
 ## Sign detection windows
 
@@ -143,7 +143,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 2.85 s: A pressed the accelerator.
 - t = 3.40 s: A's time-to-contact with track_001 became critical.
 - t = 3.70 s: A started turning left.
-- t = 5.30 s: A observed track_001 enter its forward path corridor.
+- t = 5.15 s: A observed track_001 enter its forward path corridor.
 - t = 5.40 s: A's collision sensor recorded a contact (peak impulse 12940 N*s).
 - t = 5.40 s: A's time-to-contact with track_001 stopped being critical.
 - t = 5.40 s: A stopped turning left.

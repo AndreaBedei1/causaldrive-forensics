@@ -236,6 +236,7 @@ class ReplayEvent:
     event_type: str
     subject: Optional[str]
     node_id: str
+    attributes: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -328,7 +329,7 @@ def load_local_events(path: Path, run_start: float, clock_origin: Optional[float
     origin = float(graph["recorder"]["clock"]["origin_source_timestamp"])
     offset = (origin if clock_origin is None else clock_origin) - run_start
     events = [ReplayEvent(round(offset + float(node["t_local"]), 6), owner, str(node["event_type"]),
-                          node.get("subject_id"), str(node["node_id"])) for node in graph["nodes"]]
+                          node.get("subject_id"), str(node["node_id"]),dict(node.get('attributes') or {})) for node in graph["nodes"]]
     return LocalEvents(owner, origin, events, state_intervals(events, observed_from=round(offset, 6)))
 
 
@@ -782,6 +783,8 @@ class ReplayRun:
     start: float  # source timestamp of replay time 0
     duration: float
     local_events: Dict[str, LocalEvents] = field(default_factory=dict)
+    entity_event_overrides: List[ReplayEvent] = field(default_factory=list)
+    entity_source_nodes: set = field(default_factory=set)
     collisions: List[CollisionMark] = field(default_factory=list)
     clock: str = SOURCE_CLOCK  # GLOBAL_CLOCK (reconstruction alignment) or SOURCE_CLOCK (recorded timestamps)
     clock_origins: Dict[str, float] = field(default_factory=dict)  # the clock's value at each recorder's t_local = 0
@@ -884,6 +887,22 @@ class ReplayRun:
         origins = {pid: self.clock_origins.get(pid, local.origin) for pid, local in self.local_events.items()}
         if (rec / "global" / "global_graph.json").exists():
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
+            if self.clock == GLOBAL_CLOCK:
+                graph = _read_json(rec / 'global' / 'global_graph.json')
+                for node in graph['nodes']:
+                    attrs = node.get('attributes') or {}
+                    if attrs.get('aggregation') != 'entity_state_union' or node.get('t_global') is None:
+                        continue
+                    observers = {s['graph'] for s in attrs.get('source_local_nodes',[])}
+                    if len(observers) != 1:
+                        raise ValueError('An entity event must have one observing recorder')
+                    actor = next(iter(observers))
+                    if actor not in self.local_events:
+                        continue
+                    self.entity_event_overrides.append(ReplayEvent(node['t_global']-self.start,actor,
+                        node['event_type'],node.get('subject_id'),node['node_id'],attrs))
+                    self.entity_source_nodes.update((s['graph'],s['local_node'])
+                                                    for s in attrs.get('source_local_nodes',[]))
 
     # -- queries --------------------------------------------------------------
 
@@ -903,7 +922,12 @@ class ReplayRun:
         local = self.local_events.get(actor)
         if local is None:
             return []
-        return [e for e in local.events if t - window < e.time <= t + _EPS]
+        return [e for e in self.display_events() if e.actor == actor and t - window < e.time <= t + _EPS]
+
+    def display_events(self) -> List[ReplayEvent]:
+        """Read the persisted entity timeline for display, keeping source events available in all_events."""
+        events = [e for e in self.all_events() if (e.actor,e.node_id) not in self.entity_source_nodes]
+        return sorted(events+self.entity_event_overrides,key=lambda e:(e.time,e.actor,e.node_id))
 
     def active_states(self, actor: str, t: float) -> List[StateInterval]:
         local = self.local_events.get(actor)

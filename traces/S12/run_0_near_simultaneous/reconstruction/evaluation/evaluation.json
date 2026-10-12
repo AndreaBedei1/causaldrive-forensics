@@ -1,6 +1,6 @@
 {
   "run": "S12/run_0_near_simultaneous",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 3/3; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 4/4; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 192.76600752398372,
       "peak_impulse": 7661.461427344263,
-      "reconstructed_as": "g40",
+      "reconstructed_as": "g37",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 54,
+    "nodes": 49,
     "max_abs_error_s": 0.0,
-    "order_pairs": 1375,
-    "order_concordant": 1375
+    "order_pairs": 1122,
+    "order_concordant": 1122
   },
   "tracks": [
     {
@@ -89,13 +89,13 @@
     },
     {
       "track": "B:track_001#segment_2",
-      "decision": "U1",
-      "status": "ANONYMOUS",
+      "decision": "A",
+      "status": "ASSOCIATED",
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0
       },
-      "verdict": "left anonymous (true identity A)",
+      "verdict": "correct",
       "samples": 13,
       "raw_rmse_to_surface_m": 0.144,
       "smoothed_rmse_to_surface_m": 0.297,

@@ -183,7 +183,7 @@ class ReplayApp:
         self.ids = [p.participant_id for p in run.participants]  # the recorders: TAB cycles these only
         self.colors = {pid: PALETTE[i % len(PALETTE)] for i, pid in enumerate(self.ids)}
         self.clock = PlaybackClock(run.duration, speed=args.speed, start=args.start, playing=not args.paused)
-        self.events = run.all_events()
+        self.events = run.display_events()
         self.selected = args.follow if args.follow in self.ids else self.ids[0]
         self.camera_mode = args.camera
         self.heading = run.participants[0].trajectory.pose_at(run.start).yaw

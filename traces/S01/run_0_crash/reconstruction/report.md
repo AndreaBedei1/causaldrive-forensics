@@ -38,7 +38,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 14394.
 
 ## Global graph
 
-18 nodes, 35 edges; 1 merged node(s): g14 COLLISION(A,B) from A:e08 + B:e07.
+18 nodes, 35 edges; 3 merged node(s): g08 CLOSING_START(A,B) from A:e04 + A:e10, g09 CRITICAL_TTC_START(A,B) from A:e05 + A:e09, g14 COLLISION(A,B) from A:e08 + B:e07.
 
 ### Event sequence (global time)
 
@@ -154,6 +154,7 @@ B:
     "measurement_std_m": 0.5,
     "radial_speed_std_mps": 0.3,
     "acceleration_std_mps2": 6.0,
+    "smoothing_innovation_sigma": 3.0,
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5
   },

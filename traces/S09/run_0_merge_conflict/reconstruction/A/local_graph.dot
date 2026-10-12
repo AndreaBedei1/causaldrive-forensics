@@ -7,8 +7,8 @@ digraph "local_A" {
   "A:e03" [label="TURN_LEFT_START\nA\nt=0.00", fillcolor="#e5e7eb"];
   "A:e04" [label="TRACK_APPEARED_LEFT\nA -> track_001\nt=2.75", fillcolor="#bfdbfe"];
   "A:e05" [label="CLOSING_START\nA -> track_001\nt=2.75", fillcolor="#bfdbfe"];
-  "A:e06" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.30", fillcolor="#bfdbfe"];
-  "A:e07" [label="EGO_PATH_EXIT\nA -> track_001\nt=5.55", fillcolor="#bfdbfe"];
+  "A:e06" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.20", fillcolor="#bfdbfe"];
+  "A:e07" [label="EGO_PATH_EXIT\nA -> track_001\nt=5.65", fillcolor="#bfdbfe"];
   "A:e08" [label="CRITICAL_TTC_START\nA -> track_001\nt=6.90", fillcolor="#bfdbfe"];
   "A:e09" [label="COLLISION\nA\nt=10.25", fillcolor="#fca5a5"];
   "A:e10" [label="CRITICAL_TTC_END\nA -> track_001\nt=10.25", fillcolor="#bfdbfe"];

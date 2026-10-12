@@ -136,7 +136,9 @@
       "actor_id": "B",
       "subject_id": "track_001",
       "t_local": 2.7,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": false
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -220,8 +222,28 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_001",
-      "t_local": 5.25,
-      "attributes": {},
+      "t_local": 5.1,
+      "attributes": {
+        "estimated_body_corners_vehicle_m": [
+          [
+            6.981,
+            1.291
+          ],
+          [
+            5.1835,
+            1.9065
+          ],
+          [
+            6.6736,
+            6.2585
+          ],
+          [
+            8.4711,
+            5.643
+          ]
+        ],
+        "geometry": "estimated_body"
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -244,7 +266,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 5.2
+        "facts_t_local": 5.0
       }
     },
     {

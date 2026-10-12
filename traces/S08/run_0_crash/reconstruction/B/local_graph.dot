@@ -21,11 +21,13 @@ digraph "local_B" {
   "B:e17" [label="MOVING_END\nB\nt=4.60", fillcolor="#e5e7eb"];
   "B:e18" [label="STOP_START\nB\nt=4.60", fillcolor="#e5e7eb"];
   "B:e19" [label="CLOSING_END\nB -> track_002\nt=4.75", fillcolor="#bfdbfe"];
+  "B:e20" [label="EGO_PATH_ENTRY\nB -> track_002\nt=4.75", fillcolor="#bfdbfe"];
   {rank=same; "B:e01"; "B:e02";}
   {rank=same; "B:e03"; "B:e04"; "B:e05"; "B:e06";}
   {rank=same; "B:e08"; "B:e09"; "B:e10"; "B:e11";}
   {rank=same; "B:e12"; "B:e13";}
   {rank=same; "B:e15"; "B:e16"; "B:e17"; "B:e18";}
+  {rank=same; "B:e19"; "B:e20";}
   "B:e01" -> "B:e03" [label="PRECEDES"];
   "B:e01" -> "B:e04" [label="PRECEDES"];
   "B:e01" -> "B:e05" [label="PRECEDES"];
@@ -57,9 +59,13 @@ digraph "local_B" {
   "B:e14" -> "B:e17" [label="PRECEDES"];
   "B:e14" -> "B:e18" [label="PRECEDES"];
   "B:e15" -> "B:e19" [label="PRECEDES"];
+  "B:e15" -> "B:e20" [label="PRECEDES"];
   "B:e16" -> "B:e19" [label="PRECEDES"];
+  "B:e16" -> "B:e20" [label="PRECEDES"];
   "B:e17" -> "B:e19" [label="PRECEDES"];
+  "B:e17" -> "B:e20" [label="PRECEDES"];
   "B:e18" -> "B:e19" [label="PRECEDES"];
+  "B:e18" -> "B:e20" [label="PRECEDES"];
   "B:e04" -> "B:e05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -68,4 +74,5 @@ digraph "local_B" {
   "B:e03" -> "B:e14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e04" -> "B:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e19" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e03" -> "B:e20" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

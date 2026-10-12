@@ -326,6 +326,12 @@ def target_box(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootpr
     # lane, parallel to the recorder, not to head straight at it.
     tvy = math.copysign(max(abs(tvy) - sample.vel_std_mps, 0.0), tvy)
     speed = math.hypot(tvx, tvy)
+    if sample.body_estimate is not None:
+        x, y, heading, length, width = sample.body_estimate
+        dx, dy = x - own.x, y - own.y
+        angle = heading - own.heading
+        return (np.array([c * dx + s * dy, -s * dx + c * dy]),
+                np.array([math.cos(angle), math.sin(angle)]), (length / 2, width / 2), speed, angle)
     if speed >= HEADING_MIN_SPEED_MPS:
         ux, uy = tvx / speed, tvy / speed
     else:
@@ -350,6 +356,24 @@ def target_box(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootpr
 def box_corners(centre: np.ndarray, unit: np.ndarray, half: Tuple[float, float]) -> np.ndarray:
     along, across = unit * half[0], np.array([-unit[1], unit[0]]) * half[1]
     return np.array([centre + along + across, centre + along - across, centre - along - across, centre - along + across])
+
+
+def body_in_corridor(corners: np.ndarray, front: float, half_width: float) -> bool:
+    """Exact overlap of an oriented body with the forward half-strip.
+
+    Clip the convex box to x >= front before testing its lateral extent; an
+    axis-aligned bounding rectangle can otherwise invent overlap at a corner.
+    """
+    clipped = []
+    for a, b in zip(corners, np.roll(corners, -1, axis=0)):
+        if a[0] >= front:
+            clipped.append(a)
+        if (a[0] >= front) != (b[0] >= front):
+            clipped.append(a + (b - a) * (front - a[0]) / (b[0] - a[0]))
+    if not clipped or float(np.max(corners[:, 0])) <= front:
+        return False
+    ys = np.asarray(clipped)[:, 1]
+    return bool(np.min(ys) <= half_width and np.max(ys) >= -half_width)
 
 
 def segment_hits_box(p0: np.ndarray, p1: np.ndarray, centre: np.ndarray, unit: np.ndarray,
@@ -484,8 +508,13 @@ class _Prediction:
                                     if acceleration <= -cfg.target_braking_min_mps2 else 0.0)
         self.target_centre = centre
         self.target_unit = unit
+        # A fitted body's orientation and its translation velocity are distinct
+        # (e.g. lateral motion without body yaw). Never forecast along box yaw.
+        tvx, tvy = c * sample.vx_mps + s * sample.vy_mps, -s * sample.vx_mps + c * sample.vy_mps
+        tvy = math.copysign(max(abs(tvy)-sample.vel_std_mps,0.0),tvy)
+        self.target_motion_unit = np.array([tvx,tvy])/speed if speed > 1e-9 else unit
         self.target_half = half
-        self.encounter = _encounter(self.target_speed, math.degrees(self.target_angle))
+        self.encounter = _encounter(self.target_speed,math.degrees(math.atan2(self.target_motion_unit[1],self.target_motion_unit[0])))
         # Relative velocity across the recorder's heading (+ = to its right; no uncertainty removed).
         self.lateral_relative_speed = -s * (sample.vx_mps - own.vx) + c * (sample.vy_mps - own.vy)
 
@@ -509,7 +538,7 @@ class _Prediction:
             moved = _travel(self.times, self.target_speed, target_reaction, target_deceleration)
         else:
             moved = _target_travel(self.times, self.target_speed, self.target_acceleration)
-        targets = self.target_centre + moved[:, None] * self.target_unit
+        targets = self.target_centre + moved[:, None] * self.target_motion_unit
         return _overlap(centres, angles, self.ego_half, targets, self.target_angle, self.target_half)
 
 

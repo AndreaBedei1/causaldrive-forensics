@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.1 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,8 +10,8 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 229.826 | 4243.5 | g32 | yes | 0.0 s |
-| A + C | 230.876 | 322.1 | g49 | yes | 0.0 s |
+| A + B | 229.826 | 4243.5 | g26 | yes | 0.0 s |
+| A + C | 230.876 | 322.1 | g39 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -33,7 +33,7 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-64 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1899/1899 pairs.
+49 timed global nodes; max |t_global - true global time| = 0.1 s; event order agrees with the truth for 1088/1088 pairs.
 
 ## Anonymous tracks: identity and trajectory
 

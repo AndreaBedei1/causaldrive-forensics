@@ -163,7 +163,9 @@
       "actor_id": "A",
       "subject_id": "track_001",
       "t_local": 2.75,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": false
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -214,8 +216,28 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 5.3,
-      "attributes": {},
+      "t_local": 5.2,
+      "attributes": {
+        "estimated_body_corners_vehicle_m": [
+          [
+            53.3805,
+            -4.2989
+          ],
+          [
+            52.6421,
+            -2.5483
+          ],
+          [
+            56.8805,
+            -0.7606
+          ],
+          [
+            57.6189,
+            -2.5112
+          ]
+        ],
+        "geometry": "estimated_body"
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -238,7 +260,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 5.2
+        "facts_t_local": 5.1
       }
     },
     {
@@ -247,8 +269,28 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 5.55,
-      "attributes": {},
+      "t_local": 5.65,
+      "attributes": {
+        "estimated_body_corners_vehicle_m": [
+          [
+            46.8906,
+            2.0702
+          ],
+          [
+            45.8629,
+            3.6682
+          ],
+          [
+            49.7318,
+            6.1564
+          ],
+          [
+            50.7596,
+            4.5584
+          ]
+        ],
+        "geometry": "estimated_body"
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -271,7 +313,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 5.5
+        "facts_t_local": 5.6
       }
     },
     {

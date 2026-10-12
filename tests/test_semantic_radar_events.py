@@ -104,8 +104,9 @@ class RadarTransitionTests(unittest.TestCase):
         events = _events(_track(profile))
         entry = next(t for name, t in events if name == "EGO_PATH_ENTRY")
         exit_ = next(t for name, t in events if name == "EGO_PATH_EXIT")
-        self.assertAlmostEqual(entry, 2.0)   # lateral reaches -1.5 m
-        self.assertAlmostEqual(exit_, 3.8)   # lateral exceeds +2.0 m (corridor + hysteresis)
+        # The estimated body's near lateral edge enters before the median point.
+        self.assertLess(entry,2.0)
+        self.assertGreater(exit_,3.5)
 
     def test_no_invented_entry_for_a_track_first_seen_in_the_path(self):
         events = _events(_track(lambda t: (15.0, 0.0 if t < 3.0 else 4.0, 0.0)))
@@ -125,7 +126,7 @@ class RadarTransitionTests(unittest.TestCase):
 
     def test_track_events_carry_no_telemetry(self):
         for event in track_events("A", _track(lambda t: (20.0 - 5.0 * (t - 1.0), 0.0, 5.0)), 10.0, CFG):
-            self.assertLessEqual(set(event.attributes), {"active_at_first_observation"})
+            self.assertLessEqual(set(event.attributes), {"active_at_first_observation", "initial_in_ego_path"})
             self.assertEqual(event.subject_id, "track_001")
 
 

@@ -772,6 +772,10 @@ class TrackSample:
     occluded: bool = False
     identity_ambiguous: bool = False
 
+    # Optional estimated rigid body in this track's local odometric frame:
+    # centre x/y, heading radians, length/width. Nominal inference is the default.
+    body_estimate: Optional[Tuple[float, float, float, float, float]] = None
+
     def __post_init__(self) -> None:
         if self.clearance_m is None:
             self.clearance_m = self.range_m

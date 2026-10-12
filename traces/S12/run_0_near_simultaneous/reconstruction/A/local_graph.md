@@ -17,7 +17,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e03 | 0.20 | STOP_SIGN_DETECTED_START | A | sign-0 | camera | relevant_to_ego_path=True |
 | A:e04 | 2.40 | THROTTLE_END | A | - | controls |  |
 | A:e05 | 2.40 | BRAKE_START | A | - | controls |  |
-| A:e06 | 2.50 | TRACK_APPEARED_LEFT | A | track_001 | radar |  |
+| A:e06 | 2.50 | TRACK_APPEARED_LEFT | A | track_001 | radar | initial_in_ego_path=False |
 | A:e07 | 2.50 | CLOSING_START | A | track_001 | radar | active_at_first_observation=True |
 | A:e08 | 2.75 | STOP_SIGN_DETECTED_END | A | sign-0 | camera |  |
 | A:e09 | 3.70 | CLOSING_END | A | track_001 | radar |  |

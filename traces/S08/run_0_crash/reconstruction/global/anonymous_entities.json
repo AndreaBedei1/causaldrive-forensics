@@ -60,7 +60,8 @@
       "accepted": true,
       "until": null,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     },
     {
       "track": "B:track_001",
@@ -73,7 +74,8 @@
       "accepted": true,
       "until": null,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     },
     {
       "track": "C:track_001",
@@ -86,7 +88,8 @@
       "accepted": true,
       "until": 0.0,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     },
     {
       "track": "C:track_002",
@@ -99,7 +102,8 @@
       "accepted": true,
       "until": 0.0,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     }
   ],
   "association_evidence": [],

@@ -7,7 +7,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 2.1,
+     "t_local": 1.65,
      "track": "B#all"
     },
     {
@@ -28,7 +28,7 @@
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 1.75,
+     "t_local": 1.35,
      "track": "B#all"
     }
    ],
@@ -55,7 +55,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 2.1,
+     "t_local": 1.65,
      "track": "B#1"
     },
     {
@@ -76,7 +76,7 @@
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 1.75,
+     "t_local": 1.35,
      "track": "B#1"
     }
    ],
@@ -88,7 +88,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 2.0,
+     "t_local": 1.65,
      "track": "B#1"
     },
     {
@@ -109,7 +109,7 @@
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 1.65,
+     "t_local": 1.35,
      "track": "B#1"
     }
    ],
@@ -128,7 +128,14 @@
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 1.65,
+     "t_local": 1.45,
+     "track": "track_001"
+    },
+    {
+     "type": "EGO_PATH_ENTRY",
+     "side": "EGO_PATH_ENTRY",
+     "subject": "B",
+     "t_local": 1.8,
      "track": "track_001"
     },
     {
@@ -136,13 +143,6 @@
      "side": "CRITICAL_TTC_START",
      "subject": "B",
      "t_local": 1.9,
-     "track": "track_001"
-    },
-    {
-     "type": "EGO_PATH_ENTRY",
-     "side": "EGO_PATH_ENTRY",
-     "subject": "B",
-     "t_local": 2.45,
      "track": "track_001"
     },
     {
@@ -178,7 +178,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.35
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -189,7 +189,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -244,7 +244,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.45
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -255,7 +255,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -308,7 +308,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.35
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -319,7 +319,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -376,7 +376,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.0
     ],
     "side_agree": 1,
     "missed": [],
@@ -387,7 +387,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.0
     ],
     "side_agree": 1,
     "missed": [],
@@ -512,7 +512,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.35
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -523,7 +523,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -576,7 +576,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.45
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -587,7 +587,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -638,7 +638,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.35
+     0.15
     ],
     "side_agree": 1,
     "missed": [],
@@ -649,7 +649,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -702,7 +702,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.0
     ],
     "side_agree": 1,
     "missed": [],
@@ -713,7 +713,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.1
+     0.0
     ],
     "side_agree": 1,
     "missed": [],

@@ -38,7 +38,8 @@
       "accepted": true,
       "until": null,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     },
     {
       "track": "B:track_002",
@@ -51,7 +52,8 @@
       "accepted": true,
       "until": 1.05,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     },
     {
       "track": "B:track_003",
@@ -64,7 +66,8 @@
       "accepted": true,
       "until": 1.05,
       "refused": null,
-      "reacquired": false
+      "reacquired": false,
+      "collision_anchored": false
     }
   ],
   "association_evidence": [],

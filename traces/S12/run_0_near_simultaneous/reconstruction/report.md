@@ -11,7 +11,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
 | A | 12.85 s | 130 | 26 | 49 | 1 | A:e19 @ 7.15 s |
-| B | 12.85 s | 130 | 29 | 51 | 3 | B:e22 @ 7.15 s |
+| B | 12.85 s | 130 | 29 | 49 | 3 | B:e22 @ 7.15 s |
 
 ## Graph alignment
 
@@ -32,17 +32,17 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 |-------------|---------------|--------|-----------:|----------|
 | A:track_001 | B | ASSOCIATED | 0.93 | A and B both reported collision_001 (peak impulse 7661.46 vs 7661.46 N*s)<br>tracked for 4.65 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 11.8 m -> 0.1 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.58 m/s over 3.0 s<br>clearance at the contact 0.13 m<br>the only track of A compatible with the contact |
 | B:track_001#segment_1 | A | ASSOCIATED | 0.90 | B and A both reported collision_001 (peak impulse 7661.46 vs 7661.46 N*s)<br>tracked for 4.65 s before the matched collision<br>continuous up to the contact: last observed 0.40 s before it (window 1.00 s)<br>approaching before the contact: clearance 14.4 m -> 3.8 m over the last 1.0 s<br>track speed agrees with A's own speed: RMSE 0.69 m/s over 2.6 s<br>clearance at the contact 3.81 m (beyond 3.50 m: confidence factor 0.99)<br>the only track of B compatible with the contact |
-| B:track_001#segment_2 | U1 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 7661.46 vs 7661.46 N*s)<br>tracked for 0.35 s before the matched collision (needs 1.00 s)<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 3.6 m -> 0.0 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 3.46 m/s over 0.4 s (> 1.50)<br>clearance at the contact 0.00 m<br>anonymous road user U1: B:track_001#segment_2 |
+| B:track_001#segment_2 | A | ASSOCIATED | 1.00 | B and A both reported collision_001 (peak impulse 7661.46 vs 7661.46 N*s)<br>tracked for 0.35 s before the matched collision (needs 1.00 s)<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 3.6 m -> 0.0 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 3.46 m/s over 0.4 s (> 1.50)<br>clearance at the contact 0.00 m<br>short impact segment identity anchored by the matched collision, touching geometry, persistent fresh body support and two named parent flanks; no compatible rival. Motion uncertainty remains local; velocity disturbance is not an identity veto. |
 | B:track_001#segment_3 | A | ASSOCIATED | 1.00 | B and A both reported collision_001 (peak impulse 7661.46 vs 7661.46 N*s)<br>tracked for 0.00 s before the matched collision (needs 1.00 s)<br>first seen 0.90 s after the matched collision<br>range trend before the contact not measurable<br>speed not comparable with A's own speed before the collision<br>common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma, over 97 samples; 100% within 3 sigma) at A's own velocity (median difference 0.04 m/s) |
 
 ## Road users in the common frame
 
 - B:track_001#segment_3 is A: its returns lie on A's own footprint (median 0.00 m over 97 samples, 100% within 3 sigma) at A's velocity.
-- U1 (anonymous, -0.35 to 0.85 s): B:track_001#segment_2; footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- B:track_001#segment_2 is A: its returns lie on A's own footprint (median 0.00 m over 25 samples, 100% within 3 sigma) at A's velocity.
 
 ## Global graph
 
-54 nodes, 123 edges; 1 merged node(s): g40 COLLISION(A,B) from A:e19 + B:e22.
+49 nodes, 109 edges; 7 merged node(s): g12 TRACK_APPEARED_RIGHT(B,A) from B:e06 + B:e19 + B:e20 + B:e28 + B:e29, g13 CLOSING_START(A,B) from A:e07 + A:e09, g14 CLOSING_START(B,A) from B:e07 + B:e11, g27 CLOSING_START(A,B) from A:e14 + A:e21, g28 CLOSING_START(B,A) from B:e14 + B:e21 + B:e23, g33 CRITICAL_TTC_START(A,B) from A:e17 + A:e20, g37 COLLISION(A,B) from A:e19 + B:e22.
 
 ### Event sequence (global time)
 
@@ -63,14 +63,11 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - `-1.25` CRITICAL_TTC_START(A,B)
 - `-1.10` CRITICAL_TTC_START(B,A)
 - `-1.00` TURN_LEFT_START(A)
-- `-0.40` EGO_PATH_ENTRY(B,A); TRACK_LOST(B,A)
-- `-0.35` TRACK_APPEARED_FRONT(B,U1); CLOSING_START(B,U1)
+- `-0.50` EGO_PATH_ENTRY(B,A)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B)
-- `+0.05` CLOSING_END(A,B); CLOSING_END(B,U1); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- `+0.05` CLOSING_END(A,B); CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.30` MOVING_END(B); STOP_START(B)
 - `+0.50` TURN_LEFT_END(A); MOVING_END(A); STOP_START(A)
-- `+0.85` TRACK_LOST(B,U1)
-- `+0.90` TRACK_APPEARED_LEFT(B,A)
 
 ### What happened, in plain language
 
@@ -109,14 +106,11 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - 1.25 s before the reference collision, A's time-to-contact with B became critical.
 - 1.10 s before the reference collision, B's time-to-contact with A became critical.
 - 1.00 s before the reference collision, A started turning left.
-- 0.40 s before the reference collision, B observed A enter its forward path corridor.
-- 0.40 s before the reference collision, B's radar lost A (its states are UNKNOWN from then on, not ended).
-- 0.35 s before the reference collision, B's radar started tracking anonymous road user U1, which appeared in front of it.
-- 0.35 s before the reference collision, B observed anonymous road user U1 start closing in (already the case when first observed).
+- 0.50 s before the reference collision, B observed A enter its forward path corridor.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 7661, B: 7661 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
 - 0.05 s after the reference collision, A observed B stop closing in.
-- 0.05 s after the reference collision, B observed anonymous road user U1 stop closing in.
+- 0.05 s after the reference collision, B observed A stop closing in.
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.05 s after the reference collision, A started braking.
@@ -126,15 +120,13 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - 0.50 s after the reference collision, A stopped turning left.
 - 0.50 s after the reference collision, A stopped moving.
 - 0.50 s after the reference collision, A came to a stop.
-- 0.85 s after the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
-- 0.90 s after the reference collision, B's radar started tracking A, which appeared on its left.
 
 ### Temporal safety relations
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
 - A's track_001 (B): CRITICAL_TTC_START 5.90, COLLISION with B 7.15 (+1.25 s) [local times; t_global: critical_ttc_start -1.25, collision +0.00]
-- B's track_001#segment_1 (A): CRITICAL_TTC_START 6.05, COLLISION with A 7.15 (+1.10 s); EGO_PATH_ENTRY 6.75 after critical TTC (+0.70 s) [local times; t_global: critical_ttc_start -1.10, ego_path_entry -0.40, collision +0.00]
+- B's track_001#segment_1 (A): CRITICAL_TTC_START 6.05, COLLISION with A 7.15 (+1.10 s); EGO_PATH_ENTRY 6.65 after critical TTC (+0.60 s) [local times; t_global: critical_ttc_start -1.10, ego_path_entry -0.50, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -148,10 +140,8 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - CLOSING_START(A,B); CLOSING_START(B,A)
 - STOP_END(B); MOVING_START(B)
 - STOP_END(A); MOVING_START(A)
-- EGO_PATH_ENTRY(B,A); TRACK_LOST(B,A)
-- TRACK_APPEARED_FRONT(B,U1); CLOSING_START(B,U1)
 - COLLISION(A,B); CRITICAL_TTC_END(A,B)
-- CLOSING_END(A,B); CLOSING_END(B,U1); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- CLOSING_END(A,B); CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(B); STOP_START(B)
 - TURN_LEFT_END(A); MOVING_END(A); STOP_START(A)
 
@@ -163,7 +153,7 @@ A:
 B:
 - CLOSING of track_001#segment_1, since B:e14 (t = 5.10 s); the track was lost at 6.75 s
 - CRITICAL_TTC of track_001#segment_1, since B:e17 (t = 6.05 s); the track was lost at 6.75 s
-- EGO_PATH of track_001#segment_1, since B:e18 (t = 6.75 s); the track was lost at 6.75 s
+- EGO_PATH of track_001#segment_1, since B:e18 (t = 6.65 s); the track was lost at 6.75 s
 - BRAKE, since B:e25 (t = 7.20 s)
 - STOP, since B:e27 (t = 7.45 s)
 
@@ -186,12 +176,11 @@ A lost track's states become UNKNOWN: the recorder can no longer tell whether th
 A:
 - no track was lost
 B:
-- track_001#segment_1 at 6.75 s (B:e19): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_001#segment_1 at 6.75 s (B:e19): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
 - lost with no state active: track_001#segment_2
 
 ## Uncertainty and limitations
 
-- B:track_001#segment_2 stays anonymous (U1): tracked for 0.35 s before the matched collision (needs 1.00 s); track speed disagrees with A's own speed: RMSE 3.46 m/s over 0.4 s (> 1.50).
 - Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
 - Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
 
@@ -226,6 +215,7 @@ B:
     "measurement_std_m": 0.5,
     "radial_speed_std_mps": 0.3,
     "acceleration_std_mps2": 6.0,
+    "smoothing_innovation_sigma": 3.0,
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5
   },

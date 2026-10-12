@@ -43,27 +43,27 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 22183.
 | g04 | -5.90 | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
 | g05 | -5.90 | THROTTLE_START | A | - | A:e02 @ 0.00 | active_at_first_observation=True |
 | g06 | -5.90 | THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
-| g07 | -5.90 | TRACK_APPEARED_FRONT | A | B | A:e03 @ 0.00 |  |
-| g08 | -5.90 | TRACK_APPEARED_FRONT | B | C | B:e03 @ 0.00 |  |
-| g09 | -5.40 | CRITICAL_TTC_START | A | B | A:e04 @ 0.50 |  |
+| g07 | -5.90 | TRACK_APPEARED_FRONT | A | B | A:e03 @ 0.00 | initial_in_ego_path=True; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g08 | -5.90 | TRACK_APPEARED_FRONT | B | C | B:e03 @ 0.00 | initial_in_ego_path=True; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g09 | -5.40 | CRITICAL_TTC_START | A | B | A:e04 @ 0.50, A:e09 @ 5.90 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g10 | -3.00 | THROTTLE_END | C | - | C:e03 @ 2.95 |  |
 | g11 | -3.00 | BRAKE_START | C | - | C:e04 @ 2.95 |  |
-| g12 | -2.70 | CLOSING_START | B | C | B:e04 @ 3.20 |  |
-| g13 | -2.50 | CRITICAL_TTC_START | B | C | B:e05 @ 3.40 |  |
+| g12 | -2.70 | CLOSING_START | B | C | B:e04 @ 3.20, B:e09 @ 4.85 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g13 | -2.50 | CRITICAL_TTC_START | B | C | B:e05 @ 3.40, B:e08 @ 4.35 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
 | g14 | -2.25 | THROTTLE_END | B | - | B:e06 @ 3.65 |  |
 | g15 | -2.25 | BRAKE_START | B | - | B:e07 @ 3.65 |  |
-| g16 | -2.05 | CLOSING_START | A | B | A:e05 @ 3.85 |  |
+| g16 | -2.05 | CLOSING_START | A | B | A:e05 @ 3.85, A:e10 @ 5.90 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g17 | -1.60 | MOVING_END | C | - | C:e05 @ 4.35 |  |
 | g18 | -1.60 | STOP_START | C | - | C:e06 @ 4.35 |  |
-| g19 | -1.55 | CRITICAL_TTC_END | B | C | B:e08 @ 4.35 |  |
-| g20 | -1.05 | CLOSING_END | B | C | B:e09 @ 4.85 |  |
+| g19 | -1.55 | CRITICAL_TTC_END | B | C | B:e08 @ 4.35 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g20 | -1.05 | CLOSING_END | B | C | B:e09 @ 4.85 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
 | g21 | -1.05 | MOVING_END | B | - | B:e10 @ 4.85 |  |
 | g22 | -1.05 | STOP_START | B | - | B:e11 @ 4.85 |  |
 | g23 | -0.65 | THROTTLE_END | A | - | A:e06 @ 5.25 |  |
 | g24 | -0.65 | BRAKE_START | A | - | A:e07 @ 5.25 |  |
 | g25 | 0.00 | COLLISION | - | A, B | A:e08 @ 5.90, B:e12 @ 5.90 | matched_event=collision_001; reference_event=True; peak_impulse=A 22183.35, B 22183.35 |
-| g26 | 0.00 | CRITICAL_TTC_END | A | B | A:e09 @ 5.90 |  |
-| g27 | 0.00 | CLOSING_END | A | B | A:e10 @ 5.90 |  |
+| g26 | 0.00 | CRITICAL_TTC_END | A | B | A:e09 @ 5.90 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g27 | 0.00 | CLOSING_END | A | B | A:e10 @ 5.90 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g28 | 0.10 | MOVING_END | A | - | A:e11 @ 6.00 |  |
 | g29 | 0.10 | STOP_START | A | - | A:e12 @ 6.00 |  |
 
@@ -170,16 +170,16 @@ Each recorder's own belief just before its events, in its own local names (track
 | -5.90 | A | g03 MOVING_START(A) (A:e01)<br>g05 THROTTLE_START(A) (A:e02)<br>g07 TRACK_APPEARED_FRONT(A,B) (A:e03) | ego: not yet observed |
 | -5.90 | B | g04 MOVING_START(B) (B:e01)<br>g06 THROTTLE_START(B) (B:e02)<br>g08 TRACK_APPEARED_FRONT(B,C) (B:e03) | ego: not yet observed |
 | -5.40 | A | g09 CRITICAL_TTC_START(A,B) (A:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
+| -5.40 | A | g09 CRITICAL_TTC_START(A,B) (A:e04)<br>g16 CLOSING_START(A,B) (A:e05)<br>g25 COLLISION(A,B) (A:e08)<br>g26 CRITICAL_TTC_END(A,B) (A:e09)<br>g27 CLOSING_END(A,B) (A:e10) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
 | -3.00 | C | g10 THROTTLE_END(C) (C:e03)<br>g11 BRAKE_START(C) (C:e04) | ego: MOVING, THROTTLE |
 | -2.70 | B | g12 CLOSING_START(B,C) (B:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -2.70 | B | g12 CLOSING_START(B,C) (B:e04)<br>g20 CLOSING_END(B,C) (B:e09)<br>g21 MOVING_END(B) (B:e10)<br>g22 STOP_START(B) (B:e11) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
 | -2.50 | B | g13 CRITICAL_TTC_START(B,C) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
+| -2.50 | B | g13 CRITICAL_TTC_START(B,C) (B:e05)<br>g19 CRITICAL_TTC_END(B,C) (B:e08) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
 | -2.25 | B | g14 THROTTLE_END(B) (B:e06)<br>g15 BRAKE_START(B) (B:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
 | -2.05 | A | g16 CLOSING_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
 | -1.60 | C | g17 MOVING_END(C) (C:e05)<br>g18 STOP_START(C) (C:e06) | ego: MOVING, BRAKE |
-| -1.55 | B | g19 CRITICAL_TTC_END(B,C) (B:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| -1.05 | B | g20 CLOSING_END(B,C) (B:e09)<br>g21 MOVING_END(B) (B:e10)<br>g22 STOP_START(B) (B:e11) | ego: MOVING, BRAKE<br>track_001: CLOSING, IN_EGO_PATH |
 | -0.65 | A | g23 THROTTLE_END(A) (A:e06)<br>g24 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| +0.00 | A | g25 COLLISION(A,B) (A:e08)<br>g26 CRITICAL_TTC_END(A,B) (A:e09)<br>g27 CLOSING_END(A,B) (A:e10) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
 | +0.00 | B | g25 COLLISION(A,B) (B:e12) | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH |
 | +0.10 | A | g28 MOVING_END(A) (A:e11)<br>g29 STOP_START(A) (A:e12) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
 

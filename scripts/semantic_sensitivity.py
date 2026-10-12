@@ -61,7 +61,7 @@ def variant_semantics(base: Any, name: str, value: Any) -> Any:
 
 
 def _reconstruction_events(locals_: Dict[str, Any], contacts: Dict[str, Any], identity: Dict[str, Optional[str]],
-                           semantics: Any, cfg: Any) -> Dict[str, List[Dict[str, Any]]]:
+                           semantics: Any, cfg: Any, body_based: bool = True) -> Dict[str, List[Dict[str, Any]]]:
     from cdf.evaluation.event_oracle import _type
     from cdf.reconstruction.local import contact_partners, mark_occlusions, sample_period, track_events
     out: Dict[str, List[Dict[str, Any]]] = {}
@@ -72,7 +72,7 @@ def _reconstruction_events(locals_: Dict[str, Any], contacts: Dict[str, Any], id
         events = []
         for track in rec.tracks:
             for event in track_events(owner, track, rec.ego.end, semantics, rec.ego, None, rec.footprint,
-                                      partners.get(track.track_id, ())):
+                                      partners.get(track.track_id, ()), body_based=body_based):
                 family = _type(event.type)
                 if family is not None:
                     events.append({"type": family, "side": event.type, "t_local": round(event.t_local, 4),

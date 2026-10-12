@@ -440,6 +440,7 @@ class RecorderLink:
     until: Optional[float] = None  # the evidence stops at this contact with a third body (t_global)
     refused: Optional[str] = None
     reacquired: bool = False
+    collision_anchored: bool = False
 
 
 def _third_body_contact(observer: RecorderBody, target: RecorderBody) -> float:
@@ -1225,10 +1226,75 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
     return result
 
 
+def collision_continuity_links(view: CommonView, associations: Sequence[Association],
+                               alignment: Alignment, links: Sequence[RecorderLink],
+                               cfg: ReconstructionConfig) -> List[RecorderLink]:
+    """Bridge a short impact segment only with two named flanks and fresh body evidence.
+
+    Ambiguity remains inside the local tracker/semantic state; collision and
+    geometry can establish its recorder identity without claiming precise motion.
+    An actual switch or a competing recorder/track cannot inherit the name.
+    """
+    known = {t.name: t.entity for t in view.tracks if t.status == ASSOCIATED}
+    known.update({link.track: link.recorder for link in links})
+    decisions = {a.local_graph + ':' + a.local_track: a for a in associations}
+    out = []
+    for track in view.tracks:
+        if track.name in known or track.parent_track is None:
+            continue
+        item = decisions[track.name]
+        clock = alignment.graphs[track.recorder]
+        if clock.status != 'ALIGNED' or clock.offset_to_global is None:
+            continue
+        event = next((e for e in alignment.matched_events if e['event_id'] == item.collision_event
+                      and track.recorder in e['graphs'] and item.candidate in e['graphs']), None)
+        if event is None or track.end-track.start > 2*cfg.fusion.contact_window_s:
+            continue
+        contact = event['t_local'][track.recorder] + clock.offset_to_global
+        if not track.start <= contact <= track.end:
+            continue
+        siblings = [t for t in view.tracks if t.recorder == track.recorder and t.parent_track == track.parent_track]
+        before = [t for t in siblings if 0 < track.start-t.end <= cfg.tracking.max_track_gap_s and known.get(t.name)==item.candidate]
+        after = [t for t in siblings if 0 < t.start-track.end <= cfg.tracking.max_track_gap_s and known.get(t.name)==item.candidate]
+        if not before or not after:
+            continue
+        body = view.bodies[item.candidate]
+        samples = [s for s in track.samples if s.measured and body.covers(s.t_global)]
+        if len(samples) < cfg.fusion.link_min_samples:
+            continue
+        distances = np.array([body.distance(s.t_global, s.point) for s in samples])
+        sigmas = np.array([_position_sigma(cfg, s, body.poses) for s in samples])
+        within = distances <= 3*sigmas
+        width = cfg.fusion.link_min_samples
+        if not all(np.mean(within[i:i+width]) >= cfg.fusion.link_min_fraction for i in range(len(samples)-width+1)):
+            continue
+        at = min(samples, key=lambda s: abs(s.t_global-contact))
+        observer = view.bodies[track.recorder]
+        if abs(at.t_global-contact) > cfg.tracking.max_track_gap_s or observer.distance(contact, at.near) > cfg.fusion.touching_clearance_m:
+            continue
+        rivals = [t for t in view.tracks if t.recorder==track.recorder and t.parent_track!=track.parent_track
+                  and t.start <= contact <= t.end]
+        if any(observer.distance(contact,min(t.samples,key=lambda s:abs(s.t_global-contact)).near)
+               < cfg.fusion.rival_clearance_m for t in rivals):
+            continue
+        if any(sum(rival.distance(s.t_global,s.point)<=3*_position_sigma(cfg,s,rival.poses)
+                   for s in samples if rival.covers(s.t_global)) >= width*cfg.fusion.link_min_fraction
+               for name,rival in view.bodies.items() if name not in (track.recorder,item.candidate)):
+            continue
+        speed_gap = [np.linalg.norm(s.velocity-np.array([body.pose_at_global(s.t_global).vx,
+                                                        body.pose_at_global(s.t_global).vy])) for s in samples]
+        out.append(RecorderLink(track.name,item.candidate,len(samples),round(float(np.median(distances)),3),
+                   round(float(np.median(distances/sigmas)),3),round(float(np.median(speed_gap)),3),
+                   round(float(np.mean(within)),3),True,
+                   collision_anchored=True))
+    return out
+
+
 def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Association],
           poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> RoadUserFusion:
     view = build_common_view(locals_, alignment, associations, poses)
     links = link_to_recorders(view, cfg)
+    links += collision_continuity_links(view, associations, alignment, links, cfg)
     by_key = {(a.local_graph, a.local_track): a for a in associations}
     for link in links:
         recorder, track_id = link.track.split(":", 1)
@@ -1236,18 +1302,23 @@ def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Assoc
         item.status, item.global_entity, item.candidate = ASSOCIATED, link.recorder, link.recorder
         item.confidence = link.fraction_within
         item.blocking = []
-        item.collision_event = None
-        item.evidence = list(item.evidence) + [
+        if not link.collision_anchored:
+            item.collision_event = None
+        item.evidence = list(item.evidence) + ([
             "common frame: its returns lie on {0}'s own footprint (median {1:.2f} m, {2:.2f} sigma, over {3} "
             "samples{6}; {4:.0%} within 3 sigma) at {0}'s own velocity (median difference {5:.2f} m/s)".format(
                 link.recorder, link.median_distance_m, link.median_distance_sigma, link.samples,
                 link.fraction_within, link.median_velocity_difference_mps,
                 "" if link.until is None else " before {0}'s contact with a third body at {1:+.2f} s".format(
-                    link.recorder, link.until))]
+                    link.recorder, link.until))] if not link.collision_anchored else [])
         item.source_graphs = sorted(set(item.source_graphs) | {recorder, link.recorder})
         if link.reacquired:
             item.evidence.append('reacquired after an identity boundary: persistent fresh geometry and velocity '
                                  'throughout the stable segment, continuous with the earlier named segment; no supported rival')
+        if link.collision_anchored:
+            item.evidence.append('short impact segment identity anchored by the matched collision, touching geometry, '
+                                 'persistent fresh body support and two named parent flanks; no compatible rival. '
+                                 'Motion uncertainty remains local; velocity disturbance is not an identity veto.')
     linked = {link.track for link in links}
     anonymous = [t for t in view.tracks if t.status != ASSOCIATED and t.name not in linked]
     by_name = {t.name: t for t in anonymous}

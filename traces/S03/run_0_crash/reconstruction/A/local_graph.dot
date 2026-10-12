@@ -18,6 +18,7 @@ digraph "local_A" {
   "A:e14" [label="TURN_LEFT_END\nA\nt=4.70", fillcolor="#e5e7eb"];
   "A:e15" [label="MOVING_END\nA\nt=4.75", fillcolor="#e5e7eb"];
   "A:e16" [label="STOP_START\nA\nt=4.75", fillcolor="#e5e7eb"];
+  "A:e17" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.00", fillcolor="#bfdbfe"];
   {rank=same; "A:e01"; "A:e02";}
   {rank=same; "A:e03"; "A:e04";}
   {rank=same; "A:e06"; "A:e07"; "A:e08"; "A:e09";}
@@ -47,10 +48,13 @@ digraph "local_A" {
   "A:e13" -> "A:e14" [label="PRECEDES"];
   "A:e14" -> "A:e15" [label="PRECEDES"];
   "A:e14" -> "A:e16" [label="PRECEDES"];
+  "A:e15" -> "A:e17" [label="PRECEDES"];
+  "A:e16" -> "A:e17" [label="PRECEDES"];
   "A:e03" -> "A:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e03" -> "A:e05" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e03" -> "A:e07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e03" -> "A:e08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e03" -> "A:e12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "A:e03" -> "A:e13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "A:e03" -> "A:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

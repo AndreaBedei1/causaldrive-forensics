@@ -136,7 +136,9 @@
       "actor_id": "A",
       "subject_id": "track_001",
       "t_local": 2.05,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": false
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {
@@ -584,6 +586,59 @@
         "signs": {},
         "facts_t_local": 4.7
       }
+    },
+    {
+      "node_id": "A:e17",
+      "event_type": "EGO_PATH_ENTRY",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "track_001",
+      "t_local": 5.0,
+      "attributes": {
+        "estimated_body_corners_vehicle_m": [
+          [
+            2.4474,
+            3.1916
+          ],
+          [
+            2.4474,
+            1.2916
+          ],
+          [
+            -2.1526,
+            1.2916
+          ],
+          [
+            -2.1526,
+            3.1916
+          ]
+        ],
+        "geometry": "estimated_body"
+      },
+      "source": "radar",
+      "confidence": null,
+      "perceived_state_before": {
+        "ego": {
+          "MOVING": false,
+          "STOP": true,
+          "BRAKE": true,
+          "THROTTLE": false,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
+        },
+        "external": {
+          "track_001": {
+            "CLOSING": false,
+            "CRITICAL_TTC": false,
+            "IN_EGO_PATH": false,
+            "CUT_IN_FROM_LEFT": false,
+            "CUT_IN_FROM_RIGHT": false
+          }
+        },
+        "signs": {},
+        "facts_t_local": 4.9
+      }
     }
   ],
   "edges": [
@@ -708,6 +763,16 @@
       "relation": "PRECEDES"
     },
     {
+      "from": "A:e15",
+      "to": "A:e17",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "A:e16",
+      "to": "A:e17",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "A:e03",
       "to": "A:e04",
       "relation": "SAME_TRACK"
@@ -735,6 +800,11 @@
     {
       "from": "A:e03",
       "to": "A:e13",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "A:e03",
+      "to": "A:e17",
       "relation": "SAME_TRACK"
     }
   ],

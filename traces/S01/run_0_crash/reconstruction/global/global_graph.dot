@@ -9,8 +9,8 @@ digraph "global" {
   "g05" [label="TRACK_APPEARED_FRONT\nA -> B\nt=-6.75", fillcolor="#bfdbfe"];
   "g06" [label="THROTTLE_END\nB\nt=-2.80", fillcolor="#fde68a"];
   "g07" [label="BRAKE_START\nB\nt=-2.80", fillcolor="#fde68a"];
-  "g08" [label="CLOSING_START\nA -> B\nt=-2.55", fillcolor="#bfdbfe"];
-  "g09" [label="CRITICAL_TTC_START\nA -> B\nt=-2.35", fillcolor="#bfdbfe"];
+  "g08" [label="CLOSING_START\nA -> B\nt=-2.55", fillcolor="#bfdbfe", peripheries=2];
+  "g09" [label="CRITICAL_TTC_START\nA -> B\nt=-2.35", fillcolor="#bfdbfe", peripheries=2];
   "g10" [label="MOVING_END\nB\nt=-1.60", fillcolor="#e5e7eb"];
   "g11" [label="STOP_START\nB\nt=-1.60", fillcolor="#e5e7eb"];
   "g12" [label="THROTTLE_END\nA\nt=-1.20", fillcolor="#fde68a"];

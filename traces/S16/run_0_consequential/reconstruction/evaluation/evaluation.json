@@ -1,6 +1,6 @@
 {
   "run": "S16/run_0_consequential",
-  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 6/6; anonymous: 1; max |t_global error| 0.1 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 229.82582645490766,
       "peak_impulse": 4243.514729638987,
-      "reconstructed_as": "g32",
+      "reconstructed_as": "g26",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -21,7 +21,7 @@
       ],
       "sim_time": 230.87582647055387,
       "peak_impulse": 322.104643689845,
-      "reconstructed_as": "g49",
+      "reconstructed_as": "g39",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -84,10 +84,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 64,
-    "max_abs_error_s": 0.0,
-    "order_pairs": 1899,
-    "order_concordant": 1899
+    "nodes": 49,
+    "max_abs_error_s": 0.1,
+    "order_pairs": 1088,
+    "order_concordant": 1088
   },
   "tracks": [
     {

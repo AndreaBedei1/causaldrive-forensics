@@ -2,7 +2,7 @@
 
 This compares the finished reconstruction with `ground_truth/` (simulator state). The reconstruction never read it and was not changed by this evaluation.
 
-**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 3/3; anonymous: 1; max |t_global error| 0.0 s**
+**collision reconstructed: yes (1/1 vehicle contacts); associations correct: 4/4; anonymous: 0; max |t_global error| 0.0 s**
 
 Privileged assumption: recorder raw clocks are CARLA simulator time.
 
@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 192.766 | 7661.5 | g40 | yes | 0.0 s |
+| A + B | 192.766 | 7661.5 | g37 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -27,7 +27,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-54 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1375/1375 pairs.
+49 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1122/1122 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
@@ -35,7 +35,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
 | A:track_001 | B | B | correct | 104 | 0.223 / 0.324 m | 1.442 m | 2.739 / 0.505 m/s |
 | B:track_001#segment_1 | A | A | correct | 43 | 0.213 / 0.303 m | 1.151 m | 3.752 / 0.936 m/s |
-| B:track_001#segment_2 | U1 | A | left anonymous (true identity A) | 13 | 0.144 / 0.297 m | 1.069 m | 3.351 / 2.114 m/s |
+| B:track_001#segment_2 | A | A | correct | 13 | 0.144 / 0.297 m | 1.069 m | 3.351 / 2.114 m/s |
 | B:track_001#segment_3 | A | A | correct | 48 | 0.134 / 0.134 m | 1.214 m | 2.174 / 0.068 m/s |
 
 ## Clearance at the true contacts

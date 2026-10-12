@@ -48,9 +48,9 @@
   {
     "local_graph": "B",
     "local_track": "track_001#segment_2",
-    "global_entity": "U1",
-    "status": "ANONYMOUS",
-    "confidence": null,
+    "global_entity": "A",
+    "status": "ASSOCIATED",
+    "confidence": 1.0,
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
@@ -60,15 +60,12 @@
       "approaching before the contact: clearance 3.6 m -> 0.0 m over the last 1.0 s",
       "track speed disagrees with A's own speed: RMSE 3.46 m/s over 0.4 s (> 1.50)",
       "clearance at the contact 0.00 m",
-      "anonymous road user U1: B:track_001#segment_2"
+      "short impact segment identity anchored by the matched collision, touching geometry, persistent fresh body support and two named parent flanks; no compatible rival. Motion uncertainty remains local; velocity disturbance is not an identity veto."
     ],
-    "blocking": [
-      "tracked for 0.35 s before the matched collision (needs 1.00 s)",
-      "track speed disagrees with A's own speed: RMSE 3.46 m/s over 0.4 s (> 1.50)"
-    ],
+    "blocking": [],
     "source_graphs": [
-      "B",
-      "A"
+      "A",
+      "B"
     ]
   },
   {

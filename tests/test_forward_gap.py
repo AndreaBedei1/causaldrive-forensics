@@ -348,7 +348,7 @@ class CampaignRegressionTests(unittest.TestCase):
             self.skipTest("canonical trace not present")
         self.assertIsNotNone(self.first(nodes, "CUT_IN_FROM_LEFT_START", "track_001"))
 
-    def test_s17_a_is_critical_before_the_cut_in_and_b_sees_no_cut_in(self):  # C, D
+    def test_s17_a_is_critical_before_u1_cut_in_and_b_sees_a_manoeuvre(self):
         a_nodes, b_nodes = _graph("S17/run_0_crash", "A"), _graph("S17/run_0_crash", "B")
         if a_nodes is None or b_nodes is None:
             self.skipTest("canonical trace not present")
@@ -357,7 +357,7 @@ class CampaignRegressionTests(unittest.TestCase):
         entry = self.first(a_nodes, "EGO_PATH_ENTRY", "track_001")
         collision = next(n["t_local"] for n in a_nodes if n["event_type"] == "COLLISION")
         self.assertTrue(critical < cut_in < entry < collision, (critical, cut_in, entry, collision))
-        self.assertFalse([n for n in b_nodes if n["event_type"].startswith("CUT_IN")])
+        self.assertEqual({n['subject_id'] for n in b_nodes if n['event_type'].startswith('CUT_IN')},{'track_001'})
 
     def test_no_critical_ttc_on_a_car_behind_or_beside_for_the_gap_alone(self):
         for run in sorted(p for p in (ROOT / "traces").glob("S*/run_*") if p.is_dir()):

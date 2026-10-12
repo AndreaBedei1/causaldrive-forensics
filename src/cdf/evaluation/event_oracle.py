@@ -16,9 +16,9 @@ radar has to assume.  Two oracles:
   ``tracking.min_track_frames`` are dropped, as the tracker drops them;
 * COVERAGE_TRACKED: COVERAGE with the point a radar track reports instead of the true nearest point: the
   median of V's outline points facing one of R's radars (the visible faces), as the median of a track's
-  returns is.  The corridor and cut-in tests use the tracked point, so COVERAGE_TRACKED against COVERAGE
-  measures what that convention costs, and the reconstruction against COVERAGE_TRACKED what is left: sensing,
-  tracking and estimation.
+  returns is. All three oracles carry the same true oriented body estimate, so body-based PATH and
+  CUT_IN no longer depend on the representative-point convention. The explicit body/point geometry
+  ablation is implemented on identical reconstructed tracks in scripts/body_event_ablation.py.
 
 Each ideal track goes through ``cdf.reconstruction.local.track_events`` with R's own ego trajectory and
 footprint; R's true contacts with V end its CRITICAL_TTC episode, as R's collision sensor does in the
@@ -186,7 +186,8 @@ def ideal_samples(rec: RecorderTruth, target: str, frames: Mapping[int, Mapping[
                      "velocity": velocity, "speed": speed, "acceleration": acceleration,
                      "relative": np.array([c * relative[0] + s * relative[1], -s * relative[0] + c * relative[1]]),
                      "range": float(min(np.hypot(*(near_v - m)) for m in mounts)),
-                     "dims": (2.0 * ext["x"], 2.0 * ext["y"])})
+                     "dims": (2.0 * ext["x"], 2.0 * ext["y"]),
+                     "body": (float(centre[0]), float(centre[1]), heading, 2.0 * ext['x'], 2.0 * ext['y'])})
     samples = []
     for i, row in enumerate(rows):
         before, after = rows[max(i - 1, 0)], rows[min(i + 1, len(rows) - 1)]
@@ -203,6 +204,7 @@ def ideal_samples(rec: RecorderTruth, target: str, frames: Mapping[int, Mapping[
             meas_x_m=float(near_l[0]), meas_y_m=float(near_l[1]), clearance_m=row["clearance"],
             ahead_m=float(near_v[0]) - rec.footprint.x_max, surface_offset_m=row["depth"],
             acceleration_mps2=row["acceleration"],
+            body_estimate=row['body'],
             relative_vx_mps=float(row["relative"][0]), relative_vy_mps=float(row["relative"][1])))
     return samples
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from functools import lru_cache
@@ -92,6 +93,12 @@ def provenance(config: Optional[Mapping[str, Any]] = None, runs: Sequence[str] =
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "python": sys.version.split()[0],
     }
+    freeze = os.environ.get('CDF_ANALYSIS_FREEZE_COMMIT')
+    if freeze:
+        if record['git_commit'] != freeze or record['git_dirty']:
+            raise RuntimeError('frozen analysis requires the named commit and a clean execution tree')
+        record['analysis_commit'] = freeze
+        record['analysis_started_from_clean_tree'] = True
     record['analysis_code_sha256'] = record['code_sha256']
     if record['git_commit'] and commit_code_hash(record['git_commit']) == record['code_sha256']:
         record['equivalent_clean_commit'] = record['git_commit']

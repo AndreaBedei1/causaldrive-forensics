@@ -293,10 +293,6 @@ def table_robustness(t: Tables) -> None:
 
     rows = []
     displayed = list(record['rows'])
-    past_baseline = next((row for past in record.get('analysis_history', []) for row in past.get('rows', [])
-                          if row['family'] == 'baseline'), None)
-    if past_baseline is not None:
-        displayed.insert(1, dict(past_baseline, family='baseline historical'))
     for row in displayed:
         errors = None
         if row.get("wrong_links") is not None or row.get("false_merges") is not None:
@@ -307,8 +303,7 @@ def table_robustness(t: Tables) -> None:
                      None if errors is None else round(errors, 1),
                      None if row.get("identical_graphs") is None else "{0:.0f}/{1}".format(row["identical_graphs"], row["runs"])])
     t.write("T5_robustness", "Robustness of the reconstruction on the canonical runs (docs/robustness_profiles.md): mean "
-             "+- SD over seeds of the metrics pooled over the runs. Baseline/impulse refreshed in final hardening; "
-             "other families retain the historical implementation and its baseline (see family_provenance in summary.json).",
+             "+- SD over seeds of the metrics pooled over the runs. All conditions use the same clean analysis freeze.",
             ["family", "level", "seeds", "identity acc.", "collisions", "runs aligned", "core events", "event dt p95 [s]",
              "centre err. [m]", "wrong links + false merges", "identical graphs"], rows,
             "Core events: the unperturbed reconstruction's instant core events found again (same type, actor, subject "
@@ -333,7 +328,7 @@ def table_sensitivity(t: Tables) -> None:
                 cells.append("{0}/{1}".format(s["varied"], s["nominal"]))
             rows.append(cells)
         t.write("T6_sensitivity_{0}".format(label),
-                "Historical one-at-a-time sensitivity of the core events to their thresholds before the first contact ({0} runs, "
+                "One-at-a-time sensitivity of the core events to their thresholds before the first contact ({0} runs, "
                 "{1}).".format(record["runs"], label),
                 ["setting", "CTTC start: recall / precision", "CTTC start: oracle events", "path entry: recall / precision",
                  "path entry: oracle events", "cut-in R: recall / precision", "cut-in R: oracle events"], rows,
@@ -341,6 +336,43 @@ def table_sensitivity(t: Tables) -> None:
                 "events: COVERAGE oracle events under the varied value / nominal value (what the threshold alone does "
                 "to the reference).  Full table: results/semantics/sensitivity_{0}.md.".format(label),
                 [0] * 7)
+
+
+def table_body_ablation(t: Tables) -> None:
+    for label in ('canonical','sweeps'):
+        path=ROOT/'results/semantics'/('body_point_'+label+'.json')
+        if not path.exists():continue
+        record=_read(path);rows=[]
+        for geometry in ('point','body'):
+            for kind in ('EGO_PATH_ENTRY','CUT_IN_FROM_LEFT_START','CUT_IN_FROM_RIGHT_START','CRITICAL_TTC_START'):
+                r=record['rows'][geometry]['RECONSTRUCTION vs COVERAGE'][kind]
+                rows.append([geometry,kind,r['found'],r['expected'],r['matched'],r['precision'],r['recall'],r['delta_median_s']])
+        t.write('T8_body_point_'+label,'Body-vs-point geometry on identical tracks, target-motion frame and body reference ('+label+').',
+                ['geometry','event','found','expected','matched','precision','recall','onset dt median [s]'],rows,
+                'Pre-contact window. This isolates geometry; historical recalls under different definitions are not paired ablations.',
+                [0,0,0,0,0,3,3,3])
+
+
+def table_pose_and_combined(t: Tables) -> None:
+    path=ROOT/'results/robustness/summary.json'
+    if not path.exists():return
+    record=_read(path)
+    rows=[]
+    for r in record['rows']:
+        if r['family'] not in ('baseline','gnss','gnss_refined','gnss_correlated'):continue
+        rows.append([r['family'],r['level'],r['seeds'],r.get('absolute_pose_rms_m'),r.get('relative_pose_rms_m'),
+                     r.get('fused_centre_error_m'),r.get('wrong_links'),r.get('false_merges'),r.get('missed_links'),r.get('runs_aligned')])
+    t.write('T9_pose','Injected absolute and pairwise relative pose error vs fusion quality, same frozen analysis.',
+            ['family','level','seeds','absolute RMS [m]','relative RMS [m]','fusion median [m]','wrong links','false merges','missed links','aligned'],rows,
+            'Pose and fusion errors: median per run, then mean over seeds. Counts: campaign total per draw, averaged over seeds. Refined conditions share the same injected input error.',
+            [0,0,0,3,3,3,1,1,1,3])
+    rows=[[r['level'],r['seeds'],r['runs'],r.get('collision_recall'),r.get('false_collision_matches'),
+           r.get('collision_unmatched'),r.get('ambiguous_candidate_refusals'),r.get('runs_aligned')]
+          for r in record['rows'] if r['family']=='combined']
+    t.write('T10_combined','Combined GNSS and 10% impulse noise on all 17 canonical cases.',
+            ['condition','seeds','jobs','collision recall','wrong pairings','unmatched true contacts','ambiguous candidate refusals','aligned'],rows,
+            'Recall and alignment are pooled per seed then averaged; counts are totals per draw averaged over seeds. Singleton unpaired callbacks are not wrong pairings.',
+            [0,0,0,3,1,1,1,3])
 
 
 def table_impulse(t: Tables) -> None:
@@ -356,7 +388,7 @@ def table_impulse(t: Tables) -> None:
             ["relative error per report", "mean P(pass)", "min P(pass)"], rows,
             "CARLA gives both bodies of a contact the same impulse magnitude (largest relative difference {0}); the "
              "legacy gate paired reports within {1:.0%} (engineering assumption). The final geometry-supported "
-             "uncertainty gate is evaluated in T5 and docs/audit/technical_hardening.md.".format(
+             "uncertainty gate is evaluated in T5 and docs/FINAL_VALIDATION_REPORT.md.".format(
                 record["max_relative_difference"], record["impulse_tolerance"]),
             [0, 2, 2])
 
@@ -365,7 +397,8 @@ def table_impulse(t: Tables) -> None:
 # Figures
 # ------------------------------------------------------------------------------------------------
 
-def figure_timeline(out: Path, written: List[Tuple[str, str]], run: Path = ROOT / "traces" / "S17" / "run_0_crash") -> None:
+def figure_timeline(out: Path, written: List[Tuple[str, str]], run: Optional[Path] = None) -> None:
+    run = run or ROOT / 'traces' / 'S17' / 'run_0_crash'
     """Per-vehicle event graph of one run on t_global: what each recorder's sensors established about each road
     user, its own actions, and (privileged overlay) when ground truth puts the same events."""
     graph_path = run / "reconstruction" / "global" / "global_graph.json"
@@ -553,7 +586,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     from cdf.reconstruction.config import load_config
     tables = Tables(args.out)
     for build in (table_campaign, table_sweeps, table_fusion, table_fusion_sweeps, table_oracle, table_robustness,
-                  table_sensitivity, table_impulse):
+                  table_sensitivity, table_impulse, table_body_ablation, table_pose_and_combined):
         build(tables)
     figures: List[Tuple[str, str]] = []
     for build in (figure_timeline, figure_alignment, figure_fusion):
@@ -566,7 +599,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         digest.update(source.relative_to(ROOT).as_posix().encode('utf-8') + b'\0')
         digest.update(source.read_bytes().replace(b'\r\n', b'\n') + b'\0')
     prov['analysis_scripts_sha256'] = digest.hexdigest()
-    prov['scope'] = 'Rendering of tables/figures; each input study retains its own execution provenance'
+    prov['scope'] = 'All tables and figures generated from studies executed at the same clean analysis freeze'
     inputs = sorted({p for folder in ('sweeps', 'semantics', 'robustness')
                      for p in (ROOT / 'results' / folder).glob('*.json')}
                     | {ROOT / 'traces' / 'fusion_metrics.json'}
@@ -608,11 +641,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
               "- robustness: `results/robustness/summary.json`, `impulse_symmetry.json`",
               "- semantics: `results/semantics/event_oracle_<label>.json`, `sensitivity_<label>.json`"]
     index += ['', '## Analysis scope and provenance', '',
-              'Canonical/sweep reconstructions and event-oracle comparisons were refreshed in final hardening.',
-              'Baseline and impulse robustness were rerun; other robustness families and threshold sensitivity remain historical studies',
-              'under their original execution provenance. Verified `equivalent_clean_commit` annotations preserve their original dirty flags.',
+              'All 17 canonical runs, 240 saved sweeps, robustness families and semantic sensitivity were rerun offline',
+              'from the same clean analysis freeze. Acquisition provenance remains historical and unchanged.',
               'The table/figure rendering snapshot is in `artifact_provenance.json` (source and script hashes, clean execution commit).',
-              'See `docs/audit/technical_hardening.md` for before/after metrics and limitations.']
+              'See `docs/FINAL_VALIDATION_REPORT.md` for metrics, limitations and the analysis freeze commit.']
     (args.out / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     print("\n".join(index))
     return 0

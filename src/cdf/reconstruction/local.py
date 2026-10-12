@@ -29,6 +29,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
+import numpy as np
+
 from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .conflict import UNSAFE_FORWARD_GAP, ConflictAssessment, assess_conflict, occluded_by
@@ -732,18 +734,21 @@ def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAss
 
 
 def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions: Sequence[RelativeMotion],
-                 cfg: SemanticsConfig, body_gaps: Sequence[float]) -> Tuple[List[Span], List[Span]]:
+                 cfg: SemanticsConfig, body_gaps: Sequence[float],
+                 target_lateral_speeds: Optional[Sequence[float]] = None,
+                 body_sides: Optional[Sequence[int]] = None,
+                 body_ahead: Optional[Sequence[bool]] = None) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
 
     Kinematic only: a target ahead of the recorder's front edge, moving within ``cut_in_max_heading_deg`` of
-    the recorder's heading (so not crossing traffic), approaches the corridor
+    the path heading fixed at first observation (so not crossing traffic), approaches the corridor
     laterally at ``cut_in_lateral_speed_mps`` or more without interruption.
     The cut-in STARTS once that run has lasted ``cut_in_persistence_s``,
     began at least ``cut_in_outside_margin_m`` outside the corridor, has moved
     the target ``cut_in_min_displacement_m`` closer, the corridor is due
     within ``cut_in_horizon_s`` at the current lateral speed, and the target's
     nominal body is already within ``cut_in_preentry_margin_m`` of the corridor
-    (``body_gaps``, per sample: ``conflict.ForwardGap.lateral_body_gap_m``): a
+    (``body_gaps``: estimated body separation in that fixed frame): a
     car still crossing a lane further away may be heading for the lane next to
     the recorder's, not for its path.  The side at the start gives the
     direction, from the recorder's viewpoint (negative lateral = left).  It
@@ -755,16 +760,18 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
     corridor = cfg.path_half_width_m
     left: List[Span] = []
     right: List[Span] = []
-    run: Optional[Tuple[int, int, float]] = None  # (start index, side, |lateral| at the start)
+    run: Optional[Tuple[int, int, float]] = None  # (start index, side, body gap at the start)
     active: Optional[Tuple[int, int]] = None  # (start index, side)
     settle: Optional[int] = None
     for index, (sample, motion) in enumerate(zip(samples, motions)):
+        lateral_speed = (motion.lateral_speed_mps if target_lateral_speeds is None
+                         else target_lateral_speeds[index])
         if not motion.known or sample.occluded:
             run, settle = (None if active is None else run), None
             continue
         if active is not None:
             start, side = active
-            if -side * motion.lateral_speed_mps < cfg.cut_in_settle_speed_mps:
+            if -side * lateral_speed < cfg.cut_in_settle_speed_mps:
                 settle = index if settle is None else settle
                 if times[index] - times[settle] >= cfg.cut_in_settle_s - 1e-6:
                     (left if side < 0 else right).append((start, settle))
@@ -772,19 +779,21 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
             else:
                 settle = None
             continue
-        side = -1 if sample.lateral_m < 0 else 1
-        toward = -side * motion.lateral_speed_mps
+        side = (-1 if sample.lateral_m < 0 else 1) if body_sides is None else body_sides[index]
+        toward = -side * lateral_speed
         parallel = (motion.heading_deg is not None and abs(motion.heading_deg) <= cfg.cut_in_max_heading_deg
                     and sample.speed_mps >= cfg.cut_in_min_target_speed_mps)
-        if not (sample.ahead_m > 0 and parallel and toward >= cfg.cut_in_lateral_speed_mps):
+        ahead = sample.ahead_m > 0 if body_ahead is None else body_ahead[index]
+        if not (ahead and parallel and toward >= cfg.cut_in_lateral_speed_mps
+                and (target_lateral_speeds is None or toward > sample.vel_std_mps)):
             run = None
             continue
         if run is None or run[1] != side:
-            run = (index, side, abs(sample.lateral_m))
-        lateral = abs(sample.lateral_m)
-        due = lateral <= corridor or (lateral - corridor) / toward <= cfg.cut_in_horizon_s
-        if (run[2] >= corridor + cfg.cut_in_outside_margin_m
-                and run[2] - lateral >= cfg.cut_in_min_displacement_m
+            run = (index, side, body_gaps[index])
+        gap = body_gaps[index]
+        due = gap / toward <= cfg.cut_in_horizon_s
+        if (run[2] >= cfg.cut_in_outside_margin_m
+                and run[2] - gap >= cfg.cut_in_min_displacement_m
                 and times[index] - times[run[0]] >= cfg.cut_in_persistence_s - 1e-6 and due
                 and body_gaps[index] <= cfg.cut_in_preentry_margin_m + 1e-9):
             active, settle = (index, run[1]), None
@@ -800,7 +809,7 @@ def _stationary_ego() -> EgoTrajectory:
 def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: SemanticsConfig,
                  ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None,
                  footprint: Optional[EgoFootprint] = None,
-                 contacts: Sequence[Tuple[float, float]] = ()) -> List[SemanticEvent]:
+                 contacts: Sequence[Tuple[float, float]] = (), body_based: bool = True) -> List[SemanticEvent]:
     """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
@@ -825,11 +834,19 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     # again only when clearly beside or behind that edge (at contact the target
     # sits right at it).
     corridor, hysteresis = cfg.path_half_width_m, cfg.path_hysteresis_m
-    path = [] if track.identity_ambiguous else active_intervals(times, samples,
-                            lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
-                            lambda s: (s.ahead_m < -hysteresis
-                                       or abs(s.lateral_m) > corridor + hysteresis))
+    from .conflict import target_box, box_corners, body_in_corridor, lateral_body_gap
+    front = footprint.x_max if footprint is not None else 0.0
+    bodies = [box_corners(*target_box(s, ego.at(s.t_local), footprint, cfg)[:3]) for s in samples]
+    if body_based:
+        path = [] if track.identity_ambiguous else active_intervals(times, list(range(len(samples))),
+            lambda i: body_in_corridor(bodies[i], front, corridor),
+            lambda i: not body_in_corridor(bodies[i], front - hysteresis, corridor + hysteresis))
+    else:  # evaluator's point-geometry ablation; runtime always uses the body
+        path = [] if track.identity_ambiguous else active_intervals(times, samples,
+            lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
+            lambda s: s.ahead_m < -hysteresis or abs(s.lateral_m) > corridor + hysteresis)
     # A track first seen inside the corridor has no observed entry.
+    events[0].attributes['initial_in_ego_path'] = bool(path and path[0][0] == 0)
     events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
                            times, path, announce_initial=False)
 
@@ -854,12 +871,49 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
 
     # A cut-in can be established only once the estimate is precise enough.
     first_known = next((index for index, motion in enumerate(motions) if motion.known), len(motions))
-    body_gaps = [a.forward.lateral_body_gap_m for a in assessments]
-    from_left, from_right = cut_in_spans(times, samples, motions, cfg, body_gaps)
+    # Freeze the path orientation and lateral origin at first observation.
+    # Target velocity and body displacement in this frame cannot be created by
+    # the observer's later translation or yaw. Path entry remains instantaneous.
+    anchor = ego.at(times[0])
+    c0, s0 = math.cos(anchor.heading), math.sin(anchor.heading)
+    stable_bodies, target_lateral, stable_motions, ahead = [], [], [], []
+    for sample, motion, corners in zip(samples, motions, bodies):
+        own = ego.at(sample.t_local)
+        c, s = math.cos(own.heading), math.sin(own.heading)
+        world_corners = corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y])
+        stable = (world_corners - np.array([anchor.x, anchor.y])) @ np.array([[c0, -s0], [s0, c0]])
+        stable_bodies.append(stable)
+        target_lateral.append(-s0 * sample.vx_mps + c0 * sample.vy_mps)
+        angle = ((math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - anchor.heading) + 180) % 360 - 180
+                 if sample.speed_mps >= 1.0 else None)
+        stable_motions.append(RelativeMotion(motion.longitudinal_speed_mps, motion.lateral_speed_mps,
+                                             angle, motion.t_cpa_s, motion.d_cpa_m, motion.known,
+                                             motion.d_cpa_clearance_m))
+        ego_forward = c0 * (own.x - anchor.x) + s0 * (own.y - anchor.y) + front
+        ahead.append(float(np.max(stable[:, 0])) > ego_forward)
+    body_gaps = [lateral_body_gap(float(np.min(b[:, 1])), float(np.max(b[:, 1])), corridor)
+                 for b in stable_bodies]
+    sides = [-1 if float(np.mean(b[:, 1])) < 0 else 1 for b in stable_bodies]
+    if not body_based:
+        points = [(s.x_m - anchor.x) * -s0 + (s.y_m - anchor.y) * c0 for s in samples]
+        body_gaps = [max(abs(y) - corridor, 0.0) for y in points]
+        sides = [-1 if y < 0 else 1 for y in points]
+        ahead = [(s.x_m-own.x)*c0+(s.y_m-own.y)*s0 > front
+                 for s,own in ((s,ego.at(s.t_local)) for s in samples)]
+    from_left, from_right = cut_in_spans(times, samples, stable_motions, cfg, body_gaps,
+                                        target_lateral, sides, ahead)
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
     events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
-                           PERCEPTION, "radar", times, from_right)
+                            PERCEPTION, "radar", times, from_right)
+    for event in events:
+        if event.type in ('EGO_PATH_ENTRY','EGO_PATH_EXIT') or event.type.startswith('CUT_IN_FROM_'):
+            i = min(range(len(times)), key=lambda k: abs(times[k]-event.t_local))
+            event.attributes['estimated_body_corners_vehicle_m'] = [[round(float(v),4) for v in row] for row in bodies[i]]
+            event.attributes['geometry'] = 'estimated_body' if body_based else 'point_ablation'
+            if event.type.startswith('CUT_IN_FROM_'):
+                event.attributes['path_frame_heading_rad'] = round(anchor.heading,6)+0.0
+                event.attributes['target_lateral_speed_mps'] = round(target_lateral[i],4)+0.0
 
     lost_at = times[-1] if times[-1] < recording_end - 1e-3 else None
     if lost_at is not None:

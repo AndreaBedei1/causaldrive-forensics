@@ -72,7 +72,7 @@ def keyframes(run: ReplayRun, lead_s: float = 3.0, after_s: float = 0.5, before_
     collisions = sorted(run.collisions, key=lambda mark: mark.time)
     horizon = collisions[-1].time + 1.0 if collisions else run.duration
     marks: List[Tuple[str, float]] = []
-    for event in run.all_events():
+    for event in run.display_events():
         if event.time > horizon + 1e-6:
             continue
         if event.event_type in KEY_STARTS or event.event_type in ("CRITICAL_TTC_END", "CUT_IN_FROM_LEFT_END",
@@ -278,8 +278,11 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
         tracked = [(g["track"].track_id, g["states"]) for g in items["ghosts"] + items["associated"] + items["members"]
                    if g["observer"] == pid and g["states"]]
         lines.append(("{0}: {1}".format(pid, ", ".join(states) or "-"), recorder["colour"], "bold"))
+        entity_states = {}
         for track_id, states_of in tracked:
-            lines.append(("   {0}: {1}".format(subject_label(run, pid, track_id), ", ".join(states_of)),
+            entity_states.setdefault(subject_label(run,pid,track_id),set()).update(states_of)
+        for entity_id, states_of in sorted(entity_states.items()):
+            lines.append(("   {0}: {1}".format(entity_id, ", ".join(sorted(states_of))),
                           STATE_COLOURS["CRITICAL_TTC"] if "CRITICAL_TTC" in states_of else "black", "normal"))
     if items["entities"]:
         lines.append(("", "black", "normal"))
@@ -289,7 +292,7 @@ def render_frame(run: ReplayRun, t: float, path: Path, lanes: Optional[Sequence[
             lines.append((anonymous_row(entity.entity_id, state.observers), ROAD_USER_COLOUR, "normal"))
     if run.hidden:
         lines.append(("not on the global timeline: " + ", ".join(run.hidden), "#555555", "normal"))
-    recent = [event for event in run.all_events()
+    recent = [event for event in run.display_events()
               if t - EVENT_WINDOW_S < event.time <= t + 1e-6 and event.event_type in PAPER_CORE_EVENTS]
     if recent:
         lines.append(("", "black", "normal"))

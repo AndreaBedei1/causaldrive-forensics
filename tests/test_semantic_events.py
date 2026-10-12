@@ -279,7 +279,7 @@ class GraphTests(unittest.TestCase):
                          "TRACK_APPEARED_FRONT", "CLOSING_START", "CRITICAL_TTC_START"):
             self.assertIn(expected, a_types)
         self.assertNotIn("BRAKE_END", a_types)  # still braking when the synthetic recording ends
-        allowed = {"peak_impulse", "active_at_first_observation", "relevant_to_ego_path"}
+        allowed = {"peak_impulse", "active_at_first_observation", "relevant_to_ego_path", "initial_in_ego_path"}
         for local in result.locals:
             for node in local.graph.nodes:
                 self.assertLessEqual(set(node.attributes), allowed, node.event_type)

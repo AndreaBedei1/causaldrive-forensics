@@ -28,6 +28,8 @@ from __future__ import annotations
 import json
 import math
 from collections import Counter, defaultdict
+
+import numpy as np
 from itertools import combinations
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -167,6 +169,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
     within = Counter()
     states_compared = impure_states = 0
     entity_errors = []
+    paired_states = []
     for entity, row in zip(road_users.get("entities", []), entity_rows):
         identity = row["true_identity"]
         if identity is None or identity not in truth or reference_sim is None:
@@ -206,6 +209,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
                 for k in (1, 2, 3):
                     within["{0}_sigma".format(k)] += ratio <= k
             # No fusion: the nominal ghost box of every source track at this instant (phase-0 replay).
+            single_errors = []
             for name in entity["source_tracks"]:
                 owner, track_id = name.split(":", 1)
                 path = paths.get((owner, track_id))
@@ -215,8 +219,18 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
                             + replay.clock_origins[owner] - replay.start)
                 ghost = path.state_at(t_replay)
                 if ghost is not None:
-                    errors["single_track_nominal_centre_error_m"].append(
-                        math.hypot(ghost.centre[0] - true["transform"]["x"], ghost.centre[1] - true["transform"]["y"]))
+                    single_errors.append(math.hypot(ghost.centre[0] - true["transform"]["x"],
+                                                    ghost.centre[1] - true["transform"]["y"]))
+            if single_errors:
+                # One comparison per entity instant, matching the fused population;
+                # additional observers must not silently add statistical weight.
+                errors['single_track_nominal_centre_error_m'].append(float(np.median(single_errors)))
+            paired_states.append({'t_global': state['t_global'], 'sim_timestamp': round(reference_sim+state['t_global'],4),
+                'true_identity': identity, 'entity': entity['id'], 'method': state['method'],
+                'source_tracks': list(entity['source_tracks']), 'centre_error_m': centre,
+                'single_track_centre_errors_m': single_errors,
+                'single_track_error_median_m': float(np.median(single_errors)) if single_errors else None,
+                'fragments_for_identity': sum(row['true_identity']==identity for row in entity_rows)})
         extent = truth[identity].states[0].get("bbox_extent") or {}
         footprint = entity["footprint"]
         dims = {}
@@ -279,6 +293,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
         write_text(rec / "evaluation" / "fusion_metrics.md", fusion_markdown(result))
     # The raw values, for pooling over runs (not written).
     result["_raw"] = {"errors": {key: list(values) for key, values in errors.items()},
+                       'paired_states': paired_states,
                       "by_method": {method: {key: list(values) for key, values in table.items()}
                                     for method, table in by_method.items()}}
     return result

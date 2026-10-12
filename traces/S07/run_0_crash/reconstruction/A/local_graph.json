@@ -136,7 +136,9 @@
       "actor_id": "A",
       "subject_id": "track_001",
       "t_local": 0.0,
-      "attributes": {},
+      "attributes": {
+        "initial_in_ego_path": true
+      },
       "source": "radar",
       "confidence": null,
       "perceived_state_before": {

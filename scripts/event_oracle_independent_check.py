@@ -62,6 +62,7 @@ def travel(speed, acceleration, times):
 
 def independent_pair(rows, owner, target, origin, end, cfg):
     events, path, cut_run, cut_active, critical = [], None, None, False, False
+    anchor = None
     for frame in rows:
         if owner not in frame or target not in frame:
             continue
@@ -70,6 +71,8 @@ def independent_pair(rows, owner, target, origin, end, cfg):
         if t >= end or t < 0: continue
         ca, ya, ha = geometry(own)
         cb, yb, hb = geometry(other)
+        if anchor is None:
+            anchor = (ca.copy(),ya)
         basis = rotation(ya)
         boundary = (outline(cb,yb,hb)-ca)@basis
         d = np.maximum(np.abs(boundary)-ha,0)
@@ -79,8 +82,16 @@ def independent_pair(rows, owner, target, origin, end, cfg):
         speed_a, speed_b = np.linalg.norm(va),np.linalg.norm(vb)
         relative = (vb-va)@basis
         lateral, ahead = float(near[1]),float(near[0]-ha[0])
-        inside = ahead>0 and abs(lateral)<=cfg['path_half_width_m']
-        outside = ahead < -cfg['path_hysteresis_m'] or abs(lateral)>cfg['path_half_width_m']+cfg['path_hysteresis_m']
+        # Independently use SAT against a finite rectangle containing the full
+        # forward half-strip that could touch this body, rather than its point.
+        body_centre=(cb-ca)@basis
+        far=max(float(np.max(boundary[:,0]))+1.,ha[0]+1.)
+        def in_path(front,half_width):
+            centre=np.array([(front+far)/2,0.])
+            return bool(np.max(boundary[:,0])>front and overlaps(centre,0.,((far-front)/2,half_width),
+                                                               body_centre,yb-ya,hb))
+        inside=in_path(ha[0],cfg['path_half_width_m'])
+        outside=not in_path(ha[0]-cfg['path_hysteresis_m'],cfg['path_half_width_m']+cfg['path_hysteresis_m'])
         if path is None: path = inside
         elif not path and inside:
             events.append(dict(type='EGO_PATH_ENTRY',t_local=t)); path=True
@@ -92,23 +103,28 @@ def independent_pair(rows, owner, target, origin, end, cfg):
         body = (body-ca)@basis
         body_gap = max(float(np.min(body[:,1]))-cfg['path_half_width_m'],
                        -float(np.max(body[:,1]))-cfg['path_half_width_m'],0)
-        side = -1 if lateral<0 else 1
-        toward = -side*relative[1]
-        moving = ahead>0 and abs(heading_rel)<=cfg['cut_in_max_heading_deg'] and speed_b>=cfg['cut_in_min_target_speed_mps']
+        stable_body=(body@basis.T+ca-anchor[0])@rotation(anchor[1])
+        stable_gap=max(float(np.min(stable_body[:,1]))-cfg['path_half_width_m'],
+                       -float(np.max(stable_body[:,1]))-cfg['path_half_width_m'],0)
+        side = -1 if float(np.mean(stable_body[:,1]))<0 else 1
+        target_lateral=float((vb@rotation(anchor[1]))[1])
+        toward = -side*target_lateral
+        stable_heading=(math.degrees(heading-anchor[1])+180)%360-180
+        moving = ahead>0 and abs(stable_heading)<=cfg['cut_in_max_heading_deg'] and speed_b>=cfg['cut_in_min_target_speed_mps']
         if not cut_active:
             if moving and toward>=cfg['cut_in_lateral_speed_mps']:
-                if cut_run is None or cut_run[1]!=side: cut_run=(t,side,abs(lateral))
-                due=abs(lateral)<=cfg['path_half_width_m'] or (abs(lateral)-cfg['path_half_width_m'])/toward<=cfg['cut_in_horizon_s']
-                if (cut_run[2]>=cfg['path_half_width_m']+cfg['cut_in_outside_margin_m'] and
-                    cut_run[2]-abs(lateral)>=cfg['cut_in_min_displacement_m'] and
-                    t-cut_run[0]>=cfg['cut_in_persistence_s']-1e-6 and due and body_gap<=cfg['cut_in_preentry_margin_m']):
+                if cut_run is None or cut_run[1]!=side: cut_run=(t,side,stable_gap)
+                due=stable_gap/toward<=cfg['cut_in_horizon_s']
+                if (cut_run[2]>=cfg['cut_in_outside_margin_m'] and
+                    cut_run[2]-stable_gap>=cfg['cut_in_min_displacement_m'] and
+                    t-cut_run[0]>=cfg['cut_in_persistence_s']-1e-6 and due and stable_gap<=cfg['cut_in_preentry_margin_m']):
                     events.append(dict(type='CUT_IN_FROM_'+('LEFT' if side<0 else 'RIGHT')+'_START',t_local=t));cut_active=True
             else:cut_run=None
         # The subset tests first cut-in onset; no shared release implementation.
         clearance = max(float(np.min(body[:,0]))-ha[0],0)
         same_direction=abs(heading_rel)<=30
         front=bool(np.min(body[:,0])>ha[0] and body_gap<=1e-9)
-        entering=body_gap<=cfg['critical_front_lateral_margin_m'] and toward>=cfg['critical_front_lateral_speed_mps']+0.05
+        entering=body_gap<=cfg['critical_front_lateral_margin_m'] and -(-1 if lateral<0 else 1)*relative[1]>=cfg['critical_front_lateral_speed_mps']+0.05
         table=np.array(cfg['critical_time_gap_table'])
         required=max(speed_a*np.interp(speed_a*3.6,table[:,0],table[:,1]),cfg['critical_min_following_distance_m'])
         unsafe=bool(speed_a>=cfg['critical_forward_min_speed_mps'] and same_direction and (front or entering) and clearance<required)
@@ -118,16 +134,16 @@ def independent_pair(rows, owner, target, origin, end, cfg):
         target_acc=target_acc if target_acc<=-cfg['target_braking_min_mps2'] else 0
         target_positions=cb+travel(speed_b,target_acc,times)[:,None]*(vb/max(speed_b,1e-9))
         inflated=ha+np.array([cfg['critical_standstill_margin_m'],cfg['critical_lateral_margin_m']])
-        course=np.any(overlaps(ca+times[:,None]*va,ya,inflated,target_positions,heading,hb))
+        course=np.any(overlaps(ca+times[:,None]*va,ya,inflated,target_positions,yb,hb))
         reacted=np.maximum(times-cfg['critical_reaction_time_s'],0)
         dist=speed_a*np.minimum(times,cfg['critical_reaction_time_s'])+travel(speed_a,-cfg['critical_deceleration_mps2'],reacted)
-        braking=np.any(overlaps(ca+dist[:,None]*(va/max(speed_a,1e-9)),ya,inflated,target_positions,heading,hb))
-        if np.any(overlaps(np.repeat(ca[None],len(times),axis=0),ya,inflated,target_positions,heading,hb)):
+        braking=np.any(overlaps(ca+dist[:,None]*(va/max(speed_a,1e-9)),ya,inflated,target_positions,yb,hb))
+        if np.any(overlaps(np.repeat(ca[None],len(times),axis=0),ya,inflated,target_positions,yb,hb)):
             # Rear/side approach: even stopping the observer instantly does not
             # remove the course; test the approaching target's braking instead.
             target_dist=speed_b*np.minimum(times,cfg['critical_reaction_time_s'])+travel(speed_b,-cfg['critical_deceleration_mps2'],reacted)
             braking=np.any(overlaps(ca+times[:,None]*va,ya,inflated,
-                                    cb+target_dist[:,None]*(vb/max(speed_b,1e-9)),heading,hb))
+                                     cb+target_dist[:,None]*(vb/max(speed_b,1e-9)),yb,hb))
         now=bool(unsafe or (course and braking))
         if now and not critical and t>=cfg['critical_min_track_age_s']-1e-6:
             events.append(dict(type='CRITICAL_TTC_START',t_local=t));critical=True
@@ -168,7 +184,7 @@ def main():
     rows=[r for run in args.runs for r in check_run(run.resolve(),cfg)]
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps({'method':'Independent GT body geometry; PERFECT, pre-contact, first onset per pair/type',
-                                     'limitations':'True oriented body rather than oracle near-surface nominal placement; no shared event functions; straight forecast; first onsets only',
+                                     'limitations':'Same true oriented body; no shared event functions; independent SAT/braking and straight forecast instead of yaw-rate arcs; first onsets only',
                                      'rows':rows},indent=2)+'\n',encoding='utf-8')
     lines=['# Independent event-oracle check','',
            'Privileged evaluation only. Direct GT body geometry/control kinematics; no reconstruction event generator.',
@@ -176,7 +192,7 @@ def main():
            '| run | pair | event | main [s] | independent [s] | delta [s] |','|---|---|---|---|---|---|']
     for r in rows:
         lines.append('| {run} | {observer}→{target} | {event} | {main} | {independent} | {delta} |'.format(**r))
-    lines+=['','Checker differences are diagnostic: true oriented body vs oracle surface-based placement, explicit SAT/braking test,',
+    lines+=['','Checker differences are diagnostic: same true oriented body, independent SAT/braking test,',
             'straight forecasts instead of yaw-rate arcs, first onsets only. No definitions are changed to force agreement.','']
     args.output.with_suffix('.md').write_text('\n'.join(lines),encoding='utf-8')
     print(len(rows),'onsets checked')

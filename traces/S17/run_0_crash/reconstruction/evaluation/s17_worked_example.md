@@ -24,7 +24,7 @@ Track identities known to the reconstruction (associations.json):
 | -4.45 | 0.50 | track estimate known (age and std gates) | A | A:track_001 (anonymous) | 0.50 | 5.35 | 16.87 | - |  |
 | -2.35 | 2.60 | CRITICAL_TTC_START | A | A:track_001 (anonymous) | 2.60 | 3.31 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -2.20 | 2.75 | CUT_IN_FROM_RIGHT_START | A | A:track_001 (anonymous) | 2.70 | 3.16 | 16.83 | UNSAFE_FORWARD_GAP |  |
-| -1.60 | 3.35 | EGO_PATH_ENTRY | A | A:track_001 (anonymous) | 3.30 | 2.47 | 16.83 | UNSAFE_FORWARD_GAP |  |
+| -2.05 | 2.90 | EGO_PATH_ENTRY | A | A:track_001 (anonymous) | 2.90 | 2.87 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -1.30 | 3.65 | steering command onset (controls.jsonl) | A | - | 3.60 | 2.13 | 16.83 | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | abs(steer) >= 0.001 held 0.2 s |
 | -1.25 | 3.70 | heading response onset (EGO_MOTION) | A | - | 3.70 | - | - | - | abs(yaw rate) >= 0.5 deg/s |
 | -1.15 | 3.80 | CRITICAL_TTC_START | A | B (associated, A:track_002) | 3.80 | not ahead | - | PREDICTED_OVERLAP |  |
@@ -73,14 +73,14 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 | interval | s |
 |---|---|
 | perception (CUT_IN start) -> steering | 0.90 |
-| path entry (EGO_PATH_ENTRY) -> steering | 0.30 |
+| path entry (EGO_PATH_ENTRY) -> steering | 0.75 |
 | critical (CRITICAL_TTC_START on the track) -> steering | 1.05 |
 | steering -> heading response | 0.05 |
 
 ### 1.4 Cut-ins established by each recorder
 
 - A: CUT_IN_FROM_RIGHT_START A:track_001 (anonymous) at 2.75
-- B: none
+- B: CUT_IN_FROM_RIGHT_START A (associated, B:track_001) at 4.45
 
 ### 1.5 Isolation checks
 
@@ -132,9 +132,9 @@ First core events of A per true subject before A's first contact (t_local 4.95):
 
 | subject (true) | event | reconstruction t_local | COVERAGE t_local | PERFECT t_local |
 |---|---|---|---|---|
-| B | CRITICAL_TTC_START | 3.80 | 3.85 | 3.85 |
+| B | CRITICAL_TTC_START | 3.80 | 3.80 | 3.80 |
 | C | CRITICAL_TTC_START | 2.60 | 2.30 | 2.30 |
-| C | CUT_IN_FROM_RIGHT_START | 2.75 | 3.00 | 3.00 |
-| C | EGO_PATH_ENTRY | 3.35 | 3.20 | 3.20 |
+| C | CUT_IN_FROM_RIGHT_START | 2.75 | 2.80 | 2.80 |
+| C | EGO_PATH_ENTRY | 2.90 | 2.80 | 2.80 |
 
 Evaluation headline: collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 3; max |t_global error| 0.0 s

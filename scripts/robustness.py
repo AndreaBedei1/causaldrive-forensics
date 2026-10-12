@@ -37,6 +37,11 @@ FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "gnss": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
     # The same GNSS errors with the mutual refinement of the pose sources (fusion.mutual_refinement).
     "gnss_refined": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
+    "gnss_correlated": ([("consumer common 0.5", 0.5), ("consumer common 0.9", 0.9),
+                          ("consumer common 1.0", 1.0)], True),
+    "combined": ([("exact + 10%", ('ideal',0.0)), ("RTK + 10%", ('rtk',0.0)),
+                   ("consumer independent + 10%", ('consumer',0.0)),
+                   ("consumer common 0.9 + 10%", ('consumer',0.9))], True),
     "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
     "latency": ([("0.05 s", 0.05), ("0.10 s", 0.10), ("0.25 s", 0.25), ("0.50 s", 0.50)], False),
     "clock": ([("offsets", None)], False),
@@ -94,6 +99,13 @@ def build(job: Dict[str, Any]):
     elif family in ("gnss", "gnss_refined"):
         perturbation = Perturbation(name, gnss=GNSS_PROFILES[parameter])
         pose = PerturbedPoseSource.factory(GNSS_PROFILES[parameter], int(job["seed"]))
+    elif family in ('gnss_correlated','combined'):
+        import dataclasses
+        base, fraction = ('consumer',float(parameter)) if family=='gnss_correlated' else parameter
+        profile = dataclasses.replace(GNSS_PROFILES[base],common_fraction=float(fraction))
+        perturbation = Perturbation(name,gnss=profile,
+                     collisions=CollisionPerturbation(impulse_rel_std=.10 if family=='combined' else 0.0))
+        pose = PerturbedPoseSource.factory(profile,int(job['seed']))
     elif family == "impulse":
         perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
     elif family == "latency":
@@ -130,19 +142,24 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
     perturbation, pose = build(job)
     tag = perturbation.name + ("_" + job["recorder"] if job.get("recorder") else "")
     target = Path(work) / tag / "seed{0}".format(job["seed"]) / run_dir.parent.name / run_dir.name
+    resolved = target.resolve()
+    if Path(work).resolve() not in resolved.parents or resolved == run_dir.resolve():
+        raise ValueError('perturbed target must remain inside the dedicated work directory')
     if target.exists():
         shutil.rmtree(str(target))  # a stale scratch copy of an interrupted job (never a recording)
     result = {k: v for k, v in job.items()}
     result["perturbation"] = perturbation.to_dict()
     start = time.monotonic()
+    from cdf.evaluation.provenance import provenance
+    from cdf.reconstruction.config import load_config
+    cfg = load_config()
+    if job['family']=='gnss_refined':
+        import dataclasses
+        cfg=dataclasses.replace(cfg,fusion=dataclasses.replace(cfg.fusion,mutual_refinement=True))
+    result['provenance'] = provenance(cfg.to_dict(),runs=[str(run_dir)],
+                                      perturbation=perturbation.name,seed=int(job['seed']))
     try:
         perturbed_copy(run_dir, target, perturbation, int(job["seed"]))
-        cfg = None
-        if job["family"] == "gnss_refined":
-            import dataclasses
-            from cdf.reconstruction.config import load_config
-            base = load_config()
-            cfg = dataclasses.replace(base, fusion=dataclasses.replace(base.fusion, mutual_refinement=True))
         reconstruct_run(target, cfg, pose_factory=pose)
         base = _read_json(run_dir / "reconstruction" / "global" / "global_graph.json")
         new = _read_json(target / "reconstruction" / "global" / "global_graph.json")
@@ -156,6 +173,11 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
             fusion = evaluate_fusion(target, write=True, pose_factory=pose)
             fusion.pop("_raw", None)
             result["metrics"] = run_metrics(target, evaluation, fusion)
+            result['collision_unmatched'] = sum(c.get('reconstructed_as') is None for c in evaluation['collisions'])
+            alignment = _read_json(target/'reconstruction/global/alignment.json')
+            result['ambiguous_candidate_refusals'] = sum('ambig' in str(e).lower() for e in alignment['rejected_matches'])
+            from cdf.evaluation.pose_errors import pose_errors
+            result['pose_errors'] = pose_errors(target,pose)
         result["status"] = "complete"
     except Exception as exc:  # recorded, the study goes on
         import traceback
@@ -182,8 +204,15 @@ def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
     deltas = [abs(d) for r in done for d in r["events"]["time_deltas_s"]]
     return {"runs": len(done), "failed": len(results) - len(done),
             "association_accuracy": ratio("associations_correct", "associations_decided"),
+            'absolute_pose_rms_m': statistics.median([r['pose_errors']['absolute_position_m']['rms'] for r in done
+                                   if r.get('pose_errors')]) if any(r.get('pose_errors') for r in done) else None,
+            'relative_pose_rms_m': statistics.median([r['pose_errors']['relative_position_m']['rms'] for r in done
+                                   if r.get('pose_errors') and r['pose_errors']['relative_position_m']['rms'] is not None])
+                                   if any(r.get('pose_errors') and r['pose_errors']['relative_position_m']['rms'] is not None for r in done) else None,
             "collision_recall": ratio("collisions_reconstructed", "collisions_true"),
             "false_collision_matches": sum(m.get('false_collision_matches', 0) for m in with_metrics),
+            "collision_unmatched": sum(r.get('collision_unmatched',0) for r in done),
+            "ambiguous_candidate_refusals": sum(r.get('ambiguous_candidate_refusals',0) for r in done),
             "runs_aligned": (sum(1 for m in with_metrics if m["recorders_aligned"] == m["recorders"]) / len(with_metrics)
                              if with_metrics else None),
             "wrong_links": sum(m["links_wrong"] for m in with_metrics) if with_metrics else None,
@@ -443,6 +472,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         finished.add(key(result))
                     else:
                         print("FAILED", result["family"], result["level"], result["run"], result.get("error"), flush=True)
+            if any(r.get('status')=='failed' for r in done):
+                raise RuntimeError('Robustness jobs failed; inspect jobs.jsonl and resume after resolving the cause')
     record = summarize(done, args.results)
     for row in record["rows"]:
         print("{0:10s} {1:16s} seeds {2} runs {3:3d} assoc {4} coll {5} aligned {6} events {7} centre {8} false merges {9}".format(

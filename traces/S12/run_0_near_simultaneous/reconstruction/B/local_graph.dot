@@ -19,7 +19,7 @@ digraph "local_B" {
   "B:e15" [label="STOP_END\nB\nt=5.15", fillcolor="#e5e7eb"];
   "B:e16" [label="MOVING_START\nB\nt=5.15", fillcolor="#e5e7eb"];
   "B:e17" [label="CRITICAL_TTC_START\nB -> track_001#segment_1\nt=6.05", fillcolor="#bfdbfe"];
-  "B:e18" [label="EGO_PATH_ENTRY\nB -> track_001#segment_1\nt=6.75", fillcolor="#bfdbfe"];
+  "B:e18" [label="EGO_PATH_ENTRY\nB -> track_001#segment_1\nt=6.65", fillcolor="#bfdbfe"];
   "B:e19" [label="TRACK_LOST\nB -> track_001#segment_1\nt=6.75", fillcolor="#bfdbfe"];
   "B:e20" [label="TRACK_APPEARED_FRONT\nB -> track_001#segment_2\nt=6.80", fillcolor="#bfdbfe"];
   "B:e21" [label="CLOSING_START\nB -> track_001#segment_2\nt=6.80", fillcolor="#bfdbfe"];
@@ -36,7 +36,6 @@ digraph "local_B" {
   {rank=same; "B:e09"; "B:e10";}
   {rank=same; "B:e12"; "B:e13";}
   {rank=same; "B:e15"; "B:e16";}
-  {rank=same; "B:e18"; "B:e19";}
   {rank=same; "B:e20"; "B:e21";}
   {rank=same; "B:e23"; "B:e24"; "B:e25";}
   {rank=same; "B:e26"; "B:e27";}
@@ -63,9 +62,7 @@ digraph "local_B" {
   "B:e15" -> "B:e17" [label="PRECEDES"];
   "B:e16" -> "B:e17" [label="PRECEDES"];
   "B:e17" -> "B:e18" [label="PRECEDES"];
-  "B:e17" -> "B:e19" [label="PRECEDES"];
-  "B:e18" -> "B:e20" [label="PRECEDES"];
-  "B:e18" -> "B:e21" [label="PRECEDES"];
+  "B:e18" -> "B:e19" [label="PRECEDES"];
   "B:e19" -> "B:e20" [label="PRECEDES"];
   "B:e19" -> "B:e21" [label="PRECEDES"];
   "B:e20" -> "B:e22" [label="PRECEDES"];

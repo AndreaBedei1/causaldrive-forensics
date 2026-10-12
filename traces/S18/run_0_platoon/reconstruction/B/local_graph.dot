@@ -24,9 +24,10 @@ digraph "local_B" {
   "B:e20" [label="CLOSING_END\nB -> track_001\nt=6.60", fillcolor="#bfdbfe"];
   "B:e21" [label="MOVING_END\nB\nt=7.25", fillcolor="#e5e7eb"];
   "B:e22" [label="STOP_START\nB\nt=7.25", fillcolor="#e5e7eb"];
-  "B:e23" [label="TRACK_LOST\nB -> track_005\nt=8.55", fillcolor="#bfdbfe"];
-  "B:e24" [label="TRACK_LOST\nB -> track_002\nt=8.95", fillcolor="#bfdbfe"];
-  "B:e25" [label="TRACK_LOST\nB -> track_004\nt=9.55", fillcolor="#bfdbfe"];
+  "B:e23" [label="EGO_PATH_ENTRY\nB -> track_001\nt=7.35", fillcolor="#bfdbfe"];
+  "B:e24" [label="TRACK_LOST\nB -> track_005\nt=8.55", fillcolor="#bfdbfe"];
+  "B:e25" [label="TRACK_LOST\nB -> track_002\nt=8.95", fillcolor="#bfdbfe"];
+  "B:e26" [label="TRACK_LOST\nB -> track_004\nt=9.55", fillcolor="#bfdbfe"];
   {rank=same; "B:e01"; "B:e02"; "B:e03"; "B:e04"; "B:e05"; "B:e06"; "B:e07";}
   {rank=same; "B:e08"; "B:e09";}
   {rank=same; "B:e13"; "B:e14";}
@@ -70,6 +71,7 @@ digraph "local_B" {
   "B:e22" -> "B:e23" [label="PRECEDES"];
   "B:e23" -> "B:e24" [label="PRECEDES"];
   "B:e24" -> "B:e25" [label="PRECEDES"];
+  "B:e25" -> "B:e26" [label="PRECEDES"];
   "B:e04" -> "B:e06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e05" -> "B:e07" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e08" -> "B:e09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -80,7 +82,8 @@ digraph "local_B" {
   "B:e04" -> "B:e17" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e05" -> "B:e18" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "B:e03" -> "B:e20" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e19" -> "B:e23" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e04" -> "B:e24" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "B:e05" -> "B:e25" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e03" -> "B:e23" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e19" -> "B:e24" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e04" -> "B:e25" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "B:e05" -> "B:e26" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

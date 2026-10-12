@@ -280,13 +280,16 @@ class ExporterTests(unittest.TestCase):
             self.assertTrue(all(f["t_global_s"] is not None for f in a_rows))
 
 
-@unittest.skipUnless((S17 / "reconstruction" / "llm" / "forensic_packet.json").exists(), "S17 not recorded")
+S17_PACKET_FIXTURE = Path(__file__).resolve().parent / 'fixtures' / 's17_parked_pipeline'
+
+
+@unittest.skipUnless((S17_PACKET_FIXTURE / "forensic_packet.json").exists(), "S17 fixture missing")
 class S17PacketTests(unittest.TestCase):
     """The non-recorder C never appears in the admissible input: only anonymous tracks."""
 
     @classmethod
     def setUpClass(cls):
-        cls.text = (S17 / "reconstruction" / "llm" / "forensic_packet.json").read_text(encoding="utf-8")
+        cls.text = (S17_PACKET_FIXTURE / "forensic_packet.json").read_text(encoding="utf-8")
         cls.packet = json.loads(cls.text)
 
     def test_c_is_not_revealed(self):
@@ -295,7 +298,7 @@ class S17PacketTests(unittest.TestCase):
         self.assertEqual([r["recorder_id"] for r in self.packet["known_recorders"]], ["A", "B"])
         self.assertNotIn('"C"', self.text)
         self.assertNotIn("C:", self.text)
-        facts_text = (S17 / "reconstruction" / "llm" / "forensic_facts.jsonl").read_text(encoding="utf-8")
+        facts_text = (S17_PACKET_FIXTURE / "forensic_facts.jsonl").read_text(encoding="utf-8")
         self.assertNotIn('"C"', facts_text)
         check_packet(self.packet)
 

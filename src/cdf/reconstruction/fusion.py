@@ -303,6 +303,106 @@ def _global_subject(owner: str, subject: Optional[str], names: Dict[Any, str]) -
     return names.get((owner, subject), owner + ":" + subject)
 
 
+def aggregate_entity_events(nodes: Sequence[GlobalNode], track_ends: Dict[Any, Tuple[float, float]]) -> List[GlobalNode]:
+    """Union source timelines per observer/entity/state, retaining every local node.
+
+    track_ends maps (observer, local track) to (last global sample, sampling
+    period). Visibility is continuous across adjoining source sample cells;
+    an actual gap still produces loss/reappearance. Unknown state after loss
+    does not fabricate a semantic END.
+    """
+    families = {'CLOSING_START': ('CLOSING', True), 'CLOSING_END': ('CLOSING', False),
+                'CRITICAL_TTC_START': ('CRITICAL_TTC', True), 'CRITICAL_TTC_END': ('CRITICAL_TTC', False),
+                'EGO_PATH_ENTRY': ('IN_EGO_PATH', True), 'EGO_PATH_EXIT': ('IN_EGO_PATH', False),
+                'CUT_IN_FROM_LEFT_START': ('CUT_IN_FROM_LEFT', True), 'CUT_IN_FROM_LEFT_END': ('CUT_IN_FROM_LEFT', False),
+                'CUT_IN_FROM_RIGHT_START': ('CUT_IN_FROM_RIGHT', True), 'CUT_IN_FROM_RIGHT_END': ('CUT_IN_FROM_RIGHT', False)}
+    # Preserve silent initial support even when the source never emits an EXIT.
+    nodes = list(nodes)
+    for appearance in list(nodes):
+        if (appearance.t_global is not None and appearance.event_type.startswith('TRACK_APPEARED_')
+                and appearance.attributes.get('initial_in_ego_path')):
+            initial = copy.deepcopy(appearance)
+            initial.event_type = 'EGO_PATH_ENTRY'
+            initial.attributes['initial_state_unannounced'] = True
+            initial.observations = []
+            nodes.append(initial)
+    groups, keep = {}, []
+    for node in nodes:
+        family = families.get(node.event_type)
+        if node.event_type.startswith('TRACK_APPEARED_'):
+            family = ('TRACK_SUPPORT', True)
+        elif node.event_type == 'TRACK_LOST':
+            family = ('TRACK_SUPPORT', False)
+        track = node.attributes.get('source_track')
+        if family is None or track is None or node.t_global is None:
+            keep.append(node)
+        else:
+            groups.setdefault((node.actor_id, node.subject_id, family[0]), {}).setdefault(track, []).append((node, family[1]))
+    for (observer, entity, state), by_track in groups.items():
+        intervals = []
+        for track, changes in by_track.items():
+            opened = None
+            for node, active in sorted(changes, key=lambda x: (x[0].t_global, not x[1])):
+                if active:
+                    if opened is None:
+                        opened = node
+                elif opened is not None:
+                    intervals.append([opened.t_global, node.t_global, [opened, node], node, track])
+                    opened = None
+                else:
+                    # First-seen active state has no fabricated START (path).
+                    # Its END still contributes to the entity timeline.
+                    appeared = [n for n in nodes if n.actor_id == observer and n.subject_id == entity
+                                and n.attributes.get('source_track') == track
+                                and n.event_type.startswith('TRACK_APPEARED_') and n.t_global is not None]
+                    if appeared:
+                        initial = copy.deepcopy(node)
+                        initial.t_global = min(n.t_global for n in appeared)
+                        initial.event_type = next(k for k,v in families.items() if v == (state,True))
+                        initial.attributes['initial_state_unannounced'] = True
+                        initial.observations = []
+                        intervals.append([initial.t_global,node.t_global,[initial,node],node,track])
+                    else:
+                        keep.append(node)
+            if opened is not None:
+                last_sample, period = track_ends.get((observer, track), (float('inf'), 0.0))
+                end = last_sample + period # active last sample owns its sampling cell
+                intervals.append([opened.t_global, end, [opened], None, track])
+        united = []
+        for span in sorted(intervals, key=lambda x: x[0]):
+            tolerance = (max((track_ends.get((observer, tr), (0, 0))[1] for tr in
+                              (united[-1][4] if united else []) + [span[4]]), default=0.0)
+                         if state == 'TRACK_SUPPORT' else 0.0)
+            if united and span[0] <= united[-1][1] + tolerance + 1e-6:
+                previous = united[-1]
+                previous[2] += span[2];previous[4].append(span[4])
+                if span[1] > previous[1] + 1e-6:
+                    previous[1], previous[3] = span[1], span[3]
+                elif abs(span[1] - previous[1]) < 1e-6 and span[3] is None:
+                    previous[3] = None
+            else:
+                united.append([span[0], span[1], list(span[2]), span[3], [span[4]]])
+        for start, end, sources, ending, tracks in united:
+            first = copy.deepcopy(min(sources, key=lambda n: n.t_global))
+            first.t_global = start
+            observations = [o for n in sources for o in n.observations]
+            metadata = {'aggregation': 'entity_state_union', 'semantic_state': state,
+                        'source_tracks': sorted(observer + ':' + t for t in set(tracks)),
+                        'source_local_nodes': [{'graph': o.graph, 'local_node': o.local_node,
+                                                't_local': o.t_local, 'event_type': n.event_type,
+                                                'attributes': copy.deepcopy(n.attributes)} for n in sources for o in n.observations]}
+            first.attributes.update(metadata)
+            first.observations = observations
+            if not first.attributes.get('initial_state_unannounced'):
+                keep.append(first)
+            if ending is not None:
+                last = copy.deepcopy(ending);last.t_global = end
+                last.attributes.update(metadata)
+                last.observations = [o for n in sources if n.event_type == last.event_type for o in n.observations]
+                keep.append(last)
+    return keep
+
+
 def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                 associations: Sequence[Association]) -> GlobalGraph:
     """Local graphs + alignment + associations -> one global event graph."""
@@ -333,7 +433,8 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             drafts.append(GlobalNode(
                 node_id="", event_type=node.event_type, kind=node.kind, actor_id=local.owner,
                 subject_id=subject, participants=participants, t_global=clock.to_global(node.t_local),
-                attributes=dict(node.attributes),
+                attributes=dict(node.attributes, **({'source_track': node.subject_id}
+                                if (local.owner, node.subject_id) in names else {})),
                 source=node.source, confidence=node.confidence,
                 observations=[Observation(local.owner, node.node_id, node.t_local)]))
             drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
@@ -350,6 +451,15 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             observations=[Observation(graph, event["nodes"][graph], event["t_local"][graph]) for graph in graphs]))
         drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
 
+    track_ends = {}
+    for local in locals_:
+        clock = alignment.graphs[local.owner]
+        if clock.status != 'ALIGNED':
+            continue
+        for track in local.tracks:
+            period = min((b.t_local-a.t_local for a,b in zip(track.samples,track.samples[1:])), default=0.0)
+            track_ends[(local.owner,track.track_id)] = (clock.to_global(track.last_t), period)
+    drafts = aggregate_entity_events(drafts, track_ends)
     aligned = display_order([node for node in drafts if node.t_global is not None],
                             lambda node: node.t_global, lambda node: node.event_type,
                             lambda node: node.actor_id, lambda node: node.subject_id)
@@ -365,7 +475,10 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
     for local in sorted(locals_, key=lambda item: item.owner):
         for edge in local.graph.edges:
             if edge.relation == SAME_TRACK:
-                edges.append(GraphEdge(global_id[edge.from_node], global_id[edge.to_node], SAME_TRACK))
+                first, last = global_id.get(edge.from_node), global_id.get(edge.to_node)
+                if first is not None and last is not None and first != last:
+                    edges.append(GraphEdge(first, last, SAME_TRACK))
+    edges = list({(edge.from_node, edge.to_node, edge.relation): edge for edge in edges}.values())
 
     entities = []
     for owner in recorders:

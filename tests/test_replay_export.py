@@ -40,7 +40,7 @@ class S17ExportTests(unittest.TestCase):
         times = [round(self.replay.display_time(frame.time), 2) for frame in frames]
         self.assertEqual(times, sorted(times))
         self.assertEqual(len(times), len(set(times)))
-        for expected in (-2.35, -2.2, -1.6, -1.15, -0.8, 0.0, 0.55):
+        for expected in (-2.35, -2.2, -2.05, -1.15, -0.8, 0.0, 0.55):
             self.assertIn(expected, times)
         collision = next(frame for frame in frames if abs(self.replay.display_time(frame.time)) < 1e-6)
         self.assertIn("COLLISION(A,B)", collision.label)

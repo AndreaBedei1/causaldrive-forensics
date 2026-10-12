@@ -14,7 +14,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 |----|-----------:|------|-------|---------|--------|---------|
 | B:e01 | 0.00 | MOVING_START | B | - | ego | active_at_first_observation=True |
 | B:e02 | 0.00 | THROTTLE_START | B | - | controls | active_at_first_observation=True |
-| B:e03 | 0.00 | TRACK_APPEARED_FRONT | B | track_001 | radar |  |
+| B:e03 | 0.00 | TRACK_APPEARED_FRONT | B | track_001 | radar | initial_in_ego_path=True |
 | B:e04 | 0.50 | CRITICAL_TTC_START | B | track_001 | radar |  |
 | B:e05 | 3.20 | CLOSING_START | B | track_001 | radar |  |
 | B:e06 | 3.70 | THROTTLE_END | B | - | controls |  |

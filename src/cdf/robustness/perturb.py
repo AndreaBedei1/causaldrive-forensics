@@ -145,6 +145,13 @@ class GnssProfile:
     yaw_tau_s: float = 30.0
     yaw_white_deg: float = 0.0
     velocity_white_mps: float = 0.0
+    # Fraction of slow horizontal-position variance shared within a local run.
+    # Sensitivity parameter, not a universally calibrated receiver property.
+    common_fraction: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.common_fraction <= 1.0:
+            raise ValueError('common_fraction must be in [0, 1]')
 
     @property
     def position_std_m(self) -> float:
@@ -190,7 +197,7 @@ class PerturbedPoseSource(RecordedPoseSource):
     profile's accuracy as a receiver reports its own estimate."""
 
     def __init__(self, records: Sequence[Mapping[str, Any]], clock_origin: float, profile: GnssProfile, seed: int,
-                 recorder: str) -> None:
+                 recorder: str, common: Optional[Mapping[str, Any]] = None) -> None:
         super().__init__(records, clock_origin)
         self.name = "gnss_" + profile.name
         self.profile = profile
@@ -199,10 +206,22 @@ class PerturbedPoseSource(RecordedPoseSource):
         self.velocity_std_mps = profile.velocity_white_mps
         rng = lambda label: np.random.default_rng(stream_seed(seed, "gnss", profile.name, recorder, label))  # noqa: E731
         t = self.times
-        self.x = self.x + _error_series(t, profile.bias_m, profile.markov_m, profile.tau_s, profile.white_m,
-                                        profile.rate_hz, rng("x"))
-        self.y = self.y + _error_series(t, profile.bias_m, profile.markov_m, profile.tau_s, profile.white_m,
-                                        profile.rate_hz, rng("y"))
+        independent = math.sqrt(1-profile.common_fraction)
+        def position_error(axis: str) -> np.ndarray:
+            values = _error_series(t, profile.bias_m*independent, profile.markov_m*independent,
+                                   profile.tau_s, profile.white_m, profile.rate_hz, rng(axis))
+            if profile.common_fraction:
+                if common is None:
+                    common_times = t+clock_origin
+                    shared = _error_series(common_times, profile.bias_m, profile.markov_m, profile.tau_s,
+                                           0.0, profile.rate_hz,
+                                           np.random.default_rng(stream_seed(seed,'gnss',profile.name,'common',axis)))
+                else:
+                    common_times, shared = common[axis]
+                values += math.sqrt(profile.common_fraction)*np.interp(t+clock_origin,common_times,shared)
+            return values
+        self.x = self.x + position_error('x')
+        self.y = self.y + position_error('y')
         self.yaw = self.yaw + np.radians(_error_series(t, profile.yaw_bias_deg, profile.yaw_markov_deg, profile.yaw_tau_s,
                                                        profile.yaw_white_deg, profile.rate_hz, rng("yaw")))
         self.vx = self.vx + _error_series(t, 0.0, 0.0, 1.0, profile.velocity_white_mps, profile.rate_hz, rng("vx"))
@@ -211,11 +230,23 @@ class PerturbedPoseSource(RecordedPoseSource):
     @classmethod
     def factory(cls, profile: GnssProfile, seed: int):
         """A ``pose_factory(vehicle_dir, clock_origin)`` for the reconstruction and the replay."""
+        common: Dict[str, Any] = {}
         def make(vehicle_dir: Path, clock_origin: float) -> "PerturbedPoseSource":
             path = Path(vehicle_dir) / "ego.jsonl"
             with path.open(encoding="utf-8") as handle:
                 records = [json.loads(line) for line in handle if line.strip()]
-            return cls(records, clock_origin, profile, seed, Path(vehicle_dir).name)
+            if profile.common_fraction and not common:
+                timestamps = []
+                for peer in Path(vehicle_dir).parent.glob('*/ego.jsonl'):
+                    with peer.open(encoding='utf-8') as handle:
+                        timestamps += [float(json.loads(line)['timestamp']) for line in handle if line.strip()]
+                step = 1/profile.rate_hz
+                times = np.arange(math.floor(min(timestamps)/step)*step-step,max(timestamps)+2*step,step)
+                for axis in ['x','y']:
+                    common[axis] = (times,_error_series(times,profile.bias_m,profile.markov_m,profile.tau_s,
+                                     0.0,profile.rate_hz,
+                                     np.random.default_rng(stream_seed(seed,'gnss',profile.name,'common',axis))))
+            return cls(records, clock_origin, profile, seed, Path(vehicle_dir).name, common or None)
         return make
 
 
