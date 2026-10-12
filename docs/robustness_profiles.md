@@ -117,6 +117,33 @@ In `ideal` every amplitude is zero.  The study's unperturbed baseline uses the r
 | tau 60 s (rtk, consumer), 30 s (degraded) | Engineering assumption: no peer-reviewed Gauss-Markov time constant was found for the position error of a receiver on a moving road vehicle.  Static results bracket it: single-point solutions behave as first-order Gauss-Markov for cluster times of 10-400 s [G11], and static code multipath has bounding time constants of 100-1500 s [G13].  60 s is shorter than the static values, to cover moving-vehicle multipath and changes of the satellite set.  30 s because urban multipath varies with a mean period under one minute even for a static receiver [G12]. |
 | yaw tau 30 s (rtk), 10 s (consumer), 5 s (degraded) | Engineering assumption: no source gives a heading-error correlation time; shorter for poorer heading sources. |
 
+## Correlated position sensitivity and combined collision study
+
+The verified sources [G7, G10] support slowly varying orbit, clock and atmospheric errors;
+they do not establish one universal common fraction for neighbouring vehicle receivers.
+`gnss_correlated` therefore sweeps rho = 0.5, 0.9, 1.0 as a declared sensitivity assumption.
+For each horizontal axis:
+
+    e_i(t) = sqrt(rho) [b_common + g_common(t)]
+             + sqrt(1-rho) [b_i + g_i(t)] + w_i(t)
+
+The bias and Gauss-Markov marginal variances stay equal to the consumer profile.
+Common errors use shared absolute receiver epochs, even when recorder starts differ.
+White position noise, heading and velocity remain receiver-specific and independent.
+Even rho=1 retains independent white receiver noise. No universal GNSS correlation is asserted.
+Heading errors still produce range-dependent relative geometry errors despite common position.
+
+`pose_errors` measures absolute horizontal 2-D RMS error and simultaneous pairwise position-vector
+error against the exact recorded pose. Common translation cancels only from the latter; it can
+still displace the fused body in the absolute map. The final scatter plot relates fusion quality
+to both errors. Any empirical relative-error boundary is conditional on these runs, profiles,
+seeds and heading assumptions; conservative missed merges are reported separately.
+
+`combined` runs all 17 canonical cases at exact, RTK, consumer-independent and consumer-rho=0.9
+pose quality with 10% independent impulse noise per callback, using the same seed schedule.
+It reports true-contact recall, wrong pairings, unmatched true contacts and clock alignment.
+Singleton unpaired collision callbacks are not wrong vehicle-vehicle matches.
+
 ## Collision reports
 
 Final hardening uses `impulse_relative_std = 0.10` per report and
@@ -125,9 +152,9 @@ This configurable uncertainty budget is an engineering assumption; it is not a
 specification for a real crash-impulse sensor. Contact, pre-contact approach and
 clock/assignment consistency constrain the pairing. Ambiguous partners remain
 unmatched. The legacy 10% relative gate applies without geometry.
-The symmetry Monte Carlo report is retained as a historical diagnosis of that
-legacy gate. Only baseline/impulse were refreshed; see
-[final audit](audit/technical_hardening.md) and `summary.json.family_provenance`.
+The symmetry Monte Carlo report is regenerated as a diagnostic of that legacy
+gate. All robustness families are rerun from the final clean analysis freeze;
+see [final validation](FINAL_VALIDATION_REPORT.md).
 
 `CollisionPerturbation` rewrites each recorder's `collisions.jsonl`.  Each callback is dropped with probability `p_drop`; its impulse is multiplied by max(0, 1 + N(0, eps^2)); its timestamp is delayed by `latency_s` if the recorder is in `latency_recorders`.  The draws are made per callback, separately for each recorder.
 

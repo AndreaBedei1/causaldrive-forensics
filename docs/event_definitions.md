@@ -74,8 +74,9 @@ the field of view (the visibility audit, `scripts/audit_radar_visibility.py`, gi
 
 ## 4. EGO_PATH_ENTRY / EGO_PATH_EXIT
 
-A track is in the recorder's path while its tracked point is ahead of the recorder's front edge and within
-`path_half_width_m` of its heading line; it leaves the path only beyond the hysteresis (`local.track_events`).
+A track is in the recorder's path when its estimated target body intersects the forward corridor beyond
+the recorder's front edge. It leaves only when the whole body is outside the corridor enlarged laterally
+and backward by the hysteresis (`local.track_events`, `conflict.body_in_corridor`).
 A track first seen inside the corridor has no observed entry.
 
 | Parameter | Value | Justification |
@@ -83,19 +84,23 @@ A track first seen inside the corridor has no observed entry.
 | `path_half_width_m` | 1.5 m | Engineering assumption: half of a 3 m lane, straight ahead (no lane geometry is perceived). |
 | `path_hysteresis_m` | 0.5 m | Engineering assumption: out of the path only this far beyond it. |
 
-The test uses the radar's tracked point (the median of the track's returns), not the target's whole body:
-see section 8 for what this costs at close range.
+PATH, CUT_IN and CRITICAL_TTC use the same estimated box (`conflict.target_box`): tracked position,
+velocity heading and nominal footprint. The runtime never uses the true target dimensions or pose.
+The body-vs-point ablation holds tracks, target-motion semantics and reference body constant.
 
 ## 5. CUT_IN_FROM_LEFT / _RIGHT (START, END)
 
-A target moving within `cut_in_max_heading_deg` of the recorder's heading, at least `cut_in_min_target_speed_mps`
+A target moving within `cut_in_max_heading_deg` of the path heading frozen at its first observation, at least `cut_in_min_target_speed_mps`
 fast, approaching the corridor laterally at `cut_in_lateral_speed_mps` or more (beyond its velocity uncertainty)
 without interruption for `cut_in_persistence_s`, having started at least `cut_in_outside_margin_m` outside the
 corridor and closed at least `cut_in_min_displacement_m`, due to reach it within `cut_in_horizon_s` and with its
 nominal body already within `cut_in_preentry_margin_m` of it (`local.cut_in_spans`).  The side is the side it
 comes from.  END: lateral approach below `cut_in_settle_speed_mps` for `cut_in_settle_s`.  Claimed only on a
 precise estimate (`max_position_std_m` = 1.0 m, `max_velocity_std_mps` = 1.0 m/s, engineering assumptions);
-a sample seen past another tracked vehicle gives no evidence.
+a sample seen past another tracked vehicle gives no evidence. Absolute target velocity is projected
+into that fixed path frame; ego translation and yaw alone cannot establish a target manoeuvre.
+Distance, displacement and pre-entry are estimated body-to-corridor gaps in the same fixed frame.
+This is a straight-path operational definition: renewed or curved manoeuvres need a separate future model.
 
 | Parameter | Value | Justification |
 |---|--:|---|
@@ -172,14 +177,12 @@ recorder and every other vehicle an ideal radar track is built from ground truth
 acceleration and size) at the recorder's sweep times and passed through the same event functions: PERFECT
 (all-seeing) and COVERAGE (only where the vehicle is within one of the recorder's radar fields of view and range
 with a clear line of sight), and COVERAGE_TRACKED (the same, testing the point a radar track reports -- the
-median of the body's faces that the recorder's radars see -- instead of the true nearest point).  COVERAGE
-against PERFECT measures what the sensor coverage costs, COVERAGE_TRACKED against COVERAGE what the
-tracked-point convention of sections 4 and 5 costs, and the reconstruction against COVERAGE_TRACKED what is
-left: sensing, tracking and estimation.  Results before each recorder's first contact (the pre-crash window):
-`results/semantics/event_oracle_*.md`.  On the canonical runs the convention alone loses half of the true path
-entries (9 of 16) and three of five cut-ins from the right, while the reconstruction finds 89 % of the path
-entries its own convention would give (median +0.05 s): testing the estimated body rather than the tracked point
-is the improvement this points to.
+median of the body's visible faces). All three ideal oracles supply the same true oriented body.
+COVERAGE against PERFECT measures FOV, range and occlusion loss; reconstruction against COVERAGE
+measures sensing and estimation loss. COVERAGE_TRACKED now isolates the return-point effects on
+kinematic quantities, without replacing the true body by that point. The explicit point ablation is
+`results/semantics/body_point_*.json`. Current precision, recall and timing are in
+`results/semantics/event_oracle_*.md`, interpreted in `docs/FINAL_VALIDATION_REPORT.md`.
 
 **One-at-a-time sensitivity** (`scripts/semantic_sensitivity.py`): each threshold of section 4-6 varied to two
 alternative values, the oracle under the same definition; it reports the reconstruction's agreement with the
