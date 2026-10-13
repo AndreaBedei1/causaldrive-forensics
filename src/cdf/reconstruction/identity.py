@@ -878,19 +878,6 @@ def entity_timeline(group: Sequence[CommonTrack], joins: Sequence[PairEvidence],
             "first_hazard_relevant": min(hazards) if hazards else None}
 
 
-def stitch_spread(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig) -> float:
-    """Per-axis position standard deviation of the first track's last measured state carried across the gap to
-    the second one's first measurement with the tracker's own model (constant velocity, white acceleration
-    ``tracking.acceleration_std_mps2`` per 0.05 s sweep): sqrt(p^2 + (v dt)^2 + q dt^3 / 3), q = a^2 x 0.05."""
-    last = next((s for s in reversed(first.samples) if s.measured), None)
-    nxt = next((s for s in second.samples if s.measured), None)
-    if last is None or nxt is None:
-        return math.inf
-    gap = max(nxt.t_global - last.t_global, 0.0)
-    q = cfg.tracking.acceleration_std_mps2 ** 2 * 0.05
-    return math.sqrt(last.pos_std ** 2 + (last.vel_std * gap) ** 2 + q * gap ** 3 / 3.0)
-
-
 def stitch_density(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig) -> float:
     """Gaussian density (1/m^2 per (m/s)^2) of a re-acquisition under the stitch test's own model
     (``anonymous.stitch_evidence``: centre carried across the gap at constant velocity, white acceleration
