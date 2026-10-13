@@ -604,6 +604,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                                          "retrospective": [d for d in retro if d.get("resolved") and set(d["earlier"]) <= members],
                                          "confidence": confidence},
                          "fusion_method": "+".join(sorted({s["method"] for s in states})), "footprint": footprint,
+                         "relevance": entity_relevance(group, view.bodies, cfg),
                          "trajectory": states})
         for track in group:
             item = by_key[(track.recorder, track.track_id)]
@@ -679,3 +680,43 @@ def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
             return False
         return True if any(value is True for value in sides) else None
     return check
+
+
+# --------------------------------------------------------------------------
+# Reconstruction relevance range (sensor range is not relevance)
+# --------------------------------------------------------------------------
+
+def relevance_range(ego_speed: float, closing_speed: float, velocity_std: float, position_std: float,
+                    cfg: ReconstructionConfig) -> float:
+    """Clearance below which a target can become a conflict within the prediction horizon (conflict model):
+    d_rel = d_min(v_ego) + max(v_close + 3 sigma_v, 0) x H + 3 sigma_pos, with d_min the safe following distance
+    of the recorder's speed (``conflict.safe_following_distance``: UN R157 time gap, 2 m floor), v_close the
+    rate at which the clearance shrinks, H ``semantics.prediction_horizon_s``.  A far target that does not close
+    in stays outside; one closing fast becomes relevant earlier; uncertainty widens it."""
+    from .conflict import safe_following_distance
+    _, _, d_min = safe_following_distance(max(ego_speed, 0.0), cfg.semantics)
+    return d_min + max(closing_speed + 3.0 * velocity_std, 0.0) * cfg.semantics.prediction_horizon_s + 3.0 * position_std
+
+
+def entity_relevance(group: Sequence[CommonTrack], bodies: Dict[str, Any], cfg: ReconstructionConfig) -> Dict[str, Any]:
+    """When an entity first lies within its observers' relevance range, and its smallest clearance-to-range ratio."""
+    first, ratio = None, math.inf
+    for track in group:
+        body = bodies.get(track.recorder)
+        if body is None:
+            continue
+        for s in track.samples:
+            if not s.measured:
+                continue
+            pose = body.pose_at_global(s.t_global)
+            line = s.near - s.observer
+            clearance = float(np.hypot(*line))
+            unit = line / max(clearance, 1e-6)
+            closing = -float((s.velocity - np.array([pose.vx, pose.vy])) @ unit)
+            limit = relevance_range(math.hypot(pose.vx, pose.vy), closing, s.vel_std,
+                                    math.sqrt(measurement_variance(s, cfg)), cfg)
+            ratio = min(ratio, clearance / max(limit, 1e-6))
+            if clearance <= limit and (first is None or s.t_global < first):
+                first = s.t_global
+    return {"relevant_from_t_global": None if first is None else round(first, 3),
+            "min_clearance_to_relevance_range": None if math.isinf(ratio) else round(ratio, 3)}
