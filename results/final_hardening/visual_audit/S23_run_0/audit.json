@@ -1,0 +1,133 @@
+{
+ "run": "S23/run_0",
+ "clock": "t_global",
+ "frames": [
+  {
+   "file": "01_tgm008.50.png",
+   "label": "lead-in",
+   "replay_time": 0.0,
+   "display_time": -8.5
+  },
+  {
+   "file": "02_tgm006.75.png",
+   "label": "CRITICAL_TTC_START(A,U1)",
+   "replay_time": 1.75,
+   "display_time": -6.75
+  },
+  {
+   "file": "03_tgm006.65.png",
+   "label": "CUT_IN_FROM_RIGHT_START(A,U1)",
+   "replay_time": 1.85,
+   "display_time": -6.65
+  },
+  {
+   "file": "04_tgm005.90.png",
+   "label": "CRITICAL_TTC_END(A,U1)",
+   "replay_time": 2.6,
+   "display_time": -5.9
+  },
+  {
+   "file": "05_tgm005.85.png",
+   "label": "CUT_IN_FROM_RIGHT_END(A,U1)",
+   "replay_time": 2.65,
+   "display_time": -5.85
+  },
+  {
+   "file": "06_tgm003.20.png",
+   "label": "CRITICAL_TTC_START(A,U3)",
+   "replay_time": 5.3,
+   "display_time": -3.2
+  },
+  {
+   "file": "07_tgm003.10.png",
+   "label": "CUT_IN_FROM_RIGHT_START(A,U3)",
+   "replay_time": 5.4,
+   "display_time": -3.1
+  },
+  {
+   "file": "08_tgm002.40.png",
+   "label": "CRITICAL_TTC_END(A,U3)",
+   "replay_time": 6.1,
+   "display_time": -2.4
+  },
+  {
+   "file": "09_tgm002.35.png",
+   "label": "CUT_IN_FROM_RIGHT_END(A,U3)",
+   "replay_time": 6.15,
+   "display_time": -2.35
+  },
+  {
+   "file": "10_tgm001.40.png",
+   "label": "CRITICAL_TTC_START(A,U7)",
+   "replay_time": 7.1,
+   "display_time": -1.4
+  },
+  {
+   "file": "11_tgm001.35.png",
+   "label": "CRITICAL_TTC_START(A,B)",
+   "replay_time": 7.15,
+   "display_time": -1.35
+  },
+  {
+   "file": "12_tgm000.80.png",
+   "label": "CRITICAL_TTC_START(B,A)",
+   "replay_time": 7.7,
+   "display_time": -0.8
+  },
+  {
+   "file": "13_tgm000.20.png",
+   "label": "EGO_PATH_ENTRY(B,A); before COLLISION(A,B)",
+   "replay_time": 8.3,
+   "display_time": -0.2
+  },
+  {
+   "file": "14_tgm000.05.png",
+   "label": "CRITICAL_TTC_START(A,U8)",
+   "replay_time": 8.45,
+   "display_time": -0.05
+  },
+  {
+   "file": "15_tgp000.00.png",
+   "label": "CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); COLLISION(A,B)",
+   "replay_time": 8.5,
+   "display_time": 0.0
+  },
+  {
+   "file": "16_tgp000.30.png",
+   "label": "CRITICAL_TTC_END(A,U8); EGO_PATH_ENTRY(A,B)",
+   "replay_time": 8.8,
+   "display_time": 0.3
+  },
+  {
+   "file": "17_tgp000.50.png",
+   "label": "after COLLISION(A,B)",
+   "replay_time": 9.0,
+   "display_time": 0.5
+  }
+ ],
+ "flags": [
+  {
+   "check": "road_users_overlap",
+   "time": 1.2,
+   "display_time": -7.3,
+   "subject": "U4 / U5",
+   "detail": "drawn bodies overlap from here"
+  },
+  {
+   "check": "road_users_overlap",
+   "time": 1.2,
+   "display_time": -7.3,
+   "subject": "U5 / U6",
+   "detail": "drawn bodies overlap from here"
+  },
+  {
+   "check": "road_user_box_jump",
+   "time": 2.2,
+   "display_time": -6.3,
+   "subject": "U2",
+   "detail": "box moved 3.2 m at 6.5 m/s"
+  }
+ ],
+ "reconstruction_commit": "e2cd1c5274e1ff54971be53f88fdfe0a6222a014",
+ "note": "frames and flags are reconstruction-only (ReplayRun inputs); verdicts by the reviewer"
+}
