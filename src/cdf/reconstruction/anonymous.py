@@ -44,7 +44,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -728,6 +728,92 @@ def _overlap(a: CommonTrack, b: CommonTrack) -> bool:
     return min(a.end, b.end) - max(a.start, b.start) > 1e-6
 
 
+def _dominates(a: "RecorderLink", b: "RecorderLink") -> bool:
+    """``a``'s footprint evidence is better on every count: nearer (median sigma) and no less consistent."""
+    return a.median_distance_sigma < b.median_distance_sigma and a.fraction_within >= b.fraction_within
+
+
+def on_recorder_together(a: CommonTrack, b: CommonTrack, body: Optional[RecorderBody],
+                         cfg: ReconstructionConfig) -> bool:
+    """Both tracks lie on the recorder's own outline at the same instants, discriminatively: at each instant
+    both measured, each near surface within 3 sigma of the footprint (a point inside it is on it) with 3
+    sigma no wider than a body (``semantics.target_width_m``: the positions tell this recorder from a car
+    beside it).  Two points on one vehicle's body at once are that vehicle.  Accepted over at least
+    ``fusion.link_min_samples`` instants, ``fusion.link_min_fraction`` of them passing."""
+    if body is None:
+        return False
+    times, pa, pb, sa, sb = [], [], [], [], []
+    for x in a.samples:
+        if not x.measured or not body.covers(x.t_global):
+            continue
+        y = b.state_at(x.t_global)
+        if y is None or not y.measured:
+            continue
+        times.append(x.t_global - body.offset_to_global)
+        pa.append(x.point)
+        pb.append(y.point)
+        sa.append(_position_sigma(cfg, x, body.poses))
+        sb.append(_position_sigma(cfg, y, body.poses))
+    if len(times) < cfg.fusion.link_min_samples:
+        return False
+    da, _ = outline_distances(body.poses, body.footprint, times, np.array(pa), inside_zero=True)
+    db, _ = outline_distances(body.poses, body.footprint, times, np.array(pb), inside_zero=True)
+    sa, sb = np.array(sa), np.array(sb)
+    passed = (da <= 3.0 * sa) & (db <= 3.0 * sb) & (3.0 * np.maximum(sa, sb) <= cfg.semantics.target_width_m)
+    return float(np.mean(passed)) >= cfg.fusion.link_min_fraction
+
+
+def exclusive_recorder_links(view: CommonView, links: Sequence["RecorderLink"], cfg: ReconstructionConfig,
+                             same_body: Optional[Callable[[CommonTrack, CommonTrack, str], bool]] = None
+                             ) -> Tuple[List["RecorderLink"], List[Dict[str, Any]]]:
+    """A recorder's identity is exclusive per observer at every instant.  Two tracks of ONE observer that
+    overlap in time may both carry recorder R only with explicit evidence that they are one vehicle: the
+    same-observer split test (``pair_evidence``: one box fitted to both, consistent velocities), or both
+    lying on R's own outline at the same instants with a position uncertainty that tells R from a neighbour
+    (``on_recorder_together``).  Otherwise they compete: a collision-decided association (made per contact,
+    exclusive) keeps R and the footprint link is refused; of two footprint links the one whose evidence
+    dominates (``_dominates``) keeps R; when neither dominates, both are refused (ambiguous: neither is
+    asserted).  A track that follows another after a gap never competes with it (a re-acquisition).
+    Returns the kept links and the refusals ({"track", "recorder", "rival", "reason"})."""
+    if same_body is None:
+        def same_body(a: CommonTrack, b: CommonTrack, recorder: str) -> bool:
+            item = pair_evidence(a, b, cfg)
+            if item is not None and item.accepted and item.kind == SPLIT:
+                return True
+            return on_recorder_together(a, b, view.bodies.get(recorder), cfg)
+    by_name = {t.name: t for t in view.tracks}
+    claims: List[Tuple[str, str, Optional[RecorderLink]]] = [
+        (t.name, t.entity, None) for t in view.tracks if t.status == ASSOCIATED and t.entity is not None]
+    claims += [(link.track, link.recorder, link) for link in links]
+    refused: Dict[str, Tuple[str, str]] = {}
+    for i, (a, ra, la) in enumerate(claims):
+        for b, rb, lb in claims[i + 1:]:
+            if a == b or ra != rb or a.split(":", 1)[0] != b.split(":", 1)[0]:
+                continue
+            if la is None and lb is None:
+                continue  # two collision decisions: each was decided by its own contact
+            ta, tb = by_name.get(a), by_name.get(b)
+            if ta is None or tb is None or not _overlap(ta, tb) or same_body(ta, tb, ra):
+                continue
+            if la is None:
+                refused.setdefault(b, (ra, a))
+            elif lb is None:
+                refused.setdefault(a, (ra, b))
+            elif _dominates(la, lb):
+                refused.setdefault(b, (ra, a))
+            elif _dominates(lb, la):
+                refused.setdefault(a, (ra, b))
+            else:
+                refused.setdefault(a, (ra, b))
+                refused.setdefault(b, (ra, a))
+    kept = [link for link in links if link.track not in refused]
+    refusals = [{"track": name, "recorder": recorder, "rival": rival,
+                 "reason": "recorder link to {0} refused: {1} carries {0} at the same time and no same-body (split) "
+                           "evidence shows the two tracks are one vehicle".format(recorder, rival)}
+                for name, (recorder, rival) in sorted(refused.items())]
+    return kept, refusals
+
+
 def _one_body(evidence: Sequence[PairEvidence]) -> set:
     """Pairs of simultaneous tracks of one observer that an accepted link showed to be one body."""
     return {frozenset((e.a, e.b)) for e in evidence if e.accepted and e.kind == SPLIT}
@@ -1304,7 +1390,11 @@ def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Assoc
     view = build_common_view(locals_, alignment, associations, poses)
     links = link_to_recorders(view, cfg)
     links += collision_continuity_links(view, associations, alignment, links, cfg)
+    links, exclusive = exclusive_recorder_links(view, links, cfg)
     by_key = {(a.local_graph, a.local_track): a for a in associations}
+    for refusal in exclusive:
+        recorder, track_id = refusal["track"].split(":", 1)
+        by_key[(recorder, track_id)].evidence.append(refusal["reason"])
     for link in links:
         recorder, track_id = link.track.split(":", 1)
         item = by_key[(recorder, track_id)]

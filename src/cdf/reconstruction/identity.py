@@ -46,7 +46,7 @@ import numpy as np
 from .anonymous import (ANONYMOUS, ASSOCIATED, CROSS, SPLIT, STITCH, PairEvidence, RecorderLink, RoadUserFusion,
                         _heading, _overlap, _third_body_contact, _velocity_sigma, chi2_2dof, collision_continuity_links,
                         covariance_intersection, entity_trajectory, fit_box, pair_evidence, stitch_evidence,
-                        build_common_view, _centre_estimate)
+                        build_common_view, _centre_estimate, exclusive_recorder_links)
 from .common_frame import CommonSample, CommonTrack, PoseSource, outline_distances
 from .config import ReconstructionConfig
 from .tracking import kf_predict
@@ -539,6 +539,8 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     view = build_common_view(locals_, alignment, associations, poses)
     links, link_refusals = link_to_recorders_corrected(view, cfg, rel)
     links += collision_continuity_links(view, associations, alignment, links, cfg)
+    links, exclusive = exclusive_recorder_links(view, links, cfg)
+    link_refusals = list(link_refusals) + [{"track": r["track"], "reason": r["reason"]} for r in exclusive]
     by_key = {(a.local_graph, a.local_track): a for a in associations}
     for link in links:
         recorder, track_id = link.track.split(":", 1)
