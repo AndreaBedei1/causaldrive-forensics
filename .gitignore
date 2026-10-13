@@ -6,9 +6,11 @@ __pycache__/
 venv/
 .pytest_cache/
 *.log
-# Local secrets (API keys for the LLM providers): never committed; see .env.example.
+# Local secrets: never committed.
 .env
-# Scenario sweeps: raw recordings and their reconstructions stay local (summaries go to results/sweeps/).
+# Raw recordings of the old scenario sweeps, kept locally, not part of the canonical set.
 /sweeps/
 # Robustness study: scratch copies of the perturbed runs (deleted after each job; results go to results/robustness/).
 /robustness/
+# Raw recordings of an abandoned highway stress study, kept locally, not part of the project.
+/stress_recordings/

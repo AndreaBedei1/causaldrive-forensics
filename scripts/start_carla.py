@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Start CARLA with deterministic NVIDIA adapter selection and keep it alive."""
+"""Start the project's private CARLA 0.9.15 server (port 3000) and keep it alive until Ctrl-C.
+
+    python scripts/start_carla.py            # port 3000, offscreen, Epic quality
+
+Only the engine this script started is stopped on exit; a server already running elsewhere (port 2000) is
+never touched."""
 
 from __future__ import annotations
 
@@ -18,7 +23,7 @@ from cdf.simulation.carla_client import CarlaServer, query_nvidia_gpus
 def main() -> int:
     parser = argparse.ArgumentParser(description="Start a local CARLA 0.9.15 server")
     parser.add_argument("--carla-root", default=None)
-    parser.add_argument("--port", type=int, default=2000)
+    parser.add_argument("--port", type=int, default=3000, help="RPC port (project server: 3000)")
     parser.add_argument("--quality", default=CarlaServer.DEFAULT_QUALITY, help="Epic (default) or Low")
     parser.add_argument("--attended", action="store_true", help="show UE4 dialogs (e.g. on a crash)")
     parser.add_argument("--gpu", default="auto", help="auto, adapter index, or none")

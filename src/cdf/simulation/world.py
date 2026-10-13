@@ -172,7 +172,7 @@ class ScenarioWorld:
         # service without changing the scientific run.
         if bool(self.cfg.get("simulation.traffic_manager_enabled", True)):
             try:
-                tm_port = int(self.cfg.get("simulation.traffic_manager_port", 8000))
+                tm_port = int(self.cfg.get("simulation.traffic_manager_port", 8100))
                 self.traffic_manager = self.client.get_trafficmanager(tm_port)
                 self._tm_original_sync = True
                 self.traffic_manager.set_synchronous_mode(True)

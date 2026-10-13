@@ -168,9 +168,13 @@ def _server_executable(root: Path) -> Optional[Path]:
 # ---------------------------------------------------------------------------
 
 
+# The project's private CARLA server (configs/default.yaml simulation.port); port 2000 is left to other users.
+DEFAULT_PORT = 3000
+
+
 def connect_with_retry(
     host: str = "127.0.0.1",
-    port: int = 2000,
+    port: int = DEFAULT_PORT,
     timeout_s: float = 60.0,
     attempts: int = 40,
     retry_delay_s: float = 3.0,
@@ -285,7 +289,7 @@ class CarlaServer:
     def __init__(
         self,
         root: Optional[str] = None,
-        port: int = 2000,
+        port: int = DEFAULT_PORT,
         quality: str = DEFAULT_QUALITY,
         offscreen: bool = True,
         extra_args: Optional[Sequence[str]] = None,
@@ -538,7 +542,7 @@ class SimulatorSession:
     def __init__(
         self,
         host: str = "127.0.0.1",
-        port: int = 2000,
+        port: int = DEFAULT_PORT,
         timeout_s: float = 60.0,
         carla_root: Optional[str] = None,
         autostart: bool = True,
@@ -676,7 +680,7 @@ def session_from_config(cfg: Config, autostart: bool = True) -> SimulatorSession
     """Build a :class:`SimulatorSession` from the ``simulation`` config section."""
     return SimulatorSession(
         host=cfg.get("simulation.host", "127.0.0.1"),
-        port=int(cfg.get("simulation.port", 2000)),
+        port=int(cfg.get("simulation.port", DEFAULT_PORT)),
         timeout_s=float(cfg.get("simulation.timeout_s", 60.0)),
         carla_root=cfg.get("simulation.carla_root"),
         autostart=autostart,
@@ -690,7 +694,7 @@ def session_from_config(cfg: Config, autostart: bool = True) -> SimulatorSession
 def client_from_config(cfg: Config, autostart: bool = False) -> Any:
     """Connect using the ``simulation`` section of a resolved configuration."""
     host = cfg.get("simulation.host", "127.0.0.1")
-    port = int(cfg.get("simulation.port", 2000))
+    port = int(cfg.get("simulation.port", DEFAULT_PORT))
     timeout_s = float(cfg.get("simulation.timeout_s", 60.0))
     try:
         return connect_with_retry(host=host, port=port, timeout_s=timeout_s, attempts=5)
