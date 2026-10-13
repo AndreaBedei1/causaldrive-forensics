@@ -681,7 +681,8 @@ def contact_holds(contacts: Sequence[Contact], tracks: Sequence[LocalTrack], per
 def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAssessment],
                        release_deceleration_mps2: float, release_debounce_s: float = CRITICAL_RELEASE_DEBOUNCE_S,
                        contacts: Sequence[Tuple[float, float]] = (),
-                       holds: Sequence[Tuple[float, float]] = ()) -> Tuple[List[Span], List[Span]]:
+                       holds: Sequence[Tuple[float, float]] = (),
+                       touching: Optional[Sequence[bool]] = None) -> Tuple[List[Span], List[Span]]:
     """(intervals, those a collision ended): sample indices (start, end) of CRITICAL_TTC
     (``conflict`` module docstring, points 5 and 6).
 
@@ -709,6 +710,9 @@ def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAss
     ``holds``: contacts during which this track touched the recorder without being their partner
     (``contact_holds``).  They put the pair in the same post-impact state (no episode starts), but do not
     end an episode already running: they name no partner.
+
+    ``touching``: per sample, the body within the touching distance of the recorder.  A pair still in contact is
+    never clearly resolved: the post-impact state lasts while it touches, whatever the closing speed.
     """
     spans: List[Span] = []
     collided: List[Span] = []
@@ -733,7 +737,7 @@ def critical_intervals(times: Sequence[float], assessments: Sequence[ConflictAss
                 held_forward = False
             held, resolved, contact_until = True, None, max(contact_until, last)
         if held:
-            if (times[index] <= contact_until + 1e-6
+            if (times[index] <= contact_until + 1e-6 or (touching is not None and touching[index])
                     or not assessment.released(release_deceleration_mps2, held_forward)):
                 resolved = None
             else:
@@ -839,7 +843,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
                  ego: Optional[EgoTrajectory] = None, world: Optional[PerceivedWorld] = None,
                  footprint: Optional[EgoFootprint] = None,
                  contacts: Sequence[Tuple[float, float]] = (), body_based: bool = True,
-                 holds: Sequence[Tuple[float, float]] = ()) -> List[SemanticEvent]:
+                 holds: Sequence[Tuple[float, float]] = (),
+                 touching_clearance_m: float = 1.0) -> List[SemanticEvent]:
     """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
@@ -893,7 +898,9 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     # reason is in the TRACK_STATE facts (``critical_reason``).
     assessments = _critical_assessments(samples, ego, cfg, footprint)
     release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
-    spans, collided = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S, contacts, holds)
+    touching = [sample.clearance_m <= touching_clearance_m + 1e-9 for sample in samples]
+    spans, collided = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S, contacts, holds,
+                                         touching)
     critical_spans = _lasting(spans, times, keep=collided)
     first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
     events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
@@ -1206,7 +1213,8 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     holds = contact_holds(contacts, tracks, sample_period(ego), cfg.fusion.touching_clearance_m, partners)
     for track in tracks:
         events += track_events(owner, track, ego.end, semantics, ego, world, footprint,
-                               partners.get(track.track_id, ()), holds=holds.get(track.track_id, ()))
+                               partners.get(track.track_id, ()), holds=holds.get(track.track_id, ()),
+                               touching_clearance_m=cfg.fusion.touching_clearance_m)
     events = number_events(owner, events)
 
     trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world,

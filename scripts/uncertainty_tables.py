@@ -9,7 +9,7 @@ tracker's own Kalman filter (``tracking.kf_predict_speed`` / ``kf_update`` with 
 
 * position: the radar's polar 1-sigma (along / across the line of sight), the track point's innovation
   1-sigma (along / across) and the 99 % chi-square gate semi-axes, for the track's own point and for a
-  single return (adds the extent prior: uniform over a 4.6 x 1.9 m box);
+  single return (adds 2 x the box spread: a return and the track point are two points of one 4.6 x 1.9 m body);
 * the same after 0.5 s without a measurement (prediction growth);
 * Doppler: the radial residual sigma and the 99 % gate half-width along the line of sight.
 
@@ -95,7 +95,7 @@ def main() -> int:
                                  origins=np.zeros((8, 2)))
             R = _measurement_model(m, cfg)[2][:2, :2]
             S = P[:2, :2] + R
-            single = P[:2, :2] + body_covariance(x, cfg) + polar
+            single = P[:2, :2] + 2.0 * body_covariance(x, cfg) + polar  # as covariance_gate
             xg, Pg = x, P
             for _ in range(10):
                 xg, Pg = kf_predict_speed(xg, Pg, 0.05, cfg.acceleration_std_mps2, cfg.yaw_rate_std_rps)

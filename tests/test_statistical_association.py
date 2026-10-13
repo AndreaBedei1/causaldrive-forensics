@@ -194,6 +194,18 @@ class PostContactCriticalTests(unittest.TestCase):
         self.assertEqual(len(spans), 1)
         self.assertGreater(times[spans[0][1]], 1.6)
 
+    def test_a_pair_still_touching_is_never_released_after_its_contact(self):
+        times = [round(0.05 * k, 2) for k in range(40)]
+        # Critical before the contact at 1.0 s; after it the pair stops closing (released by speed) but stays
+        # 0.3 m apart; a new critical sample at 1.7 s must not start a second episode of the same pair.
+        assessments = [self._Assessment(t < 1.0 or abs(t - 1.7) < 1e-6, released=not (t < 1.0 or abs(t - 1.7) < 1e-6))
+                       for t in times]
+        touching = [t >= 1.0 for t in times]
+        free, _ = critical_intervals(times, assessments, 4.5, 0.2, contacts=[(1.0, 1.0)])
+        held, _ = critical_intervals(times, assessments, 4.5, 0.2, contacts=[(1.0, 1.0)], touching=touching)
+        self.assertEqual(len(free), 2)
+        self.assertEqual(len(held), 1)
+
     def test_holds_go_to_touching_tracks_that_are_not_the_partner(self):
         from types import SimpleNamespace
         contact = SimpleNamespace(first=1.0, last=1.1)
@@ -234,6 +246,13 @@ class StatisticalRecordedRunTests(unittest.TestCase):
         _, result = self.reconstruct("traces/S24/run_0", "final")
         contact = min(n.t_global for n in result.graph.nodes
                       if n.event_type == "COLLISION" and sorted(n.participants or []) == ["A", "B"])
+        late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
+                and {n.actor_id, n.subject_id} == {"A", "B"}]
+        self.assertEqual(late, [])
+
+    def test_s18_platoon_no_same_pair_critical_episode_while_touching(self):
+        _, result = self.reconstruct("traces/S18/run_0_platoon", "final")
+        contact = min(n.t_global for n in result.graph.nodes if n.event_type == "COLLISION")
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
                 and {n.actor_id, n.subject_id} == {"A", "B"}]
         self.assertEqual(late, [])
