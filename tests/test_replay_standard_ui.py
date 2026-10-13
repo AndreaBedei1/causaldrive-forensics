@@ -166,5 +166,22 @@ class ViewerTests(unittest.TestCase):
         self.assertEqual(len(lines), 1)
 
 
+class NoGroundTruthTests(unittest.TestCase):
+    def test_replay_and_standard_panels_need_no_ground_truth(self):
+        import shutil
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            src, dst = ROOT / "traces/S20/run_0", Path(tmp) / "S20" / "run_0"
+            for item in ("vehicles", "reconstruction"):
+                shutil.copytree(src / item, dst / item)
+            shutil.copy2(src / "metadata.json", dst / "metadata.json")
+            self.assertFalse((dst / "ground_truth").exists())
+            run = ReplayRun.load(dst)
+            self.assertEqual(run.clock, "t_global")
+            self.assertGreater(max(len(run.entities_at(k * 0.1)) for k in range(int(run.duration / 0.1))), 0)
+            self.assertGreater(len(run.display_events()), 0)
+            self.assertTrue(standard_panel_lines(run, "A", run.duration - 5.0, 1.0) is not None)
+
+
 if __name__ == "__main__":
     unittest.main()

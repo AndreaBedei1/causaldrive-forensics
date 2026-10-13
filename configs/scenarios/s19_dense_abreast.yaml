@@ -110,6 +110,83 @@ scenario:
       t_start: 10.0
       duration: 2.0
       params: {target_speed: 12.0}
+  # NOT YET ACQUIRED (prepared 2026-10-13): traces/S19/run_0 (default variant) has its three abreast rows all
+  # AHEAD of A and B: no other car comes within 14 m of the recorders before the contact
+  # (scripts/scenario_density.py).  "surrounded" puts A and B inside the pack: K diagonally ahead-left of B and
+  # a row of three cars 12-14 m behind them, which brakes once the crash is ahead (as F and G in S22).  K is
+  # deliberately not abreast of B (B is pushed left by the sideswipe).  Acquire as a NEW run
+  # (--variant surrounded) and check it with scripts/check_scenario_run.py --expect A-B; run_0 stays as is.
+  variants:
+    surrounded:
+      description: 'S19 with A and B inside the pack: the three abreast rows ahead, a car diagonally ahead-left
+        of B, and a row of three abreast cars 12-14 m behind the recorders that brakes after the contact.
+
+        '
+      participants:
+      - id: A
+        blueprint: vehicle.audi.tt
+        spawn: {anchor: spawn_index, index: 265, forward_m: 25.0, lane_offset: 1}
+        route: {length_m: 220.0, step_m: 2.0}
+        initial_speed: 12.0
+        target_speed: 12.0
+        post_impact_mode: coast
+        actions:
+        - {action_id: A_drifts_left, kind: lane_shift, t_start: 6.0, duration: 2.0, params: {lateral_m: -3.5}}
+      - id: B
+        blueprint: vehicle.nissan.patrol
+        spawn: {anchor: spawn_index, index: 265, forward_m: 21.0, lane_offset: 0}
+        route: {length_m: 220.0, step_m: 2.0}
+        initial_speed: 12.5
+        target_speed: 12.5
+        post_impact_mode: coast
+        actions: []
+      - {id: C, blueprint: vehicle.tesla.model3, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 40.0, lane_offset: -1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - {id: D, blueprint: vehicle.toyota.prius, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 40.0, lane_offset: 0}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - {id: E, blueprint: vehicle.tesla.model3, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 40.5, lane_offset: 1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - {id: F, blueprint: vehicle.audi.tt, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 55.0, lane_offset: -1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - {id: G, blueprint: vehicle.toyota.prius, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 55.5, lane_offset: 1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - {id: H, blueprint: vehicle.tesla.model3, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 70.5, lane_offset: -1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
+      - id: J
+        blueprint: vehicle.audi.tt
+        record: false
+        spawn: {anchor: spawn_index, index: 265, forward_m: 70.0, lane_offset: 0}
+        route: {length_m: 240.0, step_m: 2.0}
+        initial_speed: 12.0
+        target_speed: 12.0
+        post_impact_mode: drive
+        actions:
+        - {action_id: J_keeps_speed, kind: hold, t_start: 10.0, duration: 2.0, params: {target_speed: 12.0}}
+      - {id: K, blueprint: vehicle.toyota.prius, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 26.5, lane_offset: -1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.5, target_speed: 12.5, post_impact_mode: drive, actions: []}
+      - id: L
+        blueprint: vehicle.tesla.model3
+        record: false
+        spawn: {anchor: spawn_index, index: 265, forward_m: 9.5, lane_offset: -1}
+        route: {length_m: 240.0, step_m: 2.0}
+        initial_speed: 12.0
+        target_speed: 12.0
+        post_impact_mode: drive
+        actions:
+        - {action_id: L_brakes_for_the_crash, kind: brake, t_start: 7.9, duration: 4.0, params: {intensity: 0.7}}
+      - id: M
+        blueprint: vehicle.audi.tt
+        record: false
+        spawn: {anchor: spawn_index, index: 265, forward_m: 8.0, lane_offset: 0}
+        route: {length_m: 240.0, step_m: 2.0}
+        initial_speed: 12.0
+        target_speed: 12.0
+        post_impact_mode: drive
+        actions:
+        - {action_id: M_brakes_for_the_crash, kind: brake, t_start: 7.9, duration: 4.0, params: {intensity: 0.7}}
+      - id: N
+        blueprint: vehicle.toyota.prius
+        record: false
+        spawn: {anchor: spawn_index, index: 265, forward_m: 10.5, lane_offset: 1}
+        route: {length_m: 240.0, step_m: 2.0}
+        initial_speed: 12.0
+        target_speed: 12.0
+        post_impact_mode: drive
+        actions:
+        - {action_id: N_brakes_for_the_crash, kind: brake, t_start: 7.9, duration: 4.0, params: {intensity: 0.7}}
 simulation:
   # Abreast cars in adjacent lanes are 3.5 m apart centre to centre (S18): keep bodies apart, allow abreast.
   min_spawn_gap_m: 3.0
