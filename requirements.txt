@@ -1,5 +1,10 @@
+# Python 3.8 (the CARLA 0.9.15 client wheel is cp38): every pin below still supports it.
 PyYAML>=5.4
-numpy>=1.23
-Pillow>=9.0
-opencv-python>=4.5; python_version >= "3.8"
-# Install the CARLA Python API from the matching simulator distribution.
+numpy>=1.23,<1.25
+scipy>=1.10,<1.11
+matplotlib>=3.7,<3.8
+Pillow>=9.0,<11
+opencv-python>=4.5
+pygame>=2.1,<2.7
+pytest>=7,<8.4
+carla==0.9.15

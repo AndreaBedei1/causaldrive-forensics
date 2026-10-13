@@ -4,8 +4,8 @@ Offline forensic reconstruction from each vehicle's own recorded radar, odometry
 controls and collision callbacks. Local tracks and events are reconstructed first;
 clock alignment, conservative recorder links and anonymous road-user fusion follow.
 Ground truth is available only to privileged evaluation and never enters reconstruction,
-fusion or replay. Supported/tested Python version: 3.14 (the CARLA client library is needed only to
-record new scenarios; the replay draws lanes from the public OpenDRIVE files in pure Python).
+fusion or replay. Supported/tested Python version: 3.8 only (the CARLA 0.9.15 client wheel is cp38):
+one environment runs acquisition, reconstruction, evaluation, replay and the tests.
 
 The saved campaign contains 17 canonical recordings and 240 local sweep recordings.
 Current quantitative results, limitations, tests and the exact analysis freeze are in
