@@ -26,8 +26,8 @@ from src.cdf.replay.model import (ANONYMOUS, ASSOCIATED, BOX_EDGES, HEADING_FROM
                                   wrap_deg)
 
 ROOT = Path(__file__).resolve().parents[1]
-S17 = ROOT / "traces" / "S17" / "run_0_crash"
-S16 = ROOT / "traces" / "S16" / "run_0_consequential"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
+S11 = ROOT / "traces" / "S11" / "run_0_consequential"
 VIEWER_SOURCES = (ROOT / "scripts" / "replay_run.py", ROOT / "src" / "cdf" / "replay" / "model.py",
                   ROOT / "src" / "cdf" / "replay" / "topdown.py", ROOT / "src" / "cdf" / "replay" / "qa.py")
 RECONSTRUCTION_FILES = ("local_graph.json", "local_tracks.jsonl", "local_trace.jsonl")
@@ -115,9 +115,9 @@ def _poison(run_dir):
     _write(run_dir / "ground_truth" / "counterfactuals.json", {"factual": {"collisions": {"A-C": {"first_s": 2.0}}}})
     _write(run_dir / "ground_truth" / "collisions.jsonl",
            [{"participant_id": "A", "other_actor_id": 777, "timestamp": 14.0, "impulse": 9999.0}], lines=True)
-    _write(run_dir / "metadata.json", {"scenario_id": "S17", "variant": "crash", "map": "Town03",
+    _write(run_dir / "metadata.json", {"scenario_id": "S12", "variant": "crash", "map": "Town03",
                                        "participants": ["A", "B", "C"]})
-    (run_dir / "s17_unobserved_causal_vehicle.yaml").write_text("scenario:\n  scenario_id: S17\n  map: Town03\n",
+    (run_dir / "s12_unobserved_causal_vehicle.yaml").write_text("scenario:\n  scenario_id: S12\n  map: Town03\n",
                                                                 encoding="utf-8")
     _write(run_dir / "reconstruction" / "evaluation" / "identity.json",
            {"A:track_001": "C", "B:track_002": "C"})
@@ -246,46 +246,46 @@ class NoPrivilegedInputTests(unittest.TestCase):
                                  and isinstance(node.right, ast.Constant) and node.right.value == "metadata.json"),
                              path.name)
 
-    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
-    def test_loading_s17_reads_only_the_recorders_and_the_reconstruction(self):
-        self.assertTrue((S17 / "ground_truth").exists())  # the privileged files are right there
+    @unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
+    def test_loading_s12_reads_only_the_recorders_and_the_reconstruction(self):
+        self.assertTrue((S12 / "ground_truth").exists())  # the privileged files are right there
         with _Reads() as reads:
-            run = ReplayRun.load(S17)
-        allowed = {_norm(path) for path in _viewer_inputs(S17, [p.participant_id for p in run.participants])}
-        seen = reads.under(S17)
+            run = ReplayRun.load(S12)
+        allowed = {_norm(path) for path in _viewer_inputs(S12, [p.participant_id for p in run.participants])}
+        seen = reads.under(S12)
         self.assertTrue(seen)
         for event, path in seen:
             if event == "open":
                 self.assertIn(path, allowed)
             else:
-                self.assertEqual(path, _norm(S17 / "vehicles"))  # the only folder listed: who recorded
+                self.assertEqual(path, _norm(S12 / "vehicles"))  # the only folder listed: who recorded
         for event, path in reads.under(ROOT):
             for forbidden in ("ground_truth", "evaluation", os.sep + "scenarios" + os.sep, os.sep + "llm" + os.sep):
                 self.assertNotIn(forbidden, path)
-        self.assertIn(_norm(S17 / "reconstruction" / "global" / "associations.json"), {p for _, p in seen})
+        self.assertIn(_norm(S12 / "reconstruction" / "global" / "associations.json"), {p for _, p in seen})
 
-    @unittest.skipUnless((S16 / "reconstruction").exists(), "S16 trace not present")
-    def test_loading_s16_reads_only_the_recorders_and_the_reconstruction(self):
+    @unittest.skipUnless((S11 / "reconstruction").exists(), "S11 trace not present")
+    def test_loading_s11_reads_only_the_recorders_and_the_reconstruction(self):
         with _Reads() as reads:
-            run = ReplayRun.load(S16)
+            run = ReplayRun.load(S11)
         self.assertEqual([p.participant_id for p in run.participants], ["A", "B", "C"])  # three recorders
-        allowed = {_norm(path) for path in _viewer_inputs(S16, ["A", "B", "C"])}
-        seen = reads.under(S16)
+        allowed = {_norm(path) for path in _viewer_inputs(S11, ["A", "B", "C"])}
+        seen = reads.under(S11)
         self.assertTrue(seen)
         for event, path in seen:
             if event == "open":
                 self.assertIn(path, allowed)
             else:
-                self.assertEqual(path, _norm(S16 / "vehicles"))
+                self.assertEqual(path, _norm(S11 / "vehicles"))
         for event, path in reads.under(ROOT):
             for forbidden in ("ground_truth", "evaluation", os.sep + "scenarios" + os.sep, os.sep + "llm" + os.sep):
                 self.assertNotIn(forbidden, path)
 
-    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    @unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
     def test_privileged_files_change_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
-            clean = _copy_inputs(S17, Path(tmp) / "clean" / "S17" / "run_0_crash", "AB")
-            poisoned = _copy_inputs(S17, Path(tmp) / "poisoned" / "S17" / "run_0_crash", "AB")
+            clean = _copy_inputs(S12, Path(tmp) / "clean" / "S12" / "run_0_crash", "AB")
+            poisoned = _copy_inputs(S12, Path(tmp) / "poisoned" / "S12" / "run_0_crash", "AB")
             _poison(poisoned)
             with _Reads() as reads:
                 with_privileged = ReplayRun.load(poisoned)
@@ -302,10 +302,10 @@ class NoPrivilegedInputTests(unittest.TestCase):
             self.assertNotIn(_norm(poisoned / "vehicles" / "C"), path)
         self.assertEqual(set(opened), {_norm(path) for path in _viewer_inputs(poisoned, "AB")})
 
-    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    @unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
     def test_the_road_users_come_from_the_reconstruction_never_from_the_evaluation(self):
         with tempfile.TemporaryDirectory() as tmp:
-            poisoned = _copy_inputs(S17, Path(tmp) / "S17" / "run_0_crash", "AB")
+            poisoned = _copy_inputs(S12, Path(tmp) / "S12" / "run_0_crash", "AB")
             _poison(poisoned)
             run = ReplayRun.load(poisoned)
         self.assertEqual([(e.entity_id, e.source_tracks) for e in run.entities],
@@ -316,7 +316,7 @@ class NoPrivilegedInputTests(unittest.TestCase):
         for text in texts:
             self.assertIsNone(standalone_c.search(text), text)
 
-    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    @unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
     def test_a_pose_source_moves_the_recorders_and_what_they_observe_together(self):
         from src.cdf.reconstruction.common_frame import RecordedPoseSource, WorldPose
 
@@ -327,8 +327,8 @@ class NoPrivilegedInputTests(unittest.TestCase):
                 pose = super().pose_at(t_local)
                 return WorldPose(pose.x + 2.0, pose.y + 1.0, pose.yaw, pose.vx, pose.vy)
 
-        plain = ReplayRun.load(S17)
-        shifted = ReplayRun.load(S17, pose_factory=Shifted.from_vehicle_dir)
+        plain = ReplayRun.load(S12)
+        shifted = ReplayRun.load(S12, pose_factory=Shifted.from_vehicle_dir)
         for t in (0.5, 2.0, 4.0):
             a, b = plain.participant("A").trajectory.pose_at(plain.start + t), \
                 shifted.participant("A").trajectory.pose_at(shifted.start + t)
@@ -343,7 +343,7 @@ class NoPrivilegedInputTests(unittest.TestCase):
                     self.assertAlmostEqual(pb.position[1] - pa.position[1], 1.0, places=6)
                     self.assertAlmostEqual(wrap_deg(pb.yaw - pa.yaw), 0.0, places=6)
 
-    @unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
+    @unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
     def test_the_headless_export_reads_only_the_recorders_and_the_reconstruction(self):
         viewer = _load_viewer_script()
 
@@ -351,8 +351,8 @@ class NoPrivilegedInputTests(unittest.TestCase):
             raise ImportError("no carla module in this test")
         viewer.import_carla = no_carla  # no lanes: only the run's own inputs can be read
         with tempfile.TemporaryDirectory() as tmp:
-            clean = _copy_inputs(S17, Path(tmp) / "clean" / "S17" / "run_0_crash", "AB")
-            poisoned = _copy_inputs(S17, Path(tmp) / "poisoned" / "S17" / "run_0_crash", "AB")
+            clean = _copy_inputs(S12, Path(tmp) / "clean" / "S12" / "run_0_crash", "AB")
+            poisoned = _copy_inputs(S12, Path(tmp) / "poisoned" / "S12" / "run_0_crash", "AB")
             _poison(poisoned)
             with _Reads() as reads:
                 frames = viewer.export_run(poisoned, Path(tmp) / "out_poisoned")
@@ -407,19 +407,19 @@ class NoPrivilegedInputTests(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------
-# S17: two anonymous tracks of one unrecorded road user, never merged, never named
+# S12: two anonymous tracks of one unrecorded road user, never merged, never named
 # --------------------------------------------------------------------------
 
-@unittest.skipUnless((S17 / "reconstruction" / "global" / "associations.json").exists(), "S17 trace not present")
-class S17GhostTests(unittest.TestCase):
+@unittest.skipUnless((S12 / "reconstruction" / "global" / "associations.json").exists(), "S12 trace not present")
+class S12GhostTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.replay = ReplayRun.load(S17)
+        cls.replay = ReplayRun.load(S12)
         cls.tracks = {track.name: track for track in cls.replay.all_tracks()}
 
     def test_the_replay_runs_on_the_reconstructions_global_time(self):
         self.assertEqual(self.replay.clock, "t_global")
-        graph = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text(encoding="utf-8"))
+        graph = json.loads((S12 / "reconstruction" / "global" / "global_graph.json").read_text(encoding="utf-8"))
         t_global = {obs["local_node"]: node["t_global"] for node in graph["nodes"]
                     for obs in node.get("observations") or []}
         events = self.replay.all_events()

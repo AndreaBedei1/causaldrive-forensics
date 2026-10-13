@@ -52,7 +52,7 @@ def contacts(records, ego, cfg=CFG):
 
 class SegmentationTests(unittest.TestCase):
     def test_a_strong_peak_after_a_short_break_opens_a_new_collision(self):
-        # The S06 pattern: an impact, 0.25 s without contact, a second impact, then
+        # The S04 pattern: an impact, 0.25 s without contact, a second impact, then
         # persistent contact (small callbacks after a one-sample break).
         records = callbacks((1.0, [11622.0]), (1.25, [9832.0]), (1.35, [508.0, 1157.0] + [300.0] * 40))
         found = contacts(records, ego_with_jumps([]))
@@ -64,7 +64,7 @@ class SegmentationTests(unittest.TestCase):
                                        "merged_bursts": [[1.35, 1157.0]]})
 
     def test_rebounds_and_persistent_contact_stay_one_collision(self):
-        # The S16 pattern: a rebound at 43 % of the first impulse, then weaker bursts.
+        # The S11 pattern: a rebound at 43 % of the first impulse, then weaker bursts.
         records = callbacks((1.0, [9096.0]), (1.35, [3883.0]), (1.45, [1407.0] * 4), (1.75, [204.0] * 60))
         jumps = [(1.05, (-6.6, 0.0)), (1.4, (-2.0, 0.0))]  # both push the recorder backwards
         self.assertEqual(contacts(records, ego_with_jumps(jumps)),
@@ -72,7 +72,7 @@ class SegmentationTests(unittest.TestCase):
                                  "merged_bursts": [[1.35, 3883.0], [1.45, 1407.0], [1.75, 204.0]]})])
 
     def test_a_scrape_of_weak_bursts_stays_one_collision(self):
-        # The S16 A-C pattern: two bodies scraping along each other for 2 s, bursts of 140-320 N*s
+        # The S11 A-C pattern: two bodies scraping along each other for 2 s, bursts of 140-320 N*s
         # after one-sample breaks.  Peaks above new_impact_ratio of the contact's peak, but each
         # weaker than min_new_impact_impulse: one collision.
         records = callbacks((1.0, [141.0]), (1.25, [322.0, 158.0, 92.0]), (1.55, [235.0, 173.0]), (2.0, [240.0] * 20))
@@ -82,7 +82,7 @@ class SegmentationTests(unittest.TestCase):
         self.assertEqual(len(found[0][1]["merged_bursts"]), 3)
 
     def test_a_strong_rebound_pushing_the_same_way_stays_one_collision(self):
-        # The 360-degree S06 A pattern: struck again 0.2 s later with 52 % of the first impulse, and
+        # The 360-degree S04 A pattern: struck again 0.2 s later with 52 % of the first impulse, and
         # pushed backwards both times: a rebound, although above undirected_impact_ratio.
         records = callbacks((1.0, [11622.0]), (1.2, [6043.0]))
         backwards = ego_with_jumps([(1.05, (-6.4, 0.0)), (1.25, (-5.5, 0.0))])
@@ -263,11 +263,11 @@ class CampaignCollisionTests(unittest.TestCase):
                         self.assertEqual(alignment.graphs[name].status, "ALIGNED", name)
 
 
-class S06FrontPushedTests(unittest.TestCase):
-    """traces/S06/run_0_a_front_pushed: A, following too closely, strikes B while B is still slowing
+class S04FrontPushedTests(unittest.TestCase):
+    """traces/S04/run_0_a_front_pushed: A, following too closely, strikes B while B is still slowing
     behind C (4.80 s), pushes it into C (5.30 s) and strikes it again 0.15 s later (5.45 s)."""
 
-    RUN = ROOT / "traces" / "S06" / "run_0_a_front_pushed"
+    RUN = ROOT / "traces" / "S04" / "run_0_a_front_pushed"
 
     @classmethod
     def setUpClass(cls):

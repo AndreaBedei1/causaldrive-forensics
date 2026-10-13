@@ -225,33 +225,33 @@ class StatisticalRecordedRunTests(unittest.TestCase):
     reconstruct = base.RecordedRunTests.reconstruct
     collisions = base.RecordedRunTests.collisions
 
-    def test_s10_crossing_contact_matched_and_recorder_link_kept(self):
-        _, result = self.reconstruct("traces/S10/run_0_rolls_through", "final")
+    def test_s08_crossing_contact_matched_and_recorder_link_kept(self):
+        _, result = self.reconstruct("traces/S08/run_0_rolls_through", "final")
         self.assertIn(("A", "B"), self.collisions(result))
         links = {(a.local_graph, a.global_entity) for a in result.associations}
         self.assertIn(("B", "A"), links)
         self.assertIn(("A", "B"), links)
 
-    def test_s06_consumer_impulse_seeds_0_and_3_make_no_wrong_pairing(self):
+    def test_s04_consumer_impulse_seeds_0_and_3_make_no_wrong_pairing(self):
         from src.cdf.evaluation.fusion_metrics import evaluate_fusion
         from src.cdf.evaluation.reconstruction import evaluate_run
         from src.cdf.evaluation.run_metrics import run_metrics
         for seed in (0, 3):
-            target, _ = self.reconstruct("traces/S06/run_0_a_front_pushed", "final", "consumer_impulse10", seed)
+            target, _ = self.reconstruct("traces/S04/run_0_a_front_pushed", "final", "consumer_impulse10", seed)
             metrics = run_metrics(target, evaluate_run(target, clock_shift_check=False),
                                   evaluate_fusion(target, write=False))
             self.assertEqual(metrics["false_collision_matches"], 0, seed)
 
-    def test_s24_no_same_pair_critical_episode_after_their_contact(self):
-        _, result = self.reconstruct("traces/S24/run_0", "final")
+    def test_s19_no_same_pair_critical_episode_after_their_contact(self):
+        _, result = self.reconstruct("traces/S19/run_0_collision_ambiguity", "final")
         contact = min(n.t_global for n in result.graph.nodes
                       if n.event_type == "COLLISION" and sorted(n.participants or []) == ["A", "B"])
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
                 and {n.actor_id, n.subject_id} == {"A", "B"}]
         self.assertEqual(late, [])
 
-    def test_s18_platoon_no_same_pair_critical_episode_while_touching(self):
-        _, result = self.reconstruct("traces/S18/run_0_platoon", "final")
+    def test_s13_platoon_no_same_pair_critical_episode_while_touching(self):
+        _, result = self.reconstruct("traces/S13/run_0_platoon", "final")
         contact = min(n.t_global for n in result.graph.nodes if n.event_type == "COLLISION")
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
                 and {n.actor_id, n.subject_id} == {"A", "B"}]

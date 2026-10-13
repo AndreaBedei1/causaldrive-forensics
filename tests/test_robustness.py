@@ -23,7 +23,7 @@ from src.cdf.robustness.perturb import (GNSS_PROFILES, RADAR_PROFILES, Collision
 from src.cdf.evaluation.run_metrics import core_event_diff, graph_signature
 
 ROOT = Path(__file__).resolve().parents[1]
-S17 = ROOT / "traces" / "S17" / "run_0_crash"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
 S01 = ROOT / "traces" / "S01" / "run_0_crash"
 
 
@@ -98,16 +98,16 @@ class GnssTests(unittest.TestCase):
         self.assertAlmostEqual(float(np.std(series)), 0.5, delta=0.03)
 
     def test_a_perturbed_pose_source_declares_its_profile_and_is_reproducible(self):
-        a = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S17 / "vehicles" / "A", 14.307498775422573)
-        b = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S17 / "vehicles" / "A", 14.307498775422573)
-        c = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 4)(S17 / "vehicles" / "A", 14.307498775422573)
-        exact = RecordedPoseSource.from_vehicle_dir(S17 / "vehicles" / "A", 14.307498775422573)
+        a = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
+        b = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
+        c = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 4)(S12 / "vehicles" / "A", 14.307498775422573)
+        exact = RecordedPoseSource.from_vehicle_dir(S12 / "vehicles" / "A", 14.307498775422573)
         self.assertAlmostEqual(a.position_std_m, math.sqrt(1.5 ** 2 + 0.7 ** 2 + 0.05 ** 2))
         self.assertEqual(a.pose_at(2.0), b.pose_at(2.0))
         self.assertNotEqual(a.pose_at(2.0), c.pose_at(2.0))
         error = math.hypot(a.pose_at(2.0).x - exact.pose_at(2.0).x, a.pose_at(2.0).y - exact.pose_at(2.0).y)
         self.assertGreater(error, 0.0)
-        ideal = PerturbedPoseSource.factory(GNSS_PROFILES["ideal"], 3)(S17 / "vehicles" / "A", 14.307498775422573)
+        ideal = PerturbedPoseSource.factory(GNSS_PROFILES["ideal"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
         self.assertEqual(ideal.pose_at(2.0), exact.pose_at(2.0))
 
     def test_streams_are_independent_of_order(self):
@@ -118,32 +118,32 @@ class GnssTests(unittest.TestCase):
 class CopyTests(unittest.TestCase):
     def test_the_copy_links_what_it_does_not_change_and_never_overwrites(self):
         with tempfile.TemporaryDirectory() as tmp:
-            target = perturbed_copy(S17, Path(tmp) / "S17" / "run_0_crash",
+            target = perturbed_copy(S12, Path(tmp) / "S12" / "run_0_crash",
                                     Perturbation("radar", radar=RADAR_PROFILES["nominal"]), 0)
-            ego, original = target / "vehicles" / "A" / "ego.jsonl", S17 / "vehicles" / "A" / "ego.jsonl"
+            ego, original = target / "vehicles" / "A" / "ego.jsonl", S12 / "vehicles" / "A" / "ego.jsonl"
             self.assertTrue(os.path.samefile(ego, original) or ego.read_bytes() == original.read_bytes())
             self.assertFalse(os.path.samefile(target / "vehicles" / "A" / "radar" / "front" / "observations.npz",
-                                              S17 / "vehicles" / "A" / "radar" / "front" / "observations.npz"))
+                                              S12 / "vehicles" / "A" / "radar" / "front" / "observations.npz"))
             self.assertFalse((target / "reconstruction").exists())
             record = json.loads((target / "perturbation.json").read_text())
             self.assertEqual(record["perturbation"]["radar"]["name"], "nominal")
             with self.assertRaises(FileExistsError):
-                perturbed_copy(S17, target, Perturbation("again"), 0)
+                perturbed_copy(S12, target, Perturbation("again"), 0)
 
     def test_clock_offsets_downsampling_dropout_and_collision_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
-            copy = perturbed_copy(S17, Path(tmp) / "a", Perturbation(
+            copy = perturbed_copy(S12, Path(tmp) / "a", Perturbation(
                 "mixed", clock_offsets_s=(("B", 12.5),), downsample=2, drop_recorders=("A",),
                 collisions=CollisionPerturbation(latency_s=0.25, latency_recorders=("B",))), 0)
             self.assertFalse((copy / "vehicles" / "A").exists())
-            rows = [json.loads(l) for l in (S17 / "vehicles" / "B" / "ego.jsonl").read_text().splitlines()]
+            rows = [json.loads(l) for l in (S12 / "vehicles" / "B" / "ego.jsonl").read_text().splitlines()]
             new = [json.loads(l) for l in (copy / "vehicles" / "B" / "ego.jsonl").read_text().splitlines()]
             self.assertEqual(len(new), (len(rows) + 1) // 2)
             self.assertAlmostEqual(new[1]["timestamp"] - rows[2]["timestamp"], 12.5, places=6)
-            hits = [json.loads(l) for l in (S17 / "vehicles" / "B" / "collisions.jsonl").read_text().splitlines()]
+            hits = [json.loads(l) for l in (S12 / "vehicles" / "B" / "collisions.jsonl").read_text().splitlines()]
             moved = [json.loads(l) for l in (copy / "vehicles" / "B" / "collisions.jsonl").read_text().splitlines()]
             self.assertAlmostEqual(moved[0]["timestamp"] - hits[0]["timestamp"], 12.75, places=6)
-            with np.load(str(S17 / "vehicles" / "B" / "radar" / "front" / "observations.npz")) as a, \
+            with np.load(str(S12 / "vehicles" / "B" / "radar" / "front" / "observations.npz")) as a, \
                     np.load(str(copy / "vehicles" / "B" / "radar" / "front" / "observations.npz")) as b:
                 self.assertEqual(len(b["frames"]), (len(a["frames"]) + 1) // 2)
                 self.assertAlmostEqual(float(b["timestamps"][1] - a["timestamps"][2]), 12.5, places=6)
@@ -152,7 +152,7 @@ class CopyTests(unittest.TestCase):
 
 class ReconstructionUnderPerturbationTests(unittest.TestCase):
     def test_clock_offsets_move_every_time_a_recorder_wrote(self):
-        run = ROOT / "traces" / "S10" / "run_0_rolls_through"  # A records a STOP sign
+        run = ROOT / "traces" / "S08" / "run_0_rolls_through"  # A records a STOP sign
         with tempfile.TemporaryDirectory() as tmp:
             copy = perturbed_copy(run, Path(tmp) / "c", Perturbation("clock", clock_offsets_s=(("A", 7.31),)), 0)
             before = [json.loads(l) for l in (run / "vehicles" / "A" / "traffic_signs.jsonl").read_text().splitlines() if l]
@@ -165,11 +165,11 @@ class ReconstructionUnderPerturbationTests(unittest.TestCase):
 
     def test_constant_clock_offsets_leave_the_global_graph_unchanged(self):
         with tempfile.TemporaryDirectory() as tmp:
-            copy = perturbed_copy(S17, Path(tmp) / "S17" / "run_0_crash",
+            copy = perturbed_copy(S12, Path(tmp) / "S12" / "run_0_crash",
                                   Perturbation("clock", clock_offsets_s=(("A", 7.31), ("B", -14.62))), 0)
             reconstruct_run(copy, ReconstructionConfig())
             new = json.loads((copy / "reconstruction" / "global" / "global_graph.json").read_text())
-        base = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text())
+        base = json.loads((S12 / "reconstruction" / "global" / "global_graph.json").read_text())
         self.assertEqual(graph_signature(new), graph_signature(base))
         self.assertTrue(core_event_diff(base, new)["identical"])
 
@@ -200,7 +200,7 @@ def _relative(refinement, bias, a, b):
 
 class MutualRefinementTests(unittest.TestCase):
     def test_recovers_the_relative_offset_when_both_directions_are_seen(self):
-        refinement, bias = _refined(S17, 2.0, 5)  # S17: B is seen from behind and alongside
+        refinement, bias = _refined(S12, 2.0, 5)  # S12: B is seen from behind and alongside
         before, after, covariance = _relative(refinement, bias, "A", "B")
         self.assertGreater(float(np.hypot(*before)), 2.0)
         self.assertLess(float(np.hypot(*after)), 0.35)
@@ -222,11 +222,11 @@ class MutualRefinementTests(unittest.TestCase):
         cfg = ReconstructionConfig()
         refined = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, mutual_refinement=True))
         with tempfile.TemporaryDirectory() as tmp:
-            copy = perturbed_copy(S17, Path(tmp) / "S17" / "run_0_crash", Perturbation("none"), 0)
+            copy = perturbed_copy(S12, Path(tmp) / "S12" / "run_0_crash", Perturbation("none"), 0)
             result = reconstruct_run(copy, refined)
             new = json.loads((copy / "reconstruction" / "global" / "global_graph.json").read_text())
         self.assertFalse(result.road_users.refinement["applied"])
-        base = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text())
+        base = json.loads((S12 / "reconstruction" / "global" / "global_graph.json").read_text())
         self.assertEqual(graph_signature(new), graph_signature(base))
 
 

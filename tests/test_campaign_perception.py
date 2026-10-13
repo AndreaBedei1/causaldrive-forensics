@@ -73,11 +73,11 @@ class ThreeRadarLayoutTests(unittest.TestCase):
 
 
 class OcclusionTests(unittest.TestCase):
-    """S07: A behind B behind C in one lane.  A's radars see B; C, hidden behind B, is never tracked."""
+    """S05: A behind B behind C in one lane.  A's radars see B; C, hidden behind B, is never tracked."""
 
     @classmethod
     def setUpClass(cls):
-        cls.run_path = run_dir("S07/run_0_crash")
+        cls.run_path = run_dir("S05/run_0_crash")
         cls.states = {}
         for state in read_jsonl(cls.run_path / "ground_truth" / "states.jsonl"):
             cls.states.setdefault(int(state["frame"]), {})[state["participant_id"]] = state
@@ -152,18 +152,18 @@ class SignTests(unittest.TestCase):
         return read_jsonl(run_dir(run) / "vehicles" / vehicle / "traffic_signs.jsonl")
 
     def test_real_stop_signs_are_detected_and_relevant(self):
-        for run, vehicle in (("S10/run_0_rolls_through", "A"), ("S12/run_0_near_simultaneous", "A"),
-                             ("S12/run_0_near_simultaneous", "B"), ("S15/run_0_deflected_into_c", "B")):
+        for run, vehicle in (("S08/run_0_rolls_through", "A"), ("S09/run_0_near_simultaneous", "A"),
+                             ("S09/run_0_near_simultaneous", "B"), ("S10/run_0_deflected_into_c", "B")):
             stops = [s for s in self.signs(run, vehicle) if s["class"] == "STOP" and s["relevant_to_ego_path"]]
             self.assertEqual(len(stops), 1, (run, vehicle))
             self.assertGreaterEqual(stops[0]["n_detections"], 10, (run, vehicle))
 
-    def test_s15_has_no_phantom_stop_after_the_collision(self):
-        self.assertEqual(self.signs("S15/run_0_deflected_into_c", "A"), [])
+    def test_s10_has_no_phantom_stop_after_the_collision(self):
+        self.assertEqual(self.signs("S10/run_0_deflected_into_c", "A"), [])
 
     def test_road_marking_stops_are_not_signs(self):
-        # S03 / S08: the junction's "STOP" is painted on the road only.
-        for run in ("S03/run_0_crash", "S08/run_0_crash"):
+        # S03 / S06: the junction's "STOP" is painted on the road only.
+        for run in ("S03/run_0_crash", "S06/run_0_crash"):
             for vehicle in sorted((run_dir(run) / "vehicles").iterdir()):
                 self.assertEqual(self.signs(run, vehicle.name), [], (run, vehicle.name))
 
@@ -174,10 +174,10 @@ class ScenarioTimingTests(unittest.TestCase):
         return reconstruct_vehicle(path / "vehicles" / vehicle, ReconstructionConfig(),
                                    context=read_incident_context(path))
 
-    def test_s12_stops_last_about_one_and_a_half_seconds_then_both_pull_away(self):
+    def test_s09_stops_last_about_one_and_a_half_seconds_then_both_pull_away(self):
         ends = []
         for vehicle in ("A", "B"):
-            nodes = self.local("S12/run_0_near_simultaneous", vehicle).graph.nodes
+            nodes = self.local("S09/run_0_near_simultaneous", vehicle).graph.nodes
             start = next(n.t_local for n in nodes if n.event_type == "STOP_START")
             end = next(n.t_local for n in nodes if n.event_type == "STOP_END")
             self.assertTrue(1.0 <= end - start <= 2.0, (vehicle, start, end))
@@ -186,20 +186,20 @@ class ScenarioTimingTests(unittest.TestCase):
             ends.append(end)
         self.assertLessEqual(abs(ends[0] - ends[1]), 0.3)
 
-    def test_s09_approach_before_the_first_critical_situation(self):
+    def test_s07_approach_before_the_first_critical_situation(self):
         first = min(n.t_local for vehicle in ("A", "B")
-                    for n in self.local("S09/run_0_merge_conflict", vehicle).graph.nodes
+                    for n in self.local("S07/run_0_merge_conflict", vehicle).graph.nodes
                     if n.event_type == "CRITICAL_TTC_START")
         self.assertGreaterEqual(first, 5.0)
 
-    def test_s16_c_drives_in_the_next_lane_until_the_second_collision(self):
-        run = run_dir("S16/run_0_consequential")
+    def test_s11_c_drives_in_the_next_lane_until_the_second_collision(self):
+        run = run_dir("S11/run_0_consequential")
         ego = read_jsonl(run / "vehicles" / "C" / "ego.jsonl")
         collisions = read_jsonl(run / "vehicles" / "C" / "collisions.jsonl")
         first = min(float(c["timestamp"]) for c in collisions)
         speeds = [math.hypot(r["velocity"]["x"], r["velocity"]["y"]) for r in ego if float(r["timestamp"]) < first]
         self.assertTrue(all(7.0 <= v <= 10.0 for v in speeds), (min(speeds), max(speeds)))
-        scenario = (ROOT / "configs" / "scenarios" / "s16_secondary_collision.yaml").read_text(encoding="utf-8")
+        scenario = (ROOT / "configs" / "scenarios" / "s11_secondary_collision.yaml").read_text(encoding="utf-8")
         self.assertNotIn("deflect", scenario.split("participants:")[1])
 
 

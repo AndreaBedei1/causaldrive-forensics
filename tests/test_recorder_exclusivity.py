@@ -87,7 +87,7 @@ class ExclusivityTests(unittest.TestCase):
         self.assertEqual((kept, [r["track"] for r in refused]), ([], ["A:t2"]))
 
 
-class S16RecordedTests(unittest.TestCase):
+class S11RecordedTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = Path(tempfile.mkdtemp(prefix="excl_"))
@@ -98,7 +98,7 @@ class S16RecordedTests(unittest.TestCase):
 
     def reconstruct(self, method):
         from src.cdf.reconstruction.pipeline import reconstruct_run
-        src = ROOT / "traces/S16/run_0_consequential"
+        src = ROOT / "traces/S11/run_0_consequential"
         dst = self.tmp / method / "run"
         shutil.copytree(src / "vehicles", dst / "vehicles")
         for name in ("metadata.json", "incident_context.json"):
@@ -107,15 +107,15 @@ class S16RecordedTests(unittest.TestCase):
         reconstruct_run(dst, dataclasses.replace(base, fusion=dataclasses.replace(base.fusion, association_method=method)))
         return json.loads((dst / "reconstruction/global/associations.json").read_text())
 
-    def test_s16_same_observer_c_claims_are_one_body_and_unchanged(self):
-        committed = json.loads((ROOT / "traces/S16/run_0_consequential/reconstruction/global/associations.json").read_text())
+    def test_s11_same_observer_c_claims_are_one_body_and_unchanged(self):
+        committed = json.loads((ROOT / "traces/S11/run_0_consequential/reconstruction/global/associations.json").read_text())
         fresh = self.reconstruct("current")
         claims = sorted((a["local_graph"], a["local_track"]) for a in fresh if a["global_entity"] == "C")
         self.assertEqual(claims, [("A", "track_001"), ("A", "track_002"), ("B", "track_002"), ("B", "track_003")])
         self.assertEqual([(a["local_track"], a["global_entity"]) for a in committed],
                          [(a["local_track"], a["global_entity"]) for a in fresh])
 
-    def test_s16_final_has_one_c_claim_per_observer(self):
+    def test_s11_final_has_one_c_claim_per_observer(self):
         fresh = self.reconstruct("final")
         per_observer = {}
         for a in fresh:

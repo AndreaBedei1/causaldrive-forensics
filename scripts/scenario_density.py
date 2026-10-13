@@ -2,7 +2,7 @@
 """Privileged scenario check (ground truth; the SCENARIO, not the reconstruction): how much traffic surrounds
 the recorders before the first contact.
 
-    python scripts/scenario_density.py traces/S19/run_0 ... [--out results/.../density.md]
+    python scripts/scenario_density.py traces/S14/run_0_surrounded ... [--out results/.../density.md]
 
 Per run, over the time before the first vehicle contact (10 Hz): non-recorder vehicles within 15 / 30 / 50 m of
 any recorder (mean and max), by position relative to the nearest recorder in its own frame (ahead / behind /

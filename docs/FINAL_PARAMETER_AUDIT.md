@@ -25,7 +25,7 @@ common 0.9; `docs/FINAL_HARDENING_PLAN.md`); "-" = not varied in this phase.
 | parameter | value | category | used by FINAL | sensitivity / evidence |
 |---|--:|---|---|---|
 | `gating` | fixed (FINAL: covariance) | switch | `effective_config` sets covariance for FINAL | - |
-| `covariance_components` | survival,confirmation | switch | yes | T: position gate adds missed links (exact 3 -> 6, consumer 17 -> 20) by fragmenting tracks at impacts; the Doppler gate produced wrong links on S06 b_rear_first and S08 during development.  Both are implemented and NOT adopted. |
+| `covariance_components` | survival,confirmation | switch | yes | T: position gate adds missed links (exact 3 -> 6, consumer 17 -> 20) by fragmenting tracks at impacts; the Doppler gate produced wrong links on S04 b_rear_first and S06 during development.  Both are implemented and NOT adopted. |
 | `gate_probability` | 0.99 | STATISTICAL | chi-square quantile of the (unused) position/Doppler gates | - (gates not adopted) |
 | `measurement_std_m` | 0.5 | SENSOR | KF measurement noise; "arriving" test of the collision evidence (touching + 3 sigma) | - |
 | `radial_speed_std_mps` | 0.3 | SENSOR | Doppler noise; sigma of the normal-component collision rule | - |
@@ -62,8 +62,8 @@ common 0.9; `docs/FINAL_HARDENING_PLAN.md`); "-" = not varied in this phase.
 | `stitch_max_gap_s` | 1.5 | LEGACY / FAIL-SAFE | METHODS 1-3: stitch gate.  FINAL: only an upper bound; the decision is the stitch posterior (density decays with the gap) | unit test: posterior decays with the gap; a 4 m miss after 1.5 s is refused |
 | `touching_clearance_m` | 1.0 | PHYSICAL | a track "touches" the recorder (collision evidence) | - |
 | `contact_window_s` / `approach_window_s` | 1.0 / 1.0 | AUDITED-FIXED | windows of the collision evidence | - |
-| closing window | 0.2 s (code constant, 4 sweeps) | AUDITED-FIXED | FINAL: the arriving body must still be closing over the last 0.2 s | development: fixes the S20 passing-car contradiction without losing S06 b_rear_first |
-| `speed_consistency_mps` | 1.5 | LEGACY | METHODS 2-3 speed RMSE test; FINAL uses the normal-component rule (3 sigma of Doppler + track velocity noise) instead | S10 regression fixed in FINAL (0 collisions lost, S) |
+| closing window | 0.2 s (code constant, 4 sweeps) | AUDITED-FIXED | FINAL: the arriving body must still be closing over the last 0.2 s | development: fixes the S15 passing-car contradiction without losing S04 b_rear_first |
+| `speed_consistency_mps` | 1.5 | LEGACY | METHODS 2-3 speed RMSE test; FINAL uses the normal-component rule (3 sigma of Doppler + track velocity noise) instead | S08 regression fixed in FINAL (0 collisions lost, S) |
 | `impulse_relative_std`, `impulse_sigma_gate`, `impulse_tolerance` | 0.1 / 3.0 / 0.1 | SENSOR / STATISTICAL | collision report matching (unchanged) | - |
 | `clock_tolerance_s`, `contact_consistency_m`, `contact_range_m`, `contact_range_scale_m`, `rival_clearance_m` | 0.1 / 1.0 / 3.5 / 3.0 / 2.0 | LEGACY (collision matching, unchanged) | yes | - |
 | `observed_alignment_*` | step 0.05, min 10 samples, 2 m/s, ratio 3 | LEGACY (clock alignment, unchanged) | yes | - |

@@ -108,7 +108,7 @@ recorder's envelope is not on a collision course, whatever its range rate.
      ``closing_speed_threshold_mps`` or more that would cover its clearance
      within ``critical_reaction_time_s`` (clearance / closing speed, the
      TRACK_STATE ``closing_ttc_s``) is not resolved, whatever the 2-D
-     prediction says (its constant-velocity target misses a curved path: S09,
+     prediction says (its constant-velocity target misses a curved path: S07,
      a car merging into a roundabout alongside a recorder that turns);
    * the target's box outside the recorder's safety envelope now (no near
      contact), unless both stand still (below ``HEADING_MIN_SPEED_MPS``, so
@@ -321,7 +321,7 @@ def target_box(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootpr
     tvx, tvy = c * sample.vx_mps + s * sample.vy_mps, -s * sample.vx_mps + c * sample.vy_mps
     # The target's motion across the recorder's heading counts only beyond the uncertainty of
     # its estimate: a radar track's median point slides over the target's visible body while
-    # the view angle changes (S08: an oncoming car passing beside the recorder looked 1 m/s
+    # the view angle changes (S06: an oncoming car passing beside the recorder looked 1 m/s
     # closer to its lane than it was), and the null hypothesis for a car is to keep to its
     # lane, parallel to the recorder, not to head straight at it.
     tvy = math.copysign(max(abs(tvy) - sample.vel_std_mps, 0.0), tvy)

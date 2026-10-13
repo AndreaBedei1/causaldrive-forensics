@@ -91,7 +91,7 @@ IEEE 1616.1 [B22]).
 - Radar-only perception of road users that recorded nothing: their size is fitted only where the recorders see
   different faces (otherwise a nominal box); standing vehicles are not tracked; two cars 1.4 m apart side by
   side are kept apart with exact poses (0 false merges in 523 sweep merge trials) but merged when the declared
-  pose accuracy is consumer-grade (about 20 false merges per draw over the three canonical S18 runs); at the
+  pose accuracy is consumer-grade (about 20 false merges per draw over the three canonical S13 runs); at the
   first sweeps the same car can be drawn as two anonymous users until the cross-observer merge; identity
   switches at contacts and short fragments leave some tracks anonymous; heavy clutter creates spurious tracks
   and events.
@@ -115,8 +115,8 @@ IEEE 1616.1 [B22]).
 ## STOP / YIELD and the depth camera
 
 Out of the main paper (the default).  The camera-based STOP / YIELD detector runs on board and gives
-STOP_SIGN_DETECTED / YIELD events, but the campaign has four confirmed STOP tracks, all on real signs (S10 A,
-S12 A, S12 B, S15 B), and no YIELD sign on its routes (the YIELD detector is validated on the Town10HD yield
+STOP_SIGN_DETECTED / YIELD events, but the campaign has four confirmed STOP tracks, all on real signs (S08 A,
+S09 A, S09 B, S10 B), and no YIELD sign on its routes (the YIELD detector is validated on the Town10HD yield
 sign only): too little to evaluate rule-related events, and rule compliance is not one of the contributions.
 The depth camera is recorded but used by nothing in the reconstruction (it also misses frames on the second
 and third vehicle when three cameras render per tick).  Both stay in the repository, documented, as future

@@ -124,7 +124,7 @@ class NormalComponentTests(unittest.TestCase):
         return identity._normal_component_consistent(local, other, window, 5.0, 5.0, self.c)
 
     def test_a_slow_true_partner_with_a_poorly_observed_tangential_component_is_not_contradicted(self):
-        # S10-like: the track's ground velocity is mostly tangential (8 m/s, badly observed), only 2 m/s along
+        # S08-like: the track's ground velocity is mostly tangential (8 m/s, badly observed), only 2 m/s along
         # the line of sight; the true partner rolls at 3 m/s.  A full-velocity comparison would reject it.
         self.assertTrue(self.check((8.0, -2.0), 3.0))
 
@@ -132,7 +132,7 @@ class NormalComponentTests(unittest.TestCase):
         self.assertFalse(self.check((0.0, -6.0), 1.0))
 
     def test_a_partner_faster_than_the_whole_ground_velocity_is_contradicted(self):
-        # S06-like wrong clock offset: the candidate drives at 12 m/s while the arriving body moves at 4 m/s.
+        # S04-like wrong clock offset: the candidate drives at 12 m/s while the arriving body moves at 4 m/s.
         self.assertFalse(self.check((0.0, -4.0), 12.0))
 
     def test_a_consistent_partner_is_supported(self):
@@ -155,7 +155,7 @@ class ClosingBodyTests(unittest.TestCase):
         return identity.radar_contact_evidence([a, b], c)("A", 5.0, "B", 5.0)
 
     def test_a_body_passing_alongside_is_no_evidence_in_final(self):
-        # S20-like: a car arrives beside the recorder and keeps its distance through the last 0.2 s (passing,
+        # S15-like: a car arrives beside the recorder and keeps its distance through the last 0.2 s (passing,
         # not hitting).  METHOD 2 lets it contradict the true partner; METHOD 3 FINAL ignores it.
         passing = [3.0, 2.4, 1.8, 1.2, 0.8, 0.6, 0.6, 0.6, 0.6, 0.6]
         self.assertFalse(self.evidence("corrected", passing))
@@ -205,7 +205,7 @@ class RelevanceTests(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------
-# Recorded runs: S10, dense scenarios, timelines
+# Recorded runs: S08, dense scenarios, timelines
 # --------------------------------------------------------------------------
 
 class RecordedRunTests(unittest.TestCase):
@@ -241,22 +241,22 @@ class RecordedRunTests(unittest.TestCase):
         nodes = [n for n in result.graph.nodes if n.event_type == "COLLISION"]
         return sorted(tuple(sorted(getattr(n, "participants", None) or [])) for n in nodes)
 
-    def test_s10_collision_is_named_in_final(self):
-        _, result = self.reconstruct("traces/S10/run_0_rolls_through", "final")
+    def test_s08_collision_is_named_in_final(self):
+        _, result = self.reconstruct("traces/S08/run_0_rolls_through", "final")
         self.assertIn(("A", "B"), self.collisions(result))
 
     def test_dense_collisions_name_the_single_partner(self):
-        for run in ("traces/S20/run_0", "traces/S24/run_0"):
+        for run in ("traces/S15/run_0_dense_platoon", "traces/S19/run_0_collision_ambiguity"):
             _, result = self.reconstruct(run, "final")
             self.assertEqual(set(self.collisions(result)), {("A", "B")}, run)
 
-    def test_s19_dense_abreast_has_no_false_merge_in_final(self):
+    def test_s14_dense_abreast_has_no_false_merge_in_final(self):
         from src.cdf.evaluation.fusion_metrics import evaluate_fusion
-        target, _ = self.reconstruct("traces/S19/run_0", "final")
+        target, _ = self.reconstruct("traces/S14/run_0_surrounded", "final")
         self.assertEqual(evaluate_fusion(target, write=False)["merges"]["false"], 0)
 
     def test_timelines_keep_observation_before_resolution(self):
-        target, _ = self.reconstruct("traces/S20/run_0", "final")
+        target, _ = self.reconstruct("traces/S15/run_0_dense_platoon", "final")
         entities = json.loads((target / "reconstruction/global/anonymous_entities.json").read_text())["entities"]
         self.assertTrue(entities)
         for entity in entities:
@@ -270,7 +270,7 @@ class RecordedRunTests(unittest.TestCase):
     def test_retrospective_resolution_moves_no_event_timestamp(self):
         # The same tracker with the late identity resolution disabled (no posterior reaches 1.01): identity
         # decisions may differ, the event onsets may not.
-        for run in ("traces/S17/run_0_crash", "traces/S20/run_0"):
+        for run in ("traces/S12/run_0_crash", "traces/S15/run_0_dense_platoon"):
             _, final = self.reconstruct(run, "final")
             _, plain = self.reconstruct(run, "final", retrospective_min_posterior=1.01)
             onsets = lambda result: Counter((n.event_type, n.actor_id, round(n.t_global, 4)) for n in result.graph.nodes)

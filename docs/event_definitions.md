@@ -154,7 +154,7 @@ reconstructed kinematics.
 
 ## 7. Derived quantity: observed vehicle response delay
 
-The worked example (`cdf.evaluation.worked_example`, S17) measures, on the recorder's own clock, the delay from
+The worked example (`cdf.evaluation.worked_example`, S12) measures, on the recorder's own clock, the delay from
 a hazard its sensors established (CUT_IN_*_START, EGO_PATH_ENTRY, CRITICAL_TTC_START) to its own first
 steering command (|steer| >= 0.001 held 0.2 s) and to its heading response (|yaw rate| >= 0.5 deg/s), and BRAKE_START
 plays the same role for braking.  These are **observed vehicle response delays**, never human reaction times:
@@ -163,7 +163,7 @@ plays the same role for braking.  These are **observed vehicle response delays**
   perceive cues the radar does not measure (indicators, another driver's gaze, a drift that announces a lane
   change) and miss what it measures (inattention, blind spots); an automated driving system perceives through its
   own sensors and adds processing and planning time;
-* in the simulated campaign the responses are scripted (S17: a trigger on the corridor clearance plus a
+* in the simulated campaign the responses are scripted (S12: a trigger on the corridor clearance plus a
   scripted latency), so the delays describe the scenario logic, not a driver;
 * an expert would compare such delays with perception-reaction time distributions chosen for the expectation
   level and the kinematic context [B12, B13, B11]; braking onset follows kinematic urgency rather than a fixed

@@ -5,7 +5,7 @@ labels, actor IDs, maps or ground truth: only the pixels of one camera.
 
 Candidates are the external contours of the red mask (HSV, two hue bands,
 opened and closed).  A contour touching the image border is rejected: its
-shape is truncated and cannot be verified (the S15 false STOP was a red
+shape is truncated and cannot be verified (the S10 false STOP was a red
 advertising board cut by the image border).  The remaining ones are classified
 by their geometry:
 
@@ -24,7 +24,7 @@ by their geometry:
 Detections are tracked between frames by class, centre distance (relative to
 the image width), size consistency and time gap; a track is confirmed after
 ``min_detections_per_track`` detections with a stable shape.  Thresholds were
-calibrated on CARLA frames (Town05 STOP plates, the Town10HD YIELD sign; S15's
+calibrated on CARLA frames (Town05 STOP plates, the Town10HD YIELD sign; S10's
 red board and Town05's brick facades as negatives), see the README.
 """
 

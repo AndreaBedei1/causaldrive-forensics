@@ -339,8 +339,8 @@ class CampaignRegressionTests(unittest.TestCase):
             self.skipTest("canonical trace not present")
         self.assertIsNotNone(self.first(nodes, "CUT_IN_FROM_LEFT_START", "track_001"))
 
-    def test_s17_a_is_critical_before_u1_cut_in_and_b_sees_a_manoeuvre(self):
-        a_nodes, b_nodes = _graph("S17/run_0_crash", "A"), _graph("S17/run_0_crash", "B")
+    def test_s12_a_is_critical_before_u1_cut_in_and_b_sees_a_manoeuvre(self):
+        a_nodes, b_nodes = _graph("S12/run_0_crash", "A"), _graph("S12/run_0_crash", "B")
         if a_nodes is None or b_nodes is None:
             self.skipTest("canonical trace not present")
         critical = self.first(a_nodes, "CRITICAL_TTC_START", "track_001")

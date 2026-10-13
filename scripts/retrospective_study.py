@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Three-method comparison of the identity association (current / corrected / retrospective).
 
-    python scripts/retrospective_study.py traces/S18/run_* --methods current,corrected,retrospective
+    python scripts/retrospective_study.py traces/S13/run_* --methods current,corrected,retrospective
            --conditions exact,rtk,consumer,... --seeds 0,1,2 [--workers 8] [--keep]
 
 Every job: a non-destructive copy of the run (hard links; the GNSS error enters as the pose source and the

@@ -203,10 +203,10 @@ class MultiCollisionTests(unittest.TestCase):
         self.assertEqual(_partners([_contact(4.0)], [left, right]), {})
 
 
-class S17Tests(unittest.TestCase):  # G
-    """S17: A (cut in on by the unrecorded C) swerves into B.  Reconstructed live from the raw files."""
+class S12Tests(unittest.TestCase):  # G
+    """S12: A (cut in on by the unrecorded C) swerves into B.  Reconstructed live from the raw files."""
 
-    run_dir = ROOT / "traces" / "S17" / "run_0_crash"
+    run_dir = ROOT / "traces" / "S12" / "run_0_crash"
 
     @classmethod
     def setUpClass(cls):

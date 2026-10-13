@@ -1,4 +1,4 @@
-"""record: false participants, privileged triggers, and the recorded S17 run (no CARLA needed)."""
+"""record: false participants, privileged triggers, and the recorded S12 run (no CARLA needed)."""
 
 import json
 import math
@@ -16,7 +16,7 @@ from src.cdf.simulation.triggers import (ActionTrigger, Pose, box_outline, corri
                                          fire_due_triggers)
 
 ROOT = Path(__file__).resolve().parents[1]
-S17 = ROOT / "traces" / "S17" / "run_0_crash"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
 
 
 def read_jsonl(path):
@@ -154,9 +154,9 @@ class CorridorClearanceTriggerTests(unittest.TestCase):
                          ["ahead_m", "kind", "lateral_margin_m", "reaction_s", "target", "window_s"])
 
 
-class S17SpecificationTests(unittest.TestCase):
+class S12SpecificationTests(unittest.TestCase):
     def setUp(self):
-        self.spec = ScenarioSpec.from_config(load_run_config("S17"))
+        self.spec = ScenarioSpec.from_config(load_run_config("S12"))
 
     def test_c_is_physical_but_not_a_recorder(self):
         self.assertEqual(self.spec.participant_ids, ["A", "B", "C"])
@@ -186,36 +186,36 @@ class S17SpecificationTests(unittest.TestCase):
             self.spec.without(["D"])
 
     def test_triggers_must_name_a_participant(self):
-        data = load_run_config("S17").data
+        data = load_run_config("S12").data
         data["scenario"]["participants"][0]["actions"][0]["trigger"]["target"] = "Z"
         with self.assertRaises(ValueError):
             ScenarioSpec.from_config(Config(data))
 
 
-@unittest.skipUnless((S17 / "ground_truth" / "states.jsonl").exists(), "S17 not recorded")
-class S17RecordingTests(unittest.TestCase):
+@unittest.skipUnless((S12 / "ground_truth" / "states.jsonl").exists(), "S12 not recorded")
+class S12RecordingTests(unittest.TestCase):
     """The recorded run: C drove and was seen, but recorded nothing and is named nowhere admissible."""
 
     def test_only_recorders_write_data_and_the_run_metadata_lists_only_them(self):
-        self.assertEqual(sorted(p.name for p in (S17 / "vehicles").iterdir()), ["A", "B"])
-        self.assertEqual(json.loads((S17 / "metadata.json").read_text())["participants"], ["A", "B"])
-        truth = json.loads((S17 / "ground_truth" / "metadata.json").read_text())
+        self.assertEqual(sorted(p.name for p in (S12 / "vehicles").iterdir()), ["A", "B"])
+        self.assertEqual(json.loads((S12 / "metadata.json").read_text())["participants"], ["A", "B"])
+        truth = json.loads((S12 / "ground_truth" / "metadata.json").read_text())
         self.assertIn({"participant_id": "C", "record": False}, truth["participants"])
-        self.assertEqual({s["participant_id"] for s in read_jsonl(S17 / "ground_truth" / "states.jsonl")},
+        self.assertEqual({s["participant_id"] for s in read_jsonl(S12 / "ground_truth" / "states.jsonl")},
                          {"A", "B", "C"})
 
     def frames(self):
         """{frame: {participant: state}} of the frames where every participant has a state."""
         by_frame = {}
-        for state in read_jsonl(S17 / "ground_truth" / "states.jsonl"):
+        for state in read_jsonl(S12 / "ground_truth" / "states.jsonl"):
             by_frame.setdefault(state["frame"], {})[state["participant_id"]] = state
         return {frame: row for frame, row in by_frame.items() if len(row) == 3}
 
     def test_a_and_b_collide_and_nobody_touches_c(self):
-        states = read_jsonl(S17 / "ground_truth" / "states.jsonl")
+        states = read_jsonl(S12 / "ground_truth" / "states.jsonl")
         names = {s["actor_id"]: s["participant_id"] for s in states}
         pairs = set()
-        for record in read_jsonl(S17 / "ground_truth" / "collisions.jsonl"):
+        for record in read_jsonl(S12 / "ground_truth" / "collisions.jsonl"):
             pairs.add(tuple(sorted((record["participant_id"], names.get(record["other_actor_id"], "static")))))
         self.assertEqual(pairs, {("A", "B")})
         # Not a numerical near-touch either: C's box stays clear of A's and B's all along.
@@ -224,12 +224,12 @@ class S17RecordingTests(unittest.TestCase):
         self.assertGreaterEqual(min(box_gap(row["B"], row["C"]) for row in frames.values()), 1.0)
 
     def test_the_swerve_was_fired_by_a_close_cut_in_before_the_collision(self):
-        triggers = read_jsonl(S17 / "ground_truth" / "triggers.jsonl")
+        triggers = read_jsonl(S12 / "ground_truth" / "triggers.jsonl")
         self.assertEqual([(t["participant_id"], t["action_id"], t["trigger"]["target"]) for t in triggers],
                          [("A", "A_evasive_swerve_left", "C")])
-        states = read_jsonl(S17 / "ground_truth" / "states.jsonl")
+        states = read_jsonl(S12 / "ground_truth" / "states.jsonl")
         t0 = states[0]["timestamp"]
-        first_contact = min(r["timestamp"] for r in read_jsonl(S17 / "ground_truth" / "collisions.jsonl")) - t0
+        first_contact = min(r["timestamp"] for r in read_jsonl(S12 / "ground_truth" / "collisions.jsonl")) - t0
         self.assertLess(triggers[0]["action_t_start"], first_contact - 1.0)
         self.assertLessEqual(triggers[0]["measured"]["front_clearance_m"], triggers[0]["trigger"]["clearance_m"])
         # About 2 m of real clearance, box to box, when A starts reacting.
@@ -238,7 +238,7 @@ class S17RecordingTests(unittest.TestCase):
         self.assertTrue(1.5 <= box_gap(frames[reaction]["A"], frames[reaction]["C"]) <= 3.0)
 
     def test_privileged_counterfactuals(self):
-        summary = json.loads((S17 / "ground_truth" / "counterfactuals.json").read_text())
+        summary = json.loads((S12 / "ground_truth" / "counterfactuals.json").read_text())
         self.assertTrue(summary["_notice"].startswith("PRIVILEGED"))
         self.assertEqual(summary["factual"]["collisions"].keys(), {"A-B"})
         without_c, no_swerve = summary["counterfactuals"]["without_C"], summary["counterfactuals"]["swerve_disabled"]
@@ -251,19 +251,19 @@ class S17RecordingTests(unittest.TestCase):
         self.assertGreater(no_swerve["box_gaps"]["A-B"]["min_box_gap_m"], 1.0)
 
     def test_reconstruction_keeps_c_anonymous(self):
-        associations = json.loads((S17 / "reconstruction" / "global" / "associations.json").read_text())
+        associations = json.loads((S12 / "reconstruction" / "global" / "associations.json").read_text())
         entities = {(a["local_graph"], a["local_track"]): (a["status"], a["global_entity"]) for a in associations}
         # C's tracks of both recorders are one anonymous road user, U1: never named C.
         self.assertEqual(entities[("A", "track_001")], ("ANONYMOUS", "U1"))
         self.assertEqual(entities[("A", "track_002")], ("ASSOCIATED", "B"))
         self.assertEqual(entities[("B", "track_001")], ("ASSOCIATED", "A"))
-        graph = json.loads((S17 / "reconstruction" / "global" / "global_graph.json").read_text())
+        graph = json.loads((S12 / "reconstruction" / "global" / "global_graph.json").read_text())
         mentioned = {n["actor_id"] for n in graph["nodes"]} | {n["subject_id"] for n in graph["nodes"]}
         self.assertNotIn("C", mentioned)
         types = {(n["event_type"], n["subject_id"]) for n in graph["nodes"] if n["actor_id"] == "A"}
         self.assertIn(("CUT_IN_FROM_RIGHT_START", "U1"), types)
         self.assertIn(("EGO_PATH_ENTRY", "U1"), types)
-        evaluation = json.loads((S17 / "reconstruction" / "evaluation" / "evaluation.json").read_text())
+        evaluation = json.loads((S12 / "reconstruction" / "evaluation" / "evaluation.json").read_text())
         verdicts = {row["track"]: (row["true_identity"], row["verdict"]) for row in evaluation["tracks"]}
         self.assertEqual(verdicts["A:track_001"], ("C", "correctly left anonymous"))
         for (recorder, track), (status, entity) in entities.items():

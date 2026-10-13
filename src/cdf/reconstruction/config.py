@@ -31,7 +31,7 @@ class CollisionConfig:
     # Below this fraction the burst continues the contact (persistent contact).
     min_impact_ratio: float = 0.25
     # A burst weaker than this (N*s) never starts a new contact within merge_gap_s,
-    # whatever its ratio: bodies scraping or pushing along each other (S16: a 2 s
+    # whatever its ratio: bodies scraping or pushing along each other (S11: a 2 s
     # scrape of 35-320 N*s bursts).  1000 N*s changes a 1.2-2.5 t vehicle's speed by
     # 0.4-0.8 m/s; every distinct impact measured in the campaign was stronger.
     min_new_impact_impulse: float = 1000.0
@@ -110,7 +110,7 @@ class TrackingConfig:
     # doppler, median_noise, ambiguity, survival, confirmation); an absent one falls back to the fixed rule.
     # median_noise is implemented but NOT adopted: the median of a sweep's returns slides over the body as the
     # visible faces change (a systematic error of decimetres), so sigma / sqrt(n) made the filter overconfident
-    # and its velocity jitter contradicted a true collision partner (S09, development seed).
+    # and its velocity jitter contradicted a true collision partner (S07, development seed).
     covariance_components: str = "position,doppler,ambiguity,survival,confirmation"
     gate_probability: float = 0.99
     body_length_m: float = 4.6
@@ -289,7 +289,7 @@ class FusionConfig:
     # of them touches the recorder: observed within one sample of the contact,
     # its near surface at most touching_clearance_m from the recorder's body,
     # while every rival is at least rival_clearance_m away (a long vehicle seen
-    # as two tracks, S16's van: the one at its touching end is the partner).
+    # as two tracks, S11's van: the one at its touching end is the partner).
     touching_clearance_m: float = 1.0
     rival_clearance_m: float = 2.0
     # --- Road users in the common frame of the recorders' own pose streams (anonymous.py) ---

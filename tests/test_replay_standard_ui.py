@@ -86,8 +86,8 @@ class CameraTests(unittest.TestCase):
 class RecordedRunPanelTests(unittest.TestCase):
     """Every 0.1 s of the canonical runs: the standard panels stay clean and keep every recent event."""
 
-    RUNS = ("traces/S16/run_0_consequential", "traces/S18/run_0_abreast", "traces/S18/run_0_passing",
-            "traces/S18/run_0_platoon")
+    RUNS = ("traces/S11/run_0_consequential", "traces/S13/run_0_abreast", "traces/S13/run_0_passing",
+            "traces/S13/run_0_platoon")
 
     def test_panels(self):
         for path in self.RUNS:
@@ -126,7 +126,7 @@ class ViewerTests(unittest.TestCase):
         self.app.font_bold, self.app.font_small = "bold", "small"
 
     def test_vehicle_panel_uses_the_standard_lines(self):
-        self.app.run = ReplayRun.load(ROOT / "traces/S18/run_0_platoon")
+        self.app.run = ReplayRun.load(ROOT / "traces/S13/run_0_platoon")
         for t in (2.0, 6.0, 7.0, 8.0):
             for text, rgb, font in self.app._vehicle_lines("A", t):
                 self.assertNotIn("?", text)
@@ -171,7 +171,7 @@ class NoGroundTruthTests(unittest.TestCase):
         import shutil
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
-            src, dst = ROOT / "traces/S20/run_0", Path(tmp) / "S20" / "run_0"
+            src, dst = ROOT / "traces/S15/run_0_dense_platoon", Path(tmp) / "S15" / "run_0_dense_platoon"
             for item in ("vehicles", "reconstruction"):
                 shutil.copytree(src / item, dst / item)
             shutil.copy2(src / "metadata.json", dst / "metadata.json")

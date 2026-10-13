@@ -288,10 +288,10 @@ class RealRunRegressions(unittest.TestCase):
     def events(self, result):
         return [(n.event_type, n.actor_id, n.subject_id, n.t_global) for n in result.graph.nodes]
 
-    def test_s06_consumer_gnss_impulse_seed3_makes_no_wrong_pairing(self):
+    def test_s04_consumer_gnss_impulse_seed3_makes_no_wrong_pairing(self):
         from src.cdf.evaluation.reconstruction import evaluate_run
         for method in ("corrected", "retrospective"):
-            target, _ = self.reconstruct("traces/S06/run_0_a_front_pushed", method, "consumer_impulse10", 3)
+            target, _ = self.reconstruct("traces/S04/run_0_a_front_pushed", method, "consumer_impulse10", 3)
             evaluation = evaluate_run(target, clock_shift_check=False)
             from src.cdf.evaluation.run_metrics import run_metrics
             from src.cdf.evaluation.fusion_metrics import evaluate_fusion
@@ -299,14 +299,14 @@ class RealRunRegressions(unittest.TestCase):
             # The wrong pairing of METHOD 1 (A's report with B's later one, 6 m apart under consumer GNSS) is gone:
             # with no decisive evidence the reports stay unmatched rather than wrongly paired.
             self.assertEqual(metrics["false_collision_matches"], 0, method)
-        target, _ = self.reconstruct("traces/S06/run_0_a_front_pushed", "corrected", "consumer_impulse10", 0)
+        target, _ = self.reconstruct("traces/S04/run_0_a_front_pushed", "corrected", "consumer_impulse10", 0)
         evaluation = evaluate_run(target, clock_shift_check=False)
         self.assertGreaterEqual(sum(c.get("reconstructed_as") is not None for c in evaluation["collisions"]), 2)
 
     def test_collision_partner_from_the_pre_contact_radar_approach(self):
         from src.cdf.reconstruction.local import reconstruct_vehicle
         from src.cdf.reconstruction.pipeline import read_incident_context
-        run = ROOT / "traces/S06/run_0_b_rear_first"
+        run = ROOT / "traces/S04/run_0_b_rear_first"
         c = cfg()
         locals_ = [reconstruct_vehicle(p, c, context=read_incident_context(run))
                    for p in sorted((run / "vehicles").iterdir()) if p.is_dir()]
@@ -320,9 +320,9 @@ class RealRunRegressions(unittest.TestCase):
             t.samples = [s for s in t.samples if s.t_local < 6.25 - 0.06]
         self.assertTrue(check("A", 6.25, "B", 6.25))
 
-    def test_s18_consumer_gnss_has_no_false_merge(self):
+    def test_s13_consumer_gnss_has_no_false_merge(self):
         from src.cdf.evaluation.fusion_metrics import evaluate_fusion
-        for run in ("traces/S18/run_0_abreast", "traces/S18/run_0_passing", "traces/S18/run_0_platoon"):
+        for run in ("traces/S13/run_0_abreast", "traces/S13/run_0_passing", "traces/S13/run_0_platoon"):
             for method in ("corrected", "retrospective"):
                 target, _ = self.reconstruct(run, method, "consumer", 0)
                 fusion = evaluate_fusion(target, write=False)
@@ -333,29 +333,29 @@ class RealRunRegressions(unittest.TestCase):
             self.assertIn("cannot_links", entities)
 
     def test_retrospective_moves_no_event_timestamp(self):
-        for run in ("traces/S18/run_0_platoon", "traces/S17/run_0_crash"):
+        for run in ("traces/S13/run_0_platoon", "traces/S12/run_0_crash"):
             _, corrected = self.reconstruct(run, "corrected")
             _, retrospective = self.reconstruct(run, "retrospective")
             onsets = lambda result: Counter((t, a, round(time, 4)) for t, a, _, time in self.events(result))
             self.assertEqual(onsets(corrected), onsets(retrospective), run)
 
-    def test_s12_s16_s17_regressions(self):
+    def test_s09_s11_s12_regressions(self):
         for method in ("corrected", "retrospective"):
-            _, s12 = self.reconstruct("traces/S12/run_0_near_simultaneous", method)
-            b = {a.local_track: a.global_entity for a in s12.associations if a.local_graph == "B"}
+            _, s09 = self.reconstruct("traces/S09/run_0_near_simultaneous", method)
+            b = {a.local_track: a.global_entity for a in s09.associations if a.local_graph == "B"}
             self.assertTrue(all(b[k] == "A" for k in b if k.startswith("track_001")), b)
-            _, s16 = self.reconstruct("traces/S16/run_0_consequential", method)
-            cut_ins = [e for e in self.events(s16) if e[0].startswith("CUT_IN") and e[1] == "A" and e[2] == "C"]
+            _, s11 = self.reconstruct("traces/S11/run_0_consequential", method)
+            cut_ins = [e for e in self.events(s11) if e[0].startswith("CUT_IN") and e[1] == "A" and e[2] == "C"]
             self.assertEqual(cut_ins, [])
-            _, s17 = self.reconstruct("traces/S17/run_0_crash", method)
-            u1 = [e for e in self.events(s17) if e[0] == "CUT_IN_FROM_RIGHT_START" and e[1] == "A" and e[2] == "U1"]
+            _, s12 = self.reconstruct("traces/S12/run_0_crash", method)
+            u1 = [e for e in self.events(s12) if e[0] == "CUT_IN_FROM_RIGHT_START" and e[1] == "A" and e[2] == "U1"]
             self.assertEqual(len(u1), 1)
             self.assertAlmostEqual(u1[0][3], -2.2, places=2)
 
     def test_current_method_is_unchanged(self):
-        _, current = self.reconstruct("traces/S18/run_0_abreast", "current")
-        committed = json.loads((ROOT / "traces/S18/run_0_abreast/reconstruction/global/global_graph.json").read_text())
-        mine = json.loads((self.tmp / "current_exact_0/traces/S18/run_0_abreast/reconstruction/global/global_graph.json").read_text())
+        _, current = self.reconstruct("traces/S13/run_0_abreast", "current")
+        committed = json.loads((ROOT / "traces/S13/run_0_abreast/reconstruction/global/global_graph.json").read_text())
+        mine = json.loads((self.tmp / "current_exact_0/traces/S13/run_0_abreast/reconstruction/global/global_graph.json").read_text())
         self.assertEqual(committed["nodes"], mine["nodes"])
         self.assertEqual(committed["entities"], mine["entities"])
 

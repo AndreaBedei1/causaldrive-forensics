@@ -95,7 +95,7 @@ class RouteSpec:
     within a degree of each other while leading to different roads; the decision
     is then settled by which lane CARLA lists first, and ``left``, ``right`` and
     ``straight`` all select the same one. Looking downstream fixes that, but it
-    also changes which exit a roundabout takes, and S09 is frozen on the original
+    also changes which exit a roundabout takes, and S07 is frozen on the original
     choice. So the scenarios that need a turn they can rely on ask for this, and
     the ones recorded before it keep exactly the routes they were recorded with.
     """

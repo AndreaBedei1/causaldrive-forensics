@@ -12,7 +12,7 @@ from src.cdf.replay.qa import check_run
 from src.cdf.replay.topdown import frame_items, keyframes, render_frame, states_at
 
 ROOT = Path(__file__).resolve().parents[1]
-S17 = ROOT / "traces" / "S17" / "run_0_crash"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
 
 
 class CoreViewTests(unittest.TestCase):
@@ -26,11 +26,11 @@ class CoreViewTests(unittest.TestCase):
         self.assertEqual(len(PAPER_CORE_EVENTS), len(set(PAPER_CORE_EVENTS)))
 
 
-@unittest.skipUnless((S17 / "reconstruction").exists(), "S17 trace not present")
-class S17ExportTests(unittest.TestCase):
+@unittest.skipUnless((S12 / "reconstruction").exists(), "S12 trace not present")
+class S12ExportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.replay = ReplayRun.load(S17)
+        cls.replay = ReplayRun.load(S12)
 
     def at(self, t_global):
         return t_global - self.replay.display_time(0.0)
@@ -70,7 +70,7 @@ class S17ExportTests(unittest.TestCase):
             render_frame(self.replay, self.at(0.0), path, label="test")
             self.assertGreater(path.stat().st_size, 10000)
 
-    def test_s17_flags_nothing(self):
+    def test_s12_flags_nothing(self):
         flags = check_run(self.replay)
         checks = {flag.check for flag in flags}
         # C, seen by A and by B, is one road user: no duplicated ghost any more (phase 0 flagged three).

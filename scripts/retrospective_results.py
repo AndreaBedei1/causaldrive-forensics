@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Aggregate the three-method study (privileged evaluation): results/retrospective/summary<tag>.{json,md}.
 
-    python scripts/retrospective_results.py --tag _S18_heldout
+    python scripts/retrospective_results.py --tag _S13_heldout
 
 Per condition and method (counts per draw = per run and seed, averaged over seeds and summed over runs):
 merges (correct / false / missed), recorder links (wrong / missed), duplicate entities, sample identity

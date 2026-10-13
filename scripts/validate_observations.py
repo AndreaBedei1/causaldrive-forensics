@@ -2,7 +2,7 @@
 """Source-agnostic depth/radar inspection and validation metrics.
 
 This module is intentionally post-acquisition only: radar is never passed to
-the depth estimator.  It is useful for the S01/S15 reports requested by the
+the depth estimator.  It is useful for the S01/S10 reports requested by the
 acquisition task and for manually switching a consumer between sources.
 """
 

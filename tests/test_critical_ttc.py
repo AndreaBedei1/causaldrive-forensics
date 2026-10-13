@@ -115,7 +115,7 @@ class CrossingTests(unittest.TestCase):
         self.assertGreater(distant.ttc_s, close.ttc_s)
 
     def test_oncoming_traffic_in_the_next_lane_is_not_critical(self):
-        # S08 A and C: 36 m apart, closing at 19 m/s, 3.8 m apart laterally (the former model
+        # S06 A and C: 36 m apart, closing at 19 m/s, 3.8 m apart laterally (the former model
         # called this critical at TTC 1.9 s).
         result = assess(ego(9.6), target(36.0, -3.8, -8.7, 0.0, closing=18.3))
         self.assertEqual(result.encounter, "OPPOSING")
@@ -123,7 +123,7 @@ class CrossingTests(unittest.TestCase):
         self.assertFalse(result.critical)
 
     def test_a_standing_recorder_is_not_threatened_by_traffic_crossing_ahead(self):
-        # S08's C stopped short of the junction while B crosses 13 m ahead of it.
+        # S06's C stopped short of the junction while B crosses 13 m ahead of it.
         result = assess(ego(0.0), target(13.0, -15.0, 0.0, 12.6, closing=9.5))
         self.assertFalse(result.collision_course)
 
@@ -144,11 +144,11 @@ class RearThreatTests(unittest.TestCase):
         self.assertFalse(result.collision_course)
 
 
-class S08RegressionTests(unittest.TestCase):
-    """The recorded S08: CRITICAL_TTC only between the two vehicles that really collide (A, B)."""
+class S06RegressionTests(unittest.TestCase):
+    """The recorded S06: CRITICAL_TTC only between the two vehicles that really collide (A, B)."""
 
     def test_only_the_colliding_pair_is_critical(self):
-        run = ROOT / "traces" / "S08" / "run_0_crash"
+        run = ROOT / "traces" / "S06" / "run_0_crash"
         evaluation = run / "reconstruction" / "evaluation" / "evaluation.json"
         if not evaluation.exists():
             self.skipTest("canonical trace not present")

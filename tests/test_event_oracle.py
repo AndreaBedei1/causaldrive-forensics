@@ -15,7 +15,7 @@ from src.cdf.reconstruction.local import read_jsonl
 from src.cdf.evaluation.visibility import frames_by_participant
 
 ROOT = Path(__file__).resolve().parents[1]
-S17 = ROOT / "traces" / "S17" / "run_0_crash"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
 
 
 def _load_script(name):
@@ -29,11 +29,11 @@ class OracleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cfg = ReconstructionConfig()
-        cls.truth = prepare_truth(S17, cls.cfg)
-        cls.events = oracle_events(S17, cls.cfg, cls.truth)
+        cls.truth = prepare_truth(S12, cls.cfg)
+        cls.events = oracle_events(S12, cls.cfg, cls.truth)
 
     def test_ideal_clearance_is_the_true_box_gap(self):
-        states = read_jsonl(S17 / "ground_truth" / "states.jsonl")
+        states = read_jsonl(S12 / "ground_truth" / "states.jsonl")
         frames = frames_by_participant(states)
         rec = self.truth["recorders"]["A"]
         samples = {round(s.t_local, 2): s for s in self.truth["ideal"]["A"]["C"]["samples"]}
@@ -49,13 +49,13 @@ class OracleTests(unittest.TestCase):
 
     def test_ideal_track_agrees_with_the_radar_track_of_the_same_vehicle(self):
         # A:track_002 is B (privileged evaluation); its near surface against the ideal one, while tracked.
-        evaluation = json.loads((S17 / "reconstruction" / "evaluation" / "evaluation.json").read_text())
+        evaluation = json.loads((S12 / "reconstruction" / "evaluation" / "evaluation.json").read_text())
         self.assertEqual({r["track"]: r["true_identity"] for r in evaluation["tracks"]}["A:track_002"], "B")
-        tracks = {row["track_id"]: row for row in read_jsonl(S17 / "reconstruction" / "A" / "local_tracks.jsonl")
+        tracks = {row["track_id"]: row for row in read_jsonl(S12 / "reconstruction" / "A" / "local_tracks.jsonl")
                   if row["track_id"] == "track_002"}
         self.assertTrue(tracks)
         ideal = {round(s.t_local, 2): s for s in self.truth["ideal"]["A"]["B"]["samples"]}
-        rows = [r for r in read_jsonl(S17 / "reconstruction" / "A" / "local_tracks.jsonl") if r["track_id"] == "track_002"]
+        rows = [r for r in read_jsonl(S12 / "reconstruction" / "A" / "local_tracks.jsonl") if r["track_id"] == "track_002"]
         speeds = []
         for row in rows:
             sample = ideal.get(round(float(row["t_local"]), 2))
@@ -73,7 +73,7 @@ class OracleTests(unittest.TestCase):
             self.assertGreaterEqual(b.surface_offset_m, 0.0)  # the tracked point lies behind the near surface
             self.assertLess(b.surface_offset_m, 4.0)
 
-    def test_s17_hazards_are_where_the_ground_truth_puts_them(self):
+    def test_s12_hazards_are_where_the_ground_truth_puts_them(self):
         perfect = {(e["type"], e["subject"]): e["t_local"] for e in self.events["PERFECT"]["A"]}
         self.assertAlmostEqual(perfect[("CRITICAL_TTC_START", "C")], 2.30, places=2)
         self.assertIn(("CUT_IN_FROM_RIGHT_START", "C"), perfect)
@@ -90,7 +90,7 @@ class OracleTests(unittest.TestCase):
                                     and p["t_local"] <= event["t_local"] + 1e-6 for p in perfect), event)
 
     def test_reconstruction_events_carry_the_true_identity_of_their_track(self):
-        events = reconstruction_events(S17)
+        events = reconstruction_events(S12)
         subjects = {(e["track"], e["subject"]) for e in events["A"]}
         self.assertIn(("track_001", "C"), subjects)
         self.assertIn(("track_002", "B"), subjects)

@@ -15,8 +15,8 @@ of every recording remains historical; the new canonical S02 does not redefine o
 ## Reconstruct and evaluate saved files
 
 ```text
-python scripts/reconstruct_run.py traces/S17/run_0_crash
-python scripts/worked_example.py traces/S17/run_0_crash
+python scripts/reconstruct_run.py traces/S12/run_0_crash
+python scripts/worked_example.py traces/S12/run_0_crash
 python -m pytest -q
 ```
 
@@ -46,7 +46,7 @@ Each canonical run has one current `reconstruction/evaluation/visual_audit_final
 Headless replay frames read reconstructed data and public map geometry. Interactive replay:
 
 ```text
-python scripts/replay_run.py traces/S12/run_0_near_simultaneous --speed 0.25 --paused
+python scripts/replay_run.py traces/S09/run_0_near_simultaneous --speed 0.25 --paused
 ```
 
 Recorder-associated tracks are dots; each anonymous fused entity is drawn once.

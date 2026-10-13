@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PRIVILEGED EVALUATION / DEBUG TOOL: when could each recorder's radar see each other vehicle?
 
-    python scripts/audit_radar_visibility.py traces/S15/run_0_single_impact [more runs] [--json out.json]
+    python scripts/audit_radar_visibility.py traces/S10/run_0_single_impact [more runs] [--json out.json]
 
 Ground truth (``ground_truth/states.jsonl``: true poses and boxes of every
 vehicle) is read here ONLY to explain sensor coverage and to compare the

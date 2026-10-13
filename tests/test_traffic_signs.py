@@ -112,10 +112,10 @@ def test_real_yield_sign_is_detected_and_tracked():
     assert result["n_detections"] == len(frames)
 
 
-def test_s15_red_board_at_the_image_border_is_not_a_stop():
+def test_s10_red_board_at_the_image_border_is_not_a_stop():
     # The former detector confirmed a STOP on this red advertising board, cut by the
-    # right image border, after S15's first collision.
-    _, frames = _real("s15_board_at_border")
+    # right image border, after S10's first collision.
+    _, frames = _real("s10_board_at_border")
     detector = SignDetector(dict(CFG, camera_fov_deg=90.0))
     assert all(detector.detect(image) == [] for _, image in frames)
 

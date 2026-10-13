@@ -1,7 +1,7 @@
 [
  {
   "name": "stop_approach",
-  "source": "fov_S10_run_0_rolls_through / f110_A",
+  "source": "fov_S08_run_0_rolls_through / f110_A",
   "image_size": [
    1280,
    720
@@ -53,7 +53,7 @@
    }
   ],
   "expect": "STOP",
-  "note": "Town05 STOP plate on the right of S10's approach, 24 m -> 10 m"
+  "note": "Town05 STOP plate on the right of S08's approach, 24 m -> 10 m"
  },
  {
   "name": "yield_approach",
@@ -92,8 +92,8 @@
   "note": "Town10HD YIELD sign, 16 m -> 8 m"
  },
  {
-  "name": "s15_board_at_border",
-  "source": "s15_falsestop / old_A",
+  "name": "s10_board_at_border",
+  "source": "s10_falsestop / old_A",
   "image_size": [
    800,
    600
@@ -104,20 +104,20 @@
   ],
   "frames": [
    {
-    "file": "s15_board_at_border_00.png",
+    "file": "s10_board_at_border_00.png",
     "t": 6.6
    },
    {
-    "file": "s15_board_at_border_01.png",
+    "file": "s10_board_at_border_01.png",
     "t": 7.6
    }
   ],
   "expect": null,
-  "note": "S15 deflected_into_c, A after its first collision: a red board truncated by the image border"
+  "note": "S10 deflected_into_c, A after its first collision: a red board truncated by the image border"
  },
  {
   "name": "brick_facade",
-  "source": "fov_S10_run_0_rolls_through / f110_A",
+  "source": "fov_S08_run_0_rolls_through / f110_A",
   "image_size": [
    1280,
    720
@@ -141,6 +141,6 @@
    }
   ],
   "expect": null,
-  "note": "Town05 brick facade and steps behind the S10 junction"
+  "note": "Town05 brick facade and steps behind the S08 junction"
  }
 ]

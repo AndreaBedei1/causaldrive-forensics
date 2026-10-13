@@ -39,7 +39,7 @@ Measured with a car target on the private engine (returns per sweep at 10 / 25 /
 | -90 deg | 116 | 39 | 24 | 17 |
 
 - Field of view, geometric (tests/test_three_radars.py): front +-46 deg at 5 m, +-61 at 10 m, +-69 at 25 m, +-73 at 80 m; sides from 33 deg (5 m) / 27 (10 m) / 22 (40 m) to 147 / 153 / 158 deg.  Bearings 30-55 deg are seen by the front radar and a side radar together from 10 m on: no gap and no discontinuity at the front -> side transition (a target passing from one to the other stays one track, tested synthetically and seen in the campaign).
-- Rear blind zone (measured): a car directly behind is not seen within +-12 deg at 5 m and +-16 deg from 10 to 40 m (total 24-32 deg); for a point target the blind cone is 41-53 deg wide from 10 m on, up to 65 deg at 5 m.  A follower in the same lane is invisible to the car it follows (S01, S06, S07: B never tracks A; S16: A never tracks B).
+- Rear blind zone (measured): a car directly behind is not seen within +-12 deg at 5 m and +-16 deg from 10 to 40 m (total 24-32 deg); for a point target the blind cone is 41-53 deg wide from 10 m on, up to 65 deg at 5 m.  A follower in the same lane is invisible to the car it follows (S01, S04, S05: B never tracks A; S11: A never tracks B).
 - The radars never see their own vehicle (0 own-body returns; returns inside the footprint are dropped anyway).  Vertical FOV 20 deg: 10 deg halves the returns on cars at 40-60 m, 30 deg adds mostly road and sky returns.  12000 points/s per radar: 6000 left 4-7 returns on a car at 60 m, 24000 doubled the scenery returns without changing first detections.
 
 ### 2.2 Occlusion A -> B -> C
@@ -66,7 +66,7 @@ Lab (private engine, 864 configurations: observer A in {model3, audi.tt, sprinte
 | sprinter | sprinter | 0.00 | 0.00 | 0.49 |
 
 - Aligned behind a car or SUV, a car or SUV C returns nothing: the radar 0.6 m above the road does not look over a low car (B sedan, C sedan: 0.00).  Only a van taller than B shows its upper body (sprinter behind a model3 / audi.tt: 0.2-0.4 returns per sweep), as it physically should.
-- In the recorded S07 (A model3 -> B audi.tt -> C model3): A tracks B from 0.00 s to the end and never has a track on C (tests/test_campaign_perception.py).  A received 13 returns on C's body in 4 of 274 sweeps: 3 single returns under B's floor (the ray crosses B's rear plane 0.12-0.15 m above the road) and 10 at the impact instant, A's bumper radar pressed against B.  None over B's roof, none through B; no rule hides C: occlusion is CARLA's ray casting.
+- In the recorded S05 (A model3 -> B audi.tt -> C model3): A tracks B from 0.00 s to the end and never has a track on C (tests/test_campaign_perception.py).  A received 13 returns on C's body in 4 of 274 sweeps: 3 single returns under B's floor (the ray crosses B's rear plane 0.12-0.15 m above the road) and 10 at the impact instant, A's bumper radar pressed against B.  None over B's roof, none through B; no rule hides C: occlusion is CARLA's ray casting.
 
 ### 2.3 Camera
 
@@ -79,7 +79,7 @@ One RGB camera per vehicle, 1280x720, 10 Hz, behind the windscreen at its top ce
 | patrol | 0.60 | 1.62 |
 | sprinter | 1.80 | 2.10 |
 
-FOV chosen 110 deg (tested 100 / 110 / 120 on GT replays of the campaign with the new mounts): first STOP detection at 24.1 / 24.1 / 22.4 m (S10 A), 31.2 / 30.4 / 29.5 m (S12 A), 25.6 m each (Town10HD STOP), YIELD 20.7 / 15.9 / 10.5 m; at 100 deg the plate leaves the image 0.4-0.7 m earlier than at 110 deg (lost before the stop line at the S12 junction), at 120 deg it is smaller (later first detection).  110 deg is the smallest FOV that keeps the sign until the stop.  Images are not persisted; signs are detected on board (section 4.7).
+FOV chosen 110 deg (tested 100 / 110 / 120 on GT replays of the campaign with the new mounts): first STOP detection at 24.1 / 24.1 / 22.4 m (S08 A), 31.2 / 30.4 / 29.5 m (S09 A), 25.6 m each (Town10HD STOP), YIELD 20.7 / 15.9 / 10.5 m; at 100 deg the plate leaves the image 0.4-0.7 m earlier than at 110 deg (lost before the stop line at the S09 junction), at 120 deg it is smaller (later first detection).  110 deg is the smallest FOV that keeps the sign until the stop.  Images are not persisted; signs are detected on board (section 4.7).
 
 ### 2.4 Recording health
 
@@ -88,17 +88,17 @@ FOV chosen 110 deg (tested 100 / 110 / 120 on GT replays of the campaign with th
 
 ## 3. Scenarios
 
-- Recording start (all runs).  CARLA spawns a vehicle in neutral; given its initial velocity directly, the automatic gearbox engaged first gear at cruising speed after the recording had started and the over-revving engine braked the car at 10-20 m/s^2 for about 0.5 s under full throttle (every non-Tesla vehicle of the 360-degree campaign: e.g. S06 C -15.8 m/s^2 at 0.75 s).  That was read as a braking target.  Now each moving vehicle is launched over 12 ticks in the gear its gearbox would hold at that speed, at a nominal cruising throttle, and its speed controller starts from that throttle; it is spawned 0.6 s x its speed back along its lane, so the recording starts with it at its scenario spawn point.  Measured: |acceleration| <= 0.45 m/s^2 in the first second for every campaign blueprint (simulation.launch_ticks / launch_throttle).
-- post_impact_mode coast (A in S16, B in S06 a_front_pushed): no pedals, no steering, gearbox in neutral, and the brake held once at rest.  With the clutch engaged CARLA's zero-throttle engine braking decelerates a car at 4-7 m/s^2, several times a real car rolling off the pedals; in neutral a shunted car is carried on as it should be.
-- S06 a_front_pushed: B's brake action used to expire at 5.75 s and its post-impact mode was 'drive': B drove into C under full throttle and kept pushing it for 24 s.  Now B stops 3 m short of C and holds its brake; A, following 4.5 m behind at 14 m/s, strikes it while it is still slowing (3.2 m/s) and pushes it into C.  A stationary braked car cannot be pushed in CARLA (measured: it stops the striking car dead), hence the closer following.
-- S07 occluded_chain_stop (new single variant crash): A -> B -> C in one lane; C stops hard at 3.0 s (permanent stop), B stops 13.7 m short of C, A brakes late (5.3 s) and runs into B at 5.90 s.  One collision, A-B.
-- S07 C and S08 C: their stop is now a permanent stop (the brake action used to expire near the end of the recording and they drove off).
-- S09: both vehicles start 67-68 m (8.4 s at 8 m/s) further back along their own routes (A still on the circulating lane; the routes contain the original ones exactly), B's acceleration moved by the same time.  Collision at 10.25 s (was 1.8 s), same place and pair; first CRITICAL_TTC at 6.65 s.
-- S12 near_simultaneous: braking 0.3 instead of 0.95, started earlier so that both stop at their stop lines; brake released at 4.87 / 4.73 s.  Stops (STOP_START -> STOP_END) 1.50 s (A) and 1.55 s (B); both pull away within 0.05 s; collision at 7.15 s.
-- S16 consequential (rebuilt): three lanes; C, a van, drives in the left lane at 9 m/s; A moves over into the left lane behind C and slows to its speed; B follows A too closely, reacts late and runs into A at 5.55 s while A is angled across the lane line; the shunt (A from 8.2 to 11.3 m/s, coasting in neutral) carries A into the back of C at 6.60 s.  No scripted deflection; without B, A's merge ends 2.0 m behind C (checked).  A sideways knock is not used because CARLA does not carry a struck car sideways (measured: a rear-corner impact turned A by at most 7 deg and moved it 0.8 m; a sideswipe 0.3 m).
-- S15 deflected_into_c keeps its scripted post-impact deflection (unchanged on request; documented in section 7).
-- The two reference links were studied for geometry: their patterns (rear-end chains, junction crossings, roundabout merge, cut-in, multi-vehicle pile-up) are covered by S01-S16; the remaining elements (a lane-change dispute, removed with S13 on request; hit-and-run; weather) are not new geometries.  No scenario was added in the three-radar campaign.
-- S17 unobserved_causal_vehicle (2026-10-07, re-recorded 2026-10-08, section 8): a close cut-in by a vehicle that records nothing (record: false) makes A swerve into B; A's swerve is a reactive action fired when C's box is inside A's corridor within 3 m of its front (privileged corridor_clearance trigger, ground_truth/triggers.jsonl only); without the swerve A runs into C.
+- Recording start (all runs).  CARLA spawns a vehicle in neutral; given its initial velocity directly, the automatic gearbox engaged first gear at cruising speed after the recording had started and the over-revving engine braked the car at 10-20 m/s^2 for about 0.5 s under full throttle (every non-Tesla vehicle of the 360-degree campaign: e.g. S04 C -15.8 m/s^2 at 0.75 s).  That was read as a braking target.  Now each moving vehicle is launched over 12 ticks in the gear its gearbox would hold at that speed, at a nominal cruising throttle, and its speed controller starts from that throttle; it is spawned 0.6 s x its speed back along its lane, so the recording starts with it at its scenario spawn point.  Measured: |acceleration| <= 0.45 m/s^2 in the first second for every campaign blueprint (simulation.launch_ticks / launch_throttle).
+- post_impact_mode coast (A in S11, B in S04 a_front_pushed): no pedals, no steering, gearbox in neutral, and the brake held once at rest.  With the clutch engaged CARLA's zero-throttle engine braking decelerates a car at 4-7 m/s^2, several times a real car rolling off the pedals; in neutral a shunted car is carried on as it should be.
+- S04 a_front_pushed: B's brake action used to expire at 5.75 s and its post-impact mode was 'drive': B drove into C under full throttle and kept pushing it for 24 s.  Now B stops 3 m short of C and holds its brake; A, following 4.5 m behind at 14 m/s, strikes it while it is still slowing (3.2 m/s) and pushes it into C.  A stationary braked car cannot be pushed in CARLA (measured: it stops the striking car dead), hence the closer following.
+- S05 occluded_chain_stop (new single variant crash): A -> B -> C in one lane; C stops hard at 3.0 s (permanent stop), B stops 13.7 m short of C, A brakes late (5.3 s) and runs into B at 5.90 s.  One collision, A-B.
+- S05 C and S06 C: their stop is now a permanent stop (the brake action used to expire near the end of the recording and they drove off).
+- S07: both vehicles start 67-68 m (8.4 s at 8 m/s) further back along their own routes (A still on the circulating lane; the routes contain the original ones exactly), B's acceleration moved by the same time.  Collision at 10.25 s (was 1.8 s), same place and pair; first CRITICAL_TTC at 6.65 s.
+- S09 near_simultaneous: braking 0.3 instead of 0.95, started earlier so that both stop at their stop lines; brake released at 4.87 / 4.73 s.  Stops (STOP_START -> STOP_END) 1.50 s (A) and 1.55 s (B); both pull away within 0.05 s; collision at 7.15 s.
+- S11 consequential (rebuilt): three lanes; C, a van, drives in the left lane at 9 m/s; A moves over into the left lane behind C and slows to its speed; B follows A too closely, reacts late and runs into A at 5.55 s while A is angled across the lane line; the shunt (A from 8.2 to 11.3 m/s, coasting in neutral) carries A into the back of C at 6.60 s.  No scripted deflection; without B, A's merge ends 2.0 m behind C (checked).  A sideways knock is not used because CARLA does not carry a struck car sideways (measured: a rear-corner impact turned A by at most 7 deg and moved it 0.8 m; a sideswipe 0.3 m).
+- S10 deflected_into_c keeps its scripted post-impact deflection (unchanged on request; documented in section 7).
+- The two reference links were studied for geometry: their patterns (rear-end chains, junction crossings, roundabout merge, cut-in, multi-vehicle pile-up) are covered by S01-S11; the remaining elements (a lane-change dispute, removed on request; hit-and-run; weather) are not new geometries.  No scenario was added in the three-radar campaign.
+- S12 unobserved_causal_vehicle (2026-10-07, re-recorded 2026-10-08, section 8): a close cut-in by a vehicle that records nothing (record: false) makes A swerve into B; A's swerve is a reactive action fired when C's box is inside A's corridor within 3 m of its front (privileged corridor_clearance trigger, ground_truth/triggers.jsonl only); without the swerve A runs into C.
 
 
 ### 8.1 Dynamics
@@ -161,7 +161,7 @@ Same configuration on the same private engine, cameras on, into a scratch direct
 
 | run | collisions | min gap A-B m | min gap A-C m | A's swerve | A's max left departure m |
 |---|---|---|---|---|---|
-| factual (S17 as recorded) | A-B 4.95 s (1577 N*s) | 0.0 | 0.59 | A_evasive_swerve_left at 3.30 s | 2.71 |
+| factual (S12 as recorded) | A-B 4.95 s (1577 N*s) | 0.0 | 0.59 | A_evasive_swerve_left at 3.30 s | 2.71 |
 | without C (--without-participant C) | none | 1.54 | - | none | 0.0 |
 | C present, swerve disabled (--disable-action A_evasive_swerve_left) | A-C 5.95 s (478 N*s) | 1.51 | 0.0 | none | 0.01 |
 
@@ -184,7 +184,7 @@ Without C there is no swerve and no collision: C's presence is causally relevant
   the vehicle has come to rest.  With the clutch engaged CARLA's zero-throttle engine braking
   decelerates a car at 4-7 m/s^2, several times what a real car loses rolling off the pedals.
   `stop` (the default) brakes hard; `deflect` coasts and steers the vehicle off its line by a
-  scripted offset (S15 only); `drive` keeps following the route.
+  scripted offset (S10 only); `drive` keeps following the route.
 - CARLA physics to keep in mind: a stationary braked vehicle that is struck does not move (it
   stops the striking car dead), so a chain push needs the struck car still rolling; a rear
   impact on a corner turns the struck car by a few degrees at most, a forward shunt carries it.
@@ -212,11 +212,11 @@ Without C there is no swerve and no collision: C's presence is causally relevant
   action.
 
 ```text
-python scripts/run_scenario.py --scenario S17 --variant crash --output <scratch> --without-participant C
-python scripts/run_scenario.py --scenario S17 --variant crash --output <scratch> --disable-action A_evasive_swerve_left
+python scripts/run_scenario.py --scenario S12 --variant crash --output <scratch> --without-participant C
+python scripts/run_scenario.py --scenario S12 --variant crash --output <scratch> --disable-action A_evasive_swerve_left
 ```
 
-S17 `unobserved_causal_vehicle` (crash) uses both.  Three lanes, one direction: A (audi.tt,
+S12 `unobserved_causal_vehicle` (crash) uses both.  Three lanes, one direction: A (audi.tt,
 12 m/s) in the middle lane, B (nissan.patrol, 13 m/s) in the left lane 7 m behind and catching
 up, C (model3, `record: false`) in the right lane 10 m ahead of A and 1 m/s slower.  At 2.0 s C
 cuts into A's lane without braking (lane shift -3.5 m over 1.0 s, its left side in A's lane at

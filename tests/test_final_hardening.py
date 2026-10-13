@@ -200,23 +200,23 @@ class CorrelatedGNSS(unittest.TestCase):
 
 
 class CanonicalFinalRules(unittest.TestCase):
-    def test_s12_has_no_anonymous_recorder_between_parent_segments(self):
+    def test_s09_has_no_anonymous_recorder_between_parent_segments(self):
         root=Path(__file__).resolve().parents[1]
-        rows=json.loads((root/'traces/S12/run_0_near_simultaneous/reconstruction/global/associations.json').read_text(encoding='utf-8'))
+        rows=json.loads((root/'traces/S09/run_0_near_simultaneous/reconstruction/global/associations.json').read_text(encoding='utf-8'))
         parts=[r for r in rows if r['local_graph']=='B' and r['local_track'].startswith('track_001#')]
         self.assertEqual(len(parts),3)
         self.assertEqual({r['global_entity'] for r in parts},{'A'})
 
-    def test_s16_ego_turn_has_no_target_c_cut_in(self):
+    def test_s11_ego_turn_has_no_target_c_cut_in(self):
         root=Path(__file__).resolve().parents[1]
-        graph=json.loads((root/'traces/S16/run_0_consequential/reconstruction/global/global_graph.json').read_text(encoding='utf-8'))
+        graph=json.loads((root/'traces/S11/run_0_consequential/reconstruction/global/global_graph.json').read_text(encoding='utf-8'))
         self.assertFalse([n for n in graph['nodes'] if n['actor_id']=='A' and n['subject_id']=='C'
                           and n['event_type'].startswith('CUT_IN')])
 
-    def test_s18_global_entity_semantics_are_not_duplicated(self):
+    def test_s13_global_entity_semantics_are_not_duplicated(self):
         root=Path(__file__).resolve().parents[1]
         for variant in ['abreast','platoon','passing']:
-            graph=json.loads((root/'traces/S18'/('run_0_'+variant)/'reconstruction/global/global_graph.json').read_text(encoding='utf-8'))
+            graph=json.loads((root/'traces/S13'/('run_0_'+variant)/'reconstruction/global/global_graph.json').read_text(encoding='utf-8'))
             keys=[(n['actor_id'],n['subject_id'],n['event_type'],n['t_global']) for n in graph['nodes']
                   if n['subject_id'] and n['t_global'] is not None]
             self.assertEqual(len(keys),len(set(keys)),variant)
@@ -229,7 +229,7 @@ class CanonicalFinalRules(unittest.TestCase):
         for name in ['run_0_a_front_pushed','run_0_b_rear_first']:
             with tempfile.TemporaryDirectory() as temp:
                 profile=dataclasses.replace(GNSS_PROFILES['consumer'],common_fraction=.9)
-                copy=perturbed_copy(root/'traces/S06'/name,Path(temp)/'S06'/name,
+                copy=perturbed_copy(root/'traces/S04'/name,Path(temp)/'S04'/name,
                                     Perturbation('combined',gnss=profile,collisions=CollisionPerturbation(impulse_rel_std=.1)),0)
                 reconstruct_run(copy,pose_factory=PerturbedPoseSource.factory(profile,0))
                 result=evaluate_run(copy,clock_shift_check=False)
@@ -241,7 +241,7 @@ class CanonicalFinalRules(unittest.TestCase):
         from src.cdf.replay.model import ReplayRun
         root=Path(__file__).resolve().parents[1]
         for variant in ['abreast','platoon','passing']:
-            run=ReplayRun.load(root/'traces/S18'/('run_0_'+variant))
+            run=ReplayRun.load(root/'traces/S13'/('run_0_'+variant))
             shown=run.display_events()
             keys=[(e.actor,e.subject,e.event_type,e.time) for e in shown if e.subject]
             self.assertEqual(len(keys),len(set(keys)),variant)

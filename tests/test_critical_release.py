@@ -221,11 +221,11 @@ class ImminentContactTests(unittest.TestCase):
             self.assertTrue(result.released(RELEASE, False), closing)
 
 
-class S09Tests(unittest.TestCase):
-    """S09: B merges into the roundabout along a curve; A circulates (-20 deg/s)."""
+class S07Tests(unittest.TestCase):
+    """S07: B merges into the roundabout along a curve; A circulates (-20 deg/s)."""
 
     def test_a_stays_critical_about_b_until_the_collision(self):
-        run = ROOT / "traces" / "S09" / "run_0_merge_conflict"
+        run = ROOT / "traces" / "S07" / "run_0_merge_conflict"
         if not (run / "vehicles" / "A").exists():
             self.skipTest("canonical trace not present")
         local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
@@ -235,10 +235,10 @@ class S09Tests(unittest.TestCase):
         self.assertEqual(ends, [collision])  # formerly 0.80 s before it
 
 
-class S17Tests(unittest.TestCase):
-    """S17: A (cut in on by C) swerves into B.  Reconstructed live from the recorders' own files."""
+class S12Tests(unittest.TestCase):
+    """S12: A (cut in on by C) swerves into B.  Reconstructed live from the recorders' own files."""
 
-    run_dir = ROOT / "traces" / "S17" / "run_0_crash"
+    run_dir = ROOT / "traces" / "S12" / "run_0_crash"
 
     @classmethod
     def setUpClass(cls):

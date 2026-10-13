@@ -260,19 +260,19 @@ class CanonicalRunTests(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
         base = Path(cls.tmp.name)
-        cls.s17 = scratch_copy(TRACES / "S17" / "run_0_crash", base / "clean")
-        cls.s17_result = reconstruct_run(cls.s17, CFG)
-        cls.s17_poisoned = scratch_copy(TRACES / "S17" / "run_0_crash", base / "poisoned", poison=True)
-        reconstruct_run(cls.s17_poisoned, CFG)
-        cls.s17_renamed = scratch_copy(TRACES / "S17" / "run_0_crash", base / "renamed", rename={"A": "P", "B": "Q"})
-        reconstruct_run(cls.s17_renamed, CFG)
+        cls.s12 = scratch_copy(TRACES / "S12" / "run_0_crash", base / "clean")
+        cls.s12_result = reconstruct_run(cls.s12, CFG)
+        cls.s12_poisoned = scratch_copy(TRACES / "S12" / "run_0_crash", base / "poisoned", poison=True)
+        reconstruct_run(cls.s12_poisoned, CFG)
+        cls.s12_renamed = scratch_copy(TRACES / "S12" / "run_0_crash", base / "renamed", rename={"A": "P", "B": "Q"})
+        reconstruct_run(cls.s12_renamed, CFG)
 
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
 
-    def test_s17_the_three_tracks_of_the_non_recorder_are_one_anonymous_road_user(self):
-        entities = entities_of(self.s17)["entities"]
+    def test_s12_the_three_tracks_of_the_non_recorder_are_one_anonymous_road_user(self):
+        entities = entities_of(self.s12)["entities"]
         self.assertEqual([e["id"] for e in entities], ["U1"])
         u1 = entities[0]
         self.assertEqual(u1["source_tracks"], ["A:track_001", "B:track_002", "B:track_003"])
@@ -281,12 +281,12 @@ class CanonicalRunTests(unittest.TestCase):
         kinds = sorted(link["kind"] for link in u1["association"]["links"])
         self.assertEqual(kinds, [CROSS, STITCH])
         self.assertIn("box_fit", u1["fusion_method"])
-        names = {(a.local_graph, a.local_track): a.global_entity for a in self.s17_result.associations}
+        names = {(a.local_graph, a.local_track): a.global_entity for a in self.s12_result.associations}
         self.assertEqual({names[("A", "track_001")], names[("B", "track_002")], names[("B", "track_003")]}, {"U1"})
         self.assertEqual((names[("A", "track_002")], names[("B", "track_001")]), ("B", "A"))
 
-    def test_s17_the_global_graph_names_the_road_user_u1_and_never_c(self):
-        graph = json.loads((self.s17 / "reconstruction" / "global" / "global_graph.json").read_text())
+    def test_s12_the_global_graph_names_the_road_user_u1_and_never_c(self):
+        graph = json.loads((self.s12 / "reconstruction" / "global" / "global_graph.json").read_text())
         mentioned = {n["actor_id"] for n in graph["nodes"]} | {n["subject_id"] for n in graph["nodes"]}
         self.assertNotIn("C", mentioned)
         self.assertIn(("EGO_PATH_ENTRY", "U1"), {(n["event_type"], n["subject_id"]) for n in graph["nodes"]
@@ -297,18 +297,18 @@ class CanonicalRunTests(unittest.TestCase):
         self.assertTrue(all(is_anonymous_entity(e["entity_id"]) for e in anonymous))
 
     def test_poisoned_privileged_files_change_nothing(self):
-        clean, poisoned = entities_of(self.s17), entities_of(self.s17_poisoned)
+        clean, poisoned = entities_of(self.s12), entities_of(self.s12_poisoned)
         self.assertEqual(clean, poisoned)
         for name in ("associations.json", "alignment.json", "global_graph.json"):
-            self.assertEqual((self.s17 / "reconstruction" / "global" / name).read_text(encoding="utf-8"),
-                             (self.s17_poisoned / "reconstruction" / "global" / name).read_text(encoding="utf-8"))
+            self.assertEqual((self.s12 / "reconstruction" / "global" / name).read_text(encoding="utf-8"),
+                             (self.s12_poisoned / "reconstruction" / "global" / name).read_text(encoding="utf-8"))
 
     def test_renamed_recorders_give_the_same_road_user(self):
         # No rule knows a participant's name: renaming the recorders renames the source tracks only.
-        renamed = entities_of(self.s17_renamed)["entities"]
+        renamed = entities_of(self.s12_renamed)["entities"]
         self.assertEqual([e["id"] for e in renamed], ["U1"])
         self.assertEqual(renamed[0]["source_tracks"], ["P:track_001", "Q:track_002", "Q:track_003"])
-        clean = entities_of(self.s17)["entities"][0]
+        clean = entities_of(self.s12)["entities"][0]
         self.assertEqual([s["x"] for s in renamed[0]["trajectory"]], [s["x"] for s in clean["trajectory"]])
 
     def test_the_fusion_source_names_no_scenario_and_no_participant(self):
@@ -321,9 +321,9 @@ class CanonicalRunTests(unittest.TestCase):
 
 
 class LinkAndAlignmentTests(unittest.TestCase):
-    def test_s16_the_van_tracks_are_recorder_c(self):
+    def test_s11_the_van_tracks_are_recorder_c(self):
         with tempfile.TemporaryDirectory() as tmp:
-            run = scratch_copy(TRACES / "S16" / "run_0_consequential", Path(tmp))
+            run = scratch_copy(TRACES / "S11" / "run_0_consequential", Path(tmp))
             result = reconstruct_run(run, CFG)
             record = entities_of(run)
         names = {(a.local_graph + ":" + a.local_track): (a.status, a.global_entity) for a in result.associations}
@@ -332,9 +332,9 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertEqual(sorted(link["track"] for link in record["recorder_links"]),
                          ["A:track_002", "B:track_002", "B:track_003"])
 
-    def test_s08_recorder_c_is_aligned_by_its_observed_trajectory(self):
+    def test_s06_recorder_c_is_aligned_by_its_observed_trajectory(self):
         with tempfile.TemporaryDirectory() as tmp:
-            run = scratch_copy(TRACES / "S08" / "run_0_crash", Path(tmp))
+            run = scratch_copy(TRACES / "S06" / "run_0_crash", Path(tmp))
             result = reconstruct_run(run, CFG)
             record = entities_of(run)
         clock = result.alignment.graphs["C"]
@@ -352,12 +352,12 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertFalse([n for n in observed.graph.nodes if n.event_type == 'TRACK_LOST'])
         self.assertFalse([t for t in observed.tracks if t.identity_ambiguous])
 
-    def test_s07_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
+    def test_s05_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
         # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with
         # where its line of sight enters C's body (not with C's whole outline) leaves one interval of offsets,
         # within one radar period of the truth (-5.90 s, privileged; phase 1 refused it as not unique).
         with tempfile.TemporaryDirectory() as tmp:
-            run = scratch_copy(TRACES / "S07" / "run_0_crash", Path(tmp))
+            run = scratch_copy(TRACES / "S05" / "run_0_crash", Path(tmp))
             result = reconstruct_run(run, CFG)
             record = entities_of(run)
         clock = result.alignment.graphs["C"]

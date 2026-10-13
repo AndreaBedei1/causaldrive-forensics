@@ -375,7 +375,7 @@ def collision_contacts(collisions: Sequence[Mapping[str, Any]], clock_origin: fl
     one also states why.  A contact that absorbed later bursts lists them
     (``merged_bursts``: local time, peak impulse): another recorder may have
     reported one of them as a contact of its own (struck again by a third body
-    within the same contact, as B in S06).  The contact lasts until its last
+    within the same contact, as B in S04).  The contact lasts until its last
     callback (``Contact.last``).  Every callback stays in the raw log.
     """
     period = sample_period(ego)
@@ -599,7 +599,7 @@ def mark_occlusions(tracks: Sequence[LocalTrack], ego: EgoTrajectory, footprint:
     Local to the recorder (its own tracks only).  An occluded sample gives no
     CUT_IN evidence and no UNSAFE_FORWARD_GAP evidence either way: a radar target
     behind or right beside a nearer vehicle returns only part of its body, and its
-    returns can mix with that vehicle's (S16: the van seen past A from B; S17: C
+    returns can mix with that vehicle's (S11: the van seen past A from B; S12: C
     seen past A from B).  The collision-course prediction is not affected.
     """
     for track in tracks:

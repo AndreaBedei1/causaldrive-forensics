@@ -30,7 +30,7 @@ simulation:
   real_time_pacing: true
   gpu: auto
   # Rendering quality of the CARLA server.  Not Low: CARLA 0.9.15 in Low mode
-  # crashes deterministically in some scenarios (S05, S08, S13) while a camera
+  # crashes deterministically in some scenarios while a camera
   # renders a vehicle mesh (EXCEPTION_ACCESS_VIOLATION in
   # FSkeletalMeshSceneProxy).  Vehicle physics is identical in both modes;
   # radar returns and camera images are not (Low removes foliage and changes
