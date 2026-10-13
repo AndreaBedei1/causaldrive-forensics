@@ -281,6 +281,18 @@ class FusionConfig:
     # constraints, conservative one-to-one assignment) or "retrospective" (corrected + identities resolved
     # from later strong evidence, never moving an observation).
     association_method: str = "current"
+    # Declared radar accuracy for the corrected methods (range, azimuth; 1 sigma): the nominal production
+    # values of docs/robustness_profiles.md (sourced), propagated to x/y by the Jacobian.
+    radar_range_std_m: float = 0.25
+    radar_azimuth_std_deg: float = 0.5
+    # One-to-one: a link is kept over a rival only when its likelihood is this many times larger (2 ln K in
+    # median chi-square).  Engineering assumption (posterior ~0.95 with equal priors).
+    assignment_likelihood_ratio: float = 20.0
+    # Retrospective resolution: density of road users not otherwise tracked, per m^2 and per (m/s)^2 -- one
+    # vehicle per 3.5 m x 20 m of lane, velocities spread over +-10 m/s per axis (engineering assumption,
+    # sensitivity in the report) -- and the posterior needed to resolve an earlier identity.
+    retrospective_new_target_density: float = 3.57e-5
+    retrospective_min_posterior: float = 0.95
 
 
 @dataclass

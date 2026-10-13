@@ -145,3 +145,8 @@ reconstruction:
     mutual_refinement: false          # relative pose offsets from the recorders' views of each other (robustness study)
     mutual_refinement_iterations: 3
     association_method: current       # current | corrected | retrospective (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md)
+    radar_range_std_m: 0.25           # corrected methods: declared radar accuracy (robustness_profiles nominal, sourced)
+    radar_azimuth_std_deg: 0.5        # ...lateral sigma = range x azimuth sigma (Jacobian)
+    assignment_likelihood_ratio: 20.0 # one-to-one: a link beats a rival by this likelihood ratio (engineering)
+    retrospective_new_target_density: 3.57e-5  # untracked road users per m^2 per (m/s)^2 (engineering, sensitivity)
+    retrospective_min_posterior: 0.95 # backward identity resolved only at this posterior (engineering)

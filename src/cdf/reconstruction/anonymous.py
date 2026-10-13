@@ -1193,7 +1193,9 @@ class RoadUserFusion:
                 "recorder_links": [dict(link.__dict__) for link in self.links],
                 "association_evidence": [dict(e.to_dict(), score=round(e.score, 3) if math.isfinite(e.score) else None)
                                          for e in self.evidence],
-                "entities": self.entities}
+                "entities": self.entities,
+                **({"cannot_links": self.cannot_links} if getattr(self, "cannot_links", None) is not None else {}),
+                **({"retrospective": self.retrospective} if getattr(self, "retrospective", None) is not None else {})}
 
 
 def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: List[Association],
@@ -1204,7 +1206,10 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
     ``fusion.mutual_refinement`` a first pass on a copy finds the recorder links, ``mutual_offsets`` corrects
     the pose sources, and the fusion runs on the corrected ones."""
     refinement = None
-    if cfg.fusion.mutual_refinement:
+    # The corrected methods estimate the recorders' relative pose from their views of each other whenever a
+    # pose source declares an error (the relative uncertainty the association needs).
+    if cfg.fusion.mutual_refinement or (cfg.fusion.association_method != "current"
+                                        and any(getattr(s, "position_std_m", 0.0) > 0.0 for s in poses.values())):
         import copy as _copy
 
         def corrected(record: Dict[str, Any]) -> Dict[str, PoseSource]:
@@ -1221,7 +1226,7 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
         refinement["first_stage"] = {key: first.get(key) for key in ("applied", "offsets_m", "declared_position_std_m",
                                                                       "posterior", "reason") if key in first}
         poses = corrected(refinement)
-    result = _fuse(locals_, alignment, associations, poses, cfg)
+    result = _fuse(locals_, alignment, associations, poses, cfg, refinement)
     result.refinement = refinement
     return result
 
@@ -1291,7 +1296,11 @@ def collision_continuity_links(view: CommonView, associations: Sequence[Associat
 
 
 def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Association],
-          poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> RoadUserFusion:
+          poses: Dict[str, PoseSource], cfg: ReconstructionConfig,
+          refinement: Optional[Dict[str, Any]] = None) -> RoadUserFusion:
+    if cfg.fusion.association_method != "current":
+        from .identity import fuse_corrected
+        return fuse_corrected(locals_, alignment, associations, poses, cfg, refinement)
     view = build_common_view(locals_, alignment, associations, poses)
     links = link_to_recorders(view, cfg)
     links += collision_continuity_links(view, associations, alignment, links, cfg)

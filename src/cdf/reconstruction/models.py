@@ -386,14 +386,25 @@ class Association:
     blocking: List[str] = field(default_factory=list)
     # The matched collision the decision rests on (the candidate's contact).
     collision_event: Optional[str] = None
+    # Corrected / retrospective methods only (absent from the record otherwise): the association score of
+    # the identity, and for an identity resolved from later evidence the global time that evidence starts.
+    identity_confidence: Optional[float] = None
+    identity_resolved_from: Optional[float] = None
+    retrospective: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"local_graph": self.local_graph, "local_track": self.local_track,
-                "global_entity": self.global_entity, "status": self.status,
-                "confidence": self.confidence, "candidate": self.candidate,
-                "collision_event": self.collision_event,
-                "evidence": list(self.evidence), "blocking": list(self.blocking),
-                "source_graphs": list(self.source_graphs)}
+        out = {"local_graph": self.local_graph, "local_track": self.local_track,
+               "global_entity": self.global_entity, "status": self.status,
+               "confidence": self.confidence, "candidate": self.candidate,
+               "collision_event": self.collision_event,
+               "evidence": list(self.evidence), "blocking": list(self.blocking),
+               "source_graphs": list(self.source_graphs)}
+        if self.identity_confidence is not None:
+            out["identity_confidence"] = self.identity_confidence
+        if self.retrospective:
+            out["retrospective"] = True
+            out["identity_resolved_from"] = self.identity_resolved_from
+        return out
 
 
 @dataclass
