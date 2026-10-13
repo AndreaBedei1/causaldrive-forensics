@@ -144,3 +144,4 @@ reconstruction:
     entity_output_rate_hz: 10.0       # fused trajectories in global/anonymous_entities.json
     mutual_refinement: false          # relative pose offsets from the recorders' views of each other (robustness study)
     mutual_refinement_iterations: 3
+    association_method: current       # current | corrected | retrospective (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md)

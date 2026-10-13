@@ -276,6 +276,11 @@ class FusionConfig:
     # road-user fusion is redone; iterations of the estimate.
     mutual_refinement: bool = False
     mutual_refinement_iterations: int = 3
+    # Identity association of anonymous tracks (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md):
+    # "current" (pairwise gates, the algorithm of main), "corrected" (relative pose uncertainty, cannot-link
+    # constraints, conservative one-to-one assignment) or "retrospective" (corrected + identities resolved
+    # from later strong evidence, never moving an observation).
+    association_method: str = "current"
 
 
 @dataclass
