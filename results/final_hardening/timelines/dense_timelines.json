@@ -1,0 +1,1050 @@
+{
+ "S19": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "J",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": 1.0,
+   "first_hazard_relevant": -7.25
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -7.7,
+   "first_tracked": -7.6,
+   "first_relevant": -7.7,
+   "first_identity_resolved": -7.25,
+   "first_hazard_relevant": -7.2
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -7.7,
+   "first_tracked": -7.6,
+   "first_relevant": -7.7,
+   "first_identity_resolved": -6.55,
+   "first_hazard_relevant": 1.45
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -7.6,
+   "first_tracked": -7.5,
+   "first_relevant": -7.6,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U9",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -7.55,
+   "first_tracked": -7.45,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U10",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 0.6,
+   "first_detected": -1.45,
+   "first_tracked": -1.35,
+   "first_relevant": -1.45,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U11",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -1.35,
+   "first_tracked": -1.25,
+   "first_relevant": -1.35,
+   "first_identity_resolved": 1.35,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U12",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -1.25,
+   "first_tracked": -1.15,
+   "first_relevant": -1.25,
+   "first_identity_resolved": 0.35,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U13",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -1.15,
+   "first_tracked": -1.05,
+   "first_relevant": -1.15,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U14",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "J",
+   "purity": 1.0,
+   "first_detected": -1.1,
+   "first_tracked": -1.0,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U15",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -1.1,
+   "first_tracked": -1.0,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U16",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "J",
+   "purity": 1.0,
+   "first_detected": 0.4,
+   "first_tracked": 0.5,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U17",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "J",
+   "purity": 1.0,
+   "first_detected": 2.2,
+   "first_tracked": 2.3,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  }
+ ],
+ "S20": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -7.0,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "D",
+   "purity": 0.983,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": -6.95
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "I",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -7.0,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -6.7,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -6.95,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -7.0,
+   "first_hazard_relevant": -0.9
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "J",
+   "purity": 1.0,
+   "first_detected": -7.45,
+   "first_tracked": -7.35,
+   "first_relevant": -7.45,
+   "first_identity_resolved": -7.0,
+   "first_hazard_relevant": -0.95
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -1.15,
+   "first_tracked": -1.05,
+   "first_relevant": -1.15,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U9",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": 0.45,
+   "first_tracked": 0.55,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U10",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": 3.25,
+   "first_tracked": 3.35,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U11",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": 3.5,
+   "first_tracked": 3.6,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  }
+ ],
+ "S21": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": -6.3,
+   "first_hazard_relevant": -6.25
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "I",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": -6.3,
+   "first_hazard_relevant": -6.25
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": -1.15,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -6.75,
+   "first_tracked": -6.65,
+   "first_relevant": -6.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -5.95,
+   "first_tracked": -5.85,
+   "first_relevant": -5.95,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -1.95,
+   "first_tracked": -1.85,
+   "first_relevant": -1.95,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U9",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -0.85,
+   "first_tracked": -0.75,
+   "first_relevant": -0.85,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U10",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 0.659,
+   "first_detected": -0.75,
+   "first_tracked": -0.65,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U11",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 0.5,
+   "first_detected": 0.15,
+   "first_tracked": 0.25,
+   "first_relevant": 0.15,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U12",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": 1.3,
+   "first_tracked": 1.4,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U13",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": 1.55,
+   "first_tracked": 1.65,
+   "first_relevant": 1.55,
+   "first_identity_resolved": 3.9,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U14",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "I",
+   "purity": 1.0,
+   "first_detected": 1.8,
+   "first_tracked": 1.9,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U15",
+   "observers": [
+    "A"
+   ],
+   "tracks": 2,
+   "true_vehicle": "I",
+   "purity": 1.0,
+   "first_detected": 1.9,
+   "first_tracked": 2.0,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  }
+ ],
+ "S22": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 4,
+   "true_vehicle": "V",
+   "purity": 0.984,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": -3.05,
+   "first_hazard_relevant": -1.85
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 4,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": -6.85,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": -6.65,
+   "first_hazard_relevant": -6.8
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -2.15,
+   "first_tracked": -2.05,
+   "first_relevant": -2.15,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": 1.0,
+   "first_tracked": 1.1,
+   "first_relevant": 1.0,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U9",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": 1.15,
+   "first_tracked": 1.25,
+   "first_relevant": null,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  }
+ ],
+ "S23": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -8.5,
+   "first_tracked": -8.4,
+   "first_relevant": -8.5,
+   "first_identity_resolved": -8.05,
+   "first_hazard_relevant": -6.75
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -8.5,
+   "first_tracked": -8.4,
+   "first_relevant": -8.5,
+   "first_identity_resolved": -7.65,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 6,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -8.0,
+   "first_tracked": -7.9,
+   "first_relevant": -8.0,
+   "first_identity_resolved": -7.1,
+   "first_hazard_relevant": -3.2
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -7.55,
+   "first_tracked": -7.45,
+   "first_relevant": -7.55,
+   "first_identity_resolved": -6.1,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 0.962,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -7.3,
+   "first_tracked": -7.2,
+   "first_relevant": -7.3,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -1.9,
+   "first_tracked": -1.8,
+   "first_relevant": -1.9,
+   "first_identity_resolved": -1.4,
+   "first_hazard_relevant": -1.4
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -1.2,
+   "first_tracked": -1.1,
+   "first_relevant": -1.2,
+   "first_identity_resolved": -0.45,
+   "first_hazard_relevant": -0.05
+  }
+ ],
+ "S24": [
+  {
+   "entity": "U1",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "D",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": -7.3,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U2",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U3",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 3,
+   "true_vehicle": "H",
+   "purity": 0.967,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": -7.3,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U4",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U5",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "G",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": 0.4,
+   "first_hazard_relevant": -7.25
+  },
+  {
+   "entity": "U6",
+   "observers": [
+    "A",
+    "B"
+   ],
+   "tracks": 2,
+   "true_vehicle": "C",
+   "purity": 1.0,
+   "first_detected": -7.75,
+   "first_tracked": -7.65,
+   "first_relevant": -7.75,
+   "first_identity_resolved": -6.9,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U7",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "B",
+   "purity": 0.923,
+   "first_detected": -7.7,
+   "first_tracked": -7.6,
+   "first_relevant": -7.7,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U8",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "H",
+   "purity": 1.0,
+   "first_detected": -0.05,
+   "first_tracked": 0.05,
+   "first_relevant": -0.05,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U9",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": 1.2,
+   "first_tracked": 1.3,
+   "first_relevant": 1.2,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U10",
+   "observers": [
+    "A"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": 1.2,
+   "first_tracked": 1.3,
+   "first_relevant": 1.2,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": null
+  },
+  {
+   "entity": "U11",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "E",
+   "purity": 1.0,
+   "first_detected": 1.65,
+   "first_tracked": 1.75,
+   "first_relevant": 1.65,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": 2.15
+  },
+  {
+   "entity": "U12",
+   "observers": [
+    "B"
+   ],
+   "tracks": 1,
+   "true_vehicle": "F",
+   "purity": 1.0,
+   "first_detected": 1.75,
+   "first_tracked": 1.85,
+   "first_relevant": 1.75,
+   "first_identity_resolved": null,
+   "first_hazard_relevant": 2.25
+  }
+ ]
+}
