@@ -91,11 +91,18 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
         rows = identity["samples"]
         result["identity"] = {"all": summarize(rows), "by_distance": summarize(rows, "distance_bin"),
                               "by_time": summarize(rows, "time_bin"),
+                              "relevant": summarize([r for r in rows if r.get("relevant")]),
+                              "not_relevant": summarize([r for r in rows if not r.get("relevant")]),
                               "early_2s": summarize([r for r in rows if (r.get("time_before_contact_s") or 0) > 2.0])}
-        result["decisions"] = [{k: d.get(k) for k in ("track", "decision", "status", "true_identity", "verdict")}
-                               for d in fusion["track_decisions"]]
-        result["entities"] = fusion["entities"]
+        verdicts: Dict[str, int] = {}
+        for d in fusion["track_decisions"]:
+            key = d["verdict"].split(" (")[0]
+            verdicts[key] = verdicts.get(key, 0) + 1
+        result["verdicts"] = verdicts
         result["merges"] = fusion["merges"]
+        result["entity_purity_min"] = min((e["purity"] for e in fusion["entities"] if e["purity"] is not None), default=None)
+        result["duplicate_entities"] = sum(max(0, n - 1) for n in __import__("collections").Counter(
+            e["true_identity"] for e in fusion["entities"] if e["true_identity"] is not None).values())
         tracks = {}
         for r in rows:
             t = tracks.setdefault(r["track"], {"track": r["track"], "assigned": r["assigned"], "samples": 0,
@@ -106,7 +113,18 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             t["samples"] += 1
             t["outcomes"][r["outcome"]] = t["outcomes"].get(r["outcome"], 0) + 1
             t["min_range_m"] = min(t["min_range_m"], r["range_m"])
+        votes: Dict[str, Dict[Any, int]] = {}
+        for r in rows:
+            if r["true"] is not None:
+                votes.setdefault(r["track"], {})[r["true"]] = votes.setdefault(r["track"], {}).get(r["true"], 0) + 1
+        for name, t in tracks.items():
+            t["true"] = max(votes[name], key=votes[name].get) if name in votes else None
         result["tracks"] = list(tracks.values())
+        entities = json.loads((target / "reconstruction/global/anonymous_entities.json").read_text(encoding="utf-8"))
+        result["cannot_links"] = len(entities.get("cannot_links") or [])
+        result["retrospective_decisions"] = [
+            {k: d.get(k) for k in ("earlier", "later", "posterior", "gap_s", "chi2", "resolved", "candidates",
+                                   "position_sigma_m", "t_old", "t_new")} for d in entities.get("retrospective") or []]
         if job.get("samples_dir"):
             out = Path(job["samples_dir"]) / job["method"] / job["condition"] / "seed{0}".format(job["seed"])
             out.mkdir(parents=True, exist_ok=True)

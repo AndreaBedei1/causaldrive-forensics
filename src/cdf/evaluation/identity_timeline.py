@@ -14,6 +14,10 @@ Per sample (clutter excluded):
 * ``unresolved``: the sample's vehicle is right but its track sits in a secondary fragment of it (a
   missed merge or a missed recorder link): it is not wrong, it is not joined.
 
+``relevant``: the sample lies within the observer's reconstruction relevance range
+(``cdf.reconstruction.identity.relevance_range``: safe following distance + possible closure over the prediction
+horizon + 3 sigma), computed from the track's own fields and the recorder's own speed.
+
 Each sample also carries its range from the observing radar, its time before the observer's first matched
 contact (else before t_global = 0) and, when the reconstruction recorded them, the identity's confidence,
 the time its identity was resolved from and whether it was resolved retrospectively.
@@ -78,9 +82,16 @@ def identity_samples(run_dir: Path) -> Dict[str, Any]:
                 t = event["t_local"][graph] + clock["offset_to_global"]
                 contacts[graph] = min(contacts.get(graph, t), t)
 
+    from ..reconstruction.config import load_config
+    from ..reconstruction.identity import relevance_range
+    cfg = load_config()
+    import numpy as np
     rows: List[Dict[str, Any]] = []
     for name in sorted(aligned):
         offset = clocks[name]["offset_to_global"]
+        ego = _read_jsonl(run_dir / "vehicles" / name / "ego.jsonl")
+        ego_t = np.array([float(r["timestamp"]) for r in ego])
+        ego_v = np.array([float(np.hypot(r["velocity"]["x"], r["velocity"]["y"])) for r in ego])
         for row in _read_jsonl(rec / name / "local_tracks.jsonl"):
             if not row["measured"]:
                 continue
@@ -98,7 +109,10 @@ def identity_samples(run_dir: Path) -> Dict[str, Any]:
                          "time_before_contact_s": round(contacts.get(name, 0.0) - t_global, 4),
                          "confidence": item.get("identity_confidence", item.get("confidence")),
                          "resolved_from_t_global": item.get("identity_resolved_from"),
-                         "retrospective": bool(item.get("retrospective"))})
+                         "retrospective": bool(item.get("retrospective")),
+                         "relevant": bool(row.get("clearance_m") is not None and row["clearance_m"] <= relevance_range(
+                             float(np.interp(sim, ego_t, ego_v)), float(row.get("closing_speed_mps") or 0.0),
+                             float(row.get("vel_std_mps") or 0.0), float(row.get("pos_std_m") or 0.0), cfg))})
 
     # Entity majority and primary entity of every true vehicle.
     by_entity: Dict[str, Counter] = defaultdict(Counter)

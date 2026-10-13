@@ -233,6 +233,27 @@ class CollisionTests(unittest.TestCase):
         self.assertEqual(matched[0]["t_local"]["B"], 4.8)
 
 
+class RelevanceAndGeneralityTests(unittest.TestCase):
+    def test_relevance_range_follows_the_conflict_model(self):
+        c = cfg()
+        still = identity.relevance_range(13.9, 0.0, 0.2, 0.5, c)
+        closing = identity.relevance_range(13.9, 10.0, 0.2, 0.5, c)
+        receding = identity.relevance_range(13.9, -10.0, 0.2, 0.5, c)
+        self.assertGreater(closing, still)  # closing fast: relevant from farther away
+        self.assertLess(receding, still)  # moving away: no possible closure, only the safe distance and 3 sigma
+        self.assertAlmostEqual(receding, 13.9 * 1.5 + 1.5, places=1)
+        self.assertGreater(identity.relevance_range(13.9, 0.0, 0.2, 2.0, c), still)  # uncertainty widens it
+        # 50 km/h, not closing: UN R157 1.5 s gap -> about 20.8 m, plus 3 sigma (velocity) x 6 s and 3 sigma position
+        self.assertAlmostEqual(still, 13.9 * 1.5 + 0.6 * 6.0 + 1.5, places=1)
+
+    def test_no_scenario_specific_reconstruction_logic(self):
+        import re
+        pattern = re.compile(r"""["']S\d{2}["']|scenario_id|run_0_""")
+        for path in (ROOT / "src/cdf/reconstruction").glob("*.py"):
+            code = [line for line in path.read_text(encoding="utf-8").splitlines() if not line.strip().startswith("#")]
+            self.assertFalse([line for line in code if pattern.search(line)], path.name)
+
+
 class RealRunRegressions(unittest.TestCase):
     """The reconstruction on non-destructive copies (hard links) of committed runs."""
 
