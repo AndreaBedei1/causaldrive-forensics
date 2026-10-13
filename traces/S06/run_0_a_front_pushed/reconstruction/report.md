@@ -308,7 +308,13 @@ C:
     "box_width_std_m": 0.2,
     "entity_output_rate_hz": 10.0,
     "mutual_refinement": false,
-    "mutual_refinement_iterations": 3
+    "mutual_refinement_iterations": 3,
+    "association_method": "current",
+    "radar_range_std_m": 0.25,
+    "radar_azimuth_std_deg": 0.5,
+    "assignment_likelihood_ratio": 20.0,
+    "retrospective_new_target_density": 3.57e-05,
+    "retrospective_min_posterior": 0.95
   }
 }
 ```
