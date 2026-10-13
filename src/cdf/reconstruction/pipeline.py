@@ -23,7 +23,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from .alignment import align_graphs
 from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
 from .common_frame import PoseSource, RecordedPoseSource, contact_check, common_track, outline_distances
-from .config import ReconstructionConfig, load_config
+from .config import ReconstructionConfig, effective_config, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .local import LocalReconstruction, reconstruct_vehicle
 from .models import Alignment, Association, GlobalGraph
@@ -161,7 +161,7 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
 def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,
                     pose_factory: Optional[PoseFactory] = None) -> RunReconstruction:
     run_dir = Path(run_dir)
-    cfg = cfg or load_config()
+    cfg = effective_config(cfg or load_config())
     output_dir = run_dir / "reconstruction"
     # A previous privileged evaluation would describe an older reconstruction.
     for stale in (output_dir / "evaluation" / "evaluation.json", output_dir / "evaluation" / "evaluation.md"):

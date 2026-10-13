@@ -533,7 +533,8 @@ def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset,
 def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[Any], poses: Dict[str, PoseSource],
                    cfg: ReconstructionConfig, refinement: Optional[Dict[str, Any]] = None) -> RoadUserFusion:
     """``anonymous._fuse`` for the corrected and retrospective methods (module docstring)."""
-    retrospective = cfg.fusion.association_method == "retrospective"
+    final = cfg.fusion.association_method == "final"
+    retrospective = cfg.fusion.association_method in ("retrospective", "final")
     rel = RelativePose(poses, refinement)
     view = build_common_view(locals_, alignment, associations, poses)
     links, link_refusals = link_to_recorders_corrected(view, cfg, rel)
@@ -561,9 +562,19 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     anonymous = [t for t in view.tracks if t.status != ASSOCIATED and t.name not in linked]
     by_name = {t.name: t for t in anonymous}
     evidence: List[PairEvidence] = []
+    relevant = {t.name: relevant_samples(t, view.bodies, cfg) for t in anonymous} if final else {}
+    resolved_at: Dict[frozenset, float] = {}
     for i, a in enumerate(anonymous):
         for b in anonymous[i + 1:]:
-            if a.recorder != b.recorder or _overlap(a, b):
+            if final and a.recorder != b.recorder:
+                # Operative relevance: cross-recorder identity evidence only where at least one of the two
+                # observations lies inside its observer's relevance envelope (TRUSTED_FOR_FUSION).
+                ra, rb = relevant_view(a, relevant[a.name], relevant[b.name], b), relevant_view(b, relevant[b.name], relevant[a.name], a)
+                item = pair_corrected(ra, rb, cfg, rel)
+                when = resolution_time(ra, rb, cfg)
+                if when is not None:
+                    resolved_at[frozenset((a.name, b.name))] = when
+            elif a.recorder != b.recorder or _overlap(a, b):
                 item = pair_corrected(a, b, cfg, rel)
             else:
                 first, second = (a, b) if (a.start, a.name) <= (b.start, b.name) else (b, a)
@@ -605,6 +616,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                                          "confidence": confidence},
                          "fusion_method": "+".join(sorted({s["method"] for s in states})), "footprint": footprint,
                          "relevance": entity_relevance(group, view.bodies, cfg),
+                         **({"timeline": entity_timeline(group, joins, retro, resolved_at, view, locals_, cfg)} if final else {}),
                          "trajectory": states})
         for track in group:
             item = by_key[(track.recorder, track.track_id)]
@@ -620,6 +632,14 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                     "observers), carried back {1:.2f} s with the motion model; posterior {2:.3f} against {3} candidate(s) "
                     "and a new road user; observation times unchanged".format(late["t_new"], late["gap_s"],
                                                                                 late["posterior"], late["candidates"])]
+            if final and late is None and len(group) > 1:
+                times = [resolved_at[frozenset((e.a, e.b))] for e in joins
+                         if track.name in (e.a, e.b) and frozenset((e.a, e.b)) in resolved_at]
+                if times and min(times) > track.start + 1e-6:
+                    # Its identity follows from evidence that starts after its first observation: resolved later,
+                    # the observation itself unchanged.
+                    item.retrospective = True
+                    item.identity_resolved_from = round(min(times), 4)
             item.evidence = list(item.evidence) + [
                 "anonymous road user {0}: {1}".format(entity_id, ", ".join(t.name for t in group))]
     result = RoadUserFusion(links, evidence, entities, {owner: source.name for owner, source in poses.items()}, names)
@@ -661,6 +681,11 @@ def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
             # stuck to the recorder) says nothing about who arrived now.
             arriving = window[0].clearance_m > fusion.touching_clearance_m + 3.0 * cfg.tracking.measurement_std_m
             if not near or not arriving:
+                continue
+            if fusion.association_method == "final":
+                verdict = _normal_component_consistent(local, other, window, t_o, t_p, cfg)
+                if verdict is not None:
+                    touching.append(verdict)
                 continue
             errors = []
             for s in window:
@@ -720,3 +745,117 @@ def entity_relevance(group: Sequence[CommonTrack], bodies: Dict[str, Any], cfg: 
                 first = s.t_global
     return {"relevant_from_t_global": None if first is None else round(first, 3),
             "min_clearance_to_relevance_range": None if math.isinf(ratio) else round(ratio, 3)}
+
+
+
+# --------------------------------------------------------------------------
+# METHOD 3 FINAL: observable-direction collision evidence, operative relevance, target timelines
+# --------------------------------------------------------------------------
+
+def _normal_component_consistent(local: Any, other: Any, window: Sequence[Any], t_o: float, t_p: float,
+                                 cfg: ReconstructionConfig) -> Optional[bool]:
+    """Is the arriving track's motion compatible with the partner's own speed, in the direction the radar
+    observes?  The component of the target's ground velocity along the outward normal of the observer's body
+    at the target's near point (the line of sight of the radar that sees it arrive: Doppler) is the observed
+    one; a partner whose own speed is below that component by more than 3 sigma (Doppler noise and the track's
+    velocity uncertainty) cannot be the arriving body, nor can one faster than the track's whole ground speed by
+    3 sigma (the body did not move that fast at all).  The tangential component, poorly observed by a radar,
+    can only add to the track's speed and never turns a slower true partner into a contradiction.  Majority over the window; None without enough comparable samples."""
+    from .tracking import EgoFootprint  # noqa: F401  (type only)
+    fp = local.footprint
+    verdicts = []
+    for s in window:
+        t_partner = s.t_local - t_o + t_p
+        if not (other.ego.start <= t_partner <= other.ego.end):
+            continue
+        own = local.ego.at(s.t_local)
+        c, sn = math.cos(own.heading), math.sin(own.heading)
+        ego_vx, ego_vy = c * own.vx + sn * own.vy, -sn * own.vx + c * own.vy  # recorder velocity, its own axes
+        gx, gy = s.relative_vx_mps + ego_vx, s.relative_vy_mps + ego_vy        # target ground velocity, same axes
+        if fp is not None:
+            nx, ny = fp.outward(s.longitudinal_m, s.lateral_m)
+        else:
+            norm = max(math.hypot(s.longitudinal_m, s.lateral_m), 1e-6)
+            nx, ny = s.longitudinal_m / norm, s.lateral_m / norm
+        observed = abs(gx * nx + gy * ny)
+        sigma = math.sqrt(cfg.tracking.radial_speed_std_mps ** 2 + s.vel_std_mps ** 2)
+        partner = other.ego.at(t_partner).speed
+        # Too slow for the observed (Doppler) component, or faster than the observed body moves at all.
+        verdicts.append(observed - 3.0 * sigma <= partner <= math.hypot(gx, gy) + 3.0 * sigma)
+    if len(verdicts) < max(3, len(window) // 2):
+        return None
+    return sum(verdicts) * 2 >= len(verdicts)
+
+
+def relevant_samples(track: CommonTrack, bodies: Dict[str, Any], cfg: ReconstructionConfig) -> List[bool]:
+    """Per sample, inside its observer's relevance envelope (``relevance_range``)?"""
+    body = bodies.get(track.recorder)
+    out = []
+    for s in track.samples:
+        if body is None or not s.measured:
+            out.append(False)
+            continue
+        pose = body.pose_at_global(s.t_global)
+        line = s.near - s.observer
+        clearance = float(np.hypot(*line))
+        unit = line / max(clearance, 1e-6)
+        closing = -float((s.velocity - np.array([pose.vx, pose.vy])) @ unit)
+        limit = relevance_range(math.hypot(pose.vx, pose.vy), closing, s.vel_std,
+                                math.sqrt(measurement_variance(s, cfg)), cfg)
+        out.append(clearance <= limit)
+    return out
+
+
+def relevant_view(track: CommonTrack, flags: Sequence[bool], other_flags: Sequence[bool], other: CommonTrack) -> CommonTrack:
+    """The track with only the instants usable as fusion evidence measured: its own sample relevant, or the
+    other observer's simultaneous sample relevant (one of the two observers needs the road user)."""
+    other_times = [s.t_global for s, ok in zip(other.samples, other_flags) if ok]
+
+    def usable(s: CommonSample, ok: bool) -> bool:
+        return ok or any(abs(s.t_global - t) <= 0.026 for t in other_times)
+    return replace(track, samples=[s if (s.measured and usable(s, ok)) else replace(s, measured=False)
+                                   for s, ok in zip(track.samples, flags)])
+
+
+def resolution_time(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> Optional[float]:
+    """When the evidence for a pair reaches ``fusion.anonymous_min_shared_samples`` usable shared instants."""
+    times = []
+    for sa in a.samples:
+        if not sa.measured:
+            continue
+        sb = b.state_at(sa.t_global)
+        if sb is not None and sb.measured:
+            times.append(sa.t_global)
+    need = cfg.fusion.anonymous_min_shared_samples
+    return times[need - 1] if len(times) >= need else None
+
+
+def entity_timeline(group: Sequence[CommonTrack], joins: Sequence[PairEvidence], retro: Sequence[Dict[str, Any]],
+                    resolved_at: Dict[frozenset, float], view: Any, locals_: Sequence[Any],
+                    cfg: ReconstructionConfig) -> Dict[str, Any]:
+    """first_detected / first_tracked / first_relevant / first_identity_resolved / first_hazard_relevant of an
+    entity (t_global).  Observation times are the tracks' own; resolution times come after them."""
+    detected = min(t.start for t in group)
+    tracked = []
+    for t in group:
+        measured = [s.t_global for s in t.samples if s.measured]
+        if len(measured) >= cfg.tracking.min_track_updates:
+            tracked.append(measured[cfg.tracking.min_track_updates - 1])
+    relevance = entity_relevance(group, view.bodies, cfg)
+    members = {t.name for t in group}
+    resolutions = [resolved_at[frozenset((e.a, e.b))] for e in joins if frozenset((e.a, e.b)) in resolved_at]
+    resolutions += [d["t_new"] for d in retro if d.get("resolved") and set(d["earlier"]) <= members]
+    hazards = []
+    by_owner = {local.owner: local for local in locals_}
+    for t in group:
+        local, body = by_owner.get(t.recorder), view.bodies.get(t.recorder)
+        if local is None or body is None:
+            continue
+        for node in local.graph.nodes:
+            if node.event_type == "CRITICAL_TTC_START" and node.subject_id == t.track_id:
+                hazards.append(round(node.t_local + body.offset_to_global, 4))
+    return {"first_detected": round(detected, 4),
+            "first_tracked": round(min(tracked), 4) if tracked else None,
+            "first_relevant": relevance["relevant_from_t_global"],
+            "first_identity_resolved": round(min(resolutions), 4) if resolutions else None,
+            "first_hazard_relevant": min(hazards) if hazards else None}
