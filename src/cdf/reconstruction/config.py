@@ -84,6 +84,33 @@ class TrackingConfig:
     # 2.5 m (car/van width) plus one measurement standard deviation. Persistent
     # violations signal mixed bodies or unreliable heading, never a named switch.
     identity_body_width_m: float = 2.5
+    # --- Uncertainty-aware gating ("covariance"; fusion.association_method "final" switches it on) ---
+    # "fixed": the gates above (2.5 m, 4 m/s, 0.5 s, 5 sweeps).  "covariance": a return joins a track when its
+    # innovation against the prediction is within the chi-square gate of gate_probability, its covariance
+    # the track's predicted covariance plus the spread of returns over a vehicle body (length and width /
+    # sqrt(12): uniform over the box, heading from the track's velocity) plus the radar's polar noise; the
+    # Doppler residual along the return's own line of sight is gated by its predicted radial standard
+    # deviation; a track ends when its predicted position no longer tells two bodies a car width apart
+    # (3 sigma > body_width_m) or after gap_cap_s (fail-safe); a tentative track is confirmed after
+    # min_track_support_s of support with at least min_track_updates measurements (rate independent).
+    gating: str = "fixed"
+    # With gating "covariance": which statistical replacements are active (comma separated subset of
+    # position, doppler, survival, confirmation); the others keep the fixed rule.
+    covariance_components: str = "survival,confirmation"
+    gate_probability: float = 0.99
+    body_length_m: float = 4.6
+    body_width_m: float = 1.9
+    radar_range_std_m: float = 0.25
+    radar_azimuth_std_deg: float = 0.5
+    min_track_support_s: float = 0.2
+    min_track_updates: int = 3
+    gap_cap_s: float = 2.0
+    # Collision-aware process noise (covariance gating): at each of the recorder's own collision callbacks the
+    # tracks near its body (predicted clearance below body_length_m) get the velocity variance (J / m)^2 of
+    # the impulse J the sensor measured, m a nominal passenger-car mass (physical prior): an impact is the
+    # only unmodelled velocity jump the recorder itself measures.
+    nominal_vehicle_mass_kg: float = 1500.0
+    position_cap_m: float = 10.0
 
 
 @dataclass
@@ -333,6 +360,14 @@ def config_from_mapping(data: Optional[Mapping[str, Any]]) -> ReconstructionConf
         semantics=_section(SemanticsConfig, data.get("semantics")),
         fusion=_section(FusionConfig, data.get("fusion")),
     )
+
+
+def effective_config(cfg: "ReconstructionConfig") -> "ReconstructionConfig":
+    """METHOD 3 FINAL (``fusion.association_method`` "final") runs the uncertainty-aware tracker."""
+    from dataclasses import replace
+    if cfg.fusion.association_method == "final" and cfg.tracking.gating == "fixed":
+        return replace(cfg, tracking=replace(cfg.tracking, gating="covariance"))
+    return cfg
 
 
 def load_config(path: Optional[Path] = None) -> ReconstructionConfig:

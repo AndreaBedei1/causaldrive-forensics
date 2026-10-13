@@ -1155,7 +1155,10 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         # Every radar with its own mount: returns are placed from where they were measured.
         streams = [RadarStream(RadarMount.from_metadata(observations.metadata), observations)
                    for observations in load_radar_observations(vehicle_dir)]
-        tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats)
+        # The recorder's own collision callbacks (t_local, impulse): the uncertainty-aware tracker widens the
+        # prediction of a touching body by the velocity jump they imply.
+        impacts = [(float(c["timestamp"]) - clock_origin, float(c.get("impulse", 0.0))) for c in collisions]
+        tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats, impacts)
 
     semantics = cfg.semantics
     mark_occlusions(tracks, ego, footprint, semantics)
