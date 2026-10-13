@@ -1,0 +1,1806 @@
+{
+  "definition": "road users in the common frame of the recorders' own pose streams; a road user that recorded nothing is an anonymous entity U1, U2, ... and is never named after a participant; t_global as in alignment.json; positions in the map frame of the pose streams (m), headings in degrees",
+  "pose_sources": {
+    "A": "recorded",
+    "B": "recorded"
+  },
+  "parameters": {
+    "observed_alignment_step_s": 0.05,
+    "observed_alignment_min_samples": 10,
+    "observed_alignment_min_speed_mps": 2.0,
+    "observed_alignment_uniqueness_ratio": 3.0,
+    "link_min_samples": 10,
+    "link_min_fraction": 0.8,
+    "anonymous_gate_probability": 0.99,
+    "anonymous_min_shared_samples": 10,
+    "anonymous_pass_fraction": 0.8,
+    "stitch_max_gap_s": 1.5,
+    "box_face_std_m": 0.25,
+    "box_length_std_m": 0.7,
+    "box_width_std_m": 0.2,
+    "entity_output_rate_hz": 10.0,
+    "measurement_std_m": 0.5,
+    "radial_speed_std_mps": 0.3,
+    "acceleration_std_mps2": 6.0
+  },
+  "observed_alignment": [],
+  "mutual_refinement": null,
+  "recorder_links": [],
+  "association_evidence": [
+    {
+      "a": "A:track_001",
+      "b": "B:track_002",
+      "kind": "cross_observer",
+      "compared": 109,
+      "passed": 0.972,
+      "median_box_chi2": 0.082,
+      "median_velocity_chi2": 1.843,
+      "centre_gap_m": 0.783,
+      "gap_s": null,
+      "accepted": true,
+      "refused": null,
+      "lateral_chi2": null,
+      "score": 1.925
+    },
+    {
+      "a": "A:track_001",
+      "b": "B:track_003",
+      "kind": "cross_observer",
+      "compared": 7,
+      "passed": 1.0,
+      "median_box_chi2": 0.363,
+      "median_velocity_chi2": 7.23,
+      "centre_gap_m": 1.922,
+      "gap_s": null,
+      "accepted": false,
+      "refused": null,
+      "lateral_chi2": null,
+      "score": 7.593
+    },
+    {
+      "a": "B:track_002",
+      "b": "B:track_003",
+      "kind": "stitch",
+      "compared": 1,
+      "passed": 1.0,
+      "median_box_chi2": 1.633,
+      "median_velocity_chi2": 0.523,
+      "centre_gap_m": 2.161,
+      "gap_s": 0.7,
+      "accepted": true,
+      "refused": null,
+      "lateral_chi2": 3.698,
+      "score": 2.156
+    }
+  ],
+  "entities": [
+    {
+      "id": "U1",
+      "anonymous": true,
+      "identity_ambiguous": false,
+      "source_tracks": [
+        "A:track_001",
+        "B:track_002",
+        "B:track_003"
+      ],
+      "source_track_segments": [
+        {
+          "track": "A:track_001",
+          "observer": "A",
+          "t_global": [
+            -4.95,
+            2.5
+          ]
+        },
+        {
+          "track": "B:track_002",
+          "observer": "B",
+          "t_global": [
+            -4.95,
+            0.75
+          ]
+        },
+        {
+          "track": "B:track_003",
+          "observer": "B",
+          "t_global": [
+            1.45,
+            2.05
+          ]
+        }
+      ],
+      "observers": [
+        "A",
+        "B"
+      ],
+      "time_span": [
+        -4.95,
+        2.5
+      ],
+      "association": {
+        "links": [
+          {
+            "a": "A:track_001",
+            "b": "B:track_002",
+            "kind": "cross_observer",
+            "compared": 109,
+            "passed": 0.972,
+            "median_box_chi2": 0.082,
+            "median_velocity_chi2": 1.843,
+            "centre_gap_m": 0.783,
+            "gap_s": null,
+            "accepted": true,
+            "refused": null,
+            "lateral_chi2": null,
+            "score": 1.925
+          },
+          {
+            "a": "B:track_002",
+            "b": "B:track_003",
+            "kind": "stitch",
+            "compared": 1,
+            "passed": 1.0,
+            "median_box_chi2": 1.633,
+            "median_velocity_chi2": 0.523,
+            "centre_gap_m": 2.161,
+            "gap_s": 0.7,
+            "accepted": true,
+            "refused": null,
+            "lateral_chi2": 3.698,
+            "score": 2.156
+          }
+        ],
+        "confidence": 0.972
+      },
+      "fusion_method": "box_fit+covariance_intersection",
+      "footprint": {
+        "length_m": 4.6,
+        "width_m": 1.9,
+        "length": {
+          "value_m": 4.6,
+          "source": "prior",
+          "std_m": 0.7,
+          "fitted_instants": 0,
+          "observed_extent_m": 3.019,
+          "observed_extent_used": false
+        },
+        "width": {
+          "value_m": 1.9,
+          "source": "prior",
+          "std_m": 0.2,
+          "fitted_instants": 0,
+          "observed_extent_m": 1.445,
+          "observed_extent_used": false
+        }
+      },
+      "trajectory": [
+        {
+          "t_global": -4.9,
+          "x": -22.718,
+          "y": -207.485,
+          "pos_std_m": 0.391,
+          "vx": -10.549,
+          "vy": -0.461,
+          "vel_std_mps": 0.543,
+          "heading_deg": -177.5,
+          "heading_source": "velocity",
+          "length_m": 4.566,
+          "width_m": 1.894,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.8,
+          "x": -23.815,
+          "y": -207.506,
+          "pos_std_m": 0.391,
+          "vx": -10.551,
+          "vy": -0.438,
+          "vel_std_mps": 0.469,
+          "heading_deg": -177.62,
+          "heading_source": "velocity",
+          "length_m": 4.513,
+          "width_m": 1.897,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.7,
+          "x": -24.848,
+          "y": -207.576,
+          "pos_std_m": 0.391,
+          "vx": -10.607,
+          "vy": -0.422,
+          "vel_std_mps": 0.41,
+          "heading_deg": -177.72,
+          "heading_source": "velocity",
+          "length_m": 4.458,
+          "width_m": 1.928,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.6,
+          "x": -25.91,
+          "y": -207.529,
+          "pos_std_m": 0.391,
+          "vx": -10.651,
+          "vy": -0.385,
+          "vel_std_mps": 0.368,
+          "heading_deg": -177.93,
+          "heading_source": "velocity",
+          "length_m": 4.517,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.5,
+          "x": -27.061,
+          "y": -207.486,
+          "pos_std_m": 0.391,
+          "vx": -10.687,
+          "vy": -0.343,
+          "vel_std_mps": 0.342,
+          "heading_deg": -178.16,
+          "heading_source": "velocity",
+          "length_m": 4.574,
+          "width_m": 1.901,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.4,
+          "x": -27.982,
+          "y": -207.618,
+          "pos_std_m": 0.391,
+          "vx": -10.74,
+          "vy": -0.308,
+          "vel_std_mps": 0.328,
+          "heading_deg": -178.36,
+          "heading_source": "velocity",
+          "length_m": 4.353,
+          "width_m": 1.927,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.3,
+          "x": -29.08,
+          "y": -207.624,
+          "pos_std_m": 0.391,
+          "vx": -10.741,
+          "vy": -0.231,
+          "vel_std_mps": 0.32,
+          "heading_deg": -178.77,
+          "heading_source": "velocity",
+          "length_m": 4.412,
+          "width_m": 1.909,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.2,
+          "x": -30.327,
+          "y": -207.529,
+          "pos_std_m": 0.391,
+          "vx": -10.754,
+          "vy": -0.165,
+          "vel_std_mps": 0.316,
+          "heading_deg": -179.12,
+          "heading_source": "velocity",
+          "length_m": 4.61,
+          "width_m": 1.919,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.1,
+          "x": -31.382,
+          "y": -207.504,
+          "pos_std_m": 0.391,
+          "vx": -10.765,
+          "vy": -0.147,
+          "vel_std_mps": 0.316,
+          "heading_deg": -179.22,
+          "heading_source": "velocity",
+          "length_m": 4.584,
+          "width_m": 1.904,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -4.0,
+          "x": -32.3,
+          "y": -207.614,
+          "pos_std_m": 0.391,
+          "vx": -10.767,
+          "vy": -0.16,
+          "vel_std_mps": 0.316,
+          "heading_deg": -179.15,
+          "heading_source": "velocity",
+          "length_m": 4.372,
+          "width_m": 1.901,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.9,
+          "x": -33.405,
+          "y": -207.447,
+          "pos_std_m": 0.391,
+          "vx": -10.772,
+          "vy": -0.197,
+          "vel_std_mps": 0.314,
+          "heading_deg": -178.95,
+          "heading_source": "velocity",
+          "length_m": 4.389,
+          "width_m": 1.915,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.8,
+          "x": -34.604,
+          "y": -207.553,
+          "pos_std_m": 0.391,
+          "vx": -10.745,
+          "vy": -0.195,
+          "vel_std_mps": 0.314,
+          "heading_deg": -178.96,
+          "heading_source": "velocity",
+          "length_m": 4.576,
+          "width_m": 1.911,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.7,
+          "x": -35.612,
+          "y": -207.534,
+          "pos_std_m": 0.391,
+          "vx": -10.732,
+          "vy": -0.195,
+          "vel_std_mps": 0.312,
+          "heading_deg": -178.96,
+          "heading_source": "velocity",
+          "length_m": 4.483,
+          "width_m": 1.906,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.6,
+          "x": -36.652,
+          "y": -207.611,
+          "pos_std_m": 0.409,
+          "vx": -10.742,
+          "vy": -0.192,
+          "vel_std_mps": 0.311,
+          "heading_deg": -178.98,
+          "heading_source": "velocity",
+          "length_m": 4.424,
+          "width_m": 1.907,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": -3.5,
+          "x": -37.676,
+          "y": -207.586,
+          "pos_std_m": 0.391,
+          "vx": -10.738,
+          "vy": -0.176,
+          "vel_std_mps": 0.311,
+          "heading_deg": -179.06,
+          "heading_source": "velocity",
+          "length_m": 4.353,
+          "width_m": 1.905,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.4,
+          "x": -38.822,
+          "y": -207.559,
+          "pos_std_m": 0.391,
+          "vx": -10.773,
+          "vy": -0.164,
+          "vel_std_mps": 0.311,
+          "heading_deg": -179.13,
+          "heading_source": "velocity",
+          "length_m": 4.385,
+          "width_m": 1.918,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.3,
+          "x": -39.923,
+          "y": -207.581,
+          "pos_std_m": 0.391,
+          "vx": -10.764,
+          "vy": -0.112,
+          "vel_std_mps": 0.311,
+          "heading_deg": -179.4,
+          "heading_source": "velocity",
+          "length_m": 4.47,
+          "width_m": 1.904,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.2,
+          "x": -40.99,
+          "y": -207.428,
+          "pos_std_m": 0.391,
+          "vx": -10.794,
+          "vy": -0.076,
+          "vel_std_mps": 0.307,
+          "heading_deg": -179.6,
+          "heading_source": "velocity",
+          "length_m": 4.435,
+          "width_m": 1.915,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.1,
+          "x": -42.121,
+          "y": -207.548,
+          "pos_std_m": 0.391,
+          "vx": -10.809,
+          "vy": -0.041,
+          "vel_std_mps": 0.308,
+          "heading_deg": -179.78,
+          "heading_source": "velocity",
+          "length_m": 4.506,
+          "width_m": 1.903,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -3.0,
+          "x": -43.224,
+          "y": -207.573,
+          "pos_std_m": 0.391,
+          "vx": -10.85,
+          "vy": -0.007,
+          "vel_std_mps": 0.307,
+          "heading_deg": -179.97,
+          "heading_source": "velocity",
+          "length_m": 4.547,
+          "width_m": 1.907,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.9,
+          "x": -44.283,
+          "y": -207.543,
+          "pos_std_m": 0.391,
+          "vx": -10.877,
+          "vy": 0.077,
+          "vel_std_mps": 0.306,
+          "heading_deg": 179.6,
+          "heading_source": "velocity",
+          "length_m": 4.511,
+          "width_m": 1.903,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.8,
+          "x": -45.284,
+          "y": -207.561,
+          "pos_std_m": 0.391,
+          "vx": -10.903,
+          "vy": 0.203,
+          "vel_std_mps": 0.304,
+          "heading_deg": 178.93,
+          "heading_source": "velocity",
+          "length_m": 4.421,
+          "width_m": 1.905,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.7,
+          "x": -46.374,
+          "y": -207.531,
+          "pos_std_m": 0.391,
+          "vx": -10.923,
+          "vy": 0.38,
+          "vel_std_mps": 0.305,
+          "heading_deg": 178.0,
+          "heading_source": "velocity",
+          "length_m": 4.434,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.6,
+          "x": -47.568,
+          "y": -207.487,
+          "pos_std_m": 0.391,
+          "vx": -10.894,
+          "vy": 0.634,
+          "vel_std_mps": 0.303,
+          "heading_deg": 176.67,
+          "heading_source": "velocity",
+          "length_m": 4.591,
+          "width_m": 1.899,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.5,
+          "x": -48.516,
+          "y": -207.451,
+          "pos_std_m": 0.391,
+          "vx": -10.837,
+          "vy": 0.932,
+          "vel_std_mps": 0.302,
+          "heading_deg": 175.08,
+          "heading_source": "velocity",
+          "length_m": 4.41,
+          "width_m": 1.897,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.4,
+          "x": -49.619,
+          "y": -207.329,
+          "pos_std_m": 0.391,
+          "vx": -10.778,
+          "vy": 1.242,
+          "vel_std_mps": 0.302,
+          "heading_deg": 173.42,
+          "heading_source": "velocity",
+          "length_m": 4.438,
+          "width_m": 1.889,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.3,
+          "x": -50.674,
+          "y": -207.233,
+          "pos_std_m": 0.391,
+          "vx": -10.706,
+          "vy": 1.597,
+          "vel_std_mps": 0.302,
+          "heading_deg": 171.51,
+          "heading_source": "velocity",
+          "length_m": 4.416,
+          "width_m": 1.896,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.2,
+          "x": -51.76,
+          "y": -207.039,
+          "pos_std_m": 0.391,
+          "vx": -10.652,
+          "vy": 1.933,
+          "vel_std_mps": 0.305,
+          "heading_deg": 169.71,
+          "heading_source": "velocity",
+          "length_m": 4.445,
+          "width_m": 1.893,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.1,
+          "x": -52.765,
+          "y": -206.867,
+          "pos_std_m": 0.391,
+          "vx": -10.617,
+          "vy": 2.173,
+          "vel_std_mps": 0.306,
+          "heading_deg": 168.43,
+          "heading_source": "velocity",
+          "length_m": 4.363,
+          "width_m": 1.891,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -2.0,
+          "x": -53.858,
+          "y": -206.676,
+          "pos_std_m": 0.391,
+          "vx": -10.559,
+          "vy": 2.314,
+          "vel_std_mps": 0.311,
+          "heading_deg": 167.64,
+          "heading_source": "velocity",
+          "length_m": 4.379,
+          "width_m": 1.904,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.9,
+          "x": -54.975,
+          "y": -206.428,
+          "pos_std_m": 0.391,
+          "vx": -10.591,
+          "vy": 2.309,
+          "vel_std_mps": 0.312,
+          "heading_deg": 167.7,
+          "heading_source": "velocity",
+          "length_m": 4.483,
+          "width_m": 1.906,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.8,
+          "x": -55.974,
+          "y": -206.211,
+          "pos_std_m": 0.391,
+          "vx": -10.6,
+          "vy": 2.265,
+          "vel_std_mps": 0.312,
+          "heading_deg": 167.94,
+          "heading_source": "velocity",
+          "length_m": 4.37,
+          "width_m": 1.902,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.7,
+          "x": -57.073,
+          "y": -205.947,
+          "pos_std_m": 0.391,
+          "vx": -10.648,
+          "vy": 2.129,
+          "vel_std_mps": 0.314,
+          "heading_deg": 168.69,
+          "heading_source": "velocity",
+          "length_m": 4.415,
+          "width_m": 1.891,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.6,
+          "x": -58.206,
+          "y": -205.629,
+          "pos_std_m": 0.362,
+          "vx": -10.678,
+          "vy": 1.95,
+          "vel_std_mps": 0.327,
+          "heading_deg": 169.65,
+          "heading_source": "velocity",
+          "length_m": 4.387,
+          "width_m": 1.842,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.5,
+          "x": -59.15,
+          "y": -205.561,
+          "pos_std_m": 0.391,
+          "vx": -10.664,
+          "vy": 1.763,
+          "vel_std_mps": 0.329,
+          "heading_deg": 170.61,
+          "heading_source": "velocity",
+          "length_m": 4.369,
+          "width_m": 1.881,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.4,
+          "x": -60.297,
+          "y": -205.32,
+          "pos_std_m": 0.362,
+          "vx": -10.719,
+          "vy": 1.549,
+          "vel_std_mps": 0.328,
+          "heading_deg": 171.77,
+          "heading_source": "velocity",
+          "length_m": 4.385,
+          "width_m": 1.854,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.3,
+          "x": -61.291,
+          "y": -205.214,
+          "pos_std_m": 0.362,
+          "vx": -10.725,
+          "vy": 1.379,
+          "vel_std_mps": 0.327,
+          "heading_deg": 172.67,
+          "heading_source": "velocity",
+          "length_m": 4.296,
+          "width_m": 1.864,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.2,
+          "x": -62.377,
+          "y": -205.056,
+          "pos_std_m": 0.362,
+          "vx": -10.725,
+          "vy": 1.242,
+          "vel_std_mps": 0.326,
+          "heading_deg": 173.39,
+          "heading_source": "velocity",
+          "length_m": 4.292,
+          "width_m": 1.853,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.1,
+          "x": -63.425,
+          "y": -204.983,
+          "pos_std_m": 0.362,
+          "vx": -10.758,
+          "vy": 1.125,
+          "vel_std_mps": 0.325,
+          "heading_deg": 174.03,
+          "heading_source": "velocity",
+          "length_m": 4.262,
+          "width_m": 1.876,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -1.0,
+          "x": -64.513,
+          "y": -204.848,
+          "pos_std_m": 0.362,
+          "vx": -10.775,
+          "vy": 1.045,
+          "vel_std_mps": 0.324,
+          "heading_deg": 174.46,
+          "heading_source": "velocity",
+          "length_m": 4.285,
+          "width_m": 1.86,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.9,
+          "x": -65.586,
+          "y": -204.773,
+          "pos_std_m": 0.362,
+          "vx": -10.805,
+          "vy": 0.988,
+          "vel_std_mps": 0.324,
+          "heading_deg": 174.78,
+          "heading_source": "velocity",
+          "length_m": 4.286,
+          "width_m": 1.869,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.8,
+          "x": -66.606,
+          "y": -204.73,
+          "pos_std_m": 0.362,
+          "vx": -10.837,
+          "vy": 0.942,
+          "vel_std_mps": 0.324,
+          "heading_deg": 175.03,
+          "heading_source": "velocity",
+          "length_m": 4.221,
+          "width_m": 1.871,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.7,
+          "x": -67.689,
+          "y": -204.611,
+          "pos_std_m": 0.362,
+          "vx": -10.866,
+          "vy": 0.895,
+          "vel_std_mps": 0.319,
+          "heading_deg": 175.29,
+          "heading_source": "velocity",
+          "length_m": 4.205,
+          "width_m": 1.865,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.6,
+          "x": -68.841,
+          "y": -204.525,
+          "pos_std_m": 0.362,
+          "vx": -10.893,
+          "vy": 0.825,
+          "vel_std_mps": 0.3,
+          "heading_deg": 175.67,
+          "heading_source": "velocity",
+          "length_m": 4.277,
+          "width_m": 1.864,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.5,
+          "x": -69.948,
+          "y": -204.431,
+          "pos_std_m": 0.362,
+          "vx": -10.904,
+          "vy": 0.76,
+          "vel_std_mps": 0.3,
+          "heading_deg": 176.01,
+          "heading_source": "velocity",
+          "length_m": 4.252,
+          "width_m": 1.845,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.4,
+          "x": -71.159,
+          "y": -204.392,
+          "pos_std_m": 0.362,
+          "vx": -10.927,
+          "vy": 0.683,
+          "vel_std_mps": 0.3,
+          "heading_deg": 176.42,
+          "heading_source": "velocity",
+          "length_m": 4.339,
+          "width_m": 1.853,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.3,
+          "x": -72.007,
+          "y": -204.456,
+          "pos_std_m": 0.391,
+          "vx": -10.931,
+          "vy": 0.636,
+          "vel_std_mps": 0.3,
+          "heading_deg": 176.67,
+          "heading_source": "velocity",
+          "length_m": 4.33,
+          "width_m": 1.901,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.2,
+          "x": -73.123,
+          "y": -204.406,
+          "pos_std_m": 0.391,
+          "vx": -10.958,
+          "vy": 0.572,
+          "vel_std_mps": 0.3,
+          "heading_deg": 177.01,
+          "heading_source": "velocity",
+          "length_m": 4.349,
+          "width_m": 1.889,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": -0.1,
+          "x": -74.29,
+          "y": -204.364,
+          "pos_std_m": 0.391,
+          "vx": -10.99,
+          "vy": 0.53,
+          "vel_std_mps": 0.3,
+          "heading_deg": 177.24,
+          "heading_source": "velocity",
+          "length_m": 4.474,
+          "width_m": 1.889,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.0,
+          "x": -75.386,
+          "y": -204.337,
+          "pos_std_m": 0.391,
+          "vx": -11.003,
+          "vy": 0.499,
+          "vel_std_mps": 0.3,
+          "heading_deg": 177.4,
+          "heading_source": "velocity",
+          "length_m": 4.472,
+          "width_m": 1.885,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.1,
+          "x": -76.475,
+          "y": -204.308,
+          "pos_std_m": 0.391,
+          "vx": -11.001,
+          "vy": 0.422,
+          "vel_std_mps": 0.3,
+          "heading_deg": 177.8,
+          "heading_source": "velocity",
+          "length_m": 4.448,
+          "width_m": 1.89,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.2,
+          "x": -77.554,
+          "y": -204.283,
+          "pos_std_m": 0.391,
+          "vx": -10.976,
+          "vy": 0.34,
+          "vel_std_mps": 0.3,
+          "heading_deg": 178.23,
+          "heading_source": "velocity",
+          "length_m": 4.484,
+          "width_m": 1.889,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.3,
+          "x": -78.675,
+          "y": -204.276,
+          "pos_std_m": 0.391,
+          "vx": -10.935,
+          "vy": 0.266,
+          "vel_std_mps": 0.3,
+          "heading_deg": 178.61,
+          "heading_source": "velocity",
+          "length_m": 4.536,
+          "width_m": 1.892,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.4,
+          "x": -79.711,
+          "y": -203.944,
+          "pos_std_m": 0.391,
+          "vx": -10.923,
+          "vy": 0.143,
+          "vel_std_mps": 0.3,
+          "heading_deg": 179.25,
+          "heading_source": "velocity",
+          "length_m": 4.433,
+          "width_m": 1.896,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.5,
+          "x": -80.896,
+          "y": -204.194,
+          "pos_std_m": 0.391,
+          "vx": -10.871,
+          "vy": 0.056,
+          "vel_std_mps": 0.3,
+          "heading_deg": 179.71,
+          "heading_source": "velocity",
+          "length_m": 4.574,
+          "width_m": 1.891,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.6,
+          "x": -82.019,
+          "y": -204.143,
+          "pos_std_m": 0.391,
+          "vx": -10.844,
+          "vy": -0.021,
+          "vel_std_mps": 0.3,
+          "heading_deg": -179.89,
+          "heading_source": "velocity",
+          "length_m": 4.561,
+          "width_m": 1.872,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.7,
+          "x": -83.06,
+          "y": -203.818,
+          "pos_std_m": 0.391,
+          "vx": -10.838,
+          "vy": -0.078,
+          "vel_std_mps": 0.3,
+          "heading_deg": -179.59,
+          "heading_source": "velocity",
+          "length_m": 4.493,
+          "width_m": 1.891,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.8,
+          "x": -84.184,
+          "y": -203.793,
+          "pos_std_m": 0.391,
+          "vx": -10.835,
+          "vy": -0.12,
+          "vel_std_mps": 0.3,
+          "heading_deg": -179.37,
+          "heading_source": "velocity",
+          "length_m": 4.545,
+          "width_m": 1.902,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 0.9,
+          "x": -85.17,
+          "y": -204.169,
+          "pos_std_m": 0.409,
+          "vx": -10.828,
+          "vy": -0.168,
+          "vel_std_mps": 0.3,
+          "heading_deg": -179.11,
+          "heading_source": "velocity",
+          "length_m": 4.426,
+          "width_m": 1.887,
+          "method": "box_fit",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.0,
+          "x": -86.247,
+          "y": -204.244,
+          "pos_std_m": 0.409,
+          "vx": -10.844,
+          "vy": -0.253,
+          "vel_std_mps": 0.3,
+          "heading_deg": -178.66,
+          "heading_source": "velocity",
+          "length_m": 4.395,
+          "width_m": 1.895,
+          "method": "box_fit",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.1,
+          "x": -87.35,
+          "y": -204.217,
+          "pos_std_m": 0.409,
+          "vx": -10.854,
+          "vy": -0.294,
+          "vel_std_mps": 0.3,
+          "heading_deg": -178.45,
+          "heading_source": "velocity",
+          "length_m": 4.413,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.2,
+          "x": -88.429,
+          "y": -204.284,
+          "pos_std_m": 0.409,
+          "vx": -10.882,
+          "vy": -0.293,
+          "vel_std_mps": 0.3,
+          "heading_deg": -178.46,
+          "heading_source": "velocity",
+          "length_m": 4.377,
+          "width_m": 1.901,
+          "method": "box_fit",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.3,
+          "x": -89.545,
+          "y": -204.262,
+          "pos_std_m": 0.409,
+          "vx": -10.917,
+          "vy": -0.256,
+          "vel_std_mps": 0.304,
+          "heading_deg": -178.66,
+          "heading_source": "velocity",
+          "length_m": 4.394,
+          "width_m": 1.91,
+          "method": "box_fit",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.4,
+          "x": -90.662,
+          "y": -204.024,
+          "pos_std_m": 0.391,
+          "vx": -10.967,
+          "vy": -0.197,
+          "vel_std_mps": 0.308,
+          "heading_deg": -178.97,
+          "heading_source": "velocity",
+          "length_m": 4.385,
+          "width_m": 1.925,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 1.5,
+          "x": -91.829,
+          "y": -204.112,
+          "pos_std_m": 0.391,
+          "vx": -11.002,
+          "vy": -0.139,
+          "vel_std_mps": 0.313,
+          "heading_deg": -179.27,
+          "heading_source": "velocity",
+          "length_m": 4.393,
+          "width_m": 1.927,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 1.6,
+          "x": -93.009,
+          "y": -204.245,
+          "pos_std_m": 0.409,
+          "vx": -11.019,
+          "vy": -0.108,
+          "vel_std_mps": 0.318,
+          "heading_deg": -179.44,
+          "heading_source": "velocity",
+          "length_m": 4.479,
+          "width_m": 1.916,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 1.7,
+          "x": -94.109,
+          "y": -204.335,
+          "pos_std_m": 0.409,
+          "vx": -11.049,
+          "vy": -0.102,
+          "vel_std_mps": 0.334,
+          "heading_deg": -179.47,
+          "heading_source": "velocity",
+          "length_m": 4.507,
+          "width_m": 1.898,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 1.8,
+          "x": -95.31,
+          "y": -204.276,
+          "pos_std_m": 0.409,
+          "vx": -11.061,
+          "vy": -0.113,
+          "vel_std_mps": 0.343,
+          "heading_deg": -179.41,
+          "heading_source": "velocity",
+          "length_m": 4.537,
+          "width_m": 1.882,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 1.9,
+          "x": -96.356,
+          "y": -204.273,
+          "pos_std_m": 0.548,
+          "vx": -11.069,
+          "vy": -0.121,
+          "vel_std_mps": 0.356,
+          "heading_deg": -179.37,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 2.0,
+          "x": -97.174,
+          "y": -204.587,
+          "pos_std_m": 0.391,
+          "vx": -11.086,
+          "vy": -0.134,
+          "vel_std_mps": 0.377,
+          "heading_deg": -179.31,
+          "heading_source": "velocity",
+          "length_m": 4.221,
+          "width_m": 1.871,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 2.1,
+          "x": -99.812,
+          "y": -204.302,
+          "pos_std_m": 0.392,
+          "vx": -11.195,
+          "vy": -0.15,
+          "vel_std_mps": 0.406,
+          "heading_deg": -179.23,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "t_global": 2.2,
+          "x": -99.784,
+          "y": -204.409,
+          "pos_std_m": 0.548,
+          "vx": -11.594,
+          "vy": -0.214,
+          "vel_std_mps": 0.451,
+          "heading_deg": -178.94,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        },
+        {
+          "t_global": 2.3,
+          "x": -100.865,
+          "y": -204.031,
+          "pos_std_m": 0.548,
+          "vx": -12.242,
+          "vy": -0.323,
+          "vel_std_mps": 0.54,
+          "heading_deg": -178.49,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A"
+          ],
+          "measured_by": []
+        },
+        {
+          "t_global": 2.4,
+          "x": -102.182,
+          "y": -204.088,
+          "pos_std_m": 0.548,
+          "vx": -12.718,
+          "vy": -0.407,
+          "vel_std_mps": 0.584,
+          "heading_deg": -178.17,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A"
+          ],
+          "measured_by": []
+        },
+        {
+          "t_global": 2.5,
+          "x": -103.538,
+          "y": -204.148,
+          "pos_std_m": 0.548,
+          "vx": -13.042,
+          "vy": -0.467,
+          "vel_std_mps": 0.632,
+          "heading_deg": -177.95,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A"
+          ],
+          "measured_by": [
+            "A"
+          ]
+        }
+      ]
+    }
+  ]
+}

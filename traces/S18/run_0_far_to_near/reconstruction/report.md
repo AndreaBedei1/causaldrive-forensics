@@ -1,0 +1,485 @@
+# Reconstruction report - S18/run_0_far_to_near
+
+Inputs: `vehicles/A/`, `vehicles/B/` (vehicle-local files) and the supplied `incident_context.json`. `ground_truth/` and the run's `metadata.json` were not read; the privileged comparison, if run, is in `evaluation/`.
+
+Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
+
+Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock, own frame) -> graph-level alignment -> identity association -> road users in the common frame of the recorders' own pose streams -> global graph.
+
+## Local reconstructions
+
+| Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
+|----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
+| A | 11.95 s | 121 | 49 | 100 | 9 | A:e36 @ 8.50 s |
+| B | 11.95 s | 121 | 42 | 95 | 11 | B:e30 @ 8.50 s |
+
+## Graph alignment
+
+Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to_global`. A graph that did not report it is aligned through the chain of matched collisions linking it to the reference (multi-hop); its anchor is its own report of the last collision of that chain.
+
+| Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
+|-------|--------|-------------|------------------:|-----------------:|------|
+| A | ALIGNED | A:e36 | 8.50 | -8.50 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e30 | 8.50 | -8.50 | reported the reference collision collision_001 |
+
+Estimated relative clock offsets: B - A = +0.000 s
+
+Matched `collision_001`: A and B both recorded a collision; peak impulses 745.29 vs 745.29 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+
+## Identity associations
+
+| Local track | Global entity | Status | Confidence | Evidence |
+|-------------|---------------|--------|-----------:|----------|
+| A:track_001 | U1 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.50 s before the matched collision<br>lost 4.30 s before the matched collision (window 1.00 s)<br>not approaching before the contact: clearance 1.7 m -> 7.2 m over the last 1.0 s<br>speed not comparable with B's own speed before the collision<br>anonymous road user U1: A:track_001, B:track_001, B:track_007 |
+| A:track_002 | B | ASSOCIATED | 0.98 | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.50 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.5 m -> 0.3 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.32 m/s over 3.0 s<br>clearance at the contact 0.34 m<br>the only track of A compatible with the contact |
+| A:track_003 | U2 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.50 s before the matched collision<br>lost 7.25 s before the matched collision (window 1.00 s)<br>not approaching before the contact: clearance 1.6 m -> 7.1 m over the last 1.0 s<br>speed not comparable with B's own speed before the collision<br>anonymous road user U2: A:track_003 |
+| A:track_004 | U6 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 7.60 s before the matched collision<br>lost 4.70 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 46.3 m -> 39.7 m over the last 1.0 s<br>speed not comparable with B's own speed before the collision<br>anonymous road user U6: B:track_006, A:track_004 |
+| A:track_005 | U3 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 7.40 s before the matched collision<br>continuous up to the contact: last observed 0.90 s before it (window 1.00 s)<br>not approaching before the contact: clearance 1.6 m -> 6.4 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 5.23 m/s over 2.1 s (> 1.50)<br>clearance at the contact 5.65 m (beyond 3.50 m: confidence factor 0.77)<br>anonymous road user U3: B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 |
+| A:track_006 | U7 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 7.50 s before the matched collision<br>lost 6.40 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 61.2 m -> 54.2 m over the last 1.0 s<br>speed not comparable with B's own speed before the collision<br>anonymous road user U7: A:track_006 |
+| A:track_007 | U9 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 1.90 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 14.1 m -> 7.0 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 7.08 m/s over 1.9 s (> 1.50)<br>clearance at the contact 7.04 m (beyond 3.50 m: confidence factor 0.50)<br>anonymous road user U9: A:track_007, B:track_009 |
+| A:track_008 | U8 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 0.90 s before the matched collision (needs 1.00 s)<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 14.1 m -> 8.3 m over the last 1.0 s<br>track speed disagrees with B's own speed: RMSE 6.93 m/s over 0.9 s (> 1.50)<br>clearance at the contact 8.30 m (beyond 3.50 m: confidence factor 0.28)<br>anonymous road user U8: B:track_008, A:track_008 |
+| A:track_009 | U3 | ANONYMOUS | - | A and B both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 0.00 s before the matched collision (needs 1.00 s)<br>first seen 2.05 s after the matched collision<br>range trend before the contact not measurable<br>speed not comparable with B's own speed before the collision<br>anonymous road user U3: B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 |
+| B:track_001 | U1 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.50 s before the matched collision<br>lost 6.20 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 7.4 m -> 4.5 m over the last 1.0 s<br>speed not comparable with A's own speed before the collision<br>anonymous road user U1: A:track_001, B:track_001, B:track_007 |
+| B:track_002 | A | ASSOCIATED | 0.91 | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.50 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.5 m -> 0.3 m over the last 1.0 s<br>track speed agrees with A's own speed: RMSE 0.63 m/s over 3.0 s<br>clearance at the contact 0.27 m<br>the only track of B compatible with the contact |
+| B:track_003 | U3 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.35 s before the matched collision<br>lost 2.70 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 7.2 m -> 4.4 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.83 m/s over 0.3 s (> 1.50)<br>anonymous road user U3: B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 |
+| B:track_004 | U4 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 8.10 s before the matched collision<br>lost 5.95 s before the matched collision (window 1.00 s)<br>not approaching before the contact: clearance 11.0 m -> 17.5 m over the last 1.0 s<br>speed not comparable with A's own speed before the collision<br>anonymous road user U4: B:track_004 |
+| B:track_005 | U5 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 7.65 s before the matched collision<br>lost 5.10 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 49.4 m -> 42.7 m over the last 1.0 s<br>speed not comparable with A's own speed before the collision<br>anonymous road user U5: B:track_005 |
+| B:track_006 | U6 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 7.65 s before the matched collision<br>lost 5.15 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 49.1 m -> 42.4 m over the last 1.0 s<br>speed not comparable with A's own speed before the collision<br>anonymous road user U6: B:track_006, A:track_004 |
+| B:track_007 | U1 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 5.00 s before the matched collision<br>lost 3.10 s before the matched collision (window 1.00 s)<br>not approaching before the contact: clearance 10.1 m -> 16.9 m over the last 1.0 s<br>speed not comparable with A's own speed before the collision<br>anonymous road user U1: A:track_001, B:track_001, B:track_007 |
+| B:track_008 | U8 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 1.95 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 14.9 m -> 8.6 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 6.95 m/s over 2.0 s (> 1.50)<br>clearance at the contact 8.62 m (beyond 3.50 m: confidence factor 0.23)<br>anonymous road user U8: B:track_008, A:track_008 |
+| B:track_009 | U9 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 1.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.5 m -> 6.5 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 7.01 m/s over 1.7 s (> 1.50)<br>clearance at the contact 6.54 m (beyond 3.50 m: confidence factor 0.60)<br>anonymous road user U9: A:track_007, B:track_009 |
+| B:track_010 | U3 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 1.55 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>not approaching before the contact: clearance 7.8 m -> 14.4 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 5.79 m/s over 1.5 s (> 1.50)<br>clearance at the contact 7.79 m (beyond 3.50 m: confidence factor 0.36)<br>anonymous road user U3: B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 |
+| B:track_011 | U3 | ANONYMOUS | - | B and A both reported collision_001 (peak impulse 745.29 vs 745.29 N*s)<br>tracked for 0.00 s before the matched collision (needs 1.00 s)<br>first seen 1.35 s after the matched collision<br>range trend before the contact not measurable<br>speed not comparable with A's own speed before the collision<br>anonymous road user U3: B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 |
+
+## Road users in the common frame
+
+- U1 (anonymous, -8.50 to -3.10 s): A:track_001, B:track_001, B:track_007 joined by stitch B:track_001-B:track_007 (100% of 1 instants); same box A:track_001-B:track_001 (100% of 47 instants); footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- U2 (anonymous, -8.50 to -7.25 s): A:track_003; footprint 4.60 x 1.90 m (prior/prior); fusion covariance_intersection.
+- U3 (anonymous, -8.35 to 3.45 s): B:track_003, A:track_005, B:track_010, B:track_011, A:track_009 joined by stitch B:track_003-B:track_010 (100% of 1 instants); same box A:track_005-B:track_003 (100% of 86 instants); same box A:track_009-B:track_011 (100% of 28 instants); stitch B:track_010-B:track_011 (100% of 1 instants); footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- U4 (anonymous, -8.10 to -5.95 s): B:track_004; footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- U5 (anonymous, -7.65 to -5.10 s): B:track_005; footprint 4.60 x 1.90 m (prior/prior); fusion covariance_intersection.
+- U6 (anonymous, -7.65 to -4.70 s): B:track_006, A:track_004 joined by same box A:track_004-B:track_006 (97% of 29 instants); footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- U7 (anonymous, -7.50 to -6.40 s): A:track_006; footprint 4.60 x 1.90 m (prior/prior); fusion covariance_intersection.
+- U8 (anonymous, -1.95 to 3.45 s): B:track_008, A:track_008 joined by same box A:track_008-B:track_008 (100% of 87 instants); footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+- U9 (anonymous, -1.90 to 3.45 s): A:track_007, B:track_009 joined by same box A:track_007-B:track_009 (100% of 104 instants); footprint 4.60 x 1.90 m (prior/prior); fusion box_fit+covariance_intersection.
+
+## Global graph
+
+90 nodes, 206 edges; 32 merged node(s): g06 TRACK_APPEARED_RIGHT(A,U1) from A:e04 + A:e21, g07 TRACK_APPEARED_RIGHT(A,U2) from A:e05 + A:e13, g09 TRACK_APPEARED_RIGHT(B,U1) from B:e03 + B:e14, g10 CLOSING_START(A,U1) from A:e06 + A:e18, g11 CLOSING_START(B,U1) from B:e05 + B:e13, g12 TRACK_APPEARED_RIGHT(B,U3) from B:e06 + B:e21, g13 CLOSING_START(B,U3) from B:e07 + B:e20, g14 TRACK_APPEARED_RIGHT(B,U4) from B:e08 + B:e15, g15 TRACK_APPEARED_FRONT(B,U6) from B:e09 + B:e16, g16 TRACK_APPEARED_RIGHT(B,U5) from B:e10 + B:e17, g19 TRACK_APPEARED_FRONT(A,U6) from A:e07 + A:e20, g21 TRACK_APPEARED_FRONT(A,U7) from A:e09 + A:e16, g23 TRACK_APPEARED_RIGHT(A,U3) from A:e11 + A:e33, g24 CLOSING_START(A,U3) from A:e12 + A:e24, g26 CRITICAL_TTC_START(A,U1) from A:e14 + A:e17, g27 CUT_IN_FROM_RIGHT_START(A,U1) from A:e15 + A:e19, g37 TRACK_APPEARED_RIGHT(B,U1) from B:e18 + B:e19, g40 CRITICAL_TTC_START(A,U3) from A:e22 + A:e25, g41 CUT_IN_FROM_RIGHT_START(A,U3) from A:e23 + A:e26, g49 CLOSING_START(B,U8) from B:e23 + B:e37, g51 CLOSING_START(A,U9) from A:e28 + A:e44, g53 CLOSING_START(B,U9) from B:e25 + B:e38, g54 TRACK_APPEARED_RIGHT(B,U3) from B:e26 + B:e36, g55 CRITICAL_TTC_START(A,U9) from A:e29 + A:e45, g56 CRITICAL_TTC_START(A,B) from A:e30 + A:e37, g58 CLOSING_START(A,U8) from A:e32 + A:e43, g60 CRITICAL_TTC_START(B,A) from B:e27 + B:e31, g61 CLOSING_START(A,B) from A:e34 + A:e40, g62 CLOSING_START(B,A) from B:e28 + B:e32, g63 EGO_PATH_ENTRY(B,A) from B:e29 + B:e35, g64 CRITICAL_TTC_START(A,U8) from A:e35 + A:e41, g65 COLLISION(A,B) from A:e36 + B:e30.
+
+### Event sequence (global time)
+
+- `-8.50` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(A,U2); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1)
+- `-8.35` TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U3)
+- `-8.10` TRACK_APPEARED_RIGHT(B,U4)
+- `-7.65` TRACK_APPEARED_FRONT(B,U6); TRACK_APPEARED_RIGHT(B,U5); CLOSING_START(B,U5); CLOSING_START(B,U6)
+- `-7.60` TRACK_APPEARED_FRONT(A,U6); CLOSING_START(A,U6)
+- `-7.50` TRACK_APPEARED_FRONT(A,U7); CLOSING_START(A,U7)
+- `-7.40` TRACK_APPEARED_RIGHT(A,U3); CLOSING_START(A,U3)
+- `-7.25` TRACK_LOST(A,U2)
+- `-6.75` CRITICAL_TTC_START(A,U1)
+- `-6.65` CUT_IN_FROM_RIGHT_START(A,U1)
+- `-6.40` TRACK_LOST(A,U7)
+- `-6.20` CLOSING_END(B,U1); TRACK_LOST(B,U1)
+- `-5.95` TRACK_LOST(B,U4)
+- `-5.90` CRITICAL_TTC_END(A,U1); CLOSING_END(A,U1)
+- `-5.85` CUT_IN_FROM_RIGHT_END(A,U1)
+- `-5.15` TRACK_LOST(B,U6)
+- `-5.10` TRACK_LOST(B,U5)
+- `-5.00` TRACK_APPEARED_RIGHT(B,U1)
+- `-4.70` TRACK_LOST(A,U6)
+- `-4.30` TRACK_LOST(A,U1)
+- `-3.20` CRITICAL_TTC_START(A,U3)
+- `-3.10` CUT_IN_FROM_RIGHT_START(A,U3); TRACK_LOST(B,U1)
+- `-2.70` CLOSING_END(B,U3); TRACK_LOST(B,U3)
+- `-2.45` CLOSING_END(A,U3)
+- `-2.40` CRITICAL_TTC_END(A,U3)
+- `-2.35` CUT_IN_FROM_RIGHT_END(A,U3)
+- `-1.95` TRACK_APPEARED_RIGHT(B,U8); CLOSING_START(B,U8)
+- `-1.90` TRACK_APPEARED_FRONT(A,U9); CLOSING_START(A,U9)
+- `-1.70` TRACK_APPEARED_RIGHT(B,U9); CLOSING_START(B,U9)
+- `-1.55` TRACK_APPEARED_RIGHT(B,U3)
+- `-1.40` CRITICAL_TTC_START(A,U9)
+- `-1.35` CRITICAL_TTC_START(A,B)
+- `-0.90` TRACK_APPEARED_RIGHT(A,U8); CLOSING_START(A,U8); TRACK_LOST(A,U3)
+- `-0.80` CRITICAL_TTC_START(B,A)
+- `-0.70` CLOSING_START(A,B); CLOSING_START(B,A)
+- `-0.20` EGO_PATH_ENTRY(B,A)
+- `-0.05` CRITICAL_TTC_START(A,U8)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
+- `+0.05` CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- `+0.10` CLOSING_END(A,B)
+- `+0.30` CRITICAL_TTC_END(A,U8)
+- `+0.35` EGO_PATH_ENTRY(A,B)
+- `+0.70` EGO_PATH_EXIT(B,A); TRACK_LOST(B,U3)
+- `+0.80` CLOSING_END(B,U8); CLOSING_END(B,U9)
+- `+0.90` CLOSING_END(A,U8)
+- `+0.95` CLOSING_END(A,U9)
+- `+1.10` CRITICAL_TTC_END(A,U9); MOVING_END(B); STOP_START(B)
+- `+1.20` MOVING_END(A); STOP_START(A)
+- `+1.35` TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U3)
+- `+2.05` TRACK_APPEARED_RIGHT(A,U3); CLOSING_START(A,U3)
+
+### What happened, in plain language
+
+- 8.50 s before the reference collision, A started moving (already the case when first observed).
+- 8.50 s before the reference collision, B started moving (already the case when first observed).
+- 8.50 s before the reference collision, A pressed the accelerator (already the case when first observed).
+- 8.50 s before the reference collision, B pressed the accelerator (already the case when first observed).
+- 8.50 s before the reference collision, A's radar started tracking B, which appeared on its left.
+- 8.50 s before the reference collision, A's radar started tracking anonymous road user U1, which appeared on its right.
+- 8.50 s before the reference collision, A's radar started tracking anonymous road user U2, which appeared on its right.
+- 8.50 s before the reference collision, B's radar started tracking A, which appeared on its right.
+- 8.50 s before the reference collision, B's radar started tracking anonymous road user U1, which appeared on its right.
+- 8.50 s before the reference collision, A observed anonymous road user U1 start closing in (already the case when first observed).
+- 8.50 s before the reference collision, B observed anonymous road user U1 start closing in (already the case when first observed).
+- 8.35 s before the reference collision, B's radar started tracking anonymous road user U3, which appeared on its right.
+- 8.35 s before the reference collision, B observed anonymous road user U3 start closing in (already the case when first observed).
+- 8.10 s before the reference collision, B's radar started tracking anonymous road user U4, which appeared on its right.
+- 7.65 s before the reference collision, B's radar started tracking anonymous road user U6, which appeared in front of it.
+- 7.65 s before the reference collision, B's radar started tracking anonymous road user U5, which appeared on its right.
+- 7.65 s before the reference collision, B observed anonymous road user U5 start closing in (already the case when first observed).
+- 7.65 s before the reference collision, B observed anonymous road user U6 start closing in (already the case when first observed).
+- 7.60 s before the reference collision, A's radar started tracking anonymous road user U6, which appeared in front of it.
+- 7.60 s before the reference collision, A observed anonymous road user U6 start closing in (already the case when first observed).
+- 7.50 s before the reference collision, A's radar started tracking anonymous road user U7, which appeared in front of it.
+- 7.50 s before the reference collision, A observed anonymous road user U7 start closing in (already the case when first observed).
+- 7.40 s before the reference collision, A's radar started tracking anonymous road user U3, which appeared on its right.
+- 7.40 s before the reference collision, A observed anonymous road user U3 start closing in (already the case when first observed).
+- 7.25 s before the reference collision, A's radar lost anonymous road user U2 (its states are UNKNOWN from then on, not ended).
+- 6.75 s before the reference collision, A's time-to-contact with anonymous road user U1 became critical.
+- 6.65 s before the reference collision, A observed anonymous road user U1 cutting in from the right.
+- 6.40 s before the reference collision, A's radar lost anonymous road user U7 (its states are UNKNOWN from then on, not ended).
+- 6.20 s before the reference collision, B observed anonymous road user U1 stop closing in.
+- 6.20 s before the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
+- 5.95 s before the reference collision, B's radar lost anonymous road user U4 (its states are UNKNOWN from then on, not ended).
+- 5.90 s before the reference collision, A's time-to-contact with anonymous road user U1 stopped being critical.
+- 5.90 s before the reference collision, A observed anonymous road user U1 stop closing in.
+- 5.85 s before the reference collision, A observed anonymous road user U1's cut-in from the right settle.
+- 5.15 s before the reference collision, B's radar lost anonymous road user U6 (its states are UNKNOWN from then on, not ended).
+- 5.10 s before the reference collision, B's radar lost anonymous road user U5 (its states are UNKNOWN from then on, not ended).
+- 5.00 s before the reference collision, B's radar started tracking anonymous road user U1, which appeared on its right.
+- 4.70 s before the reference collision, A's radar lost anonymous road user U6 (its states are UNKNOWN from then on, not ended).
+- 4.30 s before the reference collision, A's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
+- 3.20 s before the reference collision, A's time-to-contact with anonymous road user U3 became critical.
+- 3.10 s before the reference collision, A observed anonymous road user U3 cutting in from the right.
+- 3.10 s before the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
+- 2.70 s before the reference collision, B observed anonymous road user U3 stop closing in.
+- 2.70 s before the reference collision, B's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).
+- 2.45 s before the reference collision, A observed anonymous road user U3 stop closing in.
+- 2.40 s before the reference collision, A's time-to-contact with anonymous road user U3 stopped being critical.
+- 2.35 s before the reference collision, A observed anonymous road user U3's cut-in from the right settle.
+- 1.95 s before the reference collision, B's radar started tracking anonymous road user U8, which appeared on its right.
+- 1.95 s before the reference collision, B observed anonymous road user U8 start closing in (already the case when first observed).
+- 1.90 s before the reference collision, A's radar started tracking anonymous road user U9, which appeared in front of it.
+- 1.90 s before the reference collision, A observed anonymous road user U9 start closing in (already the case when first observed).
+- 1.70 s before the reference collision, B's radar started tracking anonymous road user U9, which appeared on its right.
+- 1.70 s before the reference collision, B observed anonymous road user U9 start closing in (already the case when first observed).
+- 1.55 s before the reference collision, B's radar started tracking anonymous road user U3, which appeared on its right.
+- 1.40 s before the reference collision, A's time-to-contact with anonymous road user U9 became critical.
+- 1.35 s before the reference collision, A's time-to-contact with B became critical.
+- 0.90 s before the reference collision, A's radar started tracking anonymous road user U8, which appeared on its right.
+- 0.90 s before the reference collision, A observed anonymous road user U8 start closing in (already the case when first observed).
+- 0.90 s before the reference collision, A's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).
+- 0.80 s before the reference collision, B's time-to-contact with A became critical.
+- 0.70 s before the reference collision, A observed B start closing in.
+- 0.70 s before the reference collision, B observed A start closing in.
+- 0.20 s before the reference collision, B observed A enter its forward path corridor.
+- 0.05 s before the reference collision, A's time-to-contact with anonymous road user U8 became critical.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 745, B: 745 N*s).
+- At the reference collision, A's time-to-contact with B stopped being critical.
+- At the reference collision, B's time-to-contact with A stopped being critical.
+- 0.05 s after the reference collision, B observed A stop closing in.
+- 0.05 s after the reference collision, A released the accelerator.
+- 0.05 s after the reference collision, B released the accelerator.
+- 0.05 s after the reference collision, A started braking.
+- 0.05 s after the reference collision, B started braking.
+- 0.10 s after the reference collision, A observed B stop closing in.
+- 0.30 s after the reference collision, A's time-to-contact with anonymous road user U8 stopped being critical.
+- 0.35 s after the reference collision, A observed B enter its forward path corridor.
+- 0.70 s after the reference collision, B observed A leave its forward path corridor.
+- 0.70 s after the reference collision, B's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).
+- 0.80 s after the reference collision, B observed anonymous road user U8 stop closing in.
+- 0.80 s after the reference collision, B observed anonymous road user U9 stop closing in.
+- 0.90 s after the reference collision, A observed anonymous road user U8 stop closing in.
+- 0.95 s after the reference collision, A observed anonymous road user U9 stop closing in.
+- 1.10 s after the reference collision, A's time-to-contact with anonymous road user U9 stopped being critical.
+- 1.10 s after the reference collision, B stopped moving.
+- 1.10 s after the reference collision, B came to a stop.
+- 1.20 s after the reference collision, A stopped moving.
+- 1.20 s after the reference collision, A came to a stop.
+- 1.35 s after the reference collision, B's radar started tracking anonymous road user U3, which appeared on its right.
+- 1.35 s after the reference collision, B observed anonymous road user U3 start closing in (already the case when first observed).
+- 2.05 s after the reference collision, A's radar started tracking anonymous road user U3, which appeared on its right.
+- 2.05 s after the reference collision, A observed anonymous road user U3 start closing in (already the case when first observed).
+
+### Temporal safety relations
+
+CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
+
+- A's track_001 (unidentified U1): critical TTC already active before the cut-in: CRITICAL_TTC_START 1.75 <= CUT_IN_FROM_RIGHT_START 1.85 (+0.10 s) [local times; t_global: cut_in -6.65, critical_ttc_start -6.75, collision +0.00]
+- A's track_002 (B): CRITICAL_TTC_START 7.15, COLLISION with B 8.50 (+1.35 s); EGO_PATH_ENTRY 8.85 after critical TTC (+1.70 s) [local times; t_global: critical_ttc_start -1.35, ego_path_entry +0.35, collision +0.00]
+- A's track_005 (unidentified U3): critical TTC already active before the cut-in: CRITICAL_TTC_START 5.30 <= CUT_IN_FROM_RIGHT_START 5.40 (+0.10 s) [local times; t_global: cut_in -3.10, critical_ttc_start -3.20, collision +0.00]
+- A's track_007 (unidentified U9): CRITICAL_TTC_START 7.10, COLLISION 8.50 (+1.40 s) [local times; t_global: critical_ttc_start -1.40, collision +0.00]
+- A's track_008 (unidentified U8): CRITICAL_TTC_START 8.45, COLLISION 8.50 (+0.05 s) [local times; t_global: critical_ttc_start -0.05, collision +0.00]
+- B's track_002 (A): CRITICAL_TTC_START 7.70, COLLISION with A 8.50 (+0.80 s); EGO_PATH_ENTRY 8.30 after critical TTC (+0.60 s) [local times; t_global: critical_ttc_start -0.80, ego_path_entry -0.20, collision +0.00]
+
+### Simultaneous events (order unresolved at 0.05 s)
+
+- MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(A,U2); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1)
+- TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U3)
+- TRACK_APPEARED_FRONT(B,U6); TRACK_APPEARED_RIGHT(B,U5); CLOSING_START(B,U5); CLOSING_START(B,U6)
+- TRACK_APPEARED_FRONT(A,U6); CLOSING_START(A,U6)
+- TRACK_APPEARED_FRONT(A,U7); CLOSING_START(A,U7)
+- TRACK_APPEARED_RIGHT(A,U3); CLOSING_START(A,U3)
+- CLOSING_END(B,U1); TRACK_LOST(B,U1)
+- CRITICAL_TTC_END(A,U1); CLOSING_END(A,U1)
+- CUT_IN_FROM_RIGHT_START(A,U3); TRACK_LOST(B,U1)
+- CLOSING_END(B,U3); TRACK_LOST(B,U3)
+- TRACK_APPEARED_RIGHT(B,U8); CLOSING_START(B,U8)
+- TRACK_APPEARED_FRONT(A,U9); CLOSING_START(A,U9)
+- TRACK_APPEARED_RIGHT(B,U9); CLOSING_START(B,U9)
+- TRACK_APPEARED_RIGHT(A,U8); CLOSING_START(A,U8); TRACK_LOST(A,U3)
+- CLOSING_START(A,B); CLOSING_START(B,A)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
+- CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- EGO_PATH_EXIT(B,A); TRACK_LOST(B,U3)
+- CLOSING_END(B,U8); CLOSING_END(B,U9)
+- CRITICAL_TTC_END(A,U9); MOVING_END(B); STOP_START(B)
+- MOVING_END(A); STOP_START(A)
+- TRACK_APPEARED_RIGHT(B,U3); CLOSING_START(B,U3)
+- TRACK_APPEARED_RIGHT(A,U3); CLOSING_START(A,U3)
+
+### States still active when observation ended
+
+A:
+- CLOSING of track_004, since A:e08 (t = 0.90 s); the track was lost at 3.80 s
+- CLOSING of track_006, since A:e10 (t = 1.00 s); the track was lost at 2.10 s
+- BRAKE, since A:e39 (t = 8.55 s)
+- EGO_PATH of track_002, since A:e42 (t = 8.85 s)
+- STOP, since A:e47 (t = 9.70 s)
+- CLOSING of track_009, since A:e49 (t = 10.55 s)
+B:
+- CLOSING of track_005, since B:e11 (t = 0.85 s); the track was lost at 3.40 s
+- CLOSING of track_006, since B:e12 (t = 0.85 s); the track was lost at 3.35 s
+- BRAKE, since B:e34 (t = 8.55 s)
+- STOP, since B:e40 (t = 9.60 s)
+- CLOSING of track_011, since B:e42 (t = 9.85 s)
+
+### Sign detection windows
+
+A:
+- none
+B:
+- none
+
+### Perceived state just before each collision report
+
+- A A:e36 at 8.50 s (local): ego: MOVING, THROTTLE; track_002: CLOSING, CRITICAL_TTC; track_007: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track_008: CLOSING, CRITICAL_TTC; track lost, states UNKNOWN: track_001, track_003, track_004, track_005, track_006
+- B B:e30 at 8.50 s (local): ego: MOVING, THROTTLE; track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track_008: CLOSING; track_009: CLOSING; track_010: no active state; track lost, states UNKNOWN: track_001, track_003, track_004, track_005, track_006, track_007
+
+### Tracks lost while a state was active
+
+A lost track's states become UNKNOWN: the recorder can no longer tell whether they ended.
+
+A:
+- track_006 at 2.10 s (A:e16): CLOSING, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
+- track_004 at 3.80 s (A:e20): CLOSING, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_003, track_001, track_005
+B:
+- track_001 at 2.30 s (B:e14): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_006 at 3.35 s (B:e16): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_005 at 3.40 s (B:e17): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_003 at 5.80 s (B:e21): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- lost with no state active: track_004, track_007, track_010
+
+## Uncertainty and limitations
+
+- A:track_001 stays anonymous (U1): lost 4.30 s before the matched collision (window 1.00 s); not approaching before the contact: clearance 1.7 m -> 7.2 m over the last 1.0 s; speed not comparable with B's own speed before the collision.
+- A:track_003 stays anonymous (U2): lost 7.25 s before the matched collision (window 1.00 s); not approaching before the contact: clearance 1.6 m -> 7.1 m over the last 1.0 s; speed not comparable with B's own speed before the collision.
+- A:track_004 stays anonymous (U6): lost 4.70 s before the matched collision (window 1.00 s); speed not comparable with B's own speed before the collision.
+- A:track_005 stays anonymous (U3): not approaching before the contact: clearance 1.6 m -> 6.4 m over the last 1.0 s; track speed disagrees with B's own speed: RMSE 5.23 m/s over 2.1 s (> 1.50).
+- A:track_006 stays anonymous (U7): lost 6.40 s before the matched collision (window 1.00 s); speed not comparable with B's own speed before the collision.
+- A:track_007 stays anonymous (U9): track speed disagrees with B's own speed: RMSE 7.08 m/s over 1.9 s (> 1.50).
+- A:track_008 stays anonymous (U8): tracked for 0.90 s before the matched collision (needs 1.00 s); track speed disagrees with B's own speed: RMSE 6.93 m/s over 0.9 s (> 1.50).
+- A:track_009 stays anonymous (U3): tracked for 0.00 s before the matched collision (needs 1.00 s); first seen 2.05 s after the matched collision; range trend before the contact not measurable; speed not comparable with B's own speed before the collision.
+- B:track_001 stays anonymous (U1): lost 6.20 s before the matched collision (window 1.00 s); speed not comparable with A's own speed before the collision.
+- B:track_003 stays anonymous (U3): lost 2.70 s before the matched collision (window 1.00 s); track speed disagrees with A's own speed: RMSE 5.83 m/s over 0.3 s (> 1.50).
+- B:track_004 stays anonymous (U4): lost 5.95 s before the matched collision (window 1.00 s); not approaching before the contact: clearance 11.0 m -> 17.5 m over the last 1.0 s; speed not comparable with A's own speed before the collision.
+- B:track_005 stays anonymous (U5): lost 5.10 s before the matched collision (window 1.00 s); speed not comparable with A's own speed before the collision.
+- B:track_006 stays anonymous (U6): lost 5.15 s before the matched collision (window 1.00 s); speed not comparable with A's own speed before the collision.
+- B:track_007 stays anonymous (U1): lost 3.10 s before the matched collision (window 1.00 s); not approaching before the contact: clearance 10.1 m -> 16.9 m over the last 1.0 s; speed not comparable with A's own speed before the collision.
+- B:track_008 stays anonymous (U8): track speed disagrees with A's own speed: RMSE 6.95 m/s over 2.0 s (> 1.50).
+- B:track_009 stays anonymous (U9): track speed disagrees with A's own speed: RMSE 7.01 m/s over 1.7 s (> 1.50).
+- B:track_010 stays anonymous (U3): not approaching before the contact: clearance 7.8 m -> 14.4 m over the last 1.0 s; track speed disagrees with A's own speed: RMSE 5.79 m/s over 1.5 s (> 1.50).
+- B:track_011 stays anonymous (U3): tracked for 0.00 s before the matched collision (needs 1.00 s); first seen 1.35 s after the matched collision; range trend before the contact not measurable; speed not comparable with A's own speed before the collision.
+- Global time rests on matched collisions (t_global = 0 at the reference one) and a constant offset per recorder; clock drift is not modelled, so timing uncertainty grows away from the collisions that align each recorder.
+- Radar tracks follow the visible surface of an object, not its centre, and a straight-ahead corridor is used for 'in path'.
+
+## Files
+
+- Local: `<recorder>/local_trace.jsonl`, `local_tracks.jsonl`, `local_graph.json|md|dot`
+- Global: `global/alignment.json`, `associations.json`, `anonymous_entities.json`, `global_trace.jsonl`, `global_graph.json|md|dot`
+
+## Parameters
+
+```
+{
+  "trace_hz": 10.0,
+  "collision": {
+    "merge_gap_s": 0.5,
+    "new_impact_ratio": 0.75,
+    "min_impact_ratio": 0.25,
+    "min_new_impact_impulse": 1000.0,
+    "impact_acceleration_mps2": 20.0,
+    "reversal_angle_deg": 90.0,
+    "undirected_impact_ratio": 0.5
+  },
+  "tracking": {
+    "min_height_m": 0.3,
+    "max_height_m": 2.5,
+    "moving_speed_mps": 1.0,
+    "cluster_distance_m": 2.0,
+    "max_association_distance_m": 2.5,
+    "max_velocity_mismatch_mps": 4.0,
+    "max_track_gap_s": 0.5,
+    "min_track_frames": 5,
+    "measurement_std_m": 0.5,
+    "radial_speed_std_mps": 0.3,
+    "acceleration_std_mps2": 6.0,
+    "smoothing_innovation_sigma": 3.0,
+    "min_slowdown_returns": 3,
+    "identity_body_width_m": 2.5,
+    "gating": "fixed",
+    "covariance_components": "position,doppler,ambiguity,survival,confirmation",
+    "gate_probability": 0.99,
+    "body_length_m": 4.6,
+    "body_width_m": 1.9,
+    "radar_range_std_m": 0.25,
+    "radar_azimuth_std_deg": 0.5,
+    "min_track_support_s": 0.2,
+    "min_track_updates": 3,
+    "gap_cap_s": 2.0,
+    "nominal_vehicle_mass_kg": 1500.0,
+    "position_cap_m": 10.0,
+    "doppler_cap_mps": 10.0,
+    "return_likelihood_ratio": 20.0,
+    "yaw_rate_std_rps": 0.3
+  },
+  "semantics": {
+    "brake_onset_threshold": 0.1,
+    "throttle_on_threshold": 0.1,
+    "throttle_off_threshold": 0.05,
+    "throttle_release_debounce_s": 0.2,
+    "full_stop_speed_mps": 0.3,
+    "speed_limit_hysteresis_kmh": 1.0,
+    "closing_speed_threshold_mps": 1.0,
+    "critical_reaction_time_s": 1.0,
+    "critical_deceleration_mps2": 6.0,
+    "critical_standstill_margin_m": 1.0,
+    "critical_lateral_margin_m": 0.3,
+    "critical_release_ratio": 0.75,
+    "prediction_horizon_s": 6.0,
+    "prediction_time_step_s": 0.05,
+    "target_length_m": 4.6,
+    "target_width_m": 1.9,
+    "target_braking_min_mps2": 1.0,
+    "critical_min_track_age_s": 0.5,
+    "critical_time_gap_table": [
+      [
+        7.2,
+        1.0
+      ],
+      [
+        10.0,
+        1.1
+      ],
+      [
+        20.0,
+        1.2
+      ],
+      [
+        30.0,
+        1.3
+      ],
+      [
+        40.0,
+        1.4
+      ],
+      [
+        50.0,
+        1.5
+      ],
+      [
+        60.0,
+        1.6
+      ]
+    ],
+    "critical_min_following_distance_m": 2.0,
+    "critical_forward_min_speed_mps": 1.0,
+    "critical_front_lateral_margin_m": 1.0,
+    "critical_front_lateral_speed_mps": 0.3,
+    "critical_forward_release_factor": 1.1,
+    "occlusion_margin_m": 0.5,
+    "turn_yaw_rate_window_s": 0.2,
+    "turn_yaw_rate_on_dps": 10.0,
+    "turn_yaw_rate_off_dps": 5.0,
+    "turn_min_speed_mps": 1.0,
+    "turn_release_debounce_s": 0.3,
+    "turn_min_duration_s": 0.5,
+    "turn_min_heading_change_deg": 15.0,
+    "path_half_width_m": 1.5,
+    "path_hysteresis_m": 0.5,
+    "track_appeared_front_deg": 5.0,
+    "max_position_std_m": 1.0,
+    "max_velocity_std_mps": 1.0,
+    "cut_in_max_heading_deg": 25.0,
+    "cut_in_min_target_speed_mps": 2.0,
+    "cut_in_lateral_speed_mps": 0.3,
+    "cut_in_persistence_s": 0.5,
+    "cut_in_outside_margin_m": 0.5,
+    "cut_in_min_displacement_m": 0.5,
+    "cut_in_horizon_s": 3.0,
+    "cut_in_preentry_margin_m": 1.0,
+    "cut_in_settle_speed_mps": 0.2,
+    "cut_in_settle_s": 0.3
+  },
+  "fusion": {
+    "impulse_tolerance": 0.1,
+    "impulse_relative_std": 0.1,
+    "impulse_sigma_gate": 3.0,
+    "contact_consistency_m": 1.0,
+    "clock_tolerance_s": 0.1,
+    "contact_window_s": 1.0,
+    "contact_range_m": 3.5,
+    "contact_range_scale_m": 3.0,
+    "approach_window_s": 1.0,
+    "min_track_persistence_s": 1.0,
+    "speed_consistency_mps": 1.5,
+    "touching_clearance_m": 1.0,
+    "rival_clearance_m": 2.0,
+    "observed_alignment_step_s": 0.05,
+    "observed_alignment_min_samples": 10,
+    "observed_alignment_min_speed_mps": 2.0,
+    "observed_alignment_uniqueness_ratio": 3.0,
+    "link_min_samples": 10,
+    "link_min_fraction": 0.8,
+    "anonymous_gate_probability": 0.99,
+    "anonymous_min_shared_samples": 10,
+    "anonymous_pass_fraction": 0.8,
+    "stitch_max_gap_s": 1.5,
+    "box_face_std_m": 0.25,
+    "box_length_std_m": 0.7,
+    "box_width_std_m": 0.2,
+    "entity_output_rate_hz": 10.0,
+    "mutual_refinement": false,
+    "mutual_refinement_iterations": 3,
+    "association_method": "current",
+    "radar_range_std_m": 0.25,
+    "radar_azimuth_std_deg": 0.5,
+    "assignment_likelihood_ratio": 20.0,
+    "retrospective_new_target_density": 3.57e-05,
+    "retrospective_min_posterior": 0.95
+  }
+}
+```
