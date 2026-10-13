@@ -5933,7 +5933,19 @@
       "acceleration_std_mps2": 6.0,
       "smoothing_innovation_sigma": 3.0,
       "min_slowdown_returns": 3,
-      "identity_body_width_m": 2.5
+      "identity_body_width_m": 2.5,
+      "gating": "fixed",
+      "covariance_components": "survival,confirmation",
+      "gate_probability": 0.99,
+      "body_length_m": 4.6,
+      "body_width_m": 1.9,
+      "radar_range_std_m": 0.25,
+      "radar_azimuth_std_deg": 0.5,
+      "min_track_support_s": 0.2,
+      "min_track_updates": 3,
+      "gap_cap_s": 2.0,
+      "nominal_vehicle_mass_kg": 1500.0,
+      "position_cap_m": 10.0
     },
     "semantics": {
       "brake_onset_threshold": 0.1,

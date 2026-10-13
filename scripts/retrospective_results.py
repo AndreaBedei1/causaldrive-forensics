@@ -30,10 +30,10 @@ DIST_ORDER = ["0-10", "10-20", "20-30", "30-40", "40-50", "50-60", "60+"]
 TIME_ORDER = ["0-0.5", "0.5-1", "1-2", "2-4", "4+", "after contact"]
 
 
-def load(tag: str) -> Dict[str, List[Dict[str, Any]]]:
+def load(tag: str, base: Path = ROOT / "results" / "retrospective") -> Dict[str, List[Dict[str, Any]]]:
     out = {}
     for method in METHODS:
-        path = ROOT / "results" / "retrospective" / method / "jobs{0}.jsonl".format(tag)
+        path = base / method / "jobs{0}.jsonl".format(tag)
         if path.exists():
             out[method] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return out
@@ -221,8 +221,10 @@ def markdown(record: Dict[str, Any]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--results", type=Path, default=ROOT / "results" / "retrospective",
+                        help="folder of the <method>/jobs<tag>.jsonl files; the summary is written there")
     args = parser.parse_args()
-    data = load(args.tag)
+    data = load(args.tag, args.results)
     exact_like = {"exact", "rtk", "exact_impulse10", "rtk_impulse10"}
     record: Dict[str, Any] = {"tag": args.tag, "methods": {}}
     commits, configs, seeds, conditions, runs = set(), set(), set(), set(), set()
@@ -245,7 +247,7 @@ def main() -> int:
     record["provenance"] = {"commits": [list(c) for c in sorted(commits, key=str)], "config_sha256": sorted(str(c) for c in configs),
                             "seeds": sorted(seeds), "conditions": sorted(conditions), "runs": sorted(runs),
                             "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
-    out = ROOT / "results" / "retrospective" / "summary{0}".format(args.tag)
+    out = args.results / "summary{0}".format(args.tag)
     out.with_suffix(".json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     out.with_suffix(".md").write_text(markdown(record), encoding="utf-8")
     print(out.with_suffix(".md"))
