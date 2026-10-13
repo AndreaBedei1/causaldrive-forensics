@@ -9039,6 +9039,13 @@
       "relation": "SAME_TRACK"
     }
   ],
+  "suppressed_local_nodes": [
+    {
+      "graph": "A",
+      "local_node": "A:e33",
+      "reason": "CRITICAL_TTC episode of a colliding pair started while the pair is still in contact (post-impact state, post_contact_episodes)"
+    }
+  ],
   "run": "S19/run_0_collision_ambiguity",
   "incident_context": {
     "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",

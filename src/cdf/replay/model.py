@@ -889,6 +889,9 @@ class ReplayRun:
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
             if self.clock == GLOBAL_CLOCK:
                 graph = _read_json(rec / 'global' / 'global_graph.json')
+                # Local events the global graph deliberately does not assert stay out of the display.
+                self.entity_source_nodes.update((s['graph'], s['local_node'])
+                                                for s in graph.get('suppressed_local_nodes', []))
                 for node in graph['nodes']:
                     attrs = node.get('attributes') or {}
                     if attrs.get('aggregation') != 'entity_state_union' or node.get('t_global') is None:

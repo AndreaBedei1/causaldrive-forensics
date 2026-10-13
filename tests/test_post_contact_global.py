@@ -48,5 +48,18 @@ class PostContactTests(unittest.TestCase):
                 self.assertEqual(late, [], run.name)
 
 
+
+class ReplaySuppressionTests(unittest.TestCase):
+    def test_the_replay_does_not_display_a_suppressed_post_contact_episode(self):
+        from src.cdf.replay.model import ReplayRun
+        run = ReplayRun.load(ROOT / "traces/S19/run_0_collision_ambiguity")
+        contact = min(mark.time for mark in run.collisions)
+        shown = [e for e in run.display_events() if e.time > contact and e.actor == "A"
+                 and e.event_type == "CRITICAL_TTC_START" and run.identities.get(("A", e.subject), e.subject) == "B"]
+        kept = [e for e in run.all_events() if e.time > contact and e.actor == "A" and e.event_type == "CRITICAL_TTC_START"]
+        self.assertEqual(shown, [])
+        self.assertTrue(kept)  # the local evidence is preserved
+
+
 if __name__ == "__main__":
     unittest.main()

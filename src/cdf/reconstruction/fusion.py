@@ -573,7 +573,10 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
         entities.append({"entity_id": entity_id, "kind": "anonymous_road_user",
                          "observed_by": sorted({item.local_graph for item in items}),
                          "observed_as": [item.local_graph + ":" + item.local_track for item in items]})
-    return GlobalGraph(entities=entities, nodes=nodes, edges=edges)
+    suppressed = [{"graph": owner, "local_node": node_id,
+                   "reason": "CRITICAL_TTC episode of a colliding pair started while the pair is still in contact "
+                             "(post-impact state, post_contact_episodes)"} for owner, node_id in sorted(post_contact)]
+    return GlobalGraph(entities=entities, nodes=nodes, edges=edges, suppressed_local_nodes=suppressed)
 
 
 def global_temporal_relations(locals_: Sequence[LocalReconstruction], alignment: Alignment,

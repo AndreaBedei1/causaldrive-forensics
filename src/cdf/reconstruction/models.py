@@ -451,8 +451,14 @@ class GlobalGraph:
     entities: List[Dict[str, Any]]
     nodes: List[GlobalNode]
     edges: List[GraphEdge]
+    # Local nodes the global graph deliberately does not assert ({"graph", "local_node", "reason"}): their
+    # evidence stays in the local graph, the global trace and the standard replay leave them out.
+    suppressed_local_nodes: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"entities": copy.deepcopy(self.entities),
-                "nodes": [node.to_dict() for node in self.nodes],
-                "edges": [edge.to_dict() for edge in self.edges]}
+        out = {"entities": copy.deepcopy(self.entities),
+               "nodes": [node.to_dict() for node in self.nodes],
+               "edges": [edge.to_dict() for edge in self.edges]}
+        if self.suppressed_local_nodes:
+            out["suppressed_local_nodes"] = copy.deepcopy(self.suppressed_local_nodes)
+        return out

@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import logging
 import math
 import queue
@@ -101,6 +102,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         help="CARLA RPC port (default: simulation.port of configs/default.yaml)")
     parser.add_argument("--keep-server", action="store_true", help="leave a CARLA server this viewer started running")
     parser.add_argument("--exit-after", type=float, default=None, help=argparse.SUPPRESS)  # smoke tests
+    # Self-test of the real viewer: presses C six times through pygame's own event queue, saves the rendered
+    # window after each press and the camera sequence and CARLA vehicle actors to DIR, then exits.
+    parser.add_argument("--selftest", default=None, metavar="DIR", help=argparse.SUPPRESS)
     parser.add_argument("--export", default=None, metavar="DIR",
                         help="headless: draw top-down frames into DIR instead of opening the viewer (no CARLA "
                              "server; driving lanes from the public OpenDRIVE files when the carla module is there)")
@@ -439,6 +443,7 @@ class ReplayApp:
     def run_loop(self) -> None:
         ticker = self.pygame.time.Clock()
         last = started = time.perf_counter()
+        selftest = SelfTest(self, Path(self.args.selftest), started) if getattr(self.args, "selftest", None) else None
         while self.running:
             now = time.perf_counter()
             wall_dt, last = min(now - last, 0.25), now
@@ -448,6 +453,8 @@ class ReplayApp:
             self.clock.advance(wall_dt)
             self.render_frame()
             ticker.tick(self.args.fps)
+            if selftest is not None:
+                selftest.step(now)
             if self.args.exit_after is not None and now - started >= self.args.exit_after:
                 self.running = False
 
@@ -855,6 +862,39 @@ class ReplayApp:
             pg.draw.line(self.screen, (230, 20, 30), (mx, y - 5), (mx, y + h + 5), 3)
         cx = x + int(w * t / duration)
         pg.draw.line(self.screen, (255, 255, 255), (cx, y - 7), (cx, y + h + 7), 2)
+
+
+class SelfTest:
+    """Hidden ``--selftest``: drives the real window through pygame's event queue (no desktop access needed)."""
+
+    WARMUP_S, PERIOD_S, PRESSES = 6.0, 3.0, 6
+
+    def __init__(self, app: "ReplayApp", directory: Path, started: float) -> None:
+        self.app, self.directory, self.started = app, directory, started
+        self.directory.mkdir(parents=True, exist_ok=True)
+        self.saved, self.pressed, self.log = 0, 0, []
+
+    def _camera(self) -> str:
+        return self.app.camera_mode + (" " + self.app.selected if self.app.camera_mode == "follow" else "")
+
+    def step(self, now: float) -> None:
+        pg, elapsed = self.app.pygame, now - self.started
+        due = self.WARMUP_S + self.saved * self.PERIOD_S
+        if elapsed >= due and self.saved == self.pressed:
+            name = "{0:02d}_{1}.png".format(self.saved, self._camera().replace(" ", "_"))
+            pg.image.save(self.app.screen, str(self.directory / name))
+            self.log.append(self._camera())
+            self.saved += 1
+            if self.pressed >= self.PRESSES:
+                actors = sorted((a.attributes.get("role_name", ""), a.type_id)
+                                for a in self.app.world.get_actors().filter("vehicle.*"))
+                (self.directory / "selftest.json").write_text(json.dumps(
+                    {"run": self.app.run.name, "camera_sequence": self.log, "vehicle_actors": actors,
+                     "recorders": self.app.ids}, indent=1), encoding="utf-8")
+                self.app.running = False
+        elif elapsed >= due - self.PERIOD_S / 2.0 and self.pressed < self.saved and self.pressed < self.PRESSES:
+            pg.event.post(pg.event.Event(pg.KEYDOWN, key=pg.K_c, mod=0))
+            self.pressed += 1
 
 
 _LANES: Dict[str, Any] = {}
