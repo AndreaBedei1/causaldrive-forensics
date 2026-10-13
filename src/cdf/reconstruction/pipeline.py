@@ -136,6 +136,14 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
                 return False
         return None
 
+    if cfg.fusion.association_method != "current":
+        # Corrected methods: the pose streams only veto a pairing (bodies clearly apart); what supports or
+        # contradicts it is each recorder's own radar view of the contact (no GNSS involved).
+        from .identity import radar_contact_evidence
+        radar = radar_contact_evidence(locals_, cfg)
+
+        def approach_check(a: str, ta: float, b: str, tb: float) -> Optional[bool]:  # noqa: F811
+            return False if radar(a, ta, b, tb) is False else None
     alignment = align_graphs([local.graph for local in locals_], cfg.fusion, geometry, approach_check)
     for event in alignment.matched_events:
         event['evidence'].append('pre-contact radar trajectory checked against the candidate partner pose stream where observed')

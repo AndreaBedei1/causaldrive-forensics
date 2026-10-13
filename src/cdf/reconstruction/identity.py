@@ -626,3 +626,56 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     result.retrospective = retro  # type: ignore[attr-defined]
     return result
 
+
+# --------------------------------------------------------------------------
+# Collision association: pose-free radar evidence ("I see who hit me")
+# --------------------------------------------------------------------------
+
+def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
+    """A check for ``alignment.match_collisions`` (corrected methods): does the reporting recorder's own radar
+    show the candidate partner arriving at its body?  For a candidate pairing (O's report at t_O, P's report at
+    t_P), per side: O's non-ambiguous tracks touching O's footprint at the report (a measured sample within
+    ``fusion.contact_window_s`` before it, clearance <= ``fusion.touching_clearance_m``) that ARRIVED during the
+    last ``fusion.approach_window_s`` (clearance at its start beyond the touching clearance + 3 sigma of the
+    measurement: a body already in contact, an earlier partner, says nothing about who arrived now).  Their speed is compared with P's OWN recorded speed at the mapped instants
+    (t - t_O + t_P: the clock offset the candidate implies), RMSE <= ``fusion.speed_consistency_mps``.
+    Everything is in O's own frame and P's own speed: no pose stream, no GNSS.  Returns per candidate True
+    (some side supports it, none contradicts), False (a side has touching approaching tracks and none
+    moves like P: contradicted) or None (no radar sees the contact)."""
+    by_owner = {local.owner: local for local in locals_}
+    fusion = cfg.fusion
+
+    def side(observer: str, t_o: float, partner: str, t_p: float) -> Optional[bool]:
+        local, other = by_owner[observer], by_owner[partner]
+        touching = []
+        for track in local.tracks:
+            if track.identity_ambiguous:
+                continue
+            window = [s for s in track.samples if s.measured and t_o - fusion.approach_window_s - 1e-6 <= s.t_local <= t_o + 1e-6]
+            if len(window) < 2:
+                continue
+            near = [s for s in window if t_o - fusion.contact_window_s - 1e-6 <= s.t_local and s.clearance_m <= fusion.touching_clearance_m]
+            # Arriving: outside the contact zone (beyond the touching clearance by 3 sigma of the measurement)
+            # when the window starts, touching at the report.  A body already in contact (an earlier partner
+            # stuck to the recorder) says nothing about who arrived now.
+            arriving = window[0].clearance_m > fusion.touching_clearance_m + 3.0 * cfg.tracking.measurement_std_m
+            if not near or not arriving:
+                continue
+            errors = []
+            for s in window:
+                t_partner = s.t_local - t_o + t_p
+                if other.ego.start <= t_partner <= other.ego.end:
+                    errors.append(s.speed_mps - other.ego.at(t_partner).speed)
+            if len(errors) < max(3, len(window) // 2):
+                continue
+            touching.append(math.sqrt(sum(e * e for e in errors) / len(errors)) <= fusion.speed_consistency_mps)
+        if not touching:
+            return None
+        return any(touching)
+
+    def check(a: str, ta: float, b: str, tb: float) -> Optional[bool]:
+        sides = [side(a, ta, b, tb), side(b, tb, a, ta)]
+        if any(value is False for value in sides):
+            return False
+        return True if any(value is True for value in sides) else None
+    return check
