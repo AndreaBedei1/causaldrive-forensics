@@ -84,19 +84,34 @@ class TrackingConfig:
     # 2.5 m (car/van width) plus one measurement standard deviation. Persistent
     # violations signal mixed bodies or unreliable heading, never a named switch.
     identity_body_width_m: float = 2.5
-    # --- Uncertainty-aware gating ("covariance"; fusion.association_method "final" switches it on) ---
-    # "fixed": the gates above (2.5 m, 4 m/s, 0.5 s, 5 sweeps).  "covariance": a return joins a track when its
-    # innovation against the prediction is within the chi-square gate of gate_probability, its covariance
-    # the track's predicted covariance plus the spread of returns over a vehicle body (length and width /
-    # sqrt(12): uniform over the box, heading from the track's velocity) plus the radar's polar noise; the
-    # Doppler residual along the return's own line of sight is gated by its predicted radial standard
-    # deviation; a track ends when its predicted position no longer tells two bodies a car width apart
-    # (3 sigma > body_width_m) or after gap_cap_s (fail-safe); a tentative track is confirmed after
-    # min_track_support_s of support with at least min_track_updates measurements (rate independent).
+    # --- Uncertainty-normalised association ("covariance"; fusion.association_method "final" switches it on) ---
+    # "fixed" (METHODS 1-3): the gates above (2.5 m, 4 m/s, 0.5 s, 5 sweeps).  "covariance" (METHOD 3 FINAL):
+    #  * position: a return z joins a track when d^2 = nu' S^-1 nu <= chi2_2(gate_probability), nu = z - p,
+    #    S = P_pos (the track's predicted covariance: grows with the time since its last update and with its
+    #    speed, see yaw_rate_std_rps) + 2 B (a return and the track point are two points of one vehicle body:
+    #    B = box spread, length and width / sqrt(12), along the track's heading) + R(z) (the radar's polar
+    #    noise at the return's range: lateral sigma = range x azimuth sigma);
+    #  * doppler: the measured radial speed against the predicted velocity projected on the return's own line
+    #    of sight, normalised by sqrt(u' P_v u + radial_speed_std^2 + ego-motion variance at the recorder's
+    #    own impact), <= chi2_1(gate_probability): the tangential velocity, which Doppler does not measure,
+    #    never enters the test;
+    #  * median_noise: the track point (median of a sweep's returns) is measured with the median's standard
+    #    error, polar noise + (pi / 2) C / n (C the spread of those n returns), instead of a fixed
+    #    measurement_std_m: many returns on a near face fix it to centimetres, a few far ones do not;
+    #  * ambiguity: a return inside the gates of two tracks whose likelihoods differ by less than
+    #    return_likelihood_ratio updates neither (UNRESOLVED) and starts no track;
+    #  * survival: a track ends when its predicted position no longer tells two bodies a car width apart
+    #    (3 sigma > body_width_m), gap_cap_s at most (fail-safe);
+    #  * confirmation: min_track_support_s of support with at least min_track_updates measurements;
+    #  * hard caps (fail-safe, normally never binding; how often they bind is counted in the tracking stats):
+    #    position_cap_m and doppler_cap_mps.
     gating: str = "fixed"
-    # With gating "covariance": which statistical replacements are active (comma separated subset of
-    # position, doppler, survival, confirmation); the others keep the fixed rule.
-    covariance_components: str = "survival,confirmation"
+    # With gating "covariance": which statistical rules are active (comma separated subset of position,
+    # doppler, median_noise, ambiguity, survival, confirmation); an absent one falls back to the fixed rule.
+    # median_noise is implemented but NOT adopted: the median of a sweep's returns slides over the body as the
+    # visible faces change (a systematic error of decimetres), so sigma / sqrt(n) made the filter overconfident
+    # and its velocity jitter contradicted a true collision partner (S09, development seed).
+    covariance_components: str = "position,doppler,ambiguity,survival,confirmation"
     gate_probability: float = 0.99
     body_length_m: float = 4.6
     body_width_m: float = 1.9
@@ -111,6 +126,14 @@ class TrackingConfig:
     # only unmodelled velocity jump the recorder itself measures.
     nominal_vehicle_mass_kg: float = 1500.0
     position_cap_m: float = 10.0
+    doppler_cap_mps: float = 10.0
+    # A return gated by two tracks goes to the more likely one only when its likelihood is this many times the
+    # other's (the same decision ratio as fusion.assignment_likelihood_ratio); else it is ambiguous.
+    return_likelihood_ratio: float = 20.0
+    # Speed-dependent lateral process noise: a heading change at yaw rate omega moves a car sideways with
+    # acceleration v x omega, so the across-track acceleration variance is acceleration_std^2 + (v x
+    # yaw_rate_std)^2 (a fast target's prediction spreads faster sideways).  0.3 rad/s: a brisk lane change.
+    yaw_rate_std_rps: float = 0.3
 
 
 @dataclass

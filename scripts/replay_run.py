@@ -871,12 +871,20 @@ _LANES: Dict[str, Any] = {}
 
 def export_lanes(run: ReplayRun, map_name: Optional[str] = None) -> Tuple[Optional[str], Optional[List[Any]]]:
     """(map, driving lanes) for the headless export: the map recognised from the recorded positions and
-    the public OpenDRIVE files (``resolve_map``), parsed client-side; (None, None) without the carla module
-    or a local installation.  No server, scenario or run metadata is used."""
+    the public OpenDRIVE files (``resolve_map``), parsed client-side by the carla module or, without it, by
+    ``cdf.replay.opendrive`` (pure Python); (None, None) without a local installation.  No server, scenario or run metadata is used."""
     try:
         carla = import_carla()
-    except Exception:  # the carla module is optional for a headless export
-        return map_name, None
+    except Exception:  # without the carla module: the same public OpenDRIVE geometry, sampled in pure Python
+        from cdf.replay.opendrive import best_map, lanes_from_opendrive
+        sources = opendrive_sources(find_carla_root(load_run_config().get("simulation.carla_root")))
+        if map_name:
+            if map_name not in sources:
+                return map_name, None
+            if map_name not in _LANES:
+                _LANES[map_name] = lanes_from_opendrive(sources[map_name])
+            return map_name, _LANES[map_name]
+        return best_map(sources, [(x, y) for x, y, _ in run.map_samples()], MAP_MIN_FIT)
     root = find_carla_root(load_run_config().get("simulation.carla_root"))
     sources = opendrive_sources(root)
     name = map_name or resolve_map(run, root, None)

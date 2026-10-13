@@ -238,7 +238,7 @@ C:
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5,
     "gating": "fixed",
-    "covariance_components": "survival,confirmation",
+    "covariance_components": "position,doppler,ambiguity,survival,confirmation",
     "gate_probability": 0.99,
     "body_length_m": 4.6,
     "body_width_m": 1.9,
@@ -248,7 +248,10 @@ C:
     "min_track_updates": 3,
     "gap_cap_s": 2.0,
     "nominal_vehicle_mass_kg": 1500.0,
-    "position_cap_m": 10.0
+    "position_cap_m": 10.0,
+    "doppler_cap_mps": 10.0,
+    "return_likelihood_ratio": 20.0,
+    "yaw_rate_std_rps": 0.3
   },
   "semantics": {
     "brake_onset_threshold": 0.1,

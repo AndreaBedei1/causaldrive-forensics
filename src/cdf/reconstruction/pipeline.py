@@ -147,12 +147,12 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
     alignment = align_graphs([local.graph for local in locals_], cfg.fusion, geometry, approach_check)
     for event in alignment.matched_events:
         event['evidence'].append('pre-contact radar trajectory checked against the candidate partner pose stream where observed')
-    associations = associate_tracks(locals_, alignment, cfg.fusion)
+    associations = associate_tracks(locals_, alignment, cfg.fusion, cfg.tracking.radial_speed_std_mps)
     # A recorder no matched collision aligned: the clock offset its observed trajectory fixes, if unique,
     # in the common frame of the recorders' own pose streams (then the association is redone).
     align_by_observations(locals_, alignment, associations, poses, cfg)
     if alignment.observed:
-        associations = associate_tracks(locals_, alignment, cfg.fusion)
+        associations = associate_tracks(locals_, alignment, cfg.fusion, cfg.tracking.radial_speed_std_mps)
     # Anonymous tracks that are recorders, and the road users that recorded nothing (U1, U2, ...).
     road_users = fuse_road_users(locals_, alignment, associations, poses, cfg)
     return alignment, associations, road_users, fuse_graphs(locals_, alignment, associations)
