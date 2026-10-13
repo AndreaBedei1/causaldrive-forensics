@@ -155,7 +155,7 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
         associations = associate_tracks(locals_, alignment, cfg.fusion, cfg.tracking.radial_speed_std_mps)
     # Anonymous tracks that are recorders, and the road users that recorded nothing (U1, U2, ...).
     road_users = fuse_road_users(locals_, alignment, associations, poses, cfg)
-    return alignment, associations, road_users, fuse_graphs(locals_, alignment, associations)
+    return alignment, associations, road_users, fuse_graphs(locals_, alignment, associations, cfg.fusion.touching_clearance_m)
 
 
 def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,

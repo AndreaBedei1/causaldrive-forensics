@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .checks import temporal_safety_relations
 from .config import FusionConfig
@@ -432,8 +432,55 @@ def aggregate_entity_events(nodes: Sequence[GlobalNode], track_ends: Dict[Any, T
     return keep
 
 
+def post_contact_episodes(locals_: Sequence[LocalReconstruction], alignment: Alignment,
+                          names: Dict[Tuple[str, str], Optional[str]], merged_events: Sequence[Dict[str, Any]],
+                          touching_clearance_m: float) -> set:
+    """(owner, node id) of the CRITICAL_TTC_START/END nodes of an episode that recorder X starts, after its
+    matched collision with recorder Y, on a local track the fusion identified as Y while X and Y are still in
+    contact: some track of X identified as Y has its near surface within ``touching_clearance_m`` of X at that
+    instant.  The pair is then in a post-impact state, not facing a new pre-collision threat (local.critical_
+    intervals holds the partner track itself; a second track of Y -- another face, re-acquired at the impact --
+    is only known to be Y after the fusion).  The local graphs keep the events; the global graph does not
+    assert them."""
+    drop = set()
+    for local in locals_:
+        clock = alignment.graphs[local.owner]
+        if clock.status != "ALIGNED":
+            continue
+        contacts = []
+        for event in merged_events:
+            if local.owner in event["graphs"]:
+                t_local = event["t_local"][local.owner]
+                contacts += [(t_local, other) for other in event["graphs"] if other != local.owner]
+        if not contacts:
+            continue
+        by_track = {track.track_id: track for track in local.tracks}
+        open_episode: Dict[str, bool] = {}
+        for node in sorted(local.graph.nodes, key=lambda n: n.t_local):
+            if node.event_type not in ("CRITICAL_TTC_START", "CRITICAL_TTC_END") or node.subject_id is None:
+                continue
+            if node.event_type == "CRITICAL_TTC_END":
+                if open_episode.pop(node.subject_id, False):
+                    drop.add((local.owner, node.node_id))
+                continue
+            partner = names.get((local.owner, node.subject_id))
+            for t_contact, other in contacts:
+                if partner != other or node.t_local <= t_contact + 1e-6:
+                    continue
+                touching = any(
+                    names.get((local.owner, track_id)) == other and any(
+                        abs(sample.t_local - node.t_local) <= 0.026 and sample.clearance_m <= touching_clearance_m + 1e-9
+                        for sample in track.samples)
+                    for track_id, track in by_track.items())
+                if touching:
+                    drop.add((local.owner, node.node_id))
+                    open_episode[node.subject_id] = True
+                    break
+    return drop
+
+
 def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
-                associations: Sequence[Association]) -> GlobalGraph:
+                associations: Sequence[Association], touching_clearance_m: float = 1.0) -> GlobalGraph:
     """Local graphs + alignment + associations -> one global event graph."""
     names = {(item.local_graph, item.local_track): item.global_entity for item in associations}
     recorders = sorted(local.owner for local in locals_)
@@ -452,10 +499,11 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                 out[obs.graph] = copy.deepcopy(state)
         return out
 
+    post_contact = post_contact_episodes(locals_, alignment, names, merged_events, touching_clearance_m)
     for local in sorted(locals_, key=lambda item: item.owner):
         clock = alignment.graphs[local.owner]
         for node in local.graph.nodes:
-            if node.node_id in merged_node_ids:
+            if node.node_id in merged_node_ids or (local.owner, node.node_id) in post_contact:
                 continue
             subject = _global_subject(local.owner, node.subject_id, names)
             participants = [local.owner] + ([subject] if subject in recorders and subject != local.owner else [])

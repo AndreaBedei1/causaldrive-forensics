@@ -4168,133 +4168,6 @@
     },
     {
       "node_id": "g42",
-      "event_type": "CRITICAL_TTC_START",
-      "kind": "PERCEPTION",
-      "actor_id": "A",
-      "subject_id": "B",
-      "participants": [
-        "A",
-        "B"
-      ],
-      "t_global": 0.45,
-      "attributes": {
-        "source_track": "track_008",
-        "aggregation": "entity_state_union",
-        "semantic_state": "CRITICAL_TTC",
-        "source_tracks": [
-          "A:track_008"
-        ],
-        "source_local_nodes": [
-          {
-            "graph": "A",
-            "local_node": "A:e33",
-            "t_local": 8.2,
-            "event_type": "CRITICAL_TTC_START",
-            "attributes": {
-              "source_track": "track_008"
-            }
-          }
-        ]
-      },
-      "source": "radar",
-      "confidence": null,
-      "observations": [
-        {
-          "graph": "A",
-          "local_node": "A:e33",
-          "t_local": 8.2
-        }
-      ],
-      "perceived_state_before": {
-        "A": {
-          "ego": {
-            "MOVING": true,
-            "STOP": false,
-            "BRAKE": true,
-            "THROTTLE": false,
-            "TURN_LEFT": false,
-            "TURN_RIGHT": false,
-            "SPEED_LIMIT_EXCEEDED": false
-          },
-          "external": {
-            "track_001": {
-              "CLOSING": false,
-              "CRITICAL_TTC": false,
-              "IN_EGO_PATH": false,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            },
-            "track_002": {
-              "CLOSING": "UNKNOWN",
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": "UNKNOWN",
-              "CUT_IN_FROM_LEFT": "UNKNOWN",
-              "CUT_IN_FROM_RIGHT": "UNKNOWN"
-            },
-            "track_003": {
-              "CLOSING": "UNKNOWN",
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": "UNKNOWN",
-              "CUT_IN_FROM_LEFT": "UNKNOWN",
-              "CUT_IN_FROM_RIGHT": "UNKNOWN"
-            },
-            "track_004": {
-              "CLOSING": "UNKNOWN",
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": "UNKNOWN",
-              "CUT_IN_FROM_LEFT": "UNKNOWN",
-              "CUT_IN_FROM_RIGHT": "UNKNOWN"
-            },
-            "track_005#segment_1": {
-              "CLOSING": "UNKNOWN",
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": "UNKNOWN",
-              "CUT_IN_FROM_LEFT": "UNKNOWN",
-              "CUT_IN_FROM_RIGHT": "UNKNOWN"
-            },
-            "track_005#segment_2": {
-              "CLOSING": false,
-              "CRITICAL_TTC": false,
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            },
-            "track_006": {
-              "CLOSING": false,
-              "CRITICAL_TTC": false,
-              "IN_EGO_PATH": false,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            },
-            "track_007": {
-              "CLOSING": false,
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            },
-            "track_008": {
-              "CLOSING": false,
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            },
-            "track_009": {
-              "CLOSING": false,
-              "CRITICAL_TTC": "UNKNOWN",
-              "IN_EGO_PATH": false,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            }
-          },
-          "signs": {},
-          "facts_t_local": 8.1
-        }
-      }
-    },
-    {
-      "node_id": "g43",
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -4394,7 +4267,7 @@
       }
     },
     {
-      "node_id": "g44",
+      "node_id": "g43",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -4530,7 +4403,7 @@
       }
     },
     {
-      "node_id": "g45",
+      "node_id": "g44",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -4666,7 +4539,7 @@
       }
     },
     {
-      "node_id": "g46",
+      "node_id": "g45",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "A",
@@ -4774,7 +4647,7 @@
       }
     },
     {
-      "node_id": "g47",
+      "node_id": "g46",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "A",
@@ -4882,7 +4755,7 @@
       }
     },
     {
-      "node_id": "g48",
+      "node_id": "g47",
       "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5024,7 +4897,7 @@
       }
     },
     {
-      "node_id": "g49",
+      "node_id": "g48",
       "event_type": "TRACK_APPEARED_RIGHT",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5166,7 +5039,7 @@
       }
     },
     {
-      "node_id": "g50",
+      "node_id": "g49",
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5308,7 +5181,7 @@
       }
     },
     {
-      "node_id": "g51",
+      "node_id": "g50",
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5450,7 +5323,7 @@
       }
     },
     {
-      "node_id": "g52",
+      "node_id": "g51",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "B",
@@ -5523,7 +5396,7 @@
       }
     },
     {
-      "node_id": "g53",
+      "node_id": "g52",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "B",
@@ -5596,7 +5469,7 @@
       }
     },
     {
-      "node_id": "g54",
+      "node_id": "g53",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5746,7 +5619,7 @@
       }
     },
     {
-      "node_id": "g55",
+      "node_id": "g54",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -5896,7 +5769,7 @@
       }
     },
     {
-      "node_id": "g56",
+      "node_id": "g55",
       "event_type": "TRACK_APPEARED_LEFT",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -5989,7 +5862,7 @@
       }
     },
     {
-      "node_id": "g57",
+      "node_id": "g56",
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6096,7 +5969,7 @@
       }
     },
     {
-      "node_id": "g58",
+      "node_id": "g57",
       "event_type": "TRACK_APPEARED_RIGHT",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6196,7 +6069,7 @@
       }
     },
     {
-      "node_id": "g59",
+      "node_id": "g58",
       "event_type": "CLOSING_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6310,7 +6183,7 @@
       }
     },
     {
-      "node_id": "g60",
+      "node_id": "g59",
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -6460,7 +6333,7 @@
       }
     },
     {
-      "node_id": "g61",
+      "node_id": "g60",
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -6610,7 +6483,7 @@
       }
     },
     {
-      "node_id": "g62",
+      "node_id": "g61",
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6729,7 +6602,7 @@
       }
     },
     {
-      "node_id": "g63",
+      "node_id": "g62",
       "event_type": "CRITICAL_TTC_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6848,7 +6721,7 @@
       }
     },
     {
-      "node_id": "g64",
+      "node_id": "g63",
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -6962,7 +6835,7 @@
       }
     },
     {
-      "node_id": "g65",
+      "node_id": "g64",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7077,7 +6950,7 @@
       }
     },
     {
-      "node_id": "g66",
+      "node_id": "g65",
       "event_type": "CRITICAL_TTC_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7191,7 +7064,7 @@
       }
     },
     {
-      "node_id": "g67",
+      "node_id": "g66",
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7306,7 +7179,7 @@
       }
     },
     {
-      "node_id": "g68",
+      "node_id": "g67",
       "event_type": "CLOSING_END",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7421,7 +7294,7 @@
       }
     },
     {
-      "node_id": "g69",
+      "node_id": "g68",
       "event_type": "EGO_PATH_EXIT",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7564,7 +7437,7 @@
       }
     },
     {
-      "node_id": "g70",
+      "node_id": "g69",
       "event_type": "CUT_IN_FROM_RIGHT_START",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -7711,7 +7584,7 @@
       }
     },
     {
-      "node_id": "g71",
+      "node_id": "g70",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -7861,7 +7734,7 @@
       }
     },
     {
-      "node_id": "g72",
+      "node_id": "g71",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "A",
@@ -8011,7 +7884,7 @@
       }
     },
     {
-      "node_id": "g73",
+      "node_id": "g72",
       "event_type": "EGO_PATH_ENTRY",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -8154,7 +8027,7 @@
       }
     },
     {
-      "node_id": "g74",
+      "node_id": "g73",
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "B",
@@ -8691,7 +8564,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g43",
+      "from": "g42",
       "to": "g44",
       "relation": "PRECEDES"
     },
@@ -8701,22 +8574,42 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g44",
+      "from": "g43",
       "to": "g46",
       "relation": "PRECEDES"
     },
     {
       "from": "g44",
+      "to": "g45",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g44",
+      "to": "g46",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g45",
       "to": "g47",
       "relation": "PRECEDES"
     },
     {
       "from": "g45",
-      "to": "g46",
+      "to": "g48",
       "relation": "PRECEDES"
     },
     {
       "from": "g45",
+      "to": "g49",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g45",
+      "to": "g50",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g46",
       "to": "g47",
       "relation": "PRECEDES"
     },
@@ -8736,27 +8629,17 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g46",
+      "from": "g47",
       "to": "g51",
       "relation": "PRECEDES"
     },
     {
       "from": "g47",
-      "to": "g48",
+      "to": "g52",
       "relation": "PRECEDES"
     },
     {
-      "from": "g47",
-      "to": "g49",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g47",
-      "to": "g50",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g47",
+      "from": "g48",
       "to": "g51",
       "relation": "PRECEDES"
     },
@@ -8766,8 +8649,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g48",
-      "to": "g53",
+      "from": "g49",
+      "to": "g51",
       "relation": "PRECEDES"
     },
     {
@@ -8776,22 +8659,12 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g49",
-      "to": "g53",
+      "from": "g50",
+      "to": "g51",
       "relation": "PRECEDES"
     },
     {
       "from": "g50",
-      "to": "g52",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g50",
-      "to": "g53",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g51",
       "to": "g52",
       "relation": "PRECEDES"
     },
@@ -8802,7 +8675,7 @@
     },
     {
       "from": "g52",
-      "to": "g54",
+      "to": "g53",
       "relation": "PRECEDES"
     },
     {
@@ -8816,7 +8689,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g55",
+      "from": "g54",
       "to": "g56",
       "relation": "PRECEDES"
     },
@@ -8826,17 +8699,17 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g56",
+      "from": "g55",
       "to": "g58",
       "relation": "PRECEDES"
     },
     {
       "from": "g56",
-      "to": "g59",
+      "to": "g57",
       "relation": "PRECEDES"
     },
     {
-      "from": "g57",
+      "from": "g56",
       "to": "g58",
       "relation": "PRECEDES"
     },
@@ -8847,7 +8720,7 @@
     },
     {
       "from": "g58",
-      "to": "g60",
+      "to": "g59",
       "relation": "PRECEDES"
     },
     {
@@ -8856,7 +8729,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g60",
+      "from": "g59",
       "to": "g61",
       "relation": "PRECEDES"
     },
@@ -8867,7 +8740,7 @@
     },
     {
       "from": "g61",
-      "to": "g63",
+      "to": "g62",
       "relation": "PRECEDES"
     },
     {
@@ -8876,7 +8749,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g63",
+      "from": "g62",
       "to": "g64",
       "relation": "PRECEDES"
     },
@@ -8886,17 +8759,17 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g64",
+      "from": "g63",
       "to": "g66",
       "relation": "PRECEDES"
     },
     {
       "from": "g64",
-      "to": "g67",
+      "to": "g65",
       "relation": "PRECEDES"
     },
     {
-      "from": "g65",
+      "from": "g64",
       "to": "g66",
       "relation": "PRECEDES"
     },
@@ -8907,7 +8780,7 @@
     },
     {
       "from": "g66",
-      "to": "g68",
+      "to": "g67",
       "relation": "PRECEDES"
     },
     {
@@ -8916,7 +8789,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g68",
+      "from": "g67",
       "to": "g69",
       "relation": "PRECEDES"
     },
@@ -8926,17 +8799,17 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g69",
+      "from": "g68",
       "to": "g71",
       "relation": "PRECEDES"
     },
     {
       "from": "g69",
-      "to": "g72",
+      "to": "g70",
       "relation": "PRECEDES"
     },
     {
-      "from": "g70",
+      "from": "g69",
       "to": "g71",
       "relation": "PRECEDES"
     },
@@ -8947,17 +8820,12 @@
     },
     {
       "from": "g71",
-      "to": "g73",
+      "to": "g72",
       "relation": "PRECEDES"
     },
     {
       "from": "g72",
       "to": "g73",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g73",
-      "to": "g74",
       "relation": "PRECEDES"
     },
     {
@@ -9046,38 +8914,38 @@
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g23",
-      "to": "g42",
-      "relation": "SAME_TRACK"
-    },
-    {
       "from": "g31",
-      "to": "g45",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "g32",
       "to": "g44",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g48",
-      "to": "g51",
+      "from": "g32",
+      "to": "g43",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g49",
+      "from": "g47",
       "to": "g50",
       "relation": "SAME_TRACK"
     },
     {
+      "from": "g48",
+      "to": "g49",
+      "relation": "SAME_TRACK"
+    },
+    {
       "from": "g18",
-      "to": "g54",
+      "to": "g53",
       "relation": "SAME_TRACK"
     },
     {
       "from": "g11",
-      "to": "g55",
+      "to": "g54",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g47",
+      "to": "g59",
       "relation": "SAME_TRACK"
     },
     {
@@ -9086,18 +8954,13 @@
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g49",
-      "to": "g61",
+      "from": "g47",
+      "to": "g71",
       "relation": "SAME_TRACK"
     },
     {
       "from": "g48",
-      "to": "g72",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "g49",
-      "to": "g71",
+      "to": "g70",
       "relation": "SAME_TRACK"
     },
     {
@@ -9107,72 +8970,72 @@
     },
     {
       "from": "g06",
-      "to": "g43",
+      "to": "g42",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g56",
-      "to": "g57",
+      "from": "g55",
+      "to": "g56",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g58",
-      "to": "g59",
+      "from": "g57",
+      "to": "g58",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g56",
+      "from": "g55",
+      "to": "g61",
+      "relation": "SAME_TRACK"
+    },
+    {
+      "from": "g57",
       "to": "g62",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g58",
+      "from": "g55",
       "to": "g63",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g56",
+      "from": "g08",
       "to": "g64",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g08",
+      "from": "g57",
       "to": "g65",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g58",
+      "from": "g55",
       "to": "g66",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g56",
+      "from": "g57",
       "to": "g67",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g58",
+      "from": "g06",
       "to": "g68",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "g06",
+      "from": "g13",
       "to": "g69",
       "relation": "SAME_TRACK"
     },
     {
       "from": "g13",
-      "to": "g70",
-      "relation": "SAME_TRACK"
-    },
-    {
-      "from": "g13",
-      "to": "g73",
+      "to": "g72",
       "relation": "SAME_TRACK"
     },
     {
       "from": "g09",
-      "to": "g74",
+      "to": "g73",
       "relation": "SAME_TRACK"
     }
   ],

@@ -69,7 +69,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1897.7
 
 ## Global graph
 
-74 nodes, 181 edges; 26 merged node(s): g05 TRACK_APPEARED_FRONT(A,U3) from A:e03 + A:e18, g07 TRACK_APPEARED_LEFT(A,U2) from A:e04 + A:e20, g08 TRACK_APPEARED_LEFT(B,U3) from B:e05 + B:e22, g09 TRACK_APPEARED_LEFT(B,U5) from B:e04 + B:e29, g11 TRACK_APPEARED_RIGHT(A,U1) from A:e05 + A:e44, g12 TRACK_APPEARED_RIGHT(A,U4) from A:e06 + A:e19, g14 CLOSING_START(A,U1) from A:e07 + A:e22, g16 TRACK_APPEARED_LEFT(A,U8) from A:e09 + A:e14, g18 TRACK_APPEARED_LEFT(A,U7) from A:e11 + A:e43, g19 CLOSING_START(A,U7) from A:e12 + A:e29, g20 CRITICAL_TTC_START(B,U6) from B:e08 + B:e12, g23 TRACK_APPEARED_FRONT(A,B) from A:e15 + A:e24 + A:e35, g24 CLOSING_START(A,B) from A:e16 + A:e28, g25 CRITICAL_TTC_START(A,B) from A:e17 + A:e27, g29 CUT_IN_FROM_RIGHT_START(A,U1) from A:e21 + A:e30, g31 TRACK_APPEARED_FRONT(A,U6) from A:e23 + A:e34, g32 TRACK_APPEARED_LEFT(A,U3) from A:e25 + A:e36, g33 COLLISION(A,B) from A:e26 + B:e09, g48 TRACK_APPEARED_LEFT(A,U9) from A:e39 + A:e47, g49 TRACK_APPEARED_RIGHT(A,U10) from A:e40 + A:e48, g50 CLOSING_START(A,U10) from A:e42 + A:e46, g51 CLOSING_START(A,U9) from A:e41 + A:e45, g57 CLOSING_START(B,U11) from B:e16 + B:e24, g59 CLOSING_START(B,U12) from B:e18 + B:e25, g62 CRITICAL_TTC_START(B,U11) from B:e19 + B:e21, g63 CRITICAL_TTC_START(B,U12) from B:e20 + B:e23.
+73 nodes, 179 edges; 26 merged node(s): g05 TRACK_APPEARED_FRONT(A,U3) from A:e03 + A:e18, g07 TRACK_APPEARED_LEFT(A,U2) from A:e04 + A:e20, g08 TRACK_APPEARED_LEFT(B,U3) from B:e05 + B:e22, g09 TRACK_APPEARED_LEFT(B,U5) from B:e04 + B:e29, g11 TRACK_APPEARED_RIGHT(A,U1) from A:e05 + A:e44, g12 TRACK_APPEARED_RIGHT(A,U4) from A:e06 + A:e19, g14 CLOSING_START(A,U1) from A:e07 + A:e22, g16 TRACK_APPEARED_LEFT(A,U8) from A:e09 + A:e14, g18 TRACK_APPEARED_LEFT(A,U7) from A:e11 + A:e43, g19 CLOSING_START(A,U7) from A:e12 + A:e29, g20 CRITICAL_TTC_START(B,U6) from B:e08 + B:e12, g23 TRACK_APPEARED_FRONT(A,B) from A:e15 + A:e24 + A:e35, g24 CLOSING_START(A,B) from A:e16 + A:e28, g25 CRITICAL_TTC_START(A,B) from A:e17 + A:e27, g29 CUT_IN_FROM_RIGHT_START(A,U1) from A:e21 + A:e30, g31 TRACK_APPEARED_FRONT(A,U6) from A:e23 + A:e34, g32 TRACK_APPEARED_LEFT(A,U3) from A:e25 + A:e36, g33 COLLISION(A,B) from A:e26 + B:e09, g47 TRACK_APPEARED_LEFT(A,U9) from A:e39 + A:e47, g48 TRACK_APPEARED_RIGHT(A,U10) from A:e40 + A:e48, g49 CLOSING_START(A,U10) from A:e42 + A:e46, g50 CLOSING_START(A,U9) from A:e41 + A:e45, g56 CLOSING_START(B,U11) from B:e16 + B:e24, g58 CLOSING_START(B,U12) from B:e18 + B:e25, g61 CRITICAL_TTC_START(B,U11) from B:e19 + B:e21, g62 CRITICAL_TTC_START(B,U12) from B:e20 + B:e23.
 
 ### Event sequence (global time)
 
@@ -89,7 +89,6 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1897.7
 - `-0.05` TRACK_APPEARED_FRONT(A,U6); TRACK_APPEARED_LEFT(A,U3)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); CLOSING_END(A,U7); THROTTLE_END(B)
 - `+0.05` CUT_IN_FROM_RIGHT_END(A,U1); THROTTLE_END(A); BRAKE_START(A); BRAKE_START(B)
-- `+0.45` CRITICAL_TTC_START(A,B)
 - `+0.50` CRITICAL_TTC_END(B,U6)
 - `+0.70` TRACK_LOST(A,U3); TRACK_LOST(A,U6)
 - `+1.15` MOVING_END(A); STOP_START(A)
@@ -153,7 +152,6 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1897.7
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, A started braking.
 - 0.05 s after the reference collision, B started braking.
-- 0.45 s after the reference collision, A's time-to-contact with B became critical.
 - 0.50 s after the reference collision, B's time-to-contact with anonymous road user U6 stopped being critical.
 - 0.70 s after the reference collision, A's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).
 - 0.70 s after the reference collision, A's radar lost anonymous road user U6 (its states are UNKNOWN from then on, not ended).
