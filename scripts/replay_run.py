@@ -22,15 +22,18 @@ nothing) is drawn once, in grey: a wireframe box of its fitted footprint at the
 fused position and heading with an arrow along its motion, solid while measured,
 dashed while predicted, labelled only U1; scientific dimensions, uncertainty,
 method and sources remain in the reconstruction files. Member tracks are radar dots. A
-track associated with a recorder is a radar dot, a line from its observer and
-``A:track_002 → B``, never a second body.  A track that is neither (none after
+track associated with a recorder is a radar dot and a line from its observer (one line per
+observer and recorder), never a second body and never a second label: the recorder's own badge
+names it.  Each recorder's panel lists its recent semantic events first, then its confirmed
+important states per global road user (never UNKNOWN states, never raw track lists), at most a
+few lines (``... +N more``).  A track that is neither (none after
 the fusion) is drawn as before: a ghost box of the nominal size in its
 observer's colour.
 
 Controls: SPACE play/pause, R restart, LEFT/RIGHT seek 0.5 s (with SHIFT
 0.05 s), N/P next/previous reconstructed event, 1-4 speed 0.25/0.5/1/2x,
-C camera mode, TAB next recorder, T tracks, G ghost boxes or dots, H help, ESC
-exit.  In the free camera: W/A/S/D/Q/E move (SHIFT faster); drag with the
+C camera: overview, then a follow camera on every recorder vehicle in turn, then free (TAB next
+recorder), T tracks, G ghost boxes or dots, H help, ESC exit.  In the free camera: W/A/S/D/Q/E move (SHIFT faster); drag with the
 mouse to look or orbit, wheel to zoom.
 """
 
@@ -55,7 +58,8 @@ from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNO
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
                               project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
-from cdf.replay.presentation import HELP_LINES, anonymous_row, subject_label  # noqa: E402
+from cdf.replay.presentation import (ALERT, EGO, EVENT, HELP_LINES, MORE, event_line,  # noqa: E402
+                                     next_camera, standard_panel_lines, subject_label)
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -68,6 +72,7 @@ CAMERA_MODES = ("overview", "follow", "free")
 SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
 COLLISION_WINDOW_S = 1.5
+PANEL_MAX_WIDTH = 360  # pixels: the recorder panels stay a narrow column at the right edge
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
 TRACK_DOT_HEIGHT_M = 0.8  # radar dots above the road (tracks are planar)
 OPENDRIVE_DIR = Path("CarlaUE4") / "Content" / "Carla" / "Maps" / "OpenDrive"
@@ -208,6 +213,7 @@ class ReplayApp:
         self.overlay: Any = None
         self.pygame: Any = None
         self.occupied: List[Any] = []  # per frame: screen rectangles a track label must not cover
+        self.associated_lines: set = set()  # per frame: (observer, recorder) pairs already joined by a line
 
     # -- setup / teardown -------------------------------------------------------
 
@@ -395,7 +401,10 @@ class ReplayApp:
         elif key in speed_keys:
             self.clock.set_speed(SPEEDS[speed_keys[key]])
         elif key == pg.K_c:
-            self.camera_mode = CAMERA_MODES[(CAMERA_MODES.index(self.camera_mode) + 1) % len(CAMERA_MODES)]
+            # overview -> follow each recorder vehicle in turn -> free -> overview
+            self.camera_mode, selected = next_camera(self.ids, self.camera_mode, self.selected)
+            if selected is not None:
+                self.selected = selected
             if self.camera_mode == "free" and self.camera_pose is not None:
                 self.free = FreeCamera(self.camera_pose)
         elif key == pg.K_TAB:
@@ -480,6 +489,7 @@ class ReplayApp:
         else:
             screen.fill((20, 20, 20))
         self.occupied = []  # screen rectangles a track label must not cover
+        self.associated_lines = set()  # (observer, recorder) pairs already joined by a line this frame
         labels = self._draw_tracks(poses, t) if self.show_tracks else []
         badges = {pid: self._draw_badge(pid, pose) for pid, pose in poses.items()}
         self._draw_side_panels(t, badges)
@@ -515,38 +525,16 @@ class ReplayApp:
         return box
 
     def _vehicle_lines(self, pid: str, t: float) -> List[Tuple[str, Tuple[int, int, int], Any]]:
-        """The recorder's perceived state as the reconstruction wrote it (else its open
-        START/END pairs), then the events of the last EVENT_WINDOW_S (newest first)."""
+        """The recorder's panel (``presentation.standard_panel_lines``): its semantic events of the last
+        EVENT_WINDOW_S first (newest first), then its confirmed important states per global road user, then
+        its own braking/turning; at most a few lines.  UNKNOWN states, measured/predicted provenance and raw
+        track lists stay in the reconstruction files."""
+        style = {EVENT: ((255, 214, 10), self.font_bold), ALERT: ((255, 150, 90), self.font_small),
+                 EGO: ((200, 200, 200), self.font_small), MORE: ((170, 170, 170), self.font_small)}
         lines = []
-        perceived = self.run.perceived_lines(pid, t)
-        if perceived is not None:
-            for text in perceived:
-                lost = text.startswith("track lost")
-                alert = any(name in text for name in ("CUT_IN", "CRITICAL_TTC"))
-                rgb = (150, 150, 150) if lost else (255, 150, 90) if alert else (255, 255, 255)
-                lines.append((text, rgb, self.font_small))
-        else:
-            for state in self.run.active_states(pid, t):
-                subject = self.run.subject_name(pid, state.subject)
-                lines.append((state.state + (" → " + subject if subject else ""), (255, 255, 255), self.font_small))
-        anonymous = self.run.anonymous_at(pid, t)
-        if anonymous:
-            names = ", ".join(track.name + ("" if state.measured else " (PREDICTED)") for track, state in anonymous)
-            lines.append(("anonymous tracks: " + names, (200, 200, 255), self.font_small))
-        seen = sorted({track.road_user for track in self.run.tracks.get(pid, [])
-                       if track.road_user is not None and track.state_at(t) is not None})
-        if seen:
-            for entity_id in seen:
-                entity = self.run.entity(entity_id)
-                if entity is not None and entity.identity_ambiguous:
-                    continue
-                state = entity.state_at(t) if entity is not None else None
-                lines.append((anonymous_row(entity_id, state.observers if state else [pid]),
-                              (220, 220, 220), self.font_small))
-        for event in reversed(self.run.recent_events(pid, t, EVENT_WINDOW_S)):
-            subject = subject_label(self.run, pid, event.subject)
-            lines.append(("» " + event.event_type + (" → " + subject if subject else ""),
-                          (255, 214, 10), self.font_bold))
+        for text, kind in standard_panel_lines(self.run, pid, t, EVENT_WINDOW_S):
+            rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
+            lines.append((text, rgb, font))
         return lines
 
     def _draw_side_panels(self, t: float, badges: Dict[str, Any]) -> None:
@@ -562,7 +550,8 @@ class ReplayApp:
                                            True, (255, 255, 255))
             body = [font.render(text, True, rgb) for text, rgb, font in self._vehicle_lines(pid, t)]
             panels.append((pid, header, body))
-        width = max(240, max(max([h.get_width()] + [b.get_width() for b in body]) for _, h, body in panels) + 18)
+        width = min(PANEL_MAX_WIDTH, max(240, max(max([h.get_width()] + [b.get_width() for b in body])
+                                                  for _, h, body in panels) + 18))
         x, y = self.width - width - 8, 8
         bottom = self._bottom_bar_top() - 4  # keep clear of the help lines and the timeline
         for pid, header, body in panels:
@@ -666,7 +655,7 @@ class ReplayApp:
         return lambda: self._label(anchor, lines, ROAD_USER_RGB, len(self.ids), above=True)
 
     def _track_lines(self, track: TrackPath, state: TrackPoint) -> List[str]:
-        """``A:track_001 / ANONYMOUS`` and ``[seen by A]`` with what the sample is (PREDICTED, heading)."""
+        """The track's global subject name (a track no fusion named keeps its local id)."""
         return [subject_label(self.run, track.recorder, track.track_id)]
 
     def _draw_ghost(self, track: TrackPath, state: TrackPoint, corners: List[Vector], index: int) -> Any:
@@ -702,7 +691,9 @@ class ReplayApp:
         x, y = state.position
         point = (x, y, self._ground_z(x, y, observer.z) + TRACK_DOT_HEIGHT_M)
         uv = self._project(point)
-        if track.status == ASSOCIATED:
+        if track.status == ASSOCIATED and (track.recorder, track.entity) not in self.associated_lines:
+            # One line per observer and recorder: several tracks of one body are one subject.
+            self.associated_lines.add((track.recorder, track.entity))
             self._line3d((observer.x, observer.y, observer.z + 1.0), point, color, 1)
         if uv is None:
             return None
@@ -711,10 +702,9 @@ class ReplayApp:
             pg.draw.circle(self.screen, (255, 255, 255), uv, 6, width=2)
         else:
             pg.draw.circle(self.screen, color, uv, 6, width=2)  # hollow: predicted
-        if track.road_user is not None:
-            return None  # the body's U label already names all its radar dots
-        lines = self._track_lines(track, state) if track.ghost else [
-            track.label + ("  PREDICTED" if not state.measured else "")]
+        if not track.ghost:
+            return None  # its global subject is already named: the U label or the recorder's own badge
+        lines = self._track_lines(track, state)
         return lambda: self._label(uv, lines, color, index, above=False)
 
     def _free_rect(self, rect: Any) -> Any:
@@ -783,7 +773,7 @@ class ReplayApp:
         marks = self.run.collisions_near(t, COLLISION_WINDOW_S)
         if not marks:
             return
-        text = "COLLISION  " + "  ".join("–".join(mark.participants) or "?" for mark in marks)
+        text = "COLLISION  " + "  ".join("–".join(mark.participants) for mark in marks if mark.participants)
         surface = self.font_banner.render(text, True, (255, 255, 255))
         rect = surface.get_rect(midtop=(self.width // 2, 16))
         self.pygame.draw.rect(self.screen, (200, 20, 30), rect.inflate(28, 12), border_radius=8)
@@ -792,7 +782,7 @@ class ReplayApp:
 
     def _draw_hud(self, t: float) -> None:
         state = "END" if self.clock.at_end and not self.clock.playing else ("PLAYING" if self.clock.playing else "PAUSED")
-        camera = self.camera_mode + ("" if self.camera_mode == "overview" else " " + self.selected)
+        camera = self.camera_mode + (" " + self.selected if self.camera_mode == "follow" else "")
         tracks = ("tracks: ghost boxes + dots" if self.show_ghosts else "tracks: dots") if self.show_tracks \
             else "tracks hidden"
         lines = [(self.run.name + "  (" + self.map_name + ")", self.font_bold, (255, 255, 255)),
@@ -808,14 +798,15 @@ class ReplayApp:
         upcoming = [e for e in self.events if e.time > t + 1e-6]
         if passed:
             e = passed[-1]
-            lines.append(("last {0:+6.2f} {1} {2} {3}".format(self.run.display_time(e.time), e.actor, e.event_type,
-                                                          self.run.subject_name(e.actor, e.subject)).rstrip(),
+            lines.append(("last {0:+6.2f} {1}".format(self.run.display_time(e.time), event_line(self.run, e)),
                           self.font_small, (255, 214, 10)))
         if upcoming:
             e = upcoming[0]
-            lines.append(("next {0:+6.2f} {1} {2} {3}".format(self.run.display_time(e.time), e.actor, e.event_type,
-                                                          self.run.subject_name(e.actor, e.subject)).rstrip(),
+            lines.append(("next {0:+6.2f} {1}".format(self.run.display_time(e.time), event_line(self.run, e)),
                           self.font_small, (200, 200, 200)))
+        if not self.run.local_events:
+            lines.append(("NO RECONSTRUCTION: run scripts/reconstruct_run.py on this run (no boxes, no events)",
+                          self.font_bold, (255, 90, 90)))
         rendered = [font.render(text, True, rgb) for text, font, rgb in lines]
         width = max(r.get_width() for r in rendered) + 16
         height = sum(r.get_height() for r in rendered) + 10
@@ -919,6 +910,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     run = ReplayRun.load(run_dir)
     for note in run.notes:
         LOGGER.info("note: %s", note)
+    if not run.local_events:
+        LOGGER.warning("%s has no reconstruction (no %s): the replay shows the recorders only, no reconstructed "
+                       "road users and no events; run scripts/reconstruct_run.py %s first", run.name,
+                       run_dir / "reconstruction", run_dir)
     LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous road users: %s%s", run.name,
                 ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()),
                 "; ".join("{0} = {1}".format(e.entity_id, e.sources) for e in run.entities) or "none",
