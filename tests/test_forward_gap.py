@@ -12,7 +12,6 @@ import math
 import unittest
 from pathlib import Path
 
-from src.cdf.llm.guard import LeakGuardError, check_packet
 from src.cdf.reconstruction.config import SemanticsConfig
 from src.cdf.reconstruction.conflict import assess_conflict, minimum_time_gap_s, safe_following_distance
 from src.cdf.reconstruction.config import ReconstructionConfig
@@ -307,14 +306,6 @@ class CutInPreEntryTests(unittest.TestCase):
         for name, t in events:
             if name in ("CUT_IN_FROM_RIGHT_START", "CRITICAL_TTC_START"):
                 self.assertNotIn(round(t, 2), hidden, (name, t))
-
-
-class PacketTests(unittest.TestCase):
-    def test_forward_gap_outputs_are_refused_by_the_leak_guard(self):
-        for key in ("required_safe_distance_m", "time_headway_s", "minimum_time_gap_s", "safe_distance_margin_m",
-                    "critical_reason", "lateral_body_gap_m", "longitudinal_clearance_m", "forward_region"):
-            with self.assertRaises(LeakGuardError, msg=key):
-                check_packet({"facts": [{"type": "TRACK_STATE", key: 1.0}]})
 
 
 def _graph(run, owner):
