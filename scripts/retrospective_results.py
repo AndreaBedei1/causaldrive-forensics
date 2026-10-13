@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 ROOT = Path(__file__).resolve().parents[1]
-METHODS = ("current", "corrected", "retrospective")
+METHODS = ("current", "corrected", "retrospective", "final")
 CONF_BINS = (0.0, 0.5, 0.8, 0.9, 0.95, 0.99, 1.0001)
 GAP_BINS = (0.0, 0.5, 1.0, 2.0, 4.0, 1e9)
 DIST_ORDER = ["0-10", "10-20", "20-30", "30-40", "40-50", "50-60", "60+"]

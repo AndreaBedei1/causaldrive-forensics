@@ -579,6 +579,18 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
             else:
                 first, second = (a, b) if (a.start, a.name) <= (b.start, b.name) else (b, a)
                 item = stitch_corrected(first, second, cfg)
+                if final and item is not None and item.accepted:
+                    # A stitch is a hypothesis against a new road user: the density of the miss under the tracker's
+                    # own motion model across the gap (``backward_test``) over the new-target density; resolved
+                    # only at the minimum posterior.  A long gap or a large miss makes it UNRESOLVED, never easier.
+                    density = stitch_density(first, second, cfg)
+                    ratio = density / cfg.fusion.retrospective_new_target_density
+                    posterior = ratio / (1.0 + ratio)
+                    item.posterior = round(posterior, 4)  # type: ignore[attr-defined]
+                    if posterior < cfg.fusion.retrospective_min_posterior:
+                        item.accepted = False
+                        item.refused = ("UNRESOLVED: across the {0:.2f} s gap the re-acquisition is not singled out "
+                                        "against a new road user (posterior {1:.3f})".format(item.gap_s or 0.0, posterior))
             if item is not None:
                 evidence.append(item)
     refuse_ambiguous_corrected(evidence, by_name, cfg)
@@ -683,6 +695,11 @@ def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
             if not near or not arriving:
                 continue
             if fusion.association_method == "final":
+                # The body that hit the recorder was still closing in the last 0.2 s before the report (4 radar
+                # sweeps): one passing alongside, whose clearance no longer shrinks, did not arrive now.
+                last = [x for x in window if x.t_local >= t_o - 0.2 - 1e-6]
+                if len(last) < 2 or last[-1].clearance_m >= last[0].clearance_m:
+                    continue
                 verdict = _normal_component_consistent(local, other, window, t_o, t_p, cfg)
                 if verdict is not None:
                     touching.append(verdict)
@@ -859,3 +876,42 @@ def entity_timeline(group: Sequence[CommonTrack], joins: Sequence[PairEvidence],
             "first_relevant": relevance["relevant_from_t_global"],
             "first_identity_resolved": round(min(resolutions), 4) if resolutions else None,
             "first_hazard_relevant": min(hazards) if hazards else None}
+
+
+def stitch_spread(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig) -> float:
+    """Per-axis position standard deviation of the first track's last measured state carried across the gap to
+    the second one's first measurement with the tracker's own model (constant velocity, white acceleration
+    ``tracking.acceleration_std_mps2`` per 0.05 s sweep): sqrt(p^2 + (v dt)^2 + q dt^3 / 3), q = a^2 x 0.05."""
+    last = next((s for s in reversed(first.samples) if s.measured), None)
+    nxt = next((s for s in second.samples if s.measured), None)
+    if last is None or nxt is None:
+        return math.inf
+    gap = max(nxt.t_global - last.t_global, 0.0)
+    q = cfg.tracking.acceleration_std_mps2 ** 2 * 0.05
+    return math.sqrt(last.pos_std ** 2 + (last.vel_std * gap) ** 2 + q * gap ** 3 / 3.0)
+
+
+def stitch_density(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig) -> float:
+    """Gaussian density (1/m^2 per (m/s)^2) of a re-acquisition under the stitch test's own model
+    (``anonymous.stitch_evidence``: centre carried across the gap at constant velocity, white acceleration
+    ``tracking.acceleration_std_mps2`` over the gap, the two centre estimates' covariances; velocity difference
+    against both uncertainties plus the acceleration over the gap), on the measurement uncertainty only (one
+    recorder's pose bias is common to both sides).  A long gap spreads it: the density falls."""
+    a, b = corrected(first, 0.0, cfg), corrected(second, 0.0, cfg)
+    last = next((s for s in reversed(a.samples) if s.measured), None)
+    nxt = next((s for s in b.samples if s.measured), None)
+    if last is None or nxt is None:
+        return 0.0
+    gap = nxt.t_global - last.t_global
+    if gap <= 0.0:
+        return 0.0
+    ca, pa = _centre_estimate(a.recorder, last, _heading([last], cfg), cfg)
+    cb, pb = _centre_estimate(b.recorder, nxt, _heading([nxt], cfg), cfg)
+    sigma_a = cfg.tracking.acceleration_std_mps2
+    cov = pa + pb + np.eye(2) * ((sigma_a * gap ** 2 / 2.0) ** 2 + (last.vel_std * gap) ** 2)
+    miss = cb - (ca + last.velocity * gap)
+    var_v = _velocity_sigma(cfg, nxt.vel_std, last.vel_std) ** 2 + (sigma_a * gap) ** 2
+    dv = nxt.velocity - last.velocity
+    pos = math.exp(-0.5 * float(miss @ np.linalg.solve(cov, miss))) / (2.0 * math.pi * math.sqrt(max(np.linalg.det(cov), 1e-300)))
+    vel = math.exp(-0.5 * float(dv @ dv) / var_v) / (2.0 * math.pi * var_v)
+    return pos * vel

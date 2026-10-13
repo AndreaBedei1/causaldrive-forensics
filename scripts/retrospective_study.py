@@ -43,7 +43,7 @@ CONDITIONS: Dict[str, Any] = {
     "consumer_impulse10": ("combined", "consumer independent + 10%", ("consumer", 0.0)),
     "consumer_common_0.9_impulse10": ("combined", "consumer common 0.9 + 10%", ("consumer", 0.9)),
 }
-METHODS = ("current", "corrected", "retrospective")
+METHODS = ("current", "corrected", "retrospective", "final")
 # Seeds never used to develop or tune anything (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md, held-out policy).
 DEVELOPMENT_SEEDS = (0, 1, 2, 3)
 HELD_OUT_SEEDS = tuple(range(100, 110))
@@ -65,8 +65,17 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     perturbation, pose = robustness.build(dict(run=str(run_dir), family=family, level=level,
                                                parameter=parameter, seed=job["seed"]))
     cfg = load_config()
-    cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, association_method=job["method"]))
-    work = Path(job["work"]) / job["method"] / job["condition"] / "seed{0}".format(job["seed"])
+    method, _, overrides = job["method"].partition("@")
+    method, _, parts = method.partition(":")
+    cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, association_method=method))
+    for item in [o for o in overrides.split("@") if o]:  # sensitivity: fusion.<key>=<value>
+        key, _, value = item.partition("=")
+        cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, **{key: type(getattr(cfg.fusion, key))(value)}))
+    if parts:  # a tracker variant of the final method (development only): its covariance components
+        cfg = dataclasses.replace(cfg, tracking=dataclasses.replace(cfg.tracking, gating="covariance",
+                                                                  covariance_components=parts.replace("+", ",")))
+    safe = job["method"].replace(":", "_").replace("+", "-").replace("@", "__").replace("=", "-")
+    work = Path(job["work"]) / safe / job["condition"] / "seed{0}".format(job["seed"])
     target = work / run_dir.parent.name / run_dir.name
     if target.exists():
         shutil.rmtree(str(target))  # a stale copy of an interrupted job (never a recording)
@@ -126,7 +135,7 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             {k: d.get(k) for k in ("earlier", "later", "posterior", "gap_s", "chi2", "resolved", "candidates",
                                    "position_sigma_m", "t_old", "t_new")} for d in entities.get("retrospective") or []]
         if job.get("samples_dir"):
-            out = Path(job["samples_dir"]) / job["method"] / job["condition"] / "seed{0}".format(job["seed"])
+            out = Path(job["samples_dir"]) / safe / job["condition"] / "seed{0}".format(job["seed"])
             out.mkdir(parents=True, exist_ok=True)
             (out / (run_dir.parent.name + "_" + run_dir.name + ".json")).write_text(json.dumps(identity), encoding="utf-8")
         result["status"] = "complete"
@@ -158,7 +167,7 @@ def main(argv: List[str] = None) -> int:
     conditions = [c for c in args.conditions.split(",") if c]
     seeds = [int(s) for s in args.seeds.split(",") if s != ""]
     for name in methods:
-        if name not in METHODS:
+        if name.partition("@")[0].partition(":")[0] not in METHODS:
             raise SystemExit("unknown method " + name)
     for name in conditions:
         if name not in CONDITIONS:
@@ -174,7 +183,7 @@ def main(argv: List[str] = None) -> int:
                                      samples_dir=str(args.samples.resolve()) if args.samples else None))
     handles = {}
     for method in methods:
-        out = args.results / method
+        out = args.results / method.replace(":", "_").replace("+", "-").replace("@", "__").replace("=", "-")
         out.mkdir(parents=True, exist_ok=True)
         handles[method] = (out / "jobs{0}.jsonl".format(args.tag)).open("a", encoding="utf-8")
     done = 0
