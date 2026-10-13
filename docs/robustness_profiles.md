@@ -139,7 +139,7 @@ still displace the fused body in the absolute map. The final scatter plot relate
 to both errors. Any empirical relative-error boundary is conditional on these runs, profiles,
 seeds and heading assumptions; conservative missed merges are reported separately.
 
-`combined` runs all 17 canonical cases at exact, RTK, consumer-independent and consumer-rho=0.9
+`combined` runs all canonical cases at exact, RTK, consumer-independent and consumer-rho=0.9
 pose quality with 10% independent impulse noise per callback, using the same seed schedule.
 It reports true-contact recall, wrong pairings, unmatched true contacts and clock alignment.
 Singleton unpaired collision callbacks are not wrong vehicle-vehicle matches.
@@ -154,7 +154,7 @@ clock/assignment consistency constrain the pairing. Ambiguous partners remain
 unmatched. The legacy 10% relative gate applies without geometry.
 The symmetry Monte Carlo report is regenerated as a diagnostic of that legacy
 gate. All robustness families are rerun from the final clean analysis freeze;
-see [final validation](FINAL_VALIDATION_REPORT.md).
+see the final campaign results (`results/`).
 
 `CollisionPerturbation` rewrites each recorder's `collisions.jsonl`.  Each callback is dropped with probability `p_drop`; its impulse is multiplied by max(0, 1 + N(0, eps^2)); its timestamp is delayed by `latency_s` if the recorder is in `latency_recorders`.  The draws are made per callback, separately for each recorder.
 

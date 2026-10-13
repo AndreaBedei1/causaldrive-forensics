@@ -34,9 +34,9 @@ more bursts; one COLLISION per contact, at its first callback.
 
 Context: a regulated EDR is triggered by a velocity change of more than 8 km/h within 150 ms (UN R160
 section 5.3.1) [R160]; the collision sensor here reports every contact, with an impulse magnitude.  CARLA
-reports the same impulse magnitude to both bodies of a contact (`results/robustness/impulse_symmetry.md`), which
+reports the same impulse magnitude to both bodies of a contact (measured in the CARLA campaign), which
 the collision-anchored alignment uses within `fusion.impulse_tolerance` = 0.10 (engineering assumption; its
-robustness to impulse noise is in `results/robustness/summary.md`).  Two reports are one contact only if the two
+robustness to impulse noise is part of the robustness study, `docs/robustness_profiles.md`).  Two reports are one contact only if the two
 bodies also touch at them, each from its own pose stream (`fusion.contact_consistency_m` = 1.0 m plus 3 sigma of
 the declared pose accuracy; engineering assumption, against 0.06 m at most for every genuine match of the
 campaign and 54 m at least for the single-vehicle contacts it rejects).
@@ -181,13 +181,12 @@ median of the body's visible faces). All three ideal oracles supply the same tru
 COVERAGE against PERFECT measures FOV, range and occlusion loss; reconstruction against COVERAGE
 measures sensing and estimation loss. COVERAGE_TRACKED now isolates the return-point effects on
 kinematic quantities, without replacing the true body by that point. The explicit point ablation is
-`results/semantics/body_point_*.json`. Current precision, recall and timing are in
-`results/semantics/event_oracle_*.md`, interpreted in `docs/FINAL_VALIDATION_REPORT.md`.
+`scripts/event_oracle.py` (precision, recall and timing per event type, written next to the evaluated runs).
 
 **One-at-a-time sensitivity** (`scripts/semantic_sensitivity.py`): each threshold of section 4-6 varied to two
 alternative values, the oracle under the same definition; it reports the reconstruction's agreement with the
 oracle under each value and how far the oracle's own events move (what the choice of threshold alone does to
-the reference events): `results/semantics/sensitivity_*.md`.
+the reference events): `scripts/semantic_sensitivity.py`.
 
 ## References
 

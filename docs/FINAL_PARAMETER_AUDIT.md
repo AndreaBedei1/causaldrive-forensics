@@ -16,9 +16,9 @@ Categories:
   replaces or bounds it as noted.
 * **AUDITED-FIXED**: a fixed threshold METHOD 3 FINAL still uses; justified below, not replaced.
 
-Sensitivity sources: S = `results/final_hardening/sensitivity/SUMMARY.md` (seed 200, 23 runs, exact + consumer);
-T = tracker-component development study (seeds 200-201, the 17 canonical runs, exact / consumer / consumer
-common 0.9; `docs/FINAL_HARDENING_PLAN.md`); "-" = not varied in this phase.
+Sensitivity sources: S = development sensitivity study (seed 200, 23 runs, exact + consumer; Python 3.14 era, git history);
+T = tracker-component development study (seeds 200-201, the non-dense canonical runs, exact / consumer / consumer
+common 0.9; git history); "-" = not varied in this phase.
 
 ## Tracking (`tracking.*`)
 

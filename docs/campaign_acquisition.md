@@ -1,9 +1,7 @@
 # Recording and sensor calibration notes
 
-Acquisition/calibration information retained from the historical campaign report at `c706e025`.
-The sensor laboratory measurements are historical acquisition data, not newly simulated results.
-Per-run recording metadata and acquisition_provenance.json are authoritative; in particular
-the replacement canonical S02 has its own provenance, distinct from the old saved sweeps.
+Sensor setup and calibration of the acquisition (CARLA 0.9.15).  The sensor laboratory measurements are
+acquisition data, not simulated results.  Per-run recording metadata are authoritative.
 
 ## 2. Sensors
 

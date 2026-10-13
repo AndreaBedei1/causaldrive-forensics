@@ -1,57 +1,122 @@
 # CarlaGraph / causaldrive-forensics
 
-Offline forensic reconstruction from each vehicle's own recorded radar, odometry,
-controls and collision callbacks. Local tracks and events are reconstructed first;
-clock alignment, conservative recorder links and anonymous road-user fusion follow.
-Ground truth is available only to privileged evaluation and never enters reconstruction,
-fusion or replay. Supported/tested Python version: 3.8 only (the CARLA 0.9.15 client wheel is cp38):
-one environment runs acquisition, reconstruction, evaluation, replay and the tests.
+Accident reconstruction from partial onboard recordings.  Each vehicle that recorded something contributes
+only its own data, on its own clock: radar returns, pose and motion, controls and collision callbacks.  From
+those recordings the project reconstructs what happened between all road users, including the ones that
+recorded nothing, and replays the reconstruction.
 
-The saved campaign contains 17 canonical recordings and 240 local sweep recordings.
-Current quantitative results, limitations, tests and the exact analysis freeze are in
-[FINAL_VALIDATION_REPORT](docs/FINAL_VALIDATION_REPORT.md). The acquisition provenance
-of every recording remains historical; the new canonical S02 does not redefine old sweeps.
+```
+onboard raw recordings (per recording vehicle)
+  -> local reconstruction    radar tracks, ego motion, local semantic events (CLOSING, CRITICAL_TTC, CUT_IN, ...)
+  -> temporal alignment      on the collisions the recorders share (else on what they observed of each other)
+  -> identity association    which local track is which recorder; exclusive per observer and instant
+  -> anonymous road users    road users that recorded nothing, fused from the recorders' radar views (U1, U2, ...)
+  -> global semantic graph   one event trace on the global clock
+  -> replay / evaluation
+```
 
-## Reconstruct and evaluate saved files
+* Ground truth is used **only** for evaluation and scenario validation: never in tracking, fusion, alignment,
+  collision matching or the normal replay.
+* Road users that recorded nothing are reconstructed from the recorders' observations alone.
+* The replay shows the reconstruction, not the simulator state: recorder vehicles are CARLA actors moved along
+  their own recorded poses; reconstructed road users are boxes.
+* No LLM or external API in the pipeline; no scenario-specific reconstruction rules.  Ambiguity is left
+  unresolved: a false merge is worse than an unresolved identity.
 
-```text
-python scripts/reconstruct_run.py traces/S12/run_0_crash
-python scripts/worked_example.py traces/S12/run_0_crash
+## Environment (the only one)
+
+```bat
+conda activate carla
+python --version                                   :: Python 3.8.20
+python -c "import carla; print(carla.__file__)"    :: CARLA 0.9.15 client
+python -c "import cdf; print(cdf.__file__)"        :: this checkout's src\cdf
+```
+
+CARLA 0.9.15 (`Desktop\Carla9_15\WindowsNoEditor`), the project's private server on **port 3000** (traffic
+manager 8100; port 2000 is left to other users).  To recreate the environment:
+`conda env create -f environment.yml` (Python 3.8.20, `requirements.txt`, editable install of this checkout).
+
+## Commands
+
+```bat
+:: start the CARLA server on port 3000 (stops only the engine it started; Ctrl-C to quit)
+python scripts\start_carla.py
+
+:: record a scenario (writes traces\<id>\run_<seed>_<variant>; use a scratch --output for trials)
+python scripts\run_scenario.py --scenario S14 --output scratch\trial
+python scripts\check_scenario_run.py scratch\trial\S14\run_0_surrounded --expect A-B
+python scripts\scenario_density.py scratch\trial\S14\run_0_surrounded
+
+:: reconstruct and evaluate one run (evaluation reads ground truth only after the reconstruction is written)
+python scripts\reconstruct_run.py traces\S11\run_0_consequential --evaluate
+
+:: reconstruct + evaluate + fusion metrics + event oracle for one run, then validate the whole canonical set
+python -c "import sys; sys.path[:0]=['scripts','src']; import hardening_refresh as h; h.refresh('traces/S11/run_0_consequential')"
+python scripts\validate_canonical.py --out docs\CANONICAL_VALIDATION.md
+
+:: replay one run, or pick one from the review menu of the 23 canonical runs
+python scripts\replay_run.py traces\S14\run_0_surrounded
+scripts\review_canonical_runs.bat
+
+:: tests
 python -m pytest -q
 ```
 
-Install NumPy, Pillow, OpenCV, PyYAML, Matplotlib and pytest. Recording and interactive
-replay additionally require the matching CARLA 0.9.15 Python API. The current validation
-is entirely offline and needs no CARLA server or provider API.
+## Canonical scenarios (development set: 19 scenarios, 23 runs)
 
-For a complete reproducible analysis, execute `scripts/final_validation.py` from a
-clean detached checkout of `ANALYSIS_FREEZE_COMMIT` (`8d7343d`), with `--original-root`, a separate
-`--data-root`, `--analysis-commit` and the successive phases `stage`, `reconstruct`,
-`aggregate`, `sensitivity`, `robustness`, `visual`, `figures`, `qa`. All raw files are
-read or linked; only derived outputs are published. The script verifies the source
-checkout is clean at that commit before and after every phase.
+| id | scenario | runs | purpose |
+|---|---|---|---|
+| S01 | rear_end | crash | rear-end collision, two recorders |
+| S02 | cut_in | crash, critical_before_cut_in | cut-in collision; critical state before the cut-in |
+| S03 | crossing | crash | crossing collision at a junction |
+| S04 | chain_collision | a_front_pushed, b_rear_first | three-car chain, two orders of contacts |
+| S05 | occluded_chain_stop | crash | chain with an occluded leader |
+| S06 | multidirection_crossing | crash | three vehicles from different directions |
+| S07 | roundabout | merge_conflict | merge conflict in a roundabout (Town03_Opt) |
+| S08 | single_stop_a | rolls_through | a vehicle rolls through a STOP |
+| S09 | all_way_stop | near_simultaneous | near-simultaneous arrivals at an all-way stop |
+| S10 | intersection_pileup | deflected_into_c | pile-up, a car deflected into a third |
+| S11 | secondary_collision | consequential | a secondary collision after the first |
+| S12 | unobserved_causal_vehicle | crash | a causally relevant car that records nothing |
+| S13 | anonymous_pair | abreast, platoon, passing | two nearby non-recording cars kept apart |
+| S14 | dense_abreast | surrounded | dense abreast traffic around the recorders, one sideswipe |
+| S15 | dense_platoon | dense_platoon | dense column with adjacent traffic, rear-end |
+| S16 | dense_overtaking | overtaking | identities through passes, sideswipe while overtaking |
+| S17 | occlusion_reappearance | occlusion_reappearance | identity across an occlusion up to a collision |
+| S18 | far_to_near | far_to_near | far ambiguous identities resolved as cars approach |
+| S19 | collision_ambiguity | collision_ambiguity | several similar cars within the pose uncertainty of a contact |
 
-## Results and review
+Run folders: `traces\<id>\run_0_<run>\` with the raw recordings (`vehicles\`), the privileged
+`ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated under Python 3.8).
+Validation of the set: [docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md).  The final experimental
+campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has not been run.
 
-- [Results index](results/README.md): current tables and vector figures, with artifact hashes.
-- [Event definitions](docs/event_definitions.md): shared body geometry, target-induced cut-in and thresholds.
-- [Robustness profiles](docs/robustness_profiles.md): independent/correlated GNSS and combined impulse study.
-- [Fusion regression diagnosis](docs/audit/fusion_accuracy_regression.md): identical-instant historical comparisons.
-- [Acquisition and calibration](docs/campaign_acquisition.md): sensor geometry and recording prerequisites.
-- [Paper positioning](docs/paper_positioning.md): framing, logging prerequisites vs regulations, related work, limitations.
-- [Verified bibliography](docs/bibliography.md).
-- [Manual replay checklist](docs/manual_replay_checklist.md).
+## Replay controls
 
-Each canonical run has one current `reconstruction/evaluation/visual_audit_final` set.
-Headless replay frames read reconstructed data and public map geometry. Interactive replay:
+| key | action |
+|---|---|
+| SPACE | play / pause |
+| LEFT / RIGHT | seek 0.5 s (SHIFT: 0.05 s) |
+| N / P | next / previous reconstructed event |
+| 1-4 | speed 0.25 / 0.5 / 1 / 2x |
+| C | camera: overview -> follow each recorder vehicle in turn -> free -> overview |
+| TAB | next recorder (follow camera) |
+| T | radar tracks on / off |
+| G | ghost boxes or dots for unfused tracks |
+| H | help |
+| R | restart |
+| ESC | quit |
+| free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
-```text
-python scripts/replay_run.py traces/S09/run_0_near_simultaneous --speed 0.25 --paused
-```
+The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
+global road user (CRITICAL_TTC, CUT_IN, IN_EGO_PATH) and its own braking; at most a few lines.  Raw track ids,
+UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.
 
-Recorder-associated tracks are dots; each anonymous fused entity is drawn once.
-Radar blindness, uncertainty, conservative unmatched contacts and missed merges remain
-explicit limitations. Source nodes and source tracks are preserved in aggregated global events.
+## Documentation
 
-The optional `src/cdf/llm` infrastructure is parked and is outside this validated pipeline.
-No provider calls are needed for any current result.
+- [Event definitions](docs/event_definitions.md): semantic events, body geometry and thresholds.
+- [Parameter audit](docs/FINAL_PARAMETER_AUDIT.md): every reconstruction parameter, its category and evidence.
+- [Robustness profiles](docs/robustness_profiles.md): pose, radar and impulse perturbations of the campaign.
+- [Sensors and acquisition](docs/campaign_acquisition.md): radar geometry and recording prerequisites.
+- [Paper positioning](docs/paper_positioning.md): framing, logging prerequisites, related work, limitations.
+- [Bibliography](docs/bibliography.md).

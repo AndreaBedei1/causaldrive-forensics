@@ -1,8 +1,8 @@
 # Paper positioning
 
 Framing, logging prerequisites against the regulations, related work, limitations and the STOP / YIELD and
-depth-camera decision, kept from the phase-7 positioning (commit `11dbc6d`) with the numbers of the final
-analysis (`8d7343d`, [FINAL_VALIDATION_REPORT](FINAL_VALIDATION_REPORT.md)).  Citations: [bibliography](bibliography.md).
+depth-camera decision.  Quantitative claims come from the final experimental campaign (not yet run); the 23
+canonical runs S01-S19 are the development set.  Citations: [bibliography](bibliography.md).
 
 ## Framing
 
@@ -15,8 +15,8 @@ into anonymous entities (U1, U2, ...), builds a global semantic event trace and 
 reconstruction alone, and shows per vehicle when a hazard became perceivable from its onboard sensors and when
 the vehicle responded (an observed vehicle response delay).  These are inputs to an expert's avoidability
 analysis: the method decides neither avoidability nor liability, and a hazard perceivable by a vehicle's
-sensors is not a hazard perceived by its driver.  Every quantitative claim comes from CARLA simulations (17
-canonical runs, 240 sweep runs, 2035 robustness jobs) whose ground truth is used for evaluation only.
+sensors is not a hazard perceived by its driver.  Every quantitative claim comes from CARLA simulations (the canonical
+development runs S01-S19 and the final held-out campaign) whose ground truth is used for evaluation only.
 
 ## Logging prerequisites
 
@@ -83,34 +83,31 @@ IEEE 1616.1 [B22]).
   family at a time, except the combined GNSS + impulse study.  CARLA reports one impulse magnitude to both bodies of a contact, which
   makes collision matching easier than with real recorders.
 - Alignment: it needs a shared collision, or observed trajectories that fix one clock offset (otherwise the
-  recorder stays UNALIGNED).  Collision matching relies on the touching geometry from the pose streams: with
-  exact or RTK poses 2-10 % impulse error keeps every match (20 %: 0.985), with consumer-grade poses 0.77 of
-  the collisions match and about one wrong pairing occurs in ten draws over the 17 runs.  A collision-report
-  latency on one recorder costs matches (0.91 / 0.77 / 0.55 of the collisions at 0.10 / 0.25 / 0.50 s); clock
-  offsets are constant within a recording (no drift modelled or tested).
+  recorder stays UNALIGNED).  Collision matching relies on the touching geometry from the pose streams and on
+  the recorder's own radar view of the arriving body; with consumer-grade poses matches are lost (left
+  unmatched rather than guessed); a collision-report latency costs matches; clock offsets are constant within a
+  recording (no drift modelled or tested).
 - Radar-only perception of road users that recorded nothing: their size is fitted only where the recorders see
   different faces (otherwise a nominal box); standing vehicles are not tracked; two cars 1.4 m apart side by
-  side are kept apart with exact poses (0 false merges in 523 sweep merge trials) but merged when the declared
-  pose accuracy is consumer-grade (about 20 false merges per draw over the three canonical S13 runs); at the
-  first sweeps the same car can be drawn as two anonymous users until the cross-observer merge; identity
-  switches at contacts and short fragments leave some tracks anonymous; heavy clutter creates spurious tracks
-  and events.
-- Recorder links: 0 wrong in the canonical runs and the sweeps; 70 tracks of a recorder left anonymous in the
-  sweeps, 54 of them crossing targets whose tracked velocity is about 1 m/s off.
+  side must be kept apart, and a merge needs evidence that discriminates them at the declared pose accuracy
+  (otherwise the identities stay unresolved: false merges are worse than unresolved identities); the same car
+  can be drawn as two anonymous users until the cross-observer evidence suffices; identity switches at
+  contacts and short fragments leave some tracks anonymous; heavy clutter creates spurious tracks and events.
+- Recorder links: a recorder's identity is exclusive per observer at each instant (two simultaneous tracks
+  carry it only with same-body evidence); tracks of a recorder can stay anonymous, notably crossing targets
+  whose tracked tangential velocity is poorly observed by Doppler.
 - Pose errors: the mutual refinement estimates translations only (heading errors remain) and does not reduce
   the false merges of the degraded GNSS profile; the part of the pose errors common to all recorders stays in
   every absolute position.
 - Event semantics: thresholds with sources where they exist and engineering assumptions elsewhere
-  (`docs/event_definitions.md`); path entries and cut-ins are tested on the estimated body (path-entry recall
-  0.85 and cut-in-from-right recall 0.98 when they happen more than 0.5 s before contact, 0.44 / 0.41 in the
-  last 0.5 s, when the body enters alongside the observer at contact range); the oracle validates perception
+  (`docs/event_definitions.md`); path entries and cut-ins are tested on the estimated body (recall is lower in
+  the last 0.5 s before a contact, when the body enters alongside the observer at contact range); the oracle validates perception
   against the definitions, not the definitions against human judgement; the sensitivity varies one threshold
   at a time.
 - Responses in the campaign are scripted: observed vehicle response delays describe the scenario logic, not
   drivers; sensor perceivability is not driver perception.
 - Scope: motor vehicles only (cars and one van; no pedestrians, cyclists, motorcycles or infrastructure
-  sensors); 17 canonical runs and six sweep families of 40 runs (N capped by the recording budget; borderline
-  outcomes are rare in some families); the LLM pipeline and the temporal-logic verifier are out of the paper.
+  sensors); 19 canonical scenarios (23 development runs) on two CARLA maps; no LLM in the pipeline.
 
 ## STOP / YIELD and the depth camera
 
