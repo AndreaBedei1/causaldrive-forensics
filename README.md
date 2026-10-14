@@ -46,18 +46,29 @@ another algorithm ([parameter audit](docs/FINAL_PARAMETER_AUDIT.md)).
   cannot-link constraints, one-to-one assignment and a stitch posterior against a new road user.  Two
   observers seeing one body at the same instants are tested on every shared instant, also outside the
   relevance envelope (no two superimposed boxes of one car); a brief overlap (5-9 instants) must pass at
-  every instant, a long one (30+) by majority.  Ambiguity stays UNRESOLVED.  A retrospective resolution may
+  every instant, a long one (30+) by majority; after an observer's own collision its velocity estimates are
+  not compared (geometry decides).  A track that is the same body as another observer's track of recorder X
+  inherits X (and no other recorder).  Ambiguity stays UNRESOLVED.  A retrospective resolution may
   name an earlier observation from later evidence by several observers, against every other earlier
   candidate and a new road user; no sample, event or timestamp moves.
-* **Semantics**: CRITICAL_TTC of a pair ends at their collision (also when only the fusion knows that the
-  track was the partner) and does not restart while they touch.  CUT_IN is road-relative: with the map's
-  lanes (public OpenDRIVE file of the CARLA installation, recognised from the recorder's own positions) the
-  target must leave its own lane toward the recorder, so cars following one curved road do not cut in; no
-  cut-in starts after the recorder's own collision.
+* **Semantics**: the recorder's path corridor follows the lane it drives in (public OpenDRIVE map of the CARLA
+  installation, recognised from the recorder's own positions; at a junction the branch it takes later): cars
+  following one bend are not in its path.  CUT_IN needs a lateral manoeuvre of the target toward that path,
+  leaving its own lane, confirmed by its EGO_PATH_ENTRY; none starts after the recorder's own collision.
+  CRITICAL_TTC is PREDICTED_OVERLAP (a collision course braking cannot avoid: crossings, merges) or
+  UNSAFE_FORWARD_GAP, which only a leader can cause: a target in the recorder's path or in a confirmed cut-in,
+  never a car abreast.  A collision course that only the target's motion across its own lane creates counts
+  when that motion is confirmed (it enters the recorder's path or strikes it); otherwise the car keeps its
+  lane (a car passing beside the recorder, whose radar point slides over its faces, is no threat).  A pair's
+  episode ends at their collision (also when only the fusion knows that the track was the partner) and does
+  not restart while they touch.
 * **Global graph**: after two road users have touched, a CRITICAL_TTC between that same pair is suppressed in
   the global graph and the replay; the raw local evidence stays in the local graphs.
 
-## Environment (the only one)
+## Environment: Python 3.8 only
+
+One checkout, one environment: the conda environment `carla` (Python 3.8.20, CARLA 0.9.15 client).  No other
+Python version is supported.
 
 ```bat
 conda activate carla
@@ -69,6 +80,30 @@ python -c "import cdf; print(cdf.__file__)"        :: this checkout's src\cdf
 CARLA 0.9.15 (`Desktop\Carla9_15\WindowsNoEditor`), the project's private server on **port 3000** (traffic
 manager 8100; port 2000 is left to other users).  To recreate the environment:
 `conda env create -f environment.yml` (Python 3.8.20, `requirements.txt`, editable install of this checkout).
+
+## Replay the canonical scenarios
+
+Start CARLA 0.9.15 first, either your own server (port 2000) or the project's private one (port 3000):
+
+```bat
+conda activate carla
+:: the project's own server on port 3000 (Ctrl-C stops it); skip it when your CARLA already runs on port 2000
+python scripts\start_carla.py
+```
+
+Then, in a second terminal, the review menu of the 22 canonical runs (pick a number, the replay opens; close it
+to come back; `q` quits).  The .bat uses the server on port 2000; with the project's server pass `--port 3000`:
+
+```bat
+conda activate carla
+:: your CARLA on port 2000
+scripts\review_canonical_runs.bat
+:: or the project's server on port 3000
+python scripts\review_canonical_runs.py --port 3000
+```
+
+One run directly: `python scripts\replay_run.py traces\S14\run_0_surrounded --port 2000` (add `--start 5
+--speed 0.25` to begin at 5 s in slow motion).
 
 ## Commands
 
@@ -88,7 +123,7 @@ python scripts\reconstruct_run.py traces\S11\run_0_consequential --evaluate
 python -c "import sys; sys.path[:0]=['scripts','src']; import hardening_refresh as h; h.refresh('traces/S11/run_0_consequential')"
 python scripts\validate_canonical.py --out docs\CANONICAL_VALIDATION.md
 
-:: replay one run, or pick one from the review menu of the 23 canonical runs
+:: replay one run, or pick one from the review menu of the 22 canonical runs
 python scripts\replay_run.py traces\S14\run_0_surrounded
 scripts\review_canonical_runs.bat
 
@@ -96,7 +131,7 @@ scripts\review_canonical_runs.bat
 python -m pytest -q
 ```
 
-## Canonical scenarios (development set: 19 scenarios, 23 runs)
+## Canonical scenarios (development set: 18 scenarios, 22 runs)
 
 | id | scenario | runs | purpose |
 |---|---|---|---|
@@ -113,12 +148,11 @@ python -m pytest -q
 | S11 | secondary_collision | consequential | a secondary collision after the first |
 | S12 | unobserved_causal_vehicle | crash | a causally relevant car that records nothing |
 | S13 | anonymous_pair | abreast, platoon, passing | two nearby non-recording cars kept apart |
-| S14 | dense_abreast | surrounded | dense abreast traffic around the recorders, one sideswipe |
+| S14 | dense_abreast | surrounded | dense abreast traffic ahead of the recorders (nobody behind), one sideswipe |
 | S15 | dense_platoon | dense_platoon | dense column with adjacent traffic, rear-end |
 | S16 | dense_overtaking | overtaking | identities through passes, sideswipe while overtaking |
-| S17 | occlusion_reappearance | occlusion_reappearance | identity across an occlusion up to a collision |
-| S18 | far_to_near | far_to_near | far ambiguous identities resolved as cars approach |
-| S19 | collision_ambiguity | collision_ambiguity | several similar cars within the pose uncertainty of a contact |
+| S17 | occlusion_reappearance | occlusion_reappearance | identity across an occlusion up to a collision (nobody behind) |
+| S18 | collision_ambiguity | collision_ambiguity | several similar cars around a rear-end contact, on the straight after a bend |
 
 Run folders: `traces\<id>\run_0_<run>\` with the raw recordings (`vehicles\`), the privileged
 `ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated from the raw recordings
@@ -144,12 +178,14 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
 The upper-left panel shows the run, its time, the replay state, the camera and the last and next event.
-The panel of each recorder on the right shows what that recorder perceives and does now: first its complete
-current perceived state (`ego: MOVING, BRAKE`, then one line per local track with the states it holds, named
-after the fusion's identity, e.g. `track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road
-users it sees, then the semantic events it generated in the last second (`» CRITICAL_TTC_START → B`).  UNKNOWN
-states and the measured/predicted provenance stay in the reconstruction files; at most 8 lines, then
-`... +N more`.
+The panel of each recorder on the right shows what that recorder perceives and does now: its current perceived
+state (`ego: MOVING, BRAKE`, then one line per local track holding an active state, named after the fusion's
+identity, e.g. `track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road users it sees, then
+the semantic events it generated in the last second (`» CRITICAL_TTC_START → B`).  At most 8 lines, then
+`... +N more`; when a panel is full, its own state, the alerts (CRITICAL_TTC, CUT_IN) and the recent events are
+kept first.  UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.  A coloured
+line joins a recorder to a vehicle it holds CRITICAL_TTC or CUT_IN about, and to the nearest vehicle in its
+path, labelled with their body-to-body clearance (`1.4 m`).
 
 ## Documentation
 

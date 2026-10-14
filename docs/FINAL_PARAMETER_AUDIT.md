@@ -67,9 +67,11 @@ present tracker gates.
 | `observed_alignment_*` | step 0.05, min 10 samples, 2 m/s, ratio 3 | AUDITED-FIXED | clock alignment without a matched collision | - |
 | `link_min_samples`, `link_min_fraction` | 10 / 0.8 | STATISTICAL (evidence) | recorder links | - |
 | `min_track_persistence_s` | 1.0 | AUDITED-FIXED | collision-based association | - |
-| short overlap (code constant `SHORT_FRAGMENT_MIN_SAMPLES`) | 5 instants | STATISTICAL (evidence) | a cross-observer pair or a recorder link with 5-9 compared instants is accepted only when every instant passes | development: S12/S13/S15 duplicates removed, 0 false merges on the 23 runs |
+| short overlap (code constant `SHORT_FRAGMENT_MIN_SAMPLES`) | 5 instants | STATISTICAL (evidence) | a cross-observer pair or a recorder link with 5-9 compared instants is accepted only when every instant passes | development: S12/S13/S15 duplicates removed, 0 false merges on the canonical runs |
 | long overlap (code constant `LONG_OVERLAP_FACTOR`) | 3 x `anonymous_min_shared_samples` | STATISTICAL (evidence) | a cross-observer pair compared on 30+ instants is accepted when the median instant passes both gates | development: distinct-vehicle pairs pass at most 17 % of instants (235 pairs), same-vehicle pairs 77-100 % |
 | retrospective anchor | a cross-observer link compared on >= `anonymous_min_shared_samples` | STATISTICAL (evidence) | a later entity anchors a backward resolution only with a full-strength cross-observer link; every other earlier entity passing the backward test competes in the posterior | development: removed a false merge in S14 |
+| identity inheritance | same pair test as a cross-observer link, one recorder only | STATISTICAL (evidence) | an unnamed track inherits recorder X when it is the same body (`pair_corrected`; a short overlap must pass every instant) as another observer's track already named X, and as no track named another recorder | development: S11 B's post-contact fragment of C named C (correct per ground truth); 0 false merges, 0 wrong links on the canonical runs |
+| post-impact velocity | not compared | PHYSICAL | after an observer's own collision its velocity estimates carry the impulse: the pair test then compares the box only | unit test (`test_identity_inheritance`) |
 
 ## Road model (`reconstruction/road.py`)
 
@@ -78,6 +80,11 @@ present tracker gates.
 | map fit | 0.8 | STATISTICAL | the map is the one whose driving lanes contain 80 % of the recorder's own positions; else no road model (kinematic CUT_IN) | - |
 | lane search radius | 4.0 m | AUDITED-FIXED | lane stretches considered around a point (a lane is 3-4 m wide) | - |
 | `cut_in_lateral_speed_mps` (reused) | 0.3 | AUDITED-FIXED | the target must leave its own lane toward the recorder at least this fast | development: lane sampling every ~2 m gives <= 0.2 m/s heading error on a 60 m bend |
+| path corridor step / reach (code constants `PATH_STEP_M`, `PATH_AHEAD_M`, `PATH_BEHIND_M`) | 2 m / 80 m / 10 m | AUDITED-FIXED | the recorder's lane-following path (EGO_PATH and CUT_IN in path coordinates on bends); at a junction the branch nearest the recorder's own later position (its recorded future, never ground truth) | unit tests on a synthetic 60 m bend (`test_leader_cut_in_rules`) |
+| lane continuation (`CONTINUATION_M`, `CONTINUATION_DEG`) | 3 m / 35 deg | AUDITED-FIXED | two lane stretches continue one another when the end of one is within 3 m and 35 deg of the start of the next | - |
+| CUT_IN confirmation | a later EGO_PATH_ENTRY | rule | no entry into the recorder's path after the lateral approach: no CUT_IN | unit tests; canonical cut-in audit (`docs/CANONICAL_VALIDATION.md`) |
+| leader | in the path, or in a confirmed cut-in | rule | UNSAFE_FORWARD_GAP only for a leader (abreast or adjacent-lane cars never) | unit tests; canonical CRITICAL_TTC audit |
+| lane-keeping null hypothesis (`LANE_TRAVEL_DEG`) | 30 deg | rule / AUDITED-FIXED | a PREDICTED_OVERLAP that only the target's velocity across its own lane creates (target within 30 deg of its lane's direction) needs a confirmation: path entry (now or later) or a strike (a contact of the track, closing in over `STRIKE_CLOSING_WINDOW_S` = 0.2 s before it, or the track lost while closing within `approach_window_s` before a contact); else the course is predicted at its velocity along the lane | development: removes the passing-car episodes of S15 (A on G, J) and S18 (B on E, F); every other canonical CRITICAL_TTC start unchanged |
 
 ## Relevance envelope (`semantics.*`)
 
