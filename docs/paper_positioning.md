@@ -2,7 +2,7 @@
 
 Framing, logging prerequisites against the regulations, related work, limitations and the STOP / YIELD and
 depth-camera decision.  Quantitative claims come from the final experimental campaign (not yet run); the 23
-canonical runs S01-S19 are the development set.  Citations: [bibliography](bibliography.md).
+canonical runs S01-S18 are the development set.  Citations: [bibliography](bibliography.md).
 
 ## Framing
 
@@ -16,7 +16,7 @@ reconstruction alone, and shows per vehicle when a hazard became perceivable fro
 the vehicle responded (an observed vehicle response delay).  These are inputs to an expert's avoidability
 analysis: the method decides neither avoidability nor liability, and a hazard perceivable by a vehicle's
 sensors is not a hazard perceived by its driver.  Every quantitative claim comes from CARLA simulations (the canonical
-development runs S01-S19 and the final held-out campaign) whose ground truth is used for evaluation only.
+development runs S01-S18 and the final held-out campaign) whose ground truth is used for evaluation only.
 
 ## Logging prerequisites
 

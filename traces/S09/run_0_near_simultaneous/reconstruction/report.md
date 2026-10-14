@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 12.85 s | 130 | 27 | 51 | 2 | A:e20 @ 7.15 s |
+| A | 12.85 s | 130 | 28 | 49 | 2 | A:e20 @ 7.15 s |
 | B | 12.85 s | 130 | 33 | 63 | 3 | B:e25 @ 7.15 s |
 
 ## Graph alignment
@@ -44,7 +44,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 
 ## Global graph
 
-53 nodes, 121 edges; 10 merged node(s): g11 TRACK_APPEARED_LEFT(A,B) from A:e06 + A:e09, g12 TRACK_APPEARED_RIGHT(B,A) from B:e06 + B:e28 + B:e18 + B:e24, g14 CLOSING_START(B,A) from B:e07 + B:e11, g27 CLOSING_START(B,A) from B:e14 + B:e27 + B:e19, g31 CLOSING_START(A,B) from A:e15 + A:e22, g34 CRITICAL_TTC_START(A,B) from A:e18 + A:e21, g35 CRITICAL_TTC_START(B,A) from B:e17 + B:e26 + B:e21, g37 EGO_PATH_ENTRY(B,A) from B:e20 + B:e23 + B:e22, g38 COLLISION(A,B) from A:e20 + B:e25, g42 TRACK_LOST(B,A) from B:e28 + B:e24.
+54 nodes, 129 edges; 10 merged node(s): g11 TRACK_APPEARED_LEFT(A,B) from A:e06 + A:e09, g12 TRACK_APPEARED_RIGHT(B,A) from B:e06 + B:e28 + B:e18 + B:e24, g14 CLOSING_START(B,A) from B:e07 + B:e11, g27 CLOSING_START(B,A) from B:e14 + B:e27 + B:e19, g31 CLOSING_START(A,B) from A:e15 + A:e22, g34 CRITICAL_TTC_START(A,B) from A:e18 + A:e21, g35 CRITICAL_TTC_START(B,A) from B:e17 + B:e26 + B:e21, g37 EGO_PATH_ENTRY(B,A) from B:e20 + B:e23 + B:e22, g38 COLLISION(A,B) from A:e20 + B:e25, g42 TRACK_LOST(B,A) from B:e28 + B:e24.
 
 ### Event sequence (global time)
 
@@ -69,7 +69,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - `-0.80` EGO_PATH_ENTRY(B,A)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TRACK_LOST(B,A)
 - `+0.05` CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
-- `+0.20` TRACK_APPEARED_LEFT(B,A)
+- `+0.20` TRACK_APPEARED_LEFT(B,A); EGO_PATH_ENTRY(A,B)
 - `+0.30` MOVING_END(B); STOP_START(B)
 - `+0.50` TURN_LEFT_END(A); MOVING_END(A); STOP_START(A)
 
@@ -123,6 +123,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - 0.05 s after the reference collision, A started braking.
 - 0.05 s after the reference collision, B started braking.
 - 0.20 s after the reference collision, B's radar started tracking A, which appeared on its left.
+- 0.20 s after the reference collision, A observed B enter its forward path corridor.
 - 0.30 s after the reference collision, B stopped moving.
 - 0.30 s after the reference collision, B came to a stop.
 - 0.50 s after the reference collision, A stopped turning left.
@@ -133,7 +134,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_002 (B): CRITICAL_TTC_START 5.90, COLLISION with B 7.15 (+1.25 s) [local times; t_global: critical_ttc_start -1.25, collision +0.00]
+- A's track_002 (B): CRITICAL_TTC_START 5.90, COLLISION with B 7.15 (+1.25 s); EGO_PATH_ENTRY 7.35 after critical TTC (+1.45 s) [local times; t_global: critical_ttc_start -1.25, ego_path_entry +0.20, collision +0.00]
 - B's track_001 (A): CRITICAL_TTC_START 6.05, COLLISION with A 7.15 (+1.10 s); EGO_PATH_ENTRY 6.80 after critical TTC (+0.75 s) [local times; t_global: critical_ttc_start -1.10, ego_path_entry -0.35, collision +0.00]
 - B's track_002 (A): CRITICAL_TTC_START 6.70, COLLISION with A 7.15 (+0.45 s); EGO_PATH_ENTRY 6.35 before critical TTC (-0.35 s) [local times; t_global: critical_ttc_start -0.45, ego_path_entry -0.80, collision +0.00]
 
@@ -150,6 +151,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - STOP_END(A); MOVING_START(A)
 - COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TRACK_LOST(B,A)
 - CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- TRACK_APPEARED_LEFT(B,A); EGO_PATH_ENTRY(A,B)
 - MOVING_END(B); STOP_START(B)
 - TURN_LEFT_END(A); MOVING_END(A); STOP_START(A)
 
@@ -158,7 +160,8 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 A:
 - CLOSING of track_001, since A:e07 (t = 2.50 s); the track was lost at 3.50 s
 - BRAKE, since A:e24 (t = 7.20 s)
-- STOP, since A:e27 (t = 7.65 s)
+- EGO_PATH of track_002, since A:e25 (t = 7.35 s)
+- STOP, since A:e28 (t = 7.65 s)
 B:
 - CLOSING of track_002, since B:e19 (t = 6.20 s); the track was lost at 7.00 s
 - CRITICAL_TTC of track_002, since B:e21 (t = 6.70 s); the track was lost at 7.00 s

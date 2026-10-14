@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 15 | 25 | 1 | A:e11 @ 5.30 s |
+| A | 15.15 s | 153 | 15 | 27 | 1 | A:e10 @ 5.30 s |
 | B | 15.15 s | 153 | 11 | 16 | 0 | B:e07 @ 5.30 s |
 
 ## Graph alignment
@@ -19,7 +19,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e11 | 5.30 | -5.30 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e10 | 5.30 | -5.30 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e07 | 5.30 | -5.30 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -38,24 +38,24 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 
 ## Global graph
 
-25 nodes, 42 edges; 4 merged node(s): g06 CLOSING_START(A,B) from A:e04 + A:e13, g07 CUT_IN_FROM_LEFT_START(A,B) from A:e05 + A:e10, g09 CRITICAL_TTC_START(A,B) from A:e07 + A:e12, g17 COLLISION(A,B) from A:e11 + B:e07.
+25 nodes, 46 edges; 4 merged node(s): g06 CLOSING_START(A,B) from A:e04 + A:e12, g07 CUT_IN_FROM_LEFT_START(A,B) from A:e05 + A:e15, g08 CRITICAL_TTC_START(A,B) from A:e06 + A:e11, g16 COLLISION(A,B) from A:e10 + B:e07.
 
 ### Event sequence (global time)
 
 - `-5.30` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - `-4.40` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
-- `-3.80` CUT_IN_FROM_LEFT_START(A,B)
-- `-3.55` EGO_PATH_ENTRY(A,B)
+- `-3.60` CUT_IN_FROM_LEFT_START(A,B)
 - `-3.40` CRITICAL_TTC_START(A,B)
+- `-3.15` EGO_PATH_ENTRY(A,B)
 - `-2.15` THROTTLE_END(B); BRAKE_START(B)
 - `-1.65` BRAKE_END(B)
 - `-1.55` THROTTLE_START(B)
 - `-0.85` THROTTLE_END(A); BRAKE_START(A)
-- `-0.20` CUT_IN_FROM_LEFT_END(A,B)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); THROTTLE_END(B); BRAKE_START(B)
 - `+0.15` CLOSING_END(A,B)
 - `+0.35` MOVING_END(A); STOP_START(A)
 - `+0.55` MOVING_END(B); STOP_START(B)
+- `+1.20` CUT_IN_FROM_LEFT_END(A,B)
 
 ### What happened, in plain language
 
@@ -65,16 +65,15 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 - 5.30 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 4.40 s before the reference collision, A's radar started tracking B, which appeared on its left.
 - 4.40 s before the reference collision, A observed B start closing in (already the case when first observed).
-- 3.80 s before the reference collision, A observed B cutting in from the left.
-- 3.55 s before the reference collision, A observed B enter its forward path corridor.
+- 3.60 s before the reference collision, A observed B cutting in from the left.
 - 3.40 s before the reference collision, A's time-to-contact with B became critical.
+- 3.15 s before the reference collision, A observed B enter its forward path corridor.
 - 2.15 s before the reference collision, B released the accelerator.
 - 2.15 s before the reference collision, B started braking.
 - 1.65 s before the reference collision, B released the brake.
 - 1.55 s before the reference collision, B pressed the accelerator.
 - 0.85 s before the reference collision, A released the accelerator.
 - 0.85 s before the reference collision, A started braking.
-- 0.20 s before the reference collision, A observed B's cut-in from the left settle.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 2461, B: 2461 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, B released the accelerator.
@@ -84,12 +83,13 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 - 0.35 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B stopped moving.
 - 0.55 s after the reference collision, B came to a stop.
+- 1.20 s after the reference collision, A observed B's cut-in from the left settle.
 
 ### Temporal safety relations
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 1.50 < CRITICAL_TTC_START 1.90 (+0.40 s) < COLLISION with B 5.30 (+3.40 s); EGO_PATH_ENTRY 1.75 before critical TTC (-0.15 s) [local times; t_global: cut_in -3.80, critical_ttc_start -3.40, ego_path_entry -3.55, collision +0.00]
+- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 1.70 < CRITICAL_TTC_START 1.90 (+0.20 s) < COLLISION with B 5.30 (+3.40 s); EGO_PATH_ENTRY 2.15 after critical TTC (+0.25 s) [local times; t_global: cut_in -3.60, critical_ttc_start -3.40, ego_path_entry -3.15, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -104,9 +104,9 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e06 (t = 1.75 s)
+- EGO_PATH of track_001, since A:e07 (t = 2.15 s)
 - BRAKE, since A:e09 (t = 4.45 s)
-- STOP, since A:e15 (t = 5.65 s)
+- STOP, since A:e14 (t = 5.65 s)
 B:
 - BRAKE, since B:e09 (t = 5.30 s)
 - STOP, since B:e11 (t = 5.85 s)
@@ -120,7 +120,7 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e11 at 5.30 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- A A:e10 at 5.30 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT
 - B B:e07 at 5.30 s (local): ego: MOVING, THROTTLE
 
 ### Tracks lost while a state was active

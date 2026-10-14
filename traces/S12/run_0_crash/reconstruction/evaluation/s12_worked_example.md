@@ -22,7 +22,7 @@ Track identities known to the reconstruction (associations.json):
 |---|---|---|---|---|---|---|---|---|---|
 | -4.95 | 0.00 | TRACK_APPEARED_RIGHT | A | A:track_001 (anonymous) | 0.00 | 5.96 | 16.93 | - |  |
 | -4.45 | 0.50 | track estimate known (age and std gates) | A | A:track_001 (anonymous) | 0.50 | 5.34 | 16.87 | - |  |
-| -2.40 | 2.55 | CRITICAL_TTC_START | A | A:track_001 (anonymous) | 2.60 | 3.32 | 16.83 | UNSAFE_FORWARD_GAP |  |
+| -2.20 | 2.75 | CRITICAL_TTC_START | A | A:track_001 (anonymous) | 2.80 | 3.02 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -2.20 | 2.75 | CUT_IN_FROM_RIGHT_START | A | A:track_001 (anonymous) | 2.80 | 3.02 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -2.10 | 2.85 | EGO_PATH_ENTRY | A | A:track_001 (anonymous) | 2.90 | 2.81 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -1.30 | 3.65 | steering command onset (controls.jsonl) | A | - | 3.60 | 2.13 | 16.83 | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | abs(steer) >= 0.001 held 0.2 s |
@@ -40,8 +40,8 @@ Track identities known to the reconstruction (associations.json):
 | 2.30 | -2.65 | 11.81 | 10.96 | 3.59 | 3.17 | 1.43 | 1.425 | 16.83 | 16.83 | - | - | no | - | -0.000 |
 | 2.40 | -2.55 | 11.81 | 10.92 | 3.50 | 3.11 | 1.24 | 1.425 | 16.83 | 16.83 | - | - | yes | 3.40 | 0.000 |
 | 2.50 | -2.45 | 11.81 | 10.88 | 3.44 | 3.01 | 1.02 | 1.425 | 16.83 | 16.83 | - | - | yes | 2.50 | 0.000 |
-| 2.60 | -2.35 | 11.81 | 10.85 | 3.32 | 2.88 | 0.74 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 2.25 | -0.000 |
-| 2.70 | -2.25 | 11.81 | 10.84 | 3.14 | 2.72 | 0.40 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.95 | 0.000 |
+| 2.60 | -2.35 | 11.81 | 10.85 | 3.32 | 2.88 | 0.74 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | - | yes | 2.25 | -0.000 |
+| 2.70 | -2.25 | 11.81 | 10.84 | 3.14 | 2.72 | 0.40 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | - | yes | 1.95 | 0.000 |
 | 2.80 | -2.15 | 11.81 | 10.85 | 3.02 | 2.52 | 0.12 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.75 | -0.000 |
 | 2.90 | -2.05 | 11.81 | 10.83 | 2.81 | 2.31 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.50 | 0.000 |
 | 3.00 | -1.95 | 11.81 | 10.79 | 2.64 | 2.08 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.35 | 0.000 |
@@ -74,7 +74,7 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 |---|---|
 | perception (CUT_IN start) -> steering | 0.90 |
 | path entry (EGO_PATH_ENTRY) -> steering | 0.80 |
-| critical (CRITICAL_TTC_START on the track) -> steering | 1.10 |
+| critical (CRITICAL_TTC_START on the track) -> steering | 0.90 |
 | steering -> heading response | 0.05 |
 
 ### 1.4 Cut-ins established by each recorder
@@ -98,7 +98,7 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 | C collides with nobody | PASS | - |
 | without C: no collision | PASS | counterfactuals.json |
 | swerve disabled: A runs into C | PASS | {"A-C": {"first_s": 5.95, "last_s": 6.1, "peak_impulse_Ns": 477.8}} |
-| reconstructed clearance at the critical start vs true bumper gap | PASS | 3.32 m reconstructed, 3.35 m true |
+| reconstructed clearance at the critical start vs true bumper gap | PASS | 3.02 m reconstructed, 3.13 m true |
 
 - Track identities (privileged evaluation): A:track_001 = C; A:track_002 = B; B:track_001 = A; B:track_002 = C; B:track_003 = C
 - Participants that recorded nothing: C.
@@ -133,7 +133,7 @@ First core events of A per true subject before A's first contact (t_local 4.95):
 | subject (true) | event | reconstruction t_local | COVERAGE t_local | PERFECT t_local |
 |---|---|---|---|---|
 | B | CRITICAL_TTC_START | 3.80 | 3.80 | 3.80 |
-| C | CRITICAL_TTC_START | 2.55 | 2.30 | 2.30 |
+| C | CRITICAL_TTC_START | 2.75 | 2.80 | 2.80 |
 | C | CUT_IN_FROM_RIGHT_START | 2.75 | 2.80 | 2.80 |
 | C | EGO_PATH_ENTRY | 2.85 | 2.80 | 2.80 |
 

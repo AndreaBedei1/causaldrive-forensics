@@ -10,7 +10,7 @@
       ],
       "sim_time": 324.92708261311054,
       "peak_impulse": 191.8431046266532,
-      "reconstructed_as": "g48",
+      "reconstructed_as": "g47",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 99,
+    "nodes": 89,
     "max_abs_error_s": 0.0,
-    "order_pairs": 4711,
-    "order_concordant": 4711
+    "order_pairs": 3782,
+    "order_concordant": 3782
   },
   "tracks": [
     {
@@ -218,7 +218,7 @@
     },
     {
       "track": "A:track_008",
-      "decision": "U9",
+      "decision": "U8",
       "status": "ANONYMOUS",
       "true_identity": "G",
       "median_box_distance_m": {
@@ -241,7 +241,7 @@
     },
     {
       "track": "A:track_009",
-      "decision": "U10",
+      "decision": "U9",
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
@@ -264,7 +264,7 @@
     },
     {
       "track": "A:track_010",
-      "decision": "U11",
+      "decision": "U10",
       "status": "ANONYMOUS",
       "true_identity": "E",
       "median_box_distance_m": {
@@ -287,7 +287,7 @@
     },
     {
       "track": "A:track_011",
-      "decision": "U12",
+      "decision": "U11",
       "status": "ANONYMOUS",
       "true_identity": "I",
       "median_box_distance_m": {
@@ -310,7 +310,7 @@
     },
     {
       "track": "A:track_012",
-      "decision": "U12",
+      "decision": "U11",
       "status": "ANONYMOUS",
       "true_identity": "I",
       "median_box_distance_m": {
@@ -494,7 +494,7 @@
     },
     {
       "track": "B:track_008",
-      "decision": "U12",
+      "decision": "U11",
       "status": "ANONYMOUS",
       "true_identity": "I",
       "median_box_distance_m": {
@@ -517,7 +517,7 @@
     },
     {
       "track": "B:track_009",
-      "decision": "U11",
+      "decision": "U10",
       "status": "ANONYMOUS",
       "true_identity": "E",
       "median_box_distance_m": {

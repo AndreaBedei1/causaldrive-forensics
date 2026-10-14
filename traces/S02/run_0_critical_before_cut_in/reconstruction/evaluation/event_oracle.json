@@ -7,21 +7,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 3.15,
-     "track": "B#all"
-    },
-    {
-     "type": "CRITICAL_TTC_START",
-     "side": "CRITICAL_TTC_START",
-     "subject": "B",
-     "t_local": 2.3,
-     "track": "B#all"
-    },
-    {
-     "type": "CRITICAL_TTC_END",
-     "side": "CRITICAL_TTC_END",
-     "subject": "B",
-     "t_local": 4.1,
+     "t_local": 3.25,
      "track": "B#all"
     },
     {
@@ -29,6 +15,20 @@
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
      "t_local": 2.85,
+     "track": "B#all"
+    },
+    {
+     "type": "CRITICAL_TTC_START",
+     "side": "CRITICAL_TTC_START",
+     "subject": "B",
+     "t_local": 2.5,
+     "track": "B#all"
+    },
+    {
+     "type": "CRITICAL_TTC_END",
+     "side": "CRITICAL_TTC_END",
+     "subject": "B",
+     "t_local": 4.1,
      "track": "B#all"
     }
    ],
@@ -55,21 +55,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 3.15,
-     "track": "B#1"
-    },
-    {
-     "type": "CRITICAL_TTC_START",
-     "side": "CRITICAL_TTC_START",
-     "subject": "B",
-     "t_local": 2.3,
-     "track": "B#1"
-    },
-    {
-     "type": "CRITICAL_TTC_END",
-     "side": "CRITICAL_TTC_END",
-     "subject": "B",
-     "t_local": 4.1,
+     "t_local": 3.25,
      "track": "B#1"
     },
     {
@@ -77,6 +63,20 @@
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
      "t_local": 2.85,
+     "track": "B#1"
+    },
+    {
+     "type": "CRITICAL_TTC_START",
+     "side": "CRITICAL_TTC_START",
+     "subject": "B",
+     "t_local": 2.5,
+     "track": "B#1"
+    },
+    {
+     "type": "CRITICAL_TTC_END",
+     "side": "CRITICAL_TTC_END",
+     "subject": "B",
+     "t_local": 4.1,
      "track": "B#1"
     }
    ],
@@ -110,21 +110,7 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 3.15,
-     "track": "B#1"
-    },
-    {
-     "type": "CRITICAL_TTC_START",
-     "side": "CRITICAL_TTC_START",
-     "subject": "B",
-     "t_local": 2.3,
-     "track": "B#1"
-    },
-    {
-     "type": "CRITICAL_TTC_END",
-     "side": "CRITICAL_TTC_END",
-     "subject": "B",
-     "t_local": 4.1,
+     "t_local": 3.25,
      "track": "B#1"
     },
     {
@@ -132,6 +118,20 @@
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
      "t_local": 2.85,
+     "track": "B#1"
+    },
+    {
+     "type": "CRITICAL_TTC_START",
+     "side": "CRITICAL_TTC_START",
+     "subject": "B",
+     "t_local": 2.5,
+     "track": "B#1"
+    },
+    {
+     "type": "CRITICAL_TTC_END",
+     "side": "CRITICAL_TTC_END",
+     "subject": "B",
+     "t_local": 4.1,
      "track": "B#1"
     }
    ],
@@ -172,21 +172,21 @@
      "type": "CRITICAL_TTC_START",
      "side": "CRITICAL_TTC_START",
      "subject": "B",
-     "t_local": 2.6,
+     "t_local": 2.65,
      "track": "track_001"
     },
     {
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 2.85,
+     "t_local": 2.95,
      "track": "track_001"
     },
     {
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 3.0,
+     "t_local": 3.05,
      "track": "track_001"
     },
     {
@@ -246,7 +246,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -257,7 +257,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -277,7 +277,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.1
     ],
     "side_agree": 2,
@@ -316,7 +316,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -327,7 +327,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -347,7 +347,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.1
     ],
     "side_agree": 2,
@@ -382,7 +382,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -393,7 +393,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -413,7 +413,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.5
     ],
     "side_agree": 2,
@@ -588,7 +588,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -599,7 +599,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -619,7 +619,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.1
     ],
     "side_agree": 2,
@@ -655,7 +655,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -666,7 +666,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -686,7 +686,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.1
     ],
     "side_agree": 2,
@@ -718,7 +718,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     -0.15
+     -0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -729,7 +729,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.0
+     0.1
     ],
     "side_agree": 1,
     "missed": [],
@@ -749,7 +749,7 @@
     "expected": 2,
     "matched": 2,
     "deltas": [
-     0.3,
+     0.15,
      0.5
     ],
     "side_agree": 2,

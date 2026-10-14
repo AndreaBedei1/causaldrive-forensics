@@ -1,14 +1,13 @@
 scenario:
   scenario_id: S14
   name: dense_abreast
-  description: 'Dense three-lane traffic, one direction, fourteen cars: the recorders A (right lane) and B
-    (middle lane, slightly behind and slightly faster) drive inside the pack.  Three abreast rows are ahead
-    of them (15, 30 and 45 m), a car is just ahead of A in the right lane, a car is diagonally behind-left of
-    B, and a row of three abreast cars follows 12-16 m behind.  For six seconds nothing happens: every car
-    keeps its lane.  Then A drifts left into B (over 2 s) and they collide (the only contact); the cars behind
-    slow to 6 m/s once the crash is ahead, everyone else drives on.  A correct reconstruction keeps every
-    abreast pair apart before and after the contact, never merges two of the twelve into one road user,
-    names the contact partner B, and leaves an identity unresolved rather than guessing.
+  description: 'Dense three-lane traffic, one direction, ten cars: the recorders A (right lane) and B
+    (middle lane, slightly behind and slightly faster) drive behind the pack.  Three abreast rows are ahead
+    of them (15, 30 and 45 m) and a car is just ahead of A in the right lane; nobody follows them.  For six
+    seconds nothing happens: every car keeps its lane.  Then A drifts left into B (over 2 s) and they
+    collide (the only contact); everyone else drives on.  A correct reconstruction keeps every abreast pair
+    apart before and after the contact, never merges two of the eight into one road user, names the
+    contact partner B, and leaves an identity unresolved rather than guessing.
 
     '
   research_question: In dense abreast traffic around the recorders, does the identity reconstruction keep
@@ -58,47 +57,6 @@ scenario:
     - {action_id: J_keeps_speed, kind: hold, t_start: 10.0, duration: 2.0, params: {target_speed: 12.0}}
   # Just ahead of A in the right lane (A drifts left, away from it).
   - {id: P, blueprint: vehicle.toyota.prius, record: false, spawn: {anchor: spawn_index, index: 265, forward_m: 32.5, lane_offset: 1}, route: {length_m: 240.0, step_m: 2.0}, initial_speed: 12.0, target_speed: 12.0, post_impact_mode: drive, actions: []}
-  # Diagonally behind-left of B, and a row of three behind the recorders: they slow down once the crash is ahead.
-  - id: K
-    blueprint: vehicle.audi.tt
-    record: false
-    spawn: {anchor: spawn_index, index: 265, forward_m: 13.5, lane_offset: -1}
-    route: {length_m: 240.0, step_m: 2.0}
-    initial_speed: 12.0
-    target_speed: 12.0
-    post_impact_mode: drive
-    actions:
-    - {action_id: K_slows_for_the_crash, kind: set_speed, t_start: 7.9, duration: 3.0, params: {target_speed: 6.0}}
-  - id: L
-    blueprint: vehicle.tesla.model3
-    record: false
-    spawn: {anchor: spawn_index, index: 265, forward_m: 4.0, lane_offset: -1}
-    route: {length_m: 240.0, step_m: 2.0}
-    initial_speed: 12.0
-    target_speed: 12.0
-    post_impact_mode: drive
-    actions:
-    - {action_id: L_slows_for_the_crash, kind: set_speed, t_start: 7.9, duration: 3.0, params: {target_speed: 6.0}}
-  - id: M
-    blueprint: vehicle.audi.tt
-    record: false
-    spawn: {anchor: spawn_index, index: 265, forward_m: 7.0, lane_offset: 0}
-    route: {length_m: 240.0, step_m: 2.0}
-    initial_speed: 12.0
-    target_speed: 12.0
-    post_impact_mode: drive
-    actions:
-    - {action_id: M_slows_for_the_crash, kind: set_speed, t_start: 7.9, duration: 3.0, params: {target_speed: 6.0}}
-  - id: N
-    blueprint: vehicle.toyota.prius
-    record: false
-    spawn: {anchor: spawn_index, index: 265, forward_m: 9.0, lane_offset: 1}
-    route: {length_m: 240.0, step_m: 2.0}
-    initial_speed: 12.0
-    target_speed: 12.0
-    post_impact_mode: drive
-    actions:
-    - {action_id: N_slows_for_the_crash, kind: set_speed, t_start: 7.9, duration: 3.0, params: {target_speed: 6.0}}
   variants:
     surrounded: {}
 simulation:

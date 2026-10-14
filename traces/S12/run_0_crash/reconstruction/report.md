@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 10.95 s | 111 | 23 | 44 | 2 | A:e12 @ 4.95 s |
+| A | 10.95 s | 111 | 23 | 47 | 2 | A:e12 @ 4.95 s |
 | B | 10.95 s | 111 | 23 | 41 | 3 | B:e10 @ 4.95 s |
 
 ## Graph alignment
@@ -42,13 +42,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 
 ## Global graph
 
-45 nodes, 95 edges; 15 merged node(s): g06 TRACK_APPEARED_RIGHT(A,U1) from A:e04 + A:e23, g08 TRACK_APPEARED_RIGHT(B,U1) from B:e04 + B:e18, g09 CLOSING_START(A,U1) from A:e05 + A:e11, g10 CLOSING_START(B,U1) from B:e05 + B:e16, g11 CRITICAL_TTC_START(A,U1) from A:e06 + A:e18, g12 CUT_IN_FROM_RIGHT_START(A,U1) from A:e07 + A:e17, g13 CUT_IN_FROM_RIGHT_START(B,A) from B:e06 + B:e23, g14 EGO_PATH_ENTRY(A,U1) from A:e08 + A:e19, g15 CRITICAL_TTC_START(A,B) from A:e09 + A:e13, g16 CRITICAL_TTC_START(B,A) from B:e07 + B:e11, g17 EGO_PATH_ENTRY(B,A) from B:e08 + B:e15, g18 CLOSING_START(B,A) from B:e09 + B:e12, g19 CLOSING_START(A,B) from A:e10 + A:e14, g21 COLLISION(A,B) from A:e12 + B:e10, g42 TRACK_APPEARED_RIGHT(B,U1) from B:e21 + B:e22.
+45 nodes, 113 edges; 15 merged node(s): g06 TRACK_APPEARED_RIGHT(A,U1) from A:e04 + A:e23, g08 TRACK_APPEARED_RIGHT(B,U1) from B:e04 + B:e18, g09 CLOSING_START(A,U1) from A:e05 + A:e11, g10 CLOSING_START(B,U1) from B:e05 + B:e16, g11 CRITICAL_TTC_START(A,U1) from A:e06 + A:e18, g12 CUT_IN_FROM_RIGHT_START(A,U1) from A:e07 + A:e17, g13 CUT_IN_FROM_RIGHT_START(B,A) from B:e06 + B:e23, g14 EGO_PATH_ENTRY(A,U1) from A:e08 + A:e19, g15 CRITICAL_TTC_START(A,B) from A:e09 + A:e13, g16 CRITICAL_TTC_START(B,A) from B:e07 + B:e11, g17 EGO_PATH_ENTRY(B,A) from B:e08 + B:e15, g18 CLOSING_START(B,A) from B:e09 + B:e12, g19 CLOSING_START(A,B) from A:e10 + A:e14, g21 COLLISION(A,B) from A:e12 + B:e10, g42 TRACK_APPEARED_RIGHT(B,U1) from B:e21 + B:e22.
 
 ### Event sequence (global time)
 
 - `-4.95` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1)
-- `-2.40` CRITICAL_TTC_START(A,U1)
-- `-2.20` CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A)
+- `-2.20` CRITICAL_TTC_START(A,U1); CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A)
 - `-2.10` EGO_PATH_ENTRY(A,U1)
 - `-1.15` CRITICAL_TTC_START(A,B)
 - `-1.05` CRITICAL_TTC_START(B,A)
@@ -61,9 +60,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 - `+0.10` EGO_PATH_EXIT(B,A)
 - `+0.20` CLOSING_END(B,U1)
 - `+0.35` CUT_IN_FROM_RIGHT_END(A,U1)
-- `+0.55` CRITICAL_TTC_END(A,U1); EGO_PATH_EXIT(A,U1)
+- `+0.55` CRITICAL_TTC_END(A,U1)
 - `+0.70` EGO_PATH_ENTRY(B,A)
 - `+0.75` TRACK_LOST(B,U1)
+- `+0.90` EGO_PATH_EXIT(A,U1)
 - `+1.00` MOVING_END(B); STOP_START(B)
 - `+1.10` MOVING_END(A); STOP_START(A)
 - `+1.45` EGO_PATH_ENTRY(A,B)
@@ -84,7 +84,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 - 4.95 s before the reference collision, B's radar started tracking anonymous road user U1, which appeared on its right.
 - 4.95 s before the reference collision, A observed anonymous road user U1 start closing in (already the case when first observed).
 - 4.95 s before the reference collision, B observed anonymous road user U1 start closing in (already the case when first observed).
-- 2.40 s before the reference collision, A's time-to-contact with anonymous road user U1 became critical.
+- 2.20 s before the reference collision, A's time-to-contact with anonymous road user U1 became critical.
 - 2.20 s before the reference collision, A observed anonymous road user U1 cutting in from the right.
 - 2.20 s before the reference collision, B observed A cutting in from the right.
 - 2.10 s before the reference collision, A observed anonymous road user U1 enter its forward path corridor.
@@ -107,9 +107,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 - 0.20 s after the reference collision, B observed anonymous road user U1 stop closing in.
 - 0.35 s after the reference collision, A observed anonymous road user U1's cut-in from the right settle.
 - 0.55 s after the reference collision, A's time-to-contact with anonymous road user U1 stopped being critical.
-- 0.55 s after the reference collision, A observed anonymous road user U1 leave its forward path corridor.
 - 0.70 s after the reference collision, B observed A enter its forward path corridor.
 - 0.75 s after the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
+- 0.90 s after the reference collision, A observed anonymous road user U1 leave its forward path corridor.
 - 1.00 s after the reference collision, B stopped moving.
 - 1.00 s after the reference collision, B came to a stop.
 - 1.10 s after the reference collision, A stopped moving.
@@ -124,17 +124,16 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (unidentified U1): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.55 <= CUT_IN_FROM_RIGHT_START 2.75 (+0.20 s); EGO_PATH_ENTRY 2.85 after critical TTC (+0.30 s) [local times; t_global: cut_in -2.20, critical_ttc_start -2.40, ego_path_entry -2.10, collision +0.00]
+- A's track_001 (unidentified U1): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.75 <= CUT_IN_FROM_RIGHT_START 2.75 (+0.00 s); EGO_PATH_ENTRY 2.85 after critical TTC (+0.10 s) [local times; t_global: cut_in -2.20, critical_ttc_start -2.20, ego_path_entry -2.10, collision +0.00]
 - A's track_002 (B): CRITICAL_TTC_START 3.80, COLLISION with B 4.95 (+1.15 s); EGO_PATH_ENTRY 6.40 after critical TTC (+2.60 s) [local times; t_global: critical_ttc_start -1.15, ego_path_entry +1.45, collision +0.00]
 - B's track_001 (A): cut-in started before critical TTC: CUT_IN_FROM_RIGHT_START 2.75 < CRITICAL_TTC_START 3.90 (+1.15 s) < COLLISION with A 4.95 (+1.05 s); EGO_PATH_ENTRY 4.05 after critical TTC (+0.15 s) [local times; t_global: cut_in -2.20, critical_ttc_start -1.05, ego_path_entry -0.90, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
 - MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1)
-- CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A)
+- CRITICAL_TTC_START(A,U1); CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A)
 - COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 - THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
-- CRITICAL_TTC_END(A,U1); EGO_PATH_EXIT(A,U1)
 - MOVING_END(B); STOP_START(B)
 - MOVING_END(A); STOP_START(A)
 

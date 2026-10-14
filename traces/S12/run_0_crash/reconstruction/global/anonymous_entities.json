@@ -34,13 +34,13 @@
       "compared": 109,
       "passed": 1.0,
       "median_box_chi2": 0.037,
-      "median_velocity_chi2": 1.47,
+      "median_velocity_chi2": 0.434,
       "centre_gap_m": 0.764,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 1.507
+      "score": 0.471
     },
     {
       "a": "A:track_001",
@@ -49,13 +49,13 @@
       "compared": 5,
       "passed": 1.0,
       "median_box_chi2": 0.649,
-      "median_velocity_chi2": 3.451,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 1.559,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 4.1
+      "score": 0.649
     },
     {
       "a": "B:track_002",
@@ -126,14 +126,14 @@
             "compared": 109,
             "passed": 1.0,
             "median_box_chi2": 0.037,
-            "median_velocity_chi2": 1.47,
+            "median_velocity_chi2": 0.434,
             "centre_gap_m": 0.764,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 1.507,
-            "posterior": 0.9792
+            "score": 0.471,
+            "posterior": 0.9875
           },
           {
             "a": "A:track_001",
@@ -142,18 +142,18 @@
             "compared": 5,
             "passed": 1.0,
             "median_box_chi2": 0.649,
-            "median_velocity_chi2": 3.451,
+            "median_velocity_chi2": 0.0,
             "centre_gap_m": 1.559,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 4.1,
-            "posterior": 0.9279
+            "score": 0.649,
+            "posterior": 0.9864
           }
         ],
         "retrospective": [],
-        "confidence": 0.9279
+        "confidence": 0.9864
       },
       "fusion_method": "box_fit+covariance_intersection",
       "footprint": {
@@ -185,7 +185,7 @@
         "first_tracked": -4.85,
         "first_relevant": -4.95,
         "first_identity_resolved": -4.5,
-        "first_hazard_relevant": -2.4
+        "first_hazard_relevant": -2.2
       },
       "trajectory": [
         {

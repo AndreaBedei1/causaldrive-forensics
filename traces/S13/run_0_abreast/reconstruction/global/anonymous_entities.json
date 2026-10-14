@@ -34,13 +34,13 @@
       "compared": 177,
       "passed": 0.034,
       "median_box_chi2": 17.728,
-      "median_velocity_chi2": 0.171,
+      "median_velocity_chi2": 0.106,
       "centre_gap_m": 3.561,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 17.899
+      "score": 17.834
     },
     {
       "a": "A:track_001",
@@ -49,13 +49,13 @@
       "compared": 119,
       "passed": 0.017,
       "median_box_chi2": 18.694,
-      "median_velocity_chi2": 0.213,
+      "median_velocity_chi2": 0.19,
       "centre_gap_m": 3.62,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 18.907
+      "score": 18.884
     },
     {
       "a": "A:track_001",
@@ -64,13 +64,13 @@
       "compared": 108,
       "passed": 1.0,
       "median_box_chi2": 0.138,
-      "median_velocity_chi2": 0.155,
+      "median_velocity_chi2": 0.139,
       "centre_gap_m": 0.329,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.293
+      "score": 0.277
     },
     {
       "a": "A:track_003",
@@ -79,13 +79,13 @@
       "compared": 119,
       "passed": 1.0,
       "median_box_chi2": 0.111,
-      "median_velocity_chi2": 0.032,
+      "median_velocity_chi2": 0.024,
       "centre_gap_m": 0.226,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.143
+      "score": 0.135
     },
     {
       "a": "A:track_003",
@@ -94,13 +94,13 @@
       "compared": 109,
       "passed": 0.018,
       "median_box_chi2": 18.587,
-      "median_velocity_chi2": 0.227,
+      "median_velocity_chi2": 0.206,
       "centre_gap_m": 3.575,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 18.814
+      "score": 18.793
     },
     {
       "a": "B:track_002",
@@ -109,13 +109,13 @@
       "compared": 132,
       "passed": 0.023,
       "median_box_chi2": 19.045,
-      "median_velocity_chi2": 0.241,
+      "median_velocity_chi2": 0.194,
       "centre_gap_m": 3.609,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 19.286
+      "score": 19.239
     }
   ],
   "entities": [
@@ -162,13 +162,13 @@
             "compared": 108,
             "passed": 1.0,
             "median_box_chi2": 0.138,
-            "median_velocity_chi2": 0.155,
+            "median_velocity_chi2": 0.139,
             "centre_gap_m": 0.329,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.293,
+            "score": 0.277,
             "posterior": 0.9886
           }
         ],
@@ -2504,13 +2504,13 @@
             "compared": 119,
             "passed": 1.0,
             "median_box_chi2": 0.111,
-            "median_velocity_chi2": 0.032,
+            "median_velocity_chi2": 0.024,
             "centre_gap_m": 0.226,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.143,
+            "score": 0.135,
             "posterior": 0.9894
           }
         ],

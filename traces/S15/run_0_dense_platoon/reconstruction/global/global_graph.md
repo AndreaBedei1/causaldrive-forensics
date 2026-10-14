@@ -29,7 +29,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e24 | 7.45 | -7.45 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e20 | 7.45 | -7.45 | reported the reference collision collision_001 |
 | B | ALIGNED | B:e18 | 7.45 | -7.45 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
@@ -69,69 +69,58 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 34836.
 | g02 | -7.45 | MOVING_START | B | - | B:e01 @ 0.00 | active_at_first_observation=True |
 | g03 | -7.45 | THROTTLE_START | A | - | A:e02 @ 0.00 | active_at_first_observation=True |
 | g04 | -7.45 | THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
-| g05 | -7.45 | TRACK_APPEARED_FRONT | A | U2 | A:e03 @ 0.00, A:e40 @ 11.85 | initial_in_ego_path=True; source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
-| g06 | -7.45 | TRACK_APPEARED_LEFT | A | U1 | A:e04 @ 0.00, A:e32 @ 9.55 | initial_in_ego_path=False; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g07 | -7.45 | TRACK_APPEARED_LEFT | A | U5 | A:e05 @ 0.00, A:e29 @ 8.95 | initial_in_ego_path=False; source_track=track_005; aggregation=entity_state_union; source_tracks=['A:track_005'] |
+| g05 | -7.45 | TRACK_APPEARED_FRONT | A | U2 | A:e03 @ 0.00, A:e30 @ 11.85 | initial_in_ego_path=True; source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
+| g06 | -7.45 | TRACK_APPEARED_LEFT | A | U1 | A:e04 @ 0.00, A:e25 @ 9.55 | initial_in_ego_path=False; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g07 | -7.45 | TRACK_APPEARED_LEFT | A | U5 | A:e05 @ 0.00, A:e24 @ 8.95 | initial_in_ego_path=False; source_track=track_005; aggregation=entity_state_union; source_tracks=['A:track_005'] |
 | g08 | -7.45 | TRACK_APPEARED_LEFT | A | U6 | A:e06 @ 0.00 | initial_in_ego_path=False; source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
 | g09 | -7.45 | TRACK_APPEARED_LEFT | B | U1 | B:e05 @ 0.00, B:e17 @ 7.40 | initial_in_ego_path=False; source_track=track_005; aggregation=entity_state_union; source_tracks=['B:track_005'] |
 | g10 | -7.45 | TRACK_APPEARED_LEFT | B | U5 | B:e04 @ 0.00, B:e12 @ 3.70 | initial_in_ego_path=False; source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
 | g11 | -7.45 | TRACK_APPEARED_LEFT | B | U6 | B:e03 @ 0.00, B:e23 @ 8.25 | initial_in_ego_path=False; source_track=track_001#segment_1; aggregation=entity_state_union; source_tracks=['B:track_001#segment_1'] |
-| g12 | -7.45 | TRACK_APPEARED_RIGHT | A | U3 | A:e07 @ 0.00, A:e42 @ 11.90 | initial_in_ego_path=False; source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
+| g12 | -7.45 | TRACK_APPEARED_RIGHT | A | U3 | A:e07 @ 0.00, A:e31 @ 11.90 | initial_in_ego_path=False; source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
 | g13 | -7.45 | TRACK_APPEARED_RIGHT | A | U4 | A:e08 @ 0.00 | initial_in_ego_path=False; source_track=track_004; aggregation=entity_state_union; source_tracks=['A:track_004'] |
 | g14 | -7.45 | TRACK_APPEARED_RIGHT | A | U7 | A:e09 @ 0.00 | initial_in_ego_path=False; source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
 | g15 | -7.45 | TRACK_APPEARED_RIGHT | B | U3 | B:e07 @ 0.00, B:e16 @ 7.40 | initial_in_ego_path=False; source_track=track_004; aggregation=entity_state_union; source_tracks=['B:track_004'] |
 | g16 | -7.45 | TRACK_APPEARED_RIGHT | B | U7 | B:e06 @ 0.00, B:e21 @ 7.45 | initial_in_ego_path=False; source_track=track_003; aggregation=entity_state_union; source_tracks=['B:track_003'] |
 | g17 | -7.40 | TRACK_APPEARED_FRONT | B | A | B:e08 @ 0.05 | initial_in_ego_path=True; source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
 | g18 | -7.15 | TRACK_APPEARED_RIGHT | B | U4 | B:e09 @ 0.30, B:e11 @ 3.55 | initial_in_ego_path=False; source_track=track_007; aggregation=entity_state_union; source_tracks=['B:track_007'] |
-| g19 | -6.95 | CRITICAL_TTC_START | A | U2 | A:e10 @ 0.50, A:e17 @ 6.80 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
+| g19 | -6.95 | CRITICAL_TTC_START | A | U2 | A:e10 @ 0.50, A:e15 @ 6.80 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
 | g20 | -6.90 | CRITICAL_TTC_START | B | A | B:e10 @ 0.55, B:e19 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
 | g21 | -3.90 | TRACK_LOST | B | U4 | B:e11 @ 3.55 | source_track=track_007; aggregation=entity_state_union; source_tracks=['B:track_007'] |
 | g22 | -3.75 | TRACK_LOST | B | U5 | B:e12 @ 3.70 | source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
 | g23 | -1.50 | THROTTLE_END | A | - | A:e11 @ 5.95 |  |
 | g24 | -1.50 | BRAKE_START | A | - | A:e12 @ 5.95 |  |
 | g25 | -1.25 | CLOSING_START | B | A | B:e13 @ 6.20, B:e20 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
-| g26 | -1.20 | CLOSING_START | A | U6 | A:e13 @ 6.25, A:e23 @ 7.25 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
+| g26 | -1.20 | CLOSING_START | A | U6 | A:e13 @ 6.25, A:e19 @ 7.25 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
 | g27 | -1.15 | TRACK_APPEARED_LEFT | B | U5 | B:e14 @ 6.30, B:e15 @ 6.75 | initial_in_ego_path=False; source_track=track_008; aggregation=entity_state_union; source_tracks=['B:track_008'] |
-| g28 | -1.10 | CLOSING_START | A | U7 | A:e14 @ 6.35, A:e19 @ 7.10 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
-| g29 | -0.90 | CRITICAL_TTC_START | A | U6 | A:e15 @ 6.55, A:e22 @ 7.20 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
-| g30 | -0.90 | CRITICAL_TTC_START | A | U7 | A:e16 @ 6.55, A:e18 @ 7.05 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
-| g31 | -0.70 | TRACK_LOST | B | U5 | B:e15 @ 6.75 | source_track=track_008; aggregation=entity_state_union; source_tracks=['B:track_008'] |
-| g32 | -0.65 | CRITICAL_TTC_END | A | U2 | A:e17 @ 6.80 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
-| g33 | -0.40 | CRITICAL_TTC_END | A | U7 | A:e18 @ 7.05 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
-| g34 | -0.35 | CLOSING_END | A | U7 | A:e19 @ 7.10 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
-| g35 | -0.30 | MOVING_END | A | - | A:e20 @ 7.15 |  |
-| g36 | -0.30 | STOP_START | A | - | A:e21 @ 7.15 |  |
-| g37 | -0.25 | CRITICAL_TTC_END | A | U6 | A:e22 @ 7.20 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
-| g38 | -0.20 | CLOSING_END | A | U6 | A:e23 @ 7.25 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
-| g39 | -0.05 | TRACK_LOST | B | U1 | B:e17 @ 7.40 | source_track=track_005; aggregation=entity_state_union; source_tracks=['B:track_005'] |
-| g40 | -0.05 | TRACK_LOST | B | U3 | B:e16 @ 7.40 | source_track=track_004; aggregation=entity_state_union; source_tracks=['B:track_004'] |
-| g41 | 0.00 | COLLISION | - | A, B | A:e24 @ 7.45, B:e18 @ 7.45 | matched_event=collision_001; reference_event=True; peak_impulse=A 34836.87, B 34836.87 |
-| g42 | 0.00 | CRITICAL_TTC_END | B | A | B:e19 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
-| g43 | 0.00 | CLOSING_END | B | A | B:e20 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
-| g44 | 0.00 | TRACK_LOST | B | U7 | B:e21 @ 7.45 | source_track=track_003; aggregation=entity_state_union; source_tracks=['B:track_003'] |
-| g45 | 0.05 | BRAKE_END | A | - | A:e25 @ 7.50 |  |
-| g46 | 0.05 | THROTTLE_END | B | - | B:e22 @ 7.50 |  |
-| g47 | 0.45 | TRACK_APPEARED_FRONT | A | U8 | A:e26 @ 7.90, A:e33 @ 10.25 | initial_in_ego_path=True; source_track=track_008; aggregation=entity_state_union; source_tracks=['A:track_008'] |
-| g48 | 0.55 | BRAKE_START | A | - | A:e27 @ 8.00 |  |
-| g49 | 0.80 | EGO_PATH_ENTRY | A | U4 | A:e28 @ 8.25, A:e39 @ 11.00 | geometry=estimated_body; source_track=track_004; aggregation=entity_state_union; source_tracks=['A:track_004'] |
-| g50 | 0.80 | TRACK_LOST | B | U6 | B:e23 @ 8.25 | source_track=track_001#segment_1; aggregation=entity_state_union; source_tracks=['B:track_001#segment_1'] |
-| g51 | 0.85 | TRACK_APPEARED_LEFT | B | U9 | B:e24 @ 8.30, B:e25 @ 11.70 | initial_in_ego_path=False; source_track=track_001#segment_2; aggregation=entity_state_union; source_tracks=['B:track_001#segment_2'] |
-| g52 | 1.50 | TRACK_LOST | A | U5 | A:e29 @ 8.95 | source_track=track_005; aggregation=entity_state_union; source_tracks=['A:track_005'] |
-| g53 | 1.80 | EGO_PATH_EXIT | A | U8 | A:e30 @ 9.25 | geometry=estimated_body; source_track=track_008; aggregation=entity_state_union; source_tracks=['A:track_008'] |
-| g54 | 2.05 | EGO_PATH_ENTRY | A | U3 | A:e31 @ 9.50, A:e41 @ 11.90 | geometry=estimated_body; source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
-| g55 | 2.10 | TRACK_LOST | A | U1 | A:e32 @ 9.55 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g56 | 2.80 | TRACK_LOST | A | U8 | A:e33 @ 10.25 | source_track=track_008; aggregation=entity_state_union; source_tracks=['A:track_008'] |
-| g57 | 3.05 | EGO_PATH_ENTRY | A | U7 | A:e34 @ 10.50 | geometry=estimated_body; source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
-| g58 | 3.10 | EGO_PATH_EXIT | A | U2 | A:e35 @ 10.55 | geometry=estimated_body; source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
-| g59 | 3.25 | TRACK_APPEARED_LEFT | A | U10 | A:e36 @ 10.70, A:e38 @ 10.95 | initial_in_ego_path=False; source_track=track_009; aggregation=entity_state_union; source_tracks=['A:track_009'] |
-| g60 | 3.50 | TRACK_APPEARED_LEFT | A | U11 | A:e37 @ 10.95 | initial_in_ego_path=False; source_track=track_010; aggregation=entity_state_union; source_tracks=['A:track_010'] |
-| g61 | 3.50 | TRACK_LOST | A | U10 | A:e38 @ 10.95 | source_track=track_009; aggregation=entity_state_union; source_tracks=['A:track_009'] |
-| g62 | 3.55 | EGO_PATH_EXIT | A | U4 | A:e39 @ 11.00 | geometry=estimated_body; source_track=track_004; aggregation=entity_state_union; source_tracks=['A:track_004'] |
-| g63 | 4.25 | TRACK_LOST | B | U9 | B:e25 @ 11.70 | source_track=track_001#segment_2; aggregation=entity_state_union; source_tracks=['B:track_001#segment_2'] |
-| g64 | 4.30 | TRACK_APPEARED_LEFT | B | U12 | B:e26 @ 11.75 | initial_in_ego_path=False; source_track=track_001#segment_3; aggregation=entity_state_union; source_tracks=['B:track_001#segment_3'] |
-| g65 | 4.40 | TRACK_LOST | A | U2 | A:e40 @ 11.85 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
-| g66 | 4.45 | EGO_PATH_EXIT | A | U3 | A:e41 @ 11.90 | geometry=estimated_body; source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
-| g67 | 4.45 | TRACK_LOST | A | U3 | A:e42 @ 11.90 | source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
+| g28 | -1.10 | CLOSING_START | A | U7 | A:e14 @ 6.35, A:e16 @ 7.10 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
+| g29 | -0.70 | TRACK_LOST | B | U5 | B:e15 @ 6.75 | source_track=track_008; aggregation=entity_state_union; source_tracks=['B:track_008'] |
+| g30 | -0.65 | CRITICAL_TTC_END | A | U2 | A:e15 @ 6.80 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
+| g31 | -0.35 | CLOSING_END | A | U7 | A:e16 @ 7.10 | source_track=track_007; aggregation=entity_state_union; source_tracks=['A:track_007'] |
+| g32 | -0.30 | MOVING_END | A | - | A:e17 @ 7.15 |  |
+| g33 | -0.30 | STOP_START | A | - | A:e18 @ 7.15 |  |
+| g34 | -0.20 | CLOSING_END | A | U6 | A:e19 @ 7.25 | source_track=track_006; aggregation=entity_state_union; source_tracks=['A:track_006'] |
+| g35 | -0.05 | TRACK_LOST | B | U1 | B:e17 @ 7.40 | source_track=track_005; aggregation=entity_state_union; source_tracks=['B:track_005'] |
+| g36 | -0.05 | TRACK_LOST | B | U3 | B:e16 @ 7.40 | source_track=track_004; aggregation=entity_state_union; source_tracks=['B:track_004'] |
+| g37 | 0.00 | COLLISION | - | A, B | A:e20 @ 7.45, B:e18 @ 7.45 | matched_event=collision_001; reference_event=True; peak_impulse=A 34836.87, B 34836.87 |
+| g38 | 0.00 | CRITICAL_TTC_END | B | A | B:e19 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
+| g39 | 0.00 | CLOSING_END | B | A | B:e20 @ 7.45 | source_track=track_006; aggregation=entity_state_union; source_tracks=['B:track_006'] |
+| g40 | 0.00 | TRACK_LOST | B | U7 | B:e21 @ 7.45 | source_track=track_003; aggregation=entity_state_union; source_tracks=['B:track_003'] |
+| g41 | 0.05 | BRAKE_END | A | - | A:e21 @ 7.50 |  |
+| g42 | 0.05 | THROTTLE_END | B | - | B:e22 @ 7.50 |  |
+| g43 | 0.45 | TRACK_APPEARED_FRONT | A | U8 | A:e22 @ 7.90, A:e26 @ 10.25 | initial_in_ego_path=True; source_track=track_008; aggregation=entity_state_union; source_tracks=['A:track_008'] |
+| g44 | 0.55 | BRAKE_START | A | - | A:e23 @ 8.00 |  |
+| g45 | 0.80 | TRACK_LOST | B | U6 | B:e23 @ 8.25 | source_track=track_001#segment_1; aggregation=entity_state_union; source_tracks=['B:track_001#segment_1'] |
+| g46 | 0.85 | TRACK_APPEARED_LEFT | B | U9 | B:e24 @ 8.30, B:e25 @ 11.70 | initial_in_ego_path=False; source_track=track_001#segment_2; aggregation=entity_state_union; source_tracks=['B:track_001#segment_2'] |
+| g47 | 1.50 | TRACK_LOST | A | U5 | A:e24 @ 8.95 | source_track=track_005; aggregation=entity_state_union; source_tracks=['A:track_005'] |
+| g48 | 2.10 | TRACK_LOST | A | U1 | A:e25 @ 9.55 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g49 | 2.80 | TRACK_LOST | A | U8 | A:e26 @ 10.25 | source_track=track_008; aggregation=entity_state_union; source_tracks=['A:track_008'] |
+| g50 | 3.25 | TRACK_APPEARED_LEFT | A | U10 | A:e27 @ 10.70, A:e29 @ 10.95 | initial_in_ego_path=False; source_track=track_009; aggregation=entity_state_union; source_tracks=['A:track_009'] |
+| g51 | 3.50 | TRACK_APPEARED_LEFT | A | U11 | A:e28 @ 10.95 | initial_in_ego_path=False; source_track=track_010; aggregation=entity_state_union; source_tracks=['A:track_010'] |
+| g52 | 3.50 | TRACK_LOST | A | U10 | A:e29 @ 10.95 | source_track=track_009; aggregation=entity_state_union; source_tracks=['A:track_009'] |
+| g53 | 4.25 | TRACK_LOST | B | U9 | B:e25 @ 11.70 | source_track=track_001#segment_2; aggregation=entity_state_union; source_tracks=['B:track_001#segment_2'] |
+| g54 | 4.30 | TRACK_APPEARED_LEFT | B | U12 | B:e26 @ 11.75 | initial_in_ego_path=False; source_track=track_001#segment_3; aggregation=entity_state_union; source_tracks=['B:track_001#segment_3'] |
+| g55 | 4.40 | TRACK_LOST | A | U2 | A:e30 @ 11.85 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
+| g56 | 4.45 | TRACK_LOST | A | U3 | A:e31 @ 11.90 | source_track=track_003; aggregation=entity_state_union; source_tracks=['A:track_003'] |
 
 ## Edges
 
@@ -165,94 +154,70 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 34836.
     g26 --PRECEDES--> g27
     g27 --PRECEDES--> g28
     g28 --PRECEDES--> g29
-    g28 --PRECEDES--> g30
-    g29 --PRECEDES--> g31
+    g29 --PRECEDES--> g30
     g30 --PRECEDES--> g31
     g31 --PRECEDES--> g32
-    g32 --PRECEDES--> g33
+    g31 --PRECEDES--> g33
+    g32 --PRECEDES--> g34
     g33 --PRECEDES--> g34
     g34 --PRECEDES--> g35
     g34 --PRECEDES--> g36
     g35 --PRECEDES--> g37
+    g35 --PRECEDES--> g38
+    g35 --PRECEDES--> g39
+    g35 --PRECEDES--> g40
     g36 --PRECEDES--> g37
-    g37 --PRECEDES--> g38
-    g38 --PRECEDES--> g39
-    g38 --PRECEDES--> g40
+    g36 --PRECEDES--> g38
+    g36 --PRECEDES--> g39
+    g36 --PRECEDES--> g40
+    g37 --PRECEDES--> g41
+    g37 --PRECEDES--> g42
+    g38 --PRECEDES--> g41
+    g38 --PRECEDES--> g42
     g39 --PRECEDES--> g41
     g39 --PRECEDES--> g42
-    g39 --PRECEDES--> g43
-    g39 --PRECEDES--> g44
     g40 --PRECEDES--> g41
     g40 --PRECEDES--> g42
-    g40 --PRECEDES--> g43
-    g40 --PRECEDES--> g44
-    g41 --PRECEDES--> g45
-    g41 --PRECEDES--> g46
-    g42 --PRECEDES--> g45
-    g42 --PRECEDES--> g46
-    g43 --PRECEDES--> g45
-    g43 --PRECEDES--> g46
+    g41 --PRECEDES--> g43
+    g42 --PRECEDES--> g43
+    g43 --PRECEDES--> g44
     g44 --PRECEDES--> g45
-    g44 --PRECEDES--> g46
-    g45 --PRECEDES--> g47
+    g45 --PRECEDES--> g46
     g46 --PRECEDES--> g47
     g47 --PRECEDES--> g48
     g48 --PRECEDES--> g49
-    g48 --PRECEDES--> g50
-    g49 --PRECEDES--> g51
+    g49 --PRECEDES--> g50
     g50 --PRECEDES--> g51
-    g51 --PRECEDES--> g52
+    g50 --PRECEDES--> g52
+    g51 --PRECEDES--> g53
     g52 --PRECEDES--> g53
     g53 --PRECEDES--> g54
     g54 --PRECEDES--> g55
     g55 --PRECEDES--> g56
-    g56 --PRECEDES--> g57
-    g57 --PRECEDES--> g58
-    g58 --PRECEDES--> g59
-    g59 --PRECEDES--> g60
-    g59 --PRECEDES--> g61
-    g60 --PRECEDES--> g62
-    g61 --PRECEDES--> g62
-    g62 --PRECEDES--> g63
-    g63 --PRECEDES--> g64
-    g64 --PRECEDES--> g65
-    g65 --PRECEDES--> g66
-    g65 --PRECEDES--> g67
     g05 --SAME_TRACK--> g19
     g08 --SAME_TRACK--> g26
     g14 --SAME_TRACK--> g28
-    g08 --SAME_TRACK--> g29
-    g14 --SAME_TRACK--> g30
-    g05 --SAME_TRACK--> g32
-    g14 --SAME_TRACK--> g33
-    g14 --SAME_TRACK--> g34
-    g08 --SAME_TRACK--> g37
-    g08 --SAME_TRACK--> g38
-    g13 --SAME_TRACK--> g49
-    g07 --SAME_TRACK--> g52
-    g47 --SAME_TRACK--> g53
-    g12 --SAME_TRACK--> g54
-    g06 --SAME_TRACK--> g55
-    g47 --SAME_TRACK--> g56
-    g14 --SAME_TRACK--> g57
-    g05 --SAME_TRACK--> g58
-    g59 --SAME_TRACK--> g61
-    g13 --SAME_TRACK--> g62
-    g05 --SAME_TRACK--> g65
-    g12 --SAME_TRACK--> g66
-    g12 --SAME_TRACK--> g67
+    g05 --SAME_TRACK--> g30
+    g14 --SAME_TRACK--> g31
+    g08 --SAME_TRACK--> g34
+    g07 --SAME_TRACK--> g47
+    g06 --SAME_TRACK--> g48
+    g43 --SAME_TRACK--> g49
+    g50 --SAME_TRACK--> g52
+    g05 --SAME_TRACK--> g55
+    g12 --SAME_TRACK--> g56
     g17 --SAME_TRACK--> g20
     g18 --SAME_TRACK--> g21
     g10 --SAME_TRACK--> g22
     g17 --SAME_TRACK--> g25
-    g27 --SAME_TRACK--> g31
-    g15 --SAME_TRACK--> g40
-    g09 --SAME_TRACK--> g39
-    g17 --SAME_TRACK--> g42
-    g17 --SAME_TRACK--> g43
-    g16 --SAME_TRACK--> g44
-    g11 --SAME_TRACK--> g50
-    g51 --SAME_TRACK--> g63
+    g27 --SAME_TRACK--> g29
+    g15 --SAME_TRACK--> g36
+    g09 --SAME_TRACK--> g35
+    g17 --SAME_TRACK--> g38
+    g17 --SAME_TRACK--> g39
+    g16 --SAME_TRACK--> g40
+    g11 --SAME_TRACK--> g45
+    g46 --SAME_TRACK--> g53
 ```
 
 ## Global trace
@@ -273,45 +238,33 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -1.20 | CLOSING_START(A,U6) |
 | -1.15 | TRACK_APPEARED_LEFT(B,U5) |
 | -1.10 | CLOSING_START(A,U7) |
-| -0.90 | CRITICAL_TTC_START(A,U6); CRITICAL_TTC_START(A,U7) |
 | -0.70 | TRACK_LOST(B,U5) |
 | -0.65 | CRITICAL_TTC_END(A,U2) |
-| -0.40 | CRITICAL_TTC_END(A,U7) |
 | -0.35 | CLOSING_END(A,U7) |
 | -0.30 | MOVING_END(A); STOP_START(A) |
-| -0.25 | CRITICAL_TTC_END(A,U6) |
 | -0.20 | CLOSING_END(A,U6) |
 | -0.05 | TRACK_LOST(B,U1); TRACK_LOST(B,U3) |
 | +0.00 | COLLISION(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TRACK_LOST(B,U7) |
 | +0.05 | BRAKE_END(A); THROTTLE_END(B) |
 | +0.45 | TRACK_APPEARED_FRONT(A,U8) |
 | +0.55 | BRAKE_START(A) |
-| +0.80 | EGO_PATH_ENTRY(A,U4); TRACK_LOST(B,U6) |
+| +0.80 | TRACK_LOST(B,U6) |
 | +0.85 | TRACK_APPEARED_LEFT(B,U9) |
 | +1.50 | TRACK_LOST(A,U5) |
-| +1.80 | EGO_PATH_EXIT(A,U8) |
-| +2.05 | EGO_PATH_ENTRY(A,U3) |
 | +2.10 | TRACK_LOST(A,U1) |
 | +2.80 | TRACK_LOST(A,U8) |
-| +3.05 | EGO_PATH_ENTRY(A,U7) |
-| +3.10 | EGO_PATH_EXIT(A,U2) |
 | +3.25 | TRACK_APPEARED_LEFT(A,U10) |
 | +3.50 | TRACK_APPEARED_LEFT(A,U11); TRACK_LOST(A,U10) |
-| +3.55 | EGO_PATH_EXIT(A,U4) |
 | +4.25 | TRACK_LOST(B,U9) |
 | +4.30 | TRACK_APPEARED_LEFT(B,U12) |
 | +4.40 | TRACK_LOST(A,U2) |
-| +4.45 | EGO_PATH_EXIT(A,U3); TRACK_LOST(A,U3) |
+| +4.45 | TRACK_LOST(A,U3) |
 
 ## Temporal safety relations
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
 - A's track_002 (unidentified U2): CRITICAL_TTC_START 0.50, COLLISION 7.45 (+6.95 s) [local times; t_global: critical_ttc_start -6.95, collision +0.00]
-- A's track_003 (unidentified U3): EGO_PATH_ENTRY 9.50, no critical TTC [local times; t_global: ego_path_entry +2.05]
-- A's track_004 (unidentified U4): EGO_PATH_ENTRY 8.25, no critical TTC [local times; t_global: ego_path_entry +0.80]
-- A's track_006 (unidentified U6): CRITICAL_TTC_START 6.55, COLLISION 7.45 (+0.90 s) [local times; t_global: critical_ttc_start -0.90, collision +0.00]
-- A's track_007 (unidentified U7): CRITICAL_TTC_START 6.55, COLLISION 7.45 (+0.90 s); EGO_PATH_ENTRY 10.50 after critical TTC (+3.95 s) [local times; t_global: critical_ttc_start -0.90, ego_path_entry +3.05, collision +0.00]
 - B's track_006 (A): CRITICAL_TTC_START 0.55, COLLISION with A 7.45 (+6.90 s) [local times; t_global: critical_ttc_start -6.90, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
@@ -322,49 +275,40 @@ Each recorder's own belief just before its events, in its own local names (track
 |---------:|----------|---------------------|-----------------------------|
 | -7.45 | A | g01 MOVING_START(A) (A:e01)<br>g03 THROTTLE_START(A) (A:e02)<br>g05 TRACK_APPEARED_FRONT(A,U2) (A:e03)<br>g06 TRACK_APPEARED_LEFT(A,U1) (A:e04)<br>g07 TRACK_APPEARED_LEFT(A,U5) (A:e05)<br>g08 TRACK_APPEARED_LEFT(A,U6) (A:e06)<br>g12 TRACK_APPEARED_RIGHT(A,U3) (A:e07)<br>g13 TRACK_APPEARED_RIGHT(A,U4) (A:e08)<br>g14 TRACK_APPEARED_RIGHT(A,U7) (A:e09) | ego: not yet observed |
 | -7.45 | B | g02 MOVING_START(B) (B:e01)<br>g04 THROTTLE_START(B) (B:e02)<br>g09 TRACK_APPEARED_LEFT(B,U1) (B:e05)<br>g10 TRACK_APPEARED_LEFT(B,U5) (B:e04)<br>g11 TRACK_APPEARED_LEFT(B,U6) (B:e03)<br>g15 TRACK_APPEARED_RIGHT(B,U3) (B:e07)<br>g16 TRACK_APPEARED_RIGHT(B,U7) (B:e06) | ego: not yet observed |
-| -7.45 | A | g05 TRACK_APPEARED_FRONT(A,U2) (A:e03)<br>g65 TRACK_LOST(A,U2) (A:e40) | ego: not yet observed |
-| -7.45 | A | g06 TRACK_APPEARED_LEFT(A,U1) (A:e04)<br>g55 TRACK_LOST(A,U1) (A:e32) | ego: not yet observed |
-| -7.45 | A | g07 TRACK_APPEARED_LEFT(A,U5) (A:e05)<br>g52 TRACK_LOST(A,U5) (A:e29) | ego: not yet observed |
-| -7.45 | B | g09 TRACK_APPEARED_LEFT(B,U1) (B:e05)<br>g15 TRACK_APPEARED_RIGHT(B,U3) (B:e07)<br>g39 TRACK_LOST(B,U1) (B:e17)<br>g40 TRACK_LOST(B,U3) (B:e16) | ego: not yet observed |
+| -7.45 | A | g05 TRACK_APPEARED_FRONT(A,U2) (A:e03)<br>g55 TRACK_LOST(A,U2) (A:e30) | ego: not yet observed |
+| -7.45 | A | g06 TRACK_APPEARED_LEFT(A,U1) (A:e04)<br>g48 TRACK_LOST(A,U1) (A:e25) | ego: not yet observed |
+| -7.45 | A | g07 TRACK_APPEARED_LEFT(A,U5) (A:e05)<br>g47 TRACK_LOST(A,U5) (A:e24) | ego: not yet observed |
+| -7.45 | B | g09 TRACK_APPEARED_LEFT(B,U1) (B:e05)<br>g15 TRACK_APPEARED_RIGHT(B,U3) (B:e07)<br>g35 TRACK_LOST(B,U1) (B:e17)<br>g36 TRACK_LOST(B,U3) (B:e16) | ego: not yet observed |
 | -7.45 | B | g10 TRACK_APPEARED_LEFT(B,U5) (B:e04)<br>g22 TRACK_LOST(B,U5) (B:e12) | ego: not yet observed |
-| -7.45 | B | g11 TRACK_APPEARED_LEFT(B,U6) (B:e03)<br>g50 TRACK_LOST(B,U6) (B:e23) | ego: not yet observed |
-| -7.45 | A | g12 TRACK_APPEARED_RIGHT(A,U3) (A:e07)<br>g54 EGO_PATH_ENTRY(A,U3) (A:e31)<br>g66 EGO_PATH_EXIT(A,U3) (A:e41)<br>g67 TRACK_LOST(A,U3) (A:e42) | ego: not yet observed |
-| -7.45 | B | g16 TRACK_APPEARED_RIGHT(B,U7) (B:e06)<br>g20 CRITICAL_TTC_START(B,A) (B:e10)<br>g25 CLOSING_START(B,A) (B:e13)<br>g41 COLLISION(A,B) (B:e18)<br>g42 CRITICAL_TTC_END(B,A) (B:e19)<br>g43 CLOSING_END(B,A) (B:e20)<br>g44 TRACK_LOST(B,U7) (B:e21) | ego: not yet observed |
+| -7.45 | B | g11 TRACK_APPEARED_LEFT(B,U6) (B:e03)<br>g45 TRACK_LOST(B,U6) (B:e23) | ego: not yet observed |
+| -7.45 | A | g12 TRACK_APPEARED_RIGHT(A,U3) (A:e07)<br>g56 TRACK_LOST(A,U3) (A:e31) | ego: not yet observed |
+| -7.45 | B | g16 TRACK_APPEARED_RIGHT(B,U7) (B:e06)<br>g20 CRITICAL_TTC_START(B,A) (B:e10)<br>g25 CLOSING_START(B,A) (B:e13)<br>g37 COLLISION(A,B) (B:e18)<br>g38 CRITICAL_TTC_END(B,A) (B:e19)<br>g39 CLOSING_END(B,A) (B:e20)<br>g40 TRACK_LOST(B,U7) (B:e21) | ego: not yet observed |
 | -7.40 | B | g17 TRACK_APPEARED_FRONT(B,A) (B:e08) | ego: MOVING, THROTTLE<br>track_001#segment_1: CRITICAL_TTC?<br>track_002: CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC? |
 | -7.15 | B | g18 TRACK_APPEARED_RIGHT(B,U4) (B:e09) | ego: MOVING, THROTTLE<br>track_001#segment_1: CRITICAL_TTC?<br>track_002: CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC?<br>track_006: IN_EGO_PATH, CRITICAL_TTC? |
 | -7.15 | B | g18 TRACK_APPEARED_RIGHT(B,U4) (B:e09)<br>g21 TRACK_LOST(B,U4) (B:e11) | ego: MOVING, THROTTLE<br>track_001#segment_1: CRITICAL_TTC?<br>track_002: CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC?<br>track_006: IN_EGO_PATH, CRITICAL_TTC? |
 | -6.95 | A | g19 CRITICAL_TTC_START(A,U2) (A:e10) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC?<br>track_002: IN_EGO_PATH, CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC?<br>track_006: CRITICAL_TTC?<br>track_007: CRITICAL_TTC? |
-| -6.95 | A | g19 CRITICAL_TTC_START(A,U2) (A:e10)<br>g32 CRITICAL_TTC_END(A,U2) (A:e17) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC?<br>track_002: IN_EGO_PATH, CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC?<br>track_006: CRITICAL_TTC?<br>track_007: CRITICAL_TTC? |
+| -6.95 | A | g19 CRITICAL_TTC_START(A,U2) (A:e10)<br>g30 CRITICAL_TTC_END(A,U2) (A:e15) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC?<br>track_002: IN_EGO_PATH, CRITICAL_TTC?<br>track_003: CRITICAL_TTC?<br>track_004: CRITICAL_TTC?<br>track_005: CRITICAL_TTC?<br>track_006: CRITICAL_TTC?<br>track_007: CRITICAL_TTC? |
 | -6.90 | B | g20 CRITICAL_TTC_START(B,A) (B:e10) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_002: no active state<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: IN_EGO_PATH, CRITICAL_TTC?<br>track_007: CRITICAL_TTC? |
 | -1.50 | A | g23 THROTTLE_END(A) (A:e11)<br>g24 BRAKE_START(A) (A:e12) | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
 | -1.25 | B | g25 CLOSING_START(B,A) (B:e13) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CRITICAL_TTC, IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_007 |
 | -1.20 | A | g26 CLOSING_START(A,U6) (A:e13) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
-| -1.20 | A | g26 CLOSING_START(A,U6) (A:e13)<br>g38 CLOSING_END(A,U6) (A:e23) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
+| -1.20 | A | g26 CLOSING_START(A,U6) (A:e13)<br>g34 CLOSING_END(A,U6) (A:e19) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
 | -1.15 | B | g27 TRACK_APPEARED_LEFT(B,U5) (B:e14) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_007 |
-| -1.15 | B | g27 TRACK_APPEARED_LEFT(B,U5) (B:e14)<br>g31 TRACK_LOST(B,U5) (B:e15) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_007 |
+| -1.15 | B | g27 TRACK_APPEARED_LEFT(B,U5) (B:e14)<br>g29 TRACK_LOST(B,U5) (B:e15) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING, CRITICAL_TTC, IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_007 |
 | -1.10 | A | g28 CLOSING_START(A,U7) (A:e14) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: no active state |
-| -1.10 | A | g28 CLOSING_START(A,U7) (A:e14)<br>g34 CLOSING_END(A,U7) (A:e19) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: no active state |
-| -0.90 | A | g29 CRITICAL_TTC_START(A,U6) (A:e15)<br>g30 CRITICAL_TTC_START(A,U7) (A:e16) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: CLOSING |
-| -0.90 | A | g29 CRITICAL_TTC_START(A,U6) (A:e15)<br>g37 CRITICAL_TTC_END(A,U6) (A:e22) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: CLOSING |
-| -0.90 | A | g30 CRITICAL_TTC_START(A,U7) (A:e16)<br>g33 CRITICAL_TTC_END(A,U7) (A:e18) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: CLOSING |
-| -0.30 | A | g35 MOVING_END(A) (A:e20)<br>g36 STOP_START(A) (A:e21) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING, CRITICAL_TTC<br>track_007: no active state |
-| +0.00 | A | g41 COLLISION(A,B) (A:e24) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
-| +0.05 | A | g45 BRAKE_END(A) (A:e25) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
-| +0.05 | B | g46 THROTTLE_END(B) (B:e22) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_003, track_004, track_005, track_007, track_008 |
-| +0.45 | A | g47 TRACK_APPEARED_FRONT(A,U8) (A:e26) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
-| +0.45 | A | g47 TRACK_APPEARED_FRONT(A,U8) (A:e26)<br>g56 TRACK_LOST(A,U8) (A:e33) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
-| +0.55 | A | g48 BRAKE_START(A) (A:e27) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state<br>track_008: IN_EGO_PATH, CRITICAL_TTC? |
-| +0.80 | A | g49 EGO_PATH_ENTRY(A,U4) (A:e28) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state<br>track_008: IN_EGO_PATH, CRITICAL_TTC? |
-| +0.80 | A | g49 EGO_PATH_ENTRY(A,U4) (A:e28)<br>g62 EGO_PATH_EXIT(A,U4) (A:e39) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state<br>track_008: IN_EGO_PATH, CRITICAL_TTC? |
-| +0.85 | B | g51 TRACK_APPEARED_LEFT(B,U9) (B:e24) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_002, track_003, track_004, track_005, track_007, track_008 |
-| +0.85 | B | g51 TRACK_APPEARED_LEFT(B,U9) (B:e24)<br>g63 TRACK_LOST(B,U9) (B:e25) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_002, track_003, track_004, track_005, track_007, track_008 |
-| +1.80 | A | g53 EGO_PATH_EXIT(A,U8) (A:e30) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: no active state<br>track_008: IN_EGO_PATH<br>track lost, states UNKNOWN: track_005 |
-| +2.05 | A | g54 EGO_PATH_ENTRY(A,U3) (A:e31) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: no active state<br>track_008: no active state<br>track lost, states UNKNOWN: track_005 |
-| +3.05 | A | g57 EGO_PATH_ENTRY(A,U7) (A:e34) | ego: STOP, BRAKE<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: no active state<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
-| +3.10 | A | g58 EGO_PATH_EXIT(A,U2) (A:e35) | ego: STOP, BRAKE<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
-| +3.25 | A | g59 TRACK_APPEARED_LEFT(A,U10) (A:e36) | ego: STOP, BRAKE<br>track_002: no active state<br>track_003: IN_EGO_PATH<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
-| +3.25 | A | g59 TRACK_APPEARED_LEFT(A,U10) (A:e36)<br>g60 TRACK_APPEARED_LEFT(A,U11) (A:e37)<br>g61 TRACK_LOST(A,U10) (A:e38) | ego: STOP, BRAKE<br>track_002: no active state<br>track_003: IN_EGO_PATH<br>track_004: IN_EGO_PATH<br>track_006: no active state<br>track_007: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
-| +4.30 | B | g64 TRACK_APPEARED_LEFT(B,U12) (B:e26) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_001#segment_2, track_002, track_003, track_004, track_005, track_007, track_008 |
+| -1.10 | A | g28 CLOSING_START(A,U7) (A:e14)<br>g31 CLOSING_END(A,U7) (A:e16) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CRITICAL_TTC, IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: no active state |
+| -0.30 | A | g32 MOVING_END(A) (A:e17)<br>g33 STOP_START(A) (A:e18) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: CLOSING<br>track_007: no active state |
+| +0.00 | A | g37 COLLISION(A,B) (A:e20) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
+| +0.05 | A | g41 BRAKE_END(A) (A:e21) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
+| +0.05 | B | g42 THROTTLE_END(B) (B:e22) | ego: MOVING, THROTTLE<br>track_001#segment_1: no active state<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_002, track_003, track_004, track_005, track_007, track_008 |
+| +0.45 | A | g43 TRACK_APPEARED_FRONT(A,U8) (A:e22) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
+| +0.45 | A | g43 TRACK_APPEARED_FRONT(A,U8) (A:e22)<br>g49 TRACK_LOST(A,U8) (A:e26) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state |
+| +0.55 | A | g44 BRAKE_START(A) (A:e23) | ego: STOP<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_005: no active state<br>track_006: no active state<br>track_007: no active state<br>track_008: IN_EGO_PATH, CRITICAL_TTC? |
+| +0.85 | B | g46 TRACK_APPEARED_LEFT(B,U9) (B:e24) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_002, track_003, track_004, track_005, track_007, track_008 |
+| +0.85 | B | g46 TRACK_APPEARED_LEFT(B,U9) (B:e24)<br>g53 TRACK_LOST(B,U9) (B:e25) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_002, track_003, track_004, track_005, track_007, track_008 |
+| +3.25 | A | g50 TRACK_APPEARED_LEFT(A,U10) (A:e27) | ego: STOP, BRAKE<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_006: no active state<br>track_007: no active state<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
+| +3.25 | A | g50 TRACK_APPEARED_LEFT(A,U10) (A:e27)<br>g51 TRACK_APPEARED_LEFT(A,U11) (A:e28)<br>g52 TRACK_LOST(A,U10) (A:e29) | ego: STOP, BRAKE<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: no active state<br>track_006: no active state<br>track_007: no active state<br>track lost, states UNKNOWN: track_001, track_005, track_008 |
+| +4.30 | B | g54 TRACK_APPEARED_LEFT(B,U12) (B:e26) | ego: MOVING<br>track_006: IN_EGO_PATH<br>track lost, states UNKNOWN: track_001#segment_1, track_001#segment_2, track_002, track_003, track_004, track_005, track_007, track_008 |
 
 ## Plain-language reading
 
@@ -396,15 +340,11 @@ Each recorder's own belief just before its events, in its own local names (track
 - 1.20 s before the reference collision, A observed anonymous road user U6 start closing in.
 - 1.15 s before the reference collision, B's radar started tracking anonymous road user U5, which appeared on its left.
 - 1.10 s before the reference collision, A observed anonymous road user U7 start closing in.
-- 0.90 s before the reference collision, A's time-to-contact with anonymous road user U6 became critical.
-- 0.90 s before the reference collision, A's time-to-contact with anonymous road user U7 became critical.
 - 0.70 s before the reference collision, B's radar lost anonymous road user U5 (its states are UNKNOWN from then on, not ended).
 - 0.65 s before the reference collision, A's time-to-contact with anonymous road user U2 stopped being critical.
-- 0.40 s before the reference collision, A's time-to-contact with anonymous road user U7 stopped being critical.
 - 0.35 s before the reference collision, A observed anonymous road user U7 stop closing in.
 - 0.30 s before the reference collision, A stopped moving.
 - 0.30 s before the reference collision, A came to a stop.
-- 0.25 s before the reference collision, A's time-to-contact with anonymous road user U6 stopped being critical.
 - 0.20 s before the reference collision, A observed anonymous road user U6 stop closing in.
 - 0.05 s before the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
 - 0.05 s before the reference collision, B's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).
@@ -416,22 +356,15 @@ Each recorder's own belief just before its events, in its own local names (track
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.45 s after the reference collision, A's radar started tracking anonymous road user U8, which appeared in front of it.
 - 0.55 s after the reference collision, A started braking.
-- 0.80 s after the reference collision, A observed anonymous road user U4 enter its forward path corridor.
 - 0.80 s after the reference collision, B's radar lost anonymous road user U6 (its states are UNKNOWN from then on, not ended).
 - 0.85 s after the reference collision, B's radar started tracking anonymous road user U9, which appeared on its left.
 - 1.50 s after the reference collision, A's radar lost anonymous road user U5 (its states are UNKNOWN from then on, not ended).
-- 1.80 s after the reference collision, A observed anonymous road user U8 leave its forward path corridor.
-- 2.05 s after the reference collision, A observed anonymous road user U3 enter its forward path corridor.
 - 2.10 s after the reference collision, A's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
 - 2.80 s after the reference collision, A's radar lost anonymous road user U8 (its states are UNKNOWN from then on, not ended).
-- 3.05 s after the reference collision, A observed anonymous road user U7 enter its forward path corridor.
-- 3.10 s after the reference collision, A observed anonymous road user U2 leave its forward path corridor.
 - 3.25 s after the reference collision, A's radar started tracking anonymous road user U10, which appeared on its left.
 - 3.50 s after the reference collision, A's radar started tracking anonymous road user U11, which appeared on its left.
 - 3.50 s after the reference collision, A's radar lost anonymous road user U10 (its states are UNKNOWN from then on, not ended).
-- 3.55 s after the reference collision, A observed anonymous road user U4 leave its forward path corridor.
 - 4.25 s after the reference collision, B's radar lost anonymous road user U9 (its states are UNKNOWN from then on, not ended).
 - 4.30 s after the reference collision, B's radar started tracking anonymous road user U12, which appeared on its left.
 - 4.40 s after the reference collision, A's radar lost anonymous road user U2 (its states are UNKNOWN from then on, not ended).
-- 4.45 s after the reference collision, A observed anonymous road user U3 leave its forward path corridor.
 - 4.45 s after the reference collision, A's radar lost anonymous road user U3 (its states are UNKNOWN from then on, not ended).

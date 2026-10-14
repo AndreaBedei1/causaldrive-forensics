@@ -30,7 +30,7 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e16 | 6.45 | CLOSING_END | B | track_001 | radar |  |
 | B:e17 | 7.25 | MOVING_END | B | - | ego |  |
 | B:e18 | 7.25 | STOP_START | B | - | ego |  |
-| B:e19 | 7.45 | EGO_PATH_ENTRY | B | track_001 | radar | geometry=estimated_body |
+| B:e19 | 7.40 | EGO_PATH_ENTRY | B | track_001 | radar | geometry=estimated_body |
 | B:e20 | 8.95 | TRACK_LOST | B | track_002 | radar |  |
 | B:e21 | 8.95 | TRACK_LOST | B | track_003 | radar |  |
 
@@ -98,14 +98,14 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 6.40 | B:e15 CLOSING_END track_002 | ego: MOVING, BRAKE<br>track_001: CLOSING<br>track_002: CLOSING<br>track_003: no active state | 6.30 |
 | 6.45 | B:e16 CLOSING_END track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING<br>track_002: no active state<br>track_003: no active state | 6.40 |
 | 7.25 | B:e17 MOVING_END<br>B:e18 STOP_START | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: no active state<br>track_003: no active state | 7.20 |
-| 7.45 | B:e19 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: no active state<br>track_003: no active state | 7.40 |
+| 7.40 | B:e19 EGO_PATH_ENTRY track_001 | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: no active state<br>track_003: no active state | 7.30 |
 | 8.95 | B:e20 TRACK_LOST track_002<br>B:e21 TRACK_LOST track_003 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH<br>track_002: no active state<br>track_003: no active state | 8.90 |
 
 ## States still active when observation ended
 
 - BRAKE, since B:e13 (t = 6.25 s)
 - STOP, since B:e18 (t = 7.25 s)
-- EGO_PATH of track_001, since B:e19 (t = 7.45 s)
+- EGO_PATH of track_001, since B:e19 (t = 7.40 s)
 
 ## Tracks lost
 
@@ -115,7 +115,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 5.55, COLLISION 6.20 (+0.65 s); EGO_PATH_ENTRY 7.45 after critical TTC (+1.90 s)
+- track_001: CRITICAL_TTC_START 5.55, COLLISION 6.20 (+0.65 s); EGO_PATH_ENTRY 7.40 after critical TTC (+1.85 s)
 
 ## Sign detection windows
 
@@ -153,6 +153,6 @@ Bearing: positive = to B's right. Ranges are measured from the radar to the visi
 - t = 6.45 s: B observed track_001 stop closing in.
 - t = 7.25 s: B stopped moving.
 - t = 7.25 s: B came to a stop.
-- t = 7.45 s: B observed track_001 enter its forward path corridor.
+- t = 7.40 s: B observed track_001 enter its forward path corridor.
 - t = 8.95 s: B's radar lost track_002 (its states are UNKNOWN from then on, not ended).
 - t = 8.95 s: B's radar lost track_003 (its states are UNKNOWN from then on, not ended).

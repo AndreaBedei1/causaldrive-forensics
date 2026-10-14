@@ -50,15 +50,17 @@ class PostContactTests(unittest.TestCase):
 
 
 class ReplaySuppressionTests(unittest.TestCase):
-    def test_the_replay_does_not_display_a_suppressed_post_contact_episode(self):
+    def test_the_replay_displays_no_same_pair_critical_episode_after_their_contact(self):
+        # Every canonical run: the local contact rules close such an episode at the source, and the replay shows
+        # the global timeline, where a post-contact episode of the pair is suppressed in any case.
         from src.cdf.replay.model import ReplayRun
-        run = ReplayRun.load(ROOT / "traces/S19/run_0_collision_ambiguity")
-        contact = min(mark.time for mark in run.collisions)
-        shown = [e for e in run.display_events() if e.time > contact and e.actor == "A"
-                 and e.event_type == "CRITICAL_TTC_START" and run.identities.get(("A", e.subject), e.subject) == "B"]
-        kept = [e for e in run.all_events() if e.time > contact and e.actor == "A" and e.event_type == "CRITICAL_TTC_START"]
-        self.assertEqual(shown, [])
-        self.assertTrue(kept)  # the local evidence is preserved
+        for run_dir in sorted(p for p in (ROOT / "traces").glob("S*/run_*") if (p / "reconstruction/global").exists()):
+            run = ReplayRun.load(run_dir)
+            for mark in run.collisions:
+                pair = set(mark.participants)
+                shown = [e for e in run.display_events() if e.time > mark.time and e.event_type == "CRITICAL_TTC_START"
+                         and {e.actor, run.identities.get((e.actor, e.subject), e.subject)} == pair]
+                self.assertEqual(shown, [], run_dir.name)
 
 
 if __name__ == "__main__":

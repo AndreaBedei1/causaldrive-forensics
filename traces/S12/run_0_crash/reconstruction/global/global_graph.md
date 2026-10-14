@@ -49,10 +49,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 | g08 | -4.95 | TRACK_APPEARED_RIGHT | B | U1 | B:e04 @ 0.00, B:e18 @ 5.70 | initial_in_ego_path=False; source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
 | g09 | -4.95 | CLOSING_START | A | U1 | A:e05 @ 0.00, A:e11 @ 4.60 | active_at_first_observation=True; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g10 | -4.95 | CLOSING_START | B | U1 | B:e05 @ 0.00, B:e16 @ 5.15 | active_at_first_observation=True; source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
-| g11 | -2.40 | CRITICAL_TTC_START | A | U1 | A:e06 @ 2.55, A:e18 @ 5.50 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g11 | -2.20 | CRITICAL_TTC_START | A | U1 | A:e06 @ 2.75, A:e18 @ 5.50 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g12 | -2.20 | CUT_IN_FROM_RIGHT_START | A | U1 | A:e07 @ 2.75, A:e17 @ 5.30 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g13 | -2.20 | CUT_IN_FROM_RIGHT_START | B | A | B:e06 @ 2.75, B:e23 @ 8.40 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g14 | -2.10 | EGO_PATH_ENTRY | A | U1 | A:e08 @ 2.85, A:e19 @ 5.50 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g14 | -2.10 | EGO_PATH_ENTRY | A | U1 | A:e08 @ 2.85, A:e19 @ 5.85 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g15 | -1.15 | CRITICAL_TTC_START | A | B | A:e09 @ 3.80, A:e13 @ 4.95 | source_track=track_002; aggregation=entity_state_union; source_tracks=['A:track_002'] |
 | g16 | -1.05 | CRITICAL_TTC_START | B | A | B:e07 @ 3.90, B:e11 @ 4.95 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
 | g17 | -0.90 | EGO_PATH_ENTRY | B | A | B:e08 @ 4.05, B:e15 @ 5.05 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
@@ -72,9 +72,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 | g31 | 0.20 | CLOSING_END | B | U1 | B:e16 @ 5.15 | source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
 | g32 | 0.35 | CUT_IN_FROM_RIGHT_END | A | U1 | A:e17 @ 5.30 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g33 | 0.55 | CRITICAL_TTC_END | A | U1 | A:e18 @ 5.50 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g34 | 0.55 | EGO_PATH_EXIT | A | U1 | A:e19 @ 5.50 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g35 | 0.70 | EGO_PATH_ENTRY | B | A | B:e17 @ 5.65 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g36 | 0.75 | TRACK_LOST | B | U1 | B:e18 @ 5.70 | source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
+| g34 | 0.70 | EGO_PATH_ENTRY | B | A | B:e17 @ 5.65 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g35 | 0.75 | TRACK_LOST | B | U1 | B:e18 @ 5.70 | source_track=track_002; aggregation=entity_state_union; source_tracks=['B:track_002'] |
+| g36 | 0.90 | EGO_PATH_EXIT | A | U1 | A:e19 @ 5.85 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g37 | 1.00 | MOVING_END | B | - | B:e19 @ 5.95 |  |
 | g38 | 1.00 | STOP_START | B | - | B:e20 @ 5.95 |  |
 | g39 | 1.10 | MOVING_END | A | - | A:e20 @ 6.05 |  |
@@ -89,17 +89,36 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
 
 ```
     g01 --PRECEDES--> g11
+    g01 --PRECEDES--> g12
+    g01 --PRECEDES--> g13
     g02 --PRECEDES--> g11
+    g02 --PRECEDES--> g12
+    g02 --PRECEDES--> g13
     g03 --PRECEDES--> g11
+    g03 --PRECEDES--> g12
+    g03 --PRECEDES--> g13
     g04 --PRECEDES--> g11
+    g04 --PRECEDES--> g12
+    g04 --PRECEDES--> g13
     g05 --PRECEDES--> g11
+    g05 --PRECEDES--> g12
+    g05 --PRECEDES--> g13
     g06 --PRECEDES--> g11
+    g06 --PRECEDES--> g12
+    g06 --PRECEDES--> g13
     g07 --PRECEDES--> g11
+    g07 --PRECEDES--> g12
+    g07 --PRECEDES--> g13
     g08 --PRECEDES--> g11
+    g08 --PRECEDES--> g12
+    g08 --PRECEDES--> g13
     g09 --PRECEDES--> g11
+    g09 --PRECEDES--> g12
+    g09 --PRECEDES--> g13
     g10 --PRECEDES--> g11
-    g11 --PRECEDES--> g12
-    g11 --PRECEDES--> g13
+    g10 --PRECEDES--> g12
+    g10 --PRECEDES--> g13
+    g11 --PRECEDES--> g14
     g12 --PRECEDES--> g14
     g13 --PRECEDES--> g14
     g14 --PRECEDES--> g15
@@ -140,8 +159,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
     g30 --PRECEDES--> g31
     g31 --PRECEDES--> g32
     g32 --PRECEDES--> g33
-    g32 --PRECEDES--> g34
-    g33 --PRECEDES--> g35
+    g33 --PRECEDES--> g34
     g34 --PRECEDES--> g35
     g35 --PRECEDES--> g36
     g36 --PRECEDES--> g37
@@ -167,7 +185,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
     g05 --SAME_TRACK--> g24
     g06 --SAME_TRACK--> g32
     g06 --SAME_TRACK--> g33
-    g06 --SAME_TRACK--> g34
+    g06 --SAME_TRACK--> g36
     g05 --SAME_TRACK--> g41
     g06 --SAME_TRACK--> g44
     g08 --SAME_TRACK--> g10
@@ -179,8 +197,8 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1576.9
     g07 --SAME_TRACK--> g25
     g07 --SAME_TRACK--> g30
     g08 --SAME_TRACK--> g31
-    g07 --SAME_TRACK--> g35
-    g08 --SAME_TRACK--> g36
+    g07 --SAME_TRACK--> g34
+    g08 --SAME_TRACK--> g35
     g42 --SAME_TRACK--> g43
     g07 --SAME_TRACK--> g45
 ```
@@ -192,8 +210,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | t_global | Events |
 |---------:|--------|
 | -4.95 | MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(A,U1); TRACK_APPEARED_RIGHT(B,A); TRACK_APPEARED_RIGHT(B,U1); CLOSING_START(A,U1); CLOSING_START(B,U1) |
-| -2.40 | CRITICAL_TTC_START(A,U1) |
-| -2.20 | CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A) |
+| -2.20 | CRITICAL_TTC_START(A,U1); CUT_IN_FROM_RIGHT_START(A,U1); CUT_IN_FROM_RIGHT_START(B,A) |
 | -2.10 | EGO_PATH_ENTRY(A,U1) |
 | -1.15 | CRITICAL_TTC_START(A,B) |
 | -1.05 | CRITICAL_TTC_START(B,A) |
@@ -206,9 +223,10 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | +0.10 | EGO_PATH_EXIT(B,A) |
 | +0.20 | CLOSING_END(B,U1) |
 | +0.35 | CUT_IN_FROM_RIGHT_END(A,U1) |
-| +0.55 | CRITICAL_TTC_END(A,U1); EGO_PATH_EXIT(A,U1) |
+| +0.55 | CRITICAL_TTC_END(A,U1) |
 | +0.70 | EGO_PATH_ENTRY(B,A) |
 | +0.75 | TRACK_LOST(B,U1) |
+| +0.90 | EGO_PATH_EXIT(A,U1) |
 | +1.00 | MOVING_END(B); STOP_START(B) |
 | +1.10 | MOVING_END(A); STOP_START(A) |
 | +1.45 | EGO_PATH_ENTRY(A,B) |
@@ -221,7 +239,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
-- A's track_001 (unidentified U1): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.55 <= CUT_IN_FROM_RIGHT_START 2.75 (+0.20 s); EGO_PATH_ENTRY 2.85 after critical TTC (+0.30 s) [local times; t_global: cut_in -2.20, critical_ttc_start -2.40, ego_path_entry -2.10, collision +0.00]
+- A's track_001 (unidentified U1): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.75 <= CUT_IN_FROM_RIGHT_START 2.75 (+0.00 s); EGO_PATH_ENTRY 2.85 after critical TTC (+0.10 s) [local times; t_global: cut_in -2.20, critical_ttc_start -2.20, ego_path_entry -2.10, collision +0.00]
 - A's track_002 (B): CRITICAL_TTC_START 3.80, COLLISION with B 4.95 (+1.15 s); EGO_PATH_ENTRY 6.40 after critical TTC (+2.60 s) [local times; t_global: critical_ttc_start -1.15, ego_path_entry +1.45, collision +0.00]
 - B's track_001 (A): cut-in started before critical TTC: CUT_IN_FROM_RIGHT_START 2.75 < CRITICAL_TTC_START 3.90 (+1.15 s) < COLLISION with A 4.95 (+1.05 s); EGO_PATH_ENTRY 4.05 after critical TTC (+0.15 s) [local times; t_global: cut_in -2.20, critical_ttc_start -1.05, ego_path_entry -0.90, collision +0.00]
 
@@ -234,16 +252,16 @@ Each recorder's own belief just before its events, in its own local names (track
 | -4.95 | A | g01 MOVING_START(A) (A:e01)<br>g03 THROTTLE_START(A) (A:e02)<br>g05 TRACK_APPEARED_LEFT(A,B) (A:e03)<br>g06 TRACK_APPEARED_RIGHT(A,U1) (A:e04)<br>g09 CLOSING_START(A,U1) (A:e05) | ego: not yet observed |
 | -4.95 | B | g02 MOVING_START(B) (B:e01)<br>g04 THROTTLE_START(B) (B:e02)<br>g07 TRACK_APPEARED_RIGHT(B,A) (B:e03)<br>g08 TRACK_APPEARED_RIGHT(B,U1) (B:e04)<br>g10 CLOSING_START(B,U1) (B:e05) | ego: not yet observed |
 | -4.95 | A | g06 TRACK_APPEARED_RIGHT(A,U1) (A:e04)<br>g44 TRACK_LOST(A,U1) (A:e23) | ego: not yet observed |
-| -4.95 | B | g08 TRACK_APPEARED_RIGHT(B,U1) (B:e04)<br>g36 TRACK_LOST(B,U1) (B:e18) | ego: not yet observed |
+| -4.95 | B | g08 TRACK_APPEARED_RIGHT(B,U1) (B:e04)<br>g35 TRACK_LOST(B,U1) (B:e18) | ego: not yet observed |
 | -4.95 | A | g09 CLOSING_START(A,U1) (A:e05)<br>g20 CLOSING_END(A,U1) (A:e11) | ego: not yet observed |
 | -4.95 | B | g10 CLOSING_START(B,U1) (B:e05)<br>g31 CLOSING_END(B,U1) (B:e16) | ego: not yet observed |
-| -2.40 | A | g11 CRITICAL_TTC_START(A,U1) (A:e06) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: no active state |
-| -2.40 | A | g11 CRITICAL_TTC_START(A,U1) (A:e06)<br>g14 EGO_PATH_ENTRY(A,U1) (A:e08)<br>g33 CRITICAL_TTC_END(A,U1) (A:e18)<br>g34 EGO_PATH_EXIT(A,U1) (A:e19) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: no active state |
-| -2.20 | A | g12 CUT_IN_FROM_RIGHT_START(A,U1) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state |
-| -2.20 | A | g12 CUT_IN_FROM_RIGHT_START(A,U1) (A:e07)<br>g32 CUT_IN_FROM_RIGHT_END(A,U1) (A:e17) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state |
+| -2.20 | A | g11 CRITICAL_TTC_START(A,U1) (A:e06)<br>g12 CUT_IN_FROM_RIGHT_START(A,U1) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: no active state |
+| -2.20 | A | g11 CRITICAL_TTC_START(A,U1) (A:e06)<br>g33 CRITICAL_TTC_END(A,U1) (A:e18) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: no active state |
+| -2.20 | A | g12 CUT_IN_FROM_RIGHT_START(A,U1) (A:e07)<br>g32 CUT_IN_FROM_RIGHT_END(A,U1) (A:e17) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: no active state |
 | -2.20 | B | g13 CUT_IN_FROM_RIGHT_START(B,A) (B:e06) | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING |
 | -2.20 | B | g13 CUT_IN_FROM_RIGHT_START(B,A) (B:e06)<br>g45 CUT_IN_FROM_RIGHT_END(B,A) (B:e23) | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING |
 | -2.10 | A | g14 EGO_PATH_ENTRY(A,U1) (A:e08) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: no active state |
+| -2.10 | A | g14 EGO_PATH_ENTRY(A,U1) (A:e08)<br>g36 EGO_PATH_EXIT(A,U1) (A:e19) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: no active state |
 | -1.15 | A | g15 CRITICAL_TTC_START(A,B) (A:e09) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: no active state |
 | -1.15 | A | g15 CRITICAL_TTC_START(A,B) (A:e09)<br>g19 CLOSING_START(A,B) (A:e10)<br>g21 COLLISION(A,B) (A:e12)<br>g22 CRITICAL_TTC_END(A,B) (A:e13)<br>g24 CLOSING_END(A,B) (A:e14) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: no active state |
 | -1.05 | B | g16 CRITICAL_TTC_START(B,A) (B:e07) | ego: MOVING, THROTTLE<br>track_001: CUT_IN_FROM_RIGHT<br>track_002: CLOSING |
@@ -254,7 +272,7 @@ Each recorder's own belief just before its events, in its own local names (track
 | -0.60 | A | g19 CLOSING_START(A,B) (A:e10) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CRITICAL_TTC |
 | +0.05 | A | g26 THROTTLE_END(A) (A:e15)<br>g28 BRAKE_START(A) (A:e16) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: no active state |
 | +0.05 | B | g27 THROTTLE_END(B) (B:e13)<br>g29 BRAKE_START(B) (B:e14) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING |
-| +0.70 | B | g35 EGO_PATH_ENTRY(B,A) (B:e17) | ego: MOVING, BRAKE<br>track_001: CUT_IN_FROM_RIGHT<br>track_002: no active state |
+| +0.70 | B | g34 EGO_PATH_ENTRY(B,A) (B:e17) | ego: MOVING, BRAKE<br>track_001: CUT_IN_FROM_RIGHT<br>track_002: no active state |
 | +1.00 | B | g37 MOVING_END(B) (B:e19)<br>g38 STOP_START(B) (B:e20) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track lost, states UNKNOWN: track_002 |
 | +1.10 | A | g39 MOVING_END(A) (A:e20)<br>g40 STOP_START(A) (A:e21) | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: no active state |
 | +1.45 | A | g41 EGO_PATH_ENTRY(A,B) (A:e22) | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: no active state |
@@ -273,7 +291,7 @@ Each recorder's own belief just before its events, in its own local names (track
 - 4.95 s before the reference collision, B's radar started tracking anonymous road user U1, which appeared on its right.
 - 4.95 s before the reference collision, A observed anonymous road user U1 start closing in (already the case when first observed).
 - 4.95 s before the reference collision, B observed anonymous road user U1 start closing in (already the case when first observed).
-- 2.40 s before the reference collision, A's time-to-contact with anonymous road user U1 became critical.
+- 2.20 s before the reference collision, A's time-to-contact with anonymous road user U1 became critical.
 - 2.20 s before the reference collision, A observed anonymous road user U1 cutting in from the right.
 - 2.20 s before the reference collision, B observed A cutting in from the right.
 - 2.10 s before the reference collision, A observed anonymous road user U1 enter its forward path corridor.
@@ -296,9 +314,9 @@ Each recorder's own belief just before its events, in its own local names (track
 - 0.20 s after the reference collision, B observed anonymous road user U1 stop closing in.
 - 0.35 s after the reference collision, A observed anonymous road user U1's cut-in from the right settle.
 - 0.55 s after the reference collision, A's time-to-contact with anonymous road user U1 stopped being critical.
-- 0.55 s after the reference collision, A observed anonymous road user U1 leave its forward path corridor.
 - 0.70 s after the reference collision, B observed A enter its forward path corridor.
 - 0.75 s after the reference collision, B's radar lost anonymous road user U1 (its states are UNKNOWN from then on, not ended).
+- 0.90 s after the reference collision, A observed anonymous road user U1 leave its forward path corridor.
 - 1.00 s after the reference collision, B stopped moving.
 - 1.00 s after the reference collision, B came to a stop.
 - 1.10 s after the reference collision, A stopped moving.

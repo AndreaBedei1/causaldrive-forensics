@@ -34,13 +34,13 @@
       "compared": 18,
       "passed": 0.0,
       "median_box_chi2": 25.009,
-      "median_velocity_chi2": 0.138,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 9.551,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 25.147
+      "score": 25.009
     },
     {
       "a": "A:track_002",
@@ -49,13 +49,13 @@
       "compared": 130,
       "passed": 1.0,
       "median_box_chi2": 0.101,
-      "median_velocity_chi2": 0.073,
+      "median_velocity_chi2": 0.055,
       "centre_gap_m": 0.221,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.174
+      "score": 0.156
     },
     {
       "a": "A:track_002",
@@ -79,13 +79,13 @@
       "compared": 7,
       "passed": 0.0,
       "median_box_chi2": 22.624,
-      "median_velocity_chi2": 0.222,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 9.232,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 22.846
+      "score": 22.624
     },
     {
       "a": "A:track_003",
@@ -94,13 +94,13 @@
       "compared": 3,
       "passed": 0.0,
       "median_box_chi2": 24.347,
-      "median_velocity_chi2": 0.155,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 9.427,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 24.502
+      "score": 24.347
     },
     {
       "a": "A:track_003",
@@ -109,13 +109,13 @@
       "compared": 11,
       "passed": 1.0,
       "median_box_chi2": 0.611,
-      "median_velocity_chi2": 0.033,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 0.451,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.644
+      "score": 0.611
     },
     {
       "a": "B:track_002",
@@ -139,13 +139,13 @@
       "compared": 22,
       "passed": 0.0,
       "median_box_chi2": 21.806,
-      "median_velocity_chi2": 0.22,
+      "median_velocity_chi2": 0.0,
       "centre_gap_m": 9.053,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 22.026
+      "score": 21.806
     }
   ],
   "entities": [
@@ -192,18 +192,18 @@
             "compared": 130,
             "passed": 1.0,
             "median_box_chi2": 0.101,
-            "median_velocity_chi2": 0.073,
+            "median_velocity_chi2": 0.055,
             "centre_gap_m": 0.221,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.174,
-            "posterior": 0.9892
+            "score": 0.156,
+            "posterior": 0.9893
           }
         ],
         "retrospective": [],
-        "confidence": 0.9892
+        "confidence": 0.9893
       },
       "fusion_method": "box_fit+covariance_intersection",
       "footprint": {
@@ -2576,14 +2576,14 @@
             "compared": 11,
             "passed": 1.0,
             "median_box_chi2": 0.611,
-            "median_velocity_chi2": 0.033,
+            "median_velocity_chi2": 0.0,
             "centre_gap_m": 0.451,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.644,
-            "posterior": 0.9864
+            "score": 0.611,
+            "posterior": 0.9866
           }
         ],
         "retrospective": [

@@ -153,6 +153,13 @@
      "subject": "B",
      "t_local": 7.15,
      "track": "track_002"
+    },
+    {
+     "type": "EGO_PATH_ENTRY",
+     "side": "EGO_PATH_ENTRY",
+     "subject": "B",
+     "t_local": 7.35,
+     "track": "track_002"
     }
    ],
    "B": [
@@ -237,7 +244,7 @@
     ]
    },
    "EGO_PATH_ENTRY": {
-    "found": 2,
+    "found": 3,
     "expected": 1,
     "matched": 1,
     "deltas": [
@@ -246,6 +253,7 @@
     "side_agree": 1,
     "missed": [],
     "extra": [
+     "A/B@7.35",
      "B/A@6.80"
     ]
    },
@@ -311,7 +319,7 @@
     ]
    },
    "EGO_PATH_ENTRY": {
-    "found": 2,
+    "found": 3,
     "expected": 1,
     "matched": 1,
     "deltas": [
@@ -320,6 +328,7 @@
     "side_agree": 1,
     "missed": [],
     "extra": [
+     "A/B@7.35",
      "B/A@6.80"
     ]
    },
@@ -379,7 +388,7 @@
     "extra": []
    },
    "EGO_PATH_ENTRY": {
-    "found": 2,
+    "found": 3,
     "expected": 1,
     "matched": 1,
     "deltas": [
@@ -388,6 +397,7 @@
     "side_agree": 1,
     "missed": [],
     "extra": [
+     "A/B@7.35",
      "B/A@6.80"
     ]
    },

@@ -47,10 +47,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 - `-3.95` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - `-1.90` TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 - `-1.65` THROTTLE_END(A); BRAKE_START(A)
-- `-1.50` CRITICAL_TTC_START(A,B)
+- `-1.45` CRITICAL_TTC_START(A,B)
 - `-1.40` CRITICAL_TTC_START(B,A)
-- `-1.25` CUT_IN_FROM_LEFT_START(A,B)
-- `-1.10` EGO_PATH_ENTRY(A,B)
+- `-1.15` CUT_IN_FROM_LEFT_START(A,B)
+- `-1.05` EGO_PATH_ENTRY(A,B)
 - `-0.85` BRAKE_END(A)
 - `-0.75` THROTTLE_START(A)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
@@ -70,10 +70,10 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 - 1.90 s before the reference collision, B observed A start closing in (already the case when first observed).
 - 1.65 s before the reference collision, A released the accelerator.
 - 1.65 s before the reference collision, A started braking.
-- 1.50 s before the reference collision, A's time-to-contact with B became critical.
+- 1.45 s before the reference collision, A's time-to-contact with B became critical.
 - 1.40 s before the reference collision, B's time-to-contact with A became critical.
-- 1.25 s before the reference collision, A observed B cutting in from the left.
-- 1.10 s before the reference collision, A observed B enter its forward path corridor.
+- 1.15 s before the reference collision, A observed B cutting in from the left.
+- 1.05 s before the reference collision, A observed B enter its forward path corridor.
 - 0.85 s before the reference collision, A released the brake.
 - 0.75 s before the reference collision, A pressed the accelerator.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 604, B: 604 N*s).
@@ -95,7 +95,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.60 <= CUT_IN_FROM_LEFT_START 2.85 (+0.25 s); EGO_PATH_ENTRY 3.00 after critical TTC (+0.40 s) [local times; t_global: cut_in -1.25, critical_ttc_start -1.50, ego_path_entry -1.10, collision +0.00]
+- A's track_001 (B): critical TTC already active before the cut-in: CRITICAL_TTC_START 2.65 <= CUT_IN_FROM_LEFT_START 2.95 (+0.30 s); EGO_PATH_ENTRY 3.05 after critical TTC (+0.40 s) [local times; t_global: cut_in -1.15, critical_ttc_start -1.45, ego_path_entry -1.05, collision +0.00]
 - B's track_001 (A): CRITICAL_TTC_START 2.70, COLLISION with A 4.10 (+1.40 s) [local times; t_global: critical_ttc_start -1.40, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
@@ -111,7 +111,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 ### States still active when observation ended
 
 A:
-- EGO_PATH of track_001, since A:e09 (t = 3.00 s)
+- EGO_PATH of track_001, since A:e09 (t = 3.05 s)
 - BRAKE, since A:e16 (t = 4.15 s)
 - STOP, since A:e18 (t = 4.65 s)
 B:

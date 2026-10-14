@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e22",
+      "anchor_node": "A:e15",
       "anchor_t_local": 7.75,
       "offset_to_global": -7.75,
       "method": "matched_collisions",
@@ -16,7 +16,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e23",
+      "anchor_node": "B:e21",
       "anchor_t_local": 7.75,
       "offset_to_global": -7.75,
       "method": "matched_collisions",
@@ -37,23 +37,23 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e22",
-        "B": "B:e23"
+        "A": "A:e15",
+        "B": "B:e21"
       },
       "t_local": {
         "A": 7.75,
         "B": 7.75
       },
       "peak_impulse": {
-        "A": 254.4,
-        "B": 254.4
+        "A": 497.63,
+        "B": 497.63
       },
       "impulse_similarity": 1.0,
       "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
-        "peak impulses 254.4 vs 254.4 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 497.63 vs 497.63 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
         "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
         "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",

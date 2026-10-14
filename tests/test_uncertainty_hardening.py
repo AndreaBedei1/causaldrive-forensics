@@ -239,7 +239,7 @@ class RecordedRunTests(unittest.TestCase):
         self.assertIn(("A", "B"), self.collisions(result))
 
     def test_dense_collisions_name_the_single_partner(self):
-        for run in ("traces/S15/run_0_dense_platoon", "traces/S19/run_0_collision_ambiguity"):
+        for run in ("traces/S15/run_0_dense_platoon", "traces/S18/run_0_collision_ambiguity"):
             _, result = self.reconstruct(run)
             self.assertEqual(set(self.collisions(result)), {("A", "B")}, run)
 

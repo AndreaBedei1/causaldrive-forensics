@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e09",
+      "anchor_node": "A:e07",
       "anchor_t_local": 10.25,
       "offset_to_global": -10.25,
       "method": "matched_collisions",
@@ -16,7 +16,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e12",
+      "anchor_node": "B:e11",
       "anchor_t_local": 10.25,
       "offset_to_global": -10.25,
       "method": "matched_collisions",
@@ -37,8 +37,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e09",
-        "B": "B:e12"
+        "A": "A:e07",
+        "B": "B:e11"
       },
       "t_local": {
         "A": 10.25,

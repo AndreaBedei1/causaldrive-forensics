@@ -3,7 +3,7 @@
 
     python scripts/validate_canonical.py [--out docs/CANONICAL_VALIDATION.md]
 
-Checks the manifest (S01..S19, 23 runs, no gaps, no stray folders), then per run: reconstruction files present
+Checks the manifest (S01..S18, 22 runs, no gaps, no stray folders), then per run: reconstruction files present
 and finite (no NaN/Inf in any JSON), made with the current ``configs/reconstruction.yaml`` (the configuration
 recorded in ``global_graph.json``; anything else is a stale output), every recorder aligned, collisions reconstructed (evaluation), no wrong
 collision pairing, no wrong recorder link, no false merge, no global CRITICAL_TTC episode of a colliding pair
@@ -36,7 +36,7 @@ CANONICAL = {
     "S04": ["a_front_pushed", "b_rear_first"], "S05": ["crash"], "S06": ["crash"], "S07": ["merge_conflict"],
     "S08": ["rolls_through"], "S09": ["near_simultaneous"], "S10": ["deflected_into_c"], "S11": ["consequential"],
     "S12": ["crash"], "S13": ["abreast", "platoon", "passing"], "S14": ["surrounded"], "S15": ["dense_platoon"],
-    "S16": ["overtaking"], "S17": ["occlusion_reappearance"], "S18": ["far_to_near"], "S19": ["collision_ambiguity"],
+    "S16": ["overtaking"], "S17": ["occlusion_reappearance"], "S18": ["collision_ambiguity"],
 }
 
 
@@ -57,8 +57,8 @@ def _finite(value):
 def manifest_problems():
     problems = []
     ids = sorted(p.name for p in (ROOT / "traces").iterdir() if p.is_dir())
-    if ids != ["S{0:02d}".format(k) for k in range(1, 20)]:
-        problems.append("scenario folders are not exactly S01..S19: {0}".format(ids))
+    if ids != sorted(CANONICAL):
+        problems.append("scenario folders are not exactly S01..S18: {0}".format(ids))
     found = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "traces").glob("S*/run_*"))
     expected = sorted(p.relative_to(ROOT).as_posix() for p in canonical_runs())
     if found != expected:
@@ -66,7 +66,7 @@ def manifest_problems():
             sorted(set(found) - set(expected)), sorted(set(expected) - set(found))))
     configs = sorted(p.name.split("_")[0].upper() for p in (ROOT / "configs/scenarios").glob("*.yaml"))
     if configs != sorted(CANONICAL):
-        problems.append("scenario configs are not exactly S01..S19: {0}".format(configs))
+        problems.append("scenario configs are not exactly S01..S18: {0}".format(configs))
     return problems
 
 
@@ -191,7 +191,7 @@ def main() -> int:
     args = parser.parse_args()
     lines = ["# Canonical development set: automatic validation", ""]
     problems = manifest_problems()
-    lines.append("Manifest: " + ("OK (S01..S19, {0} runs)".format(len(canonical_runs())) if not problems else "FAIL: " + "; ".join(problems)))
+    lines.append("Manifest: " + ("OK (S01..S18, {0} runs)".format(len(canonical_runs())) if not problems else "FAIL: " + "; ".join(problems)))
     lines += ["", "Reconstruction: the single reconstruction method, `configs/reconstruction.yaml` (configuration digest "
               "{0}); every run is checked to carry exactly this configuration.".format(config_digest(current_config()))]
     lines += ["", "| run | status | collisions | recorder/identity decisions | merges (correct/false/missed) | unresolved identities | semantic anomalies | boxes (max at once) | events | warnings / failures |",

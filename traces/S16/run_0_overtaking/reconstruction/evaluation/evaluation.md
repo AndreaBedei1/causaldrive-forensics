@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 324.927 | 191.8 | g48 | yes | 0.0 s |
+| A + B | 324.927 | 191.8 | g47 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -27,7 +27,7 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-99 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 4711/4711 pairs.
+89 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 3782/3782 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
@@ -40,11 +40,11 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | A:track_005 | U5 | E | correctly left anonymous | 6 | 0.234 / 0.239 m | 2.271 m | 0.658 / 0.037 m/s |
 | A:track_006 | B | B | correct | 116 | 0.253 / 0.283 m | 1.642 m | 4.725 / 0.8 m/s |
 | A:track_007 | U4 | D | correctly left anonymous | 64 | 0.272 / 0.457 m | 1.835 m | 6.552 / 0.081 m/s |
-| A:track_008 | U9 | G | correctly left anonymous | 49 | 1.37 / 1.346 m | 2.184 m | 6.593 / 1.028 m/s |
-| A:track_009 | U10 | C | correctly left anonymous | 16 | 0.265 / 0.229 m | 2.247 m | 1.951 / 0.056 m/s |
-| A:track_010 | U11 | E | correctly left anonymous | 37 | 0.207 / 0.457 m | 1.716 m | 3.51 / 1.396 m/s |
-| A:track_011 | U12 | I | correctly left anonymous | 3 | 0.212 / 0.263 m | 1.37 m | 5.857 / 0.122 m/s |
-| A:track_012 | U12 | I | correctly left anonymous | 5 | 0.333 / 0.24 m | 1.883 m | 4.756 / 0.129 m/s |
+| A:track_008 | U8 | G | correctly left anonymous | 49 | 1.37 / 1.346 m | 2.184 m | 6.593 / 1.028 m/s |
+| A:track_009 | U9 | C | correctly left anonymous | 16 | 0.265 / 0.229 m | 2.247 m | 1.951 / 0.056 m/s |
+| A:track_010 | U10 | E | correctly left anonymous | 37 | 0.207 / 0.457 m | 1.716 m | 3.51 / 1.396 m/s |
+| A:track_011 | U11 | I | correctly left anonymous | 3 | 0.212 / 0.263 m | 1.37 m | 5.857 / 0.122 m/s |
+| A:track_012 | U11 | I | correctly left anonymous | 5 | 0.333 / 0.24 m | 1.883 m | 4.756 / 0.129 m/s |
 | B:track_001 | A | A | correct | 120 | 2.373 / 1.914 m | 3.043 m | 4.411 / 1.077 m/s |
 | B:track_002 | U3 | F | correctly left anonymous | 119 | 0.41 / 0.491 m | 1.637 m | 4.182 / 0.079 m/s |
 | B:track_003 | U6 | E | correctly left anonymous | 53 | 0.284 / 0.471 m | 1.328 m | 2.97 / 0.462 m/s |
@@ -52,8 +52,8 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 | B:track_005 | U7 | G | correctly left anonymous | 22 | 0.451 / 0.55 m | 1.724 m | 1.773 / 0.066 m/s |
 | B:track_006 | U4 | D | correctly left anonymous | 61 | 0.269 / 0.413 m | 1.854 m | 4.865 / 0.142 m/s |
 | B:track_007 | U8 | G | correctly left anonymous | 53 | 0.352 / 0.423 m | 1.853 m | 5.555 / 0.13 m/s |
-| B:track_008 | U12 | I | correctly left anonymous | 12 | 0.582 / 0.64 m | 1.384 m | 6.795 / 0.201 m/s |
-| B:track_009 | U11 | E | correctly left anonymous | 18 | 0.201 / 0.531 m | 1.439 m | 3.92 / 1.906 m/s |
+| B:track_008 | U11 | I | correctly left anonymous | 12 | 0.582 / 0.64 m | 1.384 m | 6.795 / 0.201 m/s |
+| B:track_009 | U10 | E | correctly left anonymous | 18 | 0.201 / 0.531 m | 1.439 m | 3.92 / 1.906 m/s |
 
 ## Clearance at the true contacts
 

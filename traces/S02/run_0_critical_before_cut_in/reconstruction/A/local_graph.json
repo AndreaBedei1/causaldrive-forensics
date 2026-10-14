@@ -255,7 +255,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.6,
+      "t_local": 2.65,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -279,7 +279,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 2.5
+        "facts_t_local": 2.6
       }
     },
     {
@@ -288,29 +288,29 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.85,
+      "t_local": 2.95,
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            9.2309,
-            -1.7796
+            8.7596,
+            -1.5198
           ],
           [
-            9.5376,
-            -3.6547
+            9.1123,
+            -3.3868
           ],
           [
-            4.9979,
-            -4.3973
+            4.5922,
+            -4.2407
           ],
           [
-            4.6912,
-            -2.5222
+            4.2395,
+            -2.3737
           ]
         ],
         "geometry": "estimated_body",
         "path_frame_heading_rad": 0.000124,
-        "target_lateral_speed_mps": 1.2958
+        "target_lateral_speed_mps": 1.2762
       },
       "source": "radar",
       "confidence": null,
@@ -334,7 +334,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 2.8
+        "facts_t_local": 2.9
       }
     },
     {
@@ -343,24 +343,24 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.0,
+      "t_local": 3.05,
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            8.5873,
-            -1.4143
+            8.3959,
+            -1.2884
           ],
           [
-            8.9622,
-            -3.277
+            8.7881,
+            -3.1475
           ],
           [
-            4.4526,
-            -4.1847
+            4.2871,
+            -4.0969
           ],
           [
-            4.0777,
-            -2.322
+            3.895,
+            -2.2378
           ]
         ],
         "geometry": "estimated_body"
@@ -387,7 +387,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 2.9
+        "facts_t_local": 3.0
       }
     },
     {
@@ -717,7 +717,7 @@
         ],
         "geometry": "estimated_body",
         "path_frame_heading_rad": 0.000124,
-        "target_lateral_speed_mps": 0.1452
+        "target_lateral_speed_mps": 0.1401
       },
       "source": "radar",
       "confidence": null,

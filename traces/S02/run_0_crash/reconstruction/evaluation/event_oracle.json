@@ -7,7 +7,14 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 1.65,
+     "t_local": 2.05,
+     "track": "B#all"
+    },
+    {
+     "type": "CUT_IN_FROM_LEFT_START",
+     "side": "CUT_IN_FROM_LEFT_START",
+     "subject": "B",
+     "t_local": 1.5,
      "track": "B#all"
     },
     {
@@ -22,13 +29,6 @@
      "side": "CRITICAL_TTC_END",
      "subject": "B",
      "t_local": 5.3,
-     "track": "B#all"
-    },
-    {
-     "type": "CUT_IN_FROM_LEFT_START",
-     "side": "CUT_IN_FROM_LEFT_START",
-     "subject": "B",
-     "t_local": 1.35,
      "track": "B#all"
     }
    ],
@@ -55,7 +55,14 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 1.65,
+     "t_local": 2.05,
+     "track": "B#1"
+    },
+    {
+     "type": "CUT_IN_FROM_LEFT_START",
+     "side": "CUT_IN_FROM_LEFT_START",
+     "subject": "B",
+     "t_local": 1.5,
      "track": "B#1"
     },
     {
@@ -70,13 +77,6 @@
      "side": "CRITICAL_TTC_END",
      "subject": "B",
      "t_local": 5.3,
-     "track": "B#1"
-    },
-    {
-     "type": "CUT_IN_FROM_LEFT_START",
-     "side": "CUT_IN_FROM_LEFT_START",
-     "subject": "B",
-     "t_local": 1.35,
      "track": "B#1"
     }
    ],
@@ -88,7 +88,14 @@
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
-     "t_local": 1.65,
+     "t_local": 2.05,
+     "track": "B#1"
+    },
+    {
+     "type": "CUT_IN_FROM_LEFT_START",
+     "side": "CUT_IN_FROM_LEFT_START",
+     "subject": "B",
+     "t_local": 1.5,
      "track": "B#1"
     },
     {
@@ -103,13 +110,6 @@
      "side": "CRITICAL_TTC_END",
      "subject": "B",
      "t_local": 5.3,
-     "track": "B#1"
-    },
-    {
-     "type": "CUT_IN_FROM_LEFT_START",
-     "side": "CUT_IN_FROM_LEFT_START",
-     "subject": "B",
-     "t_local": 1.35,
      "track": "B#1"
     }
    ],
@@ -128,14 +128,7 @@
      "type": "CUT_IN_FROM_LEFT_START",
      "side": "CUT_IN_FROM_LEFT_START",
      "subject": "B",
-     "t_local": 1.5,
-     "track": "track_001"
-    },
-    {
-     "type": "EGO_PATH_ENTRY",
-     "side": "EGO_PATH_ENTRY",
-     "subject": "B",
-     "t_local": 1.75,
+     "t_local": 1.7,
      "track": "track_001"
     },
     {
@@ -143,6 +136,13 @@
      "side": "CRITICAL_TTC_START",
      "subject": "B",
      "t_local": 1.9,
+     "track": "track_001"
+    },
+    {
+     "type": "EGO_PATH_ENTRY",
+     "side": "EGO_PATH_ENTRY",
+     "subject": "B",
+     "t_local": 2.15,
      "track": "track_001"
     },
     {
@@ -189,7 +189,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -255,7 +255,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -319,7 +319,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -523,7 +523,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -587,7 +587,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],
@@ -649,7 +649,7 @@
     "expected": 1,
     "matched": 1,
     "deltas": [
-     0.15
+     0.2
     ],
     "side_agree": 1,
     "missed": [],

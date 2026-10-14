@@ -52,22 +52,23 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
 | g15 | 0.00 | CLOSING_END | B | A | B:e08 @ 4.10 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
 | g16 | 0.00 | TURN_LEFT_START | A | - | A:e09 @ 4.10 |  |
 | g17 | 0.00 | TURN_RIGHT_START | B | - | B:e09 @ 4.10 |  |
-| g18 | 0.05 | THROTTLE_END | A | - | A:e10 @ 4.15 |  |
-| g19 | 0.05 | THROTTLE_END | B | - | B:e10 @ 4.15 |  |
-| g20 | 0.05 | BRAKE_START | A | - | A:e11 @ 4.15 |  |
-| g21 | 0.05 | BRAKE_START | B | - | B:e11 @ 4.15 |  |
-| g22 | 0.15 | CLOSING_START | A | B | A:e12 @ 4.25, A:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g23 | 0.15 | CLOSING_START | B | A | B:e12 @ 4.25, B:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g24 | 0.50 | TURN_RIGHT_END | B | - | B:e13 @ 4.60 |  |
-| g25 | 0.50 | MOVING_END | B | - | B:e14 @ 4.60 |  |
-| g26 | 0.50 | STOP_START | B | - | B:e15 @ 4.60 |  |
-| g27 | 0.60 | TURN_LEFT_END | A | - | A:e13 @ 4.70 |  |
-| g28 | 0.65 | MOVING_END | A | - | A:e14 @ 4.75 |  |
-| g29 | 0.65 | STOP_START | A | - | A:e15 @ 4.75 |  |
-| g30 | 0.70 | CLOSING_END | A | B | A:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
-| g31 | 0.70 | CLOSING_END | B | A | B:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g32 | 0.70 | EGO_PATH_ENTRY | B | A | B:e17 @ 4.80 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g33 | 0.85 | EGO_PATH_ENTRY | A | B | A:e17 @ 4.95 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g18 | 0.00 | EGO_PATH_ENTRY | B | A | B:e10 @ 4.10, B:e14 @ 4.45 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g19 | 0.05 | THROTTLE_END | A | - | A:e10 @ 4.15 |  |
+| g20 | 0.05 | THROTTLE_END | B | - | B:e11 @ 4.15 |  |
+| g21 | 0.05 | BRAKE_START | A | - | A:e11 @ 4.15 |  |
+| g22 | 0.05 | BRAKE_START | B | - | B:e12 @ 4.15 |  |
+| g23 | 0.15 | CLOSING_START | A | B | A:e12 @ 4.25, A:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g24 | 0.15 | CLOSING_START | B | A | B:e13 @ 4.25, B:e18 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g25 | 0.35 | EGO_PATH_EXIT | B | A | B:e14 @ 4.45 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g26 | 0.50 | TURN_RIGHT_END | B | - | B:e15 @ 4.60 |  |
+| g27 | 0.50 | MOVING_END | B | - | B:e16 @ 4.60 |  |
+| g28 | 0.50 | STOP_START | B | - | B:e17 @ 4.60 |  |
+| g29 | 0.60 | TURN_LEFT_END | A | - | A:e13 @ 4.70 |  |
+| g30 | 0.65 | MOVING_END | A | - | A:e14 @ 4.75 |  |
+| g31 | 0.65 | STOP_START | A | - | A:e15 @ 4.75 |  |
+| g32 | 0.70 | CLOSING_END | A | B | A:e16 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g33 | 0.70 | CLOSING_END | B | A | B:e18 @ 4.80 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
+| g34 | 0.85 | EGO_PATH_ENTRY | A | B | A:e17 @ 4.95 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 
 ## Edges
 
@@ -94,76 +95,78 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12137.
     g10 --PRECEDES--> g15
     g10 --PRECEDES--> g16
     g10 --PRECEDES--> g17
-    g11 --PRECEDES--> g18
+    g10 --PRECEDES--> g18
     g11 --PRECEDES--> g19
     g11 --PRECEDES--> g20
     g11 --PRECEDES--> g21
-    g12 --PRECEDES--> g18
+    g11 --PRECEDES--> g22
     g12 --PRECEDES--> g19
     g12 --PRECEDES--> g20
     g12 --PRECEDES--> g21
-    g13 --PRECEDES--> g18
+    g12 --PRECEDES--> g22
     g13 --PRECEDES--> g19
     g13 --PRECEDES--> g20
     g13 --PRECEDES--> g21
-    g14 --PRECEDES--> g18
+    g13 --PRECEDES--> g22
     g14 --PRECEDES--> g19
     g14 --PRECEDES--> g20
     g14 --PRECEDES--> g21
-    g15 --PRECEDES--> g18
+    g14 --PRECEDES--> g22
     g15 --PRECEDES--> g19
     g15 --PRECEDES--> g20
     g15 --PRECEDES--> g21
-    g16 --PRECEDES--> g18
+    g15 --PRECEDES--> g22
     g16 --PRECEDES--> g19
     g16 --PRECEDES--> g20
     g16 --PRECEDES--> g21
-    g17 --PRECEDES--> g18
+    g16 --PRECEDES--> g22
     g17 --PRECEDES--> g19
     g17 --PRECEDES--> g20
     g17 --PRECEDES--> g21
+    g17 --PRECEDES--> g22
+    g18 --PRECEDES--> g19
+    g18 --PRECEDES--> g20
+    g18 --PRECEDES--> g21
     g18 --PRECEDES--> g22
-    g18 --PRECEDES--> g23
-    g19 --PRECEDES--> g22
     g19 --PRECEDES--> g23
-    g20 --PRECEDES--> g22
+    g19 --PRECEDES--> g24
     g20 --PRECEDES--> g23
-    g21 --PRECEDES--> g22
+    g20 --PRECEDES--> g24
     g21 --PRECEDES--> g23
+    g21 --PRECEDES--> g24
+    g22 --PRECEDES--> g23
     g22 --PRECEDES--> g24
-    g22 --PRECEDES--> g25
-    g22 --PRECEDES--> g26
-    g23 --PRECEDES--> g24
     g23 --PRECEDES--> g25
-    g23 --PRECEDES--> g26
-    g24 --PRECEDES--> g27
+    g24 --PRECEDES--> g25
+    g25 --PRECEDES--> g26
     g25 --PRECEDES--> g27
-    g26 --PRECEDES--> g27
-    g27 --PRECEDES--> g28
+    g25 --PRECEDES--> g28
+    g26 --PRECEDES--> g29
     g27 --PRECEDES--> g29
-    g28 --PRECEDES--> g30
-    g28 --PRECEDES--> g31
-    g28 --PRECEDES--> g32
+    g28 --PRECEDES--> g29
     g29 --PRECEDES--> g30
     g29 --PRECEDES--> g31
-    g29 --PRECEDES--> g32
+    g30 --PRECEDES--> g32
     g30 --PRECEDES--> g33
+    g31 --PRECEDES--> g32
     g31 --PRECEDES--> g33
-    g32 --PRECEDES--> g33
+    g32 --PRECEDES--> g34
+    g33 --PRECEDES--> g34
     g05 --SAME_TRACK--> g06
     g05 --SAME_TRACK--> g09
     g05 --SAME_TRACK--> g12
     g05 --SAME_TRACK--> g14
-    g05 --SAME_TRACK--> g22
-    g05 --SAME_TRACK--> g30
-    g05 --SAME_TRACK--> g33
+    g05 --SAME_TRACK--> g23
+    g05 --SAME_TRACK--> g32
+    g05 --SAME_TRACK--> g34
     g07 --SAME_TRACK--> g08
     g07 --SAME_TRACK--> g10
     g07 --SAME_TRACK--> g13
     g07 --SAME_TRACK--> g15
-    g07 --SAME_TRACK--> g23
-    g07 --SAME_TRACK--> g31
-    g07 --SAME_TRACK--> g32
+    g07 --SAME_TRACK--> g18
+    g07 --SAME_TRACK--> g24
+    g07 --SAME_TRACK--> g25
+    g07 --SAME_TRACK--> g33
 ```
 
 ## Global trace
@@ -177,13 +180,14 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | -2.00 | TRACK_APPEARED_LEFT(B,A); CLOSING_START(B,A) |
 | -1.55 | CRITICAL_TTC_START(A,B) |
 | -1.50 | CRITICAL_TTC_START(B,A) |
-| +0.00 | COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B) |
+| +0.00 | COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_START(A); TURN_RIGHT_START(B); EGO_PATH_ENTRY(B,A) |
 | +0.05 | THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B) |
 | +0.15 | CLOSING_START(A,B); CLOSING_START(B,A) |
+| +0.35 | EGO_PATH_EXIT(B,A) |
 | +0.50 | TURN_RIGHT_END(B); MOVING_END(B); STOP_START(B) |
 | +0.60 | TURN_LEFT_END(A) |
 | +0.65 | MOVING_END(A); STOP_START(A) |
-| +0.70 | CLOSING_END(A,B); CLOSING_END(B,A); EGO_PATH_ENTRY(B,A) |
+| +0.70 | CLOSING_END(A,B); CLOSING_END(B,A) |
 | +0.85 | EGO_PATH_ENTRY(A,B) |
 
 ## Temporal safety relations
@@ -191,7 +195,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 Per track: does the cut-in start before the critical TTC, or was the critical TTC already active? Is the path entry before or after it? Temporal properties only, not causes.
 
 - A's track_001 (B): CRITICAL_TTC_START 2.55, COLLISION with B 4.10 (+1.55 s); EGO_PATH_ENTRY 4.95 after critical TTC (+2.40 s) [local times; t_global: critical_ttc_start -1.55, ego_path_entry +0.85, collision +0.00]
-- B's track_001 (A): CRITICAL_TTC_START 2.60, COLLISION with A 4.10 (+1.50 s); EGO_PATH_ENTRY 4.80 after critical TTC (+2.20 s) [local times; t_global: critical_ttc_start -1.50, ego_path_entry +0.70, collision +0.00]
+- B's track_001 (A): CRITICAL_TTC_START 2.60, COLLISION with A 4.10 (+1.50 s); EGO_PATH_ENTRY 4.10 after critical TTC (+1.50 s) [local times; t_global: critical_ttc_start -1.50, ego_path_entry +0.00, collision +0.00]
 
 ## Perceived state before each event, per observing recorder
 
@@ -204,19 +208,20 @@ Each recorder's own belief just before its events, in its own local names (track
 | -2.05 | A | g05 TRACK_APPEARED_RIGHT(A,B) (A:e03)<br>g06 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE |
 | -2.05 | A | g06 CLOSING_START(A,B) (A:e04)<br>g09 CRITICAL_TTC_START(A,B) (A:e05)<br>g11 COLLISION(A,B) (A:e06)<br>g12 CRITICAL_TTC_END(A,B) (A:e07)<br>g14 CLOSING_END(A,B) (A:e08)<br>g16 TURN_LEFT_START(A) (A:e09) | ego: MOVING, THROTTLE |
 | -2.00 | B | g07 TRACK_APPEARED_LEFT(B,A) (B:e03)<br>g08 CLOSING_START(B,A) (B:e04) | ego: MOVING, THROTTLE |
-| -2.00 | B | g08 CLOSING_START(B,A) (B:e04)<br>g10 CRITICAL_TTC_START(B,A) (B:e05)<br>g11 COLLISION(A,B) (B:e06)<br>g13 CRITICAL_TTC_END(B,A) (B:e07)<br>g15 CLOSING_END(B,A) (B:e08)<br>g17 TURN_RIGHT_START(B) (B:e09) | ego: MOVING, THROTTLE |
+| -2.00 | B | g08 CLOSING_START(B,A) (B:e04)<br>g10 CRITICAL_TTC_START(B,A) (B:e05)<br>g11 COLLISION(A,B) (B:e06)<br>g13 CRITICAL_TTC_END(B,A) (B:e07)<br>g15 CLOSING_END(B,A) (B:e08)<br>g17 TURN_RIGHT_START(B) (B:e09)<br>g18 EGO_PATH_ENTRY(B,A) (B:e10) | ego: MOVING, THROTTLE |
 | -1.55 | A | g09 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC? |
 | -1.50 | B | g10 CRITICAL_TTC_START(B,A) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC? |
-| +0.05 | A | g18 THROTTLE_END(A) (A:e10)<br>g20 BRAKE_START(A) (A:e11) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: no active state |
-| +0.05 | B | g19 THROTTLE_END(B) (B:e10)<br>g21 BRAKE_START(B) (B:e11) | ego: MOVING, THROTTLE, TURN_RIGHT<br>track_001: no active state |
-| +0.15 | A | g22 CLOSING_START(A,B) (A:e12) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state |
-| +0.15 | A | g22 CLOSING_START(A,B) (A:e12)<br>g30 CLOSING_END(A,B) (A:e16) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state |
-| +0.15 | B | g23 CLOSING_START(B,A) (B:e12) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: no active state |
-| +0.15 | B | g23 CLOSING_START(B,A) (B:e12)<br>g31 CLOSING_END(B,A) (B:e16)<br>g32 EGO_PATH_ENTRY(B,A) (B:e17) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: no active state |
-| +0.50 | B | g24 TURN_RIGHT_END(B) (B:e13)<br>g25 MOVING_END(B) (B:e14)<br>g26 STOP_START(B) (B:e15) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: CLOSING |
-| +0.60 | A | g27 TURN_LEFT_END(A) (A:e13) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING |
-| +0.65 | A | g28 MOVING_END(A) (A:e14)<br>g29 STOP_START(A) (A:e15) | ego: MOVING, BRAKE<br>track_001: CLOSING |
-| +0.85 | A | g33 EGO_PATH_ENTRY(A,B) (A:e17) | ego: STOP, BRAKE<br>track_001: no active state |
+| +0.00 | B | g18 EGO_PATH_ENTRY(B,A) (B:e10)<br>g25 EGO_PATH_EXIT(B,A) (B:e14) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC |
+| +0.05 | A | g19 THROTTLE_END(A) (A:e10)<br>g21 BRAKE_START(A) (A:e11) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: no active state |
+| +0.05 | B | g20 THROTTLE_END(B) (B:e11)<br>g22 BRAKE_START(B) (B:e12) | ego: MOVING, THROTTLE, TURN_RIGHT<br>track_001: IN_EGO_PATH |
+| +0.15 | A | g23 CLOSING_START(A,B) (A:e12) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state |
+| +0.15 | A | g23 CLOSING_START(A,B) (A:e12)<br>g32 CLOSING_END(A,B) (A:e16) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state |
+| +0.15 | B | g24 CLOSING_START(B,A) (B:e13) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: IN_EGO_PATH |
+| +0.15 | B | g24 CLOSING_START(B,A) (B:e13)<br>g33 CLOSING_END(B,A) (B:e18) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: IN_EGO_PATH |
+| +0.50 | B | g26 TURN_RIGHT_END(B) (B:e15)<br>g27 MOVING_END(B) (B:e16)<br>g28 STOP_START(B) (B:e17) | ego: MOVING, BRAKE, TURN_RIGHT<br>track_001: CLOSING |
+| +0.60 | A | g29 TURN_LEFT_END(A) (A:e13) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING |
+| +0.65 | A | g30 MOVING_END(A) (A:e14)<br>g31 STOP_START(A) (A:e15) | ego: MOVING, BRAKE<br>track_001: CLOSING |
+| +0.85 | A | g34 EGO_PATH_ENTRY(A,B) (A:e17) | ego: STOP, BRAKE<br>track_001: no active state |
 
 ## Plain-language reading
 
@@ -237,12 +242,14 @@ Each recorder's own belief just before its events, in its own local names (track
 - At the reference collision, B observed A stop closing in.
 - At the reference collision, A started turning left.
 - At the reference collision, B started turning right.
+- At the reference collision, B observed A enter its forward path corridor.
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.05 s after the reference collision, A started braking.
 - 0.05 s after the reference collision, B started braking.
 - 0.15 s after the reference collision, A observed B start closing in.
 - 0.15 s after the reference collision, B observed A start closing in.
+- 0.35 s after the reference collision, B observed A leave its forward path corridor.
 - 0.50 s after the reference collision, B stopped turning right.
 - 0.50 s after the reference collision, B stopped moving.
 - 0.50 s after the reference collision, B came to a stop.
@@ -251,5 +258,4 @@ Each recorder's own belief just before its events, in its own local names (track
 - 0.65 s after the reference collision, A came to a stop.
 - 0.70 s after the reference collision, A observed B stop closing in.
 - 0.70 s after the reference collision, B observed A stop closing in.
-- 0.70 s after the reference collision, B observed A enter its forward path corridor.
 - 0.85 s after the reference collision, A observed B enter its forward path corridor.

@@ -12,10 +12,10 @@ digraph "global" {
   "g08" [label="CLOSING_START\nB -> A\nt=-1.90", fillcolor="#bfdbfe", peripheries=2];
   "g09" [label="THROTTLE_END\nA\nt=-1.65", fillcolor="#fde68a"];
   "g10" [label="BRAKE_START\nA\nt=-1.65", fillcolor="#fde68a"];
-  "g11" [label="CRITICAL_TTC_START\nA -> B\nt=-1.50", fillcolor="#bfdbfe", peripheries=2];
+  "g11" [label="CRITICAL_TTC_START\nA -> B\nt=-1.45", fillcolor="#bfdbfe", peripheries=2];
   "g12" [label="CRITICAL_TTC_START\nB -> A\nt=-1.40", fillcolor="#bfdbfe", peripheries=2];
-  "g13" [label="CUT_IN_FROM_LEFT_START\nA -> B\nt=-1.25", fillcolor="#bfdbfe", peripheries=2];
-  "g14" [label="EGO_PATH_ENTRY\nA -> B\nt=-1.10", fillcolor="#bfdbfe"];
+  "g13" [label="CUT_IN_FROM_LEFT_START\nA -> B\nt=-1.15", fillcolor="#bfdbfe", peripheries=2];
+  "g14" [label="EGO_PATH_ENTRY\nA -> B\nt=-1.05", fillcolor="#bfdbfe"];
   "g15" [label="BRAKE_END\nA\nt=-0.85", fillcolor="#fde68a"];
   "g16" [label="THROTTLE_START\nA\nt=-0.75", fillcolor="#fde68a"];
   "g17" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];

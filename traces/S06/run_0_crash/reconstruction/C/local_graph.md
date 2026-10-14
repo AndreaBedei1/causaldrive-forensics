@@ -6,7 +6,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
 - Anonymous radar tracks: 3 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 16; edges: 33 (PRECEDES 26, SAME_TRACK 7)
+- Nodes: 20; edges: 38 (PRECEDES 27, SAME_TRACK 11)
 
 ## Nodes
 
@@ -16,18 +16,22 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e02 | 0.00 | THROTTLE_START | C | - | controls | active_at_first_observation=True |
 | C:e03 | 0.10 | TRACK_APPEARED_LEFT | C | track_001 | radar | initial_in_ego_path=False |
 | C:e04 | 0.10 | CLOSING_START | C | track_001 | radar | active_at_first_observation=True |
-| C:e05 | 0.30 | TRACK_LOST | C | track_001 | radar |  |
-| C:e06 | 0.40 | TRACK_APPEARED_LEFT | C | track_002 | radar | initial_in_ego_path=False |
-| C:e07 | 0.40 | CLOSING_START | C | track_002 | radar | active_at_first_observation=True |
-| C:e08 | 2.10 | TRACK_APPEARED_LEFT | C | track_003 | radar | initial_in_ego_path=False |
-| C:e09 | 2.10 | CLOSING_START | C | track_003 | radar | active_at_first_observation=True |
-| C:e10 | 2.35 | THROTTLE_END | C | - | controls |  |
-| C:e11 | 2.35 | BRAKE_START | C | - | controls |  |
-| C:e12 | 2.90 | MOVING_END | C | - | ego |  |
-| C:e13 | 2.90 | STOP_START | C | - | ego |  |
-| C:e14 | 4.60 | CLOSING_END | C | track_003 | radar |  |
-| C:e15 | 4.60 | EGO_PATH_ENTRY | C | track_003 | radar | geometry=estimated_body |
-| C:e16 | 4.60 | TRACK_LOST | C | track_002 | radar |  |
+| C:e05 | 0.15 | EGO_PATH_ENTRY | C | track_001 | radar | geometry=estimated_body |
+| C:e06 | 0.25 | EGO_PATH_EXIT | C | track_001 | radar | geometry=estimated_body |
+| C:e07 | 0.30 | TRACK_LOST | C | track_001 | radar |  |
+| C:e08 | 0.40 | TRACK_APPEARED_LEFT | C | track_002 | radar | initial_in_ego_path=False |
+| C:e09 | 0.40 | CLOSING_START | C | track_002 | radar | active_at_first_observation=True |
+| C:e10 | 2.10 | TRACK_APPEARED_LEFT | C | track_003 | radar | initial_in_ego_path=False |
+| C:e11 | 2.10 | CLOSING_START | C | track_003 | radar | active_at_first_observation=True |
+| C:e12 | 2.35 | THROTTLE_END | C | - | controls |  |
+| C:e13 | 2.35 | BRAKE_START | C | - | controls |  |
+| C:e14 | 2.75 | EGO_PATH_ENTRY | C | track_002 | radar | geometry=estimated_body |
+| C:e15 | 2.90 | MOVING_END | C | - | ego |  |
+| C:e16 | 2.90 | STOP_START | C | - | ego |  |
+| C:e17 | 3.65 | EGO_PATH_EXIT | C | track_002 | radar | geometry=estimated_body |
+| C:e18 | 4.60 | CLOSING_END | C | track_003 | radar |  |
+| C:e19 | 4.60 | EGO_PATH_ENTRY | C | track_003 | radar | geometry=estimated_body |
+| C:e20 | 4.60 | TRACK_LOST | C | track_002 | radar |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -41,9 +45,7 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e03 --PRECEDES--> C:e05
     C:e04 --PRECEDES--> C:e05
     C:e05 --PRECEDES--> C:e06
-    C:e05 --PRECEDES--> C:e07
-    C:e06 --PRECEDES--> C:e08
-    C:e06 --PRECEDES--> C:e09
+    C:e06 --PRECEDES--> C:e07
     C:e07 --PRECEDES--> C:e08
     C:e07 --PRECEDES--> C:e09
     C:e08 --PRECEDES--> C:e10
@@ -55,18 +57,25 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e11 --PRECEDES--> C:e12
     C:e11 --PRECEDES--> C:e13
     C:e12 --PRECEDES--> C:e14
-    C:e12 --PRECEDES--> C:e15
-    C:e12 --PRECEDES--> C:e16
     C:e13 --PRECEDES--> C:e14
-    C:e13 --PRECEDES--> C:e15
-    C:e13 --PRECEDES--> C:e16
+    C:e14 --PRECEDES--> C:e15
+    C:e14 --PRECEDES--> C:e16
+    C:e15 --PRECEDES--> C:e17
+    C:e16 --PRECEDES--> C:e17
+    C:e17 --PRECEDES--> C:e18
+    C:e17 --PRECEDES--> C:e19
+    C:e17 --PRECEDES--> C:e20
     C:e03 --SAME_TRACK--> C:e04
     C:e03 --SAME_TRACK--> C:e05
-    C:e06 --SAME_TRACK--> C:e07
+    C:e03 --SAME_TRACK--> C:e06
+    C:e03 --SAME_TRACK--> C:e07
     C:e08 --SAME_TRACK--> C:e09
+    C:e10 --SAME_TRACK--> C:e11
     C:e08 --SAME_TRACK--> C:e14
-    C:e08 --SAME_TRACK--> C:e15
-    C:e06 --SAME_TRACK--> C:e16
+    C:e08 --SAME_TRACK--> C:e17
+    C:e10 --SAME_TRACK--> C:e18
+    C:e10 --SAME_TRACK--> C:e19
+    C:e08 --SAME_TRACK--> C:e20
 ```
 
 ## Perceived state before each event
@@ -77,30 +86,36 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | C:e01 MOVING_START<br>C:e02 THROTTLE_START | ego: not yet observed | - |
 | 0.10 | C:e03 TRACK_APPEARED_LEFT track_001<br>C:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE | 0.00 |
-| 0.30 | C:e05 TRACK_LOST track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC?, CUT_IN_FROM_LEFT?, CUT_IN_FROM_RIGHT? | 0.20 |
-| 0.40 | C:e06 TRACK_APPEARED_LEFT track_002<br>C:e07 CLOSING_START track_002 | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 0.30 |
-| 2.10 | C:e08 TRACK_APPEARED_LEFT track_003<br>C:e09 CLOSING_START track_003 | ego: MOVING, THROTTLE<br>track_002: CLOSING<br>track lost, states UNKNOWN: track_001 | 2.00 |
-| 2.35 | C:e10 THROTTLE_END<br>C:e11 BRAKE_START | ego: MOVING, THROTTLE<br>track_002: CLOSING<br>track_003: CLOSING, CRITICAL_TTC?<br>track lost, states UNKNOWN: track_001 | 2.30 |
-| 2.90 | C:e12 MOVING_END<br>C:e13 STOP_START | ego: MOVING, BRAKE<br>track_002: CLOSING<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 2.80 |
-| 4.60 | C:e14 CLOSING_END track_003<br>C:e15 EGO_PATH_ENTRY track_003<br>C:e16 TRACK_LOST track_002 | ego: STOP, BRAKE<br>track_002: CLOSING<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 4.50 |
+| 0.15 | C:e05 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC?, CUT_IN_FROM_LEFT?, CUT_IN_FROM_RIGHT? | 0.10 |
+| 0.25 | C:e06 EGO_PATH_EXIT track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH, CRITICAL_TTC?, CUT_IN_FROM_LEFT?, CUT_IN_FROM_RIGHT? | 0.20 |
+| 0.30 | C:e07 TRACK_LOST track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC?, CUT_IN_FROM_LEFT?, CUT_IN_FROM_RIGHT? | 0.20 |
+| 0.40 | C:e08 TRACK_APPEARED_LEFT track_002<br>C:e09 CLOSING_START track_002 | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 0.30 |
+| 2.10 | C:e10 TRACK_APPEARED_LEFT track_003<br>C:e11 CLOSING_START track_003 | ego: MOVING, THROTTLE<br>track_002: CLOSING<br>track lost, states UNKNOWN: track_001 | 2.00 |
+| 2.35 | C:e12 THROTTLE_END<br>C:e13 BRAKE_START | ego: MOVING, THROTTLE<br>track_002: CLOSING<br>track_003: CLOSING, CRITICAL_TTC?<br>track lost, states UNKNOWN: track_001 | 2.30 |
+| 2.75 | C:e14 EGO_PATH_ENTRY track_002 | ego: MOVING, BRAKE<br>track_002: CLOSING<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 2.70 |
+| 2.90 | C:e15 MOVING_END<br>C:e16 STOP_START | ego: MOVING, BRAKE<br>track_002: CLOSING, IN_EGO_PATH<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 2.80 |
+| 3.65 | C:e17 EGO_PATH_EXIT track_002 | ego: STOP, BRAKE<br>track_002: CLOSING, IN_EGO_PATH<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 3.60 |
+| 4.60 | C:e18 CLOSING_END track_003<br>C:e19 EGO_PATH_ENTRY track_003<br>C:e20 TRACK_LOST track_002 | ego: STOP, BRAKE<br>track_002: CLOSING<br>track_003: CLOSING<br>track lost, states UNKNOWN: track_001 | 4.50 |
 
 ## States still active when observation ended
 
 - CLOSING of track_001, since C:e04 (t = 0.10 s); the track was lost at 0.30 s
-- CLOSING of track_002, since C:e07 (t = 0.40 s); the track was lost at 4.60 s
-- BRAKE, since C:e11 (t = 2.35 s)
-- STOP, since C:e13 (t = 2.90 s)
-- EGO_PATH of track_003, since C:e15 (t = 4.60 s)
+- CLOSING of track_002, since C:e09 (t = 0.40 s); the track was lost at 4.60 s
+- BRAKE, since C:e13 (t = 2.35 s)
+- STOP, since C:e16 (t = 2.90 s)
+- EGO_PATH of track_003, since C:e19 (t = 4.60 s)
 
 ## Tracks lost
 
-- track_001 at 0.30 s (C:e05): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_002 at 4.60 s (C:e16): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 0.30 s (C:e07): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 4.60 s (C:e20): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Temporal safety relations
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
+- track_001: EGO_PATH_ENTRY 0.15, no critical TTC
+- track_002: EGO_PATH_ENTRY 2.75, no critical TTC
 - track_003: EGO_PATH_ENTRY 4.60, no critical TTC
 
 ## Sign detection windows
@@ -125,6 +140,8 @@ Bearing: positive = to C's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: C pressed the accelerator (already the case when first observed).
 - t = 0.10 s: C's radar started tracking track_001, which appeared on its left.
 - t = 0.10 s: C observed track_001 start closing in (already the case when first observed).
+- t = 0.15 s: C observed track_001 enter its forward path corridor.
+- t = 0.25 s: C observed track_001 leave its forward path corridor.
 - t = 0.30 s: C's radar lost track_001 (its states are UNKNOWN from then on, not ended).
 - t = 0.40 s: C's radar started tracking track_002, which appeared on its left.
 - t = 0.40 s: C observed track_002 start closing in (already the case when first observed).
@@ -132,8 +149,10 @@ Bearing: positive = to C's right. Ranges are measured from the radar to the visi
 - t = 2.10 s: C observed track_003 start closing in (already the case when first observed).
 - t = 2.35 s: C released the accelerator.
 - t = 2.35 s: C started braking.
+- t = 2.75 s: C observed track_002 enter its forward path corridor.
 - t = 2.90 s: C stopped moving.
 - t = 2.90 s: C came to a stop.
+- t = 3.65 s: C observed track_002 leave its forward path corridor.
 - t = 4.60 s: C observed track_003 stop closing in.
 - t = 4.60 s: C observed track_003 enter its forward path corridor.
 - t = 4.60 s: C's radar lost track_002 (its states are UNKNOWN from then on, not ended).

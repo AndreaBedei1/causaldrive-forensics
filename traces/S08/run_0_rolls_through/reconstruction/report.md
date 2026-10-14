@@ -11,7 +11,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
 | A | 15.95 s | 161 | 21 | 37 | 1 | A:e14 @ 5.40 s |
-| B | 15.95 s | 161 | 20 | 44 | 3 | B:e12 @ 5.40 s |
+| B | 15.95 s | 161 | 34 | 84 | 3 | B:e26 @ 5.40 s |
 
 ## Graph alignment
 
@@ -20,7 +20,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
 | A | ALIGNED | A:e14 | 5.40 | -5.40 | reported the reference collision collision_001 |
-| B | ALIGNED | B:e12 | 5.40 | -5.40 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e26 | 5.40 | -5.40 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
 
@@ -42,7 +42,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 
 ## Global graph
 
-32 nodes, 73 edges; 7 merged node(s): g09 CLOSING_START(A,B) from A:e07 + A:e16, g10 TRACK_APPEARED_RIGHT(B,A) from B:e03 + B:e08 + B:e05 + B:e15 + B:e09 + B:e16, g11 CLOSING_START(B,A) from B:e04 + B:e06 + B:e14 + B:e10, g15 CRITICAL_TTC_START(A,B) from A:e11 + A:e15, g17 CRITICAL_TTC_START(B,A) from B:e07 + B:e11 + B:e13, g19 COLLISION(A,B) from A:e14 + B:e12, g24 TRACK_LOST(B,A) from B:e08 + B:e15 + B:e16.
+38 nodes, 86 edges; 10 merged node(s): g09 CLOSING_START(A,B) from A:e07 + A:e16, g10 TRACK_APPEARED_RIGHT(B,A) from B:e03 + B:e10 + B:e05 + B:e29 + B:e15 + B:e30, g11 CLOSING_START(B,A) from B:e04 + B:e06 + B:e28 + B:e16, g15 CRITICAL_TTC_START(A,B) from A:e11 + A:e15, g17 EGO_PATH_ENTRY(B,A) from B:e07 + B:e09, g18 CRITICAL_TTC_START(B,A) from B:e08 + B:e25 + B:e27, g20 EGO_PATH_ENTRY(B,A) from B:e11 + B:e12, g22 EGO_PATH_ENTRY(B,A) from B:e13 + B:e14, g25 COLLISION(A,B) from A:e14 + B:e26, g30 TRACK_LOST(B,A) from B:e10 + B:e29 + B:e30.
 
 ### Event sequence (global time)
 
@@ -55,7 +55,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 - `-2.55` BRAKE_END(A); THROTTLE_START(A)
 - `-2.05` CRITICAL_TTC_START(A,B)
 - `-1.70` TURN_LEFT_START(A)
-- `-1.50` CRITICAL_TTC_START(B,A)
+- `-1.50` EGO_PATH_ENTRY(B,A); CRITICAL_TTC_START(B,A)
+- `-1.45` EGO_PATH_EXIT(B,A)
+- `-0.90` EGO_PATH_ENTRY(B,A)
+- `-0.85` EGO_PATH_EXIT(B,A)
+- `-0.70` EGO_PATH_ENTRY(B,A)
+- `-0.65` EGO_PATH_EXIT(B,A)
 - `-0.25` EGO_PATH_ENTRY(A,B)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); TURN_LEFT_END(A); TRACK_LOST(B,A)
 - `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
@@ -80,7 +85,13 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 - 2.55 s before the reference collision, A pressed the accelerator.
 - 2.05 s before the reference collision, A's time-to-contact with B became critical.
 - 1.70 s before the reference collision, A started turning left.
+- 1.50 s before the reference collision, B observed A enter its forward path corridor.
 - 1.50 s before the reference collision, B's time-to-contact with A became critical.
+- 1.45 s before the reference collision, B observed A leave its forward path corridor.
+- 0.90 s before the reference collision, B observed A enter its forward path corridor.
+- 0.85 s before the reference collision, B observed A leave its forward path corridor.
+- 0.70 s before the reference collision, B observed A enter its forward path corridor.
+- 0.65 s before the reference collision, B observed A leave its forward path corridor.
 - 0.25 s before the reference collision, A observed B enter its forward path corridor.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 12940, B: 12940 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
@@ -102,8 +113,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
 - A's track_001 (B): CRITICAL_TTC_START 3.35, COLLISION with B 5.40 (+2.05 s); EGO_PATH_ENTRY 5.15 after critical TTC (+1.80 s) [local times; t_global: critical_ttc_start -2.05, ego_path_entry -0.25, collision +0.00]
-- B's track_002 (A): CRITICAL_TTC_START 3.90, COLLISION with A 5.40 (+1.50 s) [local times; t_global: critical_ttc_start -1.50, collision +0.00]
-- B's track_003 (A): CRITICAL_TTC_START 5.30, COLLISION with A 5.40 (+0.10 s) [local times; t_global: critical_ttc_start -0.10, collision +0.00]
+- B's track_001 (A): EGO_PATH_ENTRY 3.90, no critical TTC [local times; t_global: ego_path_entry -1.50, collision +0.00]
+- B's track_002 (A): CRITICAL_TTC_START 3.90, COLLISION with A 5.40 (+1.50 s); EGO_PATH_ENTRY 4.50 after critical TTC (+0.60 s) [local times; t_global: critical_ttc_start -1.50, ego_path_entry -0.90, collision +0.00]
+- B's track_003 (A): CRITICAL_TTC_START 5.30, COLLISION with A 5.40 (+0.10 s); EGO_PATH_ENTRY 4.95 before critical TTC (-0.35 s) [local times; t_global: critical_ttc_start -0.10, ego_path_entry -0.45, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -112,6 +124,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 - BRAKE_END(A); THROTTLE_START(A)
+- EGO_PATH_ENTRY(B,A); CRITICAL_TTC_START(B,A)
 - COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); TURN_LEFT_END(A); TRACK_LOST(B,A)
 - THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(A); STOP_START(A)
@@ -125,10 +138,11 @@ A:
 - STOP, since A:e21 (t = 5.50 s)
 B:
 - CLOSING of track_001, since B:e04 (t = 2.70 s); the track was lost at 3.95 s
-- CRITICAL_TTC of track_002, since B:e07 (t = 3.90 s); the track was lost at 5.40 s
-- CLOSING of track_003, since B:e10 (t = 4.80 s); the track was lost at 5.40 s
-- BRAKE, since B:e18 (t = 5.45 s)
-- STOP, since B:e20 (t = 5.60 s)
+- CRITICAL_TTC of track_002, since B:e08 (t = 3.90 s); the track was lost at 5.40 s
+- CLOSING of track_003, since B:e16 (t = 4.80 s); the track was lost at 5.40 s
+- EGO_PATH of track_003, since B:e24 (t = 5.15 s); the track was lost at 5.40 s
+- BRAKE, since B:e32 (t = 5.45 s)
+- STOP, since B:e34 (t = 5.60 s)
 
 ### Sign detection windows
 
@@ -140,7 +154,7 @@ B:
 ### Perceived state just before each collision report
 
 - A A:e14 at 5.40 s (local): ego: MOVING, THROTTLE, TURN_LEFT; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; sign-0: STOP sign known, relevant to the path
-- B B:e12 at 5.40 s (local): ego: MOVING, THROTTLE; track_002: CLOSING, CRITICAL_TTC; track_003: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track lost, states UNKNOWN: track_001
+- B B:e26 at 5.40 s (local): ego: MOVING, THROTTLE; track_002: CLOSING, CRITICAL_TTC; track_003: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track lost, states UNKNOWN: track_001
 
 ### Tracks lost while a state was active
 
@@ -149,9 +163,9 @@ A lost track's states become UNKNOWN: the recorder can no longer tell whether th
 A:
 - no track was lost
 B:
-- track_001 at 3.95 s (B:e08): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
-- track_002 at 5.40 s (B:e15): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
-- track_003 at 5.40 s (B:e16): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
+- track_001 at 3.95 s (B:e10): CLOSING, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 5.40 s (B:e29): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_003 at 5.40 s (B:e30): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Uncertainty and limitations
 

@@ -241,8 +241,8 @@ class StatisticalRecordedRunTests(unittest.TestCase):
                                   evaluate_fusion(target, write=False))
             self.assertEqual(metrics["false_collision_matches"], 0, seed)
 
-    def test_s19_no_same_pair_critical_episode_after_their_contact(self):
-        _, result = self.reconstruct("traces/S19/run_0_collision_ambiguity")
+    def test_s18_no_same_pair_critical_episode_after_their_contact(self):
+        _, result = self.reconstruct("traces/S18/run_0_collision_ambiguity")
         contact = min(n.t_global for n in result.graph.nodes
                       if n.event_type == "COLLISION" and sorted(n.participants or []) == ["A", "B"])
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact

@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 148.738 | 12137.1 | g29 | yes | 0.0 s |
+| A + B | 148.738 | 12137.1 | g33 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -32,7 +32,7 @@ Relative clock offset C - B: estimated +0.050 s, true +0.000 s (error +0.050 s).
 
 ## Global event times
 
-55 timed global nodes; max |t_global - true global time| = 0.05 s; event order agrees with the truth for 1387/1387 pairs.
+61 timed global nodes; max |t_global - true global time| = 0.05 s; event order agrees with the truth for 1724/1724 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
