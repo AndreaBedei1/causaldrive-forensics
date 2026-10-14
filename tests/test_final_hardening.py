@@ -200,12 +200,13 @@ class CorrelatedGNSS(unittest.TestCase):
 
 
 class CanonicalFinalRules(unittest.TestCase):
-    def test_s09_has_no_anonymous_recorder_between_parent_segments(self):
+    def test_s09_has_no_anonymous_recorder_between_its_tracks(self):
+        # B sees only A: however its view of A is fragmented, every fragment is A, none an anonymous road user.
         root=Path(__file__).resolve().parents[1]
         rows=json.loads((root/'traces/S09/run_0_near_simultaneous/reconstruction/global/associations.json').read_text(encoding='utf-8'))
-        parts=[r for r in rows if r['local_graph']=='B' and r['local_track'].startswith('track_001#')]
-        self.assertEqual(len(parts),3)
-        self.assertEqual({r['global_entity'] for r in parts},{'A'})
+        parts=[r for r in rows if r['local_graph']=='B']
+        self.assertGreaterEqual(len(parts),2)
+        self.assertEqual({(r['status'],r['global_entity']) for r in parts},{('ASSOCIATED','A')})
 
     def test_s11_ego_turn_has_no_target_c_cut_in(self):
         root=Path(__file__).resolve().parents[1]
@@ -245,4 +246,8 @@ class CanonicalFinalRules(unittest.TestCase):
             shown=run.display_events()
             keys=[(e.actor,e.subject,e.event_type,e.time) for e in shown if e.subject]
             self.assertEqual(len(keys),len(set(keys)),variant)
-            self.assertGreater(len(run.all_events()),len(shown))
+            # The local sources stay available (an entity timeline replaces them only where one road user was
+            # seen through several local tracks).
+            self.assertGreaterEqual(len(run.all_events()),len(shown))
+            sources={(e.actor,e.node_id) for e in run.all_events()}
+            self.assertTrue(all((e.actor,e.node_id) in sources for e in shown if not e.attributes.get('aggregation')))

@@ -86,8 +86,8 @@
   "event_timing": {
     "nodes": 30,
     "max_abs_error_s": 0.0,
-    "order_pairs": 392,
-    "order_concordant": 392
+    "order_pairs": 399,
+    "order_concordant": 399
   },
   "tracks": [
     {
@@ -100,12 +100,12 @@
         "C": 4.25
       },
       "verdict": "correct",
-      "samples": 140,
-      "raw_rmse_to_surface_m": 0.196,
-      "smoothed_rmse_to_surface_m": 0.201,
-      "smoothed_rmse_to_centre_m": 1.931,
-      "raw_difference_speed_rmse_mps": 2.149,
-      "speed_rmse_mps": 0.211
+      "samples": 136,
+      "raw_rmse_to_surface_m": 0.206,
+      "smoothed_rmse_to_surface_m": 0.202,
+      "smoothed_rmse_to_centre_m": 1.93,
+      "raw_difference_speed_rmse_mps": 2.013,
+      "speed_rmse_mps": 0.214
     },
     {
       "track": "B:track_001",
@@ -118,11 +118,11 @@
       },
       "verdict": "correct",
       "samples": 142,
-      "raw_rmse_to_surface_m": 0.167,
+      "raw_rmse_to_surface_m": 0.173,
       "smoothed_rmse_to_surface_m": 0.165,
       "smoothed_rmse_to_centre_m": 2.145,
-      "raw_difference_speed_rmse_mps": 1.212,
-      "speed_rmse_mps": 0.062
+      "raw_difference_speed_rmse_mps": 1.085,
+      "speed_rmse_mps": 0.061
     }
   ],
   "contact_clearances": [
@@ -132,10 +132,10 @@
       "partner": "C",
       "track": "B:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.055,
+      "clearance_m": 0.056,
       "true_gap_m": 0.0,
-      "error_m": 0.055,
-      "range_m": 0.045,
+      "error_m": 0.056,
+      "range_m": 0.017,
       "ttc_s": null
     },
     {
@@ -153,7 +153,7 @@
       "clearance_m": 0.191,
       "true_gap_m": 0.126,
       "error_m": 0.065,
-      "range_m": 0.151,
+      "range_m": 0.147,
       "ttc_s": null
     },
     {

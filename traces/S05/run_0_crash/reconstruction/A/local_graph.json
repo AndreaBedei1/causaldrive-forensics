@@ -135,7 +135,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 0.0,
+      "t_local": 0.1,
       "attributes": {
         "initial_in_ego_path": true
       },
@@ -143,17 +143,17 @@
       "confidence": null,
       "perceived_state_before": {
         "ego": {
-          "MOVING": "UNKNOWN",
-          "STOP": "UNKNOWN",
-          "BRAKE": "UNKNOWN",
-          "THROTTLE": "UNKNOWN",
-          "TURN_LEFT": "UNKNOWN",
-          "TURN_RIGHT": "UNKNOWN",
-          "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+          "MOVING": true,
+          "STOP": false,
+          "BRAKE": false,
+          "THROTTLE": true,
+          "TURN_LEFT": false,
+          "TURN_RIGHT": false,
+          "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": null
+        "facts_t_local": 0.0
       }
     },
     {
@@ -162,7 +162,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 0.5,
+      "t_local": 0.6,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -186,7 +186,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 0.4
+        "facts_t_local": 0.5
       }
     },
     {
@@ -459,12 +459,12 @@
   "edges": [
     {
       "from": "A:e01",
-      "to": "A:e04",
+      "to": "A:e03",
       "relation": "PRECEDES"
     },
     {
       "from": "A:e02",
-      "to": "A:e04",
+      "to": "A:e03",
       "relation": "PRECEDES"
     },
     {
@@ -573,11 +573,11 @@
       "track_id": "track_001",
       "parent_track": null,
       "identity_ambiguous": false,
-      "first_seen_t_local": 0.0,
+      "first_seen_t_local": 0.1,
       "last_seen_t_local": 13.65,
-      "duration_s": 13.65,
-      "measured_sweeps": 272,
-      "radar_returns": 96095,
+      "duration_s": 13.55,
+      "measured_sweeps": 271,
+      "radar_returns": 96120,
       "radars": [
         "front"
       ],
@@ -585,9 +585,9 @@
       "min_range_t_local": 5.9,
       "min_clearance_m": 0.09,
       "min_clearance_t_local": 5.9,
-      "max_speed_mps": 13.86,
-      "first_range_m": 19.36,
-      "first_bearing_deg": 0.3,
+      "max_speed_mps": 13.87,
+      "first_range_m": 19.35,
+      "first_bearing_deg": 0.1,
       "last_range_m": 0.09,
       "last_bearing_deg": 0.0
     }

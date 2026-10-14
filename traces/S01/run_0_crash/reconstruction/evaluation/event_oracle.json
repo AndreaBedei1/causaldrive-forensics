@@ -76,6 +76,13 @@
   "RECONSTRUCTION": {
    "A": [
     {
+     "type": "TRACK_APPEARED",
+     "side": "TRACK_APPEARED_FRONT",
+     "subject": "B",
+     "t_local": 0.45,
+     "track": "track_001"
+    },
+    {
      "type": "CRITICAL_TTC_START",
      "side": "CRITICAL_TTC_START",
      "subject": "B",
@@ -100,13 +107,15 @@
  "comparison": {
   "RECONSTRUCTION vs COVERAGE": {
    "TRACK_APPEARED": {
-    "found": 0,
+    "found": 1,
     "expected": 0,
     "matched": 0,
     "deltas": [],
     "side_agree": 0,
     "missed": [],
-    "extra": []
+    "extra": [
+     "A/B@0.45"
+    ]
    },
    "EGO_PATH_ENTRY": {
     "found": 0,
@@ -160,13 +169,15 @@
   },
   "RECONSTRUCTION vs COVERAGE_TRACKED": {
    "TRACK_APPEARED": {
-    "found": 0,
+    "found": 1,
     "expected": 0,
     "matched": 0,
     "deltas": [],
     "side_agree": 0,
     "missed": [],
-    "extra": []
+    "extra": [
+     "A/B@0.45"
+    ]
    },
    "EGO_PATH_ENTRY": {
     "found": 0,
@@ -410,13 +421,15 @@
  "comparison_pre_contact": {
   "RECONSTRUCTION vs COVERAGE": {
    "TRACK_APPEARED": {
-    "found": 0,
+    "found": 1,
     "expected": 0,
     "matched": 0,
     "deltas": [],
     "side_agree": 0,
     "missed": [],
-    "extra": []
+    "extra": [
+     "A/B@0.45"
+    ]
    },
    "EGO_PATH_ENTRY": {
     "found": 0,
@@ -468,13 +481,15 @@
   },
   "RECONSTRUCTION vs COVERAGE_TRACKED": {
    "TRACK_APPEARED": {
-    "found": 0,
+    "found": 1,
     "expected": 0,
     "matched": 0,
     "deltas": [],
     "side_agree": 0,
     "missed": [],
-    "extra": []
+    "extra": [
+     "A/B@0.45"
+    ]
    },
    "EGO_PATH_ENTRY": {
     "found": 0,

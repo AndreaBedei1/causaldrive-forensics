@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 44,
+    "nodes": 45,
     "max_abs_error_s": 0.0,
-    "order_pairs": 874,
-    "order_concordant": 874
+    "order_pairs": 925,
+    "order_concordant": 925
   },
   "tracks": [
     {
@@ -61,16 +61,16 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "B": 9.84,
+        "B": 9.8,
         "C": 0.0
       },
       "verdict": "correctly left anonymous",
       "samples": 73,
-      "raw_rmse_to_surface_m": 0.289,
-      "smoothed_rmse_to_surface_m": 0.313,
-      "smoothed_rmse_to_centre_m": 2.132,
-      "raw_difference_speed_rmse_mps": 0.788,
-      "speed_rmse_mps": 0.081
+      "raw_rmse_to_surface_m": 0.297,
+      "smoothed_rmse_to_surface_m": 0.331,
+      "smoothed_rmse_to_centre_m": 2.118,
+      "raw_difference_speed_rmse_mps": 0.883,
+      "speed_rmse_mps": 0.08
     },
     {
       "track": "A:track_002",
@@ -79,15 +79,15 @@
       "true_identity": "B",
       "median_box_distance_m": {
         "B": 0.0,
-        "C": 12.22
+        "C": 12.29
       },
       "verdict": "correct",
       "samples": 110,
-      "raw_rmse_to_surface_m": 0.174,
-      "smoothed_rmse_to_surface_m": 0.194,
-      "smoothed_rmse_to_centre_m": 2.103,
-      "raw_difference_speed_rmse_mps": 0.832,
-      "speed_rmse_mps": 0.34
+      "raw_rmse_to_surface_m": 1.452,
+      "smoothed_rmse_to_surface_m": 1.277,
+      "smoothed_rmse_to_centre_m": 3.178,
+      "raw_difference_speed_rmse_mps": 3.859,
+      "speed_rmse_mps": 1.183
     },
     {
       "track": "B:track_001",
@@ -95,16 +95,16 @@
       "status": "ASSOCIATED",
       "true_identity": "A",
       "median_box_distance_m": {
-        "A": 0.01,
-        "C": 9.39
+        "A": 0.83,
+        "C": 9.62
       },
       "verdict": "correct",
       "samples": 110,
-      "raw_rmse_to_surface_m": 0.1,
-      "smoothed_rmse_to_surface_m": 0.223,
-      "smoothed_rmse_to_centre_m": 1.342,
-      "raw_difference_speed_rmse_mps": 2.283,
-      "speed_rmse_mps": 0.461
+      "raw_rmse_to_surface_m": 2.449,
+      "smoothed_rmse_to_surface_m": 2.036,
+      "smoothed_rmse_to_centre_m": 3.119,
+      "raw_difference_speed_rmse_mps": 4.648,
+      "speed_rmse_mps": 0.881
     },
     {
       "track": "B:track_002",
@@ -112,16 +112,16 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 5.35,
+        "A": 5.37,
         "C": 0.0
       },
       "verdict": "correctly left anonymous",
       "samples": 58,
       "raw_rmse_to_surface_m": 0.18,
-      "smoothed_rmse_to_surface_m": 0.387,
-      "smoothed_rmse_to_centre_m": 1.018,
-      "raw_difference_speed_rmse_mps": 5.152,
-      "speed_rmse_mps": 0.558
+      "smoothed_rmse_to_surface_m": 0.396,
+      "smoothed_rmse_to_centre_m": 1.008,
+      "raw_difference_speed_rmse_mps": 5.12,
+      "speed_rmse_mps": 0.529
     },
     {
       "track": "B:track_003",
@@ -129,16 +129,16 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 12.49,
+        "A": 13.17,
         "C": 0.0
       },
       "verdict": "correctly left anonymous",
-      "samples": 6,
-      "raw_rmse_to_surface_m": 0.424,
-      "smoothed_rmse_to_surface_m": 0.557,
-      "smoothed_rmse_to_centre_m": 1.007,
-      "raw_difference_speed_rmse_mps": 6.697,
-      "speed_rmse_mps": 0.427
+      "samples": 4,
+      "raw_rmse_to_surface_m": 0.496,
+      "smoothed_rmse_to_surface_m": 0.596,
+      "smoothed_rmse_to_centre_m": 1.229,
+      "raw_difference_speed_rmse_mps": 5.523,
+      "speed_rmse_mps": 0.367
     }
   ],
   "contact_clearances": [
@@ -148,10 +148,10 @@
       "partner": "B",
       "track": "A:track_002",
       "seen_s_before_contact": -0.05,
-      "clearance_m": 0.105,
+      "clearance_m": 0.735,
       "true_gap_m": 0.0,
-      "error_m": 0.105,
-      "range_m": 0.155,
+      "error_m": 0.735,
+      "range_m": 0.803,
       "ttc_s": null
     },
     {
@@ -160,10 +160,10 @@
       "partner": "A",
       "track": "B:track_001",
       "seen_s_before_contact": -0.05,
-      "clearance_m": 0.242,
+      "clearance_m": 0.0,
       "true_gap_m": 0.0,
-      "error_m": 0.242,
-      "range_m": 0.855,
+      "error_m": 0.0,
+      "range_m": 0.48,
       "ttc_s": null
     }
   ],

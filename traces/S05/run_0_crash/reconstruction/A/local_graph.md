@@ -14,8 +14,8 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 |----|-----------:|------|-------|---------|--------|---------|
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
 | A:e02 | 0.00 | THROTTLE_START | A | - | controls | active_at_first_observation=True |
-| A:e03 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 | radar | initial_in_ego_path=True |
-| A:e04 | 0.50 | CRITICAL_TTC_START | A | track_001 | radar |  |
+| A:e03 | 0.10 | TRACK_APPEARED_FRONT | A | track_001 | radar | initial_in_ego_path=True |
+| A:e04 | 0.60 | CRITICAL_TTC_START | A | track_001 | radar |  |
 | A:e05 | 3.85 | CLOSING_START | A | track_001 | radar |  |
 | A:e06 | 5.25 | THROTTLE_END | A | - | controls |  |
 | A:e07 | 5.25 | BRAKE_START | A | - | controls |  |
@@ -30,8 +30,8 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
 ## Edges
 
 ```
-    A:e01 --PRECEDES--> A:e04
-    A:e02 --PRECEDES--> A:e04
+    A:e01 --PRECEDES--> A:e03
+    A:e02 --PRECEDES--> A:e03
     A:e03 --PRECEDES--> A:e04
     A:e04 --PRECEDES--> A:e05
     A:e05 --PRECEDES--> A:e06
@@ -60,8 +60,9 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
-| 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_FRONT track_001 | ego: not yet observed | - |
-| 0.50 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
+| 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START | ego: not yet observed | - |
+| 0.10 | A:e03 TRACK_APPEARED_FRONT track_001 | ego: MOVING, THROTTLE | 0.00 |
+| 0.60 | A:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.50 |
 | 3.85 | A:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.80 |
 | 5.25 | A:e06 THROTTLE_END<br>A:e07 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.20 |
 | 5.90 | A:e08 COLLISION<br>A:e09 CRITICAL_TTC_END track_001<br>A:e10 CLOSING_END track_001 | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.80 |
@@ -80,7 +81,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 0.50, COLLISION 5.90 (+5.40 s)
+- track_001: CRITICAL_TTC_START 0.60, COLLISION 5.90 (+5.30 s)
 
 ## Sign detection windows
 
@@ -92,7 +93,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 13.65 | 272 | 19.4 m / +0 deg | 0.06 m (5.90) | 0.1 m / +0 deg | 13.9 m/s |
+| track_001 | 0.10 | 13.65 | 271 | 19.4 m / +0 deg | 0.06 m (5.90) | 0.1 m / +0 deg | 13.9 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
@@ -100,8 +101,8 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 
 - t = 0.00 s: A started moving (already the case when first observed).
 - t = 0.00 s: A pressed the accelerator (already the case when first observed).
-- t = 0.00 s: A's radar started tracking track_001, which appeared in front of it.
-- t = 0.50 s: A's time-to-contact with track_001 became critical.
+- t = 0.10 s: A's radar started tracking track_001, which appeared in front of it.
+- t = 0.60 s: A's time-to-contact with track_001 became critical.
 - t = 3.85 s: A observed track_001 start closing in.
 - t = 5.25 s: A released the accelerator.
 - t = 5.25 s: A started braking.

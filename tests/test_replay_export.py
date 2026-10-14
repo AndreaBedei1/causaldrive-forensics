@@ -40,7 +40,7 @@ class S12ExportTests(unittest.TestCase):
         times = [round(self.replay.display_time(frame.time), 2) for frame in frames]
         self.assertEqual(times, sorted(times))
         self.assertEqual(len(times), len(set(times)))
-        for expected in (-2.35, -2.2, -2.05, -1.15, -0.8, 0.0, 0.55):
+        for expected in (-2.4, -2.2, -2.1, -1.15, -0.9, 0.0, 0.55):  # one or two radar sweeps earlier than the fixed gates
             self.assertIn(expected, times)
         collision = next(frame for frame in frames if abs(self.replay.display_time(frame.time)) < 1e-6)
         self.assertIn("COLLISION(A,B)", collision.label)
@@ -56,7 +56,7 @@ class S12ExportTests(unittest.TestCase):
         self.assertIn("CRITICAL_TTC", tracks_before.get("track_002", []))
 
     def test_a_frame_draws_the_recorders_and_the_anonymous_road_user_once(self):
-        items = frame_items(self.replay, self.at(-2.35))
+        items = frame_items(self.replay, self.at(-2.40))
         self.assertEqual([r["id"] for r in items["recorders"]], ["A", "B"])
         self.assertEqual(items["ghosts"], [])
         self.assertEqual([e["entity"].entity_id for e in items["entities"]], ["U1"])

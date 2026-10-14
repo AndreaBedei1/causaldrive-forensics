@@ -8,8 +8,10 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 |-------|----------|--------|----|---------------|-------:|---------|
 | A:track_001 | B | ASSOCIATED | collision | B | 1.000 | correct link |
 | B:track_001 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
+| B:track_002 | A | ASSOCIATED | collision | A | 1.000 | correct link |
+| B:track_003 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
 
-Counts: correct link: 2
+Counts: correct link: 4
 
 ## Anonymous entities
 

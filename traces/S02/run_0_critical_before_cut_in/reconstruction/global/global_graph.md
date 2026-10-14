@@ -22,14 +22,14 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.95 | A and B both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 3.95 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.8 m -> 0.0 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.47 m/s over 3.0 s<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
-| B:track_001 | A | ASSOCIATED | 0.98 | B and A both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 1.90 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.7 m -> 0.3 m over the last 1.0 s<br>track speed agrees with A's own speed: RMSE 0.29 m/s over 1.9 s<br>clearance at the contact 0.35 m<br>the only track of B compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 0.97 | A and B both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 3.95 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.7 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.39 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
+| B:track_001 | A | ASSOCIATED | 0.98 | B and A both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 1.90 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.8 m -> 0.4 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.29 m/s for reference)<br>clearance at the contact 0.43 m<br>the only track of B compatible with the contact |
 
 ## Nodes
 
@@ -47,7 +47,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 | g10 | -1.65 | BRAKE_START | A | - | A:e06 @ 2.45 |  |
 | g11 | -1.50 | CRITICAL_TTC_START | A | B | A:e07 @ 2.60, A:e13 @ 4.10 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g12 | -1.40 | CRITICAL_TTC_START | B | A | B:e05 @ 2.70, B:e07 @ 4.10 | source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
-| g13 | -1.25 | CUT_IN_FROM_LEFT_START | A | B | A:e08 @ 2.85, A:e19 @ 4.90 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g13 | -1.25 | CUT_IN_FROM_LEFT_START | A | B | A:e08 @ 2.85, A:e19 @ 4.95 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g14 | -1.10 | EGO_PATH_ENTRY | A | B | A:e09 @ 3.00 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g15 | -0.85 | BRAKE_END | A | - | A:e10 @ 3.25 |  |
 | g16 | -0.75 | THROTTLE_START | A | - | A:e11 @ 3.35 |  |
@@ -64,7 +64,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 | g27 | 0.55 | MOVING_END | B | - | B:e11 @ 4.65 |  |
 | g28 | 0.55 | STOP_START | A | - | A:e18 @ 4.65 |  |
 | g29 | 0.55 | STOP_START | B | - | B:e12 @ 4.65 |  |
-| g30 | 0.80 | CUT_IN_FROM_LEFT_END | A | B | A:e19 @ 4.90 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
+| g30 | 0.85 | CUT_IN_FROM_LEFT_END | A | B | A:e19 @ 4.95 | geometry=estimated_body; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 
 ## Edges
 
@@ -173,7 +173,7 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 | +0.00 | COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A) |
 | +0.05 | CLOSING_END(A,B); CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B) |
 | +0.55 | MOVING_END(A); MOVING_END(B); STOP_START(A); STOP_START(B) |
-| +0.80 | CUT_IN_FROM_LEFT_END(A,B) |
+| +0.85 | CUT_IN_FROM_LEFT_END(A,B) |
 
 ## Temporal safety relations
 
@@ -238,4 +238,4 @@ Each recorder's own belief just before its events, in its own local names (track
 - 0.55 s after the reference collision, B stopped moving.
 - 0.55 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B came to a stop.
-- 0.80 s after the reference collision, A observed B's cut-in from the left settle.
+- 0.85 s after the reference collision, A observed B's cut-in from the left settle.

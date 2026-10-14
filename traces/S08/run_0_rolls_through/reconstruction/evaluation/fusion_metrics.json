@@ -23,10 +23,28 @@
       "true_identity": "A",
       "purity": 1.0,
       "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "collision",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_003",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
     }
   ],
   "decision_counts": {
-    "correct link": 2
+    "correct link": 4
   },
   "entities": [],
   "merges": {

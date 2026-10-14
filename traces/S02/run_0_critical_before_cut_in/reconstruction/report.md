@@ -24,14 +24,14 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48 vs 604.48 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.95 | A and B both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 3.95 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.8 m -> 0.0 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.47 m/s over 3.0 s<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
-| B:track_001 | A | ASSOCIATED | 0.98 | B and A both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 1.90 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.7 m -> 0.3 m over the last 1.0 s<br>track speed agrees with A's own speed: RMSE 0.29 m/s over 1.9 s<br>clearance at the contact 0.35 m<br>the only track of B compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 0.97 | A and B both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 3.95 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.7 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.39 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
+| B:track_001 | A | ASSOCIATED | 0.98 | B and A both reported collision_001 (peak impulse 604.48 vs 604.48 N*s)<br>tracked for 1.90 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 1.8 m -> 0.4 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.29 m/s for reference)<br>clearance at the contact 0.43 m<br>the only track of B compatible with the contact |
 
 ## Road users in the common frame
 
@@ -56,7 +56,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A)
 - `+0.05` CLOSING_END(A,B); CLOSING_END(B,A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.55` MOVING_END(A); MOVING_END(B); STOP_START(A); STOP_START(B)
-- `+0.80` CUT_IN_FROM_LEFT_END(A,B)
+- `+0.85` CUT_IN_FROM_LEFT_END(A,B)
 
 ### What happened, in plain language
 
@@ -89,7 +89,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 604.48
 - 0.55 s after the reference collision, B stopped moving.
 - 0.55 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B came to a stop.
-- 0.80 s after the reference collision, A observed B's cut-in from the left settle.
+- 0.85 s after the reference collision, A observed B's cut-in from the left settle.
 
 ### Temporal safety relations
 
@@ -168,8 +168,6 @@ B:
     "max_height_m": 2.5,
     "moving_speed_mps": 1.0,
     "cluster_distance_m": 2.0,
-    "max_association_distance_m": 2.5,
-    "max_velocity_mismatch_mps": 4.0,
     "max_track_gap_s": 0.5,
     "min_track_frames": 5,
     "measurement_std_m": 0.5,
@@ -178,8 +176,6 @@ B:
     "smoothing_innovation_sigma": 3.0,
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5,
-    "gating": "fixed",
-    "covariance_components": "position,doppler,ambiguity,survival,confirmation",
     "gate_probability": 0.99,
     "body_length_m": 4.6,
     "body_width_m": 1.9,
@@ -302,7 +298,6 @@ B:
     "entity_output_rate_hz": 10.0,
     "mutual_refinement": false,
     "mutual_refinement_iterations": 3,
-    "association_method": "current",
     "radar_range_std_m": 0.25,
     "radar_azimuth_std_deg": 0.5,
     "assignment_likelihood_ratio": 20.0,

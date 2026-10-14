@@ -25,7 +25,24 @@
   },
   "observed_alignment": [],
   "mutual_refinement": null,
-  "recorder_links": [],
+  "recorder_links": [
+    {
+      "track": "B:track_001",
+      "recorder": "A",
+      "samples": 8,
+      "median_distance_m": 0.0,
+      "median_distance_sigma": 0.0,
+      "median_velocity_difference_mps": 0.03,
+      "fraction_within": 1.0,
+      "accepted": true,
+      "until": null,
+      "refused": null,
+      "reacquired": false,
+      "collision_anchored": false
+    }
+  ],
   "association_evidence": [],
-  "entities": []
+  "entities": [],
+  "cannot_links": [],
+  "retrospective": []
 }

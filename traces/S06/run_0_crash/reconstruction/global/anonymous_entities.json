@@ -33,11 +33,11 @@
       "pooled": [
         "A:track_001",
         "B:track_001",
-        "C:track_001 on A",
-        "C:track_002 on B"
+        "C:track_002 on A",
+        "C:track_003 on B"
       ],
-      "offset_to_global": -4.1,
-      "median_distance_sigma": 0.616,
+      "offset_to_global": -4.15,
+      "median_distance_sigma": 0.647,
       "interval": [
         -4.2,
         -4.0
@@ -52,10 +52,10 @@
     {
       "track": "A:track_001",
       "recorder": "C",
-      "samples": 303,
+      "samples": 51,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.086,
+      "median_velocity_difference_mps": 0.025,
       "fraction_within": 1.0,
       "accepted": true,
       "until": null,
@@ -66,11 +66,11 @@
     {
       "track": "B:track_001",
       "recorder": "C",
-      "samples": 262,
+      "samples": 261,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.046,
-      "fraction_within": 0.935,
+      "median_velocity_difference_mps": 0.017,
+      "fraction_within": 1.0,
       "accepted": true,
       "until": null,
       "refused": null,
@@ -80,10 +80,10 @@
     {
       "track": "C:track_001",
       "recorder": "A",
-      "samples": 77,
-      "median_distance_m": 0.0,
-      "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.152,
+      "samples": 5,
+      "median_distance_m": 0.005,
+      "median_distance_sigma": 0.007,
+      "median_velocity_difference_mps": 0.028,
       "fraction_within": 1.0,
       "accepted": true,
       "until": 0.0,
@@ -93,11 +93,25 @@
     },
     {
       "track": "C:track_002",
-      "recorder": "B",
-      "samples": 40,
+      "recorder": "A",
+      "samples": 73,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.482,
+      "median_velocity_difference_mps": 0.022,
+      "fraction_within": 1.0,
+      "accepted": true,
+      "until": 0.0,
+      "refused": null,
+      "reacquired": false,
+      "collision_anchored": false
+    },
+    {
+      "track": "C:track_003",
+      "recorder": "B",
+      "samples": 41,
+      "median_distance_m": 0.0,
+      "median_distance_sigma": 0.0,
+      "median_velocity_difference_mps": 0.051,
       "fraction_within": 1.0,
       "accepted": true,
       "until": 0.0,
@@ -107,5 +121,7 @@
     }
   ],
   "association_evidence": [],
-  "entities": []
+  "entities": [],
+  "cannot_links": [],
+  "retrospective": []
 }

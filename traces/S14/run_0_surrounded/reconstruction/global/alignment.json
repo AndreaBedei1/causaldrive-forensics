@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e20",
+      "anchor_node": "A:e22",
       "anchor_t_local": 7.75,
       "offset_to_global": -7.75,
       "method": "matched_collisions",
@@ -16,7 +16,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e25",
+      "anchor_node": "B:e23",
       "anchor_t_local": 7.75,
       "offset_to_global": -7.75,
       "method": "matched_collisions",
@@ -37,8 +37,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e20",
-        "B": "B:e25"
+        "A": "A:e22",
+        "B": "B:e23"
       },
       "t_local": {
         "A": 7.75,
@@ -57,7 +57,7 @@
         "no competing report within tolerance",
         "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
         "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
-        "pre-contact radar trajectory checked against the candidate partner pose stream where observed"
+        "pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted"
       ]
     }
   ],

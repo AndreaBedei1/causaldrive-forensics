@@ -731,7 +731,7 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_002",
-      "t_local": 4.75,
+      "t_local": 4.8,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -771,24 +771,24 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "track_002",
-      "t_local": 4.75,
+      "t_local": 4.8,
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            2.9084,
-            -1.1602
+            2.9426,
+            -1.1543
           ],
           [
-            2.9084,
-            -3.0602
+            2.9426,
+            -3.0543
           ],
           [
-            -1.6916,
-            -3.0602
+            -1.6574,
+            -3.0543
           ],
           [
-            -1.6916,
-            -1.1602
+            -1.6574,
+            -1.1543
           ]
         ],
         "geometry": "estimated_body"
@@ -1072,20 +1072,20 @@
       "last_seen_t_local": 15.15,
       "duration_s": 13.05,
       "measured_sweeps": 262,
-      "radar_returns": 17693,
+      "radar_returns": 19549,
       "radars": [
         "front",
         "right"
       ],
-      "min_range_m": 9.22,
-      "min_range_t_local": 11.65,
-      "min_clearance_m": 8.21,
-      "min_clearance_t_local": 13.5,
-      "max_speed_mps": 6.4,
-      "first_range_m": 33.33,
-      "first_bearing_deg": 27.7,
-      "last_range_m": 10.26,
-      "last_bearing_deg": 36.6
+      "min_range_m": 9.25,
+      "min_range_t_local": 15.0,
+      "min_clearance_m": 8.18,
+      "min_clearance_t_local": 14.8,
+      "max_speed_mps": 6.2,
+      "first_range_m": 33.3,
+      "first_bearing_deg": 27.6,
+      "last_range_m": 10.27,
+      "last_bearing_deg": 37.1
     },
     {
       "track_id": "track_002",
@@ -1095,20 +1095,20 @@
       "last_seen_t_local": 15.15,
       "duration_s": 13.05,
       "measured_sweeps": 262,
-      "radar_returns": 135886,
+      "radar_returns": 143741,
       "radars": [
         "front",
         "left"
       ],
-      "min_range_m": 0.64,
+      "min_range_m": 0.65,
       "min_range_t_local": 4.6,
       "min_clearance_m": 0.11,
-      "min_clearance_t_local": 4.95,
-      "max_speed_mps": 10.42,
-      "first_range_m": 32.54,
-      "first_bearing_deg": -38.8,
-      "last_range_m": 0.74,
-      "last_bearing_deg": -71.9
+      "min_clearance_t_local": 5.05,
+      "max_speed_mps": 10.41,
+      "first_range_m": 32.57,
+      "first_bearing_deg": -38.9,
+      "last_range_m": 0.76,
+      "last_bearing_deg": -69.3
     }
   ]
 }

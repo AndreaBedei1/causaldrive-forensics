@@ -182,7 +182,7 @@
         "A",
         "B"
       ],
-      "t_global": -6.75,
+      "t_global": -6.3,
       "attributes": {
         "initial_in_ego_path": true,
         "source_track": "track_001",
@@ -195,7 +195,7 @@
           {
             "graph": "A",
             "local_node": "A:e03",
-            "t_local": 0.0,
+            "t_local": 0.45,
             "event_type": "TRACK_APPEARED_FRONT",
             "attributes": {
               "initial_in_ego_path": true,
@@ -210,23 +210,23 @@
         {
           "graph": "A",
           "local_node": "A:e03",
-          "t_local": 0.0
+          "t_local": 0.45
         }
       ],
       "perceived_state_before": {
         "A": {
           "ego": {
-            "MOVING": "UNKNOWN",
-            "STOP": "UNKNOWN",
-            "BRAKE": "UNKNOWN",
-            "THROTTLE": "UNKNOWN",
-            "TURN_LEFT": "UNKNOWN",
-            "TURN_RIGHT": "UNKNOWN",
-            "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
+            "MOVING": true,
+            "STOP": false,
+            "BRAKE": false,
+            "THROTTLE": true,
+            "TURN_LEFT": false,
+            "TURN_RIGHT": false,
+            "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
           "signs": {},
-          "facts_t_local": null
+          "facts_t_local": 0.4
         }
       }
     },
@@ -936,42 +936,22 @@
   "edges": [
     {
       "from": "g01",
-      "to": "g06",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g01",
-      "to": "g07",
+      "to": "g05",
       "relation": "PRECEDES"
     },
     {
       "from": "g02",
-      "to": "g06",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g02",
-      "to": "g07",
+      "to": "g05",
       "relation": "PRECEDES"
     },
     {
       "from": "g03",
-      "to": "g06",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g03",
-      "to": "g07",
+      "to": "g05",
       "relation": "PRECEDES"
     },
     {
       "from": "g04",
-      "to": "g06",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g04",
-      "to": "g07",
+      "to": "g05",
       "relation": "PRECEDES"
     },
     {
@@ -1155,8 +1135,6 @@
       "max_height_m": 2.5,
       "moving_speed_mps": 1.0,
       "cluster_distance_m": 2.0,
-      "max_association_distance_m": 2.5,
-      "max_velocity_mismatch_mps": 4.0,
       "max_track_gap_s": 0.5,
       "min_track_frames": 5,
       "measurement_std_m": 0.5,
@@ -1165,8 +1143,6 @@
       "smoothing_innovation_sigma": 3.0,
       "min_slowdown_returns": 3,
       "identity_body_width_m": 2.5,
-      "gating": "fixed",
-      "covariance_components": "position,doppler,ambiguity,survival,confirmation",
       "gate_probability": 0.99,
       "body_length_m": 4.6,
       "body_width_m": 1.9,
@@ -1289,7 +1265,6 @@
       "entity_output_rate_hz": 10.0,
       "mutual_refinement": false,
       "mutual_refinement_iterations": 3,
-      "association_method": "current",
       "radar_range_std_m": 0.25,
       "radar_azimuth_std_deg": 0.5,
       "assignment_likelihood_ratio": 20.0,

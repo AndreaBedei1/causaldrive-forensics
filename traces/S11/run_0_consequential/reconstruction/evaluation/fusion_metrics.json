@@ -16,15 +16,6 @@
       "verdict": "correct link"
     },
     {
-      "track": "A:track_002",
-      "decision": "C",
-      "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "C",
-      "purity": 1.0,
-      "verdict": "correct link"
-    },
-    {
       "track": "B:track_001",
       "decision": "A",
       "status": "ASSOCIATED",
@@ -34,26 +25,35 @@
       "verdict": "correct link"
     },
     {
-      "track": "B:track_002",
+      "track": "B:track_002#segment_1",
       "decision": "C",
       "status": "ASSOCIATED",
       "by": "common_frame",
       "true_identity": "C",
       "purity": 1.0,
       "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002#segment_2",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": null,
+      "purity": 1.0,
+      "verdict": "anonymous (clutter: no true vehicle)"
+    },
+    {
+      "track": "B:track_002#segment_3",
+      "decision": "U3",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": null,
+      "purity": 1.0,
+      "verdict": "anonymous (clutter: no true vehicle)"
     },
     {
       "track": "B:track_003",
-      "decision": "C",
-      "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "C",
-      "purity": 1.0,
-      "verdict": "correct link"
-    },
-    {
-      "track": "B:track_004",
-      "decision": "U1",
+      "decision": "U2",
       "status": "ANONYMOUS",
       "by": null,
       "true_identity": "C",
@@ -71,14 +71,30 @@
     }
   ],
   "decision_counts": {
-    "correct link": 6,
+    "anonymous": 2,
+    "correct link": 4,
     "missed link": 1
   },
   "entities": [
     {
       "id": "U1",
       "source_tracks": [
-        "B:track_004"
+        "B:track_002#segment_2"
+      ],
+      "observers": [
+        "B"
+      ],
+      "true_identity": null,
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "B:track_002#segment_2": null
+      }
+    },
+    {
+      "id": "U2",
+      "source_tracks": [
+        "B:track_003"
       ],
       "observers": [
         "B"
@@ -87,7 +103,22 @@
       "identity_is_recorder": true,
       "purity": 1.0,
       "track_identities": {
-        "B:track_004": "C"
+        "B:track_003": "C"
+      }
+    },
+    {
+      "id": "U3",
+      "source_tracks": [
+        "B:track_002#segment_3"
+      ],
+      "observers": [
+        "B"
+      ],
+      "true_identity": null,
+      "identity_is_recorder": false,
+      "purity": 1.0,
+      "track_identities": {
+        "B:track_002#segment_3": null
       }
     }
   ],
@@ -98,42 +129,42 @@
   },
   "fragmentation": {
     "C": [
-      "U1"
+      "U2"
     ]
   },
   "state_errors": {
     "centre_error_m": {
-      "n": 3,
-      "median": 3.3025,
-      "q25": 3.2911,
-      "q75": 3.3299,
-      "p90": 3.3463,
-      "p95": 3.3518,
-      "max": 3.3573,
-      "mean": 3.3132,
-      "iqr": 0.0388
+      "n": 8,
+      "median": 0.504,
+      "q25": 0.4324,
+      "q75": 0.7224,
+      "p90": 0.9061,
+      "p95": 1.0139,
+      "max": 1.1218,
+      "mean": 0.58,
+      "iqr": 0.2901
     },
     "coverage_s": {
       "n": 1,
-      "median": 0.3,
-      "q25": 0.3,
-      "q75": 0.3,
-      "p90": 0.3,
-      "p95": 0.3,
-      "max": 0.3,
-      "mean": 0.3,
+      "median": 0.75,
+      "q25": 0.75,
+      "q75": 0.75,
+      "p90": 0.75,
+      "p95": 0.75,
+      "max": 0.75,
+      "mean": 0.75,
       "iqr": 0.0
     },
     "heading_error_deg": {
-      "n": 3,
-      "median": 7.606,
-      "q25": 7.4041,
-      "q75": 7.6702,
-      "p90": 7.7087,
-      "p95": 7.7215,
-      "max": 7.7343,
-      "mean": 7.5142,
-      "iqr": 0.266
+      "n": 8,
+      "median": 3.8096,
+      "q25": 1.9332,
+      "q75": 4.5598,
+      "p90": 4.7591,
+      "p95": 4.9096,
+      "max": 5.0602,
+      "mean": 3.2812,
+      "iqr": 2.6266
     },
     "length_error_m": {
       "n": 1,
@@ -147,48 +178,48 @@
       "iqr": 0.0
     },
     "normalised_centre_error": {
-      "n": 3,
-      "median": 6.0264,
-      "q25": 6.0057,
-      "q75": 6.0765,
-      "p90": 6.1065,
-      "p95": 6.1165,
-      "max": 6.1265,
-      "mean": 6.046,
-      "iqr": 0.0707
+      "n": 8,
+      "median": 0.9198,
+      "q25": 0.789,
+      "q75": 1.3183,
+      "p90": 1.6534,
+      "p95": 1.8502,
+      "max": 2.047,
+      "mean": 1.0584,
+      "iqr": 0.5293
     },
     "single_track_nominal_centre_error_m": {
-      "n": 3,
-      "median": 3.3066,
-      "q25": 3.291,
-      "q75": 3.3399,
-      "p90": 3.3599,
-      "p95": 3.3665,
-      "max": 3.3732,
-      "mean": 3.3184,
-      "iqr": 0.0489
+      "n": 7,
+      "median": 0.9578,
+      "q25": 0.933,
+      "q75": 0.9834,
+      "p90": 0.9911,
+      "p95": 0.9943,
+      "max": 0.9976,
+      "mean": 0.9535,
+      "iqr": 0.0504
     },
     "speed_error_mps": {
-      "n": 3,
-      "median": 0.3609,
-      "q25": 0.1968,
-      "q75": 0.4004,
-      "p90": 0.424,
-      "p95": 0.4319,
-      "max": 0.4398,
-      "mean": 0.2778,
-      "iqr": 0.2036
+      "n": 8,
+      "median": 0.2574,
+      "q25": 0.1989,
+      "q75": 0.3646,
+      "p90": 0.4714,
+      "p95": 0.5774,
+      "max": 0.6833,
+      "mean": 0.3018,
+      "iqr": 0.1657
     },
     "velocity_error_mps": {
-      "n": 3,
-      "median": 0.9156,
-      "q25": 0.7764,
-      "q75": 0.959,
-      "p90": 0.9849,
-      "p95": 0.9936,
-      "max": 1.0023,
-      "mean": 0.8517,
-      "iqr": 0.1826
+      "n": 8,
+      "median": 0.5872,
+      "q25": 0.3748,
+      "q75": 0.7914,
+      "p90": 0.8931,
+      "p95": 0.9186,
+      "max": 0.9442,
+      "mean": 0.5786,
+      "iqr": 0.4166
     },
     "width_error_m": {
       "n": 1,
@@ -205,57 +236,57 @@
   "state_errors_by_method": {
     "covariance_intersection": {
       "centre_error_m": {
-        "n": 3,
-        "median": 3.3025,
-        "q25": 3.2911,
-        "q75": 3.3299,
-        "p90": 3.3463,
-        "p95": 3.3518,
-        "max": 3.3573,
-        "mean": 3.3132,
-        "iqr": 0.0388
+        "n": 8,
+        "median": 0.504,
+        "q25": 0.4324,
+        "q75": 0.7224,
+        "p90": 0.9061,
+        "p95": 1.0139,
+        "max": 1.1218,
+        "mean": 0.58,
+        "iqr": 0.2901
       },
       "heading_error_deg": {
-        "n": 3,
-        "median": 7.606,
-        "q25": 7.4041,
-        "q75": 7.6702,
-        "p90": 7.7087,
-        "p95": 7.7215,
-        "max": 7.7343,
-        "mean": 7.5142,
-        "iqr": 0.266
+        "n": 8,
+        "median": 3.8096,
+        "q25": 1.9332,
+        "q75": 4.5598,
+        "p90": 4.7591,
+        "p95": 4.9096,
+        "max": 5.0602,
+        "mean": 3.2812,
+        "iqr": 2.6266
       },
       "speed_error_mps": {
-        "n": 3,
-        "median": 0.3609,
-        "q25": 0.1968,
-        "q75": 0.4004,
-        "p90": 0.424,
-        "p95": 0.4319,
-        "max": 0.4398,
-        "mean": 0.2778,
-        "iqr": 0.2036
+        "n": 8,
+        "median": 0.2574,
+        "q25": 0.1989,
+        "q75": 0.3646,
+        "p90": 0.4714,
+        "p95": 0.5774,
+        "max": 0.6833,
+        "mean": 0.3018,
+        "iqr": 0.1657
       },
       "velocity_error_mps": {
-        "n": 3,
-        "median": 0.9156,
-        "q25": 0.7764,
-        "q75": 0.959,
-        "p90": 0.9849,
-        "p95": 0.9936,
-        "max": 1.0023,
-        "mean": 0.8517,
-        "iqr": 0.1826
+        "n": 8,
+        "median": 0.5872,
+        "q25": 0.3748,
+        "q75": 0.7914,
+        "p90": 0.8931,
+        "p95": 0.9186,
+        "max": 0.9442,
+        "mean": 0.5786,
+        "iqr": 0.4166
       }
     }
   },
   "calibration": {
-    "states": 3,
+    "states": 8,
     "observed_within": {
-      "1_sigma": 0.0,
-      "2_sigma": 0.0,
-      "3_sigma": 0.0
+      "1_sigma": 0.625,
+      "2_sigma": 0.875,
+      "3_sigma": 1.0
     },
     "expected_within_gaussian": {
       "1_sigma": 0.393,
@@ -265,54 +296,54 @@
   },
   "entity_errors": [
     {
-      "id": "U1",
+      "id": "U2",
       "true_identity": "C",
-      "coverage_s": 0.3,
-      "states": 3,
+      "coverage_s": 0.75,
+      "states": 8,
       "impure_states": 0,
       "centre_error_m": {
-        "n": 3,
-        "median": 3.3025,
-        "q25": 3.2911,
-        "q75": 3.3299,
-        "p90": 3.3463,
-        "p95": 3.3518,
-        "max": 3.3573,
-        "mean": 3.3132,
-        "iqr": 0.0388
+        "n": 8,
+        "median": 0.504,
+        "q25": 0.4324,
+        "q75": 0.7224,
+        "p90": 0.9061,
+        "p95": 1.0139,
+        "max": 1.1218,
+        "mean": 0.58,
+        "iqr": 0.2901
       },
       "velocity_error_mps": {
-        "n": 3,
-        "median": 0.9156,
-        "q25": 0.7764,
-        "q75": 0.959,
-        "p90": 0.9849,
-        "p95": 0.9936,
-        "max": 1.0023,
-        "mean": 0.8517,
-        "iqr": 0.1826
+        "n": 8,
+        "median": 0.5872,
+        "q25": 0.3748,
+        "q75": 0.7914,
+        "p90": 0.8931,
+        "p95": 0.9186,
+        "max": 0.9442,
+        "mean": 0.5786,
+        "iqr": 0.4166
       },
       "speed_error_mps": {
-        "n": 3,
-        "median": 0.3609,
-        "q25": 0.1968,
-        "q75": 0.4004,
-        "p90": 0.424,
-        "p95": 0.4319,
-        "max": 0.4398,
-        "mean": 0.2778,
-        "iqr": 0.2036
+        "n": 8,
+        "median": 0.2574,
+        "q25": 0.1989,
+        "q75": 0.3646,
+        "p90": 0.4714,
+        "p95": 0.5774,
+        "max": 0.6833,
+        "mean": 0.3018,
+        "iqr": 0.1657
       },
       "heading_error_deg": {
-        "n": 3,
-        "median": 7.606,
-        "q25": 7.4041,
-        "q75": 7.6702,
-        "p90": 7.7087,
-        "p95": 7.7215,
-        "max": 7.7343,
-        "mean": 7.5142,
-        "iqr": 0.266
+        "n": 8,
+        "median": 3.8096,
+        "q25": 1.9332,
+        "q75": 4.5598,
+        "p90": 4.7591,
+        "p95": 4.9096,
+        "max": 5.0602,
+        "mean": 3.2812,
+        "iqr": 2.6266
       },
       "length_error_m": -1.315,
       "width_error_m": -0.088,
@@ -323,6 +354,6 @@
     }
   ],
   "observed_alignment": [],
-  "states_compared": 3,
+  "states_compared": 8,
   "impure_states": 0
 }

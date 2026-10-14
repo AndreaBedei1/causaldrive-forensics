@@ -430,7 +430,7 @@ class S12GhostTests(unittest.TestCase):
                          [(0.0, ("A", "B"))])
         critical = next(e for e in events if e.event_type == "CRITICAL_TTC_START" and e.subject == "track_001"
                         and e.actor == "A")
-        self.assertAlmostEqual(self.replay.display_time(critical.time), -2.35, places=6)
+        self.assertAlmostEqual(self.replay.display_time(critical.time), -2.40, places=6)  # local 2.55 s
 
     def test_the_tracks_are_shown_as_the_fusion_decided(self):
         self.assertEqual({name: (t.status, t.entity, t.road_user, t.ghost) for name, t in self.tracks.items()},

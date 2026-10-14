@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e08",
+      "anchor_node": "A:e09",
       "anchor_t_local": 4.1,
       "offset_to_global": -4.1,
       "method": "matched_collisions",
@@ -29,16 +29,16 @@
       "status": "ALIGNED",
       "anchor_node": null,
       "anchor_t_local": null,
-      "offset_to_global": -4.1,
+      "offset_to_global": -4.15,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.62 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_002 on A, C:track_003 on B lie where their lines of sight enter the body (pooled median 0.65 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
     "B - A": 0.0,
-    "C - A": 0.0,
-    "C - B": 0.0
+    "C - A": 0.05,
+    "C - B": 0.05
   },
   "matched_events": [
     {
@@ -48,7 +48,7 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e08",
+        "A": "A:e09",
         "B": "B:e08"
       },
       "t_local": {
@@ -68,7 +68,7 @@
         "no competing report within tolerance",
         "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
         "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
-        "pre-contact radar trajectory checked against the candidate partner pose stream where observed"
+        "pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted"
       ]
     }
   ],
@@ -82,11 +82,11 @@
       "pooled": [
         "A:track_001",
         "B:track_001",
-        "C:track_001 on A",
-        "C:track_002 on B"
+        "C:track_002 on A",
+        "C:track_003 on B"
       ],
-      "offset_to_global": -4.1,
-      "median_distance_sigma": 0.616,
+      "offset_to_global": -4.15,
+      "median_distance_sigma": 0.647,
       "interval": [
         -4.2,
         -4.0

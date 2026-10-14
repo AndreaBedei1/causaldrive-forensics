@@ -34,9 +34,9 @@
         "B:track_001"
       ],
       "offset_to_global": -5.95,
-      "median_distance_sigma": 0.63,
+      "median_distance_sigma": 0.625,
       "interval": [
-        -5.95,
+        -6.0,
         -5.9
       ],
       "other_intervals": 0,
@@ -49,11 +49,11 @@
     {
       "track": "B:track_001",
       "recorder": "C",
-      "samples": 272,
-      "median_distance_m": 0.0,
-      "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.054,
-      "fraction_within": 0.996,
+      "samples": 81,
+      "median_distance_m": 0.261,
+      "median_distance_sigma": 0.478,
+      "median_velocity_difference_mps": 0.034,
+      "fraction_within": 1.0,
       "accepted": true,
       "until": null,
       "refused": null,
@@ -62,5 +62,7 @@
     }
   ],
   "association_evidence": [],
-  "entities": []
+  "entities": [],
+  "cannot_links": [],
+  "retrospective": []
 }

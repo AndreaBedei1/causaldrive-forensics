@@ -33,8 +33,8 @@
       "samples": 60,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.533,
-      "fraction_within": 0.817,
+      "median_velocity_difference_mps": 0.031,
+      "fraction_within": 1.0,
       "accepted": true,
       "until": 0.9,
       "refused": null,
@@ -47,8 +47,8 @@
       "samples": 72,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.493,
-      "fraction_within": 0.931,
+      "median_velocity_difference_mps": 0.018,
+      "fraction_within": 1.0,
       "accepted": true,
       "until": 0.0,
       "refused": null,
@@ -57,5 +57,7 @@
     }
   ],
   "association_evidence": [],
-  "entities": []
+  "entities": [],
+  "cannot_links": [],
+  "retrospective": []
 }

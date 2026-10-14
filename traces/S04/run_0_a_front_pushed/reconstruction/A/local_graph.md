@@ -93,7 +93,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 13.70 | 275 | 4.5 m / +0 deg | 0.03 m (5.45) | 0.5 m / +2 deg | 13.8 m/s |
+| track_001 | 0.00 | 13.70 | 275 | 4.5 m / +0 deg | 0.11 m (5.40) | 0.6 m / +1 deg | 13.8 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 

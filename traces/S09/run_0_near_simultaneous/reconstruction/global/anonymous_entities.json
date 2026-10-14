@@ -27,12 +27,12 @@
   "mutual_refinement": null,
   "recorder_links": [
     {
-      "track": "B:track_001#segment_3",
-      "recorder": "A",
-      "samples": 97,
+      "track": "A:track_001",
+      "recorder": "B",
+      "samples": 21,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 0.042,
+      "median_velocity_difference_mps": 0.036,
       "fraction_within": 1.0,
       "accepted": true,
       "until": null,
@@ -41,20 +41,36 @@
       "collision_anchored": false
     },
     {
-      "track": "B:track_001#segment_2",
+      "track": "B:track_002",
       "recorder": "A",
-      "samples": 25,
+      "samples": 16,
       "median_distance_m": 0.0,
       "median_distance_sigma": 0.0,
-      "median_velocity_difference_mps": 2.142,
+      "median_velocity_difference_mps": 0.07,
       "fraction_within": 1.0,
       "accepted": true,
       "until": null,
       "refused": null,
       "reacquired": false,
-      "collision_anchored": true
+      "collision_anchored": false
+    },
+    {
+      "track": "B:track_003",
+      "recorder": "A",
+      "samples": 111,
+      "median_distance_m": 0.0,
+      "median_distance_sigma": 0.0,
+      "median_velocity_difference_mps": 0.018,
+      "fraction_within": 1.0,
+      "accepted": true,
+      "until": null,
+      "refused": null,
+      "reacquired": false,
+      "collision_anchored": false
     }
   ],
   "association_evidence": [],
-  "entities": []
+  "entities": [],
+  "cannot_links": [],
+  "retrospective": []
 }

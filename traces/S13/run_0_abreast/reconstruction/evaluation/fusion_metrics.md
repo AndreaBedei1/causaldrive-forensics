@@ -6,60 +6,55 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 
 | Track | Decision | Status | By | True identity | Purity | Verdict |
 |-------|----------|--------|----|---------------|-------:|---------|
-| A:track_001#segment_1 | U1 | ANONYMOUS | - | D | 1.000 | anonymous (non-recording road user D) |
-| A:track_001#segment_2 | U4 | ANONYMOUS | - | D | 0.795 | anonymous (non-recording road user D) |
-| A:track_001#segment_3 | U2 | ANONYMOUS | - | C | 1.000 | anonymous (non-recording road user C) |
+| A:track_001 | U1 | ANONYMOUS | - | D | 1.000 | anonymous (non-recording road user D) |
 | A:track_002 | B | ASSOCIATED | collision | B | 1.000 | correct link |
-| A:track_003 | U3 | ANONYMOUS | - | D | 0.978 | anonymous (non-recording road user D) |
+| A:track_003 | U2 | ANONYMOUS | - | C | 1.000 | anonymous (non-recording road user C) |
 | B:track_001 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 | B:track_002 | U2 | ANONYMOUS | - | C | 1.000 | anonymous (non-recording road user C) |
-| B:track_003 | U3 | ANONYMOUS | - | D | 1.000 | anonymous (non-recording road user D) |
-| B:track_004 | U2 | ANONYMOUS | - | C | 1.000 | anonymous (non-recording road user C) |
+| B:track_003 | U1 | ANONYMOUS | - | D | 1.000 | anonymous (non-recording road user D) |
 
-Counts: anonymous: 7, correct link: 2
+Counts: anonymous: 4, correct link: 2
 
 ## Anonymous entities
 
 | Entity | Source tracks | True identity | Recorder? | Purity |
 |--------|---------------|---------------|-----------|-------:|
-| U1 | A:track_001#segment_1 | D | no | 1.000 |
-| U2 | B:track_002, B:track_004, A:track_001#segment_3 | C | no | 1.000 |
-| U3 | B:track_003, A:track_003 | D | no | 0.988 |
-| U4 | A:track_001#segment_2 | D | no | 0.795 |
+| U1 | A:track_001, B:track_003 | D | no | 1.000 |
+| U2 | A:track_003, B:track_002 | C | no | 1.000 |
 
-Merges over pairs of anonymous tracks: correct 4, false 0, missed 5.
-Fragmentation (true road user -> entities): C -> U2, D -> U1/U3/U4
+Merges over pairs of anonymous tracks: correct 2, false 0, missed 0.
+Fragmentation (true road user -> entities): C -> U2, D -> U1
 
-## Fused state errors (against the majority identity, 238 pure states; 12 impure states where a source track was on another body, excluded)
+## Fused state errors (against the majority identity, 207 pure states; 0 impure states where a source track was on another body, excluded)
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 238 | 0.402 | 0.240 | 0.707 | 0.466 | 0.883 | 0.946 | 3.249 |
-| coverage_s | 4 | 7.000 | 2.913 | 10.262 | 7.350 | 10.375 | 10.412 | 10.450 |
-| heading_error_deg | 238 | 0.575 | 0.267 | 1.104 | 0.837 | 1.969 | 3.182 | 16.274 |
-| length_error_m | 4 | 0.086 | 0.086 | 0.113 | 0.026 | 0.160 | 0.176 | 0.192 |
-| normalised_centre_error | 238 | 0.874 | 0.561 | 1.374 | 0.813 | 1.675 | 1.878 | 5.928 |
-| single_track_nominal_centre_error_m | 238 | 0.724 | 0.475 | 1.171 | 0.696 | 1.478 | 1.568 | 1.685 |
-| speed_error_mps | 238 | 0.072 | 0.030 | 0.118 | 0.088 | 0.244 | 0.296 | 0.974 |
-| velocity_error_mps | 238 | 0.160 | 0.085 | 0.275 | 0.190 | 0.457 | 0.715 | 3.558 |
-| width_error_m | 4 | 0.107 | 0.107 | 0.146 | 0.039 | 0.216 | 0.240 | 0.263 |
+| centre_error_m | 207 | 0.323 | 0.207 | 0.535 | 0.328 | 0.768 | 0.856 | 1.780 |
+| coverage_s | 2 | 10.300 | 10.225 | 10.375 | 0.150 | 10.420 | 10.435 | 10.450 |
+| heading_error_deg | 207 | 0.414 | 0.163 | 0.823 | 0.660 | 1.287 | 2.053 | 4.540 |
+| length_error_m | 2 | 0.139 | 0.113 | 0.166 | 0.053 | 0.181 | 0.187 | 0.192 |
+| normalised_centre_error | 207 | 0.817 | 0.514 | 1.240 | 0.727 | 1.564 | 1.661 | 2.506 |
+| single_track_nominal_centre_error_m | 207 | 0.442 | 0.310 | 0.595 | 0.284 | 0.682 | 0.745 | 0.867 |
+| speed_error_mps | 207 | 0.034 | 0.017 | 0.067 | 0.050 | 0.119 | 0.164 | 0.264 |
+| velocity_error_mps | 207 | 0.114 | 0.055 | 0.199 | 0.144 | 0.288 | 0.482 | 1.003 |
+| width_error_m | 2 | 0.185 | 0.146 | 0.224 | 0.078 | 0.247 | 0.255 | 0.263 |
 
 ### Method: box_fit
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 142 | 0.314 | 0.192 | 0.487 | 0.295 | 0.734 | 0.993 | 1.903 |
-| heading_error_deg | 142 | 0.598 | 0.281 | 1.003 | 0.722 | 1.839 | 2.887 | 14.764 |
-| speed_error_mps | 142 | 0.066 | 0.025 | 0.117 | 0.092 | 0.240 | 0.271 | 0.974 |
-| velocity_error_mps | 142 | 0.159 | 0.080 | 0.260 | 0.180 | 0.401 | 0.662 | 3.260 |
+| centre_error_m | 157 | 0.269 | 0.176 | 0.375 | 0.200 | 0.557 | 0.719 | 1.780 |
+| heading_error_deg | 157 | 0.426 | 0.160 | 0.754 | 0.594 | 1.212 | 1.782 | 4.540 |
+| speed_error_mps | 157 | 0.028 | 0.013 | 0.049 | 0.036 | 0.086 | 0.126 | 0.199 |
+| velocity_error_mps | 157 | 0.103 | 0.043 | 0.174 | 0.131 | 0.265 | 0.361 | 0.931 |
 
 ### Method: covariance_intersection
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 96 | 0.651 | 0.416 | 0.827 | 0.411 | 0.926 | 0.941 | 3.249 |
-| heading_error_deg | 96 | 0.539 | 0.227 | 1.229 | 1.002 | 2.436 | 4.391 | 16.274 |
-| speed_error_mps | 96 | 0.079 | 0.032 | 0.122 | 0.089 | 0.239 | 0.326 | 0.958 |
-| velocity_error_mps | 96 | 0.181 | 0.090 | 0.309 | 0.219 | 0.528 | 1.051 | 3.558 |
+| centre_error_m | 50 | 0.680 | 0.485 | 0.796 | 0.311 | 0.882 | 0.893 | 0.911 |
+| heading_error_deg | 50 | 0.409 | 0.224 | 0.929 | 0.705 | 1.941 | 2.551 | 3.783 |
+| speed_error_mps | 50 | 0.068 | 0.037 | 0.114 | 0.076 | 0.171 | 0.203 | 0.264 |
+| velocity_error_mps | 50 | 0.163 | 0.085 | 0.273 | 0.187 | 0.496 | 0.668 | 1.003 |
 
-Calibration of pos_std_m over 238 states: within 1/2/3 sigma 0.592/0.966/0.979 (Gaussian: 0.393/0.865/0.989).
+Calibration of pos_std_m over 207 states: within 1/2/3 sigma 0.662/0.976/1.000 (Gaussian: 0.393/0.865/0.989).

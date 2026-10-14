@@ -31,7 +31,7 @@ digraph "global" {
   "g27" [label="MOVING_END\nB\nt=+0.55", fillcolor="#e5e7eb"];
   "g28" [label="STOP_START\nA\nt=+0.55", fillcolor="#e5e7eb"];
   "g29" [label="STOP_START\nB\nt=+0.55", fillcolor="#e5e7eb"];
-  "g30" [label="CUT_IN_FROM_LEFT_END\nA -> B\nt=+0.80", fillcolor="#bfdbfe"];
+  "g30" [label="CUT_IN_FROM_LEFT_END\nA -> B\nt=+0.85", fillcolor="#bfdbfe"];
   {rank=same; "g01"; "g02"; "g03"; "g04";}
   {rank=same; "g05"; "g06";}
   {rank=same; "g07"; "g08";}

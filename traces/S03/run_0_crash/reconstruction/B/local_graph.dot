@@ -17,8 +17,8 @@ digraph "local_B" {
   "B:e13" [label="TURN_RIGHT_END\nB\nt=4.60", fillcolor="#e5e7eb"];
   "B:e14" [label="MOVING_END\nB\nt=4.60", fillcolor="#e5e7eb"];
   "B:e15" [label="STOP_START\nB\nt=4.60", fillcolor="#e5e7eb"];
-  "B:e16" [label="CLOSING_END\nB -> track_001\nt=4.75", fillcolor="#bfdbfe"];
-  "B:e17" [label="EGO_PATH_ENTRY\nB -> track_001\nt=4.75", fillcolor="#bfdbfe"];
+  "B:e16" [label="CLOSING_END\nB -> track_001\nt=4.80", fillcolor="#bfdbfe"];
+  "B:e17" [label="EGO_PATH_ENTRY\nB -> track_001\nt=4.80", fillcolor="#bfdbfe"];
   {rank=same; "B:e01"; "B:e02";}
   {rank=same; "B:e03"; "B:e04";}
   {rank=same; "B:e06"; "B:e07"; "B:e08"; "B:e09";}

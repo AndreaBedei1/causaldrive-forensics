@@ -53,16 +53,25 @@
     },
     {
       "track": "C:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "A",
+      "purity": 0.86,
+      "verdict": "correct link"
+    },
+    {
+      "track": "C:track_003",
       "decision": "B",
       "status": "ASSOCIATED",
       "by": "common_frame",
       "true_identity": "B",
-      "purity": 1.0,
+      "purity": 0.924,
       "verdict": "correct link"
     }
   ],
   "decision_counts": {
-    "correct link": 6
+    "correct link": 7
   },
   "entities": [],
   "merges": {
@@ -91,9 +100,9 @@
     {
       "recorder": "C",
       "accepted": true,
-      "estimated_offset_s": -4.1,
+      "estimated_offset_s": -4.15,
       "true_offset_s": -4.1,
-      "error_s": 0.0,
+      "error_s": -0.05,
       "interval": [
         -4.2,
         -4.0

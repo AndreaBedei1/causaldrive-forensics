@@ -51,8 +51,8 @@
   "event_timing": {
     "nodes": 33,
     "max_abs_error_s": 0.0,
-    "order_pairs": 483,
-    "order_concordant": 483
+    "order_pairs": 485,
+    "order_concordant": 485
   },
   "tracks": [
     {
@@ -65,11 +65,11 @@
       },
       "verdict": "correct",
       "samples": 131,
-      "raw_rmse_to_surface_m": 0.09,
+      "raw_rmse_to_surface_m": 0.089,
       "smoothed_rmse_to_surface_m": 0.118,
-      "smoothed_rmse_to_centre_m": 1.41,
-      "raw_difference_speed_rmse_mps": 1.825,
-      "speed_rmse_mps": 0.41
+      "smoothed_rmse_to_centre_m": 1.411,
+      "raw_difference_speed_rmse_mps": 1.879,
+      "speed_rmse_mps": 0.413
     },
     {
       "track": "B:track_001",
@@ -81,11 +81,11 @@
       },
       "verdict": "correct",
       "samples": 131,
-      "raw_rmse_to_surface_m": 0.156,
-      "smoothed_rmse_to_surface_m": 0.178,
-      "smoothed_rmse_to_centre_m": 1.195,
-      "raw_difference_speed_rmse_mps": 1.608,
-      "speed_rmse_mps": 0.528
+      "raw_rmse_to_surface_m": 0.154,
+      "smoothed_rmse_to_surface_m": 0.177,
+      "smoothed_rmse_to_centre_m": 1.16,
+      "raw_difference_speed_rmse_mps": 1.69,
+      "speed_rmse_mps": 0.527
     }
   ],
   "contact_clearances": [
@@ -95,10 +95,10 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.347,
+      "clearance_m": 0.427,
       "true_gap_m": 0.0,
-      "error_m": 0.347,
-      "range_m": 1.908,
+      "error_m": 0.427,
+      "range_m": 1.957,
       "ttc_s": null
     },
     {
@@ -107,10 +107,10 @@
       "partner": "A",
       "track": "B:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.462,
+      "clearance_m": 0.488,
       "true_gap_m": 0.0,
-      "error_m": 0.462,
-      "range_m": 2.194,
+      "error_m": 0.488,
+      "range_m": 2.205,
       "ttc_s": null
     }
   ],

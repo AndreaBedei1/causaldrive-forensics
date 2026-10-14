@@ -694,25 +694,25 @@
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            9.2586,
-            -1.8439
+            9.2309,
+            -1.7796
           ],
           [
-            9.5692,
-            -3.7184
+            9.5376,
+            -3.6547
           ],
           [
-            5.0311,
-            -4.4704
+            4.9979,
+            -4.3973
           ],
           [
-            4.7205,
-            -2.5959
+            4.6912,
+            -2.5222
           ]
         ],
         "geometry": "estimated_body",
         "path_frame_heading_rad": 0.000124,
-        "target_lateral_speed_mps": 1.3132,
+        "target_lateral_speed_mps": 1.2958,
         "source_track": "track_001",
         "aggregation": "entity_state_union",
         "semantic_state": "CUT_IN_FROM_LEFT",
@@ -728,55 +728,55 @@
             "attributes": {
               "estimated_body_corners_vehicle_m": [
                 [
-                  9.2586,
-                  -1.8439
+                  9.2309,
+                  -1.7796
                 ],
                 [
-                  9.5692,
-                  -3.7184
+                  9.5376,
+                  -3.6547
                 ],
                 [
-                  5.0311,
-                  -4.4704
+                  4.9979,
+                  -4.3973
                 ],
                 [
-                  4.7205,
-                  -2.5959
+                  4.6912,
+                  -2.5222
                 ]
               ],
               "geometry": "estimated_body",
               "path_frame_heading_rad": 0.000124,
-              "target_lateral_speed_mps": 1.3132,
+              "target_lateral_speed_mps": 1.2958,
               "source_track": "track_001"
             }
           },
           {
             "graph": "A",
             "local_node": "A:e19",
-            "t_local": 4.9,
+            "t_local": 4.95,
             "event_type": "CUT_IN_FROM_LEFT_END",
             "attributes": {
               "estimated_body_corners_vehicle_m": [
                 [
-                  6.9762,
-                  0.469
+                  7.1195,
+                  0.5223
                 ],
                 [
-                  6.9762,
-                  -1.431
+                  7.1195,
+                  -1.3777
                 ],
                 [
-                  2.3762,
-                  -1.431
+                  2.5195,
+                  -1.3777
                 ],
                 [
-                  2.3762,
-                  0.469
+                  2.5195,
+                  0.5223
                 ]
               ],
               "geometry": "estimated_body",
               "path_frame_heading_rad": 0.000124,
-              "target_lateral_speed_mps": 0.154,
+              "target_lateral_speed_mps": 0.1452,
               "source_track": "track_001"
             }
           }
@@ -793,7 +793,7 @@
         {
           "graph": "A",
           "local_node": "A:e19",
-          "t_local": 4.9
+          "t_local": 4.95
         }
       ],
       "perceived_state_before": {
@@ -835,20 +835,20 @@
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            8.6236,
-            -1.4917
+            8.5873,
+            -1.4143
           ],
           [
-            8.9968,
-            -3.3547
+            8.9622,
+            -3.277
           ],
           [
-            4.4865,
-            -4.2584
+            4.4526,
+            -4.1847
           ],
           [
-            4.1132,
-            -2.3954
+            4.0777,
+            -2.322
           ]
         ],
         "geometry": "estimated_body",
@@ -867,20 +867,20 @@
             "attributes": {
               "estimated_body_corners_vehicle_m": [
                 [
-                  8.6236,
-                  -1.4917
+                  8.5873,
+                  -1.4143
                 ],
                 [
-                  8.9968,
-                  -3.3547
+                  8.9622,
+                  -3.277
                 ],
                 [
-                  4.4865,
-                  -4.2584
+                  4.4526,
+                  -4.1847
                 ],
                 [
-                  4.1132,
-                  -2.3954
+                  4.0777,
+                  -2.322
                 ]
               ],
               "geometry": "estimated_body",
@@ -1757,29 +1757,29 @@
         "A",
         "B"
       ],
-      "t_global": 0.8,
+      "t_global": 0.85,
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            6.9762,
-            0.469
+            7.1195,
+            0.5223
           ],
           [
-            6.9762,
-            -1.431
+            7.1195,
+            -1.3777
           ],
           [
-            2.3762,
-            -1.431
+            2.5195,
+            -1.3777
           ],
           [
-            2.3762,
-            0.469
+            2.5195,
+            0.5223
           ]
         ],
         "geometry": "estimated_body",
         "path_frame_heading_rad": 0.000124,
-        "target_lateral_speed_mps": 0.154,
+        "target_lateral_speed_mps": 0.1452,
         "source_track": "track_001",
         "aggregation": "entity_state_union",
         "semantic_state": "CUT_IN_FROM_LEFT",
@@ -1795,55 +1795,55 @@
             "attributes": {
               "estimated_body_corners_vehicle_m": [
                 [
-                  9.2586,
-                  -1.8439
+                  9.2309,
+                  -1.7796
                 ],
                 [
-                  9.5692,
-                  -3.7184
+                  9.5376,
+                  -3.6547
                 ],
                 [
-                  5.0311,
-                  -4.4704
+                  4.9979,
+                  -4.3973
                 ],
                 [
-                  4.7205,
-                  -2.5959
+                  4.6912,
+                  -2.5222
                 ]
               ],
               "geometry": "estimated_body",
               "path_frame_heading_rad": 0.000124,
-              "target_lateral_speed_mps": 1.3132,
+              "target_lateral_speed_mps": 1.2958,
               "source_track": "track_001"
             }
           },
           {
             "graph": "A",
             "local_node": "A:e19",
-            "t_local": 4.9,
+            "t_local": 4.95,
             "event_type": "CUT_IN_FROM_LEFT_END",
             "attributes": {
               "estimated_body_corners_vehicle_m": [
                 [
-                  6.9762,
-                  0.469
+                  7.1195,
+                  0.5223
                 ],
                 [
-                  6.9762,
-                  -1.431
+                  7.1195,
+                  -1.3777
                 ],
                 [
-                  2.3762,
-                  -1.431
+                  2.5195,
+                  -1.3777
                 ],
                 [
-                  2.3762,
-                  0.469
+                  2.5195,
+                  0.5223
                 ]
               ],
               "geometry": "estimated_body",
               "path_frame_heading_rad": 0.000124,
-              "target_lateral_speed_mps": 0.154,
+              "target_lateral_speed_mps": 0.1452,
               "source_track": "track_001"
             }
           }
@@ -1855,7 +1855,7 @@
         {
           "graph": "A",
           "local_node": "A:e19",
-          "t_local": 4.9
+          "t_local": 4.95
         }
       ],
       "perceived_state_before": {
@@ -1879,7 +1879,7 @@
             }
           },
           "signs": {},
-          "facts_t_local": 4.8
+          "facts_t_local": 4.9
         }
       }
     }
@@ -2374,8 +2374,6 @@
       "max_height_m": 2.5,
       "moving_speed_mps": 1.0,
       "cluster_distance_m": 2.0,
-      "max_association_distance_m": 2.5,
-      "max_velocity_mismatch_mps": 4.0,
       "max_track_gap_s": 0.5,
       "min_track_frames": 5,
       "measurement_std_m": 0.5,
@@ -2384,8 +2382,6 @@
       "smoothing_innovation_sigma": 3.0,
       "min_slowdown_returns": 3,
       "identity_body_width_m": 2.5,
-      "gating": "fixed",
-      "covariance_components": "position,doppler,ambiguity,survival,confirmation",
       "gate_probability": 0.99,
       "body_length_m": 4.6,
       "body_width_m": 1.9,
@@ -2508,7 +2504,6 @@
       "entity_output_rate_hz": 10.0,
       "mutual_refinement": false,
       "mutual_refinement_iterations": 3,
-      "association_method": "current",
       "radar_range_std_m": 0.25,
       "radar_azimuth_std_deg": 0.5,
       "assignment_likelihood_ratio": 20.0,

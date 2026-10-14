@@ -11,9 +11,10 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 | B:track_001 | C | ASSOCIATED | common_frame | C | 1.000 | correct link |
 | B:track_002 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 | C:track_001 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
-| C:track_002 | B | ASSOCIATED | common_frame | B | 1.000 | correct link |
+| C:track_002 | A | ASSOCIATED | common_frame | A | 0.860 | correct link |
+| C:track_003 | B | ASSOCIATED | common_frame | B | 0.924 | correct link |
 
-Counts: correct link: 6
+Counts: correct link: 7
 
 ## Anonymous entities
 
@@ -34,4 +35,4 @@ Calibration of pos_std_m over 0 states: within 1/2/3 sigma 0.000/0.000/0.000 (Ga
 
 | Recorder | Accepted | Estimated offset | True offset | Error | Interval |
 |----------|----------|-----------------:|------------:|------:|----------|
-| C | True | -4.100 | -4.100 | 0.000 | [-4.2, -4.0] |
+| C | True | -4.150 | -4.100 | -0.050 | [-4.2, -4.0] |

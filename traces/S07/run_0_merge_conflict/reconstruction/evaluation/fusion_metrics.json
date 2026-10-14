@@ -19,6 +19,15 @@
       "track": "B:track_001",
       "decision": "A",
       "status": "ASSOCIATED",
+      "by": "common_frame",
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "correct link"
+    },
+    {
+      "track": "B:track_002",
+      "decision": "A",
+      "status": "ASSOCIATED",
       "by": "collision",
       "true_identity": "A",
       "purity": 1.0,
@@ -26,7 +35,7 @@
     }
   ],
   "decision_counts": {
-    "correct link": 2
+    "correct link": 3
   },
   "entities": [],
   "merges": {

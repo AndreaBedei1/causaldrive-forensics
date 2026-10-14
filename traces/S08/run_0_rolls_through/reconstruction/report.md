@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.95 s | 161 | 21 | 39 | 1 | A:e14 @ 5.40 s |
-| B | 15.95 s | 161 | 13 | 25 | 1 | B:e07 @ 5.40 s |
+| A | 15.95 s | 161 | 21 | 37 | 1 | A:e14 @ 5.40 s |
+| B | 15.95 s | 161 | 20 | 44 | 3 | B:e12 @ 5.40 s |
 
 ## Graph alignment
 
@@ -20,26 +20,29 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
 | A | ALIGNED | A:e14 | 5.40 | -5.40 | reported the reference collision collision_001 |
-| B | ALIGNED | B:e07 | 5.40 | -5.40 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e12 | 5.40 | -5.40 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.27 vs 12940.27 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.27 vs 12940.27 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.6 m -> 0.1 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.18 m/s over 2.8 s<br>clearance at the contact 0.09 m<br>the only track of A compatible with the contact |
-| B:track_001 | A | ASSOCIATED | 0.86 | B and A both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.3 m -> 0.6 m over the last 1.0 s<br>track speed disagrees with A's own speed: RMSE 1.61 m/s over 2.7 s (> 1.50)<br>clearance at the contact 0.59 m<br>common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma, over 266 samples; 86% within 3 sigma) at A's own velocity (median difference 0.04 m/s) |
+| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.6 m -> 0.1 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.18 m/s for reference)<br>clearance at the contact 0.06 m<br>the only track of A compatible with the contact |
+| B:track_001 | A | ASSOCIATED | 1.00 | B and A both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.70 s before the matched collision<br>lost 1.45 s before the matched collision (window 1.00 s)<br>approaching before the contact: clearance 31.1 m -> 19.7 m over the last 1.0 s<br>track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 2.30 m/s for reference)<br>common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 25 samples; 100% within 3 sigma) at A's own velocity |
+| B:track_002 | A | ASSOCIATED | 0.72 | B and A both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.00 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.3 m -> 1.6 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 1.21 m/s for reference)<br>clearance at the contact 1.44 m<br>the only track of B compatible with the contact |
+| B:track_003 | A | ASSOCIATED | 1.00 | B and A both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 0.60 s before the matched collision (needs 1.00 s)<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 8.0 m -> 0.7 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 1.01 m/s for reference)<br>clearance at the contact 0.75 m<br>common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 13 samples; 100% within 3 sigma) at A's own velocity |
 
 ## Road users in the common frame
 
-- B:track_001 is A: its returns lie on A's own footprint (median 0.00 m over 266 samples, 86% within 3 sigma) at A's velocity.
+- B:track_001 is A: its returns lie on A's own footprint (median 0.00 m over 25 samples, 100% within 3 sigma) at A's velocity.
+- B:track_003 is A: its returns lie on A's own footprint (median 0.00 m over 13 samples, 100% within 3 sigma) at A's velocity.
 
 ## Global graph
 
-33 nodes, 78 edges; 5 merged node(s): g09 CLOSING_START(A,B) from A:e07 + A:e17, g11 CLOSING_START(B,A) from B:e04 + B:e09, g15 CRITICAL_TTC_START(A,B) from A:e11 + A:e15, g16 CRITICAL_TTC_START(B,A) from B:e05 + B:e08, g20 COLLISION(A,B) from A:e14 + B:e07.
+32 nodes, 73 edges; 7 merged node(s): g09 CLOSING_START(A,B) from A:e07 + A:e16, g10 TRACK_APPEARED_RIGHT(B,A) from B:e03 + B:e08 + B:e05 + B:e15 + B:e09 + B:e16, g11 CLOSING_START(B,A) from B:e04 + B:e06 + B:e14 + B:e10, g15 CRITICAL_TTC_START(A,B) from A:e11 + A:e15, g17 CRITICAL_TTC_START(B,A) from B:e07 + B:e11 + B:e13, g19 COLLISION(A,B) from A:e14 + B:e12, g24 TRACK_LOST(B,A) from B:e08 + B:e15 + B:e16.
 
 ### Event sequence (global time)
 
@@ -50,13 +53,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 - `-2.70` TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 - `-2.65` STOP_SIGN_DETECTED_END(A,A:sign-0)
 - `-2.55` BRAKE_END(A); THROTTLE_START(A)
-- `-2.00` CRITICAL_TTC_START(A,B)
-- `-1.80` CRITICAL_TTC_START(B,A)
+- `-2.05` CRITICAL_TTC_START(A,B)
 - `-1.70` TURN_LEFT_START(A)
-- `-0.30` EGO_PATH_ENTRY(B,A)
+- `-1.50` CRITICAL_TTC_START(B,A)
 - `-0.25` EGO_PATH_ENTRY(A,B)
-- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TURN_LEFT_END(A)
-- `+0.05` CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); TURN_LEFT_END(A); TRACK_LOST(B,A)
+- `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.10` MOVING_END(A); STOP_START(A)
 - `+0.20` MOVING_END(B); STOP_START(B)
 
@@ -76,17 +78,16 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 - 2.65 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
 - 2.55 s before the reference collision, A released the brake.
 - 2.55 s before the reference collision, A pressed the accelerator.
-- 2.00 s before the reference collision, A's time-to-contact with B became critical.
-- 1.80 s before the reference collision, B's time-to-contact with A became critical.
+- 2.05 s before the reference collision, A's time-to-contact with B became critical.
 - 1.70 s before the reference collision, A started turning left.
-- 0.30 s before the reference collision, B observed A enter its forward path corridor.
+- 1.50 s before the reference collision, B's time-to-contact with A became critical.
 - 0.25 s before the reference collision, A observed B enter its forward path corridor.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 12940, B: 12940 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, B's time-to-contact with A stopped being critical.
-- At the reference collision, B observed A stop closing in.
+- At the reference collision, A observed B stop closing in.
 - At the reference collision, A stopped turning left.
-- 0.05 s after the reference collision, A observed B stop closing in.
+- At the reference collision, B's radar lost A (its states are UNKNOWN from then on, not ended).
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.05 s after the reference collision, A started braking.
@@ -100,8 +101,9 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): CRITICAL_TTC_START 3.40, COLLISION with B 5.40 (+2.00 s); EGO_PATH_ENTRY 5.15 after critical TTC (+1.75 s) [local times; t_global: critical_ttc_start -2.00, ego_path_entry -0.25, collision +0.00]
-- B's track_001 (A): CRITICAL_TTC_START 3.60, COLLISION with A 5.40 (+1.80 s); EGO_PATH_ENTRY 5.10 after critical TTC (+1.50 s) [local times; t_global: critical_ttc_start -1.80, ego_path_entry -0.30, collision +0.00]
+- A's track_001 (B): CRITICAL_TTC_START 3.35, COLLISION with B 5.40 (+2.05 s); EGO_PATH_ENTRY 5.15 after critical TTC (+1.80 s) [local times; t_global: critical_ttc_start -2.05, ego_path_entry -0.25, collision +0.00]
+- B's track_002 (A): CRITICAL_TTC_START 3.90, COLLISION with A 5.40 (+1.50 s) [local times; t_global: critical_ttc_start -1.50, collision +0.00]
+- B's track_003 (A): CRITICAL_TTC_START 5.30, COLLISION with A 5.40 (+0.10 s) [local times; t_global: critical_ttc_start -0.10, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -110,8 +112,8 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 - BRAKE_END(A); THROTTLE_START(A)
-- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(B,A); TURN_LEFT_END(A)
-- CLOSING_END(A,B); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); TURN_LEFT_END(A); TRACK_LOST(B,A)
+- THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(A); STOP_START(A)
 - MOVING_END(B); STOP_START(B)
 
@@ -122,9 +124,11 @@ A:
 - BRAKE, since A:e19 (t = 5.45 s)
 - STOP, since A:e21 (t = 5.50 s)
 B:
-- EGO_PATH of track_001, since B:e06 (t = 5.10 s)
-- BRAKE, since B:e11 (t = 5.45 s)
-- STOP, since B:e13 (t = 5.60 s)
+- CLOSING of track_001, since B:e04 (t = 2.70 s); the track was lost at 3.95 s
+- CRITICAL_TTC of track_002, since B:e07 (t = 3.90 s); the track was lost at 5.40 s
+- CLOSING of track_003, since B:e10 (t = 4.80 s); the track was lost at 5.40 s
+- BRAKE, since B:e18 (t = 5.45 s)
+- STOP, since B:e20 (t = 5.60 s)
 
 ### Sign detection windows
 
@@ -136,7 +140,7 @@ B:
 ### Perceived state just before each collision report
 
 - A A:e14 at 5.40 s (local): ego: MOVING, THROTTLE, TURN_LEFT; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; sign-0: STOP sign known, relevant to the path
-- B B:e07 at 5.40 s (local): ego: MOVING, THROTTLE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e12 at 5.40 s (local): ego: MOVING, THROTTLE; track_002: CLOSING, CRITICAL_TTC; track_003: CLOSING, CRITICAL_TTC, IN_EGO_PATH; track lost, states UNKNOWN: track_001
 
 ### Tracks lost while a state was active
 
@@ -145,7 +149,9 @@ A lost track's states become UNKNOWN: the recorder can no longer tell whether th
 A:
 - no track was lost
 B:
-- no track was lost
+- track_001 at 3.95 s (B:e08): CLOSING were true; they are UNKNOWN afterwards (no END recorded)
+- track_002 at 5.40 s (B:e15): CLOSING, CRITICAL_TTC were true; they are UNKNOWN afterwards (no END recorded)
+- track_003 at 5.40 s (B:e16): CLOSING, CRITICAL_TTC, IN_EGO_PATH were true; they are UNKNOWN afterwards (no END recorded)
 
 ## Uncertainty and limitations
 
@@ -176,8 +182,6 @@ B:
     "max_height_m": 2.5,
     "moving_speed_mps": 1.0,
     "cluster_distance_m": 2.0,
-    "max_association_distance_m": 2.5,
-    "max_velocity_mismatch_mps": 4.0,
     "max_track_gap_s": 0.5,
     "min_track_frames": 5,
     "measurement_std_m": 0.5,
@@ -186,8 +190,6 @@ B:
     "smoothing_innovation_sigma": 3.0,
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5,
-    "gating": "fixed",
-    "covariance_components": "position,doppler,ambiguity,survival,confirmation",
     "gate_probability": 0.99,
     "body_length_m": 4.6,
     "body_width_m": 1.9,
@@ -310,7 +312,6 @@ B:
     "entity_output_rate_hz": 10.0,
     "mutual_refinement": false,
     "mutual_refinement_iterations": 3,
-    "association_method": "current",
     "radar_range_std_m": 0.25,
     "radar_azimuth_std_deg": 0.5,
     "assignment_likelihood_ratio": 20.0,

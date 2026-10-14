@@ -162,7 +162,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.75,
+      "t_local": 3.3,
       "attributes": {
         "initial_in_ego_path": false
       },
@@ -180,7 +180,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 2.7
+        "facts_t_local": 3.2
       }
     },
     {
@@ -189,7 +189,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 2.75,
+      "t_local": 3.3,
       "attributes": {
         "active_at_first_observation": true
       },
@@ -207,7 +207,7 @@
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 2.7
+        "facts_t_local": 3.2
       }
     },
     {
@@ -216,24 +216,24 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 5.2,
+      "t_local": 5.15,
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            53.3805,
-            -4.2989
+            53.8878,
+            -4.7813
           ],
           [
-            52.6421,
-            -2.5483
+            53.1487,
+            -3.0309
           ],
           [
-            56.8805,
-            -0.7606
+            57.3863,
+            -1.2414
           ],
           [
-            57.6189,
-            -2.5112
+            58.1254,
+            -2.9917
           ]
         ],
         "geometry": "estimated_body"
@@ -273,20 +273,20 @@
       "attributes": {
         "estimated_body_corners_vehicle_m": [
           [
-            46.8906,
-            2.0702
+            46.996,
+            2.1812
           ],
           [
-            45.8629,
-            3.6682
+            45.9501,
+            3.7674
           ],
           [
-            49.7318,
-            6.1564
+            49.7903,
+            6.2996
           ],
           [
-            50.7596,
-            4.5584
+            50.8363,
+            4.7134
           ]
         ],
         "geometry": "estimated_body"
@@ -778,25 +778,25 @@
       "track_id": "track_001",
       "parent_track": null,
       "identity_ambiguous": false,
-      "first_seen_t_local": 2.75,
+      "first_seen_t_local": 3.3,
       "last_seen_t_local": 23.35,
-      "duration_s": 20.6,
-      "measured_sweeps": 401,
-      "radar_returns": 27797,
+      "duration_s": 20.05,
+      "measured_sweeps": 396,
+      "radar_returns": 41258,
       "radars": [
         "front",
         "left",
         "right"
       ],
-      "min_range_m": 0.99,
-      "min_range_t_local": 10.55,
+      "min_range_m": 1.33,
+      "min_range_t_local": 10.5,
       "min_clearance_m": 0.0,
       "min_clearance_t_local": 10.3,
-      "max_speed_mps": 10.53,
-      "first_range_m": 87.37,
-      "first_bearing_deg": -43.1,
-      "last_range_m": 1.6,
-      "last_bearing_deg": 100.6
+      "max_speed_mps": 10.62,
+      "first_range_m": 80.79,
+      "first_bearing_deg": -34.5,
+      "last_range_m": 2.6,
+      "last_bearing_deg": 103.2
     }
   ]
 }

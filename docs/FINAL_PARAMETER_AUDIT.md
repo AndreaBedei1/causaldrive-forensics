@@ -67,6 +67,17 @@ present tracker gates.
 | `observed_alignment_*` | step 0.05, min 10 samples, 2 m/s, ratio 3 | AUDITED-FIXED | clock alignment without a matched collision | - |
 | `link_min_samples`, `link_min_fraction` | 10 / 0.8 | STATISTICAL (evidence) | recorder links | - |
 | `min_track_persistence_s` | 1.0 | AUDITED-FIXED | collision-based association | - |
+| short overlap (code constant `SHORT_FRAGMENT_MIN_SAMPLES`) | 5 instants | STATISTICAL (evidence) | a cross-observer pair or a recorder link with 5-9 compared instants is accepted only when every instant passes | development: S12/S13/S15 duplicates removed, 0 false merges on the 23 runs |
+| long overlap (code constant `LONG_OVERLAP_FACTOR`) | 3 x `anonymous_min_shared_samples` | STATISTICAL (evidence) | a cross-observer pair compared on 30+ instants is accepted when the median instant passes both gates | development: distinct-vehicle pairs pass at most 17 % of instants (235 pairs), same-vehicle pairs 77-100 % |
+| retrospective anchor | a cross-observer link compared on >= `anonymous_min_shared_samples` | STATISTICAL (evidence) | a later entity anchors a backward resolution only with a full-strength cross-observer link; every other earlier entity passing the backward test competes in the posterior | development: removed a false merge in S14 |
+
+## Road model (`reconstruction/road.py`)
+
+| parameter | value | category | role | sensitivity / evidence |
+|---|--:|---|---|---|
+| map fit | 0.8 | STATISTICAL | the map is the one whose driving lanes contain 80 % of the recorder's own positions; else no road model (kinematic CUT_IN) | - |
+| lane search radius | 4.0 m | AUDITED-FIXED | lane stretches considered around a point (a lane is 3-4 m wide) | - |
+| `cut_in_lateral_speed_mps` (reused) | 0.3 | AUDITED-FIXED | the target must leave its own lane toward the recorder at least this fast | development: lane sampling every ~2 m gives <= 0.2 m/s heading error on a 60 m bend |
 
 ## Relevance envelope (`semantics.*`)
 

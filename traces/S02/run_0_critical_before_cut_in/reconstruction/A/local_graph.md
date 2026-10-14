@@ -30,7 +30,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e16 | 4.15 | BRAKE_START | A | - | controls |  |
 | A:e17 | 4.65 | MOVING_END | A | - | ego |  |
 | A:e18 | 4.65 | STOP_START | A | - | ego |  |
-| A:e19 | 4.90 | CUT_IN_FROM_LEFT_END | A | track_001 | radar | geometry=estimated_body |
+| A:e19 | 4.95 | CUT_IN_FROM_LEFT_END | A | track_001 | radar | geometry=estimated_body |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -93,7 +93,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 4.10 | A:e12 COLLISION<br>A:e13 CRITICAL_TTC_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_LEFT | 4.00 |
 | 4.15 | A:e14 CLOSING_END track_001<br>A:e15 THROTTLE_END<br>A:e16 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH, CUT_IN_FROM_LEFT | 4.10 |
 | 4.65 | A:e17 MOVING_END<br>A:e18 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_LEFT | 4.60 |
-| 4.90 | A:e19 CUT_IN_FROM_LEFT_END track_001 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_LEFT | 4.80 |
+| 4.95 | A:e19 CUT_IN_FROM_LEFT_END track_001 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_LEFT | 4.90 |
 
 ## States still active when observation ended
 
@@ -121,7 +121,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.15 | 11.45 | 227 | 23.9 m / -6 deg | 0.53 m (4.95) | 0.7 m / -12 deg | 7.0 m/s |
+| track_001 | 0.15 | 11.45 | 227 | 24.0 m / -6 deg | 0.57 m (4.75) | 0.7 m / -13 deg | 6.8 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
@@ -145,4 +145,4 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 4.15 s: A started braking.
 - t = 4.65 s: A stopped moving.
 - t = 4.65 s: A came to a stop.
-- t = 4.90 s: A observed track_001's cut-in from the left settle.
+- t = 4.95 s: A observed track_001's cut-in from the left settle.

@@ -9,12 +9,11 @@
     "collision_event": null,
     "evidence": [
       "A and B both reported collision_001 (peak impulse 12137.11 vs 12137.11 N*s)",
-      "tracked for 4.10 s before the matched collision",
-      "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 21.7 m -> 11.7 m over the last 1.0 s",
-      "track speed disagrees with B's own speed: RMSE 8.47 m/s over 3.0 s (> 1.50)",
-      "clearance at the contact 11.69 m (beyond 3.50 m: confidence factor 0.02)",
-      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 303 samples; 100% within 3 sigma) at C's own velocity (median difference 0.09 m/s)"
+      "tracked for 4.00 s before the matched collision",
+      "lost 1.50 s before the matched collision (window 1.00 s)",
+      "approaching before the contact: clearance 46.8 m -> 27.7 m over the last 1.0 s",
+      "track motion contradicts B's own speed in the observed direction (3 sigma; full-speed RMSE 2.91 m/s for reference)",
+      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 51 samples; 100% within 3 sigma) at C's own velocity"
     ],
     "blocking": [],
     "source_graphs": [
@@ -35,9 +34,9 @@
       "A and B both reported collision_001 (peak impulse 12137.11 vs 12137.11 N*s)",
       "tracked for 2.05 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 14.8 m -> 0.3 m over the last 1.0 s",
-      "track speed agrees with B's own speed: RMSE 0.65 m/s over 2.0 s",
-      "clearance at the contact 0.35 m",
+      "approaching before the contact: clearance 14.8 m -> 0.4 m over the last 1.0 s",
+      "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.65 m/s for reference)",
+      "clearance at the contact 0.43 m",
       "the only track of A compatible with the contact"
     ],
     "blocking": [],
@@ -51,17 +50,17 @@
     "local_track": "track_001",
     "global_entity": "C",
     "status": "ASSOCIATED",
-    "confidence": 0.935,
+    "confidence": 1.0,
     "candidate": "C",
     "collision_event": null,
     "evidence": [
       "B and A both reported collision_001 (peak impulse 12137.11 vs 12137.11 N*s)",
       "tracked for 2.00 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 18.6 m -> 10.7 m over the last 1.0 s",
-      "track speed disagrees with A's own speed: RMSE 7.61 m/s over 2.0 s (> 1.50)",
+      "approaching before the contact: clearance 18.4 m -> 10.7 m over the last 1.0 s",
+      "track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 7.61 m/s for reference)",
       "clearance at the contact 10.71 m (beyond 3.50 m: confidence factor 0.06)",
-      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma, over 262 samples; 94% within 3 sigma) at C's own velocity (median difference 0.05 m/s)"
+      "common frame: its returns lie on C's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 261 samples; 100% within 3 sigma) at C's own velocity"
     ],
     "blocking": [],
     "source_graphs": [
@@ -75,16 +74,16 @@
     "local_track": "track_002",
     "global_entity": "A",
     "status": "ASSOCIATED",
-    "confidence": 0.89,
+    "confidence": 0.9,
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
       "B and A both reported collision_001 (peak impulse 12137.11 vs 12137.11 N*s)",
       "tracked for 2.00 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 15.2 m -> 0.5 m over the last 1.0 s",
-      "track speed agrees with A's own speed: RMSE 0.71 m/s over 2.0 s",
-      "clearance at the contact 0.46 m",
+      "approaching before the contact: clearance 15.0 m -> 0.5 m over the last 1.0 s",
+      "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.70 m/s for reference)",
+      "clearance at the contact 0.49 m",
       "the only track of B compatible with the contact"
     ],
     "blocking": [],
@@ -103,7 +102,7 @@
     "collision_event": null,
     "evidence": [
       "no matched collision of C names a partner",
-      "common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma, over 77 samples before A's contact with a third body at +0.00 s; 100% within 3 sigma) at A's own velocity (median difference 0.15 m/s)"
+      "common frame: its returns lie on A's own footprint (median 0.01 m, 0.01 sigma of the relative uncertainty, over 5 samples; 100% within 3 sigma) at A's own velocity"
     ],
     "blocking": [],
     "source_graphs": [
@@ -114,6 +113,24 @@
   {
     "local_graph": "C",
     "local_track": "track_002",
+    "global_entity": "A",
+    "status": "ASSOCIATED",
+    "confidence": 1.0,
+    "candidate": "A",
+    "collision_event": null,
+    "evidence": [
+      "no matched collision of C names a partner",
+      "common frame: its returns lie on A's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 73 samples; 100% within 3 sigma) at A's own velocity"
+    ],
+    "blocking": [],
+    "source_graphs": [
+      "A",
+      "C"
+    ]
+  },
+  {
+    "local_graph": "C",
+    "local_track": "track_003",
     "global_entity": "B",
     "status": "ASSOCIATED",
     "confidence": 1.0,
@@ -121,7 +138,7 @@
     "collision_event": null,
     "evidence": [
       "no matched collision of C names a partner",
-      "common frame: its returns lie on B's own footprint (median 0.00 m, 0.00 sigma, over 40 samples before B's contact with a third body at +0.00 s; 100% within 3 sigma) at B's own velocity (median difference 0.48 m/s)"
+      "common frame: its returns lie on B's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 41 samples; 100% within 3 sigma) at B's own velocity"
     ],
     "blocking": [],
     "source_graphs": [

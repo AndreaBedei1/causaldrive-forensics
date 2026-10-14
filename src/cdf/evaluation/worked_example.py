@@ -148,6 +148,12 @@ def _frame_at_or_before(frames: Sequence[Dict[str, Any]], t_local: float) -> Opt
     return best
 
 
+def _frame_at_or_after(frames: Sequence[Dict[str, Any]], t_local: float) -> Optional[Dict[str, Any]]:
+    """The first trace frame at or after ``t_local``: a frame holds the state after its own transitions, so an
+    event between two 10 Hz frames is first described by the next one."""
+    return next((frame for frame in frames if float(frame["t_local"]) >= t_local - 1e-6), None)
+
+
 def _fact(frame: Optional[Dict[str, Any]], kind: str, subject: Optional[str] = None) -> Optional[Dict[str, Any]]:
     if frame is None:
         return None
@@ -200,7 +206,7 @@ def reconstruction_part(run_dir: Path, observer: str = "A", track: str = "track_
             if node is None:
                 return
             t = float(node["t_local"])
-            frame = _frame_at_or_before(frames, t)
+            frame = _frame_at_or_after(frames, t) or _frame_at_or_before(frames, t)
             state = _fact(frame, "TRACK_STATE", subject) if subject else None
             timeline.append(TimelineRow(
                 t, to_global(t), node["event_type"], observer, _subject_label(observer, subject, statuses),

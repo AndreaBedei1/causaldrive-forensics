@@ -35,15 +35,25 @@ another algorithm ([parameter audit](docs/FINAL_PARAMETER_AUDIT.md)).
   A return two tracks explain within a likelihood ratio of 20 is ambiguous and updates neither.  A track
   survives while its predicted position can still tell two bodies a car width apart (2 s cap), is confirmed
   after 0.2 s of support and 3 updates, and a recorder's own impact widens the covariance of the tracks
-  touching it.  A part of a known body seen apart is never a second vehicle.
+  touching it.  A part of a known body seen apart is never a second vehicle.  A target that crashes ahead
+  keeps its track through the abrupt slowdown or rebound (no foreign return inside its own body region).
 * **Alignment** on the collisions the recorders report: a pairing is refused when the pose streams put the
   bodies apart or a recorder's own radar view of the contact contradicts the partner's speed in the observed
   direction.
-* **Identity** (`reconstruction/identity.py`).  Recorder links use the relative pose uncertainty and are
-  conservative: one recorder per observer and instant unless same-body evidence joins two fragments.
-  Anonymous road users come from one-box evidence across observers, cannot-link constraints, one-to-one
-  assignment and a stitch posterior against a new road user; ambiguity stays UNRESOLVED.  A retrospective
-  resolution may name an earlier observation from later strong evidence; no sample, event or timestamp moves.
+* **Identity** (`reconstruction/identity.py`).  Recorder links use the relative pose uncertainty and the
+  line-of-sight (Doppler) velocity, and are conservative: one recorder per observer and instant unless
+  same-body evidence joins two fragments.  Anonymous road users come from one-box evidence across observers,
+  cannot-link constraints, one-to-one assignment and a stitch posterior against a new road user.  Two
+  observers seeing one body at the same instants are tested on every shared instant, also outside the
+  relevance envelope (no two superimposed boxes of one car); a brief overlap (5-9 instants) must pass at
+  every instant, a long one (30+) by majority.  Ambiguity stays UNRESOLVED.  A retrospective resolution may
+  name an earlier observation from later evidence by several observers, against every other earlier
+  candidate and a new road user; no sample, event or timestamp moves.
+* **Semantics**: CRITICAL_TTC of a pair ends at their collision (also when only the fusion knows that the
+  track was the partner) and does not restart while they touch.  CUT_IN is road-relative: with the map's
+  lanes (public OpenDRIVE file of the CARLA installation, recognised from the recorder's own positions) the
+  target must leave its own lane toward the recorder, so cars following one curved road do not cut in; no
+  cut-in starts after the recorder's own collision.
 * **Global graph**: after two road users have touched, a CRITICAL_TTC between that same pair is suppressed in
   the global graph and the replay; the raw local evidence stays in the local graphs.
 
@@ -133,9 +143,13 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | ESC | quit |
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
-The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
-global road user (CRITICAL_TTC, CUT_IN, IN_EGO_PATH) and its own braking; at most a few lines.  Raw track ids,
-UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.
+The upper-left panel shows the run, its time, the replay state, the camera and the last and next event.
+The panel of each recorder on the right shows what that recorder perceives and does now: first its complete
+current perceived state (`ego: MOVING, BRAKE`, then one line per local track with the states it holds, named
+after the fusion's identity, e.g. `track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road
+users it sees, then the semantic events it generated in the last second (`» CRITICAL_TTC_START → B`).  UNKNOWN
+states and the measured/predicted provenance stay in the reconstruction files; at most 8 lines, then
+`... +N more`.
 
 ## Documentation
 

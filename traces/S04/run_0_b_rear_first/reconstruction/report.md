@@ -26,16 +26,16 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 31706.27 vs 31706.27 N*s (similarity 1.000, tolerance 0.10); 1 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.01 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+Matched `collision_001`: A and B both recorded a collision; peak impulses 31706.27 vs 31706.27 N*s (similarity 1.000, tolerance 0.10); 1 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.01 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
-Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.46 vs 21842.46 N*s (similarity 1.000, tolerance 0.10); 2 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar trajectory checked against the candidate partner pose stream where observed
+Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.46 vs 21842.46 N*s (similarity 1.000, tolerance 0.10); 2 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.83 | A and B both reported collision_001 (peak impulse 31706.27 vs 31706.27 N*s)<br>tracked for 6.25 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.0 m -> 0.1 m over the last 1.0 s<br>track speed agrees with B's own speed: RMSE 0.92 m/s over 3.0 s<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
-| B:track_001 | C | ASSOCIATED | 1.00 | B and C both reported collision_002 at 4.70 s (peak impulse 21842.46 vs 21842.46 N*s)<br>tracked for 4.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.0 m -> 0.1 m over the last 1.0 s<br>track speed agrees with C's own speed: RMSE 0.13 m/s over 3.0 s<br>clearance at the contact 0.06 m<br>the only track of B compatible with the contact<br>collision_001 with A at 6.25 s: not compatible (track speed disagrees with A's own speed: RMSE 11.94 m/s over 3.0 s (> 1.50)) |
+| A:track_001 | B | ASSOCIATED | 0.83 | A and B both reported collision_001 (peak impulse 31706.27 vs 31706.27 N*s)<br>tracked for 5.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.0 m -> 0.1 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.92 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
+| B:track_001 | C | ASSOCIATED | 1.00 | B and C both reported collision_002 at 4.70 s (peak impulse 21842.46 vs 21842.46 N*s)<br>tracked for 4.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.0 m -> 0.1 m over the last 1.0 s<br>track motion compatible with C's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)<br>clearance at the contact 0.06 m<br>the only track of B compatible with the contact<br>collision_001 with A at 6.25 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 11.95 m/s for reference)) |
 
 ## Road users in the common frame
 
@@ -47,7 +47,8 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
 
 ### Event sequence (global time)
 
-- `-6.25` MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+- `-6.25` MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(B,C)
+- `-5.80` TRACK_APPEARED_FRONT(A,B)
 - `-5.75` CRITICAL_TTC_START(B,C)
 - `-3.30` THROTTLE_END(C); BRAKE_START(C)
 - `-3.05` CLOSING_START(B,C)
@@ -68,8 +69,8 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
 - 6.25 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 6.25 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 6.25 s before the reference collision, C pressed the accelerator (already the case when first observed).
-- 6.25 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 6.25 s before the reference collision, B's radar started tracking C, which appeared in front of it.
+- 5.80 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 5.75 s before the reference collision, B's time-to-contact with C became critical.
 - 3.30 s before the reference collision, C released the accelerator.
 - 3.30 s before the reference collision, C started braking.
@@ -102,7 +103,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
-- MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(A,B); TRACK_APPEARED_FRONT(B,C)
+- MOVING_START(A); MOVING_START(B); MOVING_START(C); THROTTLE_START(A); THROTTLE_START(B); THROTTLE_START(C); TRACK_APPEARED_FRONT(B,C)
 - THROTTLE_END(C); BRAKE_START(C)
 - MOVING_END(C); STOP_START(C)
 - COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C); CRITICAL_TTC_START(A,B)
@@ -181,8 +182,6 @@ C:
     "max_height_m": 2.5,
     "moving_speed_mps": 1.0,
     "cluster_distance_m": 2.0,
-    "max_association_distance_m": 2.5,
-    "max_velocity_mismatch_mps": 4.0,
     "max_track_gap_s": 0.5,
     "min_track_frames": 5,
     "measurement_std_m": 0.5,
@@ -191,8 +190,6 @@ C:
     "smoothing_innovation_sigma": 3.0,
     "min_slowdown_returns": 3,
     "identity_body_width_m": 2.5,
-    "gating": "fixed",
-    "covariance_components": "position,doppler,ambiguity,survival,confirmation",
     "gate_probability": 0.99,
     "body_length_m": 4.6,
     "body_width_m": 1.9,
@@ -315,7 +312,6 @@ C:
     "entity_output_rate_hz": 10.0,
     "mutual_refinement": false,
     "mutual_refinement_iterations": 3,
-    "association_method": "current",
     "radar_range_std_m": 0.25,
     "radar_azimuth_std_deg": 0.5,
     "assignment_likelihood_ratio": 20.0,

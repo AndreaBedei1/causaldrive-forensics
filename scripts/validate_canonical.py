@@ -4,16 +4,21 @@
     python scripts/validate_canonical.py [--out docs/CANONICAL_VALIDATION.md]
 
 Checks the manifest (S01..S19, 23 runs, no gaps, no stray folders), then per run: reconstruction files present
-and finite (no NaN/Inf in any JSON), every recorder aligned, collisions reconstructed (evaluation), no wrong
+and finite (no NaN/Inf in any JSON), made with the current ``configs/reconstruction.yaml`` (the configuration
+recorded in ``global_graph.json``; anything else is a stale output), every recorder aligned, collisions reconstructed (evaluation), no wrong
 collision pairing, no wrong recorder link, no false merge, no global CRITICAL_TTC episode of a colliding pair
 after its contact while touching, replay loading (global clock, boxes, events) and the standard replay panels
-(no '?', no PREDICTED, at most the panel line limit, no repeated global subject, no recent event lost).  Ground
-truth is read only through the evaluation files.  Exit status 1 on any FAIL.
+(the recorder's current state above its recent events, no '?', no PREDICTED, at most the panel line limit
+plus '... +N more', no repeated subject, no recent event lost unless the panel is truncated); the
+last two groups are the semantic anomalies.  Unresolved identities: tracks whose identity decision the
+reconstruction itself left UNRESOLVED (``unresolved_tracks``; no ground truth).  Ground truth is read only through the
+evaluation files.  Exit status 1 on any FAIL.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import sys
@@ -22,8 +27,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from cdf.reconstruction.config import load_config  # noqa: E402
 from cdf.replay.model import ReplayRun  # noqa: E402
-from cdf.replay.presentation import EVENT, MAX_PANEL_LINES, MORE, standard_panel_lines, subject_label  # noqa: E402
+from cdf.replay.presentation import EVENT, MAX_PANEL_LINES, MORE, standard_panel_lines  # noqa: E402
 
 CANONICAL = {
     "S01": ["crash"], "S02": ["crash", "critical_before_cut_in"], "S03": ["crash"],
@@ -64,8 +70,34 @@ def manifest_problems():
     return problems
 
 
+def config_digest(config) -> str:
+    return hashlib.sha256(json.dumps(config, sort_keys=True).encode("utf-8")).hexdigest()[:12]
+
+
+def current_config():
+    """The current configuration as a run records it (JSON: tuples become lists)."""
+    return json.loads(json.dumps(load_config().to_dict()))
+
+
+def unresolved_tracks(rec: Path) -> set:
+    """Tracks whose identity the reconstruction left UNRESOLVED: a recorder link or a road-user link refused as
+    UNRESOLVED, or an earlier entity a retrospective test could not resolve (reconstruction files only)."""
+    out = set()
+    for a in json.loads((rec / "global/associations.json").read_text(encoding="utf-8")):
+        if any("UNRESOLVED" in text for text in a.get("evidence", []) + a.get("blocking", [])):
+            out.add(a["local_graph"] + ":" + a["local_track"])
+    entities = json.loads((rec / "global/anonymous_entities.json").read_text(encoding="utf-8"))
+    for e in entities.get("association_evidence", []):
+        if (e.get("refused") or "").startswith("UNRESOLVED"):
+            out.update((e["a"], e["b"]))
+    for d in entities.get("retrospective") or []:
+        if not d.get("resolved"):
+            out.update(d.get("earlier") or [])
+    return out
+
+
 def check_run(run: Path):
-    fails, warns, info = [], [], {}
+    fails, warns, info = [], [], {"semantic": 0}
     rec = run / "reconstruction"
     for name in ("global/global_graph.json", "global/alignment.json", "global/associations.json",
                  "global/anonymous_entities.json", "evaluation/evaluation.json"):
@@ -76,6 +108,11 @@ def check_run(run: Path):
     for path in rec.rglob("*.json"):
         if not _finite(json.loads(path.read_text(encoding="utf-8"))):
             fails.append("non-finite number in " + path.relative_to(rec).as_posix())
+    graph = json.loads((rec / "global/global_graph.json").read_text(encoding="utf-8"))
+    if graph.get("reconstruction_config") != current_config():
+        fails.append("stale reconstruction: made with configuration {0}, not the current {1}".format(
+            config_digest(graph.get("reconstruction_config")), config_digest(current_config())))
+    info["unresolved"] = len(unresolved_tracks(rec))
     alignment = json.loads((rec / "global/alignment.json").read_text(encoding="utf-8"))
     unaligned = [g for g, c in alignment["graphs"].items() if c["status"] != "ALIGNED"]
     if unaligned:
@@ -106,12 +143,12 @@ def check_run(run: Path):
         fails.append("{0} false merge(s)".format(merges["false"]))
     if merges.get("missed", 0):
         warns.append("{0} missed merge(s) (unresolved identities, conservative)".format(merges["missed"]))
-    graph = json.loads((rec / "global/global_graph.json").read_text(encoding="utf-8"))
     for c in (n for n in graph["nodes"] if n["event_type"] == "COLLISION" and n.get("participants")):
         late = [n for n in graph["nodes"] if n["event_type"] == "CRITICAL_TTC_START" and n.get("t_global") is not None
                 and n["t_global"] > c["t_global"] and {n["actor_id"], n["subject_id"]} == set(c["participants"])]
         if late:
             fails.append("global CRITICAL_TTC of {0} after their contact".format(c["participants"]))
+            info["semantic"] += 1
     try:
         replay = ReplayRun.load(run)
     except Exception as exc:  # reported, never hidden
@@ -129,14 +166,20 @@ def check_run(run: Path):
             too_many = len(lines) > MAX_PANEL_LINES + 1 or (len(lines) == MAX_PANEL_LINES + 1 and lines[-1][1] != MORE)
             if too_many or any("?" in x or "PREDICTED" in x for x in texts):
                 fails.append("panel rule broken at t={0:.1f} ({1})".format(t, p.participant_id))
+                info["semantic"] += 1
                 break
             subjects = [text.split(":")[0] for text, kind in lines if kind not in (EVENT, MORE)]
             if len(subjects) != len(set(subjects)):
                 fails.append("a global subject repeated in a panel at t={0:.1f}".format(t))
-            recent = {(e.event_type, subject_label(replay, p.participant_id, e.subject))
-                      for e in replay.recent_events(p.participant_id, t, 1.0)}
-            if len(recent) < MAX_PANEL_LINES and sum(kind == EVENT for _, kind in lines) != len(recent):
+                info["semantic"] += 1
+            kinds = [kind for _, kind in lines if kind != MORE]
+            if EVENT in kinds and any(kind != EVENT for kind in kinds[kinds.index(EVENT):]):
+                fails.append("a state listed below the recent events at t={0:.1f}".format(t))
+                info["semantic"] += 1
+            recent = replay.recent_events(p.participant_id, t, 1.0)
+            if (not lines or lines[-1][1] != MORE) and kinds.count(EVENT) != len(recent):
                 fails.append("a recent event hidden at t={0:.1f}".format(t))
+                info["semantic"] += 1
         if fails:
             break
     return fails, warns, info
@@ -149,19 +192,22 @@ def main() -> int:
     lines = ["# Canonical development set: automatic validation", ""]
     problems = manifest_problems()
     lines.append("Manifest: " + ("OK (S01..S19, {0} runs)".format(len(canonical_runs())) if not problems else "FAIL: " + "; ".join(problems)))
-    lines += ["", "| run | status | collisions | recorder/identity decisions | merges (correct/false/missed) | boxes (max at once) | events | warnings / failures |",
-              "|---|---|---|---|---|--:|--:|---|"]
+    lines += ["", "Reconstruction: the single reconstruction method, `configs/reconstruction.yaml` (configuration digest "
+              "{0}); every run is checked to carry exactly this configuration.".format(config_digest(current_config()))]
+    lines += ["", "| run | status | collisions | recorder/identity decisions | merges (correct/false/missed) | unresolved identities | semantic anomalies | boxes (max at once) | events | warnings / failures |",
+              "|---|---|---|---|---|--:|--:|--:|--:|---|"]
     failed = bool(problems)
     for run in canonical_runs():
         fails, warns, info = check_run(run)
         status = "FAIL" if fails else ("WARN" if warns else "PASS")
         failed |= bool(fails)
         merges = info.get("merges", {})
-        lines.append("| {0} | {1} | {2} | {3} | {4}/{5}/{6} | {7} | {8} | {9} |".format(
+        lines.append("| {0} | {1} | {2} | {3} | {4}/{5}/{6} | {10} | {11} | {7} | {8} | {9} |".format(
             run.relative_to(ROOT / "traces").as_posix(), status, info.get("collisions", "-"),
             ", ".join("{0} {1}".format(k, v) for k, v in sorted(info.get("links", {}).items())),
             merges.get("correct", 0), merges.get("false", 0), merges.get("missed", 0), info.get("boxes_max", "-"),
-            info.get("events", "-"), "; ".join(["FAIL: " + f for f in fails] + ["WARN: " + w for w in warns]) or "-"))
+            info.get("events", "-"), "; ".join(["FAIL: " + f for f in fails] + ["WARN: " + w for w in warns]) or "-",
+            info.get("unresolved", "-"), info.get("semantic", "-")))
     text = "\n".join(lines) + "\n"
     if args.out:
         args.out.write_text(text, encoding="utf-8")

@@ -28,13 +28,13 @@ digraph "global" {
   "g24" [label="TURN_RIGHT_END\nB\nt=+0.50", fillcolor="#e5e7eb"];
   "g25" [label="MOVING_END\nB\nt=+0.50", fillcolor="#e5e7eb"];
   "g26" [label="STOP_START\nB\nt=+0.50", fillcolor="#e5e7eb"];
-  "g27" [label="CLOSING_END\nA -> B\nt=+0.55", fillcolor="#bfdbfe"];
-  "g28" [label="TURN_LEFT_END\nA\nt=+0.60", fillcolor="#e5e7eb"];
-  "g29" [label="CLOSING_END\nB -> A\nt=+0.65", fillcolor="#bfdbfe"];
-  "g30" [label="MOVING_END\nA\nt=+0.65", fillcolor="#e5e7eb"];
-  "g31" [label="STOP_START\nA\nt=+0.65", fillcolor="#e5e7eb"];
-  "g32" [label="EGO_PATH_ENTRY\nB -> A\nt=+0.65", fillcolor="#bfdbfe"];
-  "g33" [label="EGO_PATH_ENTRY\nA -> B\nt=+0.90", fillcolor="#bfdbfe"];
+  "g27" [label="TURN_LEFT_END\nA\nt=+0.60", fillcolor="#e5e7eb"];
+  "g28" [label="MOVING_END\nA\nt=+0.65", fillcolor="#e5e7eb"];
+  "g29" [label="STOP_START\nA\nt=+0.65", fillcolor="#e5e7eb"];
+  "g30" [label="CLOSING_END\nA -> B\nt=+0.70", fillcolor="#bfdbfe"];
+  "g31" [label="CLOSING_END\nB -> A\nt=+0.70", fillcolor="#bfdbfe"];
+  "g32" [label="EGO_PATH_ENTRY\nB -> A\nt=+0.70", fillcolor="#bfdbfe"];
+  "g33" [label="EGO_PATH_ENTRY\nA -> B\nt=+0.85", fillcolor="#bfdbfe"];
   {rank=same; "g01"; "g02"; "g03"; "g04";}
   {rank=same; "g05"; "g06";}
   {rank=same; "g07"; "g08";}
@@ -42,7 +42,8 @@ digraph "global" {
   {rank=same; "g18"; "g19"; "g20"; "g21";}
   {rank=same; "g22"; "g23";}
   {rank=same; "g24"; "g25"; "g26";}
-  {rank=same; "g29"; "g30"; "g31"; "g32";}
+  {rank=same; "g28"; "g29";}
+  {rank=same; "g30"; "g31"; "g32";}
   "g01" -> "g05" [label="PRECEDES"];
   "g01" -> "g06" [label="PRECEDES"];
   "g02" -> "g05" [label="PRECEDES"];
@@ -111,11 +112,13 @@ digraph "global" {
   "g25" -> "g27" [label="PRECEDES"];
   "g26" -> "g27" [label="PRECEDES"];
   "g27" -> "g28" [label="PRECEDES"];
-  "g28" -> "g29" [label="PRECEDES"];
+  "g27" -> "g29" [label="PRECEDES"];
   "g28" -> "g30" [label="PRECEDES"];
   "g28" -> "g31" [label="PRECEDES"];
   "g28" -> "g32" [label="PRECEDES"];
-  "g29" -> "g33" [label="PRECEDES"];
+  "g29" -> "g30" [label="PRECEDES"];
+  "g29" -> "g31" [label="PRECEDES"];
+  "g29" -> "g32" [label="PRECEDES"];
   "g30" -> "g33" [label="PRECEDES"];
   "g31" -> "g33" [label="PRECEDES"];
   "g32" -> "g33" [label="PRECEDES"];
@@ -124,13 +127,13 @@ digraph "global" {
   "g05" -> "g12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g05" -> "g27" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g05" -> "g30" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g05" -> "g33" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g08" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g10" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g23" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "g07" -> "g29" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "g07" -> "g31" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g32" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

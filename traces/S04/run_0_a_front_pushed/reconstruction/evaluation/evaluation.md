@@ -40,8 +40,8 @@ Relative clock offset C - B: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | B | B | correct | 138 | 0.252 / 0.47 m | 1.691 m | 7.749 / 0.544 m/s |
-| B:track_001 | C | C | correct | 138 | 0.169 / 0.17 m | 2.141 m | 1.202 / 0.064 m/s |
+| A:track_001 | B | B | correct | 138 | 0.569 / 0.543 m | 1.613 m | 2.411 / 0.49 m/s |
+| B:track_001 | C | C | correct | 138 | 0.169 / 0.17 m | 2.14 m | 1.237 / 0.064 m/s |
 
 ## Clearance at the true contacts
 
@@ -49,11 +49,11 @@ Per recorder, its track lying on the partner at the last 10 Hz sample at or befo
 
 | Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
 |---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
-| A + B | A | B | A:track_001 | 0.0 s | 0.296 m | 0.001 m | 0.295 m | 0.355 m |
+| A + B | A | B | A:track_001 | 0.0 s | 0.444 m | 0.001 m | 0.443 m | 0.474 m |
 | A + B | B | A | - | - s | - m | - m | - m | - m |
-| B + C | B | C | B:track_001 | 0.0 s | 0.026 m | 0.0 m | 0.026 m | 0.015 m |
+| B + C | B | C | B:track_001 | 0.0 s | 0.027 m | 0.0 m | 0.027 m | 0.014 m |
 | B + C | C | B | - | - s | - m | - m | - m | - m |
-| A + B | A | B | A:track_001 | -0.05 s | 0.009 m | 0.0 m | 0.009 m | 0.075 m |
+| A + B | A | B | A:track_001 | -0.05 s | 0.165 m | 0.0 m | 0.165 m | 0.248 m |
 | A + B | B | A | - | - s | - m | - m | - m | - m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).

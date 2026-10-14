@@ -20,51 +20,51 @@ Track identities known to the reconstruction (associations.json):
 
 | t_global | t_local | event | actor | subject | facts at t_local | clearance m | d_min m | critical reason | note |
 |---|---|---|---|---|---|---|---|---|---|
-| -4.95 | 0.00 | TRACK_APPEARED_RIGHT | A | A:track_001 (anonymous) | 0.00 | 6.01 | 16.93 | - |  |
-| -4.45 | 0.50 | track estimate known (age and std gates) | A | A:track_001 (anonymous) | 0.50 | 5.35 | 16.87 | - |  |
-| -2.35 | 2.60 | CRITICAL_TTC_START | A | A:track_001 (anonymous) | 2.60 | 3.31 | 16.83 | UNSAFE_FORWARD_GAP |  |
-| -2.20 | 2.75 | CUT_IN_FROM_RIGHT_START | A | A:track_001 (anonymous) | 2.70 | 3.16 | 16.83 | UNSAFE_FORWARD_GAP |  |
-| -2.05 | 2.90 | EGO_PATH_ENTRY | A | A:track_001 (anonymous) | 2.90 | 2.87 | 16.83 | UNSAFE_FORWARD_GAP |  |
+| -4.95 | 0.00 | TRACK_APPEARED_RIGHT | A | A:track_001 (anonymous) | 0.00 | 5.96 | 16.93 | - |  |
+| -4.45 | 0.50 | track estimate known (age and std gates) | A | A:track_001 (anonymous) | 0.50 | 5.34 | 16.87 | - |  |
+| -2.40 | 2.55 | CRITICAL_TTC_START | A | A:track_001 (anonymous) | 2.60 | 3.32 | 16.83 | UNSAFE_FORWARD_GAP |  |
+| -2.20 | 2.75 | CUT_IN_FROM_RIGHT_START | A | A:track_001 (anonymous) | 2.80 | 3.02 | 16.83 | UNSAFE_FORWARD_GAP |  |
+| -2.10 | 2.85 | EGO_PATH_ENTRY | A | A:track_001 (anonymous) | 2.90 | 2.81 | 16.83 | UNSAFE_FORWARD_GAP |  |
 | -1.30 | 3.65 | steering command onset (controls.jsonl) | A | - | 3.60 | 2.13 | 16.83 | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | abs(steer) >= 0.001 held 0.2 s |
 | -1.25 | 3.70 | heading response onset (EGO_MOTION) | A | - | 3.70 | - | - | - | abs(yaw rate) >= 0.5 deg/s |
 | -1.15 | 3.80 | CRITICAL_TTC_START | A | B (associated, A:track_002) | 3.80 | not ahead | - | PREDICTED_OVERLAP |  |
-| 0.00 | 4.95 | COLLISION | A | B (associated, A:track_002) | 4.90 | not ahead | - | PREDICTED_OVERLAP | global participants: A, B |
+| 0.00 | 4.95 | COLLISION | A | B (associated, A:track_002) | 5.00 | not ahead | - | - | global participants: A, B |
 
 ### 1.2 A's TRACK_STATE facts of A:track_001
 
 | t_local | t_global | v_ego m/s | v_target m/s | clearance m | lateral m | body gap m | t_front s | d_timegap m | d_min m | region | critical reason | collision course | ttc_s | steer |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 0.50 | -4.45 | 11.83 | 10.71 | 5.35 | 3.15 | 1.53 | 1.426 | 16.87 | 16.87 | - | - | no | - | -0.000 |
-| 1.00 | -3.95 | 11.81 | 10.76 | 4.90 | 3.24 | 1.64 | 1.425 | 16.82 | 16.82 | - | - | no | - | -0.000 |
-| 2.00 | -2.95 | 11.81 | 10.87 | 3.89 | 3.36 | 1.73 | 1.425 | 16.83 | 16.83 | - | - | no | - | -0.000 |
-| 2.30 | -2.65 | 11.81 | 10.95 | 3.60 | 3.29 | 1.57 | 1.425 | 16.83 | 16.83 | - | - | no | - | -0.000 |
-| 2.40 | -2.55 | 11.81 | 10.90 | 3.52 | 3.23 | 1.38 | 1.425 | 16.83 | 16.83 | - | - | yes | 3.65 | 0.000 |
-| 2.50 | -2.45 | 11.81 | 10.86 | 3.43 | 3.13 | 1.15 | 1.425 | 16.83 | 16.83 | - | - | yes | 2.45 | 0.000 |
-| 2.60 | -2.35 | 11.81 | 10.84 | 3.31 | 3.01 | 0.89 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 2.20 | -0.000 |
-| 2.70 | -2.25 | 11.81 | 10.82 | 3.16 | 2.85 | 0.56 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.95 | 0.000 |
-| 2.80 | -2.15 | 11.81 | 10.83 | 3.04 | 2.65 | 0.25 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.75 | -0.000 |
-| 2.90 | -2.05 | 11.81 | 10.84 | 2.87 | 2.43 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.60 | 0.000 |
-| 3.00 | -1.95 | 11.81 | 10.80 | 2.72 | 2.20 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.40 | 0.000 |
-| 3.10 | -1.85 | 11.81 | 10.83 | 2.59 | 1.97 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.30 | 0.000 |
-| 3.20 | -1.75 | 11.81 | 10.85 | 2.52 | 1.74 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.30 | -0.000 |
-| 3.30 | -1.65 | 11.81 | 10.84 | 2.47 | 1.53 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.30 | -0.000 |
-| 3.40 | -1.55 | 11.81 | 10.83 | 2.37 | 1.33 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.20 | 0.000 |
-| 3.50 | -1.45 | 11.81 | 10.80 | 2.26 | 1.15 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.15 | -0.000 |
-| 3.60 | -1.35 | 11.81 | 10.84 | 2.13 | 1.00 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.10 | 0.000 |
-| 3.70 | -1.25 | 11.81 | 10.80 | 2.11 | 0.86 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.05 | -0.007 |
-| 3.80 | -1.15 | 11.81 | 10.82 | 2.01 | 0.75 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.00 | -0.023 |
-| 3.90 | -1.05 | 11.80 | 10.81 | 1.93 | 0.68 | 0.00 | 1.425 | 16.82 | 16.82 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.90 | -0.047 |
-| 4.00 | -0.95 | 11.80 | 10.86 | 1.85 | 0.67 | 0.00 | 1.425 | 16.80 | 16.80 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.80 | -0.060 |
-| 4.10 | -0.85 | 11.79 | 10.86 | 1.76 | 0.73 | 0.00 | 1.424 | 16.79 | 16.79 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.70 | -0.080 |
-| 4.20 | -0.75 | 11.79 | 10.90 | 1.65 | 0.85 | 0.00 | 1.424 | 16.79 | 16.79 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.60 | -0.072 |
-| 4.30 | -0.65 | 11.78 | 10.92 | 1.50 | 1.00 | 0.00 | 1.424 | 16.78 | 16.78 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.45 | -0.052 |
-| 4.40 | -0.55 | 11.80 | 10.93 | 1.32 | 1.18 | 0.00 | 1.425 | 16.80 | 16.80 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.35 | -0.052 |
-| 4.50 | -0.45 | 11.80 | 10.94 | 1.08 | 1.37 | 0.00 | 1.425 | 16.82 | 16.82 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.20 | -0.014 |
-| 4.60 | -0.35 | 11.81 | 10.96 | 0.83 | 1.55 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | no | - | -0.003 |
-| 4.70 | -0.25 | 11.81 | 10.96 | 0.72 | 1.71 | 0.07 | 1.425 | 16.83 | 16.83 | - | - | no | - | 0.031 |
-| 4.80 | -0.15 | 11.81 | 11.01 | 0.67 | 1.82 | 0.16 | 1.425 | 16.84 | 16.84 | - | - | yes | 2.00 | 0.024 |
-| 4.90 | -0.05 | 11.82 | 11.01 | 0.60 | 1.92 | 0.21 | 1.425 | 16.84 | 16.84 | - | PREDICTED_OVERLAP | yes | 1.05 | 0.037 |
-| 5.00 | 0.05 | 12.42 | 11.01 | 0.53 | 1.91 | 0.18 | 1.447 | 17.97 | 17.97 | - | PREDICTED_OVERLAP | yes | 0.85 | 0.000 |
+| 0.50 | -4.45 | 11.83 | 10.71 | 5.34 | 2.99 | 1.33 | 1.426 | 16.87 | 16.87 | - | - | no | - | -0.000 |
+| 1.00 | -3.95 | 11.81 | 10.75 | 4.88 | 3.11 | 1.49 | 1.425 | 16.82 | 16.82 | - | - | no | - | -0.000 |
+| 2.00 | -2.95 | 11.81 | 10.87 | 3.90 | 3.24 | 1.61 | 1.425 | 16.83 | 16.83 | - | - | no | - | -0.000 |
+| 2.30 | -2.65 | 11.81 | 10.96 | 3.59 | 3.17 | 1.43 | 1.425 | 16.83 | 16.83 | - | - | no | - | -0.000 |
+| 2.40 | -2.55 | 11.81 | 10.92 | 3.50 | 3.11 | 1.24 | 1.425 | 16.83 | 16.83 | - | - | yes | 3.40 | 0.000 |
+| 2.50 | -2.45 | 11.81 | 10.88 | 3.44 | 3.01 | 1.02 | 1.425 | 16.83 | 16.83 | - | - | yes | 2.50 | 0.000 |
+| 2.60 | -2.35 | 11.81 | 10.85 | 3.32 | 2.88 | 0.74 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 2.25 | -0.000 |
+| 2.70 | -2.25 | 11.81 | 10.84 | 3.14 | 2.72 | 0.40 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.95 | 0.000 |
+| 2.80 | -2.15 | 11.81 | 10.85 | 3.02 | 2.52 | 0.12 | 1.425 | 16.83 | 16.83 | FRONT_LATERAL | UNSAFE_FORWARD_GAP | yes | 1.75 | -0.000 |
+| 2.90 | -2.05 | 11.81 | 10.83 | 2.81 | 2.31 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.50 | 0.000 |
+| 3.00 | -1.95 | 11.81 | 10.79 | 2.64 | 2.08 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.35 | 0.000 |
+| 3.10 | -1.85 | 11.81 | 10.80 | 2.52 | 1.86 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.25 | 0.000 |
+| 3.20 | -1.75 | 11.81 | 10.81 | 2.46 | 1.64 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.20 | -0.000 |
+| 3.30 | -1.65 | 11.81 | 10.81 | 2.43 | 1.43 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.25 | -0.000 |
+| 3.40 | -1.55 | 11.81 | 10.83 | 2.34 | 1.24 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.20 | 0.000 |
+| 3.50 | -1.45 | 11.81 | 10.81 | 2.22 | 1.08 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | yes | 1.10 | -0.000 |
+| 3.60 | -1.35 | 11.81 | 10.77 | 2.13 | 0.93 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.00 | 0.000 |
+| 3.70 | -1.25 | 11.81 | 10.79 | 2.13 | 0.79 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.05 | -0.007 |
+| 3.80 | -1.15 | 11.81 | 10.80 | 2.03 | 0.69 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 1.00 | -0.023 |
+| 3.90 | -1.05 | 11.80 | 10.76 | 1.95 | 0.63 | 0.00 | 1.425 | 16.82 | 16.82 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.85 | -0.047 |
+| 4.00 | -0.95 | 11.80 | 10.84 | 1.87 | 0.63 | 0.00 | 1.425 | 16.80 | 16.80 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.80 | -0.060 |
+| 4.10 | -0.85 | 11.79 | 10.88 | 1.79 | 0.70 | 0.00 | 1.424 | 16.79 | 16.79 | IN_PATH | UNSAFE_FORWARD_GAP | no | - | -0.080 |
+| 4.20 | -0.75 | 11.79 | 10.88 | 1.67 | 0.82 | 0.00 | 1.424 | 16.79 | 16.79 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.60 | -0.072 |
+| 4.30 | -0.65 | 11.78 | 10.90 | 1.52 | 0.98 | 0.00 | 1.424 | 16.78 | 16.78 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.45 | -0.052 |
+| 4.40 | -0.55 | 11.80 | 10.93 | 1.35 | 1.15 | 0.00 | 1.425 | 16.80 | 16.80 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.40 | -0.052 |
+| 4.50 | -0.45 | 11.80 | 10.95 | 1.10 | 1.35 | 0.00 | 1.425 | 16.82 | 16.82 | IN_PATH | PREDICTED_OVERLAP+UNSAFE_FORWARD_GAP | yes | 0.25 | -0.014 |
+| 4.60 | -0.35 | 11.81 | 10.95 | 0.85 | 1.53 | 0.00 | 1.425 | 16.83 | 16.83 | IN_PATH | UNSAFE_FORWARD_GAP | no | - | -0.003 |
+| 4.70 | -0.25 | 11.81 | 10.96 | 0.72 | 1.68 | 0.03 | 1.425 | 16.83 | 16.83 | - | - | no | - | 0.031 |
+| 4.80 | -0.15 | 11.81 | 11.00 | 0.66 | 1.79 | 0.12 | 1.425 | 16.84 | 16.84 | - | - | yes | 2.00 | 0.024 |
+| 4.90 | -0.05 | 11.82 | 11.00 | 0.60 | 1.89 | 0.18 | 1.425 | 16.84 | 16.84 | - | PREDICTED_OVERLAP | yes | 1.10 | 0.037 |
+| 5.00 | 0.05 | 12.42 | 11.00 | 0.53 | 1.89 | 0.14 | 1.447 | 17.97 | 17.97 | - | PREDICTED_OVERLAP | yes | 0.85 | 0.000 |
 
 ### 1.3 Observed vehicle response delays
 
@@ -73,14 +73,14 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 | interval | s |
 |---|---|
 | perception (CUT_IN start) -> steering | 0.90 |
-| path entry (EGO_PATH_ENTRY) -> steering | 0.75 |
-| critical (CRITICAL_TTC_START on the track) -> steering | 1.05 |
+| path entry (EGO_PATH_ENTRY) -> steering | 0.80 |
+| critical (CRITICAL_TTC_START on the track) -> steering | 1.10 |
 | steering -> heading response | 0.05 |
 
 ### 1.4 Cut-ins established by each recorder
 
 - A: CUT_IN_FROM_RIGHT_START A:track_001 (anonymous) at 2.75
-- B: CUT_IN_FROM_RIGHT_START A (associated, B:track_001) at 4.45
+- B: CUT_IN_FROM_RIGHT_START A (associated, B:track_001) at 2.75
 
 ### 1.5 Isolation checks
 
@@ -98,7 +98,7 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 | C collides with nobody | PASS | - |
 | without C: no collision | PASS | counterfactuals.json |
 | swerve disabled: A runs into C | PASS | {"A-C": {"first_s": 5.95, "last_s": 6.1, "peak_impulse_Ns": 477.8}} |
-| reconstructed clearance at the critical start vs true bumper gap | PASS | 3.31 m reconstructed, 3.29 m true |
+| reconstructed clearance at the critical start vs true bumper gap | PASS | 3.32 m reconstructed, 3.35 m true |
 
 - Track identities (privileged evaluation): A:track_001 = C; A:track_002 = B; B:track_001 = A; B:track_002 = C; B:track_003 = C
 - Participants that recorded nothing: C.
@@ -133,8 +133,8 @@ First core events of A per true subject before A's first contact (t_local 4.95):
 | subject (true) | event | reconstruction t_local | COVERAGE t_local | PERFECT t_local |
 |---|---|---|---|---|
 | B | CRITICAL_TTC_START | 3.80 | 3.80 | 3.80 |
-| C | CRITICAL_TTC_START | 2.60 | 2.30 | 2.30 |
+| C | CRITICAL_TTC_START | 2.55 | 2.30 | 2.30 |
 | C | CUT_IN_FROM_RIGHT_START | 2.75 | 2.80 | 2.80 |
-| C | EGO_PATH_ENTRY | 2.90 | 2.80 | 2.80 |
+| C | EGO_PATH_ENTRY | 2.85 | 2.80 | 2.80 |
 
 Evaluation headline: collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 3; max |t_global error| 0.0 s
