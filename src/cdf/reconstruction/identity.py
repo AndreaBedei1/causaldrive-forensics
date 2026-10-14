@@ -180,7 +180,10 @@ def link_to_recorders_corrected(view: Any, cfg: ReconstructionConfig, rel: Relat
             cut = _third_body_contact(observer, body)
             covered = [s for s in track.samples if s.measured and body.covers(s.t_global)]
             samples = [s for s in covered if s.t_global < cut]
-            if len(samples) < fusion.link_min_samples:
+            # A short fragment (fewer samples than the minimum, at least SHORT_FRAGMENT_MIN_SAMPLES) is tested
+            # too, but every one of its samples must pass.
+            short = SHORT_FRAGMENT_MIN_SAMPLES <= len(samples) < fusion.link_min_samples
+            if len(samples) < fusion.link_min_samples and not short:
                 continue
             reach = float(np.median([np.hypot(*(s.near - s.observer)) for s in samples]))
             bias2 = rel.variance(track.recorder, name) + (rel.yaw.get(track.recorder, 0.0) * reach) ** 2
@@ -190,13 +193,17 @@ def link_to_recorders_corrected(view: Any, cfg: ReconstructionConfig, rel: Relat
             sigma = np.array([math.sqrt(measurement_variance(s, cfg) + bias2) for s in samples])
             speed_gap, speed_sigma = [], []
             for s in samples:
+                # The velocity along the observer's line of sight (Doppler); the tangential component, which the
+                # radar does not measure, is not tested.
                 pose = body.pose_at_global(s.t_global)
-                speed_gap.append(float(np.hypot(s.velocity[0] - pose.vx, s.velocity[1] - pose.vy)))
+                line = s.near - s.observer
+                unit = line / max(float(np.hypot(*line)), 1e-6)
+                speed_gap.append(abs(float((s.velocity - np.array([pose.vx, pose.vy])) @ unit)))
                 speed_sigma.append(_velocity_sigma(cfg, s.vel_std, body.poses.velocity_std_mps))
             speed_gap, speed_sigma = np.array(speed_gap), np.array(speed_sigma)
             within = float(np.mean((distance <= 3.0 * sigma) & (speed_gap <= 3.0 * speed_sigma)))
             accepted = (float(np.median(distance / sigma)) <= 2.0 and float(np.median(speed_gap / speed_sigma)) <= 2.0
-                        and within >= fusion.link_min_fraction)
+                        and within >= (1.0 if short else fusion.link_min_fraction))
             link = RecorderLink(track.name, name, len(samples), round(float(np.median(distance)), 3),
                                 round(float(np.median(distance / sigma)), 3), round(float(np.median(speed_gap)), 3),
                                 round(within, 3), accepted, None if math.isinf(cut) else round(cut, 4))
@@ -268,6 +275,13 @@ def pair_corrected(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig, re
         share = 0.5 * rel.variance(a.recorder, b.recorder)
         evidence = pair_evidence(corrected(a, share, cfg, rel.yaw.get(a.recorder, 0.0)),
                                  corrected(b, share, cfg, rel.yaw.get(b.recorder, 0.0)), cfg)
+    if (evidence is not None and not evidence.accepted and evidence.kind == CROSS
+            and evidence.compared >= LONG_OVERLAP_FACTOR * cfg.fusion.anonymous_min_shared_samples
+            and evidence.passed >= 0.5 and evidence.median_box_chi2 is not None):
+        # A long simultaneous observation by two observers: the majority decides (the median instant passes
+        # both gates); occasional failures as the visible faces change are expected over a long window.
+        gate = chi2_2dof(cfg.fusion.anonymous_gate_probability)
+        evidence.accepted = evidence.median_box_chi2 <= gate and evidence.median_velocity_chi2 <= gate
     if evidence is not None and evidence.accepted and evidence.kind == CROSS and not discriminable(sigma, cfg):
         evidence.accepted = False
         evidence.refused = ("UNRESOLVED: relative pose bias {0:.2f} m cannot tell two bodies {1:.1f} m apart"
@@ -466,15 +480,25 @@ def backward_test(old: Sequence[CommonTrack], new: Sequence[CommonTrack], cfg: R
 
 
 def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset, Dict[str, Any]],
-                        cfg: ReconstructionConfig, rel: RelativePose) -> Tuple[List[List[CommonTrack]], List[Dict[str, Any]]]:
+                        cfg: ReconstructionConfig, rel: RelativePose,
+                        links: Optional[Sequence[PairEvidence]] = None) -> Tuple[List[List[CommonTrack]], List[Dict[str, Any]]]:
     """Join an earlier entity to a later strongly identified one when the backward test singles it out."""
     fusion = cfg.fusion
     gate = chi2_4dof(fusion.anonymous_gate_probability)
     null = fusion.retrospective_new_target_density
     horizon = cfg.semantics.prediction_horizon_s
 
+    full_links = None if links is None else [e for e in links if e.accepted and e.kind == CROSS
+                                             and e.compared >= fusion.anonymous_min_shared_samples]
+
     def strong(group: Sequence[CommonTrack]) -> bool:
-        return len({t.recorder for t in group}) >= 2
+        # Seen by several observers, joined by a cross-observer link compared on at least the shared-instant
+        # minimum (``links``: the joining evidence; without it, any two observers): a brief overlap may join two
+        # fragments but does not anchor a backward resolution.
+        if full_links is None:
+            return len({t.recorder for t in group}) >= 2
+        names = {t.name for t in group}
+        return any(e.a in names and e.b in names for e in full_links)
 
     def compatible(x: Sequence[CommonTrack], y: Sequence[CommonTrack]) -> bool:
         for p in x:
@@ -509,9 +533,20 @@ def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset,
             ratios = [(j, test, test["density"] / null) for j, test in candidates]
             total = 1.0 + sum(r for _, _, r in ratios)
             j, test, ratio = max(ratios, key=lambda item: item[2])
-            posterior = ratio / total
+            # The later entity may also continue ANOTHER earlier one: every earlier entity that passes the backward
+            # test into it competes too (one-to-one, as two possible predecessors of a stitch).
+            start_j = dict(starts)[j]
+            rivals = []
+            for k, end_k in ends:
+                if k in (i, j) or not (0.0 < start_j - end_k <= horizon) or not compatible(groups[k], groups[j]):
+                    continue
+                other = backward_test(groups[k], groups[j], cfg, rel)
+                if other is not None and other["chi2"] <= gate:
+                    rivals.append(other["density"] / null)
+            posterior = min(ratio / total, ratio / (1.0 + ratio + sum(rivals)))
             record = {"earlier": [t.name for t in old], "later": [t.name for t in groups[j]],
-                      "posterior": round(posterior, 4), "candidates": len(candidates), **{k: test[k] for k in
+                      "posterior": round(posterior, 4), "candidates": len(candidates),
+                      "rival_predecessors": len(rivals), **{k: test[k] for k in
                       ("gap_s", "chi2", "position_sigma_m", "velocity_sigma_mps", "t_old", "t_new")}}
             if posterior >= fusion.retrospective_min_posterior:
                 proposals.append((posterior, i, j, record))
@@ -581,6 +616,22 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                 ra, rb = relevant_view(a, relevant[a.name], relevant[b.name], b), relevant_view(b, relevant[b.name], relevant[a.name], a)
                 item = pair_corrected(ra, rb, cfg, rel)
                 when = resolution_time(ra, rb, cfg)
+                if item is None or not item.accepted:
+                    # Superposition: two observers seeing one body at the same instants, also where neither needs
+                    # it (a car driving away from a stopped wreck): the same one-box and velocity test on every
+                    # instant both observe, with the same thresholds.  Its noise grows with range, so a far pair
+                    # passes only when the bodies coincide within that noise.
+                    full = pair_corrected(a, b, cfg, rel)
+                    short = full is not None and short_overlap(full, cfg)
+                    if short:
+                        # The two observations overlap too briefly to ever reach the shared-instant minimum (a road
+                        # user glimpsed while another observer keeps it): every shared instant must pass.
+                        full = pair_corrected(a, b, strict_short(a, b, cfg), rel) or full
+                    if full is not None and full.accepted:
+                        item = full
+                        when = resolution_time(a, b, strict_short(a, b, cfg) if short else cfg)
+                    elif item is None:
+                        item = full
                 if when is not None:
                     resolved_at[frozenset((a.name, b.name))] = when
             elif _overlap(a, b):
@@ -605,7 +656,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     refuse_ambiguous_corrected(evidence, by_name, cfg)
     cannot = cannot_links(anonymous, cfg, rel)
     groups, used = cluster_corrected(anonymous, evidence, cannot)
-    groups, retro = retrospective_links(groups, cannot, cfg, rel)
+    groups, retro = retrospective_links(groups, cannot, cfg, rel, used)
     resolved_late = {}
     for d in retro:
         if d.get("resolved"):
@@ -830,6 +881,24 @@ def relevant_view(track: CommonTrack, flags: Sequence[bool], other_flags: Sequen
         return ok or any(abs(s.t_global - t) <= 0.026 for t in other_times)
     return replace(track, samples=[s if (s.measured and usable(s, ok)) else replace(s, measured=False)
                                    for s, ok in zip(track.samples, flags)])
+
+
+LONG_OVERLAP_FACTOR = 3  # a cross-observer overlap this many times the shared-instant minimum is decided by majority
+SHORT_FRAGMENT_MIN_SAMPLES = 5  # fewest instants a short fragment is tested on (a quarter second at 20 Hz)
+
+
+def short_overlap(evidence: PairEvidence, cfg: ReconstructionConfig) -> bool:
+    """The pair was compared on every instant both observers measured, and those are fewer than
+    ``fusion.anonymous_min_shared_samples`` (it can never reach the minimum) but at least
+    ``SHORT_FRAGMENT_MIN_SAMPLES``."""
+    return SHORT_FRAGMENT_MIN_SAMPLES <= evidence.compared < cfg.fusion.anonymous_min_shared_samples
+
+
+def strict_short(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> ReconstructionConfig:
+    """The pair test for a short fragment: at least ``SHORT_FRAGMENT_MIN_SAMPLES`` shared instants, every one
+    must pass."""
+    return replace(cfg, fusion=replace(cfg.fusion, anonymous_min_shared_samples=SHORT_FRAGMENT_MIN_SAMPLES,
+                                       anonymous_pass_fraction=1.0))
 
 
 def resolution_time(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> Optional[float]:

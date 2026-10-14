@@ -27,7 +27,9 @@ class RenderTests(unittest.TestCase):
         self.assertIn("A began exceeding the speed limit (already the case when first observed)", local_md)
         # Simultaneous events share a DOT column and are listed as unresolved in the report.
         self.assertIn('{rank=same; "A:e10"; "A:e11"; "A:e12"; "A:e13";}', local_dot)
-        self.assertIn("COLLISION(A,B); SPEED_LIMIT_EXCEEDED_END(A); MOVING_END(A); MOVING_END(B)", report)
+        # A's CRITICAL_TTC about B was still open (B's track lost just before) and ends at their collision.
+        self.assertIn("COLLISION(A,B); CRITICAL_TTC_END(A,B); SPEED_LIMIT_EXCEEDED_END(A); MOVING_END(A); MOVING_END(B)",
+                      report)
         self.assertIn("simultaneous at 0.05 s resolution", global_md)
         # DOT labels stay minimal: type, who, time.
         self.assertIn('"A:e08" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)

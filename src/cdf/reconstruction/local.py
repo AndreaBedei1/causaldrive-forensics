@@ -1211,6 +1211,18 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     partners = contact_partners(contacts, tracks, sample_period(ego), semantics, cfg.fusion.touching_clearance_m)
     # Any other body touching it during a contact is post-impact too: no new CRITICAL_TTC episode.
     holds = contact_holds(contacts, tracks, sample_period(ego), cfg.fusion.touching_clearance_m, partners)
+    # A contact no track was named partner of, touched by exactly one tracked body: that body is the one the
+    # recorder collided with (nothing else touches it), so its CRITICAL_TTC episode ends at the contact.
+    named = {tuple(span) for spans in partners.values() for span in spans}
+    holders: Dict[Tuple[float, float], List[str]] = {}
+    for track_id, spans in holds.items():
+        for span in spans:
+            if tuple(span) not in named:
+                holders.setdefault(tuple(span), []).append(track_id)
+    for span, ids in holders.items():
+        if len(ids) == 1:
+            partners[ids[0]] = list(partners.get(ids[0], ())) + [span]
+            holds[ids[0]] = [h for h in holds[ids[0]] if tuple(h) != span]
     for track in tracks:
         events += track_events(owner, track, ego.end, semantics, ego, world, footprint,
                                partners.get(track.track_id, ()), holds=holds.get(track.track_id, ()),

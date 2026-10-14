@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from .checks import temporal_safety_relations
 from .config import FusionConfig
 from .local import LocalReconstruction
-from .models import (OUTCOME, SAME_TRACK, Alignment, Association, GlobalGraph, GlobalNode,
+from .models import (OUTCOME, PERCEPTION, SAME_TRACK, Alignment, Association, GlobalGraph, GlobalNode,
                      GraphClock, GraphEdge, Observation, display_order, precedes_edges)
 from .tracking import LocalTrack
 
@@ -472,6 +472,48 @@ def post_contact_episodes(locals_: Sequence[LocalReconstruction], alignment: Ali
     return drop
 
 
+def close_at_contact(drafts: List[GlobalNode]) -> Tuple[List[GlobalNode], set]:
+    """CRITICAL_TTC is the pre-collision threat: an episode of recorder X about Y still open at a collision of
+    X and Y ends there.  A CRITICAL_TTC_END of X about Y is added at the collision (source: the matched
+    collision reports) and a later end of that same episode is no longer asserted; returns the drafts and the
+    (graph, local node) of the dropped ends.  The local graphs keep every event."""
+    collisions = sorted((node.t_global, node) for node in drafts
+                        if node.event_type == "COLLISION" and node.t_global is not None and len(node.participants) >= 2)
+    dropped_nodes, dropped_local = set(), set()
+    added: List[GlobalNode] = []
+    for t_contact, collision in collisions:
+        for actor in collision.participants:
+            for subject in collision.participants:
+                if actor == subject:
+                    continue
+                episode = sorted((node for node in drafts if node.actor_id == actor and node.subject_id == subject
+                                  and node.t_global is not None and node.event_type in ("CRITICAL_TTC_START", "CRITICAL_TTC_END")
+                                  and id(node) not in dropped_nodes),
+                                 key=lambda node: (node.t_global, node.event_type == "CRITICAL_TTC_START"))
+                open_ = False
+                for node in episode:
+                    if node.t_global > t_contact + 1e-6:
+                        break
+                    open_ = node.event_type == "CRITICAL_TTC_START"
+                if not open_:
+                    continue
+                later_end = next((node for node in episode if node.t_global > t_contact + 1e-6), None)
+                if later_end is not None and later_end.event_type == "CRITICAL_TTC_END":
+                    dropped_nodes.add(id(later_end))
+                    dropped_local.update((obs.graph, obs.local_node) for obs in later_end.observations)
+                    for source in later_end.attributes.get("source_local_nodes", []):
+                        dropped_local.add((source["graph"], source["local_node"]))
+                added.append(GlobalNode(
+                    node_id="", event_type="CRITICAL_TTC_END", kind=PERCEPTION, actor_id=actor, subject_id=subject,
+                    participants=[actor, subject], t_global=t_contact,
+                    attributes={"closed_by_contact": collision.attributes.get("matched_event")},
+                    source="collision_sensor", confidence=collision.confidence,
+                    observations=[obs for obs in collision.observations if obs.graph == actor]))
+                added[-1].perceived_state_before = {graph: state for graph, state in collision.perceived_state_before.items()
+                                                    if graph == actor}
+    return [node for node in drafts if id(node) not in dropped_nodes] + added, dropped_local
+
+
 def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                 associations: Sequence[Association], touching_clearance_m: float = 1.0) -> GlobalGraph:
     """Local graphs + alignment + associations -> one global event graph."""
@@ -530,6 +572,7 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
             period = min((b.t_local-a.t_local for a,b in zip(track.samples,track.samples[1:])), default=0.0)
             track_ends[(local.owner,track.track_id)] = (clock.to_global(track.last_t), period)
     drafts = aggregate_entity_events(drafts, track_ends)
+    drafts, contact_closed = close_at_contact(drafts)
     aligned = display_order([node for node in drafts if node.t_global is not None],
                             lambda node: node.t_global, lambda node: node.event_type,
                             lambda node: node.actor_id, lambda node: node.subject_id)
@@ -569,6 +612,9 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
     suppressed = [{"graph": owner, "local_node": node_id,
                    "reason": "CRITICAL_TTC episode of a colliding pair started while the pair is still in contact "
                              "(post-impact state, post_contact_episodes)"} for owner, node_id in sorted(post_contact)]
+    suppressed += [{"graph": owner, "local_node": node_id,
+                    "reason": "end of a CRITICAL_TTC episode the pair's collision already closed (close_at_contact)"}
+                   for owner, node_id in sorted(contact_closed)]
     return GlobalGraph(entities=entities, nodes=nodes, edges=edges, suppressed_local_nodes=suppressed)
 
 

@@ -279,8 +279,14 @@ class CanonicalRunTests(unittest.TestCase):
         self.assertEqual(u1["source_tracks"], ["A:track_001", "B:track_002", "B:track_003"])
         self.assertTrue(u1["anonymous"])
         self.assertEqual(u1["observers"], ["A", "B"])
-        kinds = sorted(link["kind"] for link in u1["association"]["links"])
-        self.assertEqual(kinds, [CROSS, STITCH])
+        # Every member is joined by accepted evidence that passed at every compared instant (the brief third
+        # track through its simultaneous observation by A, not by a stitch across B's gap).
+        links = u1["association"]["links"]
+        self.assertEqual(len(links), 2)
+        self.assertTrue(all(link["accepted"] and link["passed"] == 1.0 for link in links))
+        joined = {link["a"] for link in links} | {link["b"] for link in links}
+        self.assertEqual(joined, {"A:track_001", "B:track_002", "B:track_003"})
+        self.assertTrue(all(link["kind"] in (CROSS, STITCH) for link in links))
         self.assertIn("box_fit", u1["fusion_method"])
         names = {(a.local_graph, a.local_track): a.global_entity for a in self.s12_result.associations}
         self.assertEqual({names[("A", "track_001")], names[("B", "track_002")], names[("B", "track_003")]}, {"U1"})
@@ -328,10 +334,15 @@ class LinkAndAlignmentTests(unittest.TestCase):
             result = reconstruct_run(run, CFG)
             record = entities_of(run)
         names = {(a.local_graph + ":" + a.local_track): (a.status, a.global_entity) for a in result.associations}
-        for name in ("A:track_002", "B:track_002", "B:track_003"):
+        # A's and B's tracks of the van (identities verified against the evaluation's ground truth).
+        for name in ("A:track_001", "B:track_002#segment_1"):
             self.assertEqual(names[name], ("ASSOCIATED", "C"), name)
-        self.assertEqual(sorted(link["track"] for link in record["recorder_links"]),
-                         ["A:track_002", "B:track_002", "B:track_003"])
+        # A's track is named by the A-C collision evidence, B's by its returns on the van's own outline.
+        self.assertEqual(sorted(link["track"] for link in record["recorder_links"]), ["B:track_002#segment_1"])
+        # B's later fragment of the van starts after the van touched A: its returns lie within the uncertainty of
+        # both bodies, so it is named neither (unresolved, conservatively), and never wrongly.
+        self.assertEqual(names["B:track_003"][0], "ANONYMOUS")
+        self.assertNotIn(names["B:track_003"][1], ("A", "B", "C"))
 
     def test_s06_recorder_c_is_aligned_by_its_observed_trajectory(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -347,11 +358,16 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertLessEqual(decision["interval"][0], -4.1)
         self.assertGreaterEqual(decision["interval"][1], -4.1)
         names = {(a.local_graph + ":" + a.local_track): a.global_entity for a in result.associations}
+        # C's two tracks of A and its track of B (identities verified against the evaluation's ground truth).
+        self.assertEqual(names["C:track_003"], "B")
         self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"], names["C:track_002"]),
-                         ("C", "C", "A", "B"))
+                         ("C", "C", "A", "A"))
         observed = next(local for local in result.locals if local.owner == 'C')
-        self.assertFalse([n for n in observed.graph.nodes if n.event_type == 'TRACK_LOST'])
+        # At 75 m one missed sweep already makes A's predicted position too uncertain to tell two cars apart, so
+        # the tracker ends the track and starts a new one (uncertainty-driven survival); the fusion names every
+        # fragment: none of C's tracks stays ambiguous or anonymous.
         self.assertFalse([t for t in observed.tracks if t.identity_ambiguous])
+        self.assertEqual({names["C:" + t.track_id] for t in observed.tracks}, {"A", "B"})
 
     def test_s05_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
         # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with

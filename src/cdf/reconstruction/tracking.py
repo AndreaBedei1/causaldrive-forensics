@@ -727,24 +727,26 @@ def _slowdown_gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, own
     """A confirmed track's returns after an abrupt slowdown of its target (a crash).
 
     Only when the ordinary gate gave it nothing in this sweep and its previous
-    sweep was clean (its own returns, no foreign one around it: a road crest or
-    a guardrail next to the target is foreign clutter in every sweep, so it never
-    qualifies): the free returns within the position gate whose line-of-sight
-    speed lies between standstill and the predicted one (Doppler gate width at
-    both ends), at least ``min_slowdown_returns`` of them.
+    sweep was clean (its own returns, no foreign one inside the region its own
+    body can occupy, ``on_body`` without widening: a road crest or a guardrail
+    along the target is foreign clutter in every sweep, so it never qualifies,
+    while a stray return or another vehicle metres away does not count): the
+    free returns within the position gate whose line-of-sight speed is at most
+    the predicted one in magnitude (Doppler gate width added): an impact removes
+    the target's speed or partly reverses it (a rebound), it does not add to it.
+    At least ``min_slowdown_returns`` of them.
     """
     d2, _, euclid = covariance_gate(track, sweep, cfg)
     near = free & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
     was_clean = track.clean
-    track.clean = bool(own.any()) and not (near & ~own).any()
+    track.clean = bool(own.any()) and not (free & on_body(track, sweep.points, cfg, widen=False) & ~own).any()
     if track.track_id is None or own.any() or not was_clean:
         return own
     u = _unit_lines(sweep.points, sweep.origins)
     predicted = u @ track.x[2:]
     tolerance = math.sqrt(chi2_quantile(cfg.gate_probability, 1)) * np.sqrt(
         np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2)
-    slowed = (near & (sweep.radial_speed >= np.minimum(predicted, 0.0) - tolerance)
-              & (sweep.radial_speed <= np.maximum(predicted, 0.0) + tolerance))
+    slowed = near & (np.abs(sweep.radial_speed) <= np.abs(predicted) + tolerance)
     if int(slowed.sum()) < cfg.min_slowdown_returns:
         return own
     track.clean = True

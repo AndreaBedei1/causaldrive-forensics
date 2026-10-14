@@ -234,7 +234,9 @@ class S12Tests(unittest.TestCase):  # G
 
     def test_a_about_the_anonymous_track_is_not_ended_by_the_collision_with_b(self):
         collision = self.collision("A")
-        self.assertEqual(self.events("A", "track_001", "CRITICAL_TTC_START"), [2.6])
+        # One 20 Hz radar sweep earlier than with the fixed-gate tracker (2.60 s): the uncertainty-normalised
+        # tracker confirms the track's state a sweep sooner; the episode and its reason are unchanged.
+        self.assertEqual(self.events("A", "track_001", "CRITICAL_TTC_START"), [2.55])
         ends = self.events("A", "track_001", "CRITICAL_TTC_END")
         self.assertEqual(len(ends), 1)
         self.assertGreater(ends[0], collision)  # its own geometric release (C clearly aside)
