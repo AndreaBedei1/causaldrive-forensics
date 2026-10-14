@@ -59,8 +59,9 @@ from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNO
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
                               project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
-from cdf.replay.presentation import (ALERT, EGO, EVENT, HELP_LINES, MORE, event_line,  # noqa: E402
-                                     next_camera, standard_panel_lines, subject_label)
+from cdf.replay.presentation import (ALERT, EGO, EVENT, HELP_LINES, MORE, active_state_lines,  # noqa: E402
+                                     active_states_at, event_line, next_camera, standard_panel_lines,
+                                     subject_label)
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -801,6 +802,13 @@ class ReplayApp:
                   (120, 230, 120) if state == "PLAYING" else (255, 170, 60)),
                  ("Camera {0}   selected {1}   {2}".format(camera, self.selected, tracks),
                   self.font_small, (200, 200, 200))]
+        # The semantic states active now (START..END of the reconstructed events), most important first.
+        states = active_states_at(self.run, t)
+        self.hud_active = [text for text, _ in active_state_lines(states)]
+        lines.append(("Active states ({0})".format(len(states)) if states else "Active states: none",
+                      self.font_bold, (255, 255, 255)))
+        colors = {ALERT: (255, 150, 90), EGO: (200, 200, 200), MORE: (170, 170, 170)}
+        lines += [(text, self.font_small, colors.get(kind, (235, 235, 235))) for text, kind in active_state_lines(states)]
         passed = [e for e in self.events if e.time <= t + 1e-6]
         upcoming = [e for e in self.events if e.time > t + 1e-6]
         if passed:
@@ -872,7 +880,7 @@ class SelfTest:
     def __init__(self, app: "ReplayApp", directory: Path, started: float) -> None:
         self.app, self.directory, self.started = app, directory, started
         self.directory.mkdir(parents=True, exist_ok=True)
-        self.saved, self.pressed, self.log = 0, 0, []
+        self.saved, self.pressed, self.log, self.hud = 0, 0, [], []
 
     def _camera(self) -> str:
         return self.app.camera_mode + (" " + self.app.selected if self.app.camera_mode == "follow" else "")
@@ -884,12 +892,14 @@ class SelfTest:
             name = "{0:02d}_{1}.png".format(self.saved, self._camera().replace(" ", "_"))
             pg.image.save(self.app.screen, str(self.directory / name))
             self.log.append(self._camera())
+            self.hud.append({"t": round(self.app.clock.time, 2), "active": list(getattr(self.app, "hud_active", []))})
             self.saved += 1
             if self.pressed >= self.PRESSES:
                 actors = sorted((a.attributes.get("role_name", ""), a.type_id)
                                 for a in self.app.world.get_actors().filter("vehicle.*"))
                 (self.directory / "selftest.json").write_text(json.dumps(
-                    {"run": self.app.run.name, "camera_sequence": self.log, "vehicle_actors": actors,
+                    {"run": self.app.run.name, "camera_sequence": self.log, "hud_active_states": self.hud,
+                     "vehicle_actors": actors,
                      "recorders": self.app.ids}, indent=1), encoding="utf-8")
                 self.app.running = False
         elif elapsed >= due - self.PERIOD_S / 2.0 and self.pressed < self.saved and self.pressed < self.PRESSES:

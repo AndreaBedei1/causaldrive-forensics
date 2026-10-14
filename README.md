@@ -108,7 +108,10 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | ESC | quit |
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
-The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
+The upper-left panel shows the run, its time, the replay state and the camera, then the semantic states
+active at the current time (START..END of the reconstructed events, most important first: contact,
+CRITICAL_TTC, braking / throttle, turns and cut-ins, others; at most 8 lines, then `... +N more`), then the
+last and next event.  The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
 global road user (CRITICAL_TTC, CUT_IN, IN_EGO_PATH) and its own braking; at most a few lines.  Raw track ids,
 UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.
 

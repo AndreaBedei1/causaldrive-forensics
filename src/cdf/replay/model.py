@@ -257,15 +257,17 @@ def state_intervals(events: Sequence[ReplayEvent], observed_from: float = 0.0) -
     """Pair the START/END transitions of one recorder's events (in graph order).
 
     An END without an observed START (a track first seen inside the ego path,
-    whose entry was never seen) is shown from the subject's first appearance,
-    or from ``observed_from`` (the recorder's first sample) for its own states.
+    whose entry was never seen) is shown from the subject's latest appearance
+    before it (a road user seen in several segments: the segment the END
+    belongs to), or from ``observed_from`` (the recorder's first sample) for its
+    own states.
     """
     open_: Dict[Tuple[str, Optional[str]], ReplayEvent] = {}
     appeared: Dict[Optional[str], float] = {}
     out: List[StateInterval] = []
     for event in events:
         if event.event_type.startswith("TRACK_APPEARED"):
-            appeared.setdefault(event.subject, event.time)
+            appeared[event.subject] = event.time
         transition = transition_of(event.event_type)
         if transition is None:
             continue
@@ -316,6 +318,7 @@ class LocalEvents:
     origin: float  # source timestamp of the recorder's t_local = 0
     events: List[ReplayEvent]
     intervals: List[StateInterval]
+    offset: float = 0.0  # replay time of the recorder's t_local = 0
 
 
 def load_local_events(path: Path, run_start: float, clock_origin: Optional[float] = None) -> LocalEvents:
@@ -330,7 +333,7 @@ def load_local_events(path: Path, run_start: float, clock_origin: Optional[float
     offset = (origin if clock_origin is None else clock_origin) - run_start
     events = [ReplayEvent(round(offset + float(node["t_local"]), 6), owner, str(node["event_type"]),
                           node.get("subject_id"), str(node["node_id"]),dict(node.get('attributes') or {})) for node in graph["nodes"]]
-    return LocalEvents(owner, origin, events, state_intervals(events, observed_from=round(offset, 6)))
+    return LocalEvents(owner, origin, events, state_intervals(events, observed_from=round(offset, 6)), round(offset, 6))
 
 
 @dataclass(frozen=True)
@@ -931,6 +934,26 @@ class ReplayRun:
         """Read the persisted entity timeline for display, keeping source events available in all_events."""
         events = [e for e in self.all_events() if (e.actor,e.node_id) not in self.entity_source_nodes]
         return sorted(events+self.entity_event_overrides,key=lambda e:(e.time,e.actor,e.node_id))
+
+    def display_intervals(self, actor: str) -> List[StateInterval]:
+        """The recorder's START/END intervals of the displayed events (``display_events``: global subjects, no
+        event the global graph deliberately does not assert).  A subject's state is unknown after its
+        TRACK_LOST (no END is inferred there): its interval stops at the loss -- unknown, not ended."""
+        cache = self.__dict__.setdefault("_display_intervals", {})
+        if actor not in cache:
+            local = self.local_events.get(actor)
+            events = [e for e in self.display_events() if e.actor == actor] if local is not None else []
+            lost: Dict[Optional[str], List[float]] = {}
+            for event in events:
+                if event.event_type == "TRACK_LOST":
+                    lost.setdefault(event.subject, []).append(event.time)
+            out = []
+            for item in state_intervals(events, observed_from=local.offset if local is not None else 0.0):
+                cut = next((x for x in sorted(lost.get(item.subject, [])) if item.subject is not None
+                            and x >= item.start - _EPS and (item.end is None or x < item.end - _EPS)), None)
+                out.append(item if cut is None else StateInterval(item.actor, item.state, item.subject, item.start, cut))
+            cache[actor] = out
+        return cache[actor]
 
     def active_states(self, actor: str, t: float) -> List[StateInterval]:
         local = self.local_events.get(actor)
