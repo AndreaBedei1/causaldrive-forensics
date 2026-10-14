@@ -1,5 +1,6 @@
-"""Standard replay interface: global-subject panels, event priority, no UNKNOWN '?' or PREDICTED text, the
-C-key camera cycle over the recorders.  Headless (no CARLA, no pygame)."""
+"""Standard replay interface: the recorder-centric panels of commit 848a645 (current perceived state first,
+then the recorder's recent events) without UNKNOWN '?' or PREDICTED text and capped at 8 lines + '... +N more';
+the C-key camera cycle over the recorders.  Headless (no CARLA, no pygame)."""
 
 import unittest
 from pathlib import Path
@@ -7,7 +8,7 @@ from types import SimpleNamespace
 
 from src.cdf.replay.model import ReplayRun
 from src.cdf.replay.presentation import (EVENT, MAX_PANEL_LINES, MORE, camera_cycle, event_line, next_camera,
-                                         standard_panel_lines, subject_label)
+                                         standard_panel_lines)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -21,10 +22,15 @@ class _Perceived:
 
 
 def stub_run(events, snapshot, road_users=None, identities=None):
+    road_users, identities = road_users or {}, identities or {}
+
+    def subject_name(actor, track):
+        entity = identities.get((actor, track)) or road_users.get((actor, track))
+        return track if entity is None else "{0} ({1})".format(track, entity)
     return SimpleNamespace(
         recent_events=lambda actor, t, window: [e for e in events if e.actor == actor],
-        perceived={"A": _Perceived(snapshot)}, road_users=road_users or {}, identities=identities or {},
-        active_states=lambda actor, t: [])
+        perceived={"A": _Perceived(snapshot)}, road_users=road_users, identities=identities,
+        subject_name=subject_name, active_states=lambda actor, t: [])
 
 
 def event(kind, subject=None, actor="A"):
@@ -35,33 +41,38 @@ SNAPSHOT = {"ego": {"MOVING": True, "BRAKE": True, "TURN_LEFT": "UNKNOWN"},
             "external": {"track_001": {"CLOSING": True, "CRITICAL_TTC": True, "IN_EGO_PATH": "UNKNOWN"},
                          "track_002": {"CRITICAL_TTC": True, "IN_EGO_PATH": True},
                          "track_003": {"CRITICAL_TTC": "UNKNOWN", "CUT_IN_FROM_LEFT": "UNKNOWN"},
-                         "track_004": {"IN_EGO_PATH": True}}}
+                         "track_004": {"IN_EGO_PATH": True, "CLOSING": False}}}
 
 
 class PanelTests(unittest.TestCase):
     def setUp(self):
-        # Two local tracks of one fused road user U1, one of recorder B, one unknown-only track.
+        # Two local tracks of one fused road user U1, one of recorder B, one unknown-only (lost) track.
         self.run = stub_run([event("TRACK_APPEARED_FRONT", "track_004"), event("CRITICAL_TTC_START", "track_001")],
                             SNAPSHOT, road_users={("A", "track_001"): "U1", ("A", "track_002"): "U1"},
                             identities={("A", "track_004"): "B"})
 
-    def test_events_first_newest_first_with_global_subjects(self):
-        lines = standard_panel_lines(self.run, "A", 1.0, 1.0)
-        self.assertEqual(lines[0], ("» CRITICAL_TTC_START → U1", EVENT))
-        self.assertEqual(lines[1], ("» TRACK_APPEARED_FRONT → B", EVENT))
-
-    def test_one_line_per_global_subject_and_no_unknown(self):
+    def test_current_perceived_state_first_then_the_recent_events_newest_first(self):
         texts = [text for text, _ in standard_panel_lines(self.run, "A", 1.0, 1.0)]
-        self.assertEqual(texts[2:], ["U1: CRITICAL_TTC, IN_EGO_PATH", "B: IN_EGO_PATH", "ego: BRAKE"])
-        self.assertFalse(any("?" in text or "UNKNOWN" in text or "track_00" in text for text in texts))
+        self.assertEqual(texts, ["ego: MOVING, BRAKE",
+                                 "track_001 (U1): CLOSING, CRITICAL_TTC",
+                                 "track_002 (U1): CRITICAL_TTC, IN_EGO_PATH",
+                                 "track_004 (B): IN_EGO_PATH",
+                                 "» CRITICAL_TTC_START → U1",
+                                 "» TRACK_APPEARED_FRONT → B"])
 
-    def test_cap_with_more_and_events_never_pushed_out(self):
+    def test_unknown_is_hidden_not_shown_as_false(self):
+        texts = [text for text, _ in standard_panel_lines(self.run, "A", 1.0, 1.0)]
+        self.assertFalse(any("?" in text or "UNKNOWN" in text for text in texts))
+        self.assertFalse(any(text.startswith("track_003") for text in texts))  # only unknown: no line at all
+        self.assertNotIn("TURN_LEFT", texts[0])
+
+    def test_complete_list_then_eight_lines_and_the_count_of_the_rest(self):
         many = stub_run([event("TRACK_APPEARED_LEFT", "t{0}".format(k)) for k in range(3)],
-                        {"ego": {"BRAKE": True}, "external": {"x{0}".format(k): {"CRITICAL_TTC": True} for k in range(12)}})
-        lines = standard_panel_lines(many, "A", 1.0, 1.0, max_lines=6)
-        self.assertEqual(len(lines), 6)
-        self.assertEqual([kind for _, kind in lines[:3]], [EVENT] * 3)
-        self.assertEqual(lines[-1], ("... +11 more", MORE))
+                        {"ego": {"BRAKE": True}, "external": {"x{0:02d}".format(k): {"CRITICAL_TTC": True} for k in range(12)}})
+        lines = standard_panel_lines(many, "A", 1.0, 1.0)
+        self.assertEqual(len(lines), MAX_PANEL_LINES + 1)
+        self.assertEqual(lines[0][0], "ego: BRAKE")  # the current state comes first
+        self.assertEqual(lines[-1], ("... +8 more", MORE))  # 1 + 12 + 3 lines, 8 shown
 
     def test_hud_event_line_names_the_global_subject(self):
         self.assertEqual(event_line(self.run, event("CRITICAL_TTC_START", "track_002")), "A CRITICAL_TTC_START U1")
@@ -84,10 +95,10 @@ class CameraTests(unittest.TestCase):
 
 
 class RecordedRunPanelTests(unittest.TestCase):
-    """Every 0.1 s of the canonical runs: the standard panels stay clean and keep every recent event."""
+    """Every 0.1 s of the canonical runs: state above events, no UNKNOWN or PREDICTED, 8 lines + '... +N more'."""
 
     RUNS = ("traces/S11/run_0_consequential", "traces/S13/run_0_abreast", "traces/S13/run_0_passing",
-            "traces/S13/run_0_platoon")
+            "traces/S13/run_0_platoon", "traces/S14/run_0_surrounded")
 
     def test_panels(self):
         for path in self.RUNS:
@@ -98,16 +109,19 @@ class RecordedRunPanelTests(unittest.TestCase):
                     pid = participant.participant_id
                     lines = standard_panel_lines(run, pid, t, 1.0)
                     texts = [text for text, _ in lines]
-                    self.assertLessEqual(len(lines), MAX_PANEL_LINES, (path, t))
+                    self.assertLessEqual(len(lines), MAX_PANEL_LINES + 1, (path, t))
+                    if len(lines) == MAX_PANEL_LINES + 1:
+                        self.assertEqual(lines[-1][1], MORE, (path, t))
                     for text in texts:
                         self.assertNotIn("?", text, (path, t, text))
                         self.assertNotIn("PREDICTED", text, (path, t, text))
-                        self.assertNotIn("anonymous tracks", text, (path, t, text))
-                    subjects = [text.split(":")[0] for text, kind in lines if kind not in (EVENT, MORE)]
-                    self.assertEqual(len(subjects), len(set(subjects)), (path, t, texts))
-                    recent = {(e.event_type, subject_label(run, pid, e.subject)) for e in run.recent_events(pid, t, 1.0)}
-                    if len(recent) < MAX_PANEL_LINES:  # every recent event is shown, whatever the states
-                        self.assertEqual(sum(kind == EVENT for _, kind in lines), len(recent), (path, t, texts))
+                        self.assertNotIn("UNKNOWN", text, (path, t, text))
+                    kinds = [kind for _, kind in lines if kind != MORE]
+                    if EVENT in kinds:
+                        self.assertEqual(set(kinds[kinds.index(EVENT):]), {EVENT}, (path, t, texts))
+                    if lines and lines[-1][1] != MORE:  # untruncated: every recent event is listed
+                        self.assertEqual(kinds.count(EVENT), len(run.recent_events(pid, t, 1.0)), (path, t, texts))
+
 
 def _viewer():
     import importlib.util
@@ -125,13 +139,15 @@ class ViewerTests(unittest.TestCase):
         self.app = object.__new__(self.viewer.ReplayApp)
         self.app.font_bold, self.app.font_small = "bold", "small"
 
-    def test_vehicle_panel_uses_the_standard_lines(self):
+    def test_vehicle_panel_shows_the_recorder_state_first(self):
         self.app.run = ReplayRun.load(ROOT / "traces/S13/run_0_platoon")
         for t in (2.0, 6.0, 7.0, 8.0):
-            for text, rgb, font in self.app._vehicle_lines("A", t):
+            lines = self.app._vehicle_lines("A", t)
+            self.assertTrue(lines)
+            self.assertTrue(lines[0][0].startswith("ego: "))  # the recorder's current state first
+            for text, rgb, font in lines:
                 self.assertNotIn("?", text)
                 self.assertNotIn("PREDICTED", text)
-                self.assertNotIn("anonymous tracks", text)
 
     def test_c_key_cycles_every_recorder_then_free(self):
         pg = SimpleNamespace(K_ESCAPE=1, K_SPACE=2, K_r=3, K_LEFT=4, K_RIGHT=5, K_KP1=6, K_KP2=7, K_KP3=8, K_KP4=9,

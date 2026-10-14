@@ -1,11 +1,14 @@
-"""Compact replay labels; scientific diagnostics remain in the reconstruction files.
+"""Replay panel lines; scientific diagnostics remain in the reconstruction files.
 
-The standard interface is physical/global-subject oriented: a road user several local tracks contribute to is
-named once, by its global identity (a recorder, a fused road user U1, ...); raw track ids, UNKNOWN states and
-the measured/predicted provenance stay in the reconstruction files (and in ``ReplayRun`` for debugging).
+A recorder's panel is recorder-centric (the interface of commit 848a645): first the complete CURRENT perceived
+state of that recorder as the reconstruction wrote it (its own states, then one line per local track with the
+states it holds, named after the fusion's identity: ``track_001 (B): CLOSING, CRITICAL_TTC``), its anonymous
+tracks and the road users it sees, then the semantic events it generated in the last second.  Unlike 848a645,
+UNKNOWN states ('?', "track lost, states UNKNOWN") and the PREDICTED provenance are not shown, and a panel has
+at most ``MAX_PANEL_LINES`` lines, then ``... +N more`` (the complete list is built first).
 """
 
-from typing import List, Optional, Sequence, Set, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 
 HELP_LINES = (
@@ -13,18 +16,12 @@ HELP_LINES = (
     "TAB vehicle   T tracks   G ghosts   H help   ESC quit",
 )
 
-# Lines of one recorder panel at most (events never give way to states: they are listed first).
 MAX_PANEL_LINES = 8
-EVENT, ALERT, STATE, EGO, MORE = "event", "alert", "state", "ego", "more"
-
-# Active semantic states of the scene (HUD list): at most this many lines, then "... +N more".
-MAX_ACTIVE_LINES = 8
-# Priority of an active state (lower first): contact, conflict, braking/throttle, manoeuvre, other.
-CONFLICT_STATES = ("CRITICAL_TTC",)
-CONTROL_STATES = ("BRAKE", "THROTTLE")
-MANOEUVRE_STATES = ("TURN_LEFT", "TURN_RIGHT", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
-# The graph's EGO_PATH_ENTRY / EXIT pair is the per-frame state IN_EGO_PATH of the reconstruction.
-STATE_NAMES = {"EGO_PATH": "IN_EGO_PATH"}
+EVENT, ALERT, STATE, EGO, ANONYMOUS, ROAD_USER, MORE = "event", "alert", "state", "ego", "anonymous", "road_user", "more"
+UNKNOWN = "UNKNOWN"
+# The states of a recorder and of a track, in the reconstruction's own order (world_state.EGO_STATES /
+# TRACK_STATES): a snapshot's states are listed in this order, the others after them.
+TRACK_ALERTS = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 
 
 def anonymous_row(entity_id: str, observers: Sequence[str]) -> str:
@@ -38,97 +35,76 @@ def subject_label(run, actor: str, subject) -> str:
     return run.road_users.get((actor, subject), run.identities.get((actor, subject), subject))
 
 
+def _true(states) -> List[str]:
+    return [name for name, value in states.items() if value is True]
+
+
+def perceived_state_lines(run, actor: str, t: float) -> Optional[List[Tuple[str, str]]]:
+    """The recorder's perceived state at ``t`` (``local_trace``) as (text, kind) lines, like
+    ``world_state.compact_state`` without its UNKNOWN parts: ``ego: MOVING, BRAKE``, then one line per track
+    with the states it holds (``no active state`` when it holds none and none is unknown), then the known
+    signs.  A track whose states are all or partly unknown shows only what is known; a lost track (all
+    unknown) is not listed.  None when the reconstruction wrote no perceived state."""
+    perceived = (getattr(run, "perceived", None) or {}).get(actor)
+    if perceived is None:
+        return None
+    snapshot = perceived.state_at(t)
+    if not snapshot:
+        return []
+    lines: List[Tuple[str, str]] = []
+    ego = snapshot.get("ego") or {}
+    true = _true(ego)
+    if true:
+        lines.append(("ego: " + ", ".join(true), EGO))
+    elif ego and not any(value == UNKNOWN for value in ego.values()):
+        lines.append(("ego: no active state", EGO))
+    for track_id, states in (snapshot.get("external") or {}).items():
+        true = _true(states)
+        if not true and any(value == UNKNOWN for value in states.values()):
+            continue  # lost or unknown: nothing known to show
+        name = run.subject_name(actor, track_id)
+        lines.append(("{0}: {1}".format(name, ", ".join(true) or "no active state"),
+                      ALERT if set(true) & set(TRACK_ALERTS) else STATE))
+    for sign_id, sign in (snapshot.get("signs") or {}).items():
+        lines.append(("{0}: {1} sign known{2}".format(sign_id, sign.get("class"), ", relevant to the path"
+                                                       if sign.get("relevant_to_ego_path") is True else ""), STATE))
+    return lines
+
+
 def standard_panel_lines(run, actor: str, t: float, window: float,
                          max_lines: int = MAX_PANEL_LINES) -> List[Tuple[str, str]]:
-    """(text, kind) lines of one recorder's panel: what THIS recorder currently sees and does.
+    """(text, kind) lines of one recorder's panel (848a645 order), complete list first:
 
-    1. its semantic events of the last ``window`` seconds, newest first (one line per event type and global
-       subject): ``» TRACK_APPEARED_FRONT B``;
-    2. every semantic state of this recorder active at ``t`` (``active_states_at``: START..END of its
-       reconstructed events, subjects by global identity), most important first: ``CRITICAL_TTC B``,
-       ``BRAKE``, ``CUT_IN_FROM_LEFT U1``, ``TURN_LEFT``, ...
+    1. its current perceived state (``perceived_state_lines``; without one, its open START/END pairs);
+    2. its anonymous tracks alive now, and the road users (U1, ...) its tracks belong to;
+    3. its semantic events of the last ``window`` seconds, newest first: ``» CRITICAL_TTC_START → B``.
 
-    At most ``max_lines`` lines, then ``... +N more``.  Events come first, so a state line never pushes an
-    event out.  No UNKNOWN ('?') state, no PREDICTED text, no raw track list."""
-    events: List[Tuple[str, str]] = []
-    seen: Set[Tuple[str, str]] = set()
+    Then at most ``max_lines`` lines are shown, followed by ``... +N more``.  No UNKNOWN ('?') line and no
+    PREDICTED text."""
+    lines = perceived_state_lines(run, actor, t)
+    if lines is None:
+        lines = []
+        for state in run.active_states(actor, t):
+            subject = run.subject_name(actor, state.subject)
+            lines.append((state.state + (" → " + subject if subject else ""),
+                          ALERT if state.state in TRACK_ALERTS else STATE))
+    anonymous = run.anonymous_at(actor, t) if hasattr(run, "anonymous_at") else []
+    if anonymous:
+        lines.append(("anonymous tracks: " + ", ".join(track.name for track, _ in anonymous), ANONYMOUS))
+    tracks = (getattr(run, "tracks", None) or {}).get(actor, [])
+    seen = sorted({track.road_user for track in tracks if track.road_user is not None and track.state_at(t) is not None})
+    for entity_id in seen:
+        entity = run.entity(entity_id)
+        if entity is not None and entity.identity_ambiguous:
+            continue
+        state = entity.state_at(t) if entity is not None else None
+        lines.append((anonymous_row(entity_id, state.observers if state else [actor]), ROAD_USER))
     for event in reversed(run.recent_events(actor, t, window)):
         subject = subject_label(run, actor, event.subject)
-        key = (event.event_type, subject)
-        if key in seen:
-            continue
-        seen.add(key)
-        events.append(("» " + event.event_type + (" " + subject if subject else ""), EVENT))
-    states = [(state + (" " + subject if subject else ""),
-               ALERT if state_priority(state) <= 1 or state.startswith("CUT_IN") else (EGO if subject is None else STATE))
-              for owner, subject, state in active_states_at(run, t) if owner == actor]
-    lines = events + states
+        lines.append(("» " + event.event_type + (" → " + subject if subject else ""), EVENT))
     if len(lines) <= max_lines:
         return lines
     return lines[:max_lines] + [("... +{0} more".format(len(lines) - max_lines), MORE)]
-
-
-def state_priority(state: str) -> int:
-    """0 contact, 1 conflict (CRITICAL_TTC), 2 braking / throttle, 3 turn / cut-in manoeuvre, 4 other."""
-    if "COLLISION" in state or "CONTACT" in state:
-        return 0
-    if state in CONFLICT_STATES:
-        return 1
-    if state in CONTROL_STATES:
-        return 2
-    if state in MANOEUVRE_STATES:
-        return 3
-    return 4
-
-
-def _unknown(run, actor: str, subject: Optional[str], state: str, t: float) -> bool:
-    """The recorder's per-frame state (``local_trace``) says UNKNOWN for ``state`` of ``subject`` (or of the
-    recorder itself) and none of the subject's local tracks holds it True."""
-    perceived = (getattr(run, "perceived", None) or {}).get(actor)
-    snapshot = perceived.state_at(t) if perceived is not None else None
-    if not snapshot:
-        return False
-    if subject is None:
-        values = [(snapshot.get("ego") or {}).get(state, False)]
-    else:
-        values = [states.get(state, False) for track, states in (snapshot.get("external") or {}).items()
-                  if subject_label(run, actor, track) == subject]
-    return True not in values and any(value is None or value == "UNKNOWN" for value in values)
-
-
-def active_states_at(run, t: float) -> List[Tuple[str, Optional[str], str]]:
-    """(recorder, global subject or None, state) of every semantic state active at ``t``, in display priority:
-    the START/END intervals of the reconstructed events (``ReplayRun.display_intervals``), each subject named
-    by its global identity (several local tracks of one road user give one line).  A state whose subject is
-    unknown (after its TRACK_LOST, or UNKNOWN in the recorder's per-frame state while no track of that subject
-    holds it) is not shown -- hidden, not read as false; instantaneous events are never states.
-    Within one priority: by recorder, subject and state name."""
-    items = set()
-    for actor in sorted(run.local_events):
-        for interval in run.display_intervals(actor):
-            if not interval.active_at(t):
-                continue
-            subject = subject_label(run, actor, interval.subject) or None
-            state = STATE_NAMES.get(interval.state, interval.state)
-            if not _unknown(run, actor, subject, state, t):
-                items.add((actor, subject, state))
-    return sorted(items, key=lambda item: (state_priority(item[2]), item[0], item[1] or "", item[2]))
-
-
-def active_state_lines(states: Sequence[Tuple[str, Optional[str], str]],
-                       max_lines: int = MAX_ACTIVE_LINES) -> List[Tuple[str, str]]:
-    """(text, kind) lines of the active states, ``A -> B  CRITICAL_TTC`` or ``A       BRAKE``: the first
-    ``max_lines`` in the given order, then ``... +N more`` for the rest (nothing is dropped from the data).
-    No UNKNOWN ('?') line and no PREDICTED text: only recorder, subject and state names."""
-    shown = list(states[:max_lines])
-    lefts = [actor if subject is None else "{0} -> {1}".format(actor, subject) for actor, subject, _ in shown]
-    width = max((len(left) for left in lefts), default=0)
-    lines = [("{0}  {1}".format(left.ljust(width), state),
-              ALERT if state_priority(state) <= 1 else (EGO if subject is None else STATE))
-             for left, (_, subject, state) in zip(lefts, shown)]
-    if len(states) > max_lines:
-        lines.append(("... +{0} more".format(len(states) - max_lines), MORE))
-    return lines
 
 
 def event_line(run, event) -> str:
