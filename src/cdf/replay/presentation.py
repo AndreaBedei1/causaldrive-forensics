@@ -5,7 +5,7 @@ named once, by its global identity (a recorder, a fused road user U1, ...); raw 
 the measured/predicted provenance stay in the reconstruction files (and in ``ReplayRun`` for debugging).
 """
 
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 
 HELP_LINES = (
@@ -15,9 +15,6 @@ HELP_LINES = (
 
 # Lines of one recorder panel at most (events never give way to states: they are listed first).
 MAX_PANEL_LINES = 8
-# The confirmed states worth a line, most important first; others (CLOSING, MOVING, THROTTLE) stay in the files.
-SUBJECT_STATES = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT", "IN_EGO_PATH")
-EGO_STATES = ("BRAKE", "STOP", "TURN_LEFT", "TURN_RIGHT", "SPEED_LIMIT_EXCEEDED")
 EVENT, ALERT, STATE, EGO, MORE = "event", "alert", "state", "ego", "more"
 
 # Active semantic states of the scene (HUD list): at most this many lines, then "... +N more".
@@ -41,40 +38,18 @@ def subject_label(run, actor: str, subject) -> str:
     return run.road_users.get((actor, subject), run.identities.get((actor, subject), subject))
 
 
-def _subject_states(run, actor: str, t: float) -> Tuple[Dict[str, Set[str]], Set[str]]:
-    """Confirmed (True) states at ``t`` per global subject, and the recorder's own; UNKNOWN is never shown."""
-    subjects: Dict[str, Set[str]] = {}
-    ego: Set[str] = set()
-    perceived = (getattr(run, "perceived", None) or {}).get(actor)
-    snapshot = perceived.state_at(t) if perceived is not None else None
-    if snapshot:
-        ego = {name for name, value in (snapshot.get("ego") or {}).items() if value is True}
-        for track_id, states in (snapshot.get("external") or {}).items():
-            true = {name for name in SUBJECT_STATES if states.get(name) is True}
-            if true:
-                subjects.setdefault(subject_label(run, actor, track_id), set()).update(true)
-        return subjects, ego
-    for interval in run.active_states(actor, t):  # no perceived state written: the START/END pairs
-        name = "IN_EGO_PATH" if interval.state == "EGO_PATH" else interval.state
-        if interval.subject is None:
-            ego.add(name)
-        elif name in SUBJECT_STATES:
-            subjects.setdefault(subject_label(run, actor, interval.subject), set()).add(name)
-    return subjects, ego
-
-
 def standard_panel_lines(run, actor: str, t: float, window: float,
                          max_lines: int = MAX_PANEL_LINES) -> List[Tuple[str, str]]:
-    """(text, kind) lines of one recorder's panel in the standard interface, most important first:
+    """(text, kind) lines of one recorder's panel: what THIS recorder currently sees and does.
 
-    1. the recorder's semantic events of the last ``window`` seconds, newest first (one line per event type
-       and global subject);
-    2. its confirmed important states per GLOBAL subject (a road user seen through several local tracks is
-       one line), CRITICAL_TTC first;
-    3. its own braking / stop / turn state.
+    1. its semantic events of the last ``window`` seconds, newest first (one line per event type and global
+       subject): ``» TRACK_APPEARED_FRONT B``;
+    2. every semantic state of this recorder active at ``t`` (``active_states_at``: START..END of its
+       reconstructed events, subjects by global identity), most important first: ``CRITICAL_TTC B``,
+       ``BRAKE``, ``CUT_IN_FROM_LEFT U1``, ``TURN_LEFT``, ...
 
-    At most ``max_lines`` lines; what does not fit is summarised as ``... +N more``.  Events come first, so a
-    state line can never push an event out.  No UNKNOWN ('?') state, no PREDICTED text, no raw track list."""
+    At most ``max_lines`` lines, then ``... +N more``.  Events come first, so a state line never pushes an
+    event out.  No UNKNOWN ('?') state, no PREDICTED text, no raw track list."""
     events: List[Tuple[str, str]] = []
     seen: Set[Tuple[str, str]] = set()
     for event in reversed(run.recent_events(actor, t, window)):
@@ -83,20 +58,14 @@ def standard_panel_lines(run, actor: str, t: float, window: float,
         if key in seen:
             continue
         seen.add(key)
-        events.append(("» " + event.event_type + (" → " + subject if subject else ""), EVENT))
-    subjects, ego = _subject_states(run, actor, t)
-
-    def rank(names: Set[str]) -> int:
-        return min(SUBJECT_STATES.index(name) for name in names)
-    states = [("{0}: {1}".format(subject, ", ".join(name for name in SUBJECT_STATES if name in names)),
-               ALERT if names & {"CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT"} else STATE)
-              for subject, names in sorted(subjects.items(), key=lambda item: (rank(item[1]), item[0]))]
-    own = [name for name in EGO_STATES if name in ego]
-    lines = events + states + ([("ego: " + ", ".join(own), EGO)] if own else [])
+        events.append(("» " + event.event_type + (" " + subject if subject else ""), EVENT))
+    states = [(state + (" " + subject if subject else ""),
+               ALERT if state_priority(state) <= 1 or state.startswith("CUT_IN") else (EGO if subject is None else STATE))
+              for owner, subject, state in active_states_at(run, t) if owner == actor]
+    lines = events + states
     if len(lines) <= max_lines:
         return lines
-    shown = lines[:max(max_lines - 1, 0)]
-    return shown + [("... +{0} more".format(len(lines) - len(shown)), MORE)]
+    return lines[:max_lines] + [("... +{0} more".format(len(lines) - max_lines), MORE)]
 
 
 def state_priority(state: str) -> int:

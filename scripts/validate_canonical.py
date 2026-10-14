@@ -126,7 +126,8 @@ def check_run(run: Path):
         for p in replay.participants:
             lines = standard_panel_lines(replay, p.participant_id, t, 1.0)
             texts = [text for text, _ in lines]
-            if len(lines) > MAX_PANEL_LINES or any("?" in x or "PREDICTED" in x for x in texts):
+            too_many = len(lines) > MAX_PANEL_LINES + 1 or (len(lines) == MAX_PANEL_LINES + 1 and lines[-1][1] != MORE)
+            if too_many or any("?" in x or "PREDICTED" in x for x in texts):
                 fails.append("panel rule broken at t={0:.1f} ({1})".format(t, p.participant_id))
                 break
             subjects = [text.split(":")[0] for text, kind in lines if kind not in (EVENT, MORE)]
