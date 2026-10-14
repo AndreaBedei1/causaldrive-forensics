@@ -81,8 +81,14 @@ A track first seen inside the corridor has no observed entry.
 
 | Parameter | Value | Justification |
 |---|--:|---|
-| `path_half_width_m` | 1.5 m | Engineering assumption: half of a 3 m lane, straight ahead (no lane geometry is perceived). |
+| `path_half_width_m` | 1.5 m | Engineering assumption: half of a 3 m lane. |
 | `path_hysteresis_m` | 0.5 m | Engineering assumption: out of the path only this far beyond it. |
+
+Where the map is known (`road.RoadFrame`: the public OpenDRIVE lanes of the CARLA installation, the map
+recognised from the recorder's own positions), the corridor follows the lane the recorder drives in
+(`road.lane_path`: arc length ahead, lateral offset from its line; at a junction the branch nearest the
+recorder's own later recorded position, never ground truth): a car in the next lane of a bend is not in its
+path, and the recorder's own lane change does not move the corridor.  Without a map, it is straight ahead.
 
 PATH, CUT_IN and CRITICAL_TTC use the same estimated box (`conflict.target_box`): tracked position,
 velocity heading and nominal footprint. The runtime never uses the true target dimensions or pose.
@@ -100,7 +106,12 @@ precise estimate (`max_position_std_m` = 1.0 m, `max_velocity_std_mps` = 1.0 m/s
 a sample seen past another tracked vehicle gives no evidence. Absolute target velocity is projected
 into that fixed path frame; ego translation and yaw alone cannot establish a target manoeuvre.
 Distance, displacement and pre-entry are estimated body-to-corridor gaps in the same fixed frame.
-This is a straight-path operational definition: renewed or curved manoeuvres need a separate future model.
+Where the map is known, the same quantities are measured in the path frame of section 4 (the bend the
+recorder follows is not a lateral motion of the target) and the target must leave its own lane toward the
+recorder (`road.RoadFrame.lane_toward_speed` >= `cut_in_lateral_speed_mps`).  A CUT_IN is **confirmed only
+by the target's EGO_PATH_ENTRY during it**: a lateral approach that never enters the recorder's path (it
+keeps its lane, or turns away) is no cut-in (decided offline on the whole track; the start keeps its
+time).  None starts after the recorder's own collision.
 
 | Parameter | Value | Justification |
 |---|--:|---|
@@ -125,6 +136,17 @@ for either of two reasons, per track sample:
   the available deceleration.  The time of the first overlap is the TTC in Hayward's sense [B65].
 * UNSAFE_FORWARD_GAP: a leader (same direction, ahead, in the corridor or entering it) is closer than
   d_min = max(v_ego x t_front(v_ego), 2 m).  A time gap is not a TTC [B67]: an unsafe gap alone has no TTC.
+  A leader is a target in the recorder's path (EGO_PATH) or in a confirmed cut-in into it: never a car
+  abreast or in the next lane, whatever its box geometry at one sample.
+
+A collision course that only the target's velocity across its own lane creates (the target travelling
+within `LANE_TRAVEL_DEG` = 30 deg of its lane's direction, map known) counts only when that manoeuvre is
+confirmed: the target enters the recorder's path (now or later) or strikes it (a contact of the track,
+closing in over the last 0.2 s before it, or the track lost while closing in within the collision
+evidence's approach window before a contact).  Otherwise the null hypothesis holds, the car keeps its
+lane, and the course is predicted at its velocity along the lane: the radar point of a car passing
+beside the recorder slides over its visible faces (front, then side) and fakes a lateral speed toward
+it.  The recorder's own lateral motion and crossing traffic are unaffected.
 
 CRITICAL_TTC_END after 0.2 s of clearly resolved samples (no collision course, or one avoided with less than
 `critical_release_ratio` of the available deceleration; no imminent line-of-sight contact; the target outside

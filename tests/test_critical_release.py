@@ -106,7 +106,9 @@ class LeaderExitTests(unittest.TestCase):
         assessments = _assessments(track, ego)
         self.assertEqual([assessments[t].forward.region for t in (0.95, 1.0, 1.05)],
                          ["FRONT_LATERAL", None, "FRONT_LATERAL"])
-        self.assertEqual(_of(events, "CRITICAL_TTC_START"), [0.5])
+        # The front-lateral car is a leader from its confirmed cut-in on (its EGO_PATH_ENTRY follows at 1.45 s).
+        self.assertEqual(_of(events, "CUT_IN_FROM_RIGHT_START"), [0.9])
+        self.assertEqual(_of(events, "CRITICAL_TTC_START"), [0.9])
         self.assertEqual(_of(events, "CRITICAL_TTC_END"), [])
 
     def test_a_leader_moving_clearly_aside_ends_after_the_hysteresis_and_debounce(self):  # B

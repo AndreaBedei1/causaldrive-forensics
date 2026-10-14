@@ -75,8 +75,9 @@ class OracleTests(unittest.TestCase):
 
     def test_s12_hazards_are_where_the_ground_truth_puts_them(self):
         perfect = {(e["type"], e["subject"]): e["t_local"] for e in self.events["PERFECT"]["A"]}
-        self.assertAlmostEqual(perfect[("CRITICAL_TTC_START", "C")], 2.30, places=2)
-        self.assertIn(("CUT_IN_FROM_RIGHT_START", "C"), perfect)
+        # C is A's leader from its confirmed cut-in on (no forward-gap claim while it is still in the next lane).
+        self.assertAlmostEqual(perfect[("CUT_IN_FROM_RIGHT_START", "C")], 2.80, places=2)
+        self.assertAlmostEqual(perfect[("CRITICAL_TTC_START", "C")], perfect[("CUT_IN_FROM_RIGHT_START", "C")], places=2)
         self.assertIn(("CRITICAL_TTC_START", "B"), perfect)
         self.assertNotIn("TRACK_APPEARED", {t for t, _ in perfect})
 

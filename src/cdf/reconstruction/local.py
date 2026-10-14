@@ -33,7 +33,7 @@ import numpy as np
 
 from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
-from .conflict import UNSAFE_FORWARD_GAP, ConflictAssessment, assess_conflict, occluded_by
+from .conflict import PREDICTED_OVERLAP, UNSAFE_FORWARD_GAP, ConflictAssessment, assess_conflict, occluded_by
 from .road import RoadFrame
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
@@ -50,6 +50,9 @@ MOVING_SPEED_MPS = 1.0
 MIN_EPISODE_S = 0.3
 # A critical TTC must stay clearly resolved this long, without interruption, before it ends.
 CRITICAL_RELEASE_DEBOUNCE_S = 0.2
+# A body that struck the recorder was still closing in over this window before the contact (as in the
+# collision evidence of ``identity``: 4 radar sweeps).
+STRIKE_CLOSING_WINDOW_S = 0.2
 # The camera sign tracker ends a track after this gap without a detection
 # (traffic_signs.max_time_gap_s), unless the vehicle metadata says otherwise.
 DEFAULT_SIGN_TRACK_GAP_S = 0.6
@@ -611,10 +614,12 @@ def mark_occlusions(tracks: Sequence[LocalTrack], ego: EgoTrajectory, footprint:
 
 
 def _critical_assessments(samples: Sequence[TrackSample], ego: EgoTrajectory, cfg: SemanticsConfig,
-                          footprint: Optional[EgoFootprint] = None) -> List[ConflictAssessment]:
+                          footprint: Optional[EgoFootprint] = None,
+                          leader: Optional[Sequence[bool]] = None) -> List[ConflictAssessment]:
     first = samples[0].t_local if samples else 0.0
-    return [assess_conflict(sample, ego.at(sample.t_local), footprint, cfg, sample.t_local - first)
-            for sample in samples]
+    return [assess_conflict(sample, ego.at(sample.t_local), footprint, cfg, sample.t_local - first,
+                            None if leader is None else leader[index])
+            for index, sample in enumerate(samples)]
 
 
 def closing_spans(times: Sequence[float], samples: Sequence[TrackSample], cfg: SemanticsConfig) -> List[Span]:
@@ -851,6 +856,12 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
     return left, right
 
 
+def _entered(span: Span, entries: Sequence[int]) -> bool:
+    """An EGO_PATH_ENTRY (sample index) inside the cut-in span (start..end, or to the track's end)."""
+    start, end = span
+    return any(start <= entry and (end is None or entry <= end) for entry in entries)
+
+
 def _stationary_ego() -> EgoTrajectory:
     return EgoTrajectory([EgoState(t_local=0.0, x=0.0, y=0.0, heading=0.0, vx=0.0, vy=0.0)])
 
@@ -861,7 +872,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
                  contacts: Sequence[Tuple[float, float]] = (), body_based: bool = True,
                  holds: Sequence[Tuple[float, float]] = (),
                  touching_clearance_m: float = 1.0, road: Optional["RoadFrame"] = None,
-                 impact_from: Optional[float] = None) -> List[SemanticEvent]:
+                 impact_from: Optional[float] = None, recorder_contacts: Sequence[float] = (),
+                 approach_window_s: float = 1.0) -> List[SemanticEvent]:
     """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
@@ -873,6 +885,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     velocity); without it the recorder is taken as standing still.
     ``contacts``: (first, last) callbacks of the recorder's collisions with this
     track (``contact_partners``): each ends the CRITICAL_TTC episode then active.
+    ``recorder_contacts``: first callbacks of all the recorder's collisions; a track lost while closing in
+    within ``approach_window_s`` before one of them may have struck it from a blind zone.
     """
     ego = ego or _stationary_ego()
     samples = track.samples
@@ -882,17 +896,36 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     events = [SemanticEvent(type="TRACK_APPEARED_" + appearance_side(samples[0].bearing_deg, cfg), kind=PERCEPTION,
                             actor_id=owner, subject_id=subject, t_local=times[0], source="radar")]
 
-    # Inside: ahead of the recorder's front edge and within the corridor.  Out
-    # again only when clearly beside or behind that edge (at contact the target
-    # sits right at it).
+    # The recorder's path corridor: along the lane it drives in when the map is known (``road.RoadFrame``: a
+    # bend or a turn bends the corridor, a lane change does not move it), else straight along its heading.
+    # Inside: ahead of the recorder's front edge and within the corridor.  Out again only when clearly beside
+    # or behind that edge (at contact the target sits right at it).
     corridor, hysteresis = cfg.path_half_width_m, cfg.path_hysteresis_m
     from .conflict import target_box, box_corners, body_in_corridor, lateral_body_gap
     front = footprint.x_max if footprint is not None else 0.0
     bodies = [box_corners(*target_box(s, ego.at(s.t_local), footprint, cfg)[:3]) for s in samples]
+    # Per sample, the body corners (and the track point) in the path frame: (arc length ahead of the recorder,
+    # lateral offset from its own line), None without a road model at that instant.
+    path_bodies: List[Optional[np.ndarray]] = [None] * len(samples)
+    path_points: List[Optional[np.ndarray]] = [None] * len(samples)
+    if road is not None and body_based:
+        for index, (sample, corners) in enumerate(zip(samples, bodies)):
+            own = ego.at(sample.t_local)
+            c, s = math.cos(own.heading), math.sin(own.heading)
+            local_xy = np.vstack([corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y]),
+                                  [[sample.x_m, sample.y_m]]])
+            mapped = road.to_path(ego, sample.t_local, local_xy)
+            if mapped is not None:
+                path_bodies[index], path_points[index] = mapped[:-1, :2], mapped[-1]
+
+    def in_path(i: int, front_edge: float, half: float) -> bool:
+        body = path_bodies[i] if path_bodies[i] is not None else bodies[i]
+        return body_in_corridor(body, front_edge, half)
+
     if body_based:
         path = [] if track.identity_ambiguous else active_intervals(times, list(range(len(samples))),
-            lambda i: body_in_corridor(bodies[i], front, corridor),
-            lambda i: not body_in_corridor(bodies[i], front - hysteresis, corridor + hysteresis))
+            lambda i: in_path(i, front, corridor),
+            lambda i: not in_path(i, front - hysteresis, corridor + hysteresis))
     else:  # evaluator's point-geometry ablation; runtime always uses the body
         path = [] if track.identity_ambiguous else active_intervals(times, samples,
             lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
@@ -905,46 +938,36 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     closing = closing_spans(times, samples, cfg)
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar", times, closing)
 
-    # A critical TTC (``conflict.assess_conflict``): a predicted collision course that
-    # braking cannot avoid with the available deceleration (PREDICTED_OVERLAP), or a
-    # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  It ends only
-    # once the conflict is clearly resolved for the release debounce (``critical_intervals``):
-    # no collision course or a required deceleration below ``critical_release_ratio`` of
-    # the available one, no near contact, and a leader of the episode clearly gone; or at
-    # the recorder's collision with this track, the end of the pre-collision threat.  The
-    # reason is in the TRACK_STATE facts (``critical_reason``).
-    assessments = _critical_assessments(samples, ego, cfg, footprint)
-    release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
-    touching = [sample.clearance_m <= touching_clearance_m + 1e-9 for sample in samples]
-    spans, collided = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S, contacts, holds,
-                                         touching)
-    critical_spans = _lasting(spans, times, keep=collided)
-    first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
-    events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
-                           times, critical_spans)
-
-    # A cut-in can be established only once the estimate is precise enough.
+    # CUT_IN: a lateral manoeuvre of the target toward the recorder's path, in the path frame where the road is
+    # known (the bend the recorder follows is not a lateral motion of the target), else in the frame frozen at
+    # first observation (the observer's own later translation or yaw cannot create target motion in it).
     first_known = next((index for index, motion in enumerate(motions) if motion.known), len(motions))
-    # Freeze the path orientation and lateral origin at first observation.
-    # Target velocity and body displacement in this frame cannot be created by
-    # the observer's later translation or yaw. Path entry remains instantaneous.
     anchor = ego.at(times[0])
     c0, s0 = math.cos(anchor.heading), math.sin(anchor.heading)
     stable_bodies, target_lateral, stable_motions, ahead = [], [], [], []
-    for sample, motion, corners in zip(samples, motions, bodies):
+    for index, (sample, motion, corners) in enumerate(zip(samples, motions, bodies)):
         own = ego.at(sample.t_local)
-        c, s = math.cos(own.heading), math.sin(own.heading)
-        world_corners = corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y])
-        stable = (world_corners - np.array([anchor.x, anchor.y])) @ np.array([[c0, -s0], [s0, c0]])
+        if path_bodies[index] is not None:
+            stable = path_bodies[index]
+            heading = float(path_points[index][2])  # the path direction at the target (world frame)
+            wvx, wvy = road.vector_to_world(sample.vx_mps, sample.vy_mps)
+            target_lateral.append(-math.sin(heading) * wvx + math.cos(heading) * wvy)
+            angle = ((math.degrees(math.atan2(wvy, wvx) - heading) + 180) % 360 - 180
+                     if sample.speed_mps >= 1.0 else None)
+            ahead.append(float(np.max(stable[:, 0])) > front)
+        else:
+            c, s = math.cos(own.heading), math.sin(own.heading)
+            world_corners = corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y])
+            stable = (world_corners - np.array([anchor.x, anchor.y])) @ np.array([[c0, -s0], [s0, c0]])
+            target_lateral.append(-s0 * sample.vx_mps + c0 * sample.vy_mps)
+            angle = ((math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - anchor.heading) + 180) % 360 - 180
+                     if sample.speed_mps >= 1.0 else None)
+            ego_forward = c0 * (own.x - anchor.x) + s0 * (own.y - anchor.y) + front
+            ahead.append(float(np.max(stable[:, 0])) > ego_forward)
         stable_bodies.append(stable)
-        target_lateral.append(-s0 * sample.vx_mps + c0 * sample.vy_mps)
-        angle = ((math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - anchor.heading) + 180) % 360 - 180
-                 if sample.speed_mps >= 1.0 else None)
         stable_motions.append(RelativeMotion(motion.longitudinal_speed_mps, motion.lateral_speed_mps,
                                              angle, motion.t_cpa_s, motion.d_cpa_m, motion.known,
                                              motion.d_cpa_clearance_m))
-        ego_forward = c0 * (own.x - anchor.x) + s0 * (own.y - anchor.y) + front
-        ahead.append(float(np.max(stable[:, 0])) > ego_forward)
     body_gaps = [lateral_body_gap(float(np.min(b[:, 1])), float(np.max(b[:, 1])), corridor)
                  for b in stable_bodies]
     sides = [-1 if float(np.mean(b[:, 1])) < 0 else 1 for b in stable_bodies]
@@ -963,10 +986,68 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
                                                       own.x, own.y))
     from_left, from_right = cut_in_spans(times, samples, stable_motions, cfg, body_gaps,
                                         target_lateral, sides, ahead, lane_toward, impact_from)
+    # A cut-in is confirmed only by the target's entry into the recorder's path during it: a lateral approach
+    # that never enters (it keeps its lane, or turns away) is no cut-in.  Decided offline on the whole track;
+    # the start keeps its own time.
+    entries = [start for start, _ in path if start > 0]
+    from_left = [span for span in from_left if _entered(span, entries)]
+    from_right = [span for span in from_right if _entered(span, entries)]
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
     events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
                             PERCEPTION, "radar", times, from_right)
+
+    # A critical TTC (``conflict.assess_conflict``): a predicted collision course that
+    # braking cannot avoid with the available deceleration (PREDICTED_OVERLAP), or a
+    # leader closer than the safe following distance (UNSAFE_FORWARD_GAP).  A leader is a target in the
+    # recorder's path or in a confirmed cut-in into it (``leader``): never a car beside it whose box merely
+    # touches the corridor at one sample.  It ends only
+    # once the conflict is clearly resolved for the release debounce (``critical_intervals``):
+    # no collision course or a required deceleration below ``critical_release_ratio`` of
+    # the available one, no near contact, and a leader of the episode clearly gone; or at
+    # the recorder's collision with this track, the end of the pre-collision threat.  The
+    # reason is in the TRACK_STATE facts (``critical_reason``).
+    leader_spans = path + from_left + from_right
+    leader = [any(a <= i and (b is None or i <= b) for a, b in leader_spans) for i in range(len(samples))]
+    track.leader_spans = [(times[a], None if b is None else times[b]) for a, b in leader_spans]
+    assessments = _critical_assessments(samples, ego, cfg, footprint, leader)
+    # A collision course that only the target's motion across its own lane creates needs that manoeuvre
+    # confirmed: the target enters the recorder's path (now or later) or strikes it (a contact of this track,
+    # still closing in over ``STRIKE_CLOSING_WINDOW_S`` before it).  Otherwise the null hypothesis holds, a car
+    # keeps its lane, and the course is predicted at its velocity along the lane (``road.RoadFrame.along_lane``).
+    # The track point of a car passing beside the recorder slides over its visible faces (front, then side) and
+    # fakes a lateral speed toward it; the recorder's own lateral motion and crossing traffic are unaffected.
+    track.lane_held = {}
+    if road is not None:
+        closing_now = span_values(len(samples), closing)
+        struck = [last for first, last in contacts
+                  if any(closing_now[i] is True for i, s in enumerate(samples)
+                         if first - STRIKE_CLOSING_WINDOW_S - 1e-6 <= s.t_local < first - 1e-6)]
+        # Lost while closing in, the recorder's contact following within the approach window: the striker
+        # disappeared into a blind zone just before the impact.
+        if closing_now and closing_now[-1] is True:
+            struck += [first for first in recorder_contacts if 0.0 <= first - times[-1] <= approach_window_s + 1e-6]
+        for index, assessment in enumerate(assessments):
+            if PREDICTED_OVERLAP not in (assessment.critical_reason or ""):
+                continue
+            if (any(end is None or end >= index for _, end in path)  # in the path now or entering it later
+                    or any(last >= times[index] - 1e-6 for last in struck)):
+                continue
+            sample = samples[index]
+            held = road.along_lane(sample.x_m, sample.y_m, sample.vx_mps, sample.vy_mps)
+            if held is None:
+                continue
+            track.lane_held[times[index]] = held
+            assessments[index] = assess_conflict(track.conflict_sample(sample), ego.at(sample.t_local), footprint,
+                                                 cfg, sample.t_local - samples[0].t_local, leader[index])
+    release = cfg.critical_release_ratio * cfg.critical_deceleration_mps2
+    touching = [sample.clearance_m <= touching_clearance_m + 1e-9 for sample in samples]
+    spans, collided = critical_intervals(times, assessments, release, CRITICAL_RELEASE_DEBOUNCE_S, contacts, holds,
+                                         touching)
+    critical_spans = _lasting(spans, times, keep=collided)
+    first_known_critical = next((index for index, a in enumerate(assessments) if a.known), len(assessments))
+    events += state_events(owner, subject, "CRITICAL_TTC_START", "CRITICAL_TTC_END", PERCEPTION, "radar",
+                           times, critical_spans)
     for event in events:
         if event.type in ('EGO_PATH_ENTRY','EGO_PATH_EXIT') or event.type.startswith('CUT_IN_FROM_'):
             i = min(range(len(times)), key=lambda k: abs(times[k]-event.t_local))
@@ -1125,7 +1206,8 @@ def build_trace(owner: str, ego: EgoTrajectory, controls: Sequence[Mapping[str, 
                 if sample is not None:
                     own = ego.at(sample.t_local)
                     motion = relative_motion(sample, own, semantics, footprint)
-                    conflict = assess_conflict(sample, own, footprint, semantics, sample.t_local - track.first_t)
+                    conflict = assess_conflict(track.conflict_sample(sample), own, footprint, semantics,
+                                               sample.t_local - track.first_t, track.leader_at(sample.t_local))
                     facts.append(track_state_fact(owner, track.track_id, sample, t_local, motion, semantics, conflict))
         frames.append(TraceFrame(t_local=t_local, facts=facts, events=by_frame.get(index, []),
                                  perceived_state=None if world is None else world.snapshot(t_local, before=False)))
@@ -1252,7 +1334,9 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         events += track_events(owner, track, ego.end, semantics, ego, world, footprint,
                                partners.get(track.track_id, ()), holds=holds.get(track.track_id, ()),
                                touching_clearance_m=cfg.fusion.touching_clearance_m, road=road,
-                               impact_from=min((c.first for c in contacts), default=None))
+                               impact_from=min((c.first for c in contacts), default=None),
+                               recorder_contacts=[c.first for c in contacts],
+                               approach_window_s=cfg.fusion.approach_window_s)
     events = number_events(owner, events)
 
     trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world,

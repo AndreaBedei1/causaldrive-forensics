@@ -271,21 +271,17 @@ def _lane_change(start_lateral, speed=1.0, t0=2.0, until=6.0, longitudinal=8.0):
 
 
 class CutInPreEntryTests(unittest.TestCase):
-    def test_an_adjacent_car_moving_into_the_path_cuts_in_and_is_critical_first(self):  # A
-        # Close to the lane line (near side 2.9 m out): its body is within the front-lateral margin
-        # as soon as it heads for the path, before the cut-in has persisted long enough.
-        events = _events(_track(_lane_change(2.9)))
-        cut_in = next(t for name, t in events if name == "CUT_IN_FROM_RIGHT_START")
-        critical = next(t for name, t in events if name == "CRITICAL_TTC_START")
-        entry = next(t for name, t in events if name == "EGO_PATH_ENTRY")
-        self.assertLess(critical, cut_in)
-        self.assertLess(cut_in, entry)
-        # From the middle of the next lane (near side 3.4 m out) the body reaches the margin when the
-        # cut-in is already established: both start together, the gap is never critical later.
-        events = _events(_track(_lane_change(3.4)))
-        cut_in = next(t for name, t in events if name == "CUT_IN_FROM_RIGHT_START")
-        critical = next(t for name, t in events if name == "CRITICAL_TTC_START")
-        self.assertLessEqual(critical, cut_in)
+    def test_an_adjacent_car_moving_into_the_path_cuts_in_and_the_gap_counts_from_the_cut_in(self):  # A
+        # An adjacent car is a leader (R157 forward gap) only once its cut-in is established and confirmed
+        # by its later EGO_PATH_ENTRY: the gap turns critical with the cut-in, never before it, also when
+        # its body is already within the front-lateral margin (near side 2.9 m out).
+        for near_side in (2.9, 3.4):
+            events = _events(_track(_lane_change(near_side)))
+            cut_in = next(t for name, t in events if name == "CUT_IN_FROM_RIGHT_START")
+            critical = next(t for name, t in events if name == "CRITICAL_TTC_START")
+            entry = next(t for name, t in events if name == "EGO_PATH_ENTRY")
+            self.assertEqual(critical, cut_in, near_side)
+            self.assertLess(cut_in, entry, near_side)
 
     def test_a_car_still_two_lanes_away_does_not_cut_in(self):  # B
         # It changes lanes toward the recorder but stops in the lane next to the recorder's.
@@ -339,7 +335,7 @@ class CampaignRegressionTests(unittest.TestCase):
             self.skipTest("canonical trace not present")
         self.assertIsNotNone(self.first(nodes, "CUT_IN_FROM_LEFT_START", "track_001"))
 
-    def test_s12_a_is_critical_before_u1_cut_in_and_b_sees_a_manoeuvre(self):
+    def test_s12_a_is_critical_from_u1_cut_in_and_b_sees_a_manoeuvre(self):
         a_nodes, b_nodes = _graph("S12/run_0_crash", "A"), _graph("S12/run_0_crash", "B")
         if a_nodes is None or b_nodes is None:
             self.skipTest("canonical trace not present")
@@ -347,7 +343,8 @@ class CampaignRegressionTests(unittest.TestCase):
         cut_in = self.first(a_nodes, "CUT_IN_FROM_RIGHT_START", "track_001")
         entry = self.first(a_nodes, "EGO_PATH_ENTRY", "track_001")
         collision = next(n["t_local"] for n in a_nodes if n["event_type"] == "COLLISION")
-        self.assertTrue(critical < cut_in < entry < collision, (critical, cut_in, entry, collision))
+        # U1 is a leader for A from its confirmed cut-in on (no gap claim on the adjacent car before it).
+        self.assertTrue(critical == cut_in < entry < collision, (critical, cut_in, entry, collision))
         self.assertEqual({n['subject_id'] for n in b_nodes if n['event_type'].startswith('CUT_IN')},{'track_001'})
 
     def test_no_critical_ttc_on_a_car_behind_or_beside_for_the_gap_alone(self):

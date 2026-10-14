@@ -973,6 +973,25 @@ class LocalTrack:
     returns: List[Optional[Tuple[np.ndarray, np.ndarray]]] = field(default_factory=list, repr=False, compare=False)
     parent_track: Optional[str] = None
     identity_ambiguous: bool = False
+    # Local times (start, end or None) the target is a leader candidate of the recorder: in its path or in a
+    # confirmed cut-in (``local.track_events``); None: not determined (no gate).
+    leader_spans: Optional[List[Tuple[float, Optional[float]]]] = field(default=None, repr=False, compare=False)
+    # Samples (t_local rounded to 0.1 ms) whose collision course is predicted at the velocity along the target's
+    # lane (``local.track_events``: an unconfirmed motion across its lane), that velocity in the local frame.
+    lane_held: Dict[float, Tuple[float, float]] = field(default_factory=dict, repr=False, compare=False)
+
+    def conflict_sample(self, sample: "TrackSample") -> "TrackSample":
+        """The sample as the collision-course prediction uses it (``lane_held``)."""
+        held = self.lane_held.get(round(sample.t_local, 4))
+        if held is None:
+            return sample
+        import dataclasses
+        return dataclasses.replace(sample, vx_mps=held[0], vy_mps=held[1], speed_mps=math.hypot(*held))
+
+    def leader_at(self, t_local: float) -> Optional[bool]:
+        if self.leader_spans is None:
+            return None
+        return any(a - 1e-6 <= t_local and (b is None or t_local <= b + 1e-6) for a, b in self.leader_spans)
 
     @property
     def first_t(self) -> float:

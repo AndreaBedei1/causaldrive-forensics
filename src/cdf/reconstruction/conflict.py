@@ -591,12 +591,16 @@ def forward_gap(prediction: "_Prediction", cfg: SemanticsConfig, vel_std_mps: fl
 
 
 def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoFootprint],
-                    cfg: SemanticsConfig, track_age_s: Optional[float] = None) -> ConflictAssessment:
+                    cfg: SemanticsConfig, track_age_s: Optional[float] = None,
+                    leader_gate: Optional[bool] = None) -> ConflictAssessment:
     """Collision course, TTC, braking avoidability and safe following distance of one track sample
     (see the module docstring).
 
     ``track_age_s``: time since the track's first sample (None: old enough).  ``sample.occluded``
-    (set by the local reconstruction) withholds the forward-gap reason either way.
+    (set by the local reconstruction) withholds the forward-gap reason either way.  ``leader_gate``: whether
+    the target is in the recorder's path or in a confirmed cut-in into it at this sample (``local.track_events``);
+    False: it is no leader, whatever its box geometry at this one sample (a car beside the recorder, its box
+    rotated by a heading error, or a lateral speed estimate that no path entry confirms); None: not known.
     """
     prediction = _Prediction(sample, own, footprint, cfg)
     available = cfg.critical_deceleration_mps2
@@ -608,7 +612,7 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
                                 target_speed_mps=prediction.target_speed,
                                 target_acceleration_mps2=prediction.target_acceleration,
                                 ego_speed_mps=prediction.ego_speed,
-                                forward=forward_gap(prediction, cfg, sample.vel_std_mps),
+                                forward=_gated(forward_gap(prediction, cfg, sample.vel_std_mps), leader_gate),
                                 occluded=bool(getattr(sample, "occluded", False)),
                                 contact_imminent=(sample.closing_speed_mps >= cfg.closing_speed_threshold_mps
                                                   and sample.clearance_m < cfg.critical_reaction_time_s
@@ -622,6 +626,14 @@ def assess_conflict(sample: TrackSample, own: EgoState, footprint: Optional[EgoF
     result.critical = known and bool(reasons)
     result.critical_reason = "+".join(reasons) if result.critical else None
     return result
+
+
+def _gated(forward: ForwardGap, leader_gate: Optional[bool]) -> ForwardGap:
+    """A forward gap whose target is not a leader of the recorder (``leader_gate`` False) is never unsafe."""
+    if leader_gate is False and (forward.leader or forward.unsafe):
+        import dataclasses
+        return dataclasses.replace(forward, leader=False, unsafe=False)
+    return forward
 
 
 def _collision_course(prediction: "_Prediction", sample: TrackSample, cfg: SemanticsConfig,
