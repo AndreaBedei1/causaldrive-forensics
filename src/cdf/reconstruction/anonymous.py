@@ -256,6 +256,7 @@ def build_common_view(locals_: Sequence[Any], alignment: Alignment, associations
             tracks.append(common_track(track, local.owner, local.ego, poses[local.owner], local.footprint,
                                        clock.offset_to_global, ASSOCIATED if linked else ANONYMOUS,
                                        item.global_entity if linked else None))
+            tracks[-1].own_impact = contacts[0][0] if contacts else None
     return CommonView(tracks, bodies)
 
 
@@ -490,10 +491,16 @@ def _heading(samples: Sequence[CommonSample], cfg: ReconstructionConfig) -> Opti
     return math.atan2(v[1], v[0]) if speed >= max(3.0 * spread, 1.0) else None
 
 
+def _after_impact(track: CommonTrack, sample: CommonSample) -> bool:
+    impact = getattr(track, "own_impact", None)
+    return impact is not None and sample.t_global >= impact - 1e-6
+
+
 def pair_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> Optional[PairEvidence]:
     """Same road user?  At each instant both observers measured a moving target: the box test (chi-square
     of one box fitted to both observers' faces minus those of the two separate fits, 2 dof) and the
-    velocity test (difference against both uncertainties, 2 dof), each within the gate of
+    velocity test (difference against both uncertainties, 2 dof; not at instants after an observer's own
+    collision, whose impulse corrupts its velocity estimates), each within the gate of
     ``anonymous_gate_probability``.  Two near surfaces farther apart than a box diagonal plus 6 sigma fail
     without a fit.  Accepted when at least ``anonymous_min_shared_samples`` instants were compared and at
     least ``anonymous_pass_fraction`` of them pass both."""
@@ -518,6 +525,8 @@ def pair_evidence(a: CommonTrack, b: CommonTrack, cfg: ReconstructionConfig) -> 
         reach = diagonal + 6.0 * math.hypot(_position_sigma(cfg, sa), _position_sigma(cfg, sb))
         dv = sa.velocity - sb.velocity
         d_vel = float(dv @ dv) / _velocity_sigma(cfg, sa.vel_std, sb.vel_std) ** 2
+        if _after_impact(a, sa) or _after_impact(b, sb):
+            d_vel = 0.0  # an observer's velocity estimates after its own impact say nothing: geometry decides
         if float(np.hypot(*(sa.near - sb.near))) > reach:
             box.append(math.inf)
             velocity.append(d_vel)

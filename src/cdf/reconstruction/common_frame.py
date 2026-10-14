@@ -164,6 +164,9 @@ class CommonTrack:
     entity: Optional[str] = None  # the recorder it was associated with, if any
     identity_ambiguous: bool = False
     parent_track: Optional[str] = None
+    # The observer's own first collision (global time): from then on its ego-motion compensation, hence its
+    # tracks' velocity estimates, are corrupted by the impulse.  None: no collision of its own.
+    own_impact: Optional[float] = None
 
     @property
     def name(self) -> str:

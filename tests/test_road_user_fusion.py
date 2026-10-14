@@ -338,11 +338,14 @@ class LinkAndAlignmentTests(unittest.TestCase):
         for name in ("A:track_001", "B:track_002#segment_1"):
             self.assertEqual(names[name], ("ASSOCIATED", "C"), name)
         # A's track is named by the A-C collision evidence, B's by its returns on the van's own outline.
-        self.assertEqual(sorted(link["track"] for link in record["recorder_links"]), ["B:track_002#segment_1"])
-        # B's later fragment of the van starts after the van touched A: its returns lie within the uncertainty of
-        # both bodies, so it is named neither (unresolved, conservatively), and never wrongly.
-        self.assertEqual(names["B:track_003"][0], "ANONYMOUS")
-        self.assertNotIn(names["B:track_003"][1], ("A", "B", "C"))
+        links = {link["track"]: link for link in record["recorder_links"]}
+        self.assertEqual(sorted(links), ["B:track_002#segment_1", "B:track_003"])
+        # B's later fragment of the van starts after the van touched A: its own returns cannot tell the two bodies
+        # apart, but it is one box with A's track of the van (already named C) on every shared instant, and no
+        # other recorder matches it: it inherits C (after the impact the velocity is not compared).
+        self.assertEqual(names["B:track_003"], ("ASSOCIATED", "C"))
+        self.assertEqual(links["B:track_003"]["inherited_from"], "A:track_001")
+        self.assertNotIn("inherited_from", links["B:track_002#segment_1"])
 
     def test_s06_recorder_c_is_aligned_by_its_observed_trajectory(self):
         with tempfile.TemporaryDirectory() as tmp:

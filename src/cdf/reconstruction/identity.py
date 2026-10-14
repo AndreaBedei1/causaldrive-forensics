@@ -155,6 +155,45 @@ def discriminable(sigma: float, cfg: ReconstructionConfig) -> bool:
 # Recorder links with relative uncertainty
 # --------------------------------------------------------------------------
 
+def inherited_links(view: Any, links: Sequence[RecorderLink], cfg: ReconstructionConfig,
+                    rel: RelativePose) -> List[RecorderLink]:
+    """Recorder identities passed on through another observer's view.  An anonymous track that is the same
+    body as a track another observer has identified as recorder X (the one-box and velocity test of
+    ``pair_corrected``; a brief overlap must pass at every shared instant) inherits X, provided it is the same
+    body as no track identified as any other recorder.  Its own returns may not single X out (X touching a
+    third body: both outlines within its uncertainty); the other observer's track of X does.  The usual
+    exclusivity per observer and instant applies afterwards (``exclusive_recorder_links``)."""
+    named = {t.name: t.entity for t in view.tracks if t.status == ASSOCIATED and t.entity}
+    named.update({link.track: link.recorder for link in links})
+    by_name = {t.name: t for t in view.tracks}
+    out = []
+    for track in view.tracks:
+        if track.name in named or track.identity_ambiguous:
+            continue
+        found: Dict[str, Tuple[PairEvidence, str]] = {}
+        for other_name, recorder in named.items():
+            other = by_name.get(other_name)
+            if other is None or other.recorder == track.recorder or recorder == track.recorder:
+                continue
+            evidence = pair_corrected(track, other, cfg, rel)
+            if evidence is not None and not evidence.accepted and short_overlap(evidence, cfg):
+                evidence = pair_corrected(track, other, strict_short(track, other, cfg), rel) or evidence
+            if evidence is not None and evidence.accepted:
+                best = found.get(recorder)
+                if best is None or evidence.compared > best[0].compared:
+                    found[recorder] = (evidence, other_name)
+        if len(found) != 1:
+            continue  # nothing, or the same body as two different recorders: unresolved
+        recorder, (evidence, through) = next(iter(found.items()))
+        link = RecorderLink(track.name, recorder, evidence.compared, round(evidence.centre_gap_m or 0.0, 3),
+                            round(math.sqrt(max(evidence.median_box_chi2 or 0.0, 0.0)), 3),
+                            round(math.sqrt(max(evidence.median_velocity_chi2 or 0.0, 0.0)), 3),
+                            round(evidence.passed, 3), True)
+        link.inherited_from = through  # type: ignore[attr-defined]
+        out.append(link)
+    return out
+
+
 def link_to_recorders_corrected(view: Any, cfg: ReconstructionConfig, rel: RelativePose) -> Tuple[List[RecorderLink], List[Dict[str, Any]]]:
     """Per anonymous track, the recorder whose own footprint its returns lie on, at that recorder's own
     velocity: over at least ``link_min_samples`` samples before the recorder's first contact with a third
@@ -581,6 +620,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     view = build_common_view(locals_, alignment, associations, poses)
     links, link_refusals = link_to_recorders_corrected(view, cfg, rel)
     links += collision_continuity_links(view, associations, alignment, links, cfg)
+    links += inherited_links(view, links, cfg, rel)
     links, exclusive = exclusive_recorder_links(view, links, cfg)
     link_refusals = list(link_refusals) + [{"track": r["track"], "reason": r["reason"]} for r in exclusive]
     by_key = {(a.local_graph, a.local_track): a for a in associations}
@@ -590,7 +630,13 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
         item.status, item.global_entity, item.candidate = ASSOCIATED, link.recorder, link.recorder
         item.confidence = link.fraction_within
         item.blocking = []
-        if not link.collision_anchored:
+        if getattr(link, "inherited_from", None):
+            item.collision_event = None
+            item.evidence = list(item.evidence) + [
+                "same body as {0} (identified as {1}): one box and one velocity on {2} shared instants, {3:.0%} "
+                "within the gates; the same body as no track of another recorder".format(
+                    link.inherited_from, link.recorder, link.samples, link.fraction_within)]
+        elif not link.collision_anchored:
             item.collision_event = None
             item.evidence = list(item.evidence) + [
                 "common frame: its returns lie on {0}'s own footprint (median {1:.2f} m, {2:.2f} sigma of the relative "

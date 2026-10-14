@@ -105,6 +105,16 @@ class S11RecordedTests(unittest.TestCase):
                 shutil.copy2(src / name, dst / name)
             reconstruct_run(dst, load_config())
             type(self)._fresh = json.loads((dst / "reconstruction/global/associations.json").read_text())
+            spans = {}
+            for owner in ("A", "B", "C"):
+                with (dst / "reconstruction" / owner / "local_trace.jsonl").open(encoding="utf-8") as handle:
+                    for line in handle:
+                        row = json.loads(line)
+                        for fact in row["facts"]:
+                            if fact["type"] == "TRACK_STATE":
+                                span = spans.setdefault((owner, fact["subject_id"]), [row["t_local"], row["t_local"]])
+                                span[1] = row["t_local"]
+            type(self)._spans = spans
         return type(self)._fresh
 
     def test_s11_reconstruction_matches_the_committed_one(self):
@@ -113,14 +123,18 @@ class S11RecordedTests(unittest.TestCase):
         self.assertEqual([(a["local_graph"], a["local_track"], a["global_entity"]) for a in committed],
                          [(a["local_graph"], a["local_track"], a["global_entity"]) for a in fresh])
 
-    def test_s11_has_one_c_claim_per_observer(self):
+    def test_s11_has_one_c_claim_per_observer_at_a_time(self):
         fresh = self.reconstruct()
         per_observer = {}
         for a in fresh:
             if a["global_entity"] == "C":
-                per_observer.setdefault(a["local_graph"], []).append(a["local_track"])
+                per_observer.setdefault(a["local_graph"], []).append(self._spans[(a["local_graph"], a["local_track"])])
         self.assertTrue(per_observer)
-        self.assertTrue(all(len(v) == 1 for v in per_observer.values()), per_observer)
+        # One recorder is one body: an observer's tracks named C follow one another, never overlap in time.
+        for owner, spans in per_observer.items():
+            spans.sort()
+            for (_, end), (start, _) in zip(spans, spans[1:]):
+                self.assertLess(end, start, (owner, spans))
 
 if __name__ == "__main__":
     unittest.main()
