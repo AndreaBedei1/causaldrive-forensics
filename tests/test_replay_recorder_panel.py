@@ -63,7 +63,7 @@ class RecorderPanelTests(unittest.TestCase):
     def test_f_a_state_that_ended_is_no_longer_displayed(self):
         run = run_of([(0.0, frame(track_001={"CRITICAL_TTC": True})), (2.0, frame(track_001={"CRITICAL_TTC": False}))])
         self.assertEqual(texts(run, 1.0), ["ego: MOVING", "track_001: CRITICAL_TTC"])
-        self.assertEqual(texts(run, 2.5), ["ego: MOVING", "track_001: no active state"])
+        self.assertEqual(texts(run, 2.5), ["ego: MOVING"])  # a track holding no state has no line
 
     def test_the_current_state_is_listed_above_the_recent_events(self):
         run = run_of([(0.0, frame(track_001={"CRITICAL_TTC": True}))],

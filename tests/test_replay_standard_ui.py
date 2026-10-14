@@ -74,6 +74,22 @@ class PanelTests(unittest.TestCase):
         self.assertEqual(lines[0][0], "ego: BRAKE")  # the current state comes first
         self.assertEqual(lines[-1], ("... +8 more", MORE))  # 1 + 12 + 3 lines, 8 shown
 
+    def test_a_full_panel_keeps_the_alerts_and_the_recent_events(self):
+        many = stub_run([event("CRITICAL_TTC_START", "x00"), event("TRACK_APPEARED_LEFT", "x01")],
+                        {"ego": {"MOVING": True},
+                         "external": dict({"x{0:02d}".format(k): {"IN_EGO_PATH": True} for k in range(1, 12)},
+                                          x00={"CRITICAL_TTC": True})})
+        lines = standard_panel_lines(many, "A", 1.0, 1.0)
+        texts = [text for text, _ in lines]
+        self.assertEqual(len(lines), MAX_PANEL_LINES + 1)
+        self.assertEqual(texts[0], "ego: MOVING")
+        self.assertIn("x00: CRITICAL_TTC", texts)
+        self.assertIn("» CRITICAL_TTC_START → x00", texts)
+        self.assertIn("» TRACK_APPEARED_LEFT → x01", texts)
+        self.assertEqual(lines[-1], ("... +7 more", MORE))  # 1 + 12 + 2 lines, 8 shown, in display order
+        kinds = [kind for _, kind in lines[:-1]]
+        self.assertEqual(kinds[kinds.index(EVENT):], [EVENT, EVENT])
+
     def test_hud_event_line_names_the_global_subject(self):
         self.assertEqual(event_line(self.run, event("CRITICAL_TTC_START", "track_002")), "A CRITICAL_TTC_START U1")
 
@@ -121,6 +137,26 @@ class RecordedRunPanelTests(unittest.TestCase):
                         self.assertEqual(set(kinds[kinds.index(EVENT):]), {EVENT}, (path, t, texts))
                     if lines and lines[-1][1] != MORE:  # untruncated: every recent event is listed
                         self.assertEqual(kinds.count(EVENT), len(run.recent_events(pid, t, 1.0)), (path, t, texts))
+
+
+class ClearanceLabelTests(unittest.TestCase):
+    def test_tracks_carry_the_body_to_body_clearance_of_an_active_interaction(self):
+        run = ReplayRun.load(ROOT / "traces/S02/run_0_crash")
+        if not run.tracks.get("A"):
+            self.skipTest("canonical trace not present")
+        seen = 0
+        for track in run.tracks["A"]:
+            for k in range(int(run.duration / 0.1) + 1):
+                t = k * 0.1
+                state = track.state_at(t)
+                states = ((run.perceived["A"].state_at(t) or {}).get("external") or {}).get(track.track_id) or {}
+                if state is None or states.get("CRITICAL_TTC") is not True:
+                    continue
+                self.assertIsNotNone(state.clearance, t)
+                self.assertGreaterEqual(state.clearance, -0.5, t)  # touching at most (box estimate)
+                self.assertLess(state.clearance, 60.0, t)
+                seen += 1
+        self.assertGreater(seen, 0)
 
 
 def _viewer():

@@ -1,11 +1,13 @@
 """Replay panel lines; scientific diagnostics remain in the reconstruction files.
 
-A recorder's panel is recorder-centric (the interface of commit 848a645): first the complete CURRENT perceived
-state of that recorder as the reconstruction wrote it (its own states, then one line per local track with the
-states it holds, named after the fusion's identity: ``track_001 (B): CLOSING, CRITICAL_TTC``), its anonymous
-tracks and the road users it sees, then the semantic events it generated in the last second.  Unlike 848a645,
-UNKNOWN states ('?', "track lost, states UNKNOWN") and the PREDICTED provenance are not shown, and a panel has
-at most ``MAX_PANEL_LINES`` lines, then ``... +N more`` (the complete list is built first).
+A recorder's panel is recorder-centric (the interface of commit 848a645): first the CURRENT perceived state of
+that recorder as the reconstruction wrote it (its own states, then one line per local track holding an active
+state, named after the fusion's identity: ``track_001 (B): CLOSING, CRITICAL_TTC``), its anonymous tracks and the
+road users it sees, then the semantic events it generated in the last second.  Unlike 848a645, UNKNOWN states
+('?', "track lost, states UNKNOWN"), the PREDICTED provenance and tracks holding no state are not shown, and a
+panel has at most ``MAX_PANEL_LINES`` lines, then ``... +N more``: the complete list is built first, and when it
+is longer the lines shown are the most important ones (``PRIORITY``: the recorder's own state, alerts, recent
+events, other states, anonymous tracks, road users), in their display order.
 """
 
 from typing import List, Optional, Sequence, Tuple
@@ -22,6 +24,8 @@ UNKNOWN = "UNKNOWN"
 # The states of a recorder and of a track, in the reconstruction's own order (world_state.EGO_STATES /
 # TRACK_STATES): a snapshot's states are listed in this order, the others after them.
 TRACK_ALERTS = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
+# Which lines a full panel keeps (lower first).
+PRIORITY = {EGO: 0, ALERT: 1, EVENT: 2, STATE: 3, ANONYMOUS: 4, ROAD_USER: 5}
 
 
 def anonymous_row(entity_id: str, observers: Sequence[str]) -> str:
@@ -42,9 +46,9 @@ def _true(states) -> List[str]:
 def perceived_state_lines(run, actor: str, t: float) -> Optional[List[Tuple[str, str]]]:
     """The recorder's perceived state at ``t`` (``local_trace``) as (text, kind) lines, like
     ``world_state.compact_state`` without its UNKNOWN parts: ``ego: MOVING, BRAKE``, then one line per track
-    with the states it holds (``no active state`` when it holds none and none is unknown), then the known
-    signs.  A track whose states are all or partly unknown shows only what is known; a lost track (all
-    unknown) is not listed.  None when the reconstruction wrote no perceived state."""
+    holding at least one state, then the known signs.  A track whose states are partly unknown shows only what
+    is known; a track holding none (or a lost one, all unknown) is not listed.  None when the reconstruction
+    wrote no perceived state."""
     perceived = (getattr(run, "perceived", None) or {}).get(actor)
     if perceived is None:
         return None
@@ -60,11 +64,10 @@ def perceived_state_lines(run, actor: str, t: float) -> Optional[List[Tuple[str,
         lines.append(("ego: no active state", EGO))
     for track_id, states in (snapshot.get("external") or {}).items():
         true = _true(states)
-        if not true and any(value == UNKNOWN for value in states.values()):
-            continue  # lost or unknown: nothing known to show
+        if not true:
+            continue  # no active state (or lost, unknown): nothing to show
         name = run.subject_name(actor, track_id)
-        lines.append(("{0}: {1}".format(name, ", ".join(true) or "no active state"),
-                      ALERT if set(true) & set(TRACK_ALERTS) else STATE))
+        lines.append(("{0}: {1}".format(name, ", ".join(true)), ALERT if set(true) & set(TRACK_ALERTS) else STATE))
     for sign_id, sign in (snapshot.get("signs") or {}).items():
         lines.append(("{0}: {1} sign known{2}".format(sign_id, sign.get("class"), ", relevant to the path"
                                                        if sign.get("relevant_to_ego_path") is True else ""), STATE))
@@ -104,7 +107,8 @@ def standard_panel_lines(run, actor: str, t: float, window: float,
         lines.append(("» " + event.event_type + (" → " + subject if subject else ""), EVENT))
     if len(lines) <= max_lines:
         return lines
-    return lines[:max_lines] + [("... +{0} more".format(len(lines) - max_lines), MORE)]
+    keep = sorted(sorted(range(len(lines)), key=lambda i: (PRIORITY.get(lines[i][1], len(PRIORITY)), i))[:max_lines])
+    return [lines[i] for i in keep] + [("... +{0} more".format(len(lines) - max_lines), MORE)]
 
 
 def event_line(run, event) -> str:

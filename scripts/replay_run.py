@@ -72,6 +72,9 @@ ROAD_USER_RGB = (225, 225, 225)  # an anonymous road user belongs to no observer
 CAMERA_MODES = ("overview", "follow", "free")
 SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
+# A link line with the clearance: every track a recorder holds one of these about, plus its nearest IN_EGO_PATH
+# track (the car it follows); farther cars in its path get no line.
+INTERACTION_STATES = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 COLLISION_WINDOW_S = 1.5
 PANEL_MAX_WIDTH = 360  # pixels: the recorder panels stay a narrow column at the right edge
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
@@ -180,6 +183,22 @@ def resolve_map(run: ReplayRun, carla_root: Optional[Path], current: Optional[st
     LOGGER.info("recorded positions in the driving lanes of: %s",
                 ", ".join("{0} {1:.0%}".format(name, fit) for name, fit in ranked[:4]))
     return choose_map(fits, networks, current)
+
+
+def _wrapped(text: str, font: Any, width: int) -> List[str]:
+    """A panel line split after its commas into pieces at most ``width`` pixels wide (continuations indented),
+    so a long list of states is never cut at the panel edge."""
+    if font.size(text)[0] <= width or ", " not in text:
+        return [text]
+    pieces, current = [], ""
+    for part in text.split(", "):
+        candidate = part if not current else current + ", " + part
+        if current and font.size(candidate + ",")[0] > width:
+            pieces.append(current + ",")
+            current = "    " + part
+        else:
+            current = candidate
+    return pieces + [current]
 
 
 class ReplayApp:
@@ -555,7 +574,8 @@ class ReplayApp:
             speed = self.run.participant(pid).trajectory.speed_at(self.run.start + t)
             header = self.font_bold.render("{0}   {1:5.1f} m/s  {2:3.0f} km/h".format(pid, speed, speed * 3.6),
                                            True, (255, 255, 255))
-            body = [font.render(text, True, rgb) for text, rgb, font in self._vehicle_lines(pid, t)]
+            body = [font.render(piece, True, rgb) for text, rgb, font in self._vehicle_lines(pid, t)
+                    for piece in _wrapped(text, font, PANEL_MAX_WIDTH - 18)]
             panels.append((pid, header, body))
         width = min(PANEL_MAX_WIDTH, max(240, max(max([h.get_width()] + [b.get_width() for b in body])
                                                   for _, h, body in panels) + 18))
@@ -637,7 +657,56 @@ class ReplayApp:
         labels = [self._draw_ghost(track, state, corners, index) for track, state, corners, index in boxes]
         labels += [self._draw_road_user(entity, state, corners, yaw) for entity, state, corners, yaw in users]
         labels += [self._draw_track_dot(track, state, observer, index) for track, state, observer, index in dots]
+        labels += self._draw_interaction_links(ghosts + dots, t)
         return [label for label in labels if label is not None]
+
+    def _draw_interaction_links(self, tracks: Sequence[Tuple[Any, Any, Pose, int]], t: float) -> List[Any]:
+        """The semantic link of an active interaction: a line from the observer to the track it holds
+        CRITICAL_TTC or CUT_IN about, or to its nearest IN_EGO_PATH track, labelled with their body-to-body
+        clearance (the track's near surface to the observer's own footprint, as the reconstruction measured
+        it).  One label per observer and road user (the closest of its tracks).  Returns the deferred label
+        drawings."""
+        best: Dict[Tuple[str, str], Tuple[float, Any, Any, Pose]] = {}
+        leader: Dict[str, Tuple[float, str, Any, Any, Pose]] = {}
+        for track, state, observer, _ in tracks:
+            if state.clearance is None:
+                continue
+            perceived = self.run.perceived.get(track.recorder)
+            snapshot = perceived.state_at(t) if perceived is not None else None
+            states = ((snapshot or {}).get("external") or {}).get(track.track_id) or {}
+            subject = subject_label(self.run, track.recorder, track.track_id)
+            if any(states.get(name) is True for name in INTERACTION_STATES):
+                key = (track.recorder, subject)
+                if key not in best or state.clearance < best[key][0]:
+                    best[key] = (state.clearance, track, state, observer)
+            if states.get("IN_EGO_PATH") is True:
+                if track.recorder not in leader or state.clearance < leader[track.recorder][0]:
+                    leader[track.recorder] = (state.clearance, subject, track, state, observer)
+        for recorder, (clearance, subject, track, state, observer) in leader.items():
+            if (recorder, subject) not in best:
+                best[(recorder, subject)] = (clearance, track, state, observer)
+        labels = []
+        for (recorder, _), (clearance, track, state, observer) in sorted(best.items()):
+            x, y = state.position
+            point = (x, y, self._ground_z(x, y, observer.z) + TRACK_DOT_HEIGHT_M)
+            start = (observer.x, observer.y, observer.z + 1.0)
+            color = self.colors[recorder]
+            self._line3d(start, point, color, 2)
+            middle = self._project(((start[0] + point[0]) / 2.0, (start[1] + point[1]) / 2.0, (start[2] + point[2]) / 2.0))
+            if middle is not None:
+                labels.append(lambda uv=middle, text="{0:.1f} m".format(max(clearance, 0.0)), rgb=color:
+                              self._distance_label(uv, text, rgb))
+        return labels
+
+    def _distance_label(self, uv: Tuple[int, int], text: str, color: Tuple[int, int, int]) -> None:
+        """A compact clearance label on a link line, moved to free space."""
+        surface = self.font_small.render(text, True, (255, 255, 255))
+        rect = self._free_rect(self.pygame.Rect(uv[0] - surface.get_width() // 2 - 4, uv[1] - surface.get_height() // 2,
+                                                surface.get_width() + 8, surface.get_height()))
+        self._panel(tuple(rect), 190)
+        self.pygame.draw.rect(self.screen, color, tuple(rect), 1)
+        self.screen.blit(surface, (rect.left + 4, rect.top))
+        self.occupied.append(rect.inflate(4, 4))
 
     def _draw_road_user(self, entity: EntityPath, state: EntityState, corners: List[Vector], yaw: float) -> Any:
         """An anonymous road user of the fusion: its fitted box, an arrow along its motion (none while its

@@ -453,6 +453,7 @@ class TrackPoint:
     yaw: float  # box heading [deg]: the estimated motion, else the last reliable one, else the recorder's
     heading: str  # HEADING_FROM_VELOCITY, HEADING_HELD or HEADING_UNKNOWN (no direction to show)
     measured: bool  # False: predicted by the tracker without a radar return
+    clearance: Optional[float] = None  # body to body: the near surface to the observer's own footprint [m]
 
 
 @dataclass
@@ -521,9 +522,10 @@ class TrackPath:
         yaw = a.yaw
         if (a.heading == HEADING_UNKNOWN) == (b.heading == HEADING_UNKNOWN):
             yaw = lerp_angle_deg(a.yaw, b.yaw, f)
+        clearance = None if a.clearance is None or b.clearance is None else lerp(a.clearance, b.clearance, f)
         return TrackPoint(t, (lerp(a.position[0], b.position[0], f), lerp(a.position[1], b.position[1], f)),
                           (lerp(a.centre[0], b.centre[0], f), lerp(a.centre[1], b.centre[1], f)),
-                          yaw, a.heading, a.measured)
+                          yaw, a.heading, a.measured, clearance)
 
 
 def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin: Pose, clock_origin: float,
@@ -579,7 +581,8 @@ def load_tracks(path: Path, recorder: str, trajectory: Trajectory, frame_origin:
                 dx, dy = rotate(cx - lon, cy - lat, observer.yaw)
                 centre = (position[0] + dx, position[1] + dy)
             samples.append(TrackPoint(round(source_time - run_start, 6), position, centre, yaw, heading,
-                                      bool(row.get("measured", True))))
+                                      bool(row.get("measured", True)),
+                                      None if row.get("clearance_m") is None else float(row["clearance_m"])))
         status, entity = (statuses or {}).get((recorder, track_id), (ANONYMOUS, None))
         tracks.append(TrackPath(recorder, track_id, samples, status, entity, geometry.max_gap,
                                 (road_users or {}).get((recorder, track_id))))
