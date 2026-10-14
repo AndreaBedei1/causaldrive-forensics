@@ -1,4 +1,5 @@
 @echo off
 rem Manual review menu of the 23 canonical runs. Run from an activated environment: conda activate carla
 cd /d "%~dp0.."
-python scripts\review_canonical_runs.py %*
+rem The replays use the CARLA 0.9.15 server already running on port 2000 (another port: --port N).
+python scripts\review_canonical_runs.py --port 2000 %*
