@@ -34,6 +34,7 @@ import numpy as np
 from ..recording.compact_observations import load_radar_observations
 from .config import CollisionConfig, ReconstructionConfig, SemanticsConfig
 from .conflict import UNSAFE_FORWARD_GAP, ConflictAssessment, assess_conflict, occluded_by
+from .road import RoadFrame
 from .models import (ACTION, FACT, OUTCOME, PERCEPTION, SAME_TRACK, GraphEdge, GraphNode,
                      LocalGraph, SemanticEvent, TraceFrame, display_order, precedes_edges)
 from .tracking import (EgoFootprint, EgoState, EgoTrajectory, LocalTrack, RadarMount, RadarStream,
@@ -770,8 +771,18 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
                  cfg: SemanticsConfig, body_gaps: Sequence[float],
                  target_lateral_speeds: Optional[Sequence[float]] = None,
                  body_sides: Optional[Sequence[int]] = None,
-                 body_ahead: Optional[Sequence[bool]] = None) -> Tuple[List[Span], List[Span]]:
+                 body_ahead: Optional[Sequence[bool]] = None,
+                 lane_toward_speeds: Optional[Sequence[Optional[float]]] = None,
+                 impact_from: Optional[float] = None) -> Tuple[List[Span], List[Span]]:
     """(from-left, from-right) intervals of a lateral merge toward the recorder's path.
+
+    ``impact_from``: the recorder's own first collision (local time).  From then on it follows no path of its
+    own and its impulse corrupts the ego-motion compensation of every track: no cut-in starts.
+
+    Road-relative: with a road model (``lane_toward_speeds``, ``road.RoadFrame.lane_toward_speed``: the
+    target's velocity across its own lane toward the recorder, None where unknown), the target must also be
+    leaving its lane toward the recorder at ``cut_in_lateral_speed_mps`` or more.  A car keeping its lane on a
+    curved road drifts sideways in any fixed frame, not relative to the road: it is no cut-in.
 
     Kinematic only: a target ahead of the recorder's front edge, moving within ``cut_in_max_heading_deg`` of
     the path heading fixed at first observation (so not crossing traffic), approaches the corridor
@@ -812,13 +823,18 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
             else:
                 settle = None
             continue
+        if impact_from is not None and times[index] >= impact_from - 1e-6:
+            run = None
+            continue
         side = (-1 if sample.lateral_m < 0 else 1) if body_sides is None else body_sides[index]
         toward = -side * lateral_speed
         parallel = (motion.heading_deg is not None and abs(motion.heading_deg) <= cfg.cut_in_max_heading_deg
                     and sample.speed_mps >= cfg.cut_in_min_target_speed_mps)
         ahead = sample.ahead_m > 0 if body_ahead is None else body_ahead[index]
-        if not (ahead and parallel and toward >= cfg.cut_in_lateral_speed_mps
-                and (target_lateral_speeds is None or toward > sample.vel_std_mps)):
+        lane_toward = None if lane_toward_speeds is None else lane_toward_speeds[index]
+        keeps_lane = lane_toward is not None and lane_toward < cfg.cut_in_lateral_speed_mps
+        if keeps_lane or not (ahead and parallel and toward >= cfg.cut_in_lateral_speed_mps
+                              and (target_lateral_speeds is None or toward > sample.vel_std_mps)):
             run = None
             continue
         if run is None or run[1] != side:
@@ -844,7 +860,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
                  footprint: Optional[EgoFootprint] = None,
                  contacts: Sequence[Tuple[float, float]] = (), body_based: bool = True,
                  holds: Sequence[Tuple[float, float]] = (),
-                 touching_clearance_m: float = 1.0) -> List[SemanticEvent]:
+                 touching_clearance_m: float = 1.0, road: Optional["RoadFrame"] = None,
+                 impact_from: Optional[float] = None) -> List[SemanticEvent]:
     """TRACK_APPEARED_FRONT/LEFT/RIGHT, TRACK_LOST and the EGO_PATH, CLOSING,
     CRITICAL_TTC and CUT_IN states of a track.
 
@@ -937,8 +954,15 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
         sides = [-1 if y < 0 else 1 for y in points]
         ahead = [(s.x_m-own.x)*c0+(s.y_m-own.y)*s0 > front
                  for s,own in ((s,ego.at(s.t_local)) for s in samples)]
+    lane_toward = None
+    if road is not None:  # road-relative: the target's motion across its own lane, toward the recorder
+        lane_toward = []
+        for sample in samples:
+            own = ego.at(sample.t_local)
+            lane_toward.append(road.lane_toward_speed(sample.x_m, sample.y_m, sample.vx_mps, sample.vy_mps,
+                                                      own.x, own.y))
     from_left, from_right = cut_in_spans(times, samples, stable_motions, cfg, body_gaps,
-                                        target_lateral, sides, ahead)
+                                        target_lateral, sides, ahead, lane_toward, impact_from)
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
     events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
@@ -1180,6 +1204,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     if clock_origin is None:
         clock_origin = float(ego_records[0]["timestamp"])
     ego = ego_trajectory(ego_records, clock_origin)
+    road = RoadFrame.from_ego_records(ego_records)
 
     tracks: List[LocalTrack] = []
     # The recorder's own shape (its bounding box, recorded with its metadata):
@@ -1226,7 +1251,8 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     for track in tracks:
         events += track_events(owner, track, ego.end, semantics, ego, world, footprint,
                                partners.get(track.track_id, ()), holds=holds.get(track.track_id, ()),
-                               touching_clearance_m=cfg.fusion.touching_clearance_m)
+                               touching_clearance_m=cfg.fusion.touching_clearance_m, road=road,
+                               impact_from=min((c.first for c in contacts), default=None))
     events = number_events(owner, events)
 
     trace = build_trace(owner, ego, controls, tracks, events, clock_origin, cfg.trace_hz, semantics, world,

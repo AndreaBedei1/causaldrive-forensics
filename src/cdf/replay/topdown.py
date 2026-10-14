@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from ..common.opendrive import LaneSample
 from ..reconstruction.models import PAPER_CORE_EVENTS
 from .model import DEFAULT_FOOTPRINT, HEADING_UNKNOWN, ReplayRun, rotate
 from .presentation import anonymous_row, subject_label
@@ -35,17 +36,6 @@ TRACK_HIGHLIGHTS = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT", "IN
 EVENT_WINDOW_S = 0.5  # core events shown: those of the last half second
 TRAIL_S = 2.0  # recorded path drawn behind each recorder
 KEY_STARTS = ("CRITICAL_TTC_START", "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START", "EGO_PATH_ENTRY")
-
-
-@dataclass(frozen=True)
-class LaneSample:
-    """One stretch of a driving lane: centre, heading [deg], width and length [m] (world frame)."""
-
-    x: float
-    y: float
-    yaw: float
-    width: float
-    length: float
 
 
 def lanes_from_map(carla_map: Any, spacing: float = 2.0) -> List[LaneSample]:

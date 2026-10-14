@@ -51,6 +51,7 @@ import numpy as np
 
 from ..reconstruction.config import ReconstructionConfig, SemanticsConfig
 from ..reconstruction.local import read_jsonl, track_events, vehicle_metadata
+from ..reconstruction.road import RoadFrame
 from ..reconstruction.tracking import EgoFootprint, EgoTrajectory, LocalTrack, TrackSample, ego_trajectory
 from .visibility import Box, coverage, frames_by_participant, radar_views
 
@@ -106,6 +107,7 @@ class RecorderTruth:
     footprint: EgoFootprint
     radars: List[Any]  # RadarView
     sweeps: List[Tuple[int, float]]  # (ground-truth frame, t_local) of every radar sweep
+    road: Optional[Any] = None  # the reconstruction's road model of this recorder (``reconstruction.road``)
 
 
 def recorder_truth(run_dir: Path, owner: str, frames: Mapping[int, Mapping[str, Any]]) -> Optional[RecorderTruth]:
@@ -124,7 +126,8 @@ def recorder_truth(run_dir: Path, owner: str, frames: Mapping[int, Mapping[str, 
             sweep_frames.setdefault(int(frame), float(timestamp))
     sweeps = [(frame, round(t - clock_origin, 4)) for frame, t in sorted(sweep_frames.items()) if frame in frames]
     return RecorderTruth(owner, clock_origin, (float(first["x"]), float(first["y"]), math.radians(float(first["yaw_deg"]))),
-                         ego_trajectory(ego_records, clock_origin), footprint, [view for view, _ in views], sweeps)
+                         ego_trajectory(ego_records, clock_origin), footprint, [view for view, _ in views], sweeps,
+                         RoadFrame.from_ego_records(ego_records))
 
 
 def _to_local(rec: RecorderTruth, x: float, y: float) -> np.ndarray:
@@ -223,12 +226,14 @@ def _contacts(rec: RecorderTruth, target_actors: set, collisions: Sequence[Mappi
 
 
 def _events(rec: RecorderTruth, target: str, samples: Sequence[TrackSample], semantics: SemanticsConfig,
-            contacts: Sequence[Tuple[float, float]], track_id: str) -> List[Dict[str, Any]]:
+            contacts: Sequence[Tuple[float, float]], track_id: str,
+            impact_from: Optional[float] = None) -> List[Dict[str, Any]]:
     if len(samples) < 2:
         return []
     track = LocalTrack(track_id=track_id, samples=list(samples))
     out = []
-    for event in track_events(rec.owner, track, rec.ego.end, semantics, rec.ego, None, rec.footprint, contacts):
+    for event in track_events(rec.owner, track, rec.ego.end, semantics, rec.ego, None, rec.footprint, contacts,
+                              road=rec.road, impact_from=impact_from):
         family = _type(event.type)
         if family is not None:
             out.append({"type": family, "side": event.type, "subject": target, "t_local": round(event.t_local, 4),
@@ -262,14 +267,15 @@ def oracle_events(run_dir: Path, cfg: ReconstructionConfig,
             out[name].setdefault(owner, [])
         for target, item in per_target.items():
             semantics = dataclasses.replace(cfg.semantics, target_length_m=item["dims"][0], target_width_m=item["dims"][1])
-            perfect = [e for e in _events(rec, target, item["samples"], semantics, item["contacts"], target + "#all")
-                       if e["type"] != "TRACK_APPEARED"]
+            impact = truth["first_contact"].get(owner)  # the recorder's own first contact, as its sensor reports
+            perfect = [e for e in _events(rec, target, item["samples"], semantics, item["contacts"], target + "#all",
+                                          impact) if e["type"] != "TRACK_APPEARED"]
             out["PERFECT"][owner] += perfect
             for name, samples in (("COVERAGE", item["samples"]), ("COVERAGE_TRACKED", item["tracked"])):
                 for n, piece in enumerate(_pieces(samples, item["visible"], cfg.tracking.max_track_gap_s,
                                                   cfg.tracking.min_track_frames), 1):
                     out[name][owner] += _events(rec, target, piece, semantics, item["contacts"],
-                                                "{0}#{1}".format(target, n))
+                                                "{0}#{1}".format(target, n), impact)
     return out
 
 
