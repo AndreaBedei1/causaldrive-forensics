@@ -58,13 +58,12 @@ class TrackingConfig:
     moving_speed_mps: float = 1.0
     # Moving returns closer than this in one sweep form one candidate object.
     cluster_distance_m: float = 2.0
-    # A track claims returns within this distance of its predicted position...
-    max_association_distance_m: float = 2.5
-    # ...whose line-of-sight speed differs from its prediction by at most this.
-    max_velocity_mismatch_mps: float = 4.0
-    # A track that received no return for longer than this is ended.
+    # The smoother's segment boundary and the identity checks: a track silent for
+    # longer than this is a new segment (the tracker itself ends a track on its
+    # predicted uncertainty, see survival below).
     max_track_gap_s: float = 0.5
-    # Sweeps with moving returns needed before a tentative track is reported.
+    # Fewest measurements of a smoothed segment (and of the evaluation oracle's
+    # visible pieces); a tentative track is confirmed by min_track_support_s below.
     min_track_frames: int = 5
     # Kalman filter noise: measured position, Doppler speed, unmodelled
     # acceleration (emergency braking reaches 8-10 m/s^2; 3 m/s^2 lost S01's
@@ -84,8 +83,7 @@ class TrackingConfig:
     # 2.5 m (car/van width) plus one measurement standard deviation. Persistent
     # violations signal mixed bodies or unreliable heading, never a named switch.
     identity_body_width_m: float = 2.5
-    # --- Uncertainty-normalised association ("covariance"; fusion.association_method "final" switches it on) ---
-    # "fixed" (METHODS 1-3): the gates above (2.5 m, 4 m/s, 0.5 s, 5 sweeps).  "covariance" (METHOD 3 FINAL):
+    # --- Uncertainty-normalised association of radar returns to tracks ---
     #  * position: a return z joins a track when d^2 = nu' S^-1 nu <= chi2_2(gate_probability), nu = z - p,
     #    S = P_pos (the track's predicted covariance: grows with the time since its last update and with its
     #    speed, see yaw_rate_std_rps) + 2 B (a return and the track point are two points of one vehicle body:
@@ -95,9 +93,8 @@ class TrackingConfig:
     #    of sight, normalised by sqrt(u' P_v u + radial_speed_std^2 + ego-motion variance at the recorder's
     #    own impact), <= chi2_1(gate_probability): the tangential velocity, which Doppler does not measure,
     #    never enters the test;
-    #  * median_noise: the track point (median of a sweep's returns) is measured with the median's standard
-    #    error, polar noise + (pi / 2) C / n (C the spread of those n returns), instead of a fixed
-    #    measurement_std_m: many returns on a near face fix it to centimetres, a few far ones do not;
+    #  * measurement: the track point (median of a sweep's returns) has measurement_std_m plus the radar's
+    #    polar noise at its range;
     #  * ambiguity: a return inside the gates of two tracks whose likelihoods differ by less than
     #    return_likelihood_ratio updates neither (UNRESOLVED) and starts no track;
     #  * survival: a track ends when its predicted position no longer tells two bodies a car width apart
@@ -105,13 +102,8 @@ class TrackingConfig:
     #  * confirmation: min_track_support_s of support with at least min_track_updates measurements;
     #  * hard caps (fail-safe, normally never binding; how often they bind is counted in the tracking stats):
     #    position_cap_m and doppler_cap_mps.
-    gating: str = "fixed"
-    # With gating "covariance": which statistical rules are active (comma separated subset of position,
-    # doppler, median_noise, ambiguity, survival, confirmation); an absent one falls back to the fixed rule.
-    # median_noise is implemented but NOT adopted: the median of a sweep's returns slides over the body as the
-    # visible faces change (a systematic error of decimetres), so sigma / sqrt(n) made the filter overconfident
-    # and its velocity jitter contradicted a true collision partner (S07, development seed).
-    covariance_components: str = "position,doppler,ambiguity,survival,confirmation"
+    # The median's standard error (sigma / sqrt(n)) is deliberately not used as the track point's noise: the
+    # median of a sweep's returns slides over the body as the visible faces change (decimetres, systematic).
     gate_probability: float = 0.99
     body_length_m: float = 4.6
     body_width_m: float = 1.9
@@ -120,7 +112,7 @@ class TrackingConfig:
     min_track_support_s: float = 0.2
     min_track_updates: int = 3
     gap_cap_s: float = 2.0
-    # Collision-aware process noise (covariance gating): at each of the recorder's own collision callbacks the
+    # Collision-aware process noise: at each of the recorder's own collision callbacks the
     # tracks near its body (predicted clearance below body_length_m) get the velocity variance (J / m)^2 of
     # the impulse J the sensor measured, m a nominal passenger-car mass (physical prior): an impact is the
     # only unmodelled velocity jump the recorder itself measures.
@@ -256,7 +248,7 @@ class FusionConfig:
     impulse_tolerance: float = 0.10
     # Engineering assumption, not a collision-sensor specification: independent
     # per-report relative 1-sigma uncertainty. Used only with body-contact evidence;
-    # without geometry the conservative legacy tolerance still applies.
+    # without geometry the conservative impulse_tolerance above applies.
     impulse_relative_std: float = 0.10
     impulse_sigma_gate: float = 3.0
     # A match must also put the two recorders in contact: their footprints, each at its own report time and
@@ -283,7 +275,8 @@ class FusionConfig:
     approach_window_s: float = 1.0
     # Required tracking history before the contact.
     min_track_persistence_s: float = 1.0
-    # Track speed versus the partner's own reported speed (frame independent).
+    # Scale of the full-speed RMSE between a track and the partner's own reported speed in the association
+    # confidence (the compatibility test itself is the observable-direction check, fusion._evidence).
     speed_consistency_mps: float = 1.5
     # Several compatible tracks for one contact are ambiguous, unless exactly one
     # of them touches the recorder: observed within one sample of the contact,
@@ -321,17 +314,13 @@ class FusionConfig:
     box_width_std_m: float = 0.2
     # Rate of the fused trajectories written to global/anonymous_entities.json.
     entity_output_rate_hz: float = 10.0
-    # Mutual refinement of the pose sources (off by default): the recorders' observations of each other
-    # (tracks identified with a recorder) give their relative position offsets, removed before the
-    # road-user fusion is redone; iterations of the estimate.
+    # Mutual refinement of the pose sources: the recorders' observations of each other (tracks identified
+    # with a recorder) give their relative position offsets, removed before the road-user fusion is redone.
+    # It runs whenever a pose source declares a position error; this switch also forces it on error-free
+    # pose sources (robustness study).  Iterations of the estimate.
     mutual_refinement: bool = False
     mutual_refinement_iterations: int = 3
-    # Identity association of anonymous tracks (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md):
-    # "current" (pairwise gates, the algorithm of main), "corrected" (relative pose uncertainty, cannot-link
-    # constraints, conservative one-to-one assignment) or "retrospective" (corrected + identities resolved
-    # from later strong evidence, never moving an observation).
-    association_method: str = "current"
-    # Declared radar accuracy for the corrected methods (range, azimuth; 1 sigma): the nominal production
+    # Declared radar accuracy for the identity association (range, azimuth; 1 sigma): the nominal production
     # values of docs/robustness_profiles.md (sourced), propagated to x/y by the Jacobian.
     radar_range_std_m: float = 0.25
     radar_azimuth_std_deg: float = 0.5
@@ -383,14 +372,6 @@ def config_from_mapping(data: Optional[Mapping[str, Any]]) -> ReconstructionConf
         semantics=_section(SemanticsConfig, data.get("semantics")),
         fusion=_section(FusionConfig, data.get("fusion")),
     )
-
-
-def effective_config(cfg: "ReconstructionConfig") -> "ReconstructionConfig":
-    """METHOD 3 FINAL (``fusion.association_method`` "final") runs the uncertainty-aware tracker."""
-    from dataclasses import replace
-    if cfg.fusion.association_method == "final" and cfg.tracking.gating == "fixed":
-        return replace(cfg, tracking=replace(cfg.tracking, gating="covariance"))
-    return cfg
 
 
 def load_config(path: Optional[Path] = None) -> ReconstructionConfig:

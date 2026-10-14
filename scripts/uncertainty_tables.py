@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Effective association gates of the uncertainty-normalised tracker (METHOD 3 FINAL), from the model only.
+"""Effective association gates of the uncertainty-normalised tracker, from the model only.
 
     python scripts/uncertainty_tables.py [--out results/final_hardening/uncertainty_tables.md]
 
@@ -71,7 +71,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, default=ROOT / "results" / "final_hardening" / "uncertainty_tables.md")
     args = parser.parse_args()
-    cfg = TrackingConfig(gating="covariance")
+    cfg = TrackingConfig()
     k2, k1 = math.sqrt(chi2_quantile(cfg.gate_probability, 2)), math.sqrt(chi2_quantile(cfg.gate_probability, 1))
     lines = ["# Effective gates of the uncertainty-normalised tracker (model only, no ground truth)", "",
              "`scripts/uncertainty_tables.py`.  Radar: range sigma {0} m, azimuth sigma {1} deg; Doppler sigma {2} m/s; "
@@ -117,7 +117,7 @@ def main() -> int:
             radial = speed if geometry == "front" else 0.0
             lines.append("| {0} | {1} ({2:.0f} m/s) | {3:.1f} | {4:.2f} | {5:.2f} | {6:.2f} | {7:.2f} |".format(
                 geometry, label, speed, radial, pv_along, sigma, k1 * sigma, math.sqrt(across @ P[2:, 2:] @ across)))
-    lines += ["", "Fixed gates of METHODS 1-3 for comparison: 2.5 m (any range, any direction) and 4.0 m/s.", ""]
+    lines.append("")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))

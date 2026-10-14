@@ -1,5 +1,4 @@
-"""Uncertainty-normalised association of the local radar tracker (METHOD 3 FINAL; TrackingConfig.gating
-"covariance"): range-dependent radar covariance, Mahalanobis position gate, Doppler residual along the line of
+"""Uncertainty-normalised association of the local radar tracker: range-dependent radar covariance, Mahalanobis position gate, Doppler residual along the line of
 sight, ambiguity instead of an arbitrary choice, covariance growth without data, post-contact CRITICAL_TTC."""
 
 import dataclasses
@@ -20,7 +19,7 @@ G2 = chi2_quantile(0.99, 2)
 
 
 def statistical(**overrides):
-    return dataclasses.replace(TrackingConfig(), gating="covariance", **overrides)
+    return dataclasses.replace(TrackingConfig(), **overrides)
 
 
 def sweep_at(points, radial, origin=(0.0, 0.0)):
@@ -226,7 +225,7 @@ class StatisticalRecordedRunTests(unittest.TestCase):
     collisions = base.RecordedRunTests.collisions
 
     def test_s08_crossing_contact_matched_and_recorder_link_kept(self):
-        _, result = self.reconstruct("traces/S08/run_0_rolls_through", "final")
+        _, result = self.reconstruct("traces/S08/run_0_rolls_through")
         self.assertIn(("A", "B"), self.collisions(result))
         links = {(a.local_graph, a.global_entity) for a in result.associations}
         self.assertIn(("B", "A"), links)
@@ -237,13 +236,13 @@ class StatisticalRecordedRunTests(unittest.TestCase):
         from src.cdf.evaluation.reconstruction import evaluate_run
         from src.cdf.evaluation.run_metrics import run_metrics
         for seed in (0, 3):
-            target, _ = self.reconstruct("traces/S04/run_0_a_front_pushed", "final", "consumer_impulse10", seed)
+            target, _ = self.reconstruct("traces/S04/run_0_a_front_pushed", "consumer_impulse10", seed)
             metrics = run_metrics(target, evaluate_run(target, clock_shift_check=False),
                                   evaluate_fusion(target, write=False))
             self.assertEqual(metrics["false_collision_matches"], 0, seed)
 
     def test_s19_no_same_pair_critical_episode_after_their_contact(self):
-        _, result = self.reconstruct("traces/S19/run_0_collision_ambiguity", "final")
+        _, result = self.reconstruct("traces/S19/run_0_collision_ambiguity")
         contact = min(n.t_global for n in result.graph.nodes
                       if n.event_type == "COLLISION" and sorted(n.participants or []) == ["A", "B"])
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
@@ -251,7 +250,7 @@ class StatisticalRecordedRunTests(unittest.TestCase):
         self.assertEqual(late, [])
 
     def test_s13_platoon_no_same_pair_critical_episode_while_touching(self):
-        _, result = self.reconstruct("traces/S13/run_0_platoon", "final")
+        _, result = self.reconstruct("traces/S13/run_0_platoon")
         contact = min(n.t_global for n in result.graph.nodes if n.event_type == "COLLISION")
         late = [n for n in result.graph.nodes if n.event_type == "CRITICAL_TTC_START" and n.t_global > contact
                 and {n.actor_id, n.subject_id} == {"A", "B"}]

@@ -1,38 +1,42 @@
-"""Identity association with corrected uncertainty and retrospective resolution (no ground truth).
+"""Identity association with the uncertainty each comparison has, and retrospective resolution (no ground
+truth).  ``fuse_corrected`` names every anonymous track: another recorder, an anonymous road user (U1, U2, ...)
+or UNRESOLVED.
 
-``fusion.association_method``:
-
-* ``current``: ``anonymous._fuse`` (the algorithm of main); this module is not used;
-* ``corrected``: the same evidence, with the uncertainty each comparison actually has --
-  - the radar measurement noise in the common frame grows with range: the declared polar accuracy
-    (``fusion.radar_range_std_m``, ``fusion.radar_azimuth_std_deg``) propagated by the Jacobian of
-    (range, azimuth) -> (x, y), Sigma_xy = J diag(sigma_r^2, sigma_az^2) J^T (lateral sigma = range x
-    sigma_az), on top of the extended-body scatter ``tracking.measurement_std_m``;
-  - the pose error is a RELATIVE quantity: two tracks of one recorder share its pose error, which cancels in
-    their difference except for the heading error turned over their separation; two recorders differ by
-    their relative pose error (the mutual refinement's joint posterior when the recorders observe each
-    other, else the sum of their declared variances: their correlation is unknown and not assumed);
-  - a pose error is a slowly varying bias: repeated instants do not average it out, so a positional link
-    is identity evidence only when the relative bias can tell two bodies one car width apart
-    (3 sigma_bias <= ``semantics.target_width_m``); otherwise the pair stays UNRESOLVED -- a larger
-    uncertainty lowers the confidence, it never makes a merge easier;
-  - CANNOT_LINK: two simultaneous tracks of one recorder whose returns cannot be one body (the one-box test
-    beyond its gate on at least ``fusion.link_min_samples`` instants); the clustering refuses every merge that
-    would put a cannot-link pair into one entity, also through a chain of links;
-  - one-to-one: a link with a rival (a second simultaneous candidate of the same other observer) is kept
-    only when its median chi-square is better by at least 2 ln K (``fusion.assignment_likelihood_ratio`` K),
-    else both stay UNRESOLVED;
-  - an association score for every link: the posterior of the link among its candidates and a
-    "not this road user" hypothesis at the gate, from the same chi-squares (calibrated empirically in
-    ``docs/RETROSPECTIVE_RECONSTRUCTION_REPORT.md``);
-* ``retrospective``: ``corrected`` plus backward identity resolution (``retrospective_links``): an unresolved
-  entity that ends before an entity seen by several observers starts is tested against it by carrying the
-  later entity's first state BACKWARD through the gap with the tracker's own motion model (constant velocity,
-  white acceleration ``tracking.acceleration_std_mps2``, one prediction per radar sweep), against every other
-  candidate and a new-target hypothesis (``fusion.retrospective_new_target_density``); it is resolved only
-  with a posterior of at least ``fusion.retrospective_min_posterior``, no cannot-link and no simultaneous track
-  of one observer.  Only the identity of existing observations changes: no sample, event or timestamp moves;
-  the decision records the time its evidence starts (``identity_resolved_from``) and its posterior.
+* The radar measurement noise in the common frame grows with range: the declared polar accuracy
+  (``fusion.radar_range_std_m``, ``fusion.radar_azimuth_std_deg``) propagated by the Jacobian of
+  (range, azimuth) -> (x, y), Sigma_xy = J diag(sigma_r^2, sigma_az^2) J^T (lateral sigma = range x
+  sigma_az), on top of the extended-body scatter ``tracking.measurement_std_m``.
+* The pose error is a RELATIVE quantity: two tracks of one recorder share its pose error, which cancels in
+  their difference except for the heading error turned over their separation; two recorders differ by
+  their relative pose error (the mutual refinement's joint posterior when the recorders observe each
+  other, else the sum of their declared variances: their correlation is unknown and not assumed).
+* A pose error is a slowly varying bias: repeated instants do not average it out, so a positional link
+  is identity evidence only when the relative bias can tell two bodies one car width apart
+  (3 sigma_bias <= ``semantics.target_width_m``); otherwise the pair stays UNRESOLVED -- a larger
+  uncertainty lowers the confidence, it never makes a merge easier.
+* Recorder links (``link_to_recorders_corrected``) are conservative: one recorder per observer and instant
+  unless same-body evidence (a split of one body, or both tracks on the recorder's own outline) joins the
+  two tracks (``anonymous.exclusive_recorder_links``).
+* CANNOT_LINK: two simultaneous tracks of one recorder whose returns cannot be one body (the one-box test
+  beyond its gate on at least ``fusion.link_min_samples`` instants); the clustering refuses every merge that
+  would put a cannot-link pair into one entity, also through a chain of links.
+* One-to-one: a link with a rival (a second simultaneous candidate of the same other observer) is kept
+  only when its median chi-square is better by at least 2 ln K (``fusion.assignment_likelihood_ratio`` K),
+  else both stay UNRESOLVED.
+* Operative relevance: cross-recorder identity evidence only where at least one of the two observations
+  lies inside its observer's relevance envelope (``relevance_range``).
+* A stitch of one observer's two tracks across a gap is a hypothesis against a new road user
+  (``stitch_density``); it is resolved only at ``fusion.retrospective_min_posterior``.
+* Retrospective resolution (``retrospective_links``): an unresolved entity that ends before an entity seen
+  by several observers starts is tested against it by carrying the later entity's first state BACKWARD
+  through the gap with the tracker's own motion model (constant velocity, white acceleration
+  ``tracking.acceleration_std_mps2``, one prediction per radar sweep), against every other candidate and a
+  new-target hypothesis (``fusion.retrospective_new_target_density``); it is resolved only with a posterior
+  of at least ``fusion.retrospective_min_posterior``, no cannot-link and no simultaneous track of one
+  observer.  Only the identity of existing observations changes: no sample, event or timestamp moves; the
+  decision records the time its evidence starts (``identity_resolved_from``) and its posterior.
+* Collision evidence (``radar_contact_evidence``): each recorder's own radar view of who arrived at its
+  body, tested in the direction the radar observes (``_normal_component_consistent``).
 """
 
 from __future__ import annotations
@@ -152,8 +156,13 @@ def discriminable(sigma: float, cfg: ReconstructionConfig) -> bool:
 # --------------------------------------------------------------------------
 
 def link_to_recorders_corrected(view: Any, cfg: ReconstructionConfig, rel: RelativePose) -> Tuple[List[RecorderLink], List[Dict[str, Any]]]:
-    """``anonymous.link_to_recorders`` (first pass) with per-pair relative uncertainty and the bias
-    discriminability rule; returns (links, refusals)."""
+    """Per anonymous track, the recorder whose own footprint its returns lie on, at that recorder's own
+    velocity: over at least ``link_min_samples`` samples before the recorder's first contact with a third
+    body (``anonymous._third_body_contact``), median distance and velocity difference within 2 sigma of the
+    pair's relative uncertainty and ``link_min_fraction`` of the samples within 3 sigma; refused when the
+    relative pose bias cannot tell two bodies apart, when the track lies off the recorder after that contact,
+    or when a second recorder explains it almost as well (``assignment_likelihood_ratio``).  Returns
+    (links, refusals)."""
     fusion = cfg.fusion
     links, refusals = [], []
     for track in view.tracks:
@@ -532,9 +541,7 @@ def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset,
 
 def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[Any], poses: Dict[str, PoseSource],
                    cfg: ReconstructionConfig, refinement: Optional[Dict[str, Any]] = None) -> RoadUserFusion:
-    """``anonymous._fuse`` for the corrected and retrospective methods (module docstring)."""
-    final = cfg.fusion.association_method == "final"
-    retrospective = cfg.fusion.association_method in ("retrospective", "final")
+    """Recorder links, anonymous road users and their fused trajectories (module docstring)."""
     rel = RelativePose(poses, refinement)
     view = build_common_view(locals_, alignment, associations, poses)
     links, link_refusals = link_to_recorders_corrected(view, cfg, rel)
@@ -564,11 +571,11 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     anonymous = [t for t in view.tracks if t.status != ASSOCIATED and t.name not in linked]
     by_name = {t.name: t for t in anonymous}
     evidence: List[PairEvidence] = []
-    relevant = {t.name: relevant_samples(t, view.bodies, cfg) for t in anonymous} if final else {}
+    relevant = {t.name: relevant_samples(t, view.bodies, cfg) for t in anonymous}
     resolved_at: Dict[frozenset, float] = {}
     for i, a in enumerate(anonymous):
         for b in anonymous[i + 1:]:
-            if final and a.recorder != b.recorder:
+            if a.recorder != b.recorder:
                 # Operative relevance: cross-recorder identity evidence only where at least one of the two
                 # observations lies inside its observer's relevance envelope (TRUSTED_FOR_FUSION).
                 ra, rb = relevant_view(a, relevant[a.name], relevant[b.name], b), relevant_view(b, relevant[b.name], relevant[a.name], a)
@@ -576,12 +583,12 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                 when = resolution_time(ra, rb, cfg)
                 if when is not None:
                     resolved_at[frozenset((a.name, b.name))] = when
-            elif a.recorder != b.recorder or _overlap(a, b):
+            elif _overlap(a, b):
                 item = pair_corrected(a, b, cfg, rel)
             else:
                 first, second = (a, b) if (a.start, a.name) <= (b.start, b.name) else (b, a)
                 item = stitch_corrected(first, second, cfg)
-                if final and item is not None and item.accepted:
+                if item is not None and item.accepted:
                     # A stitch is a hypothesis against a new road user: the density of the miss under the tracker's
                     # own motion model across the gap (``backward_test``) over the new-target density; resolved
                     # only at the minimum posterior.  A long gap or a large miss makes it UNRESOLVED, never easier.
@@ -598,9 +605,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
     refuse_ambiguous_corrected(evidence, by_name, cfg)
     cannot = cannot_links(anonymous, cfg, rel)
     groups, used = cluster_corrected(anonymous, evidence, cannot)
-    retro: List[Dict[str, Any]] = []
-    if retrospective:
-        groups, retro = retrospective_links(groups, cannot, cfg, rel)
+    groups, retro = retrospective_links(groups, cannot, cfg, rel)
     resolved_late = {}
     for d in retro:
         if d.get("resolved"):
@@ -623,14 +628,13 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                                                     "t_global": [round(t.start, 3), round(t.end, 3)]} for t in group],
                          "observers": sorted({t.recorder for t in group}),
                          "time_span": [round(min(t.start for t in group), 3), round(max(t.end for t in group), 3)],
-                         "association": {"method": cfg.fusion.association_method,
-                                         "links": [dict(e.to_dict(), score=round(e.score, 3),
+                         "association": {"links": [dict(e.to_dict(), score=round(e.score, 3),
                                                         posterior=getattr(e, "posterior", None)) for e in joins],
                                          "retrospective": [d for d in retro if d.get("resolved") and set(d["earlier"]) <= members],
                                          "confidence": confidence},
                          "fusion_method": "+".join(sorted({s["method"] for s in states})), "footprint": footprint,
                          "relevance": entity_relevance(group, view.bodies, cfg),
-                         **({"timeline": entity_timeline(group, joins, retro, resolved_at, view, locals_, cfg)} if final else {}),
+                         "timeline": entity_timeline(group, joins, retro, resolved_at, view, locals_, cfg),
                          "trajectory": states})
         for track in group:
             item = by_key[(track.recorder, track.track_id)]
@@ -646,7 +650,7 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                     "observers), carried back {1:.2f} s with the motion model; posterior {2:.3f} against {3} candidate(s) "
                     "and a new road user; observation times unchanged".format(late["t_new"], late["gap_s"],
                                                                                 late["posterior"], late["candidates"])]
-            if final and late is None and len(group) > 1:
+            if late is None and len(group) > 1:
                 times = [resolved_at[frozenset((e.a, e.b))] for e in joins
                          if track.name in (e.a, e.b) and frozenset((e.a, e.b)) in resolved_at]
                 if times and min(times) > track.start + 1e-6:
@@ -667,14 +671,16 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
 # --------------------------------------------------------------------------
 
 def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
-    """A check for ``alignment.match_collisions`` (corrected methods): does the reporting recorder's own radar
+    """A check for ``alignment.match_collisions``: does the reporting recorder's own radar
     show the candidate partner arriving at its body?  For a candidate pairing (O's report at t_O, P's report at
     t_P), per side: O's non-ambiguous tracks touching O's footprint at the report (a measured sample within
     ``fusion.contact_window_s`` before it, clearance <= ``fusion.touching_clearance_m``) that ARRIVED during the
     last ``fusion.approach_window_s`` (clearance at its start beyond the touching clearance + 3 sigma of the
-    measurement: a body already in contact, an earlier partner, says nothing about who arrived now).  Their speed is compared with P's OWN recorded speed at the mapped instants
-    (t - t_O + t_P: the clock offset the candidate implies), RMSE <= ``fusion.speed_consistency_mps``.
-    Everything is in O's own frame and P's own speed: no pose stream, no GNSS.  Returns per candidate True
+    measurement: a body already in contact, an earlier partner, says nothing about who arrived now) and were
+    still closing in the last 0.2 s.  Their motion is compared with P's OWN recorded speed at the mapped
+    instants (t - t_O + t_P: the clock offset the candidate implies) in the direction O's radar observes
+    (``_normal_component_consistent``).  Everything is in O's own frame and P's own speed: no pose stream,
+    no GNSS.  Returns per candidate True
     (some side supports it, none contradicts), False (a side has touching approaching tracks and none
     moves like P: contradicted) or None (no radar sees the contact)."""
     by_owner = {local.owner: local for local in locals_}
@@ -696,24 +702,14 @@ def radar_contact_evidence(locals_: Sequence[Any], cfg: ReconstructionConfig):
             arriving = window[0].clearance_m > fusion.touching_clearance_m + 3.0 * cfg.tracking.measurement_std_m
             if not near or not arriving:
                 continue
-            if fusion.association_method == "final":
-                # The body that hit the recorder was still closing in the last 0.2 s before the report (4 radar
-                # sweeps): one passing alongside, whose clearance no longer shrinks, did not arrive now.
-                last = [x for x in window if x.t_local >= t_o - 0.2 - 1e-6]
-                if len(last) < 2 or last[-1].clearance_m >= last[0].clearance_m:
-                    continue
-                verdict = _normal_component_consistent(local, other, window, t_o, t_p, cfg)
-                if verdict is not None:
-                    touching.append(verdict)
+            # The body that hit the recorder was still closing in the last 0.2 s before the report (4 radar
+            # sweeps): one passing alongside, whose clearance no longer shrinks, did not arrive now.
+            last = [x for x in window if x.t_local >= t_o - 0.2 - 1e-6]
+            if len(last) < 2 or last[-1].clearance_m >= last[0].clearance_m:
                 continue
-            errors = []
-            for s in window:
-                t_partner = s.t_local - t_o + t_p
-                if other.ego.start <= t_partner <= other.ego.end:
-                    errors.append(s.speed_mps - other.ego.at(t_partner).speed)
-            if len(errors) < max(3, len(window) // 2):
-                continue
-            touching.append(math.sqrt(sum(e * e for e in errors) / len(errors)) <= fusion.speed_consistency_mps)
+            verdict = _normal_component_consistent(local, other, window, t_o, t_p, cfg)
+            if verdict is not None:
+                touching.append(verdict)
         if not touching:
             return None
         return any(touching)
@@ -768,7 +764,7 @@ def entity_relevance(group: Sequence[CommonTrack], bodies: Dict[str, Any], cfg: 
 
 
 # --------------------------------------------------------------------------
-# METHOD 3 FINAL: observable-direction collision evidence, operative relevance, target timelines
+# Observable-direction collision evidence, operative relevance, target timelines
 # --------------------------------------------------------------------------
 
 def _normal_component_consistent(local: Any, other: Any, window: Sequence[Any], t_o: float, t_p: float,

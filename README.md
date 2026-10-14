@@ -23,6 +23,30 @@ onboard raw recordings (per recording vehicle)
 * No LLM or external API in the pipeline; no scenario-specific reconstruction rules.  Ambiguity is left
   unresolved: a false merge is worse than an unresolved identity.
 
+## Reconstruction method
+
+There is one reconstruction method; `configs/reconstruction.yaml` holds its parameters and no option selects
+another algorithm ([parameter audit](docs/FINAL_PARAMETER_AUDIT.md)).
+
+* **Radar tracking** (`reconstruction/tracking.py`).  A return joins a track when its Mahalanobis distance is
+  inside the 99 % gate of S = the track's predicted covariance + the spread of a vehicle body + the radar's
+  polar noise at the return's range (the lateral uncertainty grows with range).  Its Doppler speed is tested
+  along its own line of sight only; the tangential velocity, which Doppler does not measure, is never tested.
+  A return two tracks explain within a likelihood ratio of 20 is ambiguous and updates neither.  A track
+  survives while its predicted position can still tell two bodies a car width apart (2 s cap), is confirmed
+  after 0.2 s of support and 3 updates, and a recorder's own impact widens the covariance of the tracks
+  touching it.  A part of a known body seen apart is never a second vehicle.
+* **Alignment** on the collisions the recorders report: a pairing is refused when the pose streams put the
+  bodies apart or a recorder's own radar view of the contact contradicts the partner's speed in the observed
+  direction.
+* **Identity** (`reconstruction/identity.py`).  Recorder links use the relative pose uncertainty and are
+  conservative: one recorder per observer and instant unless same-body evidence joins two fragments.
+  Anonymous road users come from one-box evidence across observers, cannot-link constraints, one-to-one
+  assignment and a stitch posterior against a new road user; ambiguity stays UNRESOLVED.  A retrospective
+  resolution may name an earlier observation from later strong evidence; no sample, event or timestamp moves.
+* **Global graph**: after two road users have touched, a CRITICAL_TTC between that same pair is suppressed in
+  the global graph and the replay; the raw local evidence stays in the local graphs.
+
 ## Environment (the only one)
 
 ```bat
@@ -87,7 +111,8 @@ python -m pytest -q
 | S19 | collision_ambiguity | collision_ambiguity | several similar cars within the pose uncertainty of a contact |
 
 Run folders: `traces\<id>\run_0_<run>\` with the raw recordings (`vehicles\`), the privileged
-`ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated under Python 3.8).
+`ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated from the raw recordings
+with the method above).
 Validation of the set: [docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md).  The final experimental
 campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has not been run.
 
@@ -108,10 +133,7 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | ESC | quit |
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
-The upper-left panel shows the run, its time, the replay state and the camera, then the semantic states
-active at the current time (START..END of the reconstructed events, most important first: contact,
-CRITICAL_TTC, braking / throttle, turns and cut-ins, others; at most 8 lines, then `... +N more`), then the
-last and next event.  The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
+The panels on the right list, per recorder, its recent semantic events first, then its confirmed states per
 global road user (CRITICAL_TTC, CUT_IN, IN_EGO_PATH) and its own braking; at most a few lines.  Raw track ids,
 UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.
 

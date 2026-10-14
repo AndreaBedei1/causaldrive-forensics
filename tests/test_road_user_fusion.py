@@ -11,9 +11,10 @@ from pathlib import Path
 
 import numpy as np
 
-from src.cdf.reconstruction.anonymous import (CROSS, STITCH, PairEvidence, chi2_2dof, cluster,
+from src.cdf.reconstruction.anonymous import (CROSS, STITCH, PairEvidence, chi2_2dof,
                                               covariance_intersection, fit_box, offset_decision, pair_evidence,
-                                              refuse_ambiguous, stitch_evidence)
+                                              stitch_evidence)
+from src.cdf.reconstruction.identity import cluster_corrected, refuse_ambiguous_corrected
 from src.cdf.reconstruction.common_frame import CommonSample, CommonTrack, RecordedPoseSource, shifted
 from src.cdf.reconstruction.config import ReconstructionConfig
 from src.cdf.reconstruction.models import is_anonymous_entity
@@ -188,7 +189,7 @@ class AssociationTests(unittest.TestCase):
                   for name, times in (("B:t1", [0.0, 0.05]), ("B:t2", [0.5, 0.55]), ("B:t3", [0.5, 0.55]))}
         first = PairEvidence("B:t1", "B:t2", STITCH, 1, 1.0, 1.0, 0.5, 0.5, 0.45, accepted=True)
         second = PairEvidence("B:t1", "B:t3", STITCH, 1, 1.0, 2.0, 0.5, 0.5, 0.45, accepted=True)
-        refuse_ambiguous([first, second], tracks)
+        refuse_ambiguous_corrected([first, second], tracks, CFG)
         self.assertFalse(first.accepted or second.accepted)
         self.assertIn("two possible successors", first.refused)
 
@@ -199,7 +200,7 @@ class AssociationTests(unittest.TestCase):
                   for name in ("A:t1", "B:t1", "B:t2")}
         one = PairEvidence("A:t1", "B:t1", CROSS, 20, 1.0, 0.5, 0.5, 0.2, accepted=True)
         two = PairEvidence("A:t1", "B:t2", CROSS, 20, 0.9, 0.7, 0.5, 0.3, accepted=True)
-        refuse_ambiguous([one, two], tracks)
+        refuse_ambiguous_corrected([one, two], tracks, CFG)
         self.assertFalse(one.accepted or two.accepted)
         self.assertIn("two simultaneous tracks of B", one.refused)
 
@@ -211,7 +212,7 @@ class AssociationTests(unittest.TestCase):
         # Two accepted links that would chain B:t1 and B:t2 (simultaneous) through A:t1.
         links = [PairEvidence("A:t1", "B:t1", CROSS, 20, 1.0, 0.1, 0.1, 0.1, accepted=True),
                  PairEvidence("A:t1", "B:t2", CROSS, 20, 1.0, 0.2, 0.2, 0.1, accepted=True)]
-        groups, used = cluster(tracks, links)
+        groups, used = cluster_corrected(tracks, links, {})
         self.assertEqual(sorted(len(group) for group in groups), [1, 2])
         self.assertEqual(len(used), 1)
         self.assertIn("simultaneous", links[1].refused)

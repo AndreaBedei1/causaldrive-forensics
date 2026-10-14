@@ -21,7 +21,8 @@ Per recorder R and per other true vehicle V, all times in R's own local clock
   usable return  first such return passing the tracker's own height filter and
                  moving-speed test (the only returns that can start a track)
   track born     first sample of a reconstructed track lying on V (tentative start)
-  confirmed      time of that track's ``min_track_frames``-th measurement (its id)
+  confirmed      first measurement of that track with ``min_track_support_s`` of support and
+                 ``min_track_updates`` measurements (the tracker's confirmation rule: its id)
   lost           last sample of the track(s) on V, with V's visibility at that time
   occluded       sweeps in V's field of view without a return on V, split by why:
                  "vehicle" (the line of sight to V crosses another vehicle's box),
@@ -36,7 +37,7 @@ RAW_SENSOR (edge/sparse) while inside the field of view without a return,
 FILTER (returns, none usable), TRACKER (usable returns before birth /
 confirmation).  For TRACKER the longest run of consecutive sweeps with usable
 returns and the target's true speed meanwhile tell whether the tracker was
-never given ``min_track_frames`` consecutive moving sweeps (e.g. a target
+never given enough consecutive moving sweeps for a confirmation (e.g. a target
 standing still: its returns are static by design) or failed despite them.
 """
 
@@ -252,7 +253,9 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
                 target, count = max(votes.items(), key=lambda item: item[1])
                 if count >= 0.5 * len(track.samples):
                     measured = [s.t_local for s in track.samples if s.measured]
-                    confirmed = measured[min(cfg.tracking.min_track_frames, len(measured)) - 1]
+                    confirmed = next((t for k, t in enumerate(measured)
+                                      if t - measured[0] >= cfg.tracking.min_track_support_s - 1e-6
+                                      and k + 1 >= cfg.tracking.min_track_updates), measured[-1])
                     on_vehicle.setdefault(target, []).append((track.track_id, track.first_t, confirmed, track.last_t))
 
         for target, entry in sorted(per_target.items()):
@@ -290,9 +293,14 @@ def audit_run(run_dir: Path) -> List[Dict[str, Any]]:
                     "usable_sweeps": sum(1 for i in window if entry["usable"][i] > 0),
                     "sweeps": len(window), "longest_usable_run": max(runs) if runs else 0,
                     "target_speed_mps": [round(min(speeds), 2), round(max(speeds), 2)] if speeds else None}
-            row["delay_cause"] = _classify(row, entry, cfg.tracking.min_track_frames)
+            row["delay_cause"] = _classify(row, entry, confirmation_sweeps(cfg.tracking))
             rows.append(row)
     return rows
+
+
+def confirmation_sweeps(tracking: Any) -> int:
+    """Consecutive 20 Hz sweeps a confirmation needs: min_track_support_s of support, min_track_updates updates."""
+    return max(tracking.min_track_updates, int(round(tracking.min_track_support_s / 0.05)) + 1)
 
 
 def _tracker_detail(row: Dict[str, Any], min_frames: int) -> str:

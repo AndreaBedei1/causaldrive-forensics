@@ -60,8 +60,6 @@ OWN_BODY_MARGIN_M = 0.05
 # A track's near surface in one sweep: this percentile of its returns' clearances
 # (robust to one stray return, about the nearest one for few returns).
 NEAR_SURFACE_PERCENTILE = 10.0
-# Fewest returns whose spread estimates the median's own noise (a sample covariance needs three).
-MEDIAN_MIN_RETURNS = 3
 # The depth of the median point behind the near surface is smoothed over this
 # many measured sweeps on each side (running median).
 SURFACE_OFFSET_HALF_WINDOW = 2
@@ -503,20 +501,10 @@ def _measurement_model(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tu
         values.append(radial)
         variances.append(cfg.radial_speed_std_mps ** 2)
     R = np.diag(variances)
-    if cfg.gating == "covariance" and measurement.origins is not None and len(measurement.origins):
+    if measurement.origins is not None and len(measurement.origins):
         # The median point's radar noise at its range (lateral = range x azimuth sigma).
-        polar = polar_covariances(np.asarray(measurement.xy, float)[None, :],
-                                  np.median(measurement.origins, axis=0)[None, :], cfg)[0]
-        points = measurement.points
-        if "median_noise" in cfg.covariance_components and points is not None and len(points) >= MEDIAN_MIN_RETURNS:
-            # The median of n returns spread with covariance C has the standard error (pi / 2) C / n
-            # (asymptotic variance of the median): many returns on a near face fix it to centimetres, a few
-            # sparse ones on a far target do not.  The polar noise at its range is the floor.
-            residual = points - np.median(points, axis=0)
-            spread = residual.T @ residual / (len(points) - 1)
-            R[:2, :2] = polar + (math.pi / 2.0) * spread / len(points)
-        else:
-            R[:2, :2] += polar
+        R[:2, :2] += polar_covariances(np.asarray(measurement.xy, float)[None, :],
+                                       np.median(measurement.origins, axis=0)[None, :], cfg)[0]
     return np.array(rows), np.array(values, dtype=float), R
 
 
@@ -610,11 +598,8 @@ class _ActiveTrack:
         self.last_update_t = first.t_local
 
     def predict(self, t_local: float, cfg: TrackingConfig) -> None:
-        if cfg.gating == "covariance" and "position" in cfg.covariance_components:
-            self.x, self.P = kf_predict_speed(self.x, self.P, t_local - self.t_local, cfg.acceleration_std_mps2,
-                                              cfg.yaw_rate_std_rps)
-        else:
-            self.x, self.P = kf_predict(self.x, self.P, t_local - self.t_local, cfg.acceleration_std_mps2)
+        self.x, self.P = kf_predict_speed(self.x, self.P, t_local - self.t_local, cfg.acceleration_std_mps2,
+                                          cfg.yaw_rate_std_rps)
         self.t_local = t_local
 
     def update(self, measurement: TrackMeasurement, cfg: TrackingConfig) -> None:
@@ -634,7 +619,7 @@ def _unit_lines(points: np.ndarray, origins: np.ndarray) -> np.ndarray:
 
 
 # --------------------------------------------------------------------------
-# Uncertainty-aware gating (TrackingConfig.gating == "covariance")
+# Uncertainty-aware gating
 # --------------------------------------------------------------------------
 
 def chi2_quantile(probability: float, dof: int) -> float:
@@ -737,21 +722,6 @@ def _measurement_from_returns(sweep: RadarSweep, mask: np.ndarray) -> TrackMeasu
                             points=sweep.points[mask].copy(), origins=sweep.origins[mask].copy())
 
 
-def _gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, cfg: TrackingConfig) -> np.ndarray:
-    """Free returns near the predicted position with a consistent Doppler speed (each along its own radar's line of sight)."""
-    if not len(sweep.points):
-        return np.zeros(0, dtype=bool)
-    offsets = sweep.points - track.x[:2]
-    distance = np.hypot(offsets[:, 0], offsets[:, 1])
-    predicted_radial = _unit_lines(sweep.points, sweep.origins) @ track.x[2:]
-    mask = (free & (distance <= cfg.max_association_distance_m)
-            & (np.abs(sweep.radial_speed - predicted_radial) <= cfg.max_velocity_mismatch_mps))
-    if track.track_id is None:
-        # Tentative tracks may only grow on moving returns (never on scenery).
-        mask &= np.abs(sweep.radial_speed) >= cfg.moving_speed_mps
-    return mask
-
-
 def _slowdown_gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, own: np.ndarray,
                    cfg: TrackingConfig) -> np.ndarray:
     """A confirmed track's returns after an abrupt slowdown of its target (a crash).
@@ -763,22 +733,16 @@ def _slowdown_gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, own
     speed lies between standstill and the predicted one (Doppler gate width at
     both ends), at least ``min_slowdown_returns`` of them.
     """
-    offsets = sweep.points - track.x[:2]
-    if cfg.gating == "covariance" and "position" in cfg.covariance_components:
-        d2, _, euclid = covariance_gate(track, sweep, cfg)
-        near = free & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
-    else:
-        near = free & (np.hypot(offsets[:, 0], offsets[:, 1]) <= cfg.max_association_distance_m)
+    d2, _, euclid = covariance_gate(track, sweep, cfg)
+    near = free & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
     was_clean = track.clean
     track.clean = bool(own.any()) and not (near & ~own).any()
     if track.track_id is None or own.any() or not was_clean:
         return own
-    predicted = _unit_lines(sweep.points, sweep.origins) @ track.x[2:]
-    tolerance = cfg.max_velocity_mismatch_mps
-    if cfg.gating == "covariance" and "doppler" in cfg.covariance_components:
-        u = _unit_lines(sweep.points, sweep.origins)
-        tolerance = math.sqrt(chi2_quantile(cfg.gate_probability, 1)) * np.sqrt(
-            np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2)
+    u = _unit_lines(sweep.points, sweep.origins)
+    predicted = u @ track.x[2:]
+    tolerance = math.sqrt(chi2_quantile(cfg.gate_probability, 1)) * np.sqrt(
+        np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2)
     slowed = (near & (sweep.radial_speed >= np.minimum(predicted, 0.0) - tolerance)
               & (sweep.radial_speed <= np.maximum(predicted, 0.0) + tolerance))
     if int(slowed.sum()) < cfg.min_slowdown_returns:
@@ -821,9 +785,6 @@ def _statistical_assignment(ordered: Sequence[_ActiveTrack], sweep: RadarSweep, 
         gate = statistical & (euclid <= cfg.position_cap_m) & (residual <= cfg.doppler_cap_mps)
         if stats is not None:
             stats["cap_rejections"] = stats.get("cap_rejections", 0) + int((statistical & ~gate).sum())
-            stats["legacy_gate_would_differ"] = stats.get("legacy_gate_would_differ", 0) + int(
-                (gate != (free & (euclid <= cfg.max_association_distance_m)
-                          & (residual <= cfg.max_velocity_mismatch_mps))).sum())
         if track.track_id is None:
             gate &= np.abs(sweep.radial_speed) >= cfg.moving_speed_mps
         masks.append(gate)
@@ -835,7 +796,7 @@ def _statistical_assignment(ordered: Sequence[_ActiveTrack], sweep: RadarSweep, 
         loglik[~confirmed] = np.where(claimed[None, :], -np.inf, loglik[~confirmed])
     winners = np.argmax(loglik, axis=0)
     ambiguous = np.zeros(n, dtype=bool)
-    if "ambiguity" in cfg.covariance_components and len(ordered) > 1:
+    if len(ordered) > 1:
         ranked = np.sort(loglik, axis=0)
         best, second = ranked[-1], ranked[-2]
         gap = np.where(np.isfinite(second), best - np.where(np.isfinite(second), second, 0.0), np.inf)
@@ -859,18 +820,14 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
     finished: List[_ActiveTrack] = []
     births = 0
     confirmed = 0
-    kicks = _impact_kicks(sweeps, impacts, cfg) if cfg.gating == "covariance" else {}
+    kicks = _impact_kicks(sweeps, impacts, cfg)
+    g2 = chi2_quantile(cfg.gate_probability, 2)
     for index, sweep in enumerate(sweeps):
         free = np.ones(len(sweep.points), dtype=bool)
         # 1. Predict all tracks before any updates. An older track must not
         # consume a rival's better-supported returns merely because it ran first.
         # Keep confirmed-over-tentative priority; age only resolves exact ties.
         ordered = sorted(active, key=lambda item: (item.track_id is None, item.birth_order))
-        masks, scores = [], []
-        covariance = cfg.gating == "covariance"
-        parts = set(cfg.covariance_components.split(",")) if covariance else set()
-        g2, r2 = chi2_quantile(cfg.gate_probability, 2), chi2_quantile(cfg.gate_probability, 1)
-        statistical = covariance and "position" in parts and "doppler" in parts
         for track in ordered:
             track.predict(sweep.t_local, cfg)
             if index in kicks and ego is not None:
@@ -884,37 +841,8 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
                     track.P[2:, 2:] += np.eye(2) * kicks[index]
                     dt = sweep.t_local - (sweeps[index - 1].t_local if index else sweep.t_local)
                     track.P[:2, :2] += np.eye(2) * kicks[index] * dt * dt
-            if statistical:
-                continue
-            if covariance and len(sweep.points):
-                d2, radial2, euclid = covariance_gate(track, sweep, cfg)
-                if "position" not in parts:
-                    d2 = (euclid / cfg.max_association_distance_m) ** 2 * g2
-                if "doppler" not in parts:
-                    residual = np.abs(sweep.radial_speed - _unit_lines(sweep.points, sweep.origins) @ track.x[2:])
-                    radial2 = (residual / cfg.max_velocity_mismatch_mps) ** 2 * r2
-                gate = free & (d2 <= g2) & (radial2 <= r2) & (euclid <= cfg.position_cap_m)
-                if track.track_id is None:
-                    gate &= np.abs(sweep.radial_speed) >= cfg.moving_speed_mps
-                mask = _slowdown_gate(track, sweep, free, gate, cfg)
-                masks.append(mask)
-                # Normalised by the gates: each term <= 1 inside them; the tentative penalty keeps priority.
-                scores.append(np.where(mask, d2 / g2 + radial2 / r2 + (3.0 if track.track_id is None else 0.0), np.inf))
-                continue
-            mask = _slowdown_gate(track, sweep, free, _gate(track, sweep, free, cfg), cfg)
-            masks.append(mask)
-            distance = np.linalg.norm(sweep.points - track.x[:2], axis=1)
-            residual = np.abs(sweep.radial_speed - _unit_lines(sweep.points, sweep.origins) @ track.x[2:])
-            # Each normalised residual is <= 1 inside its gate. A penalty
-            # greater than 2 therefore preserves the confirmation priority.
-            scores.append(np.where(mask, (distance / cfg.max_association_distance_m) ** 2
-                                   + (residual / cfg.max_velocity_mismatch_mps) ** 2
-                                   + (3.0 if track.track_id is None else 0.0), np.inf))
-        if statistical:
-            masks, winners, ambiguous = _statistical_assignment(ordered, sweep, free, cfg, kicks.get(index, 0.0), stats)
-            free &= ~ambiguous  # an ambiguous return is nobody's and starts nothing
-        else:
-            winners = np.argmin(scores, axis=0) if scores else np.zeros(len(sweep.points), dtype=int)
+        masks, winners, ambiguous = _statistical_assignment(ordered, sweep, free, cfg, kicks.get(index, 0.0), stats)
+        free &= ~ambiguous  # an ambiguous return is nobody's and starts nothing
         confirmed_support = sum((mask.astype(int) for track, mask in zip(ordered, masks)
                                  if track.track_id is not None), np.zeros(len(sweep.points), dtype=int))
         for k, track in enumerate(ordered):
@@ -926,49 +854,38 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
                 free &= ~mask
             else:
                 track.miss(sweep)
-        # 2. End tracks that have been silent for too long.
+        # 2. End a track once its prediction no longer tells two bodies a car width apart (3 sigma), at most
+        # after the fail-safe cap.
         survivors = []
         for track in active:
-            if covariance and "survival" in parts:
-                # Survives while its prediction still tells two bodies a car width apart (3 sigma), at most
-                # the fail-safe cap.
-                spread = math.sqrt(max(float(np.linalg.eigvalsh(track.P[:2, :2])[-1]), 0.0))
-                lost = (sweep.t_local - track.last_update_t > cfg.gap_cap_s
-                        or (sweep.t_local > track.last_update_t and 3.0 * spread > cfg.body_width_m))
-            else:
-                lost = sweep.t_local - track.last_update_t > cfg.max_track_gap_s
+            spread = math.sqrt(max(float(np.linalg.eigvalsh(track.P[:2, :2])[-1]), 0.0))
+            lost = (sweep.t_local - track.last_update_t > cfg.gap_cap_s
+                    or (sweep.t_local > track.last_update_t and 3.0 * spread > cfg.body_width_m))
             if lost:
                 if track.track_id is not None:
                     finished.append(track)
             else:
                 survivors.append(track)
         active = survivors
-        # 3. Left-over moving returns away from every track start tentative tracks.
+        # 3. Left-over moving returns start tentative tracks: a new object only outside every track's gate AND
+        # outside the region its own body can occupy (``on_body``): an unlikely return of a known body is not
+        # a second body.
         candidates = free & (np.abs(sweep.radial_speed) >= cfg.moving_speed_mps)
-        suppression_m = cfg.max_association_distance_m + cfg.cluster_distance_m
-        for track in active:
-            offsets = sweep.points - track.x[:2]
-            if covariance and "position" in parts and len(sweep.points):
+        if len(sweep.points):
+            for track in active:
                 d2, _, _ = covariance_gate(track, sweep, cfg)
-                # A new object only outside every track's gate AND outside the region its own body can
-                # occupy (``on_body``): an unlikely return of a known body is not a second body.
                 candidates &= (d2 > g2) & ~on_body(track, sweep.points, cfg)
-            else:
-                candidates &= np.hypot(offsets[:, 0], offsets[:, 1]) > suppression_m
         indices = np.flatnonzero(candidates)
         for cluster in cluster_points(sweep.points[indices], cfg.cluster_distance_m):
             mask = np.zeros(len(sweep.points), dtype=bool)
             mask[indices[cluster]] = True
             births += 1
             active.append(_ActiveTrack(births, _measurement_from_returns(sweep, mask), cfg))
-        # 4. Confirm tentative tracks that kept receiving moving returns.
+        # 4. Confirm tentative tracks with min_track_support_s of support and min_track_updates measurements.
         for track in active:
-            if covariance and "confirmation" in parts:
-                ready = (track.last_update_t - track.measurements[0].t_local >= cfg.min_track_support_s - 1e-6
-                         and track.n_updates >= cfg.min_track_updates)
-            else:
-                ready = track.n_updates >= cfg.min_track_frames
-            if ready and track.track_id is None and covariance and "position" in parts:
+            ready = (track.last_update_t - track.measurements[0].t_local >= cfg.min_track_support_s - 1e-6
+                     and track.n_updates >= cfg.min_track_updates)
+            if ready and track.track_id is None:
                 # Two vehicle bodies cannot overlap: a tentative track whose point lies strictly inside a
                 # confirmed track's body region (no margin) is a part of that body seen apart (its front while
                 # the track's crossing speed lags), never a second vehicle.  It is not reported.

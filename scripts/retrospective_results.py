@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Aggregate the three-method study (privileged evaluation): results/retrospective/summary<tag>.{json,md}.
+"""Aggregate the identity study (privileged evaluation): results/retrospective/summary<tag>.{json,md}.
 
     python scripts/retrospective_results.py --tag _S13_heldout
 
-Per condition and method (counts per draw = per run and seed, averaged over seeds and summed over runs):
+Per condition and variant (baseline, or a sensitivity variant; counts per draw = per run and seed, averaged over seeds and summed over runs):
 merges (correct / false / missed), recorder links (wrong / missed), duplicate entities, sample identity
 (correct / wrong / unresolved shares; also before the first contact by more than 2 s = early identity),
 retrospective resolutions (made, correct), collisions (recall, wrong pairings, unmatched, ambiguous
 refusals, recorders aligned).  Breakdowns by range and by time before the observer's first contact,
 confidence calibration (stated association score against empirical accuracy) and the backward decisions
-by gap.  Every number is traceable to the job lines (commit, config hash, method, seed, perturbation, run).
+by gap.  Every number is traceable to the job lines (commit, config hash, variant, seed, perturbation, run).
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 ROOT = Path(__file__).resolve().parents[1]
-METHODS = ("current", "corrected", "retrospective", "final")
+BASELINE = "baseline"
 CONF_BINS = (0.0, 0.5, 0.8, 0.9, 0.95, 0.99, 1.0001)
 GAP_BINS = (0.0, 0.5, 1.0, 2.0, 4.0, 1e9)
 DIST_ORDER = ["0-10", "10-20", "20-30", "30-40", "40-50", "50-60", "60+"]
@@ -31,11 +31,13 @@ TIME_ORDER = ["0-0.5", "0.5-1", "1-2", "2-4", "4+", "after contact"]
 
 
 def load(tag: str, base: Path = ROOT / "results" / "retrospective") -> Dict[str, List[Dict[str, Any]]]:
+    """Jobs per variant folder (the baseline first)."""
     out = {}
-    for method in METHODS:
-        path = base / method / "jobs{0}.jsonl".format(tag)
+    folders = sorted((p for p in base.iterdir() if p.is_dir()), key=lambda p: (p.name != BASELINE, p.name)) if base.exists() else []
+    for folder in folders:
+        path = folder / "jobs{0}.jsonl".format(tag)
         if path.exists():
-            out[method] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            out[folder.name] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return out
 
 
@@ -168,51 +170,52 @@ def gaps(jobs: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def markdown(record: Dict[str, Any]) -> str:
-    lines = ["# Three-method identity study ({0})".format(record["tag"]), "",
+    variants = list(record["variants"])
+    lines = ["# Identity study ({0})".format(record["tag"]), "",
              "Privileged evaluation of `scripts/retrospective_study.py`; provenance at the end.  Counts per draw "
              "(summed over runs, averaged over seeds); shares over all measured samples.", ""]
     cols = ["merges_correct", "merges_false", "merges_missed", "links_wrong", "links_missed", "duplicate_entities",
             "correct_share", "wrong_share", "unresolved_share", "early_correct_share", "early_wrong_share",
             "retrospective_resolved", "retrospective_correct"]
-    lines += ["| condition | method | seeds | " + " | ".join(cols) + " |", "|---|---|--:|" + "--:|" * len(cols)]
-    conditions = sorted({c for m in record["methods"].values() for c in m["conditions"]})
+    lines += ["| condition | variant | seeds | " + " | ".join(cols) + " |", "|---|---|--:|" + "--:|" * len(cols)]
+    conditions = sorted({c for m in record["variants"].values() for c in m["conditions"]})
     for condition in conditions:
-        for method in METHODS:
-            row = record["methods"].get(method, {}).get("conditions", {}).get(condition)
+        for variant in variants:
+            row = record["variants"][variant].get("conditions", {}).get(condition)
             if row:
-                lines.append("| {0} | {1} | {2} | ".format(condition, method, row["seeds"]) +
+                lines.append("| {0} | {1} | {2} | ".format(condition, variant, row["seeds"]) +
                              " | ".join(str(row[c]) for c in cols) + " |")
     lines += ["", "## Collisions", "",
-              "| condition | method | recall | wrong pairings | unmatched true contacts | ambiguous refusals | recorders aligned |",
+              "| condition | variant | recall | wrong pairings | unmatched true contacts | ambiguous refusals | recorders aligned |",
               "|---|---|---|--:|--:|--:|---|"]
     for condition in conditions:
-        for method in METHODS:
-            row = record["methods"].get(method, {}).get("conditions", {}).get(condition)
+        for variant in variants:
+            row = record["variants"][variant].get("conditions", {}).get(condition)
             if row:
                 lines.append("| {0} | {1} | {2}/{3} | {4} | {5} | {6} | {7}/{8} |".format(
-                    condition, method, row["collisions_reconstructed"], row["collisions_true"], row["collision_wrong"],
+                    condition, variant, row["collisions_reconstructed"], row["collisions_true"], row["collision_wrong"],
                     row["collision_unmatched"], row["ambiguous_refusals"], row["recorders_aligned"], row["recorders"]))
     for name, key, order in (("Range from the observing radar", "by_distance", DIST_ORDER),
                              ("Time before the observer's first contact", "by_time", TIME_ORDER)):
         for group, label in (("exact_like", "exact and RTK"), ("consumer_like", "consumer and correlated consumer")):
             lines += ["", "## {0} ({1})".format(name, label), "",
-                      "| bin [m or s] | " + " | ".join("{0} correct / wrong / unresolved (samples)".format(m) for m in METHODS) + " |",
-                      "|---|" + "---|" * len(METHODS)]
+                      "| bin [m or s] | " + " | ".join("{0} correct / wrong / unresolved (samples)".format(v) for v in variants) + " |",
+                      "|---|" + "---|" * len(variants)]
             for b in order:
                 cells = []
-                for method in METHODS:
-                    block = record["methods"].get(method, {}).get(key, {}).get(group, {}).get(b)
+                for variant in variants:
+                    block = record["variants"][variant].get(key, {}).get(group, {}).get(b)
                     cells.append("-" if not block else "{0} / {1} / {2} ({3}{4})".format(
                         block["correct_share"], block["wrong_share"], block["unresolved_share"], block["samples"],
                         ", few" if block["samples"] < 50 else ""))
                 lines.append("| {0} | ".format(b) + " | ".join(cells) + " |")
     lines += ["", "## Confidence calibration (tracks with an association score)", "",
-              "| method | score bin | tracks | empirical accuracy |", "|---|---|--:|--:|"]
-    for method in METHODS:
-        for b, v in record["methods"].get(method, {}).get("calibration", {}).get("reliability", {}).items():
-            lines.append("| {0} | {1} | {2} | {3} |".format(method, b, v["tracks"], v["empirical_accuracy"]))
-    lines += ["", "## Backward decisions by gap (retrospective)", "", "| gap [s] | outcome counts |", "|---|---|"]
-    for b, v in record["methods"].get("retrospective", {}).get("gaps", {}).items():
+              "| variant | score bin | tracks | empirical accuracy |", "|---|---|--:|--:|"]
+    for variant in variants:
+        for b, v in record["variants"][variant].get("calibration", {}).get("reliability", {}).items():
+            lines.append("| {0} | {1} | {2} | {3} |".format(variant, b, v["tracks"], v["empirical_accuracy"]))
+    lines += ["", "## Backward decisions by gap (baseline)", "", "| gap [s] | outcome counts |", "|---|---|"]
+    for b, v in record["variants"].get(BASELINE, {}).get("gaps", {}).items():
         lines.append("| {0} | {1} |".format(b, ", ".join("{0} {1}".format(k, n) for k, n in sorted(v.items()))))
     lines += ["", "## Provenance", "", "```", json.dumps(record["provenance"], indent=1), "```", ""]
     return "\n".join(lines)
@@ -222,15 +225,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
     parser.add_argument("--results", type=Path, default=ROOT / "results" / "retrospective",
-                        help="folder of the <method>/jobs<tag>.jsonl files; the summary is written there")
+                        help="folder of the <variant>/jobs<tag>.jsonl files; the summary is written there")
     args = parser.parse_args()
     data = load(args.tag, args.results)
     exact_like = {"exact", "rtk", "exact_impulse10", "rtk_impulse10"}
-    record: Dict[str, Any] = {"tag": args.tag, "methods": {}}
+    record: Dict[str, Any] = {"tag": args.tag, "variants": {}}
     commits, configs, seeds, conditions, runs = set(), set(), set(), set(), set()
-    for method, jobs in data.items():
+    for variant, jobs in data.items():
         all_conditions = {j["condition"] for j in jobs}
-        record["methods"][method] = {
+        record["variants"][variant] = {
             "conditions": condition_table(jobs),
             "by_distance": {"exact_like": breakdown(jobs, "by_distance", exact_like),
                             "consumer_like": breakdown(jobs, "by_distance", all_conditions - exact_like - {"degraded"})},

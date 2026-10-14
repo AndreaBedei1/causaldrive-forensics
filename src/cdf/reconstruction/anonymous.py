@@ -12,24 +12,23 @@ pose sources declare; nothing depends on a scenario.
    a target at rest gives no time information and leaves the recorder unaligned.  When no collision was
    matched at all (a near miss), the first recorder's own clock is the global one (t_global = its t_local)
    and the others are aligned to it this way.
-2. RECORDER LINKS (``link_to_recorders``): an anonymous track whose observed near surface lies on another
-   recorder's own footprint outline, moving at that recorder's own velocity, over most of its life, is
-   that recorder.  The footprint and the pose are the recorder's own: no face ambiguity.
-3. ANONYMOUS ROAD USERS.  Two anonymous tracks of different observers are one road user when one rigid
-   box (centre, half length, half width with priors, heading from the motion) explains the faces both
-   observers' returns show, and their velocities agree, over most of their shared window
-   (``pair_evidence``): radars at different places see different faces, so their track points differ by
-   up to a car length while the box they imply is one.  The same test joins two simultaneous tracks of
-   one observer that are faces of one body (a tracker splitting a road user).  Two tracks of one
-   observer, the second starting shortly after the first ended where the first is predicted to be, are
-   one road user (``stitch_evidence``).  A link with a rival (a second successor, or two simultaneous
-   partners of one observer that are not one body) is refused.  The remaining links join tracks into
-   entities, best first, never putting two simultaneous tracks of one observer into one entity unless a
-   link showed them to be one body (``cluster``): U1, U2, ... by first appearance.
-Optionally (``fusion.mutual_refinement``) the pose sources are refined first (``mutual_offsets``): the tracks
-   identified with a recorder show its surface where its observers put it, against the faces of its box
-   where its own pose stream puts it; the position offsets this fixes (only along the faces' normals, with
-   the declared accuracies as priors) are removed and steps 2-4 are redone.
+2. RECORDER LINKS and 3. ANONYMOUS ROAD USERS: ``identity.fuse_corrected`` (see that module), on the
+   building blocks defined here.  An anonymous track whose observed near surface lies on another
+   recorder's own footprint outline, moving at that recorder's own velocity, is that recorder
+   (``RecorderLink``; one recorder per observer and instant, ``exclusive_recorder_links``; a short impact
+   segment between two named flanks, ``collision_continuity_links``).  Two anonymous tracks of different
+   observers are one road user when one rigid box (centre, half length, half width with priors, heading
+   from the motion) explains the faces both observers' returns show, and their velocities agree, over
+   most of their shared window (``pair_evidence``): radars at different places see different faces, so
+   their track points differ by up to a car length while the box they imply is one.  The same test joins
+   two simultaneous tracks of one observer that are faces of one body (a tracker splitting a road user).
+   Two tracks of one observer, the second starting shortly after the first ended where the first is
+   predicted to be, are one road user (``stitch_evidence``).  U1, U2, ... by first appearance.
+   When a pose source declares a position error (or with ``fusion.mutual_refinement``) the pose sources
+   are refined first (``mutual_offsets``): the tracks identified with a recorder show its surface where
+   its observers put it, against the faces of its box where its own pose stream puts it; the position
+   offsets this fixes (only along the faces' normals, with the declared accuracies as priors) are
+   removed and steps 2-4 are redone.
 
 4. FUSED STATE of each entity (``entity_trajectory``): one box fitted to the faces the returns of all its
    observers show (``fit_box``: each visible face is a linear constraint on the centre and one half
@@ -450,120 +449,6 @@ def _third_body_contact(observer: RecorderBody, target: RecorderBody) -> float:
     return min((t for t, partners in target.contacts if observer.recorder not in partners), default=math.inf)
 
 
-def link_to_recorders(view: CommonView, cfg: ReconstructionConfig) -> List[RecorderLink]:
-    """Per anonymous track, the recorder whose own footprint its returns lie on.
-
-    Evidence: the track's measured samples (the median of its returns: on or inside the target's body)
-    up to the candidate recorder's first contact with a third body (``_third_body_contact``).  A point
-    inside the recorder's footprint is on it: no other body can be there.  Accepted when, over at least
-    ``link_min_samples`` samples, the median distance to the footprint is within 2 sigma
-    (``_position_sigma``), the median velocity difference within 2 sigma (``_velocity_sigma``) and at least
-    ``link_min_fraction`` of the samples lie within 3 sigma of both -- unless the track's samples after
-    that contact lie clearly off the recorder (median beyond 3 sigma over at least ``link_min_samples``):
-    the track switched to another body and stays anonymous (identity is per track).  Of several accepted
-    recorders, the closest one."""
-    fusion = cfg.fusion
-    links = []
-    for track in view.tracks:
-        if track.status == ASSOCIATED or track.identity_ambiguous:
-            continue
-        observer = view.bodies[track.recorder]
-        if (track.parent_track is not None
-                and any(track.start >= _third_body_contact(observer, body)
-                        for name, body in view.bodies.items() if name != track.recorder)):
-            continue  # later segments require the fresh, rival-checked pass below
-        candidates = []
-        for name, body in view.bodies.items():
-            if name == track.recorder:
-                continue
-            cut = _third_body_contact(observer, body)
-            covered = [s for s in track.samples if s.measured and body.covers(s.t_global)]
-            samples = [s for s in covered if s.t_global < cut]
-            if len(samples) < fusion.link_min_samples:
-                continue
-            distance, _ = outline_distances(body.poses, body.footprint,
-                                            np.array([s.t_global for s in samples]) - body.offset_to_global,
-                                            np.array([s.point for s in samples]), inside_zero=True)
-            sigma = np.array([_position_sigma(cfg, s, body.poses) for s in samples])
-            speed_gap, speed_sigma = [], []
-            for s in samples:
-                pose = body.pose_at_global(s.t_global)
-                speed_gap.append(float(np.hypot(s.velocity[0] - pose.vx, s.velocity[1] - pose.vy)))
-                speed_sigma.append(_velocity_sigma(cfg, s.vel_std, body.poses.velocity_std_mps))
-            speed_gap, speed_sigma = np.array(speed_gap), np.array(speed_sigma)
-            within = float(np.mean((distance <= 3.0 * sigma) & (speed_gap <= 3.0 * speed_sigma)))
-            accepted = (float(np.median(distance / sigma)) <= 2.0 and float(np.median(speed_gap / speed_sigma)) <= 2.0
-                        and within >= fusion.link_min_fraction)
-            link = RecorderLink(track.name, name, len(samples), round(float(np.median(distance)), 3),
-                                round(float(np.median(distance / sigma)), 3), round(float(np.median(speed_gap)), 3),
-                                round(within, 3), accepted, None if math.isinf(cut) else round(cut, 4))
-            after = [s for s in covered if s.t_global >= cut]
-            if accepted and len(after) >= fusion.link_min_samples:
-                rest, _ = outline_distances(body.poses, body.footprint,
-                                            np.array([s.t_global for s in after]) - body.offset_to_global,
-                                            np.array([s.point for s in after]), inside_zero=True)
-                rest_sigma = np.array([_position_sigma(cfg, s, body.poses) for s in after])
-                if float(np.median(rest / rest_sigma)) > 3.0:
-                    link.accepted = False
-                    link.refused = ("after {2}'s contact with a third body at {0:+.2f} s the track lies {1:.2f} m off "
-                                    "{2} (median): it switched to another body".format(cut, float(np.median(rest)), name))
-            candidates.append(link)
-        accepted = sorted((c for c in candidates if c.accepted), key=lambda c: c.median_distance_sigma)
-        links += accepted[:1]
-    # A stable segment born after a third-body contact has no pre-contact
-    # samples. Permit fresh identity evidence, never inheritance across the
-    # ambiguous segment or anonymous motion stitching.
-    known = {link.track: link.recorder for link in links}
-    known.update({t.name: t.entity for t in view.tracks if t.status == ASSOCIATED})
-    for track in view.tracks:
-        if track.name in known or track.identity_ambiguous or track.parent_track is None:
-            continue
-        previous = [t for t in view.tracks if t.recorder == track.recorder
-                    and t.parent_track == track.parent_track and t.name in known
-                    and 0.0 < track.start - t.end <= fusion.stitch_max_gap_s]
-        targets = {known[t.name] for t in previous}
-        if len(targets) != 1:
-            continue
-        target = next(iter(targets))
-        body = view.bodies[target]
-        cut = _third_body_contact(view.bodies[track.recorder], body)
-        samples = [s for s in track.samples if s.measured and body.covers(s.t_global)]
-        if (track.start < cut or len(samples) < fusion.link_min_samples
-                or any(b.t_global - a.t_global > cfg.tracking.max_track_gap_s for a, b in zip(samples, samples[1:]))):
-            continue
-        evidence = {}
-        for name, rival in view.bodies.items():
-            if name == track.recorder or not all(rival.covers(s.t_global) for s in samples):
-                continue
-            distance, _ = outline_distances(rival.poses, rival.footprint,
-                np.array([s.t_global for s in samples]) - rival.offset_to_global,
-                np.array([s.point for s in samples]), inside_zero=True)
-            sigma = np.array([_position_sigma(cfg, s, rival.poses) for s in samples])
-            speed_gap = np.array([np.linalg.norm(s.velocity - np.array([rival.pose_at_global(s.t_global).vx,
-                                                                     rival.pose_at_global(s.t_global).vy]))
-                                  for s in samples])
-            speed_sigma = np.array([_velocity_sigma(cfg, s.vel_std, rival.poses.velocity_std_mps) for s in samples])
-            within = (distance <= 3.0 * sigma) & (speed_gap <= 3.0 * speed_sigma)
-            evidence[name] = (distance, sigma, speed_gap, speed_sigma, within)
-        if target not in evidence:
-            continue
-        distance, sigma, speed_gap, speed_sigma, within = evidence[target]
-        # Require persistence throughout the segment, including its beginning:
-        # a long clean suffix must not name an earlier contaminated prefix.
-        width = fusion.link_min_samples
-        persistent = all(float(np.mean(within[i:i + width])) >= fusion.link_min_fraction
-                         for i in range(len(within) - width + 1))
-        rival_supported = any(np.any(np.convolve(values[-1].astype(int), np.ones(width, dtype=int), mode='valid')
-                                    >= math.ceil(width * fusion.link_min_fraction))
-                              for name, values in evidence.items() if name != target)
-        if (persistent and not rival_supported and float(np.median(distance / sigma)) <= 1.0
-                and float(np.median(speed_gap / speed_sigma)) <= 1.0):
-            links.append(RecorderLink(track.name, target, len(samples), round(float(np.median(distance)), 3),
-                         round(float(np.median(distance / sigma)), 3), round(float(np.median(speed_gap)), 3),
-                         round(float(np.mean(within)), 3), True, reacquired=True))
-    return links
-
-
 # --------------------------------------------------------------------------
 # 3. Anonymous road users: pairs across observers, stitches within one
 # --------------------------------------------------------------------------
@@ -812,79 +697,6 @@ def exclusive_recorder_links(view: CommonView, links: Sequence["RecorderLink"], 
                            "evidence shows the two tracks are one vehicle".format(recorder, rival)}
                 for name, (recorder, rival) in sorted(refused.items())]
     return kept, refusals
-
-
-def _one_body(evidence: Sequence[PairEvidence]) -> set:
-    """Pairs of simultaneous tracks of one observer that an accepted link showed to be one body."""
-    return {frozenset((e.a, e.b)) for e in evidence if e.accepted and e.kind == SPLIT}
-
-
-def refuse_ambiguous(evidence: Sequence[PairEvidence], tracks: Dict[str, CommonTrack]) -> None:
-    """Refuse every link that has a rival: a track with two stitched successors (or predecessors), or a
-    track compatible with two simultaneous tracks of one other observer that are not one body.
-    Conservative: an ambiguity fragments a road user rather than merging two."""
-    accepted = [e for e in evidence if e.accepted]
-    one_body = _one_body(evidence)
-    refusals: Dict[int, str] = {}
-    for e in accepted:
-        for other in accepted:
-            if other is e:
-                continue
-            if e.kind == STITCH:
-                if other.kind != STITCH:
-                    continue
-                if other.a == e.a:
-                    refusals[id(e)] = "{0} has two possible successors ({1}, {2})".format(e.a, e.b, other.b)
-                elif other.b == e.b:
-                    refusals[id(e)] = "{0} has two possible predecessors ({1}, {2})".format(e.b, e.a, other.a)
-                continue
-            if other.kind == STITCH:
-                continue
-            for mine, partner in ((e.a, e.b), (e.b, e.a)):
-                if mine not in (other.a, other.b):
-                    continue
-                rival = other.b if other.a == mine else other.a
-                if (rival != partner and tracks[rival].recorder == tracks[partner].recorder
-                        and tracks[rival].recorder != tracks[mine].recorder
-                        and _overlap(tracks[rival], tracks[partner])
-                        and frozenset((rival, partner)) not in one_body):
-                    refusals[id(e)] = "{0} is compatible with two simultaneous tracks of {1} ({2}, {3})".format(
-                        mine, tracks[partner].recorder, partner, rival)
-    for e in accepted:
-        if id(e) in refusals:
-            e.accepted, e.refused = False, refusals[id(e)]
-
-
-def cluster(tracks: Sequence[CommonTrack], evidence: Sequence[PairEvidence]) -> Tuple[List[List[CommonTrack]], List[PairEvidence]]:
-    """(entities, the links that joined them): accepted links in order of score, never joining two
-    groups that would hold two simultaneous tracks of one observer, unless an accepted link showed those
-    two to be one body; every track ends in exactly one entity, entities ordered by first appearance."""
-    parent = {track.name: track.name for track in tracks}
-    one_body = _one_body(evidence)
-
-    def root(name: str) -> str:
-        while parent[name] != name:
-            parent[name] = parent[parent[name]]
-            name = parent[name]
-        return name
-
-    def conflict(x: CommonTrack, y: CommonTrack) -> bool:
-        return x.recorder == y.recorder and _overlap(x, y) and frozenset((x.name, y.name)) not in one_body
-
-    members = {track.name: [track] for track in tracks}
-    used = []
-    for item in sorted((e for e in evidence if e.accepted), key=lambda e: (e.score, e.a, e.b)):
-        ra, rb = root(item.a), root(item.b)
-        if ra == rb:
-            continue
-        if any(conflict(x, y) for x in members[ra] for y in members[rb]):
-            item.refused = "would put two simultaneous tracks of one observer into one road user"
-            continue
-        parent[rb] = ra
-        members[ra] += members.pop(rb)
-        used.append(item)
-    groups = [sorted(group, key=lambda t: (t.start, t.name)) for name, group in members.items() if root(name) == name]
-    return sorted(groups, key=lambda group: (group[0].start, group[0].name)), used
 
 
 # --------------------------------------------------------------------------
@@ -1288,14 +1100,15 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
                     poses: Dict[str, PoseSource], cfg: ReconstructionConfig) -> RoadUserFusion:
     """Steps 2-4 of the module docstring (step 1 runs before the collision-based association is redone).
     ``associations`` are updated in place: recorder links become ASSOCIATED with the recorder, every other
-    anonymous track of an aligned recorder gets its entity's name (U1, U2, ...).  With
-    ``fusion.mutual_refinement`` a first pass on a copy finds the recorder links, ``mutual_offsets`` corrects
+    anonymous track of an aligned recorder gets its entity's name (U1, U2, ...).  The association itself is
+    ``identity.fuse_corrected``.  When a pose source declares a position error (or with
+    ``fusion.mutual_refinement``) a first pass on a copy finds the recorder links, ``mutual_offsets`` corrects
     the pose sources, and the fusion runs on the corrected ones."""
+    from .identity import fuse_corrected
     refinement = None
-    # The corrected methods estimate the recorders' relative pose from their views of each other whenever a
-    # pose source declares an error (the relative uncertainty the association needs).
-    if cfg.fusion.mutual_refinement or (cfg.fusion.association_method != "current"
-                                        and any(getattr(s, "position_std_m", 0.0) > 0.0 for s in poses.values())):
+    # The recorders' relative pose is estimated from their views of each other whenever a pose source
+    # declares an error (the relative uncertainty the association needs).
+    if cfg.fusion.mutual_refinement or any(getattr(s, "position_std_m", 0.0) > 0.0 for s in poses.values()):
         import copy as _copy
 
         def corrected(record: Dict[str, Any]) -> Dict[str, PoseSource]:
@@ -1307,12 +1120,12 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
         first = mutual_offsets(locals_, alignment, associations, poses, cfg)
         # Stage 2: every track identified on the corrected poses (links are then less ambiguous).
         trial = _copy.deepcopy(list(associations))
-        _fuse(locals_, alignment, trial, corrected(first), cfg)
+        fuse_corrected(locals_, alignment, trial, corrected(first), cfg)
         refinement = mutual_offsets(locals_, alignment, trial, poses, cfg)
         refinement["first_stage"] = {key: first.get(key) for key in ("applied", "offsets_m", "declared_position_std_m",
                                                                       "posterior", "reason") if key in first}
         poses = corrected(refinement)
-    result = _fuse(locals_, alignment, associations, poses, cfg, refinement)
+    result = fuse_corrected(locals_, alignment, associations, poses, cfg, refinement)
     result.refinement = refinement
     return result
 
@@ -1379,83 +1192,3 @@ def collision_continuity_links(view: CommonView, associations: Sequence[Associat
                    round(float(np.mean(within)),3),True,
                    collision_anchored=True))
     return out
-
-
-def _fuse(locals_: Sequence[Any], alignment: Alignment, associations: List[Association],
-          poses: Dict[str, PoseSource], cfg: ReconstructionConfig,
-          refinement: Optional[Dict[str, Any]] = None) -> RoadUserFusion:
-    if cfg.fusion.association_method != "current":
-        from .identity import fuse_corrected
-        return fuse_corrected(locals_, alignment, associations, poses, cfg, refinement)
-    view = build_common_view(locals_, alignment, associations, poses)
-    links = link_to_recorders(view, cfg)
-    links += collision_continuity_links(view, associations, alignment, links, cfg)
-    links, exclusive = exclusive_recorder_links(view, links, cfg)
-    by_key = {(a.local_graph, a.local_track): a for a in associations}
-    for refusal in exclusive:
-        recorder, track_id = refusal["track"].split(":", 1)
-        by_key[(recorder, track_id)].evidence.append(refusal["reason"])
-    for link in links:
-        recorder, track_id = link.track.split(":", 1)
-        item = by_key[(recorder, track_id)]
-        item.status, item.global_entity, item.candidate = ASSOCIATED, link.recorder, link.recorder
-        item.confidence = link.fraction_within
-        item.blocking = []
-        if not link.collision_anchored:
-            item.collision_event = None
-        item.evidence = list(item.evidence) + ([
-            "common frame: its returns lie on {0}'s own footprint (median {1:.2f} m, {2:.2f} sigma, over {3} "
-            "samples{6}; {4:.0%} within 3 sigma) at {0}'s own velocity (median difference {5:.2f} m/s)".format(
-                link.recorder, link.median_distance_m, link.median_distance_sigma, link.samples,
-                link.fraction_within, link.median_velocity_difference_mps,
-                "" if link.until is None else " before {0}'s contact with a third body at {1:+.2f} s".format(
-                    link.recorder, link.until))] if not link.collision_anchored else [])
-        item.source_graphs = sorted(set(item.source_graphs) | {recorder, link.recorder})
-        if link.reacquired:
-            item.evidence.append('reacquired after an identity boundary: persistent fresh geometry and velocity '
-                                 'throughout the stable segment, continuous with the earlier named segment; no supported rival')
-        if link.collision_anchored:
-            item.evidence.append('short impact segment identity anchored by the matched collision, touching geometry, '
-                                 'persistent fresh body support and two named parent flanks; no compatible rival. '
-                                 'Motion uncertainty remains local; velocity disturbance is not an identity veto.')
-    linked = {link.track for link in links}
-    anonymous = [t for t in view.tracks if t.status != ASSOCIATED and t.name not in linked]
-    by_name = {t.name: t for t in anonymous}
-    evidence: List[PairEvidence] = []
-    for i, a in enumerate(anonymous):
-        for b in anonymous[i + 1:]:
-            if a.recorder != b.recorder or _overlap(a, b):
-                item = pair_evidence(a, b, cfg)  # across observers, or a split track of one observer
-            else:
-                first, second = (a, b) if (a.start, a.name) <= (b.start, b.name) else (b, a)
-                item = stitch_evidence(first, second, cfg)
-            if item is not None:
-                evidence.append(item)
-    refuse_ambiguous(evidence, by_name)
-    groups, used = cluster(anonymous, evidence)
-    entities, names = [], {}
-    for number, group in enumerate(groups, 1):
-        entity_id = "U{0}".format(number)
-        members = {t.name for t in group}
-        states, footprint = entity_trajectory(group, cfg)
-        joins = [e for e in used if e.a in members and e.b in members]
-        # The weakest link's fraction of compared instants passing (a stitch compares one instant).
-        confidence = round(min(e.passed for e in joins), 3) if joins else None
-        names.update({(t.recorder, t.track_id): entity_id for t in group})
-        entities.append({"id": entity_id, "anonymous": True,
-                         "identity_ambiguous": any(t.identity_ambiguous for t in group),
-                         "source_tracks": [t.name for t in group],
-                         "source_track_segments": [{"track": t.name, "observer": t.recorder,
-                                                    "t_global": [round(t.start, 3), round(t.end, 3)]} for t in group],
-                         "observers": sorted({t.recorder for t in group}),
-                         "time_span": [round(min(t.start for t in group), 3), round(max(t.end for t in group), 3)],
-                         "association": {"links": [dict(e.to_dict(), score=round(e.score, 3)) for e in joins],
-                                         "confidence": confidence},
-                         "fusion_method": "+".join(sorted({s["method"] for s in states})), "footprint": footprint,
-                         "trajectory": states})
-        for track in group:
-            item = by_key[(track.recorder, track.track_id)]
-            item.global_entity = entity_id
-            item.evidence = list(item.evidence) + [
-                "anonymous road user {0}: {1}".format(entity_id, ", ".join(t.name for t in group))]
-    return RoadUserFusion(links, evidence, entities, {owner: source.name for owner, source in poses.items()}, names)

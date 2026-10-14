@@ -7,7 +7,8 @@ import numpy as np
 from src.cdf.common.config import load_run_config
 from src.cdf.simulation.scenario_base import ScenarioSpec
 
-from src.cdf.reconstruction.anonymous import CommonView, link_to_recorders
+from src.cdf.reconstruction.anonymous import CommonView
+from src.cdf.reconstruction.identity import RelativePose, link_to_recorders_corrected
 from src.cdf.reconstruction.common_frame import RecorderBody, RecordedPoseSource
 from src.cdf.reconstruction.config import ReconstructionConfig, TrackingConfig
 from src.cdf.reconstruction.local import reconstruct_vehicle
@@ -56,7 +57,15 @@ class RawCompetitionTests(unittest.TestCase):
         self.assertGreater(smoothed[-1,1],4)
 
 
+def link_to_recorders(view, cfg):
+    links, _ = link_to_recorders_corrected(view, cfg, RelativePose({name: b.poses for name, b in view.bodies.items()}))
+    return links
+
+
 class ReacquisitionTests(unittest.TestCase):
+    """A segment born after its candidate recorder's contact with a third body gets no recorder link from the
+    radar geometry: identity is never inherited across that contamination boundary."""
+
     def view(self, rival_y=8.0):
         cfg=ReconstructionConfig()
         def body(name,y):
@@ -69,12 +78,10 @@ class ReacquisitionTests(unittest.TestCase):
         bodies={'O':body('O',-10),'Q':body('Q',0),'R':body('R',rival_y)}
         return CommonView([before,after],bodies),cfg
 
-    def test_strong_stable_segment_can_reacquire_after_contamination_boundary(self):
+    def test_the_segment_before_the_boundary_is_linked_and_the_one_after_is_not(self):
         view,cfg=self.view()
         links=link_to_recorders(view,cfg)
-        after=next(l for l in links if l.track.endswith('segment_3'))
-        self.assertEqual(after.recorder,'Q')
-        self.assertTrue(after.reacquired)
+        self.assertEqual([(l.track.split('#')[1],l.recorder) for l in links],[('segment_1','Q')])
 
     def test_indistinguishable_rival_prevents_reacquisition(self):
         view,cfg=self.view(rival_y=0)

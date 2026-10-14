@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Three-method comparison of the identity association (current / corrected / retrospective).
+"""Identity study of the reconstruction under pose and impulse perturbations.
 
-    python scripts/retrospective_study.py traces/S13/run_* --methods current,corrected,retrospective
+    python scripts/retrospective_study.py traces/S13/run_* [--variants baseline,stitch_max_gap_s=1.0]
            --conditions exact,rtk,consumer,... --seeds 0,1,2 [--workers 8] [--keep]
 
 Every job: a non-destructive copy of the run (hard links; the GNSS error enters as the pose source and the
 impulse noise as perturbed collision reports, ``cdf.robustness.perturb``, identical draws for every
-method), the reconstruction with ``fusion.association_method`` set to the method, then the privileged
-evaluation (``evaluate_run``, ``evaluate_fusion``, ``identity_timeline``).  Ground truth is read only by
-the evaluation, after the reconstruction wrote its files.  One line per job in
-``results/retrospective/<method>/jobs.jsonl`` with its provenance (commit, config hash, method, seed,
-perturbation, run, generation time).  The copies live under ``robustness/retrospective/`` (git-ignored) and
+variant), the reconstruction (``configs/reconstruction.yaml``; a sensitivity variant ``key=value[@key=value]``
+overrides those ``fusion`` parameters, ``baseline`` none), then the privileged evaluation (``evaluate_run``,
+``evaluate_fusion``, ``identity_timeline``).  Ground truth is read only by the evaluation, after the
+reconstruction wrote its files.  One line per job in ``results/retrospective/<variant>/jobs.jsonl`` with its
+provenance (commit, config hash, variant, seed, perturbation, run, generation time).  The copies live under ``robustness/retrospective/`` (git-ignored) and
 are deleted unless ``--keep``.
 """
 
@@ -43,10 +43,27 @@ CONDITIONS: Dict[str, Any] = {
     "consumer_impulse10": ("combined", "consumer independent + 10%", ("consumer", 0.0)),
     "consumer_common_0.9_impulse10": ("combined", "consumer common 0.9 + 10%", ("consumer", 0.9)),
 }
-METHODS = ("current", "corrected", "retrospective", "final")
-# Seeds never used to develop or tune anything (docs/RETROSPECTIVE_RECONSTRUCTION_PLAN.md, held-out policy).
+BASELINE = "baseline"
+# Seeds never used to develop or tune anything (held-out policy: the final campaign only).
 DEVELOPMENT_SEEDS = (0, 1, 2, 3)
 HELD_OUT_SEEDS = tuple(range(100, 110))
+
+
+def variant_config(cfg: Any, variant: str) -> Any:
+    """The reconstruction config of a variant: ``baseline``, or sensitivity overrides of ``fusion`` parameters
+    ``key=value[@key=value]``."""
+    if variant == BASELINE:
+        return cfg
+    for item in variant.split("@"):
+        key, _, value = item.partition("=")
+        if not value or not hasattr(cfg.fusion, key):
+            raise ValueError("unknown variant " + variant)
+        cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, **{key: type(getattr(cfg.fusion, key))(value)}))
+    return cfg
+
+
+def variant_folder(variant: str) -> str:
+    return variant.replace("@", "__").replace("=", "-")
 
 
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
@@ -64,24 +81,15 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     family, level, parameter = CONDITIONS[job["condition"]]
     perturbation, pose = robustness.build(dict(run=str(run_dir), family=family, level=level,
                                                parameter=parameter, seed=job["seed"]))
-    cfg = load_config()
-    method, _, overrides = job["method"].partition("@")
-    method, _, parts = method.partition(":")
-    cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, association_method=method))
-    for item in [o for o in overrides.split("@") if o]:  # sensitivity: fusion.<key>=<value>
-        key, _, value = item.partition("=")
-        cfg = dataclasses.replace(cfg, fusion=dataclasses.replace(cfg.fusion, **{key: type(getattr(cfg.fusion, key))(value)}))
-    if parts:  # a tracker variant of the final method (development only): its covariance components
-        cfg = dataclasses.replace(cfg, tracking=dataclasses.replace(cfg.tracking, gating="covariance",
-                                                                  covariance_components=parts.replace("+", ",")))
-    safe = job["method"].replace(":", "_").replace("+", "-").replace("@", "__").replace("=", "-")
+    cfg = variant_config(load_config(), job["variant"])
+    safe = variant_folder(job["variant"])
     work = Path(job["work"]) / safe / job["condition"] / "seed{0}".format(job["seed"])
     target = work / run_dir.parent.name / run_dir.name
     if target.exists():
         shutil.rmtree(str(target))  # a stale copy of an interrupted job (never a recording)
     result: Dict[str, Any] = {k: v for k, v in job.items() if k != "work"}
     result["provenance"] = provenance(cfg.to_dict(), runs=[str(run_dir)], perturbation=perturbation.name,
-                                      seed=int(job["seed"]), extra={"method": job["method"],
+                                      seed=int(job["seed"]), extra={"variant": job["variant"],
                                                                     "condition": job["condition"]})
     start = time.monotonic()
     try:
@@ -153,7 +161,7 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
 def main(argv: List[str] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("runs", nargs="+", type=Path)
-    parser.add_argument("--methods", default=",".join(METHODS))
+    parser.add_argument("--variants", default=BASELINE)
     parser.add_argument("--conditions", default="exact,rtk,consumer")
     parser.add_argument("--seeds", default="0,1,2")
     parser.add_argument("--workers", type=int, default=8)
@@ -163,12 +171,15 @@ def main(argv: List[str] = None) -> int:
     parser.add_argument("--tag", default="", help="suffix of the jobs file (jobs<tag>.jsonl)")
     parser.add_argument("--keep", action="store_true")
     args = parser.parse_args(argv)
-    methods = [m for m in args.methods.split(",") if m]
+    variants = [v for v in args.variants.split(",") if v]
     conditions = [c for c in args.conditions.split(",") if c]
     seeds = [int(s) for s in args.seeds.split(",") if s != ""]
-    for name in methods:
-        if name.partition("@")[0].partition(":")[0] not in METHODS:
-            raise SystemExit("unknown method " + name)
+    from cdf.reconstruction.config import load_config
+    for name in variants:
+        try:
+            variant_config(load_config(), name)
+        except ValueError as exc:
+            raise SystemExit(str(exc))
     for name in conditions:
         if name not in CONDITIONS:
             raise SystemExit("unknown condition " + name)
@@ -177,24 +188,24 @@ def main(argv: List[str] = None) -> int:
         for condition in conditions:
             stochastic = CONDITIONS[condition][0] != "baseline"
             for seed in (seeds if stochastic else seeds[:1]):
-                for method in methods:
-                    jobs.append(dict(run=str(run.resolve()), condition=condition, seed=seed, method=method,
+                for variant in variants:
+                    jobs.append(dict(run=str(run.resolve()), condition=condition, seed=seed, variant=variant,
                                      work=str(args.work.resolve()), keep=args.keep,
                                      samples_dir=str(args.samples.resolve()) if args.samples else None))
     handles = {}
-    for method in methods:
-        out = args.results / method.replace(":", "_").replace("+", "-").replace("@", "__").replace("=", "-")
+    for variant in variants:
+        out = args.results / variant_folder(variant)
         out.mkdir(parents=True, exist_ok=True)
-        handles[method] = (out / "jobs{0}.jsonl".format(args.tag)).open("a", encoding="utf-8")
+        handles[variant] = (out / "jobs{0}.jsonl".format(args.tag)).open("a", encoding="utf-8")
     done = 0
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
         futures = [pool.submit(run_job, job) for job in jobs]
         for future in as_completed(futures):
             result = future.result()
-            handles[result["method"]].write(json.dumps(result) + "\n")
-            handles[result["method"]].flush()
+            handles[result["variant"]].write(json.dumps(result) + "\n")
+            handles[result["variant"]].flush()
             done += 1
-            print(done, "/", len(jobs), result["method"], result["condition"], result["seed"],
+            print(done, "/", len(jobs), result["variant"], result["condition"], result["seed"],
                   Path(result["run"]).name, result["status"], result.get("wall_s"), flush=True)
     for handle in handles.values():
         handle.close()

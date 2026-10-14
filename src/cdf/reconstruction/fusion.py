@@ -99,7 +99,7 @@ class _Evidence:
 def _observable_speed_check(track: LocalTrack, own: LocalReconstruction, clock: GraphClock,
                             partner: LocalReconstruction, partner_clock: GraphClock, start: float, end: float,
                             radial_speed_std_mps: float) -> Optional[bool]:
-    """METHOD 3 FINAL: is the track's motion compatible with the partner's own speed in the direction the radar
+    """Is the track's motion compatible with the partner's own speed in the direction the radar
     observes (``identity._normal_component_consistent``, the collision-evidence rule): the partner is not slower
     than the observed component along the outward normal by 3 sigma, nor faster than the track's whole ground
     speed by 3 sigma.  The tangential component, which Doppler does not measure, cannot contradict a partner.
@@ -115,7 +115,7 @@ def _observable_speed_check(track: LocalTrack, own: LocalReconstruction, clock: 
 
 
 def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: LocalReconstruction,
-              partner_clock: GraphClock, cfg: FusionConfig, own: Optional[LocalReconstruction] = None,
+              partner_clock: GraphClock, cfg: FusionConfig, own: LocalReconstruction,
               radial_speed_std_mps: float = 0.3) -> _Evidence:
     """Hierarchical evidence for one contact; every check but the clearance at the contact is required."""
     evidence = _Evidence()
@@ -148,22 +148,15 @@ def _evidence(track: LocalTrack, t_contact: float, clock: GraphClock, partner: L
     evidence.rmse = _speed_rmse(track, clock, partner, partner_clock, start, end) if end > start else None
     if evidence.rmse is None:
         evidence.check(False, "speed not comparable with {0}'s own speed before the collision".format(partner.owner))
-    elif cfg.association_method == "final" and own is not None:
-        # The full-speed RMSE against a fixed 1.5 m/s rejects a true partner whose tangential speed (not
-        # measured by Doppler) is estimated badly; METHOD 3 FINAL tests the observable component instead.
+    else:
+        # Not the full-speed RMSE against a fixed tolerance: it would reject a true partner whose tangential
+        # speed (not measured by Doppler) is estimated badly; the observable component is tested instead.
         verdict = _observable_speed_check(track, own, clock, partner, partner_clock, start, end, radial_speed_std_mps)
         evidence.check(verdict is not False,
                        "track motion {0} {1}'s own speed in the observed direction (3 sigma; full-speed RMSE "
                        "{2:.2f} m/s for reference)".format(
                            "compatible with" if verdict else ("contradicts" if verdict is False else "not comparable with"),
                            partner.owner, evidence.rmse))
-    else:
-        evidence.check(evidence.rmse <= cfg.speed_consistency_mps,
-                       "track speed {0} {1}'s own speed: RMSE {2:.2f} m/s over {3:.1f} s{4}".format(
-                           "agrees with" if evidence.rmse <= cfg.speed_consistency_mps else "disagrees with",
-                           partner.owner, evidence.rmse, end - start,
-                           "" if evidence.rmse <= cfg.speed_consistency_mps
-                           else " (> {0:.2f})".format(cfg.speed_consistency_mps)))
 
     at_contact = [sample.clearance_m for sample in track.samples
                   if t_contact - TOUCH_WINDOW_S - 1e-6 <= sample.t_local <= t_contact + 1e-6 and sample.measured]

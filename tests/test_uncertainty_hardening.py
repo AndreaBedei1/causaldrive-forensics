@@ -1,5 +1,5 @@
-"""METHOD 3 FINAL: uncertainty-driven tracking, observable-direction collision evidence, stitch posterior,
-operative relevance and target timelines (docs/FINAL_HARDENING_PLAN.md)."""
+"""Uncertainty-driven tracking, observable-direction collision evidence, stitch posterior, operative relevance
+and target timelines."""
 
 import dataclasses
 import json
@@ -14,7 +14,7 @@ from types import SimpleNamespace
 import numpy as np
 
 from src.cdf.reconstruction import identity
-from src.cdf.reconstruction.config import TrackingConfig, effective_config, load_config
+from src.cdf.reconstruction.config import TrackingConfig, load_config
 from src.cdf.reconstruction.tracking import RadarSweep, _impact_kicks, associate_returns, chi2_quantile
 from test_retrospective import cfg, straight, track
 
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def covariance_tracking(**overrides):
-    return dataclasses.replace(TrackingConfig(), gating="covariance", **overrides)
+    return dataclasses.replace(TrackingConfig(), **overrides)
 
 
 def sweeps_of(times, start=20.0, speed=10.0, lateral=0.0):
@@ -52,12 +52,6 @@ class TrackerUncertaintyTests(unittest.TestCase):
     def test_gate_quantiles_are_chi_square(self):
         self.assertAlmostEqual(chi2_quantile(0.99, 2), 9.2103, places=3)
         self.assertAlmostEqual(chi2_quantile(0.99, 1), 6.6349, places=3)
-
-    def test_final_method_switches_the_tracker_to_covariance_gating(self):
-        base = load_config()
-        final = dataclasses.replace(base, fusion=dataclasses.replace(base.fusion, association_method="final"))
-        self.assertEqual(effective_config(final).tracking.gating, "covariance")
-        self.assertEqual(effective_config(base).tracking.gating, base.tracking.gating)
 
     def test_confirmation_needs_support_duration_and_updates(self):
         c = covariance_tracking()
@@ -148,23 +142,22 @@ def stub_track(clearances, speed, dt=0.05, t_end=5.0):
 
 
 class ClosingBodyTests(unittest.TestCase):
-    def evidence(self, method, clearances):
-        c = cfg(method)
+    def evidence(self, clearances):
+        c = cfg()
         a = SimpleNamespace(owner="A", tracks=[stub_track(clearances, 4.0)], footprint=None, ego=_Ego(0.0))
         b = SimpleNamespace(owner="B", tracks=[], footprint=None, ego=_Ego(9.0))
         return identity.radar_contact_evidence([a, b], c)("A", 5.0, "B", 5.0)
 
-    def test_a_body_passing_alongside_is_no_evidence_in_final(self):
+    def test_a_body_passing_alongside_is_no_evidence(self):
         # S15-like: a car arrives beside the recorder and keeps its distance through the last 0.2 s (passing,
-        # not hitting).  METHOD 2 lets it contradict the true partner; METHOD 3 FINAL ignores it.
+        # not hitting): it can neither support nor contradict the partner.
         passing = [3.0, 2.4, 1.8, 1.2, 0.8, 0.6, 0.6, 0.6, 0.6, 0.6]
-        self.assertFalse(self.evidence("corrected", passing))
-        self.assertIsNone(self.evidence("final", passing))
+        self.assertIsNone(self.evidence(passing))
 
-    def test_a_closing_body_still_counts_in_final(self):
+    def test_a_closing_body_still_counts(self):
         closing = [3.0, 2.6, 2.2, 1.8, 1.4, 1.2, 1.0, 0.8, 0.5, 0.2]
         # Still closing at the report: it counts, and a 9 m/s partner is faster than the 4 m/s body by > 3 sigma.
-        self.assertFalse(self.evidence("final", closing))
+        self.assertFalse(self.evidence(closing))
 
 
 # --------------------------------------------------------------------------
@@ -173,7 +166,7 @@ class ClosingBodyTests(unittest.TestCase):
 
 class StitchPosteriorTests(unittest.TestCase):
     def posterior(self, gap, miss=0.0):
-        c = cfg("final")
+        c = cfg()
         first = track("A", "t1", straight([0, 0], 20), 0.0, [-15, 0])
         start = 0.95 + gap
         second = track("A", "t2", straight([10.0 * start + miss, 0], 20), 0.0, [-15, 0], t0=start)
@@ -185,7 +178,7 @@ class StitchPosteriorTests(unittest.TestCase):
         self.assertGreater(self.posterior(1.0), self.posterior(3.0))
 
     def test_a_short_consistent_reacquisition_is_accepted_and_a_long_missed_one_is_not(self):
-        c = cfg("final")
+        c = cfg()
         self.assertGreaterEqual(self.posterior(0.2), c.fusion.retrospective_min_posterior)
         self.assertLess(self.posterior(1.5, miss=4.0), c.fusion.retrospective_min_posterior)
 
@@ -218,8 +211,8 @@ class RecordedRunTests(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
-    def reconstruct(self, run, method, condition="exact", seed=0, **fusion):
-        key = (run, method, condition, seed, tuple(sorted(fusion.items())))
+    def reconstruct(self, run, condition="exact", seed=0, **fusion):
+        key = (run, condition, seed, tuple(sorted(fusion.items())))
         if key in self.cache:
             return self.cache[key]
         import sys
@@ -231,9 +224,9 @@ class RecordedRunTests(unittest.TestCase):
         family, level, parameter = CONDITIONS[condition]
         perturbation, pose = robustness.build(dict(run=str(ROOT / run), family=family, level=level,
                                                    parameter=parameter, seed=seed))
-        target = self.tmp / "_".join((method, condition, str(seed), str(len(self.cache)))) / run
+        target = self.tmp / "_".join((condition, str(seed), str(len(self.cache)))) / run
         perturbed_copy(ROOT / run, target, perturbation, seed)
-        result = reconstruct_run(target, cfg(method, **fusion), pose_factory=pose)
+        result = reconstruct_run(target, cfg(**fusion), pose_factory=pose)
         self.cache[key] = (target, result)
         return target, result
 
@@ -241,22 +234,22 @@ class RecordedRunTests(unittest.TestCase):
         nodes = [n for n in result.graph.nodes if n.event_type == "COLLISION"]
         return sorted(tuple(sorted(getattr(n, "participants", None) or [])) for n in nodes)
 
-    def test_s08_collision_is_named_in_final(self):
-        _, result = self.reconstruct("traces/S08/run_0_rolls_through", "final")
+    def test_s08_collision_is_named(self):
+        _, result = self.reconstruct("traces/S08/run_0_rolls_through")
         self.assertIn(("A", "B"), self.collisions(result))
 
     def test_dense_collisions_name_the_single_partner(self):
         for run in ("traces/S15/run_0_dense_platoon", "traces/S19/run_0_collision_ambiguity"):
-            _, result = self.reconstruct(run, "final")
+            _, result = self.reconstruct(run)
             self.assertEqual(set(self.collisions(result)), {("A", "B")}, run)
 
-    def test_s14_dense_abreast_has_no_false_merge_in_final(self):
+    def test_s14_dense_abreast_has_no_false_merge(self):
         from src.cdf.evaluation.fusion_metrics import evaluate_fusion
-        target, _ = self.reconstruct("traces/S14/run_0_surrounded", "final")
+        target, _ = self.reconstruct("traces/S14/run_0_surrounded")
         self.assertEqual(evaluate_fusion(target, write=False)["merges"]["false"], 0)
 
     def test_timelines_keep_observation_before_resolution(self):
-        target, _ = self.reconstruct("traces/S15/run_0_dense_platoon", "final")
+        target, _ = self.reconstruct("traces/S15/run_0_dense_platoon")
         entities = json.loads((target / "reconstruction/global/anonymous_entities.json").read_text())["entities"]
         self.assertTrue(entities)
         for entity in entities:
@@ -271,8 +264,8 @@ class RecordedRunTests(unittest.TestCase):
         # The same tracker with the late identity resolution disabled (no posterior reaches 1.01): identity
         # decisions may differ, the event onsets may not.
         for run in ("traces/S12/run_0_crash", "traces/S15/run_0_dense_platoon"):
-            _, final = self.reconstruct(run, "final")
-            _, plain = self.reconstruct(run, "final", retrospective_min_posterior=1.01)
+            _, final = self.reconstruct(run)
+            _, plain = self.reconstruct(run, retrospective_min_posterior=1.01)
             onsets = lambda result: Counter((n.event_type, n.actor_id, round(n.t_global, 4)) for n in result.graph.nodes)
             self.assertEqual(onsets(final), onsets(plain), run)
 

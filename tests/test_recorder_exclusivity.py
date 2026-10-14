@@ -1,6 +1,5 @@
 """A recorder's identity is exclusive per observer at every instant (anonymous.exclusive_recorder_links)."""
 
-import dataclasses
 import json
 import shutil
 import tempfile
@@ -96,33 +95,32 @@ class S11RecordedTests(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
-    def reconstruct(self, method):
+    def reconstruct(self):
         from src.cdf.reconstruction.pipeline import reconstruct_run
-        src = ROOT / "traces/S11/run_0_consequential"
-        dst = self.tmp / method / "run"
-        shutil.copytree(src / "vehicles", dst / "vehicles")
-        for name in ("metadata.json", "incident_context.json"):
-            shutil.copy2(src / name, dst / name)
-        base = load_config()
-        reconstruct_run(dst, dataclasses.replace(base, fusion=dataclasses.replace(base.fusion, association_method=method)))
-        return json.loads((dst / "reconstruction/global/associations.json").read_text())
+        if getattr(type(self), "_fresh", None) is None:
+            src = ROOT / "traces/S11/run_0_consequential"
+            dst = self.tmp / "run"
+            shutil.copytree(src / "vehicles", dst / "vehicles")
+            for name in ("metadata.json", "incident_context.json"):
+                shutil.copy2(src / name, dst / name)
+            reconstruct_run(dst, load_config())
+            type(self)._fresh = json.loads((dst / "reconstruction/global/associations.json").read_text())
+        return type(self)._fresh
 
-    def test_s11_same_observer_c_claims_are_one_body_and_unchanged(self):
+    def test_s11_reconstruction_matches_the_committed_one(self):
         committed = json.loads((ROOT / "traces/S11/run_0_consequential/reconstruction/global/associations.json").read_text())
-        fresh = self.reconstruct("current")
-        claims = sorted((a["local_graph"], a["local_track"]) for a in fresh if a["global_entity"] == "C")
-        self.assertEqual(claims, [("A", "track_001"), ("A", "track_002"), ("B", "track_002"), ("B", "track_003")])
-        self.assertEqual([(a["local_track"], a["global_entity"]) for a in committed],
-                         [(a["local_track"], a["global_entity"]) for a in fresh])
+        fresh = self.reconstruct()
+        self.assertEqual([(a["local_graph"], a["local_track"], a["global_entity"]) for a in committed],
+                         [(a["local_graph"], a["local_track"], a["global_entity"]) for a in fresh])
 
-    def test_s11_final_has_one_c_claim_per_observer(self):
-        fresh = self.reconstruct("final")
+    def test_s11_has_one_c_claim_per_observer(self):
+        fresh = self.reconstruct()
         per_observer = {}
         for a in fresh:
             if a["global_entity"] == "C":
                 per_observer.setdefault(a["local_graph"], []).append(a["local_track"])
+        self.assertTrue(per_observer)
         self.assertTrue(all(len(v) == 1 for v in per_observer.values()), per_observer)
-
 
 if __name__ == "__main__":
     unittest.main()

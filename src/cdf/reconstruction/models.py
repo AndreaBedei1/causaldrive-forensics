@@ -386,8 +386,8 @@ class Association:
     blocking: List[str] = field(default_factory=list)
     # The matched collision the decision rests on (the candidate's contact).
     collision_event: Optional[str] = None
-    # Corrected / retrospective methods only (absent from the record otherwise): the association score of
-    # the identity, and for an identity resolved from later evidence the global time that evidence starts.
+    # Identity association (absent from the record when not set): the association score of the identity,
+    # and for an identity resolved from later evidence the global time that evidence starts.
     identity_confidence: Optional[float] = None
     identity_resolved_from: Optional[float] = None
     retrospective: bool = False
