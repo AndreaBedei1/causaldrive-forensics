@@ -131,6 +131,29 @@ scripts\review_canonical_runs.bat
 python -m pytest -q
 ```
 
+## Frozen robustness and generalization campaign
+
+Protocol: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md) (tag `pre-robustness-campaign`); results and figures
+under `results/robustness/frozen_campaign/` and `results/generalization/frozen_campaign/`; the report (written after the campaign):
+[docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md).
+
+```bat
+:: from a clean checkout of the tag; every job refuses another commit or a modified tracked file
+git checkout pre-robustness-campaign
+set CDF_ANALYSIS_FREEZE_COMMIT=<commit of the tag>
+python scriptsreeze_manifest.py --workers 14
+
+:: robustness: every family on the 22 canonical runs (resumable: rerun the same command after an interruption)
+python scriptsobustness.py --canonical --workers 14 --work robustnessrozen_campaign --results resultsobustnessrozen_campaign
+python scripts\campaign_report.py robustness
+
+:: held-out generalization (private CARLA on port 3000): static check, record, evaluate, report
+python scripts\generalization.py check
+python scripts\generalization.py record
+python scripts\generalization.py evaluate --workers 8
+python scripts\generalization.py report
+```
+
 ## Canonical scenarios (development set: 19 scenarios, 22 runs)
 
 | id | scenario | runs | purpose |
@@ -201,6 +224,7 @@ path, labelled with their body-to-body clearance (`1.4 m`).
 - [Event definitions](docs/event_definitions.md): semantic events, body geometry and thresholds.
 - [Parameter audit](docs/FINAL_PARAMETER_AUDIT.md): every reconstruction parameter, its category and evidence.
 - [Robustness profiles](docs/robustness_profiles.md): pose, radar and impulse perturbations of the campaign.
+- [Frozen campaign protocol](docs/FROZEN_CAMPAIGN.md) and [report](docs/ROBUSTNESS_CAMPAIGN.md).
 - [Sensors and acquisition](docs/campaign_acquisition.md): radar geometry and recording prerequisites.
 - [Paper positioning](docs/paper_positioning.md): framing, logging prerequisites, related work, limitations.
 - [Bibliography](docs/bibliography.md).

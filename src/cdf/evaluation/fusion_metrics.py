@@ -227,7 +227,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
                 errors['single_track_nominal_centre_error_m'].append(float(np.median(single_errors)))
             paired_states.append({'t_global': state['t_global'], 'sim_timestamp': round(reference_sim+state['t_global'],4),
                 'true_identity': identity, 'entity': entity['id'], 'method': state['method'],
-                'source_tracks': list(entity['source_tracks']), 'centre_error_m': centre,
+                'source_tracks': list(entity['source_tracks']), 'centre_error_m': centre, 'velocity_error_mps': velocity,
                 'single_track_centre_errors_m': single_errors,
                 'single_track_error_median_m': float(np.median(single_errors)) if single_errors else None,
                 'fragments_for_identity': sum(row['true_identity']==identity for row in entity_rows)})

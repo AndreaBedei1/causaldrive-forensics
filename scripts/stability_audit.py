@@ -392,7 +392,7 @@ def audit_run(run):
     out["closure_violations"] = closure_violations(run)
     if fm:
         verdicts = Counter(d.get("verdict", "").split(" (")[0] for d in fm["track_decisions"])
-        out["fusion"] = {"merges": fm.get("merges"), "wrong_links": verdicts.get("wrong link", 0),
+        out["fusion"] = {"merges": fm.get("merges"), "wrong_links": verdicts.get("WRONG link", 0),
                          "missed_links": verdicts.get("missed link", 0)}
     return out
 

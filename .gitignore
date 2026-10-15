@@ -14,3 +14,5 @@ venv/
 /robustness/
 # Raw recordings of an abandoned highway stress study, kept locally, not part of the project.
 /stress_recordings/
+# Held-out generalization recordings of the frozen campaign (raw data, kept locally; results go to results/generalization/).
+/heldout/

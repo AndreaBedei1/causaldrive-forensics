@@ -16,7 +16,7 @@ Below, every parameter value is given exactly as in the code, with its justifica
 - `perturbed_copy` writes a new folder (an existing target is refused: a copy is never overwritten).  Every file it does not change is a hard link to the original (a copy where links are refused); changed files are written anew.  The source's `reconstruction/` folder is not copied.  `perturbation.json` records the condition and seed for bookkeeping; the reconstruction never reads it.
 - The driver refuses `traces/` as its work folder and deletes each copy after its job unless `--keep` is given.
 - The recorded ego stream is both the vehicle's own motion (odometry and IMU, used by the local reconstruction) and its absolute pose (GNSS/INS, used by the common frame).  A GNSS profile is therefore a `PerturbedPoseSource` passed as `pose_factory` to the reconstruction, the replay and the fusion evaluation; the odometry stays as recorded.
-- A condition perturbs one family only.  Every random quantity has its own stream, seeded by SHA-256 from the run seed and its labels (family, profile, recorder, sensor or axis), so no stream depends on the order of drawing.
+- A condition perturbs one family only, except `combined` (GNSS + collision impulse noise) and `radar_gnss_combined` (GNSS + radar).  Every random quantity has its own stream, seeded by SHA-256 from the run seed and its labels (sensor, profile, recorder, radar or axis; never the family), so no stream depends on the order of drawing, and a combined job of a given run, level and seed draws exactly the errors of the corresponding single-sensor jobs.
 
 ## Radar
 
@@ -144,6 +144,19 @@ pose quality with 10% independent impulse noise per callback, using the same see
 It reports true-contact recall, wrong pairings, unmatched true contacts and clock alignment.
 Singleton unpaired collision callbacks are not wrong vehicle-vehicle matches.
 
+## Simultaneous GNSS and radar degradation
+
+`radar_gnss_combined` applies one GNSS profile (`rtk`, `consumer`, `degraded`, independent receivers) and one radar
+profile (`low`, `nominal`, `high`) to the same perturbed copy: the radar errors are written into the copy's radar
+files and the GNSS errors enter through the pose source, and the frozen reconstruction runs once on the jointly
+degraded data.  All nine combinations, with the profiles above unchanged.  The radar stream of a recorder's radar
+is keyed by (seed, "radar", radar profile, recorder, radar) and the GNSS streams by (seed, "gnss", GNSS profile,
+recorder, axis): the same errors as the `radar` and `gnss` jobs of that run, level and seed, independent of each
+other.  This pairing makes the comparison with the single-sensor conditions a paired one (per run and seed): the
+report estimates the interaction I = C - R - G + B per run and gives a bootstrap interval over runs
+(`scripts/campaign_report.py`).  It is kept separate from `combined`, which studies GNSS with collision impulse
+noise.
+
 ## Collision reports
 
 Final hardening uses `impulse_relative_std = 0.10` per report and
@@ -201,7 +214,7 @@ Every sweep of one recorder's radar whose local time (seconds since its first eg
 
 ## Seeds and metrics
 
-- Stochastic families (`radar`, `gnss`, `gnss_refined`, `impulse`) draw seeds 0, 1, 2, ..., at least 3 and at most 8.  Seeds are added while the standard error over seeds of any pooled metric exceeds its tolerance: 0.02 for association accuracy, collision recall, event recall and the share of runs aligned; 0.05 m for the fused centre error.  These counts and tolerances are settings of the driver: engineering assumptions.
+- Stochastic families (`radar`, `gnss`, `gnss_refined`, `gnss_correlated`, `combined`, `radar_gnss_combined`, `impulse`) draw seeds 0, 1, 2, ..., at least 3 and at most 8.  Seeds are added while the standard error over seeds of any pooled metric exceeds its tolerance: 0.02 for association accuracy, collision recall, event recall and the share of runs aligned; 0.05 m for the fused centre error.  These counts and tolerances are settings of the driver: engineering assumptions.
 - Deterministic families (`latency`, `clock`, `downsample`, `dropout`, `outage`) run once with seed 0.  The `baseline` copy, left unchanged, must reproduce the canonical reconstruction.
 - For each condition and seed, the metrics are pooled over the runs.  The summary (`results/robustness/summary.{json,md,csv}`, `figures/`) gives the mean and SD over seeds.  The metrics are:
   - association accuracy of the decided tracks;
@@ -223,7 +236,7 @@ Every sweep of one recorder's radar whose local time (seconds since its first eg
 - The velocity noise is independent of the position error.  Differentiating the `degraded` position errors at 1 Hz would imply 1.35 m/s per axis (derived), far above the C2C-CC city speed confidence for fused states (0.6 m/s, 95 % [G8]).
 - Clock offsets are constant: there is no drift and no jitter.
 - The impulse noise is applied independently to each recorder's report.
-- Each condition perturbs one family; combined degradations are not studied.
+- Combined degradations are limited to GNSS with collision impulse noise (`combined`) and GNSS with radar (`radar_gnss_combined`); timing, sampling and data-loss perturbations are studied one at a time.
 
 ## References
 

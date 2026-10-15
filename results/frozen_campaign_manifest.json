@@ -1,0 +1,975 @@
+{
+ "name": "pre-robustness-campaign",
+ "statement": "reconstruction algorithm, configuration, event definitions, evaluation rules and experimental protocol frozen before any main result is collected; any later revision is a new version with separately identified results",
+ "code_sha256": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df",
+ "reconstruction_config_sha256": "af2b7dc72208533f4d60f6ab9f047b6b6672a82442eb14e5a3e8fd5ca8b90f3a",
+ "reconstruction_config": {
+  "trace_hz": 10.0,
+  "collision": {
+   "merge_gap_s": 0.5,
+   "new_impact_ratio": 0.75,
+   "min_impact_ratio": 0.25,
+   "min_new_impact_impulse": 1000.0,
+   "impact_acceleration_mps2": 20.0,
+   "reversal_angle_deg": 90.0,
+   "undirected_impact_ratio": 0.5
+  },
+  "tracking": {
+   "min_height_m": 0.3,
+   "max_height_m": 2.5,
+   "moving_speed_mps": 1.0,
+   "cluster_distance_m": 2.0,
+   "max_track_gap_s": 0.5,
+   "min_track_frames": 5,
+   "measurement_std_m": 0.5,
+   "radial_speed_std_mps": 0.3,
+   "acceleration_std_mps2": 6.0,
+   "smoothing_innovation_sigma": 3.0,
+   "max_braking_mps2": 30.0,
+   "contact_clearance_m": 1.0,
+   "lane_heading_std_deg": 10.0,
+   "identity_body_width_m": 2.5,
+   "gate_probability": 0.99,
+   "body_length_m": 4.6,
+   "body_width_m": 1.9,
+   "radar_range_std_m": 0.25,
+   "radar_azimuth_std_deg": 0.5,
+   "min_track_support_s": 0.2,
+   "min_track_updates": 3,
+   "gap_cap_s": 2.0,
+   "nominal_vehicle_mass_kg": 1500.0,
+   "position_cap_m": 10.0,
+   "doppler_cap_mps": 10.0,
+   "return_likelihood_ratio": 20.0,
+   "yaw_rate_std_rps": 0.3
+  },
+  "semantics": {
+   "brake_onset_threshold": 0.1,
+   "throttle_on_threshold": 0.1,
+   "throttle_off_threshold": 0.05,
+   "throttle_release_debounce_s": 0.2,
+   "full_stop_speed_mps": 0.3,
+   "speed_limit_hysteresis_kmh": 1.0,
+   "closing_speed_threshold_mps": 1.0,
+   "critical_reaction_time_s": 1.0,
+   "critical_deceleration_mps2": 6.0,
+   "critical_standstill_margin_m": 1.0,
+   "critical_lateral_margin_m": 0.3,
+   "critical_release_ratio": 0.75,
+   "prediction_horizon_s": 6.0,
+   "prediction_time_step_s": 0.05,
+   "target_length_m": 4.6,
+   "target_width_m": 1.9,
+   "target_braking_min_mps2": 1.0,
+   "critical_min_track_age_s": 0.5,
+   "critical_time_gap_table": [
+    [
+     7.2,
+     1.0
+    ],
+    [
+     10.0,
+     1.1
+    ],
+    [
+     20.0,
+     1.2
+    ],
+    [
+     30.0,
+     1.3
+    ],
+    [
+     40.0,
+     1.4
+    ],
+    [
+     50.0,
+     1.5
+    ],
+    [
+     60.0,
+     1.6
+    ]
+   ],
+   "critical_min_following_distance_m": 2.0,
+   "critical_forward_min_speed_mps": 1.0,
+   "critical_front_lateral_margin_m": 1.0,
+   "critical_front_lateral_speed_mps": 0.3,
+   "critical_forward_release_factor": 1.1,
+   "occlusion_margin_m": 0.5,
+   "turn_yaw_rate_window_s": 0.2,
+   "turn_yaw_rate_on_dps": 10.0,
+   "turn_yaw_rate_off_dps": 5.0,
+   "turn_min_speed_mps": 1.0,
+   "turn_release_debounce_s": 0.3,
+   "turn_min_duration_s": 0.5,
+   "turn_min_heading_change_deg": 15.0,
+   "path_half_width_m": 1.5,
+   "path_hysteresis_m": 0.5,
+   "path_edge_std_m": 0.25,
+   "path_occupancy_quantile": 1.645,
+   "path_min_definite_samples": 2,
+   "track_appeared_front_deg": 5.0,
+   "max_position_std_m": 1.0,
+   "max_velocity_std_mps": 1.0,
+   "cut_in_max_heading_deg": 25.0,
+   "cut_in_min_target_speed_mps": 2.0,
+   "cut_in_lateral_speed_mps": 0.3,
+   "cut_in_persistence_s": 0.5,
+   "cut_in_outside_margin_m": 0.5,
+   "cut_in_min_displacement_m": 0.5,
+   "cut_in_horizon_s": 3.0,
+   "cut_in_preentry_margin_m": 1.0,
+   "cut_in_settle_speed_mps": 0.2,
+   "cut_in_settle_s": 0.3
+  },
+  "fusion": {
+   "impulse_tolerance": 0.1,
+   "impulse_relative_std": 0.1,
+   "impulse_sigma_gate": 3.0,
+   "contact_consistency_m": 1.0,
+   "clock_tolerance_s": 0.1,
+   "contact_window_s": 1.0,
+   "contact_range_m": 3.5,
+   "contact_range_scale_m": 3.0,
+   "approach_window_s": 1.0,
+   "min_track_persistence_s": 1.0,
+   "speed_consistency_mps": 1.5,
+   "touching_clearance_m": 1.0,
+   "rival_clearance_m": 2.0,
+   "observed_alignment_step_s": 0.05,
+   "observed_alignment_min_samples": 10,
+   "observed_alignment_min_speed_mps": 2.0,
+   "observed_alignment_uniqueness_ratio": 3.0,
+   "link_min_samples": 10,
+   "link_min_fraction": 0.8,
+   "anonymous_gate_probability": 0.99,
+   "anonymous_min_shared_samples": 10,
+   "anonymous_pass_fraction": 0.8,
+   "stitch_max_gap_s": 1.5,
+   "box_face_std_m": 0.25,
+   "box_length_std_m": 0.7,
+   "box_width_std_m": 0.2,
+   "entity_output_rate_hz": 10.0,
+   "mutual_refinement": false,
+   "mutual_refinement_iterations": 3,
+   "radar_range_std_m": 0.25,
+   "radar_azimuth_std_deg": 0.5,
+   "assignment_likelihood_ratio": 20.0,
+   "retrospective_new_target_density": 3.57e-05,
+   "retrospective_min_posterior": 0.95
+  }
+ },
+ "scripts_sha256": {
+  "robustness.py": "860af77e375d4bdd57b5c0eff765483f1876d8bb62f322905439f0058919054f",
+  "campaign_report.py": "e330c5657116e30a4c4ce21bf6bc8a6ee84888d7c15d95d64e5fba2d2f5b624f",
+  "generalization.py": "d476609f0f5ddf94c3f1e10823aa751187843559fc303bdcaca03d6486ebca7e",
+  "stability_audit.py": "f756db1c44e15dbee10f24a8f3d29161b4473d39fab3777fb38d0b357a7818a2",
+  "validate_canonical.py": "94e990dead1443f8f956bf60e82d5fd36eff53ed611793ce607d3c7a2006b60d",
+  "run_scenario.py": "2c5519a6d3c42c78529e05ade2de64bb9ce85c14229ebb8d6427fdc6018fcbd2",
+  "reconstruct_run.py": "92ff2d68086c4dc3f4bb8b5d67678118716e819783e31bdfa8a4ce4cc896d41c",
+  "hardening_refresh.py": "3db0a18ff821c2f6a109d2afa0ea7e1e32cbcf498e41b6122fc1c3ed1492ab01",
+  "freeze_manifest.py": "a7dc7d860aa87b2d589b73e23e8310c59ee2bd3d95c0bd336f477031ce6300b5"
+ },
+ "scenario_configs_sha256": "8f3d58d4612b1c31452c68a0efe806f1cab52a39edfa97a19c4d8d2b75fa5088",
+ "sensor_configs_sha256": "65e2976605a32f7d401dccff8376b14fb2f2783491a36115430a086556f1b8d6",
+ "heldout_protocol_sha256": "8030bd5e302058f6b622603a29dac78cae4f5404a9d421f54c23b8ba4fe2480c",
+ "canonical_manifest": {
+  "set": "S01..S19, 22 runs",
+  "variants": {
+   "S01": [
+    "crash"
+   ],
+   "S02": [
+    "crash"
+   ],
+   "S03": [
+    "crash"
+   ],
+   "S04": [
+    "a_front_pushed",
+    "b_rear_first"
+   ],
+   "S05": [
+    "crash"
+   ],
+   "S06": [
+    "crash"
+   ],
+   "S07": [
+    "merge_conflict"
+   ],
+   "S08": [
+    "rolls_through"
+   ],
+   "S09": [
+    "near_simultaneous"
+   ],
+   "S10": [
+    "deflected_into_c"
+   ],
+   "S11": [
+    "consequential"
+   ],
+   "S12": [
+    "crash"
+   ],
+   "S13": [
+    "abreast",
+    "platoon",
+    "passing"
+   ],
+   "S14": [
+    "surrounded"
+   ],
+   "S15": [
+    "dense_platoon"
+   ],
+   "S16": [
+    "overtaking"
+   ],
+   "S17": [
+    "occlusion_reappearance"
+   ],
+   "S18": [
+    "collision_ambiguity"
+   ],
+   "S19": [
+    "highway_curve"
+   ]
+  },
+  "runs": {
+   "traces/S01/run_0_crash": {
+    "files": 34,
+    "bytes": 10948341,
+    "sha256": "6d2b78ff1f3196d00f9dbcd1f39e180bd86b21f72d260e1e4f544694a7e9a4a3"
+   },
+   "traces/S02/run_0_crash": {
+    "files": 34,
+    "bytes": 14027200,
+    "sha256": "f8deeca951cccdb0ac580cb6684a2ce992f4fada8c6b1b9f33456c70224e121e"
+   },
+   "traces/S03/run_0_crash": {
+    "files": 34,
+    "bytes": 14672727,
+    "sha256": "42c2b5ed9b1734421e66f11e00d3c03449c26ca9a2530ffe5f6920873bd4fd0b"
+   },
+   "traces/S04/run_0_a_front_pushed": {
+    "files": 48,
+    "bytes": 18521989,
+    "sha256": "f6638d5645d1000ce731f9de30c1ed2e73a03e5244e72dc728818da51d3bd3e6"
+   },
+   "traces/S04/run_0_b_rear_first": {
+    "files": 48,
+    "bytes": 19460646,
+    "sha256": "47a4e4a91683e580277dd6936c21994a29de414f8388261e5e5a7d010bfbe0e2"
+   },
+   "traces/S05/run_0_crash": {
+    "files": 48,
+    "bytes": 18809128,
+    "sha256": "729b20668037a0891e56e28c1428ad3cafa8a9abb913f2ac7cd49cdbf5c611aa"
+   },
+   "traces/S06/run_0_crash": {
+    "files": 48,
+    "bytes": 22031037,
+    "sha256": "b05a2d6c8b7c8107ab152752687b24d73e8d3c330ec6bba014ea71556a304988"
+   },
+   "traces/S07/run_0_merge_conflict": {
+    "files": 36,
+    "bytes": 31135998,
+    "sha256": "e3fb43ca84f46871a303fe7607a2829340b0312bac98b777cadf49091fbfc28f"
+   },
+   "traces/S08/run_0_rolls_through": {
+    "files": 36,
+    "bytes": 15854700,
+    "sha256": "5498c39a9908071d24faeac4ba842afc5280e6ca803c06a686760c6fe78675f7"
+   },
+   "traces/S09/run_0_near_simultaneous": {
+    "files": 34,
+    "bytes": 13306682,
+    "sha256": "fec04b155401369687d8f4dce493a4e0fd843bcd4e79f91777b50acb4c32cc8c"
+   },
+   "traces/S10/run_0_deflected_into_c": {
+    "files": 48,
+    "bytes": 22773819,
+    "sha256": "18dc695dee014907f2bac93f83fc79e233931345ad0578b69e56f25bc9a62c0b"
+   },
+   "traces/S11/run_0_consequential": {
+    "files": 48,
+    "bytes": 17257101,
+    "sha256": "e2936c159ea6f8c822a8d114502a7332daa42403ddb81221709e936c07aff56c"
+   },
+   "traces/S12/run_0_crash": {
+    "files": 36,
+    "bytes": 10872336,
+    "sha256": "63e68aa7a91dc14eab25c2a1a939d25a472e6f4dfb70b2da9fcc615fa4fe7c94"
+   },
+   "traces/S13/run_0_abreast": {
+    "files": 34,
+    "bytes": 11724595,
+    "sha256": "04fc4fc4f5dac599e62035aa604c9f55150d4eddabb418aeb147ac3531bad2de"
+   },
+   "traces/S13/run_0_platoon": {
+    "files": 34,
+    "bytes": 11719656,
+    "sha256": "689445a2bb3485906b0ff5d7f43ca00552801e5e0f7b84ee90284dcea3a1fba6"
+   },
+   "traces/S13/run_0_passing": {
+    "files": 34,
+    "bytes": 11718608,
+    "sha256": "886f1a5a2996514e4268c1bdde2ffe38c5b2745dc573f198e1f2b8378c7dfa2c"
+   },
+   "traces/S14/run_0_surrounded": {
+    "files": 34,
+    "bytes": 14714866,
+    "sha256": "d47dab69ff4ba683c03f38b710b52c7dfa2bc6e507087ffa455a5291bd751ce7"
+   },
+   "traces/S15/run_0_dense_platoon": {
+    "files": 34,
+    "bytes": 14018689,
+    "sha256": "837bd89ea6d549085e0e2c18c27bdbed39d37ab8c416665171785ac7c409128e"
+   },
+   "traces/S16/run_0_overtaking": {
+    "files": 34,
+    "bytes": 13779844,
+    "sha256": "ae48880ec56bb85c81107b51e0041ebe1f02bd8d4a505f42f3b07cfbe64177ea"
+   },
+   "traces/S17/run_0_occlusion_reappearance": {
+    "files": 36,
+    "bytes": 12994139,
+    "sha256": "e35568fdf009b66d7bbe111cd151cf46c9e169164a01fe2d408fb71f3a87c86f"
+   },
+   "traces/S18/run_0_collision_ambiguity": {
+    "files": 34,
+    "bytes": 13833580,
+    "sha256": "1569dbfc5a0ed263683d872bd8fb4469d1dc95cd0ff65a707a3228c4823c31b5"
+   },
+   "traces/S19/run_0_highway_curve": {
+    "files": 34,
+    "bytes": 12741996,
+    "sha256": "e35b607af6b87c85e58a2a63ce4627b1472bc51f988833883a1e121d55a734cb"
+   }
+  }
+ },
+ "robustness": {
+  "driver": "scripts/robustness.py --canonical --work robustness/frozen_campaign --results results/robustness/frozen_campaign",
+  "radar_profiles": {
+   "ideal": {
+    "name": "ideal",
+    "sigma_range_m": 0.0,
+    "sigma_azimuth_deg": 0.0,
+    "sigma_elevation_deg": 0.0,
+    "sigma_velocity_mps": 0.0,
+    "p_drop": 0.0,
+    "clutter_per_sweep": 0.0
+   },
+   "low": {
+    "name": "low",
+    "sigma_range_m": 0.1,
+    "sigma_azimuth_deg": 0.1,
+    "sigma_elevation_deg": 0.1,
+    "sigma_velocity_mps": 0.03,
+    "p_drop": 0.05,
+    "clutter_per_sweep": 1.0
+   },
+   "nominal": {
+    "name": "nominal",
+    "sigma_range_m": 0.25,
+    "sigma_azimuth_deg": 0.5,
+    "sigma_elevation_deg": 0.5,
+    "sigma_velocity_mps": 0.1,
+    "p_drop": 0.2,
+    "clutter_per_sweep": 3.0
+   },
+   "high": {
+    "name": "high",
+    "sigma_range_m": 0.5,
+    "sigma_azimuth_deg": 2.0,
+    "sigma_elevation_deg": 2.0,
+    "sigma_velocity_mps": 0.2,
+    "p_drop": 0.4,
+    "clutter_per_sweep": 30.0
+   }
+  },
+  "gnss_profiles": {
+   "ideal": {
+    "name": "ideal",
+    "bias_m": 0.0,
+    "markov_m": 0.0,
+    "tau_s": 60.0,
+    "white_m": 0.0,
+    "rate_hz": 1.0,
+    "yaw_bias_deg": 0.0,
+    "yaw_markov_deg": 0.0,
+    "yaw_tau_s": 30.0,
+    "yaw_white_deg": 0.0,
+    "velocity_white_mps": 0.0,
+    "common_fraction": 0.0
+   },
+   "rtk": {
+    "name": "rtk",
+    "bias_m": 0.01,
+    "markov_m": 0.015,
+    "tau_s": 60.0,
+    "white_m": 0.003,
+    "rate_hz": 10.0,
+    "yaw_bias_deg": 0.1,
+    "yaw_markov_deg": 0.15,
+    "yaw_tau_s": 30.0,
+    "yaw_white_deg": 0.05,
+    "velocity_white_mps": 0.02,
+    "common_fraction": 0.0
+   },
+   "consumer": {
+    "name": "consumer",
+    "bias_m": 1.5,
+    "markov_m": 0.7,
+    "tau_s": 60.0,
+    "white_m": 0.05,
+    "rate_hz": 1.0,
+    "yaw_bias_deg": 0.3,
+    "yaw_markov_deg": 0.9,
+    "yaw_tau_s": 10.0,
+    "yaw_white_deg": 0.3,
+    "velocity_white_mps": 0.1,
+    "common_fraction": 0.0
+   },
+   "degraded": {
+    "name": "degraded",
+    "bias_m": 3.0,
+    "markov_m": 4.5,
+    "tau_s": 30.0,
+    "white_m": 0.5,
+    "rate_hz": 1.0,
+    "yaw_bias_deg": 0.5,
+    "yaw_markov_deg": 2.8,
+    "yaw_tau_s": 5.0,
+    "yaw_white_deg": 1.0,
+    "velocity_white_mps": 0.3,
+    "common_fraction": 0.0
+   }
+  },
+  "profile_documentation": "docs/robustness_profiles.md",
+  "matrix": {
+   "baseline": {
+    "levels": [
+     {
+      "label": "none",
+      "parameter": null
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 22,
+    "jobs_max": 22,
+    "configuration": "frozen"
+   },
+   "radar": {
+    "levels": [
+     {
+      "label": "low",
+      "parameter": "low"
+     },
+     {
+      "label": "nominal",
+      "parameter": "nominal"
+     },
+     {
+      "label": "high",
+      "parameter": "high"
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 198,
+    "jobs_max": 528,
+    "configuration": "frozen"
+   },
+   "gnss": {
+    "levels": [
+     {
+      "label": "rtk",
+      "parameter": "rtk"
+     },
+     {
+      "label": "consumer",
+      "parameter": "consumer"
+     },
+     {
+      "label": "degraded",
+      "parameter": "degraded"
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 198,
+    "jobs_max": 528,
+    "configuration": "frozen"
+   },
+   "gnss_refined": {
+    "levels": [
+     {
+      "label": "rtk",
+      "parameter": "rtk"
+     },
+     {
+      "label": "consumer",
+      "parameter": "consumer"
+     },
+     {
+      "label": "degraded",
+      "parameter": "degraded"
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 198,
+    "jobs_max": 528,
+    "configuration": "ablation_mutual_refinement"
+   },
+   "gnss_correlated": {
+    "levels": [
+     {
+      "label": "consumer common 0.5",
+      "parameter": 0.5
+     },
+     {
+      "label": "consumer common 0.9",
+      "parameter": 0.9
+     },
+     {
+      "label": "consumer common 1.0",
+      "parameter": 1.0
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 198,
+    "jobs_max": 528,
+    "configuration": "frozen"
+   },
+   "combined": {
+    "levels": [
+     {
+      "label": "exact + 10%",
+      "parameter": [
+       "ideal",
+       0.0
+      ]
+     },
+     {
+      "label": "RTK + 10%",
+      "parameter": [
+       "rtk",
+       0.0
+      ]
+     },
+     {
+      "label": "consumer independent + 10%",
+      "parameter": [
+       "consumer",
+       0.0
+      ]
+     },
+     {
+      "label": "consumer common 0.9 + 10%",
+      "parameter": [
+       "consumer",
+       0.9
+      ]
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 264,
+    "jobs_max": 704,
+    "configuration": "frozen"
+   },
+   "radar_gnss_combined": {
+    "levels": [
+     {
+      "label": "gnss rtk + radar low",
+      "parameter": [
+       "rtk",
+       "low"
+      ]
+     },
+     {
+      "label": "gnss rtk + radar nominal",
+      "parameter": [
+       "rtk",
+       "nominal"
+      ]
+     },
+     {
+      "label": "gnss rtk + radar high",
+      "parameter": [
+       "rtk",
+       "high"
+      ]
+     },
+     {
+      "label": "gnss consumer + radar low",
+      "parameter": [
+       "consumer",
+       "low"
+      ]
+     },
+     {
+      "label": "gnss consumer + radar nominal",
+      "parameter": [
+       "consumer",
+       "nominal"
+      ]
+     },
+     {
+      "label": "gnss consumer + radar high",
+      "parameter": [
+       "consumer",
+       "high"
+      ]
+     },
+     {
+      "label": "gnss degraded + radar low",
+      "parameter": [
+       "degraded",
+       "low"
+      ]
+     },
+     {
+      "label": "gnss degraded + radar nominal",
+      "parameter": [
+       "degraded",
+       "nominal"
+      ]
+     },
+     {
+      "label": "gnss degraded + radar high",
+      "parameter": [
+       "degraded",
+       "high"
+      ]
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 594,
+    "jobs_max": 1584,
+    "configuration": "frozen"
+   },
+   "impulse": {
+    "levels": [
+     {
+      "label": "2%",
+      "parameter": 0.02
+     },
+     {
+      "label": "5%",
+      "parameter": 0.05
+     },
+     {
+      "label": "10%",
+      "parameter": 0.1
+     },
+     {
+      "label": "20%",
+      "parameter": 0.2
+     }
+    ],
+    "stochastic": true,
+    "jobs_initial": 264,
+    "jobs_max": 704,
+    "configuration": "frozen"
+   },
+   "latency": {
+    "levels": [
+     {
+      "label": "0.05 s",
+      "parameter": 0.05
+     },
+     {
+      "label": "0.10 s",
+      "parameter": 0.1
+     },
+     {
+      "label": "0.25 s",
+      "parameter": 0.25
+     },
+     {
+      "label": "0.50 s",
+      "parameter": 0.5
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 88,
+    "jobs_max": 88,
+    "configuration": "frozen"
+   },
+   "clock": {
+    "levels": [
+     {
+      "label": "offsets",
+      "parameter": null
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 22,
+    "jobs_max": 22,
+    "configuration": "frozen"
+   },
+   "downsample": {
+    "levels": [
+     {
+      "label": "10 Hz",
+      "parameter": 2
+     },
+     {
+      "label": "5 Hz",
+      "parameter": 4
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 44,
+    "jobs_max": 44,
+    "configuration": "frozen"
+   },
+   "dropout": {
+    "levels": [
+     {
+      "label": "one recorder",
+      "parameter": null
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 50,
+    "jobs_max": 50,
+    "configuration": "frozen"
+   },
+   "outage": {
+    "levels": [
+     {
+      "label": "1 s radar outage",
+      "parameter": 1.0
+     }
+    ],
+    "stochastic": false,
+    "jobs_initial": 50,
+    "jobs_max": 50,
+    "configuration": "frozen"
+   }
+  },
+  "jobs_initial_total": 2190,
+  "jobs_max_total": 5380,
+  "seed_schedule": {
+   "stochastic": "seeds 0, 1, 2 first; then 3, 4, ... up to 7 while the standard error over seeds of any pooled metric exceeds its tolerance (robustness.TOLERANCES), decided per (family, level)",
+   "tolerances": {
+    "association_accuracy": 0.02,
+    "collision_recall": 0.02,
+    "event_recall": 0.02,
+    "fused_centre_error_m": 0.05,
+    "runs_aligned": 0.02
+   },
+   "deterministic": "seed 0 only",
+   "streams": "SHA-256 of (seed, sensor, profile, recorder, axis/radar): independent of family, worker and execution order"
+  },
+  "max_attempts_per_job": 2,
+  "workers": 14
+ },
+ "generalization": {
+  "protocol": "configs/heldout/frozen_campaign.yaml",
+  "cases": 32,
+  "families": [
+   "adjacent_lane",
+   "chain",
+   "crossing",
+   "cut_in",
+   "dense",
+   "highway_curve",
+   "occlusion",
+   "overtaking",
+   "rear_end",
+   "roundabout",
+   "unrecorded_causal"
+  ],
+  "seeds": [
+   0
+  ],
+  "acceptance": {
+   "completed": "the runner finished and every declared participant spawned and wrote ground truth",
+   "on_road_before_contact": "every participant's centre lies on a driving lane of the map (CARLA waypoint, no projection) at every sample before its first contact",
+   "speed_bound_mps": 3.0,
+   "attitude_before_contact_deg": 10.0,
+   "attitude_whole_run_deg": 60.0
+  },
+  "recordings": "heldout/frozen_campaign/ (not committed)",
+  "results": "results/generalization/frozen_campaign/"
+ },
+ "evaluation": {
+  "report": "scripts/campaign_report.py",
+  "breakdowns": "src/cdf/evaluation/campaign_metrics.py",
+  "ground_truth_use": "evaluation only; never in the reconstruction"
+ },
+ "software": {
+  "python": "3.8.20 (default, Oct  3 2024, 15:19:54) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "absl-py": "2.3.1",
+   "asttokens": "3.0.0",
+   "astunparse": "1.6.3",
+   "async-timeout": "4.0.3",
+   "backcall": "0.2.0",
+   "beautifulsoup4": "4.14.3",
+   "bleak": "0.22.3",
+   "bleak-winrt": "1.2.0",
+   "blinker": "1.8.2",
+   "Brotli": "1.0.9",
+   "carla": "0.9.15",
+   "carla-raw-acquisition": "0.1.0",
+   "certifi": "2026.1.4",
+   "cffi": "1.17.1",
+   "charset-normalizer": "3.3.2",
+   "click": "8.1.8",
+   "clip": "1.0",
+   "colorama": "0.4.6",
+   "comm": "0.2.2",
+   "contourpy": "1.1.1",
+   "cryptography": "45.0.7",
+   "cycler": "0.12.1",
+   "debugpy": "1.8.5",
+   "decorator": "5.1.1",
+   "deepface": "0.0.98",
+   "exceptiongroup": "1.3.1",
+   "executing": "2.1.0",
+   "filelock": "3.16.1",
+   "fire": "0.7.1",
+   "Flask": "3.0.3",
+   "Flask-Cors": "5.0.0",
+   "flatbuffers": "25.12.19",
+   "fonttools": "4.57.0",
+   "fsspec": "2025.3.0",
+   "ftfy": "6.2.3",
+   "gast": "0.4.0",
+   "gdown": "5.2.1",
+   "google-auth": "2.48.0",
+   "google-auth-oauthlib": "0.4.6",
+   "google-pasta": "0.2.0",
+   "grpcio": "1.70.0",
+   "gunicorn": "23.0.0",
+   "h5py": "3.11.0",
+   "huggingface_hub": "0.36.2",
+   "idna": "3.7",
+   "importlib_metadata": "8.5.0",
+   "importlib_resources": "6.4.5",
+   "iniconfig": "2.1.0",
+   "ipykernel": "6.29.5",
+   "ipython": "8.12.2",
+   "itsdangerous": "2.2.0",
+   "jedi": "0.19.1",
+   "Jinja2": "3.1.6",
+   "joblib": "1.4.2",
+   "jupyter_client": "8.6.3",
+   "jupyter_core": "5.8.1",
+   "keras": "2.10.0",
+   "Keras-Preprocessing": "1.1.2",
+   "kiwisolver": "1.4.7",
+   "libclang": "18.1.1",
+   "lightdsa": "0.0.3",
+   "lightecc": "0.0.4",
+   "lightphe": "0.0.20",
+   "Markdown": "3.7",
+   "MarkupSafe": "2.1.5",
+   "matplotlib": "3.7.5",
+   "matplotlib-inline": "0.1.7",
+   "mkl-fft": "1.3.8",
+   "mkl-random": "1.2.4",
+   "mkl-service": "2.4.0",
+   "mpmath": "1.3.0",
+   "mtcnn": "0.1.1",
+   "nest_asyncio": "1.6.0",
+   "networkx": "3.1",
+   "numpy": "1.24.3",
+   "oauthlib": "3.3.1",
+   "open_clip_torch": "2.32.0",
+   "opencv-python": "4.13.0.90",
+   "opt_einsum": "3.4.0",
+   "packaging": "25.0",
+   "paho-mqtt": "2.1.0",
+   "pandas": "2.0.3",
+   "parso": "0.8.4",
+   "pi_heif": "0.18.0",
+   "pickleshare": "0.7.5",
+   "pillow": "10.4.0",
+   "pip": "24.2",
+   "platformdirs": "3.10.0",
+   "pluggy": "1.5.0",
+   "polars": "1.8.2",
+   "pooch": "1.7.0",
+   "prompt_toolkit": "3.0.48",
+   "protobuf": "3.19.6",
+   "psutil": "6.0.0",
+   "pure_eval": "0.2.3",
+   "pyasn1": "0.6.2",
+   "pyasn1_modules": "0.4.2",
+   "pycparser": "2.23",
+   "pyflakes": "3.2.0",
+   "pygame": "2.1.3",
+   "Pygments": "2.18.0",
+   "pyparsing": "3.1.4",
+   "pyqtgraph": "0.13.3",
+   "pyrealsense2": "2.55.1.6486",
+   "PySide6": "6.6.3.1",
+   "PySide6_Addons": "6.6.3.1",
+   "PySide6_Essentials": "6.6.3.1",
+   "PySocks": "1.7.1",
+   "pytest": "8.3.5",
+   "python-dateutil": "2.9.0.post0",
+   "python-dotenv": "1.0.1",
+   "pytz": "2025.2",
+   "pywin32": "306",
+   "PyYAML": "6.0.3",
+   "pyzmq": "26.2.0",
+   "qasync": "0.28.0",
+   "regex": "2024.11.6",
+   "requests": "2.32.4",
+   "requests-oauthlib": "2.0.0",
+   "retina-face": "0.0.17",
+   "rsa": "4.9.1",
+   "safetensors": "0.5.3",
+   "scikit-learn": "1.3.2",
+   "scipy": "1.10.1",
+   "setuptools": "75.1.0",
+   "shiboken6": "6.6.3.1",
+   "six": "1.17.0",
+   "soupsieve": "2.7",
+   "stack-data": "0.6.2",
+   "sympy": "1.13.3",
+   "tensorboard": "2.10.1",
+   "tensorboard-data-server": "0.6.1",
+   "tensorboard-plugin-wit": "1.8.1",
+   "tensorflow": "2.10.1",
+   "tensorflow-estimator": "2.10.0",
+   "tensorflow-io-gcs-filesystem": "0.31.0",
+   "termcolor": "2.4.0",
+   "threadpoolctl": "3.5.0",
+   "timm": "1.0.26",
+   "tomli": "2.4.1",
+   "torch": "2.4.1+cu121",
+   "torchaudio": "2.4.1+cu121",
+   "torchvision": "0.19.1+cu121",
+   "tornado": "6.4.1",
+   "tqdm": "4.67.1",
+   "traitlets": "5.14.3",
+   "typing_extensions": "4.13.2",
+   "tzdata": "2025.3",
+   "ultralytics": "8.4.23",
+   "ultralytics-thop": "2.0.18",
+   "urllib3": "2.2.3",
+   "wcwidth": "0.2.14",
+   "Werkzeug": "3.0.6",
+   "wheel": "0.44.0",
+   "win-inet-pton": "1.1.0",
+   "wrapt": "2.0.1",
+   "xgboost": "2.1.4",
+   "zipp": "3.21.0"
+  }
+ },
+ "carla": {
+  "client_module": "C:\\Users\\andrea.bedei3\\.conda\\envs\\carla\\lib\\site-packages\\carla\\__init__.py",
+  "client_version": "0.9.15",
+  "server_version": "0.9.15"
+ }
+}

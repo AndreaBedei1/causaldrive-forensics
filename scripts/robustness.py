@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Robustness of the reconstruction to sensor, pose, timing and data-loss perturbations.
 
-    python scripts/robustness.py traces/S*/run_* [--families radar,gnss,...] [--workers 12]
-           [--work robustness] [--results results/robustness] [--keep]
+    python scripts/robustness.py --canonical [--families radar,gnss,...] [--workers N]
+           [--work robustness/<campaign>] [--results results/robustness/<campaign>] [--keep]
+    python scripts/robustness.py traces/S01/run_0_crash ...   (explicit runs; no shell wildcard needed)
 
 For every condition (``cdf.robustness.perturb``) and run: a perturbed copy of the run's own files (hard links
 for whatever does not change), the unchanged reconstruction on it (a perturbed GNSS enters as its pose
@@ -10,7 +11,22 @@ source), the privileged evaluation, and a comparison of its core events with tho
 reconstruction (``traces/<run>/reconstruction``).  The copy is deleted afterwards (``--keep`` keeps it): raw
 data are not duplicated.  Stochastic conditions draw seeds 0, 1, 2, ... until the standard error over
 seeds of every pooled metric is below its tolerance (at most ``--max-seeds``).  Results:
-``<results>/jobs.jsonl`` (one line per run and condition), ``summary.json|md|csv`` and ``figures/``.
+``<results>/jobs.jsonl`` (one line per attempt of a run and condition, written as soon as it ends),
+``summary.json|md|csv`` and ``figures/``.
+
+Resuming: a job with a ``complete`` line is never run again; a ``failed`` one is attempted again, at most
+``--max-attempts`` times in all, and its earlier failure lines stay in ``jobs.jsonl``.  A failure does not stop
+the study: failed jobs are counted (``failed``) and their error and stack trace kept.  The summaries use one
+result per job (its complete attempt, else its last failure).
+
+``radar_gnss_combined`` applies a radar profile and a GNSS profile to the same copy and reconstruction.  Every
+random stream is keyed by seed, sensor, profile and recorder (``perturb.stream_seed``), never by the family, so
+its radar errors are those of the ``radar`` job and its GNSS errors those of the ``gnss`` job of the same run,
+level and seed (paired comparisons), and the two are independent of each other.
+
+``gnss_refined`` changes the reconstruction configuration (``fusion.mutual_refinement``): a pose-refinement
+ablation, labelled ``configuration: ablation_mutual_refinement``; every other family runs the frozen
+configuration.
 """
 
 from __future__ import annotations
@@ -42,6 +58,9 @@ FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "combined": ([("exact + 10%", ('ideal',0.0)), ("RTK + 10%", ('rtk',0.0)),
                    ("consumer independent + 10%", ('consumer',0.0)),
                    ("consumer common 0.9 + 10%", ('consumer',0.9))], True),
+    # GNSS and radar degraded together on the same copy: every GNSS profile x every radar profile.
+    "radar_gnss_combined": ([("gnss {0} + radar {1}".format(g, r), (g, r))
+                             for g in ("rtk", "consumer", "degraded") for r in ("low", "nominal", "high")], True),
     "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
     "latency": ([("0.05 s", 0.05), ("0.10 s", 0.10), ("0.25 s", 0.25), ("0.50 s", 0.50)], False),
     "clock": ([("offsets", None)], False),
@@ -90,7 +109,7 @@ def build(job: Dict[str, Any]):
                                         PerturbedPoseSource)
     run_dir, family, parameter = Path(job["run"]), job["family"], job["parameter"]
     recorders = _recorders(run_dir)
-    name = "{0}_{1}".format(family, job["level"]).replace(" ", "_").replace("%", "pct")
+    name = "{0}_{1}".format(family, job["level"]).replace(" ", "_").replace("%", "pct").replace("+", "and")
     pose = None
     if family == "baseline":
         perturbation = Perturbation(name)
@@ -106,6 +125,10 @@ def build(job: Dict[str, Any]):
         perturbation = Perturbation(name,gnss=profile,
                      collisions=CollisionPerturbation(impulse_rel_std=.10 if family=='combined' else 0.0))
         pose = PerturbedPoseSource.factory(profile,int(job['seed']))
+    elif family == "radar_gnss_combined":
+        gnss, radar = parameter
+        perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=GNSS_PROFILES[gnss])
+        pose = PerturbedPoseSource.factory(GNSS_PROFILES[gnss], int(job["seed"]))
     elif family == "impulse":
         perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
     elif family == "latency":
@@ -149,6 +172,7 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
         shutil.rmtree(str(target))  # a stale scratch copy of an interrupted job (never a recording)
     result = {k: v for k, v in job.items()}
     result["perturbation"] = perturbation.to_dict()
+    result["configuration"] = "ablation_mutual_refinement" if job["family"] == "gnss_refined" else "frozen"
     start = time.monotonic()
     from cdf.evaluation.provenance import provenance
     from cdf.reconstruction.config import load_config
@@ -165,12 +189,13 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
         new = _read_json(target / "reconstruction" / "global" / "global_graph.json")
         keep_recorders = [r for r in _recorders(run_dir) if r not in perturbation.drop_recorders]
         result["events"] = core_event_diff(base, new, keep_recorders)
-        if job["family"] == "clock":
-            # Raw clocks shifted: the privileged truth mapping no longer holds; the claim is identity.
-            result["identical_graph"] = graph_signature(base) == graph_signature(new)
-        else:
+        # The global graph identical to the unperturbed one (the baseline must reproduce it exactly).
+        result["identical_graph"] = graph_signature(base) == graph_signature(new)
+        if job["family"] != "clock":
+            # (clock: raw clocks shifted, the privileged truth mapping no longer holds; the claim is identity.)
             evaluation = evaluate_run(target, clock_shift_check=False)
             fusion = evaluate_fusion(target, write=True, pose_factory=pose)
+            fusion_full = dict(fusion)
             fusion.pop("_raw", None)
             result["metrics"] = run_metrics(target, evaluation, fusion)
             result['collision_unmatched'] = sum(c.get('reconstructed_as') is None for c in evaluation['collisions'])
@@ -178,6 +203,7 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
             result['ambiguous_candidate_refusals'] = sum('ambig' in str(e).lower() for e in alignment['rejected_matches'])
             from cdf.evaluation.pose_errors import pose_errors
             result['pose_errors'] = pose_errors(target,pose)
+            result.update(extra_evaluation(target, evaluation, fusion_full))
         result["status"] = "complete"
     except Exception as exc:  # recorded, the study goes on
         import traceback
@@ -185,9 +211,77 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
         result["error"] = repr(exc)
         result["trace"] = traceback.format_exc()[-3000:]
     result["wall_s"] = round(time.monotonic() - start, 2)
+    result["resources"] = _resources()
     if not keep and target.exists():
         shutil.rmtree(str(target), ignore_errors=True)
     return result
+
+
+def _resources() -> Dict[str, Any]:
+    """The worker's memory: working set now and its peak over the worker's life so far (several jobs run in
+    one worker, so the peak is an upper bound for this job)."""
+    import os
+    try:
+        import psutil
+        info = psutil.Process().memory_info()
+        return {"pid": os.getpid(), "rss_mb": round(info.rss / 2 ** 20, 1),
+                "peak_mb": round(getattr(info, "peak_wset", info.rss) / 2 ** 20, 1)}
+    except Exception:  # psutil missing: no resource record
+        return {"pid": os.getpid()}
+
+
+def extra_evaluation(target: Path, evaluation: Dict[str, Any], fusion: Dict[str, Any]) -> Dict[str, Any]:
+    """The campaign's further measurements of one reconstructed copy, all from the existing evaluation code:
+    trajectory error distributions and their calibration (``fusion_metrics``), the distance-band and
+    incident breakdowns (``campaign_metrics``), the privileged stability audit (``scripts/stability_audit``:
+    track losses, phantoms, duplicates, EGO_PATH oscillations, CUT_IN against its ground-truth criterion,
+    CRITICAL_TTC closure, trajectory jumps) and the ground-truth event oracle (``event_oracle``: counts and
+    time differences per event type, reconstruction against the ideal oracles)."""
+    from cdf.evaluation.campaign_metrics import campaign_metrics
+    from cdf.evaluation.event_oracle import compare_run
+    from cdf.reconstruction.config import load_config
+    out: Dict[str, Any] = {}
+    errors = fusion.get("state_errors", {})
+    out["trajectory"] = {key: errors.get(key) for key in ("centre_error_m", "velocity_error_mps", "speed_error_mps",
+                                                           "heading_error_deg", "coverage_s")}
+    out["trajectory"]["calibration"] = fusion.get("calibration")
+    out["campaign"] = campaign_metrics(target, fusion, evaluation)
+    out["campaign"].pop("track_ranges_m", None)
+    if str(ROOT / "scripts") not in sys.path:
+        sys.path.insert(0, str(ROOT / "scripts"))
+    import stability_audit
+    audit = stability_audit.audit_run(Path(target))
+    recorders = audit.get("recorders", {})
+    out["stability"] = {
+        "track_losses": sum(len(m["tracks"]["losses"]) for m in recorders.values()),
+        "fragmentation_losses": sum(1 for m in recorders.values() for loss in m["tracks"]["losses"]
+                                    if loss["kind"] == "fragmentation"),
+        "phantom_tracks": sum(len(m["tracks"]["phantoms"]) for m in recorders.values()),
+        "duplicate_track_s": round(sum(d["overlap_s"] for m in recorders.values()
+                                       for d in m["tracks"]["duplicates"]), 2),
+        "ego_path_oscillations": sum(v["oscillations"] for m in recorders.values() for v in m["ego_path"].values()),
+        "reference_path_jumps": sum(m["reference_path"].get("jumps") or 0 for m in recorders.values()),
+        "trajectory_jumps": sum(m["trajectory"]["implausible_steps"] for m in recorders.values()),
+        "cut_in": audit.get("cut_in"), "closure_violations": audit.get("closure_violations")}
+    oracle = compare_run(Path(target), load_config())
+    out["event_oracle"] = {pair: {kind: {k: v for k, v in row.items() if k in ("found", "expected", "matched", "deltas")}
+                                  for kind, row in table.items()}
+                           for pair, table in oracle["comparison"].items() if pair.startswith("RECONSTRUCTION vs")}
+    return out
+
+
+def job_key(job: Dict[str, Any]) -> Tuple[Any, ...]:
+    return (job["run"], job["family"], job["level"], job.get("recorder"), int(job["seed"]))
+
+
+def latest_results(results: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """One result per job: its complete attempt if any, else its last failed attempt (file order)."""
+    chosen: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
+    for r in results:
+        k = job_key(r)
+        if k not in chosen or chosen[k].get("status") != "complete":
+            chosen[k] = r
+    return list(chosen.values())
 
 
 def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
@@ -234,6 +328,8 @@ def summarize(all_results: Sequence[Dict[str, Any]], results_dir: Path) -> Dict[
     from cdf.evaluation.provenance import provenance
     from cdf.reconstruction.config import load_config
     groups: Dict[Tuple[str, str], Dict[int, List[Dict[str, Any]]]] = {}
+    attempts = len(all_results)
+    all_results = latest_results(all_results)
     for r in all_results:
         groups.setdefault((r["family"], r["level"]), {}).setdefault(int(r["seed"]), []).append(r)
     rows = []
@@ -253,7 +349,8 @@ def summarize(all_results: Sequence[Dict[str, Any]], results_dir: Path) -> Dict[
                             "stochastic ones), pooled per seed over runs, then mean and SD over seeds",
               "provenance": provenance(load_config().to_dict(), sorted({Path(r["run"]).parent.name + "/" +
                                                                         Path(r["run"]).name for r in all_results})),
-              "tolerances_for_seeds": TOLERANCES, "rows": rows}
+              "tolerances_for_seeds": TOLERANCES, "attempts": attempts, "jobs": len(all_results),
+              "jobs_failed": sum(1 for r in all_results if r.get("status") != "complete"), "rows": rows}
     results_dir.mkdir(parents=True, exist_ok=True)
     (results_dir / "summary.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     columns = list(rows[0].keys()) if rows else []
@@ -409,7 +506,7 @@ def figures(record: Dict[str, Any], out_dir: Path) -> List[Path]:
 
 def need_more_seeds(results: Sequence[Dict[str, Any]], family: str, level: str) -> bool:
     by_seed: Dict[int, List[Dict[str, Any]]] = {}
-    for r in results:
+    for r in latest_results(results):
         if r["family"] == family and r["level"] == level:
             by_seed.setdefault(int(r["seed"]), []).append(r)
     per_seed = [pooled(rs) for rs in by_seed.values()]
@@ -422,7 +519,9 @@ def need_more_seeds(results: Sequence[Dict[str, Any]], family: str, level: str) 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Robustness study over saved recordings (non-destructive)")
-    parser.add_argument("runs", nargs="+", type=Path)
+    parser.add_argument("runs", nargs="*", type=Path)
+    parser.add_argument("--canonical", action="store_true",
+                        help="the canonical runs of the manifest (validate_canonical.CANONICAL), no wildcard needed")
     parser.add_argument("--families", default=",".join(FAMILIES))
     parser.add_argument("--work", default=str(ROOT / "robustness"))
     parser.add_argument("--results", type=Path, default=ROOT / "results" / "robustness")
@@ -430,8 +529,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--min-seeds", type=int, default=3)
     parser.add_argument("--max-seeds", type=int, default=8)
     parser.add_argument("--keep", action="store_true", help="keep the perturbed copies and their reconstructions")
+    parser.add_argument("--max-attempts", type=int, default=2, help="attempts of a failing job in all (resumes too)")
     parser.add_argument("--summarize", action="store_true", help="only rewrite the summary from jobs.jsonl")
     args = parser.parse_args(argv)
+    if args.canonical:
+        if str(ROOT / "scripts") not in sys.path:
+            sys.path.insert(0, str(ROOT / "scripts"))
+        from validate_canonical import canonical_runs
+        args.runs = list(args.runs) + [Path(run) for run in canonical_runs()]
+    if not args.runs and not args.summarize:
+        parser.error("no runs: give run directories or --canonical")
     if Path(args.work).resolve() == (ROOT / "traces").resolve():
         parser.error("perturbed copies never go into traces/")
     args.results.mkdir(parents=True, exist_ok=True)
@@ -443,14 +550,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         runs = [run for run in args.runs if (run / "reconstruction" / "global" / "global_graph.json").exists()]
         families = [f for f in args.families.split(",") if f]
 
-        def key(job: Dict[str, Any]) -> Tuple[Any, ...]:
-            return (job["run"], job["family"], job["level"], job.get("recorder"), int(job["seed"]))
+        key = job_key
         finished = {key(r) for r in done if r.get("status") == "complete"}
+        attempts: Dict[Tuple[Any, ...], int] = {}
+        for r in done:
+            attempts[key(r)] = attempts.get(key(r), 0) + 1
         seeds = {(f, label): list(range(args.min_seeds)) for f in families for label, _ in FAMILIES[f][0]}
         while True:
             pending = [job for f in families for run in runs for job in jobs_for(run, f, sorted({s for (ff, _), ss in seeds.items()
                                                                                                   if ff == f for s in ss}))
-                       if job["seed"] in seeds[(f, job["level"])] and key(job) not in finished]
+                       if job["seed"] in seeds[(f, job["level"])] and key(job) not in finished
+                       and attempts.get(key(job), 0) < args.max_attempts]
             if not pending:
                 more = False
                 for (f, label), ss in seeds.items():
@@ -465,6 +575,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 futures = [pool.submit(run_job, job, args.work, args.keep) for job in pending]
                 for future in as_completed(futures):
                     result = future.result()
+                    result["attempt"] = attempts.get(key(result), 0) + 1
+                    attempts[key(result)] = result["attempt"]
                     handle.write(json.dumps(result) + "\n")
                     handle.flush()
                     done.append(result)
@@ -472,8 +584,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         finished.add(key(result))
                     else:
                         print("FAILED", result["family"], result["level"], result["run"], result.get("error"), flush=True)
-            if any(r.get('status')=='failed' for r in done):
-                raise RuntimeError('Robustness jobs failed; inspect jobs.jsonl and resume after resolving the cause')
+            # A failed job does not stop the study: it is retried (up to --max-attempts) and otherwise counted.
     record = summarize(done, args.results)
     for row in record["rows"]:
         print("{0:10s} {1:16s} seeds {2} runs {3:3d} assoc {4} coll {5} aligned {6} events {7} centre {8} false merges {9}".format(
