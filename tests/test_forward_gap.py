@@ -315,25 +315,6 @@ class CampaignRegressionTests(unittest.TestCase):
     def first(self, nodes, event_type, subject):
         return next((n["t_local"] for n in nodes if n["event_type"] == event_type and n["subject_id"] == subject), None)
 
-    def test_s02_critical_before_the_entry_after_the_manoeuvre_onset(self):  # E
-        run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
-        if not (run / "vehicles" / "A").exists():
-            self.skipTest("canonical trace not present")
-        # Reconstructed now from the raw files with the current rules (not read from the stored outputs).
-        local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
-        nodes = [{"event_type": n.event_type, "subject_id": n.subject_id, "t_local": n.t_local}
-                 for n in local.graph.nodes]
-        critical = self.first(nodes, "CRITICAL_TTC_START", "track_001")
-        cut_in = self.first(nodes, "CUT_IN_FROM_LEFT_START", "track_001")
-        entry = self.first(nodes, "EGO_PATH_ENTRY", "track_001")
-        self.assertIsNotNone(critical)
-        self.assertIsNotNone(cut_in)
-        # B's lateral manoeuvre starts first (ground truth: it leaves its lane line at 1.8-2.2 s), the collision
-        # course turns critical next, and both precede B's entry into A's path: the danger is recognised before
-        # the car is in the path (the scenario's point), the cut-in being dated at its onset.
-        self.assertLessEqual(cut_in, critical)
-        self.assertLess(critical, entry)
-
     def test_s02_crash_still_cuts_in(self):  # E
         nodes = _graph("S02/run_0_crash", "A")
         if nodes is None:

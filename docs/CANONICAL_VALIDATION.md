@@ -1,6 +1,6 @@
 # Canonical development set: automatic validation
 
-Manifest: OK (S01..S19, 23 runs)
+Manifest: OK (S01..S19, 22 runs)
 
 Reconstruction: the single reconstruction method, `configs/reconstruction.yaml` (configuration digest 7d3ec1ed642f); every run is checked to carry exactly this configuration.
 
@@ -10,7 +10,6 @@ Stability (privileged audit, `evaluation/stability.json`): EGO_PATH oscillations
 |---|---|---|---|---|--:|--:|---|---|--:|--:|---|
 | S01/run_0_crash | PASS | 1/1 | correct link 1 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 19 | - |
 | S02/run_0_crash | PASS | 1/1 | correct link 1 | 0/0/0 | 0 | 0 | 0/0/0/0 | 1/0/0 | 0 | 26 | - |
-| S02/run_0_critical_before_cut_in | PASS | 1/1 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 1/0/0 | 0 | 35 | - |
 | S03/run_0_crash | PASS | 1/1 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 34 | - |
 | S04/run_0_a_front_pushed | PASS | 3/3 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 35 | - |
 | S04/run_0_b_rear_first | PASS | 2/2 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 32 | - |

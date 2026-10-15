@@ -8,8 +8,6 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S01/run_0_crash | B | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S02/run_0_crash | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S02/run_0_crash | B | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| S02/run_0_critical_before_cut_in | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-| S02/run_0_critical_before_cut_in | B | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
 | S03/run_0_crash | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S03/run_0_crash | B | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S04/run_0_a_front_pushed | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -56,13 +54,12 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S18/run_0_collision_ambiguity | B | 6 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S19/run_0_highway_curve | A | 11 | 11 | 9 | 0 | 4 | 5 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S19/run_0_highway_curve | B | 7 | 7 | 5 | 0 | 0 | 5 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| **total** | | 171 | 171 | 89 | 3 | 8 | 78 | 0 | 0.00 | 36 | 4 | 0 | 11 | 2 |
+| **total** | | 169 | 169 | 89 | 3 | 8 | 78 | 0 | 0.00 | 35 | 4 | 0 | 10 | 2 |
 
 | run | CUT_IN found | true | TP | FP | missed | onset errors (s) | closure violations | wrong links | false merges | missed merges |
 |---|--:|--:|--:|---|---|---|--:|--:|--:|--:|
 | S01/run_0_crash | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S02/run_0_crash | 1 | 1 | 1 | - | - | [-0.1] | 0 | 0 | 0 | 0 |
-| S02/run_0_critical_before_cut_in | 1 | 1 | 1 | - | - | [-0.3] | 0 | 0 | 0 | 0 |
 | S03/run_0_crash | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S04/run_0_a_front_pushed | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S04/run_0_b_rear_first | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |

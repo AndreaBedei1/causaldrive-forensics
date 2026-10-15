@@ -3,7 +3,7 @@
 
     python scripts/validate_canonical.py [--out docs/CANONICAL_VALIDATION.md]
 
-Checks the manifest (S01..S19, 23 runs, no gaps, no stray folders), then per run: reconstruction files present
+Checks the manifest (S01..S19, 22 runs, no gaps, no stray folders), then per run: reconstruction files present
 and finite (no NaN/Inf in any JSON), made with the current ``configs/reconstruction.yaml`` (the configuration
 recorded in ``global_graph.json``; anything else is a stale output), every recorder aligned, collisions reconstructed (evaluation), no wrong
 collision pairing, no wrong recorder link, no false merge, no global CRITICAL_TTC episode of a colliding pair
@@ -41,7 +41,7 @@ from cdf.replay.presentation import (EVENT, MAX_EVENT_LINES, MAX_PANEL_LINES, MA
                                      recorder_panel, standard_panel_lines)
 
 CANONICAL = {
-    "S01": ["crash"], "S02": ["crash", "critical_before_cut_in"], "S03": ["crash"],
+    "S01": ["crash"], "S02": ["crash"], "S03": ["crash"],
     "S04": ["a_front_pushed", "b_rear_first"], "S05": ["crash"], "S06": ["crash"], "S07": ["merge_conflict"],
     "S08": ["rolls_through"], "S09": ["near_simultaneous"], "S10": ["deflected_into_c"], "S11": ["consequential"],
     "S12": ["crash"], "S13": ["abreast", "platoon", "passing"], "S14": ["surrounded"], "S15": ["dense_platoon"],

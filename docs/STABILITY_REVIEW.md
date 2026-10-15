@@ -8,6 +8,8 @@ controls, radar, collisions); ground truth is used only by the evaluation (`scri
 the **same audit** applied to the baseline outputs (committed at `c558d031`) and to the outputs regenerated from
 the unchanged raw recordings: a change of definition cannot pass for an improvement.
 
+> Note (2026-10-15, later): the variant S02 critical_before_cut_in was removed from the canonical set after this review (22 runs remain); the figures below that include it describe the set as reviewed.
+
 ## Root causes
 
 | symptom | root cause | where | introduced |

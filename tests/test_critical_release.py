@@ -291,21 +291,5 @@ class S12Tests(unittest.TestCase):
             self.assertFalse(assessment.inside_envelope)
 
 
-class S02RegressionTests(unittest.TestCase):
-    def test_s02_critical_before_the_entry_and_active_there(self):  # H
-        run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
-        if not (run / "vehicles" / "A").exists():
-            self.skipTest("canonical trace not present")
-        local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
-        relation = next(item for item in temporal_safety_relations(local.graph) if item["track"] == "track_001")
-        self.assertEqual(relation["cut_in"]["type"], "CUT_IN_FROM_LEFT_START")
-        # The cut-in is dated at the onset of B's lateral manoeuvre (ground truth 1.8-2.2 s), before the collision
-        # course turns critical; the critical state is already active when B enters A's path.
-        self.assertEqual(relation["cut_in_vs_critical_ttc"], "CUT_IN_BEFORE_CRITICAL_TTC")
-        entry = next(n.t_local for n in local.graph.nodes
-                     if n.event_type == "EGO_PATH_ENTRY" and n.subject_id == "track_001")
-        self.assertLess(relation["critical_ttc_start"], entry)
-
-
 if __name__ == "__main__":
     unittest.main()

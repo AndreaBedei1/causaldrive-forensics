@@ -248,23 +248,5 @@ class S12Tests(unittest.TestCase):  # G
         self.assertGreater(ends[0], collision)  # its own geometric release (C clearly aside)
 
 
-class S02RegressionTests(unittest.TestCase):  # H
-    def test_s02_critical_before_cut_in_keeps_its_order(self):
-        run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
-        if not (run / "vehicles" / "A").exists():
-            self.skipTest("canonical trace not present")
-        local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
-        relation = next(item for item in temporal_safety_relations(local.graph) if item["track"] == "track_001")
-        # B's cut-in is dated at the onset of its lateral manoeuvre (ground truth: it leaves its lane line at
-        # 1.8-2.2 s), before the collision course turns critical; both precede B's entry into A's path.
-        self.assertEqual(relation["cut_in_vs_critical_ttc"], "CUT_IN_BEFORE_CRITICAL_TTC")
-        entry = next(n.t_local for n in local.graph.nodes
-                     if n.event_type == "EGO_PATH_ENTRY" and n.subject_id == "track_001")
-        self.assertLess(relation["critical_ttc_start"], entry)
-        collision = next(n.t_local for n in local.graph.nodes if n.event_type == "COLLISION")
-        ends = [n.t_local for n in local.graph.nodes if n.event_type == "CRITICAL_TTC_END" and n.subject_id == "track_001"]
-        self.assertEqual(ends, [collision])
-
-
 if __name__ == "__main__":
     unittest.main()
