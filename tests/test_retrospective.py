@@ -350,7 +350,7 @@ class RealRunRegressions(unittest.TestCase):
         _, s12 = self.reconstruct("traces/S12/run_0_crash")
         u1 = [e for e in self.events(s12) if e[0] == "CUT_IN_FROM_RIGHT_START" and e[1] == "A" and e[2] == "U1"]
         self.assertEqual(len(u1), 1)
-        self.assertAlmostEqual(u1[0][3], -2.2, places=2)
+        self.assertAlmostEqual(u1[0][3], -2.65, places=2)  # the onset of U1's lateral approach (local 2.30 s)
 
     def test_reconstruction_matches_the_committed_one(self):
         target, _ = self.reconstruct("traces/S13/run_0_abreast")

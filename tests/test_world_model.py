@@ -243,13 +243,14 @@ class TrackAppearanceTests(unittest.TestCase):
 class CutInTests(unittest.TestCase):
     def test_cut_in_from_the_left_starts_on_evidence_and_ends_when_it_settles(self):
         events = _events(_target(_lane_change(side=-1)), ego=_ego(10.0))
-        self.assertIn(("CUT_IN_FROM_LEFT_START", 2.5), events)
+        # Dated at the onset of the lateral approach (2.0 s), established on the evidence that follows it.
+        self.assertIn(("CUT_IN_FROM_LEFT_START", 2.0), events)
         self.assertIn(("CUT_IN_FROM_LEFT_END", 5.0), events)
         self.assertNotIn("CUT_IN_FROM_RIGHT_START", _types(events))
 
     def test_cut_in_from_the_right(self):
         events = _events(_target(_lane_change(side=1)), ego=_ego(10.0))
-        self.assertIn(("CUT_IN_FROM_RIGHT_START", 2.5), events)
+        self.assertIn(("CUT_IN_FROM_RIGHT_START", 2.0), events)
         self.assertNotIn("CUT_IN_FROM_LEFT_START", _types(events))
 
     def test_brief_lateral_drift_is_not_a_cut_in(self):
@@ -270,12 +271,13 @@ class CutInTests(unittest.TestCase):
 
     def test_a_cut_in_still_under_way_when_the_track_is_lost_has_no_end(self):
         world = PerceivedWorld()
-        events = _events(_target(_lane_change(side=-1), end=3.5), ego=_ego(10.0), world=world)
-        self.assertIn(("CUT_IN_FROM_LEFT_START", 2.5), events)
-        self.assertIn(("TRACK_LOST", 3.5), events)
+        # Lost at 4.5 s: inside the path (its entry established), still moving sideways (it settles at 5.0 s).
+        events = _events(_target(_lane_change(side=-1), end=4.5), ego=_ego(10.0), world=world)
+        self.assertIn(("CUT_IN_FROM_LEFT_START", 2.0), events)
+        self.assertIn(("TRACK_LOST", 4.5), events)
         self.assertNotIn("CUT_IN_FROM_LEFT_END", _types(events))
-        self.assertIs(world.snapshot(3.5, before=True)["external"]["track_001"]["CUT_IN_FROM_LEFT"], True)
-        after = world.snapshot(3.5, before=False)["external"]["track_001"]
+        self.assertIs(world.snapshot(4.5, before=True)["external"]["track_001"]["CUT_IN_FROM_LEFT"], True)
+        after = world.snapshot(4.5, before=False)["external"]["track_001"]
         self.assertTrue(all(value == UNKNOWN for value in after.values()))
 
 

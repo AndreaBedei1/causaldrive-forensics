@@ -106,9 +106,10 @@ class LeaderExitTests(unittest.TestCase):
         assessments = _assessments(track, ego)
         self.assertEqual([assessments[t].forward.region for t in (0.95, 1.0, 1.05)],
                          ["FRONT_LATERAL", None, "FRONT_LATERAL"])
-        # The front-lateral car is a leader from its confirmed cut-in on (its EGO_PATH_ENTRY follows at 1.45 s).
-        self.assertEqual(_of(events, "CUT_IN_FROM_RIGHT_START"), [0.9])
-        self.assertEqual(_of(events, "CRITICAL_TTC_START"), [0.9])
+        # The front-lateral car moves toward the path from its first sample: its cut-in, confirmed by its
+        # EGO_PATH_ENTRY at 1.45 s, is dated from that onset, and it is a leader from then on.
+        self.assertEqual(_of(events, "CUT_IN_FROM_RIGHT_START"), [0.0])
+        self.assertEqual(len(_of(events, "CRITICAL_TTC_START")), 1)
         self.assertEqual(_of(events, "CRITICAL_TTC_END"), [])
 
     def test_a_leader_moving_clearly_aside_ends_after_the_hysteresis_and_debounce(self):  # B
@@ -291,15 +292,19 @@ class S12Tests(unittest.TestCase):
 
 
 class S02RegressionTests(unittest.TestCase):
-    def test_s02_critical_before_cut_in_is_still_critical_at_the_cut_in(self):  # H
+    def test_s02_critical_before_the_entry_and_active_there(self):  # H
         run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
         if not (run / "vehicles" / "A").exists():
             self.skipTest("canonical trace not present")
         local = reconstruct_vehicle(run / "vehicles" / "A", ReconstructionConfig(), context=read_incident_context(run))
         relation = next(item for item in temporal_safety_relations(local.graph) if item["track"] == "track_001")
         self.assertEqual(relation["cut_in"]["type"], "CUT_IN_FROM_LEFT_START")
-        self.assertEqual(relation["cut_in_vs_critical_ttc"], "CRITICAL_TTC_ALREADY_ACTIVE")
-        self.assertLess(relation["critical_ttc_start"], relation["cut_in"]["t_local"])
+        # The cut-in is dated at the onset of B's lateral manoeuvre (ground truth 1.8-2.2 s), before the collision
+        # course turns critical; the critical state is already active when B enters A's path.
+        self.assertEqual(relation["cut_in_vs_critical_ttc"], "CUT_IN_BEFORE_CRITICAL_TTC")
+        entry = next(n.t_local for n in local.graph.nodes
+                     if n.event_type == "EGO_PATH_ENTRY" and n.subject_id == "track_001")
+        self.assertLess(relation["critical_ttc_start"], entry)
 
 
 if __name__ == "__main__":

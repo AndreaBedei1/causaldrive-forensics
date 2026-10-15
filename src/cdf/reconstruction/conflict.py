@@ -433,12 +433,14 @@ def _corners(half_x: float, half_y: float) -> np.ndarray:
 
 
 def _overlap(centre_a: np.ndarray, angle_a: np.ndarray, half_a: Tuple[float, float],
-             centre_b: np.ndarray, angle_b: float, half_b: Tuple[float, float]) -> np.ndarray:
-    """Separating-axis test of two oriented rectangles, vectorised over time (A moves, B's angle is fixed)."""
+             centre_b: np.ndarray, angle_b, half_b: Tuple[float, float]) -> np.ndarray:
+    """Separating-axis test of two oriented rectangles, vectorised over time (``angle_b`` one angle or one per
+    instant)."""
     ca, sa = np.cos(angle_a), np.sin(angle_a)
     axes_a = [np.column_stack([ca, sa]), np.column_stack([-sa, ca])]
-    cb, sb = math.cos(angle_b), math.sin(angle_b)
-    axes_b = [np.tile([cb, sb], (len(angle_a), 1)), np.tile([-sb, cb], (len(angle_a), 1))]
+    angle_b = np.broadcast_to(np.asarray(angle_b, dtype=float), np.shape(angle_a))
+    cb, sb = np.cos(angle_b), np.sin(angle_b)
+    axes_b = [np.column_stack([cb, sb]), np.column_stack([-sb, cb])]
     offset = centre_b - centre_a
     separated = np.zeros(len(angle_a), dtype=bool)
     for axis in axes_a + axes_b:
@@ -514,6 +516,10 @@ class _Prediction:
         tvy = math.copysign(max(abs(tvy)-sample.vel_std_mps,0.0),tvy)
         self.target_motion_unit = np.array([tvx,tvy])/speed if speed > 1e-9 else unit
         self.target_half = half
+        # The lane the target keeps bends its predicted path as the recorder's yaw rate bends the recorder's (the
+        # null hypothesis on a curve: a car keeps its lane, it does not leave it along a tangent).
+        curvature = float(getattr(sample, "path_curvature", None) or 0.0)
+        self.target_curvature = max(-MAX_CURVATURE_PER_M, min(MAX_CURVATURE_PER_M, curvature))
         self.encounter = _encounter(self.target_speed,math.degrees(math.atan2(self.target_motion_unit[1],self.target_motion_unit[0])))
         # Relative velocity across the recorder's heading (+ = to its right; no uncertainty removed).
         self.lateral_relative_speed = -s * (sample.vx_mps - own.vx) + c * (sample.vy_mps - own.vy)
@@ -538,8 +544,17 @@ class _Prediction:
             moved = _travel(self.times, self.target_speed, target_reaction, target_deceleration)
         else:
             moved = _target_travel(self.times, self.target_speed, self.target_acceleration)
-        targets = self.target_centre + moved[:, None] * self.target_motion_unit
-        return _overlap(centres, angles, self.ego_half, targets, self.target_angle, self.target_half)
+        k, unit = self.target_curvature, self.target_motion_unit
+        if abs(k) < 1e-6:
+            targets = self.target_centre + moved[:, None] * unit
+            target_angles = self.target_angle
+        else:  # along an arc of the lane's curvature (+ = to the right of its motion)
+            theta = k * moved
+            right = np.array([-unit[1], unit[0]])
+            targets = (self.target_centre + (np.sin(theta) / k)[:, None] * unit
+                       + ((1.0 - np.cos(theta)) / k)[:, None] * right)
+            target_angles = self.target_angle + theta
+        return _overlap(centres, angles, self.ego_half, targets, target_angles, self.target_half)
 
 
 def _required(predict) -> float:

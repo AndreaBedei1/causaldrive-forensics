@@ -792,24 +792,30 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
     Kinematic only: a target ahead of the recorder's front edge, moving within ``cut_in_max_heading_deg`` of
     the path heading fixed at first observation (so not crossing traffic), approaches the corridor
     laterally at ``cut_in_lateral_speed_mps`` or more without interruption.
-    The cut-in STARTS once that run has lasted ``cut_in_persistence_s``,
+    The cut-in is ESTABLISHED once that run has lasted ``cut_in_persistence_s``,
     began at least ``cut_in_outside_margin_m`` outside the corridor, has moved
     the target ``cut_in_min_displacement_m`` closer, the corridor is due
     within ``cut_in_horizon_s`` at the current lateral speed, and the target's
     nominal body is already within ``cut_in_preentry_margin_m`` of the corridor
     (``body_gaps``: estimated body separation in that fixed frame): a
     car still crossing a lane further away may be heading for the lane next to
-    the recorder's, not for its path.  The side at the start gives the
+    the recorder's, not for its path.  It STARTS at the first sample of the
+    uninterrupted lateral approach that contains that run -- ahead of the front
+    edge yet or not (a car that starts its lane change beside the recorder and
+    draws ahead makes one manoeuvre): the earliest observation of the manoeuvre
+    that the later evidence established (offline; ``track_events`` further
+    requires the target's own entry into the path); the outside margin and the
+    displacement count from there.  The side at the start gives the
     direction, from the recorder's viewpoint (negative lateral = left).  It
     ENDS once the lateral approach has stayed below ``cut_in_settle_speed_mps``
     for ``cut_in_settle_s``: a collision does not end it by itself.  Uncertain
     samples, and samples seen past another tracked vehicle
     (``TrackSample.occluded``), give no evidence either way.
     """
-    corridor = cfg.path_half_width_m
     left: List[Span] = []
     right: List[Span] = []
-    run: Optional[Tuple[int, int, float]] = None  # (start index, side, body gap at the start)
+    run: Optional[Tuple[int, int, float]] = None  # (start index, side, body gap at the start) of the approach
+    ahead_since: Optional[int] = None  # first sample of the approach's current stretch ahead of the front edge
     active: Optional[Tuple[int, int]] = None  # (start index, side)
     settle: Optional[int] = None
     for index, (sample, motion) in enumerate(zip(samples, motions)):
@@ -817,6 +823,7 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
                          else target_lateral_speeds[index])
         if not motion.known or sample.occluded:
             run, settle = (None if active is None else run), None
+            ahead_since = None
             continue
         if active is not None:
             start, side = active
@@ -829,7 +836,7 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
                 settle = None
             continue
         if impact_from is not None and times[index] >= impact_from - 1e-6:
-            run = None
+            run, ahead_since = None, None
             continue
         side = (-1 if sample.lateral_m < 0 else 1) if body_sides is None else body_sides[index]
         toward = -side * lateral_speed
@@ -838,28 +845,213 @@ def cut_in_spans(times: Sequence[float], samples: Sequence[TrackSample], motions
         ahead = sample.ahead_m > 0 if body_ahead is None else body_ahead[index]
         lane_toward = None if lane_toward_speeds is None else lane_toward_speeds[index]
         keeps_lane = lane_toward is not None and lane_toward < cfg.cut_in_lateral_speed_mps
-        if keeps_lane or not (ahead and parallel and toward >= cfg.cut_in_lateral_speed_mps
+        if keeps_lane or not (parallel and toward >= cfg.cut_in_lateral_speed_mps
                               and (target_lateral_speeds is None or toward > sample.vel_std_mps)):
-            run = None
+            run, ahead_since = None, None
             continue
         if run is None or run[1] != side:
-            run = (index, side, body_gaps[index])
+            run, ahead_since = (index, side, body_gaps[index]), None
+        if not ahead:
+            ahead_since = None
+            continue
+        ahead_since = index if ahead_since is None else ahead_since
         gap = body_gaps[index]
         due = gap / toward <= cfg.cut_in_horizon_s
         if (run[2] >= cfg.cut_in_outside_margin_m
                 and run[2] - gap >= cfg.cut_in_min_displacement_m
-                and times[index] - times[run[0]] >= cfg.cut_in_persistence_s - 1e-6 and due
+                and times[index] - times[ahead_since] >= cfg.cut_in_persistence_s - 1e-6 and due
                 and body_gaps[index] <= cfg.cut_in_preentry_margin_m + 1e-9):
-            active, settle = (index, run[1]), None
+            active, settle = (run[0], run[1]), None
     if active is not None:
         (left if active[1] < 0 else right).append((active[0], None))
     return left, right
 
 
-def _entered(span: Span, entries: Sequence[int]) -> bool:
-    """An EGO_PATH_ENTRY (sample index) inside the cut-in span (start..end, or to the track's end)."""
+def path_occupancy(times: Sequence[float], margins: Sequence[Optional[float]], sigmas: Sequence[float],
+                   cfg: SemanticsConfig) -> Tuple[List[Span], Optional[bool]]:
+    """EGO_PATH spans from the body's signed distance to the corridor boundary (``margins``: > 0 inside by that
+    much, < 0 outside; None: no evidence, e.g. a predicted sample) and its uncertainty (``sigmas``).
+
+    A sample is definitely inside (outside) at ``path_occupancy_quantile`` sigma inside (outside), else
+    uncertain.  The first definite state is the initial occupancy: no ENTRY is invented for a body first seen
+    inside.  A new state needs ``path_min_definite_samples`` consecutive definite samples; the transition is
+    dated where the expected body crossed the boundary (the first sample with the new sign after the last
+    definite sample of the old state), not when it became certain.  Returns (spans, initially inside); the
+    span end is the first sample outside, None while inside at the end -- a lost track is not an exit."""
+    k, need = cfg.path_occupancy_quantile, max(int(cfg.path_min_definite_samples), 1)
+    definite: List[Optional[bool]] = []
+    for margin, sigma in zip(margins, sigmas):
+        if margin is None:
+            definite.append(None)
+        elif margin >= k * sigma:
+            definite.append(True)
+        elif margin <= -k * sigma:
+            definite.append(False)
+        else:
+            definite.append(None)
+    state: Optional[bool] = None
+    initial: Optional[bool] = None
+    last_definite = -1  # last sample confirming the current state
+    spans: List[Span] = []
+    start: Optional[int] = None
+    run_state, run_length = None, 0
+    for index, value in enumerate(definite):
+        if value is None:
+            continue
+        if value == run_state:
+            run_length += 1
+        else:
+            run_state, run_length = value, 1
+        if state is None:
+            if run_length >= need:
+                state = initial = value
+                last_definite = index
+                if value:
+                    start = 0
+            continue
+        if value == state:
+            last_definite = index
+            continue
+        if run_length < need:
+            continue
+        # Confirmed change: dated at the first sample after the old state's last support where the expected
+        # body is already on the new side.
+        first = index - run_length + 1
+        crossing = next((j for j in range(last_definite + 1, first + 1)
+                         if margins[j] is not None and (margins[j] > 0.0) == value), first)
+        if value:
+            start = crossing
+        else:
+            spans.append((start if start is not None else 0, crossing))
+            start = None
+        state, last_definite = value, index
+    if state and start is not None:
+        spans.append((start, None))
+    return spans, initial
+
+
+def _path_cause(index: int, times: Sequence[float], supports: Sequence[np.ndarray], ego: EgoTrajectory,
+                road: Optional["RoadFrame"], corridor: float, since: Optional[int] = None) -> str:
+    """Why the occupancy changed at sample ``index`` (an entry or an exit): which motions over the 0.5 s before
+    it -- or since sample ``since``, the start of the confirmed cut-in an entry ends -- the change needed.  The
+    corridor is the recorder's own line carried along its reference path (``road.RoadFrame.to_path``: centred
+    on the recorder's lateral position, bent like its lane).  In one frame -- the reference path at the window's
+    start (the map), else the recorder's heading there -- the body's lateral overlap with the corridor before
+    (its box at the window's start against the corridor then) and now, and with one motion undone at a time:
+    the target's own (its box at the window's start against the corridor now) and the corridor's (the box now
+    against the corridor at the window's start: the recorder moved sideways, a lane change or a drift).  The
+    body is what the occupancy uses: its nominal box and the returns that can lie on it (``supports``, local
+    frame).
+
+    TARGET_LATERAL: only the target's motion was needed; RECORDER_LATERAL: only the corridor's (a lane change
+    of the recorder toward a car keeping its lane); MUTUAL_LATERAL: both were needed, or each alone was enough
+    (two vehicles moving toward each other); LONGITUDINAL: the lateral overlap did not change -- the body crossed
+    the front edge."""
+    lo = max(0, next((j for j in range(index, -1, -1) if times[index] - times[j] >= 0.5), 0))
+    if since is not None:
+        lo = min(lo, since)
+    own0, own1 = ego.at(times[lo]), ego.at(times[index])
+    body0, body1 = supports[lo], supports[index]
+    state = road.path_at(ego, times[lo]) if road is not None else None
+    if state is not None:
+        frame = state[0]
+
+        def lateral(points: np.ndarray) -> np.ndarray:
+            return frame.project(np.array([road.to_world(*point) for point in points]))[:, 1]
+    else:
+        c, s = math.cos(own0.heading), math.sin(own0.heading)
+
+        def lateral(points: np.ndarray) -> np.ndarray:
+            return -s * (points[:, 0] - own0.x) + c * (points[:, 1] - own0.y)
+    y0, y1 = lateral(body0), lateral(body1)
+    # The corridor's centre line (the recorder's own line) then and now, in that frame.
+    c0, c1 = (float(v) for v in lateral(np.array([[own0.x, own0.y], [own1.x, own1.y]])))
+
+    def overlaps(y: np.ndarray, centre_line: float) -> bool:
+        return min(float(np.max(y)), centre_line + corridor) - max(float(np.min(y)), centre_line - corridor) > 0.0
+
+    now = overlaps(y1, c1)
+    if now == overlaps(y0, c0):
+        return "LONGITUDINAL"
+    target = overlaps(y0, c1) != now  # undoing the target's motion undoes the change
+    recorder = overlaps(y1, c0) != now  # undoing the corridor's
+    if target and not recorder:
+        return "TARGET_LATERAL"
+    if recorder and not target:
+        return "RECORDER_LATERAL"
+    return "MUTUAL_LATERAL"
+
+
+def _on_body_returns(returns: Optional[Tuple[np.ndarray, np.ndarray]], t_local: float, ego: EgoTrajectory,
+                     body: np.ndarray, face_std: float) -> Optional[np.ndarray]:
+    """The returns of one sweep that can lie on the target's body (local frame), None without two: within its
+    width band (the nominal box's half width plus two face spreads ``face_std`` across its axis: a car's width
+    is known to a few decimetres) and within one body length of the box centre along it (where the box sits
+    along its axis is what a partial view leaves uncertain); a neighbour's returns mixed into a young track lie a
+    lane away.  ``body``: the nominal box corners (recorder's vehicle frame)."""
+    if returns is None or len(returns[0]) < 2:
+        return None
+    own = ego.at(t_local)
+    c, s = math.cos(own.heading), math.sin(own.heading)
+    rel = returns[0] - np.array([own.x, own.y])
+    vehicle = np.column_stack([rel @ np.array([c, s]), rel @ np.array([-s, c])])  # recorder's vehicle frame
+    centre = np.mean(body, axis=0)
+    along = 0.5 * (body[0] + body[1]) - centre  # box_corners: front pair first
+    across = 0.5 * (body[0] - body[1])
+    half_length, half_width = float(np.hypot(*along)), float(np.hypot(*across))
+    if half_length < 1e-6 or half_width < 1e-6:
+        return None
+    a = (vehicle - centre) @ (along / half_length)
+    b = (vehicle - centre) @ (across / half_width)
+    on_body = (np.abs(b) <= half_width + 2.0 * face_std) & (np.abs(a) <= 2.0 * half_length)
+    return returns[0][on_body] if int(on_body.sum()) >= 2 else None
+
+
+def _returns_bounds(points: Optional[np.ndarray], t_local: float, ego: EgoTrajectory, road: Optional["RoadFrame"],
+                    front: float, corridor: float) -> Optional[Tuple[float, float]]:
+    """What the target's own returns of one sweep (``_on_body_returns``, local frame) prove about its body, which
+    contains them: (occupancy margin, reach ahead of the front edge), each the second deepest return's (one
+    stray return cannot decide) and each a lower bound of the body's own -- wherever the nominal box was placed
+    (a car seen from beside shows only part of its side, and the box behind its median return can sit a metre
+    or more short of its front).  The margin is signed like the body margin: ahead of the front edge and within
+    the corridor's half width.  In the path frame where the road is known, else the recorder's own frame."""
+    if points is None or len(points) < 2:
+        return None
+    mapped = road.to_path(ego, t_local, points) if road is not None else None
+    if mapped is None:
+        own = ego.at(t_local)
+        c, s = math.cos(own.heading), math.sin(own.heading)
+        rel = points - np.array([own.x, own.y])
+        mapped = np.column_stack([rel @ np.array([c, s]), rel @ np.array([-s, c])])
+    reach = mapped[:, 0] - front
+    margin = np.minimum(reach, corridor - np.abs(mapped[:, 1]))
+    return float(np.sort(margin)[-2]), float(np.sort(reach)[-2])
+
+
+def _entered(span: Span, entries: Sequence[int], needed: Optional[Callable[[int, int], bool]] = None) -> bool:
+    """An EGO_PATH_ENTRY (sample index) inside the cut-in span (start..end, or to the track's end), for which
+    the target's own manoeuvre since the span's start was needed (``needed(start, entry)``, when given)."""
     start, end = span
-    return any(start <= entry and (end is None or entry <= end) for entry in entries)
+    return any(start <= entry and (end is None or entry <= end) and (needed is None or needed(start, entry))
+               for entry in entries)
+
+
+def _manoeuvre_needed(start: int, entry: int, times: Sequence[float], supports: Sequence[np.ndarray],
+                      ego: EgoTrajectory, road: Optional["RoadFrame"], corridor: float) -> bool:
+    """Whether the target's own lateral motion since sample ``start`` was needed for its entry at ``entry``:
+    its box at ``start`` placed against the corridor of the entry (the recorder's own line along its reference
+    path then, ``road.RoadFrame.to_path``; without a map along its heading then) would not overlap it laterally.
+    A car keeping its lane that the recorder's lane change brings into its path, or that was in the path's lane
+    beside the recorder, needed none.  The body: its box and on-body returns (``supports``, local frame)."""
+    own1 = ego.at(times[entry])
+    body = supports[start]
+    mapped = road.to_path(ego, times[entry], body) if road is not None else None
+    if mapped is not None:
+        lateral = mapped[:, 1]
+    else:
+        c1, s1 = math.cos(own1.heading), math.sin(own1.heading)
+        lateral = -s1 * (body[:, 0] - own1.x) + c1 * (body[:, 1] - own1.y)
+    return not min(float(np.max(lateral)), corridor) - max(float(np.min(lateral)), -corridor) > 0.0
 
 
 def _stationary_ego() -> EgoTrajectory:
@@ -908,6 +1100,19 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     # lateral offset from its own line), None without a road model at that instant.
     path_bodies: List[Optional[np.ndarray]] = [None] * len(samples)
     path_points: List[Optional[np.ndarray]] = [None] * len(samples)
+    # The body's evidence per sample (local frame): its nominal box and the returns that can lie on it
+    # (``_on_body_returns``); what those returns prove (``_returns_bounds``): occupancy margin, reach ahead.
+    on_body = [_on_body_returns(track.returns[i], sample.t_local, ego, bodies[i], cfg.path_edge_std_m)
+               if body_based and sample.measured and i < len(track.returns) else None
+               for i, sample in enumerate(samples)]
+    supports = []
+    for sample, corners, points in zip(samples, bodies, on_body):
+        own = ego.at(sample.t_local)
+        c, s = math.cos(own.heading), math.sin(own.heading)
+        local_corners = corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y])
+        supports.append(local_corners if points is None else np.vstack([local_corners, points]))
+    proven = [_returns_bounds(points, sample.t_local, ego, road, front, corridor)
+              for sample, points in zip(samples, on_body)]
     if road is not None and body_based:
         for index, (sample, corners) in enumerate(zip(samples, bodies)):
             own = ego.at(sample.t_local)
@@ -923,17 +1128,54 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
         return body_in_corridor(body, front_edge, half)
 
     if body_based:
-        path = [] if track.identity_ambiguous else active_intervals(times, list(range(len(samples))),
-            lambda i: in_path(i, front, corridor),
-            lambda i: not in_path(i, front - hysteresis, corridor + hysteresis))
+        # Occupancy of the reference corridor with the body's uncertainty (``path_occupancy``): the signed
+        # distance of the body to the corridor boundary -- ahead of the front edge and overlapping it laterally
+        # -- against the uncertainty of its edge.  The nominal box sits behind the median return; the body's own
+        # returns bound the margin from below (``_returns_bounds``: a car seen from beside shows only part of
+        # its side, and a box placed behind the median return can sit a metre or more short of its front).  A
+        # predicted sample brings no evidence.
+        margins: List[Optional[float]] = []
+        sigmas: List[float] = []
+        evidence: List[Optional[str]] = []  # what decides each margin: the nominal box or the body's own returns
+        for i, sample in enumerate(samples):
+            body = path_bodies[i] if path_bodies[i] is not None else bodies[i]
+            ahead_margin = float(np.max(body[:, 0])) - front
+            overlap = min(float(np.max(body[:, 1])), corridor) - max(float(np.min(body[:, 1])), -corridor)
+            heading_std = min(sample.vel_std_mps / max(sample.speed_mps, 1e-6), 0.5)
+            margin = min(ahead_margin, overlap) if sample.measured else None
+            sigma = math.sqrt(sample.pos_std_m ** 2 + cfg.path_edge_std_m ** 2
+                              + (0.5 * cfg.target_length_m * heading_std) ** 2)
+            source = None if margin is None else "box"
+            if margin is not None and proven[i] is not None and proven[i][0] > margin:
+                # each return within a face's spread of the body
+                margin, sigma, source = proven[i][0], cfg.path_edge_std_m, "returns"
+            margins.append(margin)
+            sigmas.append(sigma)
+            evidence.append(source)
+        path, initially_in = ([], None) if track.identity_ambiguous else path_occupancy(times, margins, sigmas, cfg)
     else:  # evaluator's point-geometry ablation; runtime always uses the body
         path = [] if track.identity_ambiguous else active_intervals(times, samples,
             lambda s: s.ahead_m > 0 and abs(s.lateral_m) <= corridor,
             lambda s: s.ahead_m < -hysteresis or abs(s.lateral_m) > corridor + hysteresis)
+        initially_in = bool(path and path[0][0] == 0)
     # A track first seen inside the corridor has no observed entry.
-    events[0].attributes['initial_in_ego_path'] = bool(path and path[0][0] == 0)
-    events += state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
-                           times, path, announce_initial=False)
+    events[0].attributes['initial_in_ego_path'] = bool(initially_in)
+    path_events = state_events(owner, subject, "EGO_PATH_ENTRY", "EGO_PATH_EXIT", PERCEPTION, "radar",
+                               times, path, announce_initial=False)
+    if body_based:
+        # The sample that made each change certain (the first definite one of the new state from the event on):
+        # its margin, sigma and evidence (the nominal box, or the body's own returns where they reach further).
+        k = cfg.path_occupancy_quantile
+        for event in path_events:
+            index = times.index(round(event.t_local, 4))
+            entering = event.type == "EGO_PATH_ENTRY"
+            decided = next((j for j in range(index, len(samples)) if margins[j] is not None
+                            and (margins[j] >= k * sigmas[j] if entering else margins[j] <= -k * sigmas[j])), None)
+            if decided is not None:
+                event.attributes["occupancy_evidence"] = evidence[decided]
+                event.attributes["occupancy_margin_m"] = round(float(margins[decided]), 3)
+                event.attributes["occupancy_sigma_m"] = round(float(sigmas[decided]), 3)
+    events += path_events
 
     closing = closing_spans(times, samples, cfg)
     events += state_events(owner, subject, "CLOSING_START", "CLOSING_END", PERCEPTION, "radar", times, closing)
@@ -954,7 +1196,7 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
             target_lateral.append(-math.sin(heading) * wvx + math.cos(heading) * wvy)
             angle = ((math.degrees(math.atan2(wvy, wvx) - heading) + 180) % 360 - 180
                      if sample.speed_mps >= 1.0 else None)
-            ahead.append(float(np.max(stable[:, 0])) > front)
+            ahead.append(float(np.max(stable[:, 0])) > front or (proven[index] is not None and proven[index][1] > 0.0))
         else:
             c, s = math.cos(own.heading), math.sin(own.heading)
             world_corners = corners @ np.array([[c, s], [-s, c]]) + np.array([own.x, own.y])
@@ -963,7 +1205,8 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
             angle = ((math.degrees(math.atan2(sample.vy_mps, sample.vx_mps) - anchor.heading) + 180) % 360 - 180
                      if sample.speed_mps >= 1.0 else None)
             ego_forward = c0 * (own.x - anchor.x) + s0 * (own.y - anchor.y) + front
-            ahead.append(float(np.max(stable[:, 0])) > ego_forward)
+            ahead.append(float(np.max(stable[:, 0])) > ego_forward
+                         or (proven[index] is not None and proven[index][1] > 0.0))
         stable_bodies.append(stable)
         stable_motions.append(RelativeMotion(motion.longitudinal_speed_mps, motion.lateral_speed_mps,
                                              angle, motion.t_cpa_s, motion.d_cpa_m, motion.known,
@@ -986,12 +1229,25 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
                                                       own.x, own.y))
     from_left, from_right = cut_in_spans(times, samples, stable_motions, cfg, body_gaps,
                                         target_lateral, sides, ahead, lane_toward, impact_from)
-    # A cut-in is confirmed only by the target's entry into the recorder's path during it: a lateral approach
-    # that never enters (it keeps its lane, or turns away) is no cut-in.  Decided offline on the whole track;
-    # the start keeps its own time.
+    # A cut-in is confirmed only by the target's entry into the recorder's path during it, an entry its own
+    # manoeuvre was needed for (``_manoeuvre_needed``: undone since the cut-in's start, the box would stay out of
+    # the corridor of the entry): a lateral approach that never enters (it keeps its lane, or turns away) is no
+    # cut-in, nor is an entry the recorder's own lane change alone made; two cars moving into one lane, the
+    # target arriving ahead, is one.  Decided offline on the whole track; the start keeps its own time.
     entries = [start for start, _ in path if start > 0]
-    from_left = [span for span in from_left if _entered(span, entries)]
-    from_right = [span for span in from_right if _entered(span, entries)]
+
+    def needed(span_start: int, entry: int) -> bool:
+        return _manoeuvre_needed(span_start, entry, times, supports, ego, road, corridor)
+
+    from_left = [span for span in from_left if _entered(span, entries, needed)]
+    from_right = [span for span in from_right if _entered(span, entries, needed)]
+    # What changed the occupancy (``_path_cause``): over the 0.5 s before it, or for an entry that confirms a
+    # cut-in over the whole manoeuvre (the target's motion since the cut-in's start was needed for it).
+    for event in path_events:
+        index = times.index(round(event.t_local, 4))
+        since = next((start for start, end in from_left + from_right
+                      if event.type == "EGO_PATH_ENTRY" and start <= index and (end is None or index <= end)), None)
+        event.attributes["cause"] = _path_cause(index, times, supports, ego, road, corridor, since)
     events += state_events(owner, subject, "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_LEFT_END",
                            PERCEPTION, "radar", times, from_left)
     events += state_events(owner, subject, "CUT_IN_FROM_RIGHT_START", "CUT_IN_FROM_RIGHT_END",
@@ -1010,7 +1266,17 @@ def track_events(owner: str, track: LocalTrack, recording_end: float, cfg: Seman
     leader_spans = path + from_left + from_right
     leader = [any(a <= i and (b is None or i <= b) for a, b in leader_spans) for i in range(len(samples))]
     track.leader_spans = [(times[a], None if b is None else times[b]) for a, b in leader_spans]
-    assessments = _critical_assessments(samples, ego, cfg, footprint, leader)
+    # On a mapped lane the target's predicted path follows the lane's curvature (``road.RoadFrame.lane_curvature``),
+    # as the recorder's follows its own yaw rate: a car keeping its lane through a bend beside the recorder is not
+    # extrapolated along a tangent into it.
+    track.lane_curvature = {}
+    if road is not None:
+        for sample in samples:
+            curvature = road.lane_curvature(sample.x_m, sample.y_m, sample.vx_mps, sample.vy_mps)
+            if curvature is not None:
+                track.lane_curvature[round(sample.t_local, 4)] = curvature
+    assessments = _critical_assessments([track.conflict_sample(sample) for sample in samples], ego, cfg, footprint,
+                                        leader)
     # A collision course that only the target's motion across its own lane creates needs that manoeuvre
     # confirmed: the target enters the recorder's path (now or later) or strikes it (a contact of this track,
     # still closing in over ``STRIKE_CLOSING_WINDOW_S`` before it).  Otherwise the null hypothesis holds, a car
@@ -1302,7 +1568,8 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         # The recorder's own collision callbacks (t_local, impulse): the uncertainty-aware tracker widens the
         # prediction of a touching body by the velocity jump they imply.
         impacts = [(float(c["timestamp"]) - clock_origin, float(c.get("impulse", 0.0))) for c in collisions]
-        tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats, impacts)
+        tracks = build_local_tracks(streams, ego, clock_origin, cfg.tracking, footprint, radar_stats, impacts,
+                                    lane_headings=None if road is None else road.lane_headings)
 
     semantics = cfg.semantics
     mark_occlusions(tracks, ego, footprint, semantics)

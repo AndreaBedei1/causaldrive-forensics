@@ -5,7 +5,7 @@ the recorder's lane on a bend.  Synthetic tracks; the curved cases use a synthet
 import math
 import unittest
 
-from src.cdf.common.opendrive import LaneSample
+from src.cdf.common.opendrive import LanePiece, LaneSample
 from src.cdf.reconstruction.config import SemanticsConfig
 from src.cdf.reconstruction.local import track_events
 from src.cdf.reconstruction.road import RoadFrame, RoadLanes
@@ -106,10 +106,21 @@ class StraightRoadTests(unittest.TestCase):
         self.assertIsNotNone(first(events, "EGO_PATH_ENTRY"))
 
 
+def pieces(lines):
+    """Lane pieces (one road section, lanes -1, -2, ...) from centre polylines in the direction of travel."""
+    out = []
+    for number, points in enumerate(lines, 1):
+        heads = [math.atan2(b[1] - a[1], b[0] - a[0]) for a, b in zip(points, points[1:])]
+        out.append(LanePiece(("road", 0, -number), tuple(points), tuple(heads + heads[-1:]),
+                             tuple(LANE for _ in points), "-1"))
+    return out
+
+
 def three_lanes():
     """A straight three-lane road along +x: lane centres at y = -3.5, 0 (the recorder's) and +3.5."""
+    lines = [[(float(x), y) for x in range(-60, 261)] for y in (-LANE, 0.0, LANE)]
     return RoadLanes("straight", [LaneSample(x, y, 0.0, LANE, 2.0) for y in (-LANE, 0.0, LANE)
-                                  for x in range(-60, 260, 2)])
+                                  for x in range(-60, 260, 2)], pieces(lines))
 
 
 class LaneKeepingNullHypothesisTests(unittest.TestCase):
@@ -165,13 +176,18 @@ class LaneKeepingNullHypothesisTests(unittest.TestCase):
 
 def bend():
     """Two lanes of a bend of radius 60 m around (0, 60): lane centres 60 m and 63.5 m from the centre."""
-    lanes = []
+    lanes, lines = [], []
     for radius in (RADIUS, RADIUS + LANE):
+        line = []
         for k in range(160):
             a = -math.pi / 2 + (k - 20) * 2.0 / RADIUS
             lanes.append(LaneSample(radius * math.cos(a), RADIUS + radius * math.sin(a),
                                     math.degrees(a + math.pi / 2), LANE, 2.5))
-    return RoadLanes("bend", lanes)
+        for k in range(320):
+            a = -math.pi / 2 + (k - 40) * 1.0 / RADIUS
+            line.append((radius * math.cos(a), RADIUS + radius * math.sin(a)))
+        lines.append(line)
+    return RoadLanes("bend", lanes, pieces(lines))
 
 
 def on_bend(radius, s, speed=SPEED, lateral_speed=0.0):
