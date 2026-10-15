@@ -521,7 +521,8 @@ def backward_test(old: Sequence[CommonTrack], new: Sequence[CommonTrack], cfg: R
 def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset, Dict[str, Any]],
                         cfg: ReconstructionConfig, rel: RelativePose,
                         links: Optional[Sequence[PairEvidence]] = None) -> Tuple[List[List[CommonTrack]], List[Dict[str, Any]]]:
-    """Join an earlier entity to a later strongly identified one when the backward test singles it out."""
+    """Join an earlier entity to a later strongly identified one when the backward test singles it out, and the
+    earlier one ended with no other observed road user within confusion distance (``confusable_neighbours``)."""
     fusion = cfg.fusion
     gate = chi2_4dof(fusion.anonymous_gate_probability)
     null = fusion.retrospective_new_target_density
@@ -575,19 +576,28 @@ def retrospective_links(groups: List[List[CommonTrack]], cannot: Dict[frozenset,
             # The later entity may also continue ANOTHER earlier one: every earlier entity that passes the backward
             # test into it competes too (one-to-one, as two possible predecessors of a stitch).
             start_j = dict(starts)[j]
-            rivals = []
+            rivals, rival_records = [], []
             for k, end_k in ends:
                 if k in (i, j) or not (0.0 < start_j - end_k <= horizon) or not compatible(groups[k], groups[j]):
                     continue
                 other = backward_test(groups[k], groups[j], cfg, rel)
                 if other is not None and other["chi2"] <= gate:
                     rivals.append(other["density"] / null)
+                    rival_records.append({"earlier": [t.name for t in groups[k]], "chi2": other["chi2"],
+                                          "ratio": round(other["density"] / null, 3)})
             posterior = min(ratio / total, ratio / (1.0 + ratio + sum(rivals)))
+            everyone = [t for g in groups for t in g]
+            crowd = confusable_neighbours(old, end, everyone, cfg, rel, [t.name for t in groups[j]])
             record = {"earlier": [t.name for t in old], "later": [t.name for t in groups[j]],
-                      "posterior": round(posterior, 4), "candidates": len(candidates),
-                      "rival_predecessors": len(rivals), **{k: test[k] for k in
+                      "posterior": round(posterior, 4), "candidates": len(candidates), "ratio": round(ratio, 3),
+                      "rival_predecessors": len(rivals), "rivals": rival_records, **{k: test[k] for k in
                       ("gap_s", "chi2", "position_sigma_m", "velocity_sigma_mps", "t_old", "t_new")}}
-            if posterior >= fusion.retrospective_min_posterior:
+            if crowd:
+                record["resolved"] = False
+                record["reason"] = ("UNRESOLVED: when it was last measured, {0} was within two car widths of it"
+                                    .format(", ".join(crowd)))
+                decisions.append(record)
+            elif posterior >= fusion.retrospective_min_posterior:
                 proposals.append((posterior, i, j, record))
             else:
                 record["resolved"] = False
@@ -686,17 +696,27 @@ def fuse_corrected(locals_: Sequence[Any], alignment: Any, associations: List[An
                 first, second = (a, b) if (a.start, a.name) <= (b.start, b.name) else (b, a)
                 item = stitch_corrected(first, second, cfg)
                 if item is not None and item.accepted:
-                    # A stitch is a hypothesis against a new road user: the density of the miss under the tracker's
-                    # own motion model across the gap (``backward_test``) over the new-target density; resolved
-                    # only at the minimum posterior.  A long gap or a large miss makes it UNRESOLVED, never easier.
+                    # A stitch is a hypothesis against a new road user AND against every other observed road user
+                    # that could have reached that place (``rival_density``: in dense traffic the re-acquired track
+                    # is as likely another known car): the density of the miss under the tracker's own motion
+                    # model across the gap over the sum of the alternatives; resolved only at the minimum
+                    # posterior.  A long gap, a large miss or a rival nearby makes it UNRESOLVED, never easier.
                     density = stitch_density(first, second, cfg)
-                    ratio = density / cfg.fusion.retrospective_new_target_density
-                    posterior = ratio / (1.0 + ratio)
+                    rivals, rival_names = rival_density(first, second, view.tracks, cfg, rel)
+                    posterior = density / max(density + cfg.fusion.retrospective_new_target_density + rivals, 1e-300)
                     item.posterior = round(posterior, 4)  # type: ignore[attr-defined]
-                    if posterior < cfg.fusion.retrospective_min_posterior:
+                    end = max((s.t_global for s in first.samples if s.measured), default=first.end)
+                    crowd = confusable_neighbours([first], end, view.tracks, cfg, rel, [second.name])
+                    if crowd:
                         item.accepted = False
+                        item.refused = ("UNRESOLVED: when {0} was last measured, {1} was within two car widths of it: "
+                                        "across the {2:.2f} s gap nothing tells which came back".format(
+                                            first.name, ", ".join(crowd), item.gap_s or 0.0))
+                    elif posterior < cfg.fusion.retrospective_min_posterior:
+                        item.accepted = False
+                        against = "a new road user" + (" or {0}".format(", ".join(rival_names)) if rival_names else "")
                         item.refused = ("UNRESOLVED: across the {0:.2f} s gap the re-acquisition is not singled out "
-                                        "against a new road user (posterior {1:.3f})".format(item.gap_s or 0.0, posterior))
+                                        "against {1} (posterior {2:.3f})".format(item.gap_s or 0.0, against, posterior))
             if item is not None:
                 evidence.append(item)
     refuse_ambiguous_corrected(evidence, by_name, cfg)
@@ -991,27 +1011,123 @@ def entity_timeline(group: Sequence[CommonTrack], joins: Sequence[PairEvidence],
             "first_hazard_relevant": min(hazards) if hazards else None}
 
 
-def stitch_density(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig) -> float:
+def stitch_density(first: CommonTrack, second: CommonTrack, cfg: ReconstructionConfig,
+                   pose_var: float = 0.0) -> float:
     """Gaussian density (1/m^2 per (m/s)^2) of a re-acquisition under the stitch test's own model
     (``anonymous.stitch_evidence``: centre carried across the gap at constant velocity, white acceleration
     ``tracking.acceleration_std_mps2`` over the gap, the two centre estimates' covariances; velocity difference
     against both uncertainties plus the acceleration over the gap), on the measurement uncertainty only (one
-    recorder's pose bias is common to both sides).  A long gap spreads it: the density falls."""
+    recorder's pose bias is common to both sides; ``pose_var``: the relative pose variance per axis when the two
+    tracks are of different recorders).  A long gap spreads it: the density falls.  ``first`` may still be
+    observed when ``second`` starts: its last measured state up to then is carried over the remaining gap."""
     a, b = corrected(first, 0.0, cfg), corrected(second, 0.0, cfg)
-    last = next((s for s in reversed(a.samples) if s.measured), None)
     nxt = next((s for s in b.samples if s.measured), None)
-    if last is None or nxt is None:
+    if nxt is None:
+        return 0.0
+    last = next((s for s in reversed(a.samples) if s.measured and s.t_global <= nxt.t_global + 1e-6), None)
+    if last is None:
         return 0.0
     gap = nxt.t_global - last.t_global
-    if gap <= 0.0:
+    if gap < 0.0:
         return 0.0
     ca, pa = _centre_estimate(a.recorder, last, _heading([last], cfg), cfg)
     cb, pb = _centre_estimate(b.recorder, nxt, _heading([nxt], cfg), cfg)
     sigma_a = cfg.tracking.acceleration_std_mps2
-    cov = pa + pb + np.eye(2) * ((sigma_a * gap ** 2 / 2.0) ** 2 + (last.vel_std * gap) ** 2)
+    cov = pa + pb + np.eye(2) * ((sigma_a * gap ** 2 / 2.0) ** 2 + (last.vel_std * gap) ** 2 + pose_var)
     miss = cb - (ca + last.velocity * gap)
     var_v = _velocity_sigma(cfg, nxt.vel_std, last.vel_std) ** 2 + (sigma_a * gap) ** 2
     dv = nxt.velocity - last.velocity
     pos = math.exp(-0.5 * float(miss @ np.linalg.solve(cov, miss))) / (2.0 * math.pi * math.sqrt(max(np.linalg.det(cov), 1e-300)))
     vel = math.exp(-0.5 * float(dv @ dv) / var_v) / (2.0 * math.pi * var_v)
     return pos * vel
+
+
+def decisively_same_body(a: CommonTrack, b: CommonTrack, variance: float, cfg: ReconstructionConfig,
+                         rel: RelativePose) -> bool:
+    """Two observers' tracks are one body beyond doubt: they passed the one-box and velocity test at every instant
+    both measured it (at least two), and their relative uncertainty ``variance`` (m^2) separates bodies a car
+    width apart (3 sigma below ``semantics.target_width_m``): a neighbour abreast would have failed the test
+    there.  Weaker than an accepted pair (too few shared instants to merge on their own), enough to tell that
+    the other observer's track is no alternative body; with a relative uncertainty of a car width or more
+    (consumer-grade pose sources) it never holds."""
+    if a.recorder == b.recorder or 3.0 * math.sqrt(max(variance, 0.0)) >= cfg.semantics.target_width_m:
+        return False
+    strict = replace(cfg, fusion=replace(cfg.fusion, anonymous_min_shared_samples=2, anonymous_pass_fraction=1.0))
+    evidence = pair_corrected(a, b, strict, rel)
+    return evidence is not None and evidence.accepted
+
+
+def confusable_neighbours(own: Sequence[CommonTrack], t_end: float, tracks: Sequence[CommonTrack],
+                          cfg: ReconstructionConfig, rel: RelativePose,
+                          exclude: Sequence[str] = ()) -> List[str]:
+    """Other observed road users a re-acquisition could not be told apart from: tracks (any observer, not in
+    ``own`` nor ``exclude``, not ``own``'s body seen by another observer -- an accepted pair or
+    ``decisively_same_body``) measured within a sweep of ``t_end``
+    -- the predecessor's last measured instant -- whose point lies within two car widths
+    (``semantics.target_width_m``) plus 3 sigma of the two observations' relative uncertainty of ``own``'s point.
+    A car abreast in the next lane (3.5 m) is such a neighbour: across a gap, where each radar point may sit up
+    to a body half-width off its centre (the median of the visible faces) and the declared covariances do not
+    cover that bias, nothing singles out which of the two came back."""
+    last = None
+    for track in own:
+        for s in track.samples:
+            if s.measured and abs(s.t_global - t_end) < 1e-6:
+                last = (track, s)
+    if last is None:
+        return []
+    mine, sample = last
+    names = {t.name for t in own} | set(exclude)
+    out = []
+    for other in tracks:
+        if other.name in names or other.start > t_end + 0.05 or other.end < t_end - 0.05:
+            continue
+        state = other.state_at(t_end, 0.051)
+        if state is None or not state.measured:
+            continue
+        variance = (sample.pos_std ** 2 + state.pos_std ** 2
+                    + (0.0 if other.recorder == mine.recorder else rel.variance(other.recorder, mine.recorder)))
+        if other.recorder != mine.recorder and _overlap(other, mine):
+            same = pair_corrected(mine, other, cfg, rel)
+            if same is not None and same.accepted or decisively_same_body(mine, other, variance, cfg, rel):
+                continue
+        reach = 2.0 * cfg.semantics.target_width_m + 3.0 * math.sqrt(max(variance, 0.0))
+        if float(np.hypot(*(state.point - sample.point))) <= reach:
+            out.append(other.name)
+    return out
+
+
+def rival_density(first: CommonTrack, second: CommonTrack, tracks: Sequence[CommonTrack], cfg: ReconstructionConfig,
+                  rel: RelativePose) -> Tuple[float, List[str]]:
+    """The other observed road users that could equally be ``second``'s body: every track (any observer) other
+    than ``first`` measured within ``stitch_max_gap_s`` before ``second``'s first measurement or still then,
+    except tracks of ``second``'s observer measured with it (two simultaneous tracks of one observer are two
+    bodies) and tracks that are ``first``'s own body seen by another observer (the one-box and velocity test:
+    an accepted pair or ``decisively_same_body``).
+    Their re-acquisition densities (``stitch_density``, the relative pose variance added across observers) sum
+    into the alternative a stitch must beat besides a new road user.  Returns (sum, the rivals' names)."""
+    nxt = next((s for s in second.samples if s.measured), None)
+    if nxt is None:
+        return 0.0, []
+    total, names = 0.0, []
+    for other in tracks:
+        if other.name in (first.name, second.name) or other.start > nxt.t_global + 1e-6:
+            continue
+        if other.end < nxt.t_global - cfg.fusion.stitch_max_gap_s - 1e-6:
+            continue
+        if other.recorder == second.recorder and _overlap(other, second):
+            continue
+        if other.recorder != first.recorder and _overlap(other, first):
+            same = pair_corrected(first, other, cfg, rel)
+            last = max((s for s in first.samples if s.measured), key=lambda s: s.t_global, default=None)
+            state = other.state_at(last.t_global, 0.051) if last is not None else None
+            close = (None if state is None else last.pos_std ** 2 + state.pos_std ** 2
+                     + rel.variance(other.recorder, first.recorder))
+            if (same is not None and same.accepted
+                    or close is not None and decisively_same_body(first, other, close, cfg, rel)):
+                continue
+        variance = 0.0 if other.recorder == second.recorder else rel.variance(other.recorder, second.recorder)
+        density = stitch_density(other, second, cfg, variance)
+        if density > 0.0:
+            total += density
+            names.append(other.name)
+    return total, names

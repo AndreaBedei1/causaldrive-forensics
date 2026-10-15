@@ -50,6 +50,7 @@ import numpy as np
 from .common_frame import (DEFAULT_BODY, CommonSample, CommonTrack, PoseSource, RecorderBody, WorldPose,
                            common_track, entry_distances, outline_distances)
 from .config import ReconstructionConfig
+from .tracking import _transition, kf_predict, kf_update
 from .models import Alignment, Association, GraphClock
 
 ASSOCIATED = "ASSOCIATED"
@@ -712,8 +713,79 @@ def exclusive_recorder_links(view: CommonView, links: Sequence["RecorderLink"], 
 # 4. The fused state of an entity
 # --------------------------------------------------------------------------
 
+def smooth_entity_states(states: List[Dict[str, Any]], cfg: ReconstructionConfig,
+                         boundaries: Sequence[float] = ()) -> List[Dict[str, Any]]:
+    """The fused states of one road user smoothed over time (forward Kalman filter, backward Rauch-Tung-Striebel;
+    constant velocity, ``tracking.acceleration_std_mps2``).
+
+    Each instant's fused position (box fit, or covariance intersection of the observers' centre estimates: two
+    estimators with different reference points) and velocity are a measurement with their own uncertainty; an
+    instant no observer measured (only predicted tracks) is a prediction step, never a measurement.  Without
+    this, a change of estimator from one instant to the next moves the body by a metre or more (S15).  The
+    smoother does not run across a gap longer than ``tracking.max_track_gap_s``, across the observers' own
+    impacts (``boundaries``, global time: their poses and Doppler compensation jump), nor across a velocity
+    change beyond 3 sigma of the two velocities and the process noise (the road user's own impact, which the
+    local tracker follows sweep by sweep).  Positions, velocities and their uncertainties are replaced; the
+    measuring observers and the method stay as they were (``position`` = "smoothed")."""
+    if not states:
+        return states
+    tracking = cfg.tracking
+    accel = tracking.acceleration_std_mps2
+    times = [float(s["t_global"]) for s in states]
+    measured = [bool(s.get("measured_by")) for s in states]
+    breaks = {0}
+    for k in range(1, len(states)):
+        dt = times[k] - times[k - 1]
+        cut = dt > tracking.max_track_gap_s + 1e-9 or any(times[k - 1] < b <= times[k] for b in boundaries)
+        if not cut and measured[k] and measured[k - 1]:
+            dv = math.hypot(states[k]["vx"] - states[k - 1]["vx"], states[k]["vy"] - states[k - 1]["vy"])
+            spread = math.sqrt(states[k]["vel_std_mps"] ** 2 + states[k - 1]["vel_std_mps"] ** 2 + (accel * dt) ** 2)
+            cut = dv > 3.0 * spread
+        if cut:
+            breaks.add(k)
+    edges = sorted(breaks) + [len(states)]
+    out = [dict(s) for s in states]
+    H = np.eye(4)
+    for a, b in zip(edges, edges[1:]):
+        if not any(measured[a:b]):
+            continue  # nothing measured in this stretch: the predicted states stay as they are
+        # A diffuse start at the stretch's first instant (its first measurement carried back there): every
+        # measured instant then updates the state exactly once.
+        first = next(k for k in range(a, b) if measured[k])
+        s0, back = states[first], times[a] - times[first]
+        x = np.array([s0["x"] + s0["vx"] * back, s0["y"] + s0["vy"] * back, s0["vx"], s0["vy"]], dtype=float)
+        P = np.eye(4) * 25.0
+        filtered, predicted = [], []
+        for k in range(a, b):
+            if k > a:
+                x, P = kf_predict(x, P, times[k] - times[k - 1], accel)
+            predicted.append((x, P))
+            if measured[k]:
+                s = states[k]
+                z = np.array([s["x"], s["y"], s["vx"], s["vy"]], dtype=float)
+                R = np.diag([max(s["pos_std_m"], 0.05) ** 2] * 2 + [max(s["vel_std_mps"], 0.05) ** 2] * 2)
+                x, P = kf_update(x, P, z, H, R)
+            filtered.append((x, P))
+        smoothed = list(filtered)
+        for k in range(len(filtered) - 2, -1, -1):
+            F = _transition(times[a + k + 1] - times[a + k])
+            gain = filtered[k][1] @ F.T @ np.linalg.inv(predicted[k + 1][1])
+            xs = filtered[k][0] + gain @ (smoothed[k + 1][0] - predicted[k + 1][0])
+            Ps = filtered[k][1] + gain @ (smoothed[k + 1][1] - predicted[k + 1][1]) @ gain.T
+            smoothed[k] = (xs, Ps)
+        for k, (xs, Ps) in enumerate(smoothed):
+            row = out[a + k]
+            row.update({"x": round(float(xs[0]), 3), "y": round(float(xs[1]), 3),
+                        "vx": round(float(xs[2]), 3), "vy": round(float(xs[3]), 3),
+                        "pos_std_m": round(math.sqrt(max(float(np.max(np.linalg.eigvalsh(Ps[:2, :2]))), 0.0)), 3),
+                        "vel_std_mps": round(math.sqrt(max(float(np.trace(Ps[2:, 2:])) / 2.0, 0.0)), 3),
+                        "position": "smoothed"})
+    return out
+
+
 def entity_trajectory(group: Sequence[CommonTrack], cfg: ReconstructionConfig) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    """(fused states at ``entity_output_rate_hz``, footprint) of one entity."""
+    """(fused states at ``entity_output_rate_hz``, footprint) of one entity: per instant the observers' samples
+    fused (box fit or covariance intersection), then smoothed over time (``smooth_entity_states``)."""
     fusion, semantics = cfg.fusion, cfg.semantics
     step = 1.0 / fusion.entity_output_rate_hz
     start, end = min(t.start for t in group), max(t.end for t in group)
@@ -780,6 +852,8 @@ def entity_trajectory(group: Sequence[CommonTrack], cfg: ReconstructionConfig) -
 
     length = dimension(lengths, length_bounds, semantics.target_length_m, fusion.box_length_std_m)
     width = dimension(widths, width_bounds, semantics.target_width_m, fusion.box_width_std_m)
+    impacts = sorted({t.own_impact for t in group if getattr(t, "own_impact", None) is not None})
+    states = smooth_entity_states(states, cfg, impacts)
     return states, {"length_m": length["value_m"], "width_m": width["value_m"], "length": length, "width": width}
 
 
