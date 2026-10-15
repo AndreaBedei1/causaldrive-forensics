@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Menu for the manual review of the 22 canonical development runs: pick one, its interactive replay starts
+"""Menu for the manual review of the 23 canonical development runs: pick one, its interactive replay starts
 (scripts/replay_run.py, CARLA server on port 3000); when the replay window closes the menu returns.
 
     conda activate carla

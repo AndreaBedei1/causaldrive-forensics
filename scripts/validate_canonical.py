@@ -3,14 +3,22 @@
 
     python scripts/validate_canonical.py [--out docs/CANONICAL_VALIDATION.md]
 
-Checks the manifest (S01..S18, 22 runs, no gaps, no stray folders), then per run: reconstruction files present
+Checks the manifest (S01..S19, 23 runs, no gaps, no stray folders), then per run: reconstruction files present
 and finite (no NaN/Inf in any JSON), made with the current ``configs/reconstruction.yaml`` (the configuration
 recorded in ``global_graph.json``; anything else is a stale output), every recorder aligned, collisions reconstructed (evaluation), no wrong
 collision pairing, no wrong recorder link, no false merge, no global CRITICAL_TTC episode of a colliding pair
 after its contact while touching, replay loading (global clock, boxes, events) and the standard replay panels
 (the recorder's current state above its recent events, no '?', no PREDICTED, at most the panel line limit
-plus '... +N more', no repeated subject, no recent event lost unless the panel is truncated); the
-last two groups are the semantic anomalies.  Unresolved identities: tracks whose identity decision the
+plus '... +N more', no repeated subject, no recent event lost unless the panel is truncated) and the viewer's
+recorder panels (``recorder_panel``: at most ``MAX_STATE_LINES`` states plus '... +N more', the latest
+``MAX_EVENT_LINES`` events newest first and none dropped, no '?', UNKNOWN or PREDICTED); the
+last two groups are the semantic anomalies, with the semantic stability of every recorder's local trace (no
+reconstruction output needs ground truth for it): no EGO_PATH_ENTRY / EXIT of one subject undone within
+``OSCILLATION_S`` (three radar sweeps: no manoeuvre does that), no CUT_IN without the EGO_PATH_ENTRY of its
+subject that confirms it.  The privileged stability audit (``scripts/stability_audit.py``, ground truth through
+``evaluation/stability.json``) adds warnings: phantom tracks, track losses while the radar kept measuring the
+body (fragmentation), simultaneous duplicate tracks of one body, CUT_IN events without a true cut-in or true
+cut-ins not reported, and EGO_PATH oscillations per true road user (a failure).  Unresolved identities: tracks whose identity decision the
 reconstruction itself left UNRESOLVED (``unresolved_tracks``; no ground truth).  Ground truth is read only through the
 evaluation files.  Exit status 1 on any FAIL.
 """
@@ -29,7 +37,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.reconstruction.config import load_config  # noqa: E402
 from cdf.replay.model import ReplayRun  # noqa: E402
-from cdf.replay.presentation import EVENT, MAX_PANEL_LINES, MORE, standard_panel_lines  # noqa: E402
+from cdf.replay.presentation import (EVENT, MAX_EVENT_LINES, MAX_PANEL_LINES, MAX_STATE_LINES, MORE,  # noqa: E402
+                                     recorder_panel, standard_panel_lines)
 
 CANONICAL = {
     "S01": ["crash"], "S02": ["crash", "critical_before_cut_in"], "S03": ["crash"],
@@ -37,7 +46,10 @@ CANONICAL = {
     "S08": ["rolls_through"], "S09": ["near_simultaneous"], "S10": ["deflected_into_c"], "S11": ["consequential"],
     "S12": ["crash"], "S13": ["abreast", "platoon", "passing"], "S14": ["surrounded"], "S15": ["dense_platoon"],
     "S16": ["overtaking"], "S17": ["occlusion_reappearance"], "S18": ["collision_ambiguity"],
+    "S19": ["highway_curve"],
 }
+OSCILLATION_S = 0.15  # an EGO_PATH change undone within three 20 Hz radar sweeps
+SET_NAME = "S01..{0}".format(max(CANONICAL))
 
 
 def canonical_runs():
@@ -58,7 +70,7 @@ def manifest_problems():
     problems = []
     ids = sorted(p.name for p in (ROOT / "traces").iterdir() if p.is_dir())
     if ids != sorted(CANONICAL):
-        problems.append("scenario folders are not exactly S01..S18: {0}".format(ids))
+        problems.append("scenario folders are not exactly {0}: {1}".format(SET_NAME, ids))
     found = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "traces").glob("S*/run_*"))
     expected = sorted(p.relative_to(ROOT).as_posix() for p in canonical_runs())
     if found != expected:
@@ -66,7 +78,7 @@ def manifest_problems():
             sorted(set(found) - set(expected)), sorted(set(expected) - set(found))))
     configs = sorted(p.name.split("_")[0].upper() for p in (ROOT / "configs/scenarios").glob("*.yaml"))
     if configs != sorted(CANONICAL):
-        problems.append("scenario configs are not exactly S01..S18: {0}".format(configs))
+        problems.append("scenario configs are not exactly {0}: {1}".format(SET_NAME, configs))
     return problems
 
 
@@ -94,6 +106,68 @@ def unresolved_tracks(rec: Path) -> set:
         if not d.get("resolved"):
             out.update(d.get("earlier") or [])
     return out
+
+
+def semantic_stability(rec: Path) -> list:
+    """Problems of the recorders' local traces (reconstruction outputs only): an EGO_PATH_ENTRY / EXIT of one
+    subject undone within ``OSCILLATION_S``, a CUT_IN whose subject never enters the path during it."""
+    problems = []
+    for graph_path in sorted(rec.glob("*/local_graph.json")):
+        owner = graph_path.parent.name
+        nodes = json.loads(graph_path.read_text(encoding="utf-8"))["nodes"]
+        path = {}
+        for n in nodes:
+            if n["event_type"] in ("EGO_PATH_ENTRY", "EGO_PATH_EXIT"):
+                path.setdefault(n["subject_id"], []).append((n["t_local"], n["event_type"]))
+        for subject, events in path.items():
+            events.sort()
+            for (t0, e0), (t1, e1) in zip(events, events[1:]):
+                if e0 != e1 and t1 - t0 <= OSCILLATION_S + 1e-6:
+                    problems.append("{0}: EGO_PATH of {1} undone within {2:.2f} s at {3:.2f}".format(
+                        owner, subject, t1 - t0, t0))
+        for side in ("LEFT", "RIGHT"):
+            starts = sorted((n["t_local"], n["subject_id"]) for n in nodes if n["event_type"] == "CUT_IN_FROM_" + side + "_START")
+            ends = sorted((n["t_local"], n["subject_id"]) for n in nodes if n["event_type"] == "CUT_IN_FROM_" + side + "_END")
+            for start, subject in starts:
+                end = next((t for t, s in ends if s == subject and t >= start), None)
+                if not any(t >= start - 1e-6 and (end is None or t <= end + 1e-6) for t, e in path.get(subject, [])
+                           if e == "EGO_PATH_ENTRY"):
+                    problems.append("{0}: CUT_IN of {1} at {2:.2f} without its EGO_PATH_ENTRY".format(owner, subject, start))
+    return problems
+
+
+def stability_warnings(rec: Path, info: dict) -> tuple:
+    """(failures, warnings) of the privileged stability audit of this run (``evaluation/stability.json``, written by
+    ``scripts/stability_audit.py``; absent: nothing to report)."""
+    path = rec / "evaluation" / "stability.json"
+    if not path.exists():
+        info["stability"] = "-"
+        return [], ["no stability audit (evaluation/stability.json)"]
+    audit = json.loads(path.read_text(encoding="utf-8"))
+    fails, warns = [], []
+    oscillations = phantoms = fragmentation = duplicates = 0
+    for owner, recorder in sorted(audit.get("recorders", {}).items()):
+        tracks = recorder.get("tracks", {})
+        phantoms += len(tracks.get("phantoms", []))
+        fragmentation += sum(1 for loss in tracks.get("losses", []) if loss.get("kind") == "fragmentation")
+        duplicates += len(tracks.get("duplicates", []))
+        oscillations += sum(v.get("oscillations", 0) for v in (recorder.get("ego_path") or {}).values())
+    cut_in = audit.get("cut_in") or {}
+    info["stability"] = "{0}/{1}/{2}/{3}".format(oscillations, phantoms, fragmentation, duplicates)
+    info["cut_in"] = "{0}/{1}/{2}".format(cut_in.get("tp", 0), len(cut_in.get("fp", [])), len(cut_in.get("missed", [])))
+    if oscillations:
+        fails.append("{0} EGO_PATH oscillation(s) per true road user".format(oscillations))
+    if phantoms:
+        warns.append("{0} phantom track(s)".format(phantoms))
+    if fragmentation:
+        warns.append("{0} track loss(es) while the radar kept measuring the body".format(fragmentation))
+    if duplicates:
+        warns.append("{0} simultaneous duplicate track(s)".format(duplicates))
+    if cut_in.get("fp"):
+        warns.append("CUT_IN without a true cut-in: {0}".format(cut_in["fp"]))
+    if cut_in.get("missed"):
+        warns.append("true cut-in not reported: {0}".format(cut_in["missed"]))
+    return fails, warns
 
 
 def check_run(run: Path):
@@ -149,6 +223,13 @@ def check_run(run: Path):
         if late:
             fails.append("global CRITICAL_TTC of {0} after their contact".format(c["participants"]))
             info["semantic"] += 1
+    unstable = semantic_stability(rec)
+    if unstable:
+        fails.append("semantic instability: " + "; ".join(unstable[:4]) + ("; ..." if len(unstable) > 4 else ""))
+        info["semantic"] += len(unstable)
+    audit_fails, audit_warns = stability_warnings(rec, info)
+    fails += audit_fails
+    warns += audit_warns
     try:
         replay = ReplayRun.load(run)
     except Exception as exc:  # reported, never hidden
@@ -180,6 +261,16 @@ def check_run(run: Path):
             if (not lines or lines[-1][1] != MORE) and kinds.count(EVENT) != len(recent):
                 fails.append("a recent event hidden at t={0:.1f}".format(t))
                 info["semantic"] += 1
+            panel = recorder_panel(replay, p.participant_id, t)
+            texts = [text for text, _ in panel.states + panel.events]
+            ages = [float(text.split(" s ")[0]) for text, _ in panel.events]
+            if (len(panel.states) > MAX_STATE_LINES + 1
+                    or (len(panel.states) == MAX_STATE_LINES + 1 and panel.states[-1][1] != MORE)
+                    or len(panel.events) != min(panel.events_total, MAX_EVENT_LINES)
+                    or any(b > a + 1e-9 for a, b in zip(ages, ages[1:]))
+                    or any("?" in x or "UNKNOWN" in x or "PREDICTED" in x for x in texts)):
+                fails.append("recorder panel rule broken at t={0:.1f} ({1})".format(t, p.participant_id))
+                info["semantic"] += 1
         if fails:
             break
     return fails, warns, info
@@ -191,23 +282,25 @@ def main() -> int:
     args = parser.parse_args()
     lines = ["# Canonical development set: automatic validation", ""]
     problems = manifest_problems()
-    lines.append("Manifest: " + ("OK (S01..S18, {0} runs)".format(len(canonical_runs())) if not problems else "FAIL: " + "; ".join(problems)))
+    lines.append("Manifest: " + ("OK ({0}, {1} runs)".format(SET_NAME, len(canonical_runs())) if not problems else "FAIL: " + "; ".join(problems)))
     lines += ["", "Reconstruction: the single reconstruction method, `configs/reconstruction.yaml` (configuration digest "
               "{0}); every run is checked to carry exactly this configuration.".format(config_digest(current_config()))]
-    lines += ["", "| run | status | collisions | recorder/identity decisions | merges (correct/false/missed) | unresolved identities | semantic anomalies | boxes (max at once) | events | warnings / failures |",
-              "|---|---|---|---|---|--:|--:|--:|--:|---|"]
+    lines += ["", "Stability (privileged audit, `evaluation/stability.json`): EGO_PATH oscillations / phantom tracks / "
+              "fragmentation losses / duplicate tracks; CUT_IN: true positives / without a true cut-in / missed.", "",
+              "| run | status | collisions | recorder/identity decisions | merges (correct/false/missed) | unresolved identities | semantic anomalies | stability (osc/phantom/frag/dup) | CUT_IN (TP/FP/missed) | boxes (max at once) | events | warnings / failures |",
+              "|---|---|---|---|---|--:|--:|---|---|--:|--:|---|"]
     failed = bool(problems)
     for run in canonical_runs():
         fails, warns, info = check_run(run)
         status = "FAIL" if fails else ("WARN" if warns else "PASS")
         failed |= bool(fails)
         merges = info.get("merges", {})
-        lines.append("| {0} | {1} | {2} | {3} | {4}/{5}/{6} | {10} | {11} | {7} | {8} | {9} |".format(
+        lines.append("| {0} | {1} | {2} | {3} | {4}/{5}/{6} | {10} | {11} | {12} | {13} | {7} | {8} | {9} |".format(
             run.relative_to(ROOT / "traces").as_posix(), status, info.get("collisions", "-"),
             ", ".join("{0} {1}".format(k, v) for k, v in sorted(info.get("links", {}).items())),
             merges.get("correct", 0), merges.get("false", 0), merges.get("missed", 0), info.get("boxes_max", "-"),
             info.get("events", "-"), "; ".join(["FAIL: " + f for f in fails] + ["WARN: " + w for w in warns]) or "-",
-            info.get("unresolved", "-"), info.get("semantic", "-")))
+            info.get("unresolved", "-"), info.get("semantic", "-"), info.get("stability", "-"), info.get("cut_in", "-")))
     text = "\n".join(lines) + "\n"
     if args.out:
         args.out.write_text(text, encoding="utf-8")
