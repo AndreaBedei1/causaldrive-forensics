@@ -91,7 +91,7 @@ conda activate carla
 python scripts\start_carla.py
 ```
 
-Then, in a second terminal, the review menu of the 22 canonical runs (pick a number, the replay opens; close it
+Then, in a second terminal, the review menu of the 23 canonical runs (pick a number, the replay opens; close it
 to come back; `q` quits).  The .bat uses the server on port 2000; with the project's server pass `--port 3000`:
 
 ```bat
@@ -123,7 +123,7 @@ python scripts\reconstruct_run.py traces\S11\run_0_consequential --evaluate
 python -c "import sys; sys.path[:0]=['scripts','src']; import hardening_refresh as h; h.refresh('traces/S11/run_0_consequential')"
 python scripts\validate_canonical.py --out docs\CANONICAL_VALIDATION.md
 
-:: replay one run, or pick one from the review menu of the 22 canonical runs
+:: replay one run, or pick one from the review menu of the 23 canonical runs
 python scripts\replay_run.py traces\S14\run_0_surrounded
 scripts\review_canonical_runs.bat
 
@@ -131,7 +131,7 @@ scripts\review_canonical_runs.bat
 python -m pytest -q
 ```
 
-## Canonical scenarios (development set: 18 scenarios, 22 runs)
+## Canonical scenarios (development set: 19 scenarios, 23 runs)
 
 | id | scenario | runs | purpose |
 |---|---|---|---|
@@ -153,6 +153,7 @@ python -m pytest -q
 | S16 | dense_overtaking | overtaking | identities through passes, sideswipe while overtaking |
 | S17 | occlusion_reappearance | occlusion_reappearance | identity across an occlusion up to a collision (nobody behind) |
 | S18 | collision_ambiguity | collision_ambiguity | several similar cars around a rear-end contact, on the straight after a bend |
+| S19 | highway_curve | highway_curve | four-lane motorway curve (Town04, radius about 185 m) with side-by-side traffic; a cut-in on the curve ends in a rear-end contact |
 
 Run folders: `traces\<id>\run_0_<run>\` with the raw recordings (`vehicles\`), the privileged
 `ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated from the raw recordings
@@ -169,7 +170,8 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | N / P | next / previous reconstructed event |
 | 1-4 | speed 0.25 / 0.5 / 1 / 2x |
 | C | camera: overview -> follow each recorder vehicle in turn -> free -> overview |
-| TAB | next recorder (follow camera) |
+| TAB | next recorder (follow camera); its panel is the full one |
+| PgUp / PgDn | scroll the full panel's recent events |
 | T | radar tracks on / off |
 | G | ghost boxes or dots for unfused tracks |
 | H | help |
@@ -178,12 +180,15 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
 The upper-left panel shows the run, its time, the replay state, the camera and the last and next event.
-The panel of each recorder on the right shows what that recorder perceives and does now: its current perceived
-state (`ego: MOVING, BRAKE`, then one line per local track holding an active state, named after the fusion's
-identity, e.g. `track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road users it sees, then
-the semantic events it generated in the last second (`» CRITICAL_TTC_START → B`).  At most 8 lines, then
-`... +N more`; when a panel is full, its own state, the alerts (CRITICAL_TTC, CUT_IN) and the recent events are
-kept first.  UNKNOWN states and the measured/predicted provenance stay in the reconstruction files.  A coloured
+The panel of each recorder on the right shows what that recorder perceives and does, in two sections.  Its
+CURRENT state: its own (`ego: MOVING, BRAKE, INDICATOR_LEFT`; the turn indicators from its own light log, the
+replayed vehicle's indicator blinking too, absent when the recording has no light log), one line per local track holding an active state, named after
+the fusion's identity (`track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road users it sees
+-- at most 8 lines, then `... +N more`, its own state and the alerts (CRITICAL_TTC, CUT_IN) kept first.  Then
+its RECENT EVENTS, newest first, each with its age and the global subject, and for a path entry or exit what
+changed the occupancy (`-0.4 s  EGO_PATH_ENTRY → C (by own lateral motion)`): the 15 latest for the selected
+recorder (TAB; PgUp / PgDn scroll them when the window is short), the 3 latest for the others.  UNKNOWN states
+and the measured/predicted provenance stay in the reconstruction files.  A coloured
 line joins a recorder to a vehicle it holds CRITICAL_TTC or CUT_IN about, and to the nearest vehicle in its
 path, labelled with their body-to-body clearance (`1.4 m`).
 

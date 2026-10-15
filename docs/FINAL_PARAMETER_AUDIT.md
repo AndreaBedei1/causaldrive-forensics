@@ -42,7 +42,12 @@ present tracker gates.
 | `min_height_m` / `max_height_m` | 0.3 / 2.5 | PHYSICAL | object-height returns | - |
 | `max_track_gap_s` / `min_track_frames` | 0.5 s / 5 | AUDITED-FIXED | smoother segment boundary and fewest measurements of a smoothed segment; identity checks across short gaps | - |
 | `smoothing_innovation_sigma` | 3.0 | STATISTICAL | RTS smoother outlier rejection | - |
-| `min_slowdown_returns` | 3 | AUDITED-FIXED | slowdown gate support (a target that stops abruptly) | - |
+| `max_braking_mps2` | 30 m/s^2 | PHYSICAL | a confirmed track left without returns by its gates takes the returns on its own body whose Doppler is that of the predicted velocity slowed by at most this x dt (manoeuvre gate), and the update carries that braking as process noise | development: S06 C braking 22 m/s^2 followed; a moving track never "stops" on static scenery in one sweep (the S11 phantom of the earlier unbounded slowdown gate) |
+| impact gate | moving returns only; at least max(2, half the median count of the last 5 updates) | rule / AUDITED-FIXED | a target whose velocity changed in a collision (its returns on its own body region, inside its position gate, outside every other track's gate, still moving) keeps its track; the measured line-of-sight change is an impulse (velocity variance in every direction) and an RTS boundary | unit tests (`test_semantic_evidence`); S04 b_rear_first: A follows B through its rebound off C (13.8 -> -3.4 m/s in one sweep); static returns never qualify (the road surface ahead of a moving recorder is new every sweep) |
+| `contact_clearance_m` | 1.0 m | PHYSICAL | the recorder's own impact kick applies only to a body whose near surface may touch it (this + 3 sigma) | - |
+| `lane_heading_std_deg` | 10 deg | PHYSICAL (map prior) | body orientation and initial velocity of a new track from its lane's direction | development: S07 young-track loss, S13/S15 abreast births |
+| scenery by history | `max_track_gap_s` | rule | a stopped track takes no static return of a place that returned static echoes more than `max_track_gap_s` before it stopped (a stopping body brings its echoes with it) | development: S06/S09 stopped cars kept |
+| entanglement split (code) | contact distance 0.5 x (length + width) | AUDITED-FIXED | a track ended within this of a track that competed for its returns is split from it at the evidence (two bodies exchanged returns at a contact) | development: S06 C wrong link removed; S13 passing not split |
 | `identity_body_width_m` | 2.5 | AUDITED-FIXED | identity segmentation of a track | - |
 
 ## Identity and collision association (`fusion.*`)
@@ -72,19 +77,36 @@ present tracker gates.
 | retrospective anchor | a cross-observer link compared on >= `anonymous_min_shared_samples` | STATISTICAL (evidence) | a later entity anchors a backward resolution only with a full-strength cross-observer link; every other earlier entity passing the backward test competes in the posterior | development: removed a false merge in S14 |
 | identity inheritance | same pair test as a cross-observer link, one recorder only | STATISTICAL (evidence) | an unnamed track inherits recorder X when it is the same body (`pair_corrected`; a short overlap must pass every instant) as another observer's track already named X, and as no track named another recorder | development: S11 B's post-contact fragment of C named C (correct per ground truth); 0 false merges, 0 wrong links on the canonical runs |
 | post-impact velocity | not compared | PHYSICAL | after an observer's own collision its velocity estimates carry the impulse: the pair test then compares the box only | unit test (`test_identity_inheritance`) |
+| crowd / rival exclusion (`decisively_same_body`) | every shared instant passes (at least 2); 3 sigma of the relative uncertainty below `semantics.target_width_m` | STATISTICAL (evidence) | another observer's track that agreed with a re-acquired body at every shared instant, under an uncertainty that separates bodies a car width apart, is that body: neither a confusable neighbour nor a rival of the stitch (with consumer-grade pose sources it never applies) | development: S19 E's re-acquisitions by A stitched (missed merges 14 -> 11), 0 false merges on the canonical runs |
+| entity smoother | `tracking.acceleration_std_mps2`, `tracking.max_track_gap_s` | rule | the fused per-instant states of a road user (box fit or covariance intersection) are RTS-smoothed; no smoothing across gaps, the observers' own impacts, or a velocity change beyond 3 sigma (an impact of the road user) | development: implied accelerations of S15 fused trajectories 100-1190 -> mostly below 35 m/s^2; the steps left are the observers' own impacts (their recorded pose lags the jolt) |
 
-## Road model (`reconstruction/road.py`)
+## Road model (`reconstruction/road.py`, `common/opendrive.py`)
 
 | parameter | value | category | role | sensitivity / evidence |
 |---|--:|---|---|---|
-| map fit | 0.8 | STATISTICAL | the map is the one whose driving lanes contain 80 % of the recorder's own positions; else no road model (kinematic CUT_IN) | - |
-| lane search radius | 4.0 m | AUDITED-FIXED | lane stretches considered around a point (a lane is 3-4 m wide) | - |
-| `cut_in_lateral_speed_mps` (reused) | 0.3 | AUDITED-FIXED | the target must leave its own lane toward the recorder at least this fast | development: lane sampling every ~2 m gives <= 0.2 m/s heading error on a 60 m bend |
-| path corridor step / reach (code constants `PATH_STEP_M`, `PATH_AHEAD_M`, `PATH_BEHIND_M`) | 2 m / 80 m / 10 m | AUDITED-FIXED | the recorder's lane-following path (EGO_PATH and CUT_IN in path coordinates on bends); at a junction the branch nearest the recorder's own later position (its recorded future, never ground truth) | unit tests on a synthetic 60 m bend (`test_leader_cut_in_rules`) |
-| lane continuation (`CONTINUATION_M`, `CONTINUATION_DEG`) | 3 m / 35 deg | AUDITED-FIXED | two lane stretches continue one another when the end of one is within 3 m and 35 deg of the start of the next | - |
-| CUT_IN confirmation | a later EGO_PATH_ENTRY | rule | no entry into the recorder's path after the lateral approach: no CUT_IN | unit tests; canonical cut-in audit (`docs/CANONICAL_VALIDATION.md`) |
+| map fit (`MAP_MIN_FIT`) | 0.8 | STATISTICAL | the map is the one whose driving lanes contain 80 % of the recorder's own positions with a consistent heading; else no road model (kinematic CUT_IN, straight corridor) | - |
+| lane pieces | 1 m spacing; pieces narrower than 0.5 m dropped | AUDITED-FIXED | lane centre lines of the OpenDRIVE lanes (CARLA frame) | Town05: 486 pieces, every one with a successor |
+| lane graph (`CONTACT_M`, `CONTINUATION_DEG`) | 0.3 m / 30 deg | AUDITED-FIXED | a piece continues another when their end points touch (OpenDRIVE contact points) and their headings agree | unit tests (`test_path_occupancy`) |
+| map matching (`MATCH_RADIUS_M`, `MATCH_EDGE_MARGIN_M`, `MATCH_HEADING_DEG`, `MATCH_HEADING_STD_DEG`) | 6 m / 1 m / 45 deg / 20 deg | AUDITED-FIXED | lane candidates of each recorder position and their emission cost (offset over half the lane width, heading misfit) | - |
+| transition costs (`LANE_CHANGE_COST`, `JUMP_COST`) | 3 / 20 emission units | AUDITED-FIXED | the Viterbi sequence over the whole trajectory: staying in a lane or following its successor is free, a neighbouring lane costs 3 (no flip-flop on the lane line), an unconnected jump 20 | canonical audit: no reference-path flip-flop |
+| reference path (`PATH_AHEAD_M`, `PATH_BEHIND_M`) | 80 m / 10 m | AUDITED-FIXED | one path per lane episode (`ReferencePath`), traced ahead along successors; at a branch the one the recorder's own later positions take (its recorded future, never ground truth) | unit tests (junction branch, lane change) |
+| lane direction search (`LANE_SEARCH_M`) | 4 m | AUDITED-FIXED | lane stretches considered for the direction of travel at a point (the target's lane-relative velocity, the lane-keeping null hypothesis) | - |
+| `cut_in_lateral_speed_mps` (reused) | 0.3 | AUDITED-FIXED | the target must leave its own lane toward the recorder at least this fast | - |
+| CUT_IN confirmation | an EGO_PATH_ENTRY the target's own manoeuvre was needed for | rule | the target's body at the cut-in's start, against the corridor of the entry, would not overlap it; START at the onset of the uninterrupted lateral approach | canonical audit: 9 of the 11 true cut-ins found (the 2 left: a roundabout merge, S07, and a sideswipe level with the front, S14), 0 false, onset errors within 0.3 s (`docs/STABILITY_AUDIT.md`) |
 | leader | in the path, or in a confirmed cut-in | rule | UNSAFE_FORWARD_GAP only for a leader (abreast or adjacent-lane cars never) | unit tests; canonical CRITICAL_TTC audit |
-| lane-keeping null hypothesis (`LANE_TRAVEL_DEG`) | 30 deg | rule / AUDITED-FIXED | a PREDICTED_OVERLAP that only the target's velocity across its own lane creates (target within 30 deg of its lane's direction) needs a confirmation: path entry (now or later) or a strike (a contact of the track, closing in over `STRIKE_CLOSING_WINDOW_S` = 0.2 s before it, or the track lost while closing within `approach_window_s` before a contact); else the course is predicted at its velocity along the lane | development: removes the passing-car episodes of S15 (A on G, J) and S18 (B on E, F); every other canonical CRITICAL_TTC start unchanged |
+| lane-keeping null hypothesis (`LANE_TRAVEL_DEG`) | 30 deg | rule / AUDITED-FIXED | a PREDICTED_OVERLAP that only the target's velocity across its own lane creates (target within 30 deg of its lane's direction) needs a confirmation: path entry (now or later) or a strike (a contact of the track, closing in over `STRIKE_CLOSING_WINDOW_S` = 0.2 s before it, or the track lost while closing within `approach_window_s` before a contact); else the course is predicted at its velocity along the lane | development: removes the passing-car episodes of S15 (A on G, J) and S18 (B on E, F) |
+| lane curvature of the target prediction | dh/ds over 5 m either side; none in a junction | rule / AUDITED-FIXED | the target's predicted footprint follows the curvature of the lane it keeps (as the recorder's follows its yaw rate) | S19: the false episodes of A on C (abreast, 0.9 m gap) and B on C (two lanes away) on the 185 m curve removed |
+
+## EGO_PATH occupancy (`semantics.*`, `local.path_occupancy`)
+
+| parameter | value | category | role | sensitivity / evidence |
+|---|--:|---|---|---|
+| `path_half_width_m` | 1.5 m | AUDITED-FIXED | corridor half width around the recorder's own line | - |
+| `path_edge_std_m` | 0.25 m | SENSOR / PHYSICAL | the box face spread (`fusion.box_face_std_m`): sigma of a body edge, and of a return of it | - |
+| `path_occupancy_quantile` | 1.645 | STATISTICAL | definitely in / out at one-sided 95 %; between: uncertain, no change | canonical audit: 0 EGO_PATH oscillations (25 before) |
+| `path_min_definite_samples` | 2 | STATISTICAL (evidence) | consecutive definite sweeps for a change of state, dated at the boundary crossing | unit tests (`test_path_occupancy`) |
+| returns lower bound | second deepest on-body return; width band = half width + 2 x `path_edge_std_m`; one body length along | rule / AUDITED-FIXED | the body contains its returns: they bound its margin and its reach ahead from below where the nominal box sits short (side views) | S13: B's entry of A at 5.95 s (ground truth 5.87 s), its cut-in confirmed; a young track's mixed neighbour returns ignored (S13 A) |
+| `path_hysteresis_m` | 0.5 m | AUDITED-FIXED | release of an UNSAFE_FORWARD_GAP leader (and the point-geometry ablation); the occupancy itself has none | - |
 
 ## Relevance envelope (`semantics.*`)
 

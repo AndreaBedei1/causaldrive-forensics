@@ -3,8 +3,8 @@
 The paper's core events (`PAPER_CORE_EVENTS`, `src/cdf/reconstruction/models.py`) describe, per recorder and on
 its own clock, what its own sensors established and what it did: when another road user became perceivable,
 entered its path or cut in, when a conflict became critical, when it braked, when it collided.  Everything is
-local to one recorder: its own odometry (`ego.jsonl`), pedals (`controls.jsonl`), collision sensor
-(`collisions.jsonl`) and radar tracks.  The global trace only places these events on t_global and names their
+local to one recorder: its own odometry (`ego.jsonl`), pedals (`controls.jsonl`), lights (`lights.jsonl`),
+collision sensor (`collisions.jsonl`) and radar tracks.  The global trace only places these events on t_global and names their
 subjects (recorders, or anonymous road users U1, U2, ...).
 
 Every threshold is listed with its value (`configs/reconstruction.yaml`, section `semantics` unless stated)
@@ -68,27 +68,64 @@ speed >= `tracking.moving_speed_mps` = 1 m/s) start tracks: a standing vehicle i
 | `tracking.min_track_frames` | 5 sweeps (0.25 s) | Engineering assumption (tracker design): confirmation before a track is reported. |
 | `tracking.max_track_gap_s` | 0.5 s | Engineering assumption (tracker design). |
 | `tracking.moving_speed_mps` | 1.0 m/s | Engineering assumption (moving-target radar tracker). |
+| `tracking.max_braking_mps2` | 30 m/s^2 | Physical prior: about 3 g, beyond any tyre-road braking; a confirmed track follows a harder deceleration than its constant-velocity model only up to this, sweep by sweep. |
+| `tracking.contact_clearance_m` | 1.0 m | Engineering assumption: a body this close to the recorder (plus 3 sigma) may be the partner of the recorder's own impact and gets its impulse as velocity uncertainty. |
+| `tracking.lane_heading_std_deg` | 10 deg | Map prior: a vehicle travels within this of its lane's direction (body orientation, initial velocity of a new track). |
 
 TRACK_APPEARED is when a road user became perceivable to the recorder's radar tracker: not when it entered
 the field of view (the visibility audit, `scripts/audit_radar_visibility.py`, gives both).
 
+A track ends when it was not measured for long enough that its prediction can no longer tell two bodies a car
+width apart: TRACK_LOST should mean the radar stopped measuring the body, not that the tracker let it go.  A
+confirmed track therefore follows its body through hard braking (up to `max_braking_mps2`, with that braking as
+process noise), through an impact of its target (returns on its own body region, still moving, whose Doppler
+left the gate: the measured line-of-sight velocity change is carried as an impulse, and the smoother does not
+carry it into the past), and through standstill (its returns on its own body region, never static echoes of a
+place that returned static echoes before it stopped).  Static returns are never taken as an impact: in one
+sweep a body stopped dead cannot be told from the road surface or the scenery beside it.  A tentative track
+whose point lies in a confirmed track's body region is that body seen apart and is not reported; two tracks
+that exchanged returns at a contact are split where their evidence diverges.  The privileged stability audit
+(`docs/STABILITY_AUDIT.md`) classifies every TRACK_LOST against ground truth: visibility loss, sparse
+returns, or a tracker decision while the radar kept measuring the body (fragmentation).
+
 ## 4. EGO_PATH_ENTRY / EGO_PATH_EXIT
 
-A track is in the recorder's path when its estimated target body intersects the forward corridor beyond
-the recorder's front edge. It leaves only when the whole body is outside the corridor enlarged laterally
-and backward by the hysteresis (`local.track_events`, `conflict.body_in_corridor`).
-A track first seen inside the corridor has no observed entry.
+The corridor is the recorder's own line carried ahead of its front edge, `path_half_width_m` either side.
+Where the map is known (`road.RoadFrame`: the public OpenDRIVE lanes of the CARLA installation, the map
+recognised from the recorder's own recorded trajectory) the line bends like the recorder's reference path:
+the lane graph of the map, the recorder's whole recorded trajectory map-matched to it at once (Viterbi over
+the lane graph: successors, neighbours, heading), and ONE path per lane episode (`road.ReferencePath`), so
+the reference does not change from sweep to sweep; at a junction the branch the recorder's own later recorded
+positions take (its own data, never ground truth).  A car in the next lane of a bend is not in its path;
+a lane change of the recorder moves the corridor with it.  Without a map, the line is straight ahead.
+
+Occupancy is decided with the body's uncertainty (`local.path_occupancy`): per measured sample, the signed
+distance of the body to the corridor boundary (ahead of the front edge AND overlapping it laterally; > 0 inside)
+against its uncertainty sigma (position, the box face spread `path_edge_std_m`, and the half length times the
+heading uncertainty).  The body is the nominal box behind the tracked point, bounded from below by the
+returns that can lie on it (`local._on_body_returns`: within its width band and one body length along it): a
+body contains its returns, and a car seen from beside shows only part of its side, so the box behind its
+median return can sit a metre or more short of its front.  Definitely inside or outside beyond
+`path_occupancy_quantile` sigma, otherwise uncertain: an uncertain observation changes nothing.  A change of
+state needs `path_min_definite_samples` consecutive definite samples and is dated where the body crossed the
+boundary (the first sample with the new sign after the old state's last support), not when it became
+certain.  A track first seen inside has no ENTRY; a predicted sample is no evidence; a lost track is no EXIT
+(its state becomes UNKNOWN).
+
+Each ENTRY / EXIT records what changed the occupancy (`cause`, `local._path_cause`), by counterfactuals in one
+frame over the 0.5 s before it (for an entry that confirms a cut-in, since the cut-in's start), on the same body
+evidence: undo the target's own motion, or the corridor's (the recorder's lateral motion), and see whether the
+change remains.  TARGET_LATERAL: only the target's motion was needed; RECORDER_LATERAL: only the recorder's (its
+lane change toward a car keeping its lane); MUTUAL_LATERAL: both, or each alone was enough (two cars moving into
+one lane); LONGITUDINAL: the lateral overlap did not change, the body crossed the front edge.
 
 | Parameter | Value | Justification |
 |---|--:|---|
 | `path_half_width_m` | 1.5 m | Engineering assumption: half of a 3 m lane. |
-| `path_hysteresis_m` | 0.5 m | Engineering assumption: out of the path only this far beyond it. |
-
-Where the map is known (`road.RoadFrame`: the public OpenDRIVE lanes of the CARLA installation, the map
-recognised from the recorder's own positions), the corridor follows the lane the recorder drives in
-(`road.lane_path`: arc length ahead, lateral offset from its line; at a junction the branch nearest the
-recorder's own later recorded position, never ground truth): a car in the next lane of a bend is not in its
-path, and the recorder's own lane change does not move the corridor.  Without a map, it is straight ahead.
+| `path_edge_std_m` | 0.25 m | Engineering assumption, the box face spread `fusion.box_face_std_m`: a body edge, or a return of it, within this of the true face. |
+| `path_occupancy_quantile` | 1.645 | Statistical: definitely in / out at one-sided 95 %. |
+| `path_min_definite_samples` | 2 | Evidence: two consecutive definite sweeps (0.1 s) for a state change; one sweep never decides. |
+| `path_hysteresis_m` | 0.5 m | Engineering assumption: the release margin of an UNSAFE_FORWARD_GAP leader (section 6) and of the point-geometry ablation; the occupancy itself has no hysteresis, its uncertainty band replaces it. |
 
 PATH, CUT_IN and CRITICAL_TTC use the same estimated box (`conflict.target_box`): tracked position,
 velocity heading and nominal footprint. The runtime never uses the true target dimensions or pose.
@@ -108,9 +145,17 @@ into that fixed path frame; ego translation and yaw alone cannot establish a tar
 Distance, displacement and pre-entry are estimated body-to-corridor gaps in the same fixed frame.
 Where the map is known, the same quantities are measured in the path frame of section 4 (the bend the
 recorder follows is not a lateral motion of the target) and the target must leave its own lane toward the
-recorder (`road.RoadFrame.lane_toward_speed` >= `cut_in_lateral_speed_mps`).  A CUT_IN is **confirmed only
-by the target's EGO_PATH_ENTRY during it**: a lateral approach that never enters the recorder's path (it
-keeps its lane, or turns away) is no cut-in (decided offline on the whole track; the start keeps its
+recorder (`road.RoadFrame.lane_toward_speed` >= `cut_in_lateral_speed_mps`).  The body is "ahead" when its box
+or its own returns reach beyond the front edge (section 4).
+
+START: the first sample of the uninterrupted lateral approach that contains the established run, also when
+it began before the body was ahead of the front edge (a car that starts its lane change beside the recorder and
+draws ahead makes one manoeuvre): the earliest observation of the actual manoeuvre that the later evidence
+established.  A CUT_IN is **confirmed only by an EGO_PATH_ENTRY during it that the target's own manoeuvre was
+needed for** (`local._manoeuvre_needed`: the target's body at the cut-in's start, placed against the corridor
+of the entry, would not overlap it): a lateral approach that never enters the recorder's path (it keeps its
+lane, or turns away) is no cut-in, nor is an entry the recorder's own lane change alone made; two cars moving
+into one lane, the target arriving ahead, is one (decided offline on the whole track; the start keeps its
 time).  None starts after the recorder's own collision.
 
 | Parameter | Value | Justification |
@@ -132,8 +177,11 @@ for either of two reasons, per track sample:
 
 * PREDICTED_OVERLAP: the recorder's safety envelope (its footprint grown by the margins) and the target's box,
   both predicted over the horizon (recorder: constant speed and yaw rate; target: its velocity, its measured
-  deceleration when braking), overlap, and avoiding the overlap by braking after a reaction time needs at least
-  the available deceleration.  The time of the first overlap is the TTC in Hayward's sense [B65].
+  deceleration when braking, along an arc of the curvature of the lane it keeps where the map is known,
+  `road.RoadFrame.lane_curvature`, none in a junction), overlap, and avoiding the overlap by braking after a
+  reaction time needs at least the available deceleration.  The time of the first overlap is the TTC in
+  Hayward's sense [B65].  Without the curved target path, a car keeping its lane beside a recorder on a 185 m
+  curve (S19) is extrapolated along a tangent into it within a second.
 * UNSAFE_FORWARD_GAP: a leader (same direction, ahead, in the corridor or entering it) is closer than
   d_min = max(v_ego x t_front(v_ego), 2 m).  A time gap is not a TTC [B67]: an unsafe gap alone has no TTC.
   A leader is a target in the recorder's path (EGO_PATH) or in a confirmed cut-in into it: never a car
@@ -173,6 +221,26 @@ the envelope; a leader of the episode clearly gone), or at the recorder's collis
 Criticality metrics are reviewed in [B68]; responsibility-sensitive safety [B64] and the R157 performance models
 [R157, B16] are alternative safe-distance and avoidance criteria that an expert could apply to the same
 reconstructed kinematics.
+
+## 6b. INDICATOR_LEFT / INDICATOR_RIGHT (START, END)
+
+From the recorder's own light state (`lights.jsonl`: CARLA's `VehicleLightState` read back from the simulator every
+frame, `LeftBlinker` / `RightBlinker` decoded; `local.indicator_events`): INDICATOR_LEFT_START at the logged
+timestamp of the first frame with the left blinker on, INDICATOR_LEFT_END at the first frame with it off again;
+the same for the right.  No threshold and no debounce: the light state is a discrete onboard signal (the blinking
+itself is the rendering of that state).  The states INDICATOR_LEFT / INDICATOR_RIGHT are part of the recorder's
+perceived state.
+
+* The signal, not a manoeuvre: never inferred from steering, yaw, a lane change or a CUT_IN; a lane change
+  without the signal has no indicator event, an indicator without a manoeuvre (or left on after it) has one.
+* A recording made before the light log existed (every canonical run except S02 critical_before_cut_in, S07 and
+  S17, re-recorded with it): both states UNKNOWN for the whole recording, never off, and no event.
+* Other road users' indicators are not observable (no sensor of the recorders measures them): nothing is inferred
+  about them, and ground truth is never used.
+* The scenarios script the lights with an `indicator` action (`side` -1 / +1), independent of their motion:
+  S02 critical_before_cut_in (B signals its cut-in from 1 s before; A signals left for 1.2 s and does not change
+  lane), S17 (A signals its lane change and leaves the indicator on; B changes lane without signalling), S07 (a
+  roundabout driven without any signal).
 
 ## 7. Derived quantity: observed vehicle response delay
 
