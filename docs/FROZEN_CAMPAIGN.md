@@ -101,3 +101,30 @@ The campaign uses the existing evaluation only (no new event oracle, no new dete
 Aggregation and the GNSS x radar interaction analysis are defined in the docstring of `scripts/campaign_report.py`.
 Synthetic CARLA perturbations are engineering models: they establish the operating envelope of the method on
 simulated data and do not demonstrate real-world sensor performance.
+
+## Revision v2 (tag `robustness-campaign-v2`): evaluation defect found during the campaign
+
+Found on 2026-10-15 at job 191 of the v1 run (`radar high`, S16, seed 0): under heavy clutter a reconstructed
+COLLISION node carried no global time (`t_global` null: the collision was not placed on the global clock), and the
+frozen stability audit (`stability_audit.closure_violations`) compared null with a number and raised.  Because the
+whole further evaluation of a job ran as one block, the job was recorded as failed with no measurement at all, and
+exactly the most degraded cases would have been missing from the aggregates.  The reconstruction itself is not
+involved.
+
+The affected experiment (the v1 run of the matrix) was stopped after 255 records (254 complete, 1 failed) and
+revised.  v2 changes evaluation and driver code only (`scripts/`; the code hash of `src/cdf` and `configs/`, the
+configuration, the profiles, seeds and matrix are those of the freeze):
+
+- `closure_violations` skips a collision without global time (its closure is undefined);
+- `robustness.extra_evaluation` runs the distance-band breakdown, the stability audit and the event oracle each on
+  its own: one that raises is recorded under `evaluation_errors` (reported as partial evaluations) and the job keeps
+  its other measurements;
+- `campaign_report` pairs runs by `Sxx/run_...` whatever the path spelling;
+- `scripts/campaign_controller.py` (with `scripts/campaign.bat`) replaces the fixed process pool: same jobs, keys,
+  seeds, seed rule and records, one process per job, adaptive concurrency, persistent pause / resume.
+
+Equivalence: both changes only act where v1 raised, so every job v1 completed has the result v2 would give; those
+254 records are kept and every record names its commit (`provenance.git_commit`).  The v1 failure is attempted
+again under v2 (attempts are counted per version) and its v1 record stays in `jobs.jsonl` for the audit trail.
+The 14 jobs running when the v1 pool was stopped wrote nothing and run again with the same seeds and keys
+(`results/robustness/frozen_campaign/control/handover_v1_to_v2.json`).

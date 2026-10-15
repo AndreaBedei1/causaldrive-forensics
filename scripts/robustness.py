@@ -237,20 +237,46 @@ def extra_evaluation(target: Path, evaluation: Dict[str, Any], fusion: Dict[str,
     track losses, phantoms, duplicates, EGO_PATH oscillations, CUT_IN against its ground-truth criterion,
     CRITICAL_TTC closure, trajectory jumps) and the ground-truth event oracle (``event_oracle``: counts and
     time differences per event type, reconstruction against the ideal oracles)."""
+    import traceback
     from cdf.evaluation.campaign_metrics import campaign_metrics
     from cdf.evaluation.event_oracle import compare_run
     from cdf.reconstruction.config import load_config
     out: Dict[str, Any] = {}
+    # Campaign revision v2: each further evaluation runs on its own; one that raises is recorded in
+    # ``evaluation_errors`` and leaves the job's other measurements in place (v1 lost the whole job).
+    failures: Dict[str, str] = {}
     errors = fusion.get("state_errors", {})
     out["trajectory"] = {key: errors.get(key) for key in ("centre_error_m", "velocity_error_mps", "speed_error_mps",
                                                            "heading_error_deg", "coverage_s")}
     out["trajectory"]["calibration"] = fusion.get("calibration")
-    out["campaign"] = campaign_metrics(target, fusion, evaluation)
-    out["campaign"].pop("track_ranges_m", None)
+    try:
+        out["campaign"] = campaign_metrics(target, fusion, evaluation)
+        out["campaign"].pop("track_ranges_m", None)
+    except Exception:
+        failures["campaign_metrics"] = traceback.format_exc()[-2000:]
     if str(ROOT / "scripts") not in sys.path:
         sys.path.insert(0, str(ROOT / "scripts"))
     import stability_audit
-    audit = stability_audit.audit_run(Path(target))
+    try:
+        audit = stability_audit.audit_run(Path(target))
+    except Exception:
+        failures["stability_audit"] = traceback.format_exc()[-2000:]
+        audit = None
+    if audit is not None:
+        _stability(out, audit)
+    try:
+        oracle = compare_run(Path(target), load_config())
+        out["event_oracle"] = {pair: {kind: {k: v for k, v in row.items() if k in ("found", "expected", "matched", "deltas")}
+                                      for kind, row in table.items()}
+                               for pair, table in oracle["comparison"].items() if pair.startswith("RECONSTRUCTION vs")}
+    except Exception:
+        failures["event_oracle"] = traceback.format_exc()[-2000:]
+    if failures:
+        out["evaluation_errors"] = failures
+    return out
+
+
+def _stability(out: Dict[str, Any], audit: Dict[str, Any]) -> None:
     recorders = audit.get("recorders", {})
     out["stability"] = {
         "track_losses": sum(len(m["tracks"]["losses"]) for m in recorders.values()),
@@ -263,11 +289,6 @@ def extra_evaluation(target: Path, evaluation: Dict[str, Any], fusion: Dict[str,
         "reference_path_jumps": sum(m["reference_path"].get("jumps") or 0 for m in recorders.values()),
         "trajectory_jumps": sum(m["trajectory"]["implausible_steps"] for m in recorders.values()),
         "cut_in": audit.get("cut_in"), "closure_violations": audit.get("closure_violations")}
-    oracle = compare_run(Path(target), load_config())
-    out["event_oracle"] = {pair: {kind: {k: v for k, v in row.items() if k in ("found", "expected", "matched", "deltas")}
-                                  for kind, row in table.items()}
-                           for pair, table in oracle["comparison"].items() if pair.startswith("RECONSTRUCTION vs")}
-    return out
 
 
 def job_key(job: Dict[str, Any]) -> Tuple[Any, ...]:

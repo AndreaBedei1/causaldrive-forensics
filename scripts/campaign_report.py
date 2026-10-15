@@ -315,6 +315,11 @@ PAIRED = {"association_errors": lambda x: None if x.get("assoc_decided") is None
           else (x["recorders"] or 0) - (x.get("recorders_aligned") or 0)}
 
 
+def run_key(run: str) -> str:
+    """``S04/run_0_a_front_pushed`` whatever the path spelling (absolute, relative, slashes)."""
+    return "/".join(str(run).replace("\\", "/").rstrip("/").split("/")[-2:])
+
+
 def interaction_table(jobs: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Paired comparison of every GNSS x radar cell with its single-sensor conditions (module docstring)."""
     index: Dict[Tuple[str, str, str, int], Dict[str, Any]] = {}
@@ -324,9 +329,9 @@ def interaction_table(jobs: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
             continue
         numbers = job_numbers(r)
         if r["family"] == "baseline":
-            base[r["run"]] = numbers
+            base[run_key(r["run"])] = numbers
         elif r["family"] in ("radar", "gnss", "radar_gnss_combined"):
-            index[(r["family"], r["level"], r["run"], int(r["seed"]))] = numbers
+            index[(r["family"], r["level"], run_key(r["run"]), int(r["seed"]))] = numbers
     rows = []
     for g in GNSS_LEVELS:
         for rl in RADAR_LEVELS:
@@ -621,8 +626,15 @@ def robustness_report(jobs_path: Path, out: Path) -> int:
     retried = sum(1 for r in jobs if r.get("status") == "complete" and int(r.get("attempt") or 1) > 1)
     provenance = next((r.get("provenance") for r in jobs if r.get("family") == "baseline" and r.get("provenance")), {}) or {}
     out.mkdir(parents=True, exist_ok=True)
+    partial = [{"run": run_key(r["run"]), "family": r["family"], "level": r["level"], "recorder": r.get("recorder"),
+                "seed": r["seed"], "components": sorted(r["evaluation_errors"])}
+               for r in jobs if r.get("status") == "complete" and r.get("evaluation_errors")]
+    commits = defaultdict(int)
+    for r in jobs:
+        commits[(r.get("provenance") or {}).get("git_commit")] += 1
     record = {"jobs": len(jobs), "attempts": len(raw), "complete": sum(1 for r in jobs if r.get("status") == "complete"),
               "failed": len(failures), "retried_then_complete": retried, "provenance": provenance,
+              "jobs_by_commit": dict(commits), "partial_evaluations": partial,
               "conditions": rows, "interaction": inter, "resources": resources, "failures": failures,
               "metric_kinds": {k: v[1] for k, v in METRICS.items()}}
     (out / "summary.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")

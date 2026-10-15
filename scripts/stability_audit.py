@@ -343,6 +343,8 @@ def closure_violations(run):
     nodes = json.loads(path.read_text(encoding="utf-8"))["nodes"]
     out = 0
     for c in (n for n in nodes if n["event_type"] == "COLLISION" and n.get("participants")):
+        if c.get("t_global") is None:
+            continue  # a collision not on the global clock: its closure is undefined (campaign revision v2)
         pair = set(c["participants"])
         out += sum(1 for n in nodes if n["event_type"] == "CRITICAL_TTC_START" and n.get("t_global") is not None
                    and n["t_global"] > c["t_global"] and {n["actor_id"], n["subject_id"]} == pair)
