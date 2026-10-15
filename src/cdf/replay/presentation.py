@@ -11,12 +11,13 @@ events, other states, anonymous tracks, road users), in their display order.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 
 
 HELP_LINES = (
     "SPACE play/pause   ←/→ seek   N/P event   C camera (overview, each vehicle, free)",
-    "TAB vehicle (full panel)   PgUp/PgDn its events   T tracks   G ghosts   H help   ESC quit",
+    "TAB vehicle (full panel)   F focus its panel   PgUp/PgDn its events (older/newer)",
+    "T tracks   G ghosts   H help   ESC quit",
 )
 
 MAX_PANEL_LINES = 8
@@ -151,6 +152,60 @@ def recorder_panel(run, actor: str, t: float, max_events: int = MAX_EVENT_LINES,
                                                        " → " + subject if subject else "",
                                                        " ({0})".format(cause) if cause else ""), EVENT))
     return RecorderPanel(states, events, len(history))
+
+
+def wrap_text(text: str, measure: Callable[[str], int], width: int, indent: str = "    ") -> List[str]:
+    """``text`` in pieces at most ``width`` wide (``measure``: a string's width), split at spaces (a word longer
+    than a line split by characters), continuations indented; every character of ``text`` kept in order."""
+    if measure(text) <= width:
+        return [text]
+    pieces, current = [], ""
+    for word in text.split(" "):
+        candidate = word if not current else current + " " + word
+        if not current.strip() or measure(candidate) <= width:
+            current = candidate
+            continue
+        pieces.append(current)
+        current = indent + word
+    pieces.append(current)
+    out = []
+    for piece in pieces:  # a single word wider than the line: cut it by characters
+        while measure(piece) > width and len(piece.strip()) > 1:
+            cut = len(piece) - 1
+            while cut > 1 and measure(piece[:cut]) > width:
+                cut -= 1
+            out.append(piece[:cut])
+            piece = indent + piece[cut:]
+        out.append(piece)
+    return out
+
+
+def event_window(event_rows: Sequence[int], room: int, scroll: int,
+                 max_events: int = MAX_EVENT_LINES) -> Tuple[int, int, int]:
+    """The events of a recorder panel shown in ``room`` rows: (start, end, scroll) with events[start:end] shown,
+    newest first, and ``scroll`` clamped.  ``event_rows``: the rows each event takes (wrapped labels take
+    several).  At most ``max_events`` events at once; when not all fit, one row is kept for the PgUp/PgDn hint.
+    Scrolling reaches every event (the last page ends with the oldest one) and no event is ever cut: at least one
+    is shown however short the room."""
+    n = len(event_rows)
+    if n == 0:
+        return 0, 0, 0
+    if sum(event_rows) <= room and n <= max_events:
+        return 0, n, 0
+    avail = max(1, room - 1)
+
+    def end_from(start: int) -> int:
+        end, used = start, 0
+        while end < n and end - start < max_events and (end == start or used + event_rows[end] <= avail):
+            used += event_rows[end]
+            end += 1
+        return end
+
+    last = n - 1  # the earliest start whose page still ends with the oldest event
+    while last > 0 and end_from(last - 1) == n:
+        last -= 1
+    scroll = max(0, min(int(scroll), last))
+    return scroll, end_from(scroll), scroll
 
 
 def event_line(run, event) -> str:

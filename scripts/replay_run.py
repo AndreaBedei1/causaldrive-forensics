@@ -60,8 +60,8 @@ from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNO
                               project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
 from cdf.replay.presentation import (ALERT, ANONYMOUS, EGO, EVENT, HELP_LINES, MAX_EVENT_LINES,  # noqa: E402
-                                     MAX_STATE_LINES, MORE, ROAD_USER, event_line, next_camera, recorder_panel,
-                                     subject_label)
+                                     MAX_STATE_LINES, MORE, ROAD_USER, event_line, event_window, next_camera,
+                                     recorder_panel, subject_label, wrap_text)
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -74,12 +74,15 @@ CAMERA_MODES = ("overview", "follow", "free")
 SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
 COMPACT_STATE_LINES, COMPACT_EVENT_LINES = 3, 3  # the panels of the recorders not selected
+ALL_EVENTS = 10 ** 6  # the selected recorder's panel: its whole history, scrolled
 SECTION_RGB = (150, 200, 255)
+COLLISION_RGB = (255, 95, 95)  # a recorder's COLLISION events in its panel
 # A link line with the clearance: every track a recorder holds one of these about, plus its nearest IN_EGO_PATH
 # track (the car it follows); farther cars in its path get no line.
 INTERACTION_STATES = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
 COLLISION_WINDOW_S = 1.5
 PANEL_MAX_WIDTH = 360  # pixels: the recorder panels stay a narrow column at the right edge
+FOCUS_PANEL_WIDTH = 420  # pixels (at most a third of the window): the selected recorder's panel in focus mode
 LABEL_CLEARANCE_M = 0.6  # label anchor above the roof
 TRACK_DOT_HEIGHT_M = 0.8  # radar dots above the road (tracks are planar)
 OPENDRIVE_DIR = Path("CarlaUE4") / "Content" / "Carla" / "Maps" / "OpenDrive"
@@ -93,6 +96,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--paused", action="store_true", help="start paused")
     parser.add_argument("--camera", choices=CAMERA_MODES, default="overview")
     parser.add_argument("--follow", default=None, help="recorder selected for the follow camera")
+    parser.add_argument("--focus", action="store_true",
+                        help="start with the selected recorder's panel focused (F toggles)")
     parser.add_argument("--hide-tracks", action="store_true",
                         help="start with the radar-track overlay hidden (toggle with T)")
     parser.add_argument("--show-tracks", action="store_true", help=argparse.SUPPRESS)  # markers are on by default
@@ -188,22 +193,6 @@ def resolve_map(run: ReplayRun, carla_root: Optional[Path], current: Optional[st
     return choose_map(fits, networks, current)
 
 
-def _wrapped(text: str, font: Any, width: int) -> List[str]:
-    """A panel line split after its commas into pieces at most ``width`` pixels wide (continuations indented),
-    so a long list of states is never cut at the panel edge."""
-    if font.size(text)[0] <= width or ", " not in text:
-        return [text]
-    pieces, current = [], ""
-    for part in text.split(", "):
-        candidate = part if not current else current + ", " + part
-        if current and font.size(candidate + ",")[0] > width:
-            pieces.append(current + ",")
-            current = "    " + part
-        else:
-            current = candidate
-    return pieces + [current]
-
-
 class ReplayApp:
     """CARLA actors, a camera and the pygame window for one replay."""
 
@@ -217,6 +206,7 @@ class ReplayApp:
         self.events = run.display_events()
         self.selected = args.follow if args.follow in self.ids else self.ids[0]
         self.event_scroll = 0  # the selected recorder's events: index of the newest one shown
+        self.focus = bool(getattr(args, "focus", False))  # F: the selected panel takes the column, others headers
         self.camera_mode = args.camera
         self.heading = run.participants[0].trajectory.pose_at(run.start).yaw
         self.elevation = 30.0
@@ -438,6 +428,7 @@ class ReplayApp:
         elif key == pg.K_TAB:
             step = -1 if mod & pg.KMOD_SHIFT else 1
             self.selected = self.ids[(self.ids.index(self.selected) + step) % len(self.ids)]
+            self.event_scroll = 0  # the new recorder's newest events
         elif key in (pg.K_n, pg.K_p):
             target = (self.run.next_event_time if key == pg.K_n else self.run.previous_event_time)(self.clock.time)
             if target is not None:
@@ -451,6 +442,8 @@ class ReplayApp:
             self.show_ghosts = not self.show_ghosts
         elif key == pg.K_h:
             self.show_help = not self.show_help
+        elif key == pg.K_f:
+            self.focus = not self.focus
 
     def _move_free_camera(self, wall_dt: float) -> None:
         if self.camera_mode != "free" or self.free is None:
@@ -550,8 +543,8 @@ class ReplayApp:
             self._draw_side_panels(t, badges)
         finally:
             self.screen = screen
-        self._draw_collision_banner(t)
         self._draw_hud(t)
+        self._draw_collision_banner(t)  # in the free span between the HUD and the panel column
         self._draw_timeline(t)
         for label in labels:  # each in free space: off the panels, the badges and each other
             label()
@@ -585,87 +578,110 @@ class ReplayApp:
     def _vehicle_lines(self, pid: str, t: float, full: bool = True) -> List[Tuple[str, Tuple[int, int, int], Any]]:
         """The recorder's panel (``presentation.recorder_panel``): its CURRENT state (own states, active track
         states, anonymous tracks, road users) and, in a separate section, its most recent semantic events newest
-        first, each with its age.  ``full`` (the selected recorder): up to MAX_STATE_LINES states and
-        MAX_EVENT_LINES events; else compact: COMPACT_STATE_LINES states (own state and alerts first) and the
+        first, each with its age.  ``full`` (the selected recorder): up to MAX_STATE_LINES states and every
+        event (the panel shows MAX_EVENT_LINES at a time, PgUp/PgDn scroll); else compact: COMPACT_STATE_LINES states (own state and alerts first) and the
         COMPACT_EVENT_LINES latest events.  No UNKNOWN or PREDICTED text."""
         style = {ALERT: ((255, 150, 90), self.font_small), ANONYMOUS: ((200, 200, 255), self.font_small),
                  ROAD_USER: ((220, 220, 220), self.font_small), EVENT: ((255, 214, 10), self.font_small),
                  EGO: ((255, 255, 255), self.font_small), MORE: ((170, 170, 170), self.font_small)}
-        panel = recorder_panel(self.run, pid, t, MAX_EVENT_LINES if full else COMPACT_EVENT_LINES,
+        panel = recorder_panel(self.run, pid, t, ALL_EVENTS if full else COMPACT_EVENT_LINES,
                                MAX_STATE_LINES if full else COMPACT_STATE_LINES)
         lines = []
         for text, kind in panel.states:
             rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
             lines.append((text, rgb, font))
-        lines.append(("recent events ({0} so far)".format(panel.events_total), SECTION_RGB, self.font_bold))
+        collisions = sum(1 for e in self.run.display_events()
+                         if e.actor == pid and e.event_type == "COLLISION" and e.time <= t + 1e-6)
+        lines.append(("recent events ({0} so far{1})".format(
+            panel.events_total, ", {0} collision{1}".format(collisions, "s" if collisions > 1 else "") if collisions
+            else ""), SECTION_RGB, self.font_bold))
         for text, kind in panel.events:
             rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
+            if kind == EVENT and text.split("  ", 1)[-1].startswith("COLLISION"):
+                rgb, font = COLLISION_RGB, self.font_bold  # the recorder's own collisions stand out
             lines.append((text, rgb, font))
         return lines
 
     def _draw_side_panels(self, t: float, badges: Dict[str, Any]) -> None:
-        """One details panel per vehicle in a right-hand column, linked to its badge: the selected recorder's
-        panel is full (its events scrolled with PgUp/PgDn when the window is too short for all of them), the
-        others compact.  A fixed column cannot overlap however close the vehicles are, and it stops above the
-        help lines and the timeline."""
+        """One details panel per vehicle in a right-hand column, linked to its badge.  Normal layout: the
+        selected recorder's panel full, the others compact.  Focus (F): the others reduced to their headers and
+        the selected one given the rest of the column down to the help lines and the timeline.  The selected
+        panel keeps its states at the top and shows at most MAX_EVENT_LINES events newest first; when they do not
+        fit PgUp/PgDn scroll through all of them (``presentation.event_window``: none lost, none cut).  Long
+        lines wrap at the panel width."""
         pg = self.pygame
+        focus = self.focus
+        width_limit = min(FOCUS_PANEL_WIDTH, max(PANEL_MAX_WIDTH, self.width // 3)) if focus else PANEL_MAX_WIDTH
+        text_width = width_limit - 18
+
+        def rows(text: str, rgb: Tuple[int, int, int], font: Any) -> List[Any]:
+            return [font.render(piece, True, rgb) for piece in wrap_text(text, lambda x: font.size(x)[0], text_width)]
+
         panels = []
         for pid in self.ids:
             speed = self.run.participant(pid).trajectory.speed_at(self.run.start + t)
             header = self.font_bold.render("{0}   {1:5.1f} m/s  {2:3.0f} km/h".format(pid, speed, speed * 3.6),
                                            True, (255, 255, 255))
             full = pid == self.selected
-            body = [(font.render(piece, True, rgb), text.startswith(("+", "-")) and rgb == (255, 214, 10))
-                    for text, rgb, font in self._vehicle_lines(pid, t, full)
-                    for piece in _wrapped(text, font, PANEL_MAX_WIDTH - 18)]
-            panels.append((pid, header, body, full))
-        width = min(PANEL_MAX_WIDTH, max(240, max(max([h.get_width()] + [b.get_width() for b, _ in body])
-                                                  for _, h, body, _ in panels) + 18))
+            fixed, events = [], []  # fixed: rows of the states and the section line; events: the rows of each event
+            if full or not focus:
+                in_events = False
+                for text, rgb, font in self._vehicle_lines(pid, t, full):
+                    if in_events:
+                        events.append(rows(text, rgb, font))
+                    else:
+                        fixed.extend(rows(text, rgb, font))
+                        in_events = font is self.font_bold and rgb == SECTION_RGB
+            panels.append((pid, header, fixed, events, full))
+        if focus:
+            width = width_limit
+        else:
+            widest = max(max([h.get_width()] + [r.get_width() for r in fixed] + [r.get_width() for e in ev for r in e])
+                         for _, h, fixed, ev, _ in panels)
+            width = min(PANEL_MAX_WIDTH, max(240, widest + 18))
         x, y = self.width - width - 8, 8
+        self.panel_left = x  # the collision banner stays left of the column
         bottom = self._bottom_bar_top() - 4  # keep clear of the help lines and the timeline
 
-        def height_of(header: Any, body: Sequence[Tuple[Any, bool]]) -> int:
-            return header.get_height() + 6 + sum(b.get_height() for b, _ in body) + (4 if body else 0)
+        def height_of(header: Any, body: Sequence[Any]) -> int:
+            return header.get_height() + 6 + sum(b.get_height() for b in body) + (4 if body else 0)
 
-        # The compact panels first: the selected one gets the room they leave.
-        reserved = sum(height_of(h, body) + 6 for _, h, body, full in panels if not full)
+        # The other panels first: the selected one gets the room they leave.
+        reserved = sum(height_of(h, fixed + [r for e in ev for r in e]) + 6
+                       for _, h, fixed, ev, full in panels if not full)
         line = max(1, self.font_small.get_linesize())
-        for pid, header, body, full in panels:
+        for pid, header, fixed, events, full in panels:
+            body = fixed + [r for e in events for r in e]
             if full:
                 room = max(0, (bottom - y - reserved - header.get_height() - 12) // line)
-                events = [i for i, (_, is_event) in enumerate(body) if is_event]
-                if len(body) > room and events:
-                    # Scroll the events: keep the states and the section line, show a window of events.
-                    fixed = body[:events[0]]
-                    window = max(1, room - len(fixed) - 1)
-                    self.event_scroll = max(0, min(self.event_scroll, len(events) - window))
-                    shown = body[events[0] + self.event_scroll:events[0] + self.event_scroll + window]
-                    hint = []
-                    if len(events) > window:
-                        hint = [(self.font_small.render("PgUp/PgDn: events {0}-{1} of {2}".format(
-                            self.event_scroll + 1, self.event_scroll + len(shown), len(events)), True,
-                            (170, 170, 170)), False)]
-                    body = fixed + shown + hint
-                if len(body) > room:
-                    body = body[:max(0, room - 1)] + [(self.font_small.render("...", True, (200, 200, 200)), False)]
+                first, last, self.event_scroll = event_window([len(e) for e in events], room - len(fixed),
+                                                              self.event_scroll, MAX_EVENT_LINES)
+                body = fixed + [r for e in events[first:last] for r in e]
+                if (first, last) != (0, len(events)):
+                    body.append(self.font_small.render("PgUp older / PgDn newer: events {0}-{1} of {2}".format(
+                        first + 1, last, len(events)), True, (170, 170, 170)))
             else:
                 reserved -= height_of(header, body) + 6
             height = height_of(header, body)
+            if y + height > bottom and body:  # too tall for what is left: clip the body, never the header
+                keep = max(0, (bottom - y - header.get_height() - 10) // line - 1)
+                body = body[:keep] + [self.font_small.render("...", True, (200, 200, 200))]
+                height = height_of(header, body)
             if y + height > bottom:
                 break
             color = self.colors[pid]
-            self._panel((x, y, width, height), 165)
+            self._panel((x, y, width, height), 185 if focus and full else 165)
             pg.draw.rect(self.screen, color, (x, y, width, header.get_height() + 6))
             self.screen.blit(header, (x + 8, y + 3))
             line_y = y + header.get_height() + 8
-            for surface, _ in body:
+            for surface in body:
                 self.screen.blit(surface, (x + 8, line_y))
                 line_y += surface.get_height()
             badge = badges.get(pid)
             if badge is not None:
-                start = (x, y + (header.get_height() + 6) // 2)
-                pg.draw.line(self.screen, color, start, badge.midright, 2)
-                pg.draw.circle(self.screen, color, start, 4)
+                anchor = (x, y + (header.get_height() + 6) // 2)
+                pg.draw.line(self.screen, color, anchor, badge.midright, 2)
+                pg.draw.circle(self.screen, color, anchor, 4)
             y += height + 6
 
     def _ground_z(self, x: float, y: float, near_z: float) -> float:
@@ -911,15 +927,33 @@ class ReplayApp:
             start += 16.0
 
     def _draw_collision_banner(self, t: float) -> None:
+        """The collisions of the last COLLISION_WINDOW_S, every pair kept (repeated contacts too), centred in the
+        free span between the HUD and the recorder panels and wrapped onto several lines when they do not fit
+        (focus mode narrows the span); below the HUD when the span is too narrow."""
         marks = self.run.collisions_near(t, COLLISION_WINDOW_S)
         if not marks:
             return
-        text = "COLLISION  " + "  ".join("–".join(mark.participants) for mark in marks if mark.participants)
-        surface = self.font_banner.render(text, True, (255, 255, 255))
-        rect = surface.get_rect(midtop=(self.width // 2, 16))
-        self.pygame.draw.rect(self.screen, (200, 20, 30), rect.inflate(28, 12), border_radius=8)
-        self.occupied.append(rect.inflate(28, 12))
-        self.screen.blit(surface, rect)
+        pairs = ["–".join(mark.participants) for mark in marks if mark.participants]
+        hud = getattr(self, "hud_rect", (8, 8, 0, 0))
+        left, right, top = hud[0] + hud[2] + 16, getattr(self, "panel_left", self.width - 8) - 16, 16
+        if right - left < 220:  # no room beside the HUD: under it
+            left, top = 8, hud[1] + hud[3] + 10
+        lines = [line.strip() for line in wrap_text("  ".join(["COLLISION"] + pairs),
+                                                    lambda text: self.font_banner.size(text)[0],
+                                                    max(right - left - 28, self.font_banner.size("COLLISION")[0]), "")]
+        lines = [line for line in lines if line]
+        rendered = [self.font_banner.render(line, True, (255, 255, 255)) for line in lines]
+        width = max(r.get_width() for r in rendered) + 28
+        height = sum(r.get_height() for r in rendered) + 12
+        box = self.pygame.Rect(0, 0, width, height)
+        box.midtop = ((left + right) // 2, top - 6)
+        box.left = max(min(box.left, right - width), min(left, self.width - width))
+        self.pygame.draw.rect(self.screen, (200, 20, 30), box, border_radius=8)
+        self.occupied.append(box)
+        y = box.top + 6
+        for surface in rendered:
+            self.screen.blit(surface, surface.get_rect(midtop=(box.centerx, y)))
+            y += surface.get_height()
 
     def _draw_hud(self, t: float) -> None:
         state = "END" if self.clock.at_end and not self.clock.playing else ("PLAYING" if self.clock.playing else "PAUSED")
@@ -952,6 +986,7 @@ class ReplayApp:
         width = max(r.get_width() for r in rendered) + 16
         height = sum(r.get_height() for r in rendered) + 10
         self._panel((8, 8, width, height))
+        self.hud_rect = (8, 8, width, height)
         y = 13
         for surface in rendered:
             self.screen.blit(surface, (16, y))

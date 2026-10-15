@@ -91,7 +91,7 @@ conda activate carla
 python scripts\start_carla.py
 ```
 
-Then, in a second terminal, the review menu of the 23 canonical runs (pick a number, the replay opens; close it
+Then, in a second terminal, the review menu of the 22 canonical runs (pick a number, the replay opens; close it
 to come back; `q` quits).  The .bat uses the server on port 2000; with the project's server pass `--port 3000`:
 
 ```bat
@@ -123,7 +123,7 @@ python scripts\reconstruct_run.py traces\S11\run_0_consequential --evaluate
 python -c "import sys; sys.path[:0]=['scripts','src']; import hardening_refresh as h; h.refresh('traces/S11/run_0_consequential')"
 python scripts\validate_canonical.py --out docs\CANONICAL_VALIDATION.md
 
-:: replay one run, or pick one from the review menu of the 23 canonical runs
+:: replay one run, or pick one from the review menu of the 22 canonical runs
 python scripts\replay_run.py traces\S14\run_0_surrounded
 scripts\review_canonical_runs.bat
 
@@ -131,12 +131,12 @@ scripts\review_canonical_runs.bat
 python -m pytest -q
 ```
 
-## Canonical scenarios (development set: 19 scenarios, 23 runs)
+## Canonical scenarios (development set: 19 scenarios, 22 runs)
 
 | id | scenario | runs | purpose |
 |---|---|---|---|
 | S01 | rear_end | crash | rear-end collision, two recorders |
-| S02 | cut_in | crash, critical_before_cut_in | cut-in collision; critical state before the cut-in |
+| S02 | cut_in | crash | cut-in collision |
 | S03 | crossing | crash | crossing collision at a junction |
 | S04 | chain_collision | a_front_pushed, b_rear_first | three-car chain, two orders of contacts |
 | S05 | occluded_chain_stop | crash | chain with an occluded leader |
@@ -171,7 +171,8 @@ campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has
 | 1-4 | speed 0.25 / 0.5 / 1 / 2x |
 | C | camera: overview -> follow each recorder vehicle in turn -> free -> overview |
 | TAB | next recorder (follow camera); its panel is the full one |
-| PgUp / PgDn | scroll the full panel's recent events |
+| F | focus: the selected recorder's panel takes the right-hand column, the others shrink to their headers (F again: normal layout) |
+| PgUp / PgDn | the full panel's events: older / newer (every event reachable) |
 | T | radar tracks on / off |
 | G | ghost boxes or dots for unfused tracks |
 | H | help |
@@ -186,8 +187,11 @@ replayed vehicle's indicator blinking too, absent when the recording has no ligh
 the fusion's identity (`track_001 (B): CLOSING, CRITICAL_TTC`), its anonymous tracks and the road users it sees
 -- at most 8 lines, then `... +N more`, its own state and the alerts (CRITICAL_TTC, CUT_IN) kept first.  Then
 its RECENT EVENTS, newest first, each with its age and the global subject, and for a path entry or exit what
-changed the occupancy (`-0.4 s  EGO_PATH_ENTRY → C (by own lateral motion)`): the 15 latest for the selected
-recorder (TAB; PgUp / PgDn scroll them when the window is short), the 3 latest for the others.  UNKNOWN states
+changed the occupancy (`-0.4 s  EGO_PATH_ENTRY → C (by own lateral motion)`), the recorder's own COLLISION events
+in red and counted in the section line: up to 15 at a time for the selected recorder (TAB; PgUp / PgDn scroll
+through its whole history when they do not fit, long lines wrap), the 3 latest for the others.  F (or `--focus`)
+gives the selected recorder the whole column down to the timeline, the others reduced to their headers, e.g.
+`python scripts/replay_run.py traces/S04/run_0_a_front_pushed --focus --follow B`.  UNKNOWN states
 and the measured/predicted provenance stay in the reconstruction files.  A coloured
 line joins a recorder to a vehicle it holds CRITICAL_TTC or CUT_IN about, and to the nearest vehicle in its
 path, labelled with their body-to-body clearance (`1.4 m`).
