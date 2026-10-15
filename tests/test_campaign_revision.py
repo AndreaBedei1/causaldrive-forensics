@@ -76,8 +76,10 @@ class ConcurrencyTests(unittest.TestCase):
         self.assertEqual(ctl.decide(14, short, 14, 22)[0], 12)
         swapping = [self.sample(pagefile_growth_gb=0.0)] * 4 + [self.sample(pagefile_growth_gb=2.0)]
         self.assertEqual(ctl.decide(14, swapping, 14, 22)[0], 12)
-        contended = [self.sample(own_cores=8.0) for _ in range(5)]
-        self.assertEqual(ctl.decide(14, contended, 14, 22)[0], 12)
+        contended = [self.sample(own_cores=8.0, cpu_percent=95.0) for _ in range(5)]
+        self.assertEqual(ctl.decide(14, contended, 14, 22)[0], 12)  # saturated machine, workers starved
+        io_bound = [self.sample(own_cores=8.0, cpu_percent=60.0) for _ in range(5)]
+        self.assertEqual(ctl.decide(14, io_bound, 14, 22)[0], 15)  # not saturated: low CPU per job is I/O, not contention
         idle = [self.sample(other_cores=1.0) for _ in range(5)]
         self.assertEqual(ctl.decide(14, idle, 14, 22)[0], 16)  # +2 at most
         self.assertEqual(ctl.decide(20, [self.sample(other_cores=0.0, own_cores=19.5)] * 5, 20, 22)[0], 19)

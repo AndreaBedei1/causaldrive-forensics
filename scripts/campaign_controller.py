@@ -53,7 +53,9 @@ PYTHON = sys.executable
 # The campaign's code versions: v1 = the frozen tag; v2 = the evaluation revision (docs/FROZEN_CAMPAIGN.md).  A job
 # complete under v1 is complete (v2 changes no result where v1 completed); attempts count under v2 only.
 V1_COMMIT = "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8"
-VERSION_TAG = "robustness-campaign-v2"
+# v2.1 changes this controller only (operational; docs/FROZEN_CAMPAIGN.md): jobs of v2 and v2.1 run identical code.
+VERSION_TAG = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "robustness-campaign-v2.1")
+SAME_VERSION_TAGS = ("robustness-campaign-v2", "robustness-campaign-v2.1")
 
 
 def _tag_commit(tag: str) -> str:
@@ -67,6 +69,16 @@ try:
     FROZEN_COMMIT: Optional[str] = _tag_commit(VERSION_TAG)
 except RuntimeError:  # no tag: the controller refuses to run (verify_freeze)
     FROZEN_COMMIT = None
+
+
+def _same_version_commits() -> set:
+    out = {FROZEN_COMMIT} if FROZEN_COMMIT else set()
+    for tag in SAME_VERSION_TAGS:
+        try:
+            out.add(_tag_commit(tag))
+        except RuntimeError:
+            pass
+    return out
 # Overridable for a test of the controller itself in scratch folders (never for the campaign).
 RESULTS = Path(os.environ.get("CDF_CAMPAIGN_RESULTS", str(ROOT / "results" / "robustness" / "frozen_campaign")))
 WORK = Path(os.environ.get("CDF_CAMPAIGN_WORK", str(ROOT / "robustness" / "frozen_campaign")))
@@ -193,6 +205,9 @@ class Monitor:
         self.samples: List[Dict[str, Any]] = []
 
     def sample(self, workers: Dict[str, Any]) -> Dict[str, Any]:
+        """CPU of the campaign's job processes and of every other process, each measured directly over the
+        interval (v2.1: other load was total minus the jobs alive at the sample, which counted the CPU of every
+        job that ended within the interval as other load)."""
         ps = self.psutil
         vm, sw = ps.virtual_memory(), ps.swap_memory()
         io, t = ps.disk_io_counters(), time.monotonic()
@@ -201,25 +216,26 @@ class Monitor:
         if io is not None and self.io0 is not None and hasattr(io, "read_time"):
             busy = min(1.0, ((io.read_time - self.io0.read_time) + (io.write_time - self.io0.write_time)) / 1000.0 / dt)
         self.io0, self.t0 = io, t
-        own_cpu, own_rss = 0.0, 0
-        for w in workers.values():
-            for p in w["procs"]:
-                try:
-                    own_cpu += p.cpu_percent(None)
+        own_cpu, own_rss, other_cpu, others = 0.0, 0, 0.0, []
+        me = os.getpid()
+        for p in ps.process_iter(["pid", "name", "cmdline"]):  # psutil keeps the Process objects between calls
+            try:
+                if p.info["name"] == "System Idle Process":
+                    continue
+                c = p.cpu_percent(None)
+                cmd = " ".join(p.info["cmdline"] or [])
+                if p.info["pid"] == me or ("campaign_controller" in cmd and "_run-job" in cmd):
+                    own_cpu += c
                     own_rss += p.memory_info().rss
-                except Exception:
-                    pass
-            try:  # children started since the last sample (none expected: one process per job)
-                for child in w["proc"].children(recursive=True):
-                    if child.pid not in w["pids"]:
-                        w["pids"].add(child.pid)
-                        w["procs"].append(child)
-                        child.cpu_percent(None)
+                else:
+                    other_cpu += c
+                    others.append((c, p.info["name"]))
             except Exception:
                 pass
         total = ps.cpu_percent(None)
+        self.top_others = [{"name": n, "cpu_percent": round(c, 1)} for c, n in sorted(others, reverse=True)[:6] if c > 5.0]
         s = {"time": now(), "cpu_percent": total, "cpu_cores_used": round(total / 100.0 * self.cpus, 2),
-             "own_cores": round(own_cpu / 100.0, 2), "other_cores": round(max(0.0, total / 100.0 * self.cpus - own_cpu / 100.0), 2),
+             "own_cores": round(own_cpu / 100.0, 2), "other_cores": round(other_cpu / 100.0, 2),
              "ram_total_gb": round(vm.total / 2 ** 30, 1), "ram_available_gb": round(vm.available / 2 ** 30, 1),
              "own_rss_gb": round(own_rss / 2 ** 30, 2), "pagefile_used_gb": round(sw.used / 2 ** 30, 2),
              "pagefile_growth_gb": round((sw.used - self.swap0) / 2 ** 30, 2), "pagefile_percent": sw.percent,
@@ -229,16 +245,8 @@ class Monitor:
         return s
 
     def others(self, own_pids: set) -> List[Dict[str, Any]]:
-        """The largest CPU users that are not campaign workers (other users' workloads, where observable)."""
-        rows = []
-        for p in self.psutil.process_iter(["pid", "name", "cpu_times"]):
-            if p.info["pid"] in own_pids or p.info["pid"] == os.getpid():
-                continue
-            try:
-                rows.append((p.cpu_percent(None), p.info["name"]))
-            except Exception:
-                pass
-        return [{"name": n, "cpu_percent": round(c, 1)} for c, n in sorted(rows, reverse=True)[:5] if c > 5.0]
+        """The largest CPU users that are not campaign workers over the last sample (other users' workloads)."""
+        return list(getattr(self, "top_others", []))
 
 
 def decide(target: int, samples: List[Dict[str, Any]], running: int, cpus: int) -> Tuple[int, str]:
@@ -258,7 +266,8 @@ def decide(target: int, samples: List[Dict[str, Any]], running: int, cpus: int) 
         return max(MIN_WORKERS, target - 2), "RAM available {0} GB below {1}".format(avail, RAM_HEADROOM_GB)
     if growth > 1.0:
         return max(MIN_WORKERS, target - 2), "page file grew {0:.1f} GB".format(growth)
-    if running >= target and running >= 6 and per_worker < 0.75:
+    saturated = statistics.median(s.get("cpu_percent", 0.0) for s in recent) >= 90.0
+    if saturated and running >= target and running >= 6 and per_worker < 0.75:
         return max(MIN_WORKERS, target - 2), "workers get {0:.2f} core each (oversubscribed)".format(per_worker)
     capacity = int(cpus - CPU_HEADROOM - other)
     if capacity < target:
@@ -320,8 +329,9 @@ def supervise(args: argparse.Namespace) -> int:
     key = robustness.job_key
     finished = {key(r) for r in done if r.get("status") == "complete"}
     attempts: Dict[Tuple[Any, ...], int] = {}
-    for r in done:  # attempts of the current version only: a v1 failure (evaluation defect) is attempted again
-        if (r.get("provenance") or {}).get("git_commit") == FROZEN_COMMIT:
+    same = _same_version_commits()
+    for r in done:  # attempts of the current version (v2, v2.1) only: a v1 failure (evaluation defect) is attempted again
+        if (r.get("provenance") or {}).get("git_commit") in same:
             attempts[key(r)] = attempts.get(key(r), 0) + 1
     walls: Dict[Tuple[str, ...], List[float]] = {}
 
@@ -389,13 +399,44 @@ def supervise(args: argparse.Namespace) -> int:
         workers[jid] = {"job": job, "key": k, "popen": proc, "proc": p, "procs": [p], "pids": {p.pid}, "started": time.monotonic(),
                         "started_at": now(), "out": out_path, "job_path": job_path, "stderr": err}
 
+    def adopt() -> None:
+        """Job processes left running by a previous controller (v2.1): followed until they end and reaped then;
+        a job file whose process is gone is reaped from its result file (or recorded as failed without one)."""
+        live = {}
+        for p in psutil.process_iter(["pid", "cmdline"]):
+            cmd = " ".join(p.info["cmdline"] or [])
+            if "_run-job" in cmd and "campaign_controller" in cmd:
+                for part in p.info["cmdline"] or []:
+                    if part.endswith(".job.json"):
+                        live[Path(part).name[:-len(".job.json")]] = p
+        for job_path in sorted((CONTROL / "running").glob("*.job.json")):
+            jid = job_path.name[:-len(".job.json")]
+            job = json.loads(job_path.read_text(encoding="utf-8"))
+            job["parameter"] = _restore_parameter(job)
+            proc = live.get(jid)
+            age = (time.time() - proc.create_time()) if proc is not None else 0.0
+            workers[jid] = {"job": job, "key": key(job), "popen": None, "proc": proc, "procs": [proc] if proc else [],
+                            "pids": {proc.pid} if proc else set(), "started": time.monotonic() - age,
+                            "started_at": now(), "out": CONTROL / "running" / (jid + ".result.json"),
+                            "job_path": job_path, "stderr": None, "adopted": True}
+            if proc is not None:
+                proc.cpu_percent(None)
+        if workers:
+            log("adopted {0} job processes of the previous controller ({1} still running)".format(
+                len(workers), sum(1 for w in workers.values() if w["proc"] is not None)))
+
     def reap() -> int:
         reaped = 0
         for jid, w in list(workers.items()):
-            code = w["popen"].poll()
+            if w["popen"] is not None:
+                code = w["popen"].poll()
+            else:  # adopted: no exit code available
+                alive = w["proc"] is not None and w["proc"].is_running() and w["proc"].status() != psutil.STATUS_ZOMBIE
+                code = None if alive else "unknown (adopted process)"
             if code is None:
                 continue
-            w["stderr"].close()
+            if w["stderr"] is not None:
+                w["stderr"].close()
             result = None
             if w["out"].exists():
                 try:
@@ -467,6 +508,8 @@ def supervise(args: argparse.Namespace) -> int:
                 "seeds": {"{0} / {1}".format(f, label): len(ss) for (f, label), ss in seeds.items() if stochastic[f]}}
 
     started = time.monotonic()
+    last_decide = started  # v2.1: the first decision after one decision interval, not during the start-up
+    adopt()
     pending = pending_jobs()
     last_pending = time.monotonic()
     try:
@@ -484,14 +527,15 @@ def supervise(args: argparse.Namespace) -> int:
                         for child in w["proc"].children(recursive=True):
                             child.terminate()
                         w["proc"].terminate()
-                    except Exception:
+                    except Exception:  # no process (adopted job already ended) or gone
                         pass
                 gone, alive = psutil.wait_procs([p for w in workers.values() for p in w["procs"]], timeout=30)
                 for p in alive:
                     p.kill()
                 interrupted = []
                 for jid, w in list(workers.items()):
-                    w["stderr"].close()
+                    if w["stderr"] is not None:
+                        w["stderr"].close()
                     interrupted.append({"family": w["job"]["family"], "level": w["job"]["level"], "run": str(w["job"]["run"]),
                                         "recorder": w["job"].get("recorder"), "seed": w["job"]["seed"]})
                     for path in (w["out"], w["job_path"], CONTROL / "running" / (jid + ".stderr.txt")):
@@ -542,6 +586,8 @@ def supervise(args: argparse.Namespace) -> int:
                         write_json(CONTROL / "state.json", snapshot([], "COMPLETE"))
                         log("campaign complete: {0} records; summary written".format(len(done)))
                         return 0
+            if t - last_sample < POLL_S + 0.5 and state == "RUNNING":  # v2.1: live state after every sample
+                write_json(CONTROL / "state.json", dict(snapshot(pending), other_workloads=monitor.others(set())))
             if t - last_report >= REPORT_S or not (CONTROL / "state.json").exists():
                 snap = snapshot(pending if state == "RUNNING" else pending_jobs())
                 snap["other_workloads"] = monitor.others({pid for w in workers.values() for pid in w["pids"]})

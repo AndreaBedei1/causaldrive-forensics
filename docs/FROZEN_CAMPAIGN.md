@@ -128,3 +128,13 @@ Equivalence: both changes only act where v1 raised, so every job v1 completed ha
 again under v2 (attempts are counted per version) and its v1 record stays in `jobs.jsonl` for the audit trail.
 The 14 jobs running when the v1 pool was stopped wrote nothing and run again with the same seeds and keys
 (`results/robustness/frozen_campaign/control/handover_v1_to_v2.json`).
+
+## Revision v2.1 (tag `robustness-campaign-v2.1`): controller only
+
+`scripts/campaign_controller.py` only; the jobs run the same code as v2 (same `robustness.run_job`, evaluation and
+records; attempts count over v2 and v2.1 together).  The v2 controller estimated other users' load as total CPU
+minus the CPU of the jobs alive at each sample, which counted every job that ended within the interval as other
+load (measured 10.5 cores against 8.0 measured directly), and it lowered concurrency to 6.  v2.1 measures every
+process directly, makes its first decision after one interval, applies the per-worker efficiency rule only when the
+machine is saturated (below that, little CPU per job means I/O, not contention), refreshes the live state every
+minute, and on start adopts job processes a previous controller left running (no running job lost at the switch).
