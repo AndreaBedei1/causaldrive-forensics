@@ -2,7 +2,9 @@ scenario:
   scenario_id: S08
   name: single_stop_a
   description: 'A faces a stop sign on its approach; B does not. A slows down but
-    rolls through the stop line without stopping and is struck by B.
+    rolls through the stop line without stopping and is struck by B.  A signals its left turn from 0.5 s,
+    before the stop sign comes into view, and is hit during the turn with the indicator still on (never
+    switched off: no indicator end).
 
     '
   map: Town05
@@ -57,3 +59,10 @@ scenario:
             duration: 14.0
             params:
               target_speed: 5.5
+          # Left indicator (a light only, independent of the steering), on before the stop sign is detected.
+          - action_id: A_indicator_left
+            kind: indicator
+            t_start: 0.5
+            duration: 60.0  # beyond the end of the run: the turn ends in the collision, never switched off
+            params:
+              side: -1

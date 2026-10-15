@@ -83,9 +83,10 @@ def _pose(actor: Any) -> Pose:
 
 def _scheduled_end(spec: ScenarioSpec) -> float:
     """When every declared manoeuvre is over (an armed triggered action: if it fired
-    at the end of its window).  Capture control only."""
+    at the end of its window).  A turn indicator is a light, not a manoeuvre: one left on
+    beyond the run does not extend it.  Capture control only."""
     return max([action.latest_end() for participant in spec.participants for action in participant.actions
-                if action.enabled or action.trigger is None], default=0.0)
+                if (action.enabled or action.trigger is None) and action.kind != "indicator"], default=0.0)
 
 
 def write_incident_context(run_root: Path, context: Dict[str, Any]) -> None:

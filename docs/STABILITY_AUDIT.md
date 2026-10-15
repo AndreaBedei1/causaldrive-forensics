@@ -65,7 +65,7 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S04/run_0_b_rear_first | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S05/run_0_crash | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S06/run_0_crash | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
-| S07/run_0_merge_conflict | 0 | 1 | 0 | - | [('B', 'A', 9.25)] | - | 0 | 0 | 0 | 0 |
+| S07/run_0_merge_conflict | 0 | 1 | 0 | - | [('B', 'A', 5.25)] | - | 0 | 0 | 0 | 0 |
 | S08/run_0_rolls_through | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S09/run_0_near_simultaneous | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |
 | S10/run_0_deflected_into_c | 0 | 0 | 0 | - | - | - | 0 | 0 | 0 | 0 |

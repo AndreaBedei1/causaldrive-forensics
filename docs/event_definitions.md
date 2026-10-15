@@ -233,13 +233,16 @@ perceived state.
 
 * The signal, not a manoeuvre: never inferred from steering, yaw, a lane change or a CUT_IN; a lane change
   without the signal has no indicator event, an indicator without a manoeuvre (or left on after it) has one.
-* A recording made before the light log existed (every canonical run except S07 and
+* A recording made before the light log existed (every canonical run except S07, S08 and
   S17, re-recorded with it): both states UNKNOWN for the whole recording, never off, and no event.
 * Other road users' indicators are not observable (no sensor of the recorders measures them): nothing is inferred
   about them, and ground truth is never used.
 * The scenarios script the lights with an `indicator` action (`side` -1 / +1), independent of their motion:
-  S17 (A signals its lane change and leaves the indicator on; B changes lane without signalling), S07 (a
-  roundabout driven without any signal).
+  S17 (A signals its lane change and leaves the indicator on; B changes lane without signalling); S07 (A
+  signals left on the west approach, before entering, and is still circulating with it on when hit: no END; B
+  signals right before its entry turn and switches off once the turn is complete, 0.2 s before the contact);
+  S08 (A signals left before the stop sign comes into view; its turn ends in the collision with the indicator
+  still on: no END).  An indicator still on when the recording ends has no END event.
 
 ## 7. Derived quantity: observed vehicle response delay
 

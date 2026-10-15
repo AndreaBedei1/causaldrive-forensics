@@ -112,5 +112,76 @@ class ScriptedIndicatorTests(unittest.TestCase):
         self.assertEqual(c.indicator(8.0), 0)
 
 
+
+_LOCAL = {}
+
+
+def canonical_local(run, owner):
+    """The reconstruction of one canonical recorder, once per test session."""
+    if (run, owner) not in _LOCAL:
+        _LOCAL[(run, owner)] = reconstruct_vehicle(ROOT / "traces" / run / "vehicles" / owner, ReconstructionConfig())
+    return _LOCAL[(run, owner)]
+
+
+class CanonicalSignalTests(unittest.TestCase):
+    """S07 and S08 signal their turns: the reconstructed events are exactly the logged light transitions (local time
+    = scenario time - 0.05 s); an indicator still on when the recording ends has no END."""
+
+    EXPECTED = {
+        ("S07/run_0_merge_conflict", "A"): [("INDICATOR_LEFT_START", 0.95)],  # still circulating when hit
+        ("S07/run_0_merge_conflict", "B"): [("INDICATOR_RIGHT_START", 12.95), ("INDICATOR_RIGHT_END", 19.05)],
+        ("S08/run_0_rolls_through", "A"): [("INDICATOR_LEFT_START", 0.45)],  # the turn ends in the collision
+        ("S08/run_0_rolls_through", "B"): [],
+    }
+
+    @staticmethod
+    def logged(vehicle):
+        import json
+        rows = [json.loads(line) for line in (vehicle / "lights.jsonl").read_text(encoding="utf-8").splitlines()]
+        return rows
+
+    def test_events_are_the_logged_transitions(self):
+        for (run, owner), expected in self.EXPECTED.items():
+            vehicle = ROOT / "traces" / run / "vehicles" / owner
+            if not vehicle.exists():
+                continue
+            local = canonical_local(run, owner)
+            found = sorted((n.event_type, round(n.t_local, 2)) for n in local.graph.nodes
+                           if n.event_type.startswith("INDICATOR_"))
+            self.assertEqual(found, sorted(expected), (run, owner))
+            # Every transition of the log is an event and nothing else: count the on/off changes.
+            rows, changes, previous = self.logged(vehicle), 0, (False, False)
+            for row in rows:
+                state = (row["left_blinker"], row["right_blinker"])
+                changes += (state[0] != previous[0]) + (state[1] != previous[1])
+                previous = state
+            self.assertEqual(changes, len(expected), (run, owner))
+
+    def test_signals_precede_the_turns(self):
+        def first(run, owner, event):
+            local = canonical_local(run, owner)
+            return min(n.t_local for n in local.graph.nodes if n.event_type == event)
+        if not (ROOT / "traces/S08/run_0_rolls_through/vehicles/A/lights.jsonl").exists():
+            self.skipTest("canonical trace not present")
+        self.assertLess(first("S08/run_0_rolls_through", "A", "INDICATOR_LEFT_START"),
+                        first("S08/run_0_rolls_through", "A", "STOP_SIGN_DETECTED_START"))
+        self.assertLess(first("S07/run_0_merge_conflict", "A", "INDICATOR_LEFT_START"),
+                        first("S07/run_0_merge_conflict", "A", "TURN_LEFT_START"))
+        b = "S07/run_0_merge_conflict"
+        self.assertLess(first(b, "B", "INDICATOR_RIGHT_START"), first(b, "B", "TURN_RIGHT_START"))
+        self.assertLess(first(b, "B", "TURN_RIGHT_END"), first(b, "B", "INDICATOR_RIGHT_END"))
+        self.assertLess(first(b, "B", "INDICATOR_RIGHT_END"), first(b, "B", "COLLISION"))
+
+
+class CaptureTests(unittest.TestCase):
+    def test_an_indicator_left_on_does_not_extend_the_recording(self):
+        from types import SimpleNamespace
+        from src.cdf.simulation.runner import _scheduled_end
+        spec = SimpleNamespace(participants=[SimpleNamespace(actions=[
+            ScriptedAction("brake", "brake", 2.0, 3.0, {"intensity": 1.0}),
+            ScriptedAction("signal", "indicator", 0.5, 60.0, {"side": -1.0})])])
+        self.assertEqual(_scheduled_end(spec), 5.0)
+
+
 if __name__ == "__main__":
     unittest.main()
