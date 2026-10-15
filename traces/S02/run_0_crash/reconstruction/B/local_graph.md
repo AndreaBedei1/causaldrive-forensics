@@ -54,11 +54,11 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START | ego: not yet observed | - |
-| 3.15 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE | 3.10 |
-| 3.65 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.60 |
-| 3.75 | B:e06 THROTTLE_START | ego: MOVING | 3.70 |
-| 5.30 | B:e07 COLLISION<br>B:e08 THROTTLE_END<br>B:e09 BRAKE_START | ego: MOVING, THROTTLE | 5.20 |
-| 5.85 | B:e10 MOVING_END<br>B:e11 STOP_START | ego: MOVING, BRAKE | 5.80 |
+| 3.15 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.10 |
+| 3.65 | B:e05 BRAKE_END | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.60 |
+| 3.75 | B:e06 THROTTLE_START | ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.70 |
+| 5.30 | B:e07 COLLISION<br>B:e08 THROTTLE_END<br>B:e09 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 5.20 |
+| 5.85 | B:e10 MOVING_END<br>B:e11 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 5.80 |
 
 ## States still active when observation ended
 

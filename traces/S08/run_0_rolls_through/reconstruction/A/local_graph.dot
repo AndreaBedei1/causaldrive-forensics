@@ -14,7 +14,7 @@ digraph "local_A" {
   "A:e10" [label="THROTTLE_START\nA\nt=2.85", fillcolor="#fde68a"];
   "A:e11" [label="CRITICAL_TTC_START\nA -> track_001\nt=3.35", fillcolor="#bfdbfe"];
   "A:e12" [label="TURN_LEFT_START\nA\nt=3.70", fillcolor="#e5e7eb"];
-  "A:e13" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.15", fillcolor="#bfdbfe"];
+  "A:e13" [label="EGO_PATH_ENTRY\nA -> track_001\nt=4.15", fillcolor="#bfdbfe"];
   "A:e14" [label="COLLISION\nA\nt=5.40", fillcolor="#fca5a5"];
   "A:e15" [label="CRITICAL_TTC_END\nA -> track_001\nt=5.40", fillcolor="#bfdbfe"];
   "A:e16" [label="CLOSING_END\nA -> track_001\nt=5.40", fillcolor="#bfdbfe"];

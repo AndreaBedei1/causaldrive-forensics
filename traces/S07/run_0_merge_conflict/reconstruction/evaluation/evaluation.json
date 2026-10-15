@@ -1,6 +1,6 @@
 {
   "run": "S07/run_0_merge_conflict",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 3/3; anonymous: 0; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 24.25629462301731,
+      "sim_time": 25.764892175793648,
       "peak_impulse": 1904.842293204932,
-      "reconstructed_as": "g17",
+      "reconstructed_as": "g15",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 31,
+    "nodes": 28,
     "max_abs_error_s": 0.0,
-    "order_pairs": 430,
-    "order_concordant": 430
+    "order_pairs": 348,
+    "order_concordant": 348
   },
   "tracks": [
     {
@@ -61,15 +61,15 @@
       "status": "ASSOCIATED",
       "true_identity": "B",
       "median_box_distance_m": {
-        "B": 0.4
+        "B": 0.0
       },
       "verdict": "correct",
-      "samples": 198,
-      "raw_rmse_to_surface_m": 0.629,
-      "smoothed_rmse_to_surface_m": 0.568,
-      "smoothed_rmse_to_centre_m": 1.534,
-      "raw_difference_speed_rmse_mps": 5.377,
-      "speed_rmse_mps": 0.392
+      "samples": 200,
+      "raw_rmse_to_surface_m": 0.26,
+      "smoothed_rmse_to_surface_m": 0.46,
+      "smoothed_rmse_to_centre_m": 1.234,
+      "raw_difference_speed_rmse_mps": 3.379,
+      "speed_rmse_mps": 0.135
     },
     {
       "track": "B:track_001",
@@ -80,28 +80,12 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 4,
-      "raw_rmse_to_surface_m": 0.162,
-      "smoothed_rmse_to_surface_m": 0.198,
-      "smoothed_rmse_to_centre_m": 0.991,
-      "raw_difference_speed_rmse_mps": 12.799,
-      "speed_rmse_mps": 0.702
-    },
-    {
-      "track": "B:track_002",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "true_identity": "A",
-      "median_box_distance_m": {
-        "A": 0.0
-      },
-      "verdict": "correct",
-      "samples": 199,
-      "raw_rmse_to_surface_m": 0.422,
-      "smoothed_rmse_to_surface_m": 0.474,
-      "smoothed_rmse_to_centre_m": 1.544,
-      "raw_difference_speed_rmse_mps": 4.078,
-      "speed_rmse_mps": 0.317
+      "samples": 206,
+      "raw_rmse_to_surface_m": 0.417,
+      "smoothed_rmse_to_surface_m": 0.445,
+      "smoothed_rmse_to_centre_m": 1.508,
+      "raw_difference_speed_rmse_mps": 3.815,
+      "speed_rmse_mps": 0.13
     }
   ],
   "contact_clearances": [
@@ -114,19 +98,19 @@
       "clearance_m": 0.0,
       "true_gap_m": 0.0,
       "error_m": 0.0,
-      "range_m": 1.363,
+      "range_m": 0.984,
       "ttc_s": null
     },
     {
       "contact": "A + B",
       "recorder": "B",
       "partner": "A",
-      "track": "B:track_002",
+      "track": "B:track_001",
       "seen_s_before_contact": -0.05,
-      "clearance_m": 0.368,
+      "clearance_m": 0.188,
       "true_gap_m": 0.0,
-      "error_m": 0.368,
-      "range_m": 0.639,
+      "error_m": 0.188,
+      "range_m": 0.701,
       "ttc_s": null
     }
   ],

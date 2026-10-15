@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 13.70 s | 138 | 13 | 20 | 1 | A:e08 @ 4.80 s, A:e13 @ 5.45 s |
+| A | 13.70 s | 138 | 13 | 24 | 1 | A:e08 @ 4.80 s, A:e13 @ 5.45 s |
 | B | 13.70 s | 138 | 15 | 25 | 1 | B:e08 @ 4.80 s, B:e10 @ 5.30 s |
 | C | 13.70 s | 138 | 7 | 10 | 0 | C:e07 @ 5.30 s |
 
@@ -36,8 +36,8 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.89 | A and B both reported collision_001 at 4.80 s (peak impulse 10281.41 vs 10281.41 N*s)<br>tracked for 4.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 4.7 m -> 0.4 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.72 m/s for reference)<br>clearance at the contact 0.44 m<br>the only track of A compatible with the contact<br>collision_002 with B at 5.45 s: also compatible |
-| B:track_001 | C | ASSOCIATED | 1.00 | B and C both reported collision_003 at 5.30 s (peak impulse 8788.05 vs 8788.05 N*s)<br>tracked for 5.30 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 6.4 m -> 0.0 m over the last 1.0 s<br>track motion compatible with C's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)<br>clearance at the contact 0.03 m<br>the only track of B compatible with the contact<br>collision_001 with A at 4.80 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 7.47 m/s for reference))<br>collision_002 with A at 5.45 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 7.91 m/s for reference)) |
+| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 at 4.80 s (peak impulse 10281.41 vs 10281.41 N*s)<br>tracked for 4.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 4.5 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.18 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact<br>collision_002 with B at 5.45 s: also compatible |
+| B:track_001 | C | ASSOCIATED | 0.99 | B and C both reported collision_003 at 5.30 s (peak impulse 8788.05 vs 8788.05 N*s)<br>tracked for 5.30 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 6.4 m -> 0.1 m over the last 1.0 s<br>track motion compatible with C's own speed in the observed direction (3 sigma; full-speed RMSE 0.17 m/s for reference)<br>clearance at the contact 0.06 m<br>the only track of B compatible with the contact<br>collision_001 with A at 4.80 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 7.54 m/s for reference))<br>collision_002 with A at 5.45 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 7.90 m/s for reference)) |
 
 ## Road users in the common frame
 
@@ -45,7 +45,7 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 ## Global graph
 
-33 nodes, 64 edges; 7 merged node(s): g09 CRITICAL_TTC_START(A,B) from A:e04 + A:e09, g10 CRITICAL_TTC_START(B,C) from B:e04 + B:e11, g13 CLOSING_START(B,C) from B:e05 + B:e12, g16 CLOSING_START(A,B) from A:e05 + A:e10, g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
+33 nodes, 66 edges; 7 merged node(s): g09 CRITICAL_TTC_START(A,B) from A:e04 + A:e09, g10 CRITICAL_TTC_START(B,C) from B:e04 + B:e11, g13 CLOSING_START(B,C) from B:e05 + B:e12, g16 CLOSING_START(A,B) from A:e05 + A:e10, g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
 
 ### Event sequence (global time)
 
@@ -54,12 +54,11 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - `-1.85` THROTTLE_END(C); BRAKE_START(C)
 - `-1.60` CLOSING_START(B,C)
 - `-1.10` THROTTLE_END(B); BRAKE_START(B)
-- `-0.85` CLOSING_START(A,B)
+- `-0.90` CLOSING_START(A,B)
 - `-0.75` MOVING_END(C); STOP_START(C)
 - `-0.25` THROTTLE_END(A); BRAKE_START(A)
-- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
 - `+0.05` BRAKE_END(B)
-- `+0.40` CLOSING_END(A,B)
 - `+0.50` COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - `+0.55` MOVING_END(A); STOP_START(A)
 - `+0.65` COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
@@ -81,15 +80,15 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - 1.60 s before the reference collision, B observed C start closing in.
 - 1.10 s before the reference collision, B released the accelerator.
 - 1.10 s before the reference collision, B started braking.
-- 0.85 s before the reference collision, A observed B start closing in.
+- 0.90 s before the reference collision, A observed B start closing in.
 - 0.75 s before the reference collision, C stopped moving.
 - 0.75 s before the reference collision, C came to a stop.
 - 0.25 s before the reference collision, A released the accelerator.
 - 0.25 s before the reference collision, A started braking.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 10281, B: 10281 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
+- At the reference collision, A observed B stop closing in.
 - 0.05 s after the reference collision, B released the brake.
-- 0.40 s after the reference collision, A observed B stop closing in.
 - 0.50 s after the reference collision, B and C both recorded this same collision (peak impulses B: 8788, C: 8788 N*s).
 - 0.50 s after the reference collision, B's time-to-contact with C stopped being critical.
 - 0.50 s after the reference collision, B observed C stop closing in.
@@ -115,7 +114,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - THROTTLE_END(B); BRAKE_START(B)
 - MOVING_END(C); STOP_START(C)
 - THROTTLE_END(A); BRAKE_START(A)
-- COLLISION(A,B); CRITICAL_TTC_END(A,B)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
 - COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - MOVING_END(A); STOP_START(A)
 - COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
@@ -143,11 +142,11 @@ C:
 
 ### Perceived state just before each collision report
 
-- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- A A:e13 at 5.45 s (local): ego: STOP, BRAKE; track_001: IN_EGO_PATH
-- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- B B:e10 at 5.30 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- C C:e07 at 5.30 s (local): ego: STOP, BRAKE
+- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- A A:e13 at 5.45 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: IN_EGO_PATH
+- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e10 at 5.30 s (local): ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- C C:e07 at 5.30 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?
 
 ### Tracks lost while a state was active
 
@@ -196,7 +195,9 @@ C:
     "radial_speed_std_mps": 0.3,
     "acceleration_std_mps2": 6.0,
     "smoothing_innovation_sigma": 3.0,
-    "min_slowdown_returns": 3,
+    "max_braking_mps2": 30.0,
+    "contact_clearance_m": 1.0,
+    "lane_heading_std_deg": 10.0,
     "identity_body_width_m": 2.5,
     "gate_probability": 0.99,
     "body_length_m": 4.6,
@@ -276,6 +277,9 @@ C:
     "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "path_hysteresis_m": 0.5,
+    "path_edge_std_m": 0.25,
+    "path_occupancy_quantile": 1.645,
+    "path_min_definite_samples": 2,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,

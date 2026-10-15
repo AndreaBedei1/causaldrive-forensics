@@ -8,9 +8,9 @@
         "A",
         "B"
       ],
-      "sim_time": 54.93444100022316,
-      "peak_impulse": 604.4798968714863,
-      "reconstructed_as": "g17",
+      "sim_time": 17.62284803017974,
+      "peak_impulse": 937.4865756723694,
+      "reconstructed_as": "g21",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 30,
+    "nodes": 34,
     "max_abs_error_s": 0.0,
-    "order_pairs": 402,
-    "order_concordant": 402
+    "order_pairs": 524,
+    "order_concordant": 524
   },
   "tracks": [
     {
@@ -65,11 +65,11 @@
       },
       "verdict": "correct",
       "samples": 113,
-      "raw_rmse_to_surface_m": 0.166,
-      "smoothed_rmse_to_surface_m": 0.287,
-      "smoothed_rmse_to_centre_m": 1.215,
-      "raw_difference_speed_rmse_mps": 3.219,
-      "speed_rmse_mps": 0.38
+      "raw_rmse_to_surface_m": 0.165,
+      "smoothed_rmse_to_surface_m": 0.272,
+      "smoothed_rmse_to_centre_m": 1.138,
+      "raw_difference_speed_rmse_mps": 3.256,
+      "speed_rmse_mps": 0.119
     },
     {
       "track": "B:track_001",
@@ -81,11 +81,11 @@
       },
       "verdict": "correct",
       "samples": 93,
-      "raw_rmse_to_surface_m": 0.09,
-      "smoothed_rmse_to_surface_m": 0.122,
-      "smoothed_rmse_to_centre_m": 2.334,
-      "raw_difference_speed_rmse_mps": 0.622,
-      "speed_rmse_mps": 0.304
+      "raw_rmse_to_surface_m": 0.092,
+      "smoothed_rmse_to_surface_m": 0.089,
+      "smoothed_rmse_to_centre_m": 2.33,
+      "raw_difference_speed_rmse_mps": 0.79,
+      "speed_rmse_mps": 0.124
     }
   ],
   "contact_clearances": [
@@ -98,7 +98,7 @@
       "clearance_m": 0.0,
       "true_gap_m": 0.0,
       "error_m": 0.0,
-      "range_m": 0.729,
+      "range_m": 0.916,
       "ttc_s": null
     },
     {
@@ -107,10 +107,10 @@
       "partner": "A",
       "track": "B:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.428,
+      "clearance_m": 0.338,
       "true_gap_m": 0.0,
-      "error_m": 0.428,
-      "range_m": 0.895,
+      "error_m": 0.338,
+      "range_m": 0.774,
       "ttc_s": null
     }
   ],

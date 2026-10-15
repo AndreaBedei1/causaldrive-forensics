@@ -8,20 +8,15 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 |-------|----------|--------|----|---------------|-------:|---------|
 | A:track_001 | C | ASSOCIATED | collision | C | 1.000 | correct link |
 | B:track_001 | A | ASSOCIATED | collision | A | 1.000 | correct link |
-| B:track_002#segment_1 | C | ASSOCIATED | common_frame | C | 1.000 | correct link |
-| B:track_002#segment_2 | U1 | ANONYMOUS | - | - | 1.000 | anonymous (clutter: no true vehicle) |
-| B:track_002#segment_3 | U2 | ANONYMOUS | - | - | 1.000 | anonymous (clutter: no true vehicle) |
-| B:track_003 | C | ASSOCIATED | collision | C | 1.000 | correct link |
+| B:track_002 | C | ASSOCIATED | common_frame | C | 1.000 | correct link |
 | C:track_001 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 
-Counts: anonymous: 2, correct link: 5
+Counts: correct link: 4
 
 ## Anonymous entities
 
 | Entity | Source tracks | True identity | Recorder? | Purity |
 |--------|---------------|---------------|-----------|-------:|
-| U1 | B:track_002#segment_2 | - | no | 1.000 |
-| U2 | B:track_002#segment_3 | - | no | 1.000 |
 
 Merges over pairs of anonymous tracks: correct 0, false 0, missed 0.
 Fragmentation (true road user -> entities): none

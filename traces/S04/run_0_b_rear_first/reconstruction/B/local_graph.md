@@ -63,12 +63,12 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START<br>B:e03 TRACK_APPEARED_FRONT track_001 | ego: not yet observed | - |
-| 0.50 | B:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
-| 3.20 | B:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.10 |
-| 4.70 | B:e06 COLLISION<br>B:e07 CRITICAL_TTC_END track_001<br>B:e08 CLOSING_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.60 |
-| 4.75 | B:e09 THROTTLE_END<br>B:e10 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH | 4.70 |
-| 4.85 | B:e11 MOVING_END<br>B:e12 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH | 4.80 |
-| 6.25 | B:e13 COLLISION | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH | 6.20 |
+| 0.50 | B:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
+| 3.20 | B:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.10 |
+| 4.70 | B:e06 COLLISION<br>B:e07 CRITICAL_TTC_END track_001<br>B:e08 CLOSING_END track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.60 |
+| 4.75 | B:e09 THROTTLE_END<br>B:e10 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH | 4.70 |
+| 4.85 | B:e11 MOVING_END<br>B:e12 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH | 4.80 |
+| 6.25 | B:e13 COLLISION | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH | 6.20 |
 
 ## States still active when observation ended
 
@@ -95,7 +95,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 14.15 | 284 | 13.5 m / +0 deg | 0.02 m (4.70) | 0.2 m / +0 deg | 13.8 m/s |
+| track_001 | 0.00 | 14.15 | 284 | 13.5 m / +0 deg | 0.05 m (4.70) | 0.2 m / +0 deg | 13.8 m/s |
 
 Bearing: positive = to B's right. Ranges are measured from the radar to the visible surface of the object.
 

@@ -55,6 +55,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -94,6 +96,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -133,6 +137,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -172,6 +178,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -211,6 +219,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -250,6 +260,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -308,6 +320,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -366,6 +380,8 @@
             "THROTTLE": "UNKNOWN",
             "TURN_LEFT": "UNKNOWN",
             "TURN_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
           },
           "external": {},
@@ -436,6 +452,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -514,6 +532,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -559,6 +579,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -596,6 +618,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -666,6 +690,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -711,6 +737,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -756,6 +784,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -782,7 +812,7 @@
         "A",
         "B"
       ],
-      "t_global": -0.85,
+      "t_global": -0.9,
       "attributes": {
         "source_track": "track_001",
         "aggregation": "entity_state_union",
@@ -794,7 +824,7 @@
           {
             "graph": "A",
             "local_node": "A:e05",
-            "t_local": 3.95,
+            "t_local": 3.9,
             "event_type": "CLOSING_START",
             "attributes": {
               "source_track": "track_001"
@@ -803,7 +833,7 @@
           {
             "graph": "A",
             "local_node": "A:e10",
-            "t_local": 5.2,
+            "t_local": 4.8,
             "event_type": "CLOSING_END",
             "attributes": {
               "source_track": "track_001"
@@ -817,12 +847,12 @@
         {
           "graph": "A",
           "local_node": "A:e05",
-          "t_local": 3.95
+          "t_local": 3.9
         },
         {
           "graph": "A",
           "local_node": "A:e10",
-          "t_local": 5.2
+          "t_local": 4.8
         }
       ],
       "perceived_state_before": {
@@ -834,6 +864,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -846,7 +878,7 @@
             }
           },
           "signs": {},
-          "facts_t_local": 3.9
+          "facts_t_local": 3.8
         }
       }
     },
@@ -879,6 +911,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -916,6 +950,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -953,6 +989,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -998,6 +1036,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1056,6 +1096,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1078,6 +1120,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1151,6 +1195,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1169,6 +1215,81 @@
     },
     {
       "node_id": "g23",
+      "event_type": "CLOSING_END",
+      "kind": "PERCEPTION",
+      "actor_id": "A",
+      "subject_id": "B",
+      "participants": [
+        "A",
+        "B"
+      ],
+      "t_global": 0.0,
+      "attributes": {
+        "source_track": "track_001",
+        "aggregation": "entity_state_union",
+        "semantic_state": "CLOSING",
+        "source_tracks": [
+          "A:track_001"
+        ],
+        "source_local_nodes": [
+          {
+            "graph": "A",
+            "local_node": "A:e05",
+            "t_local": 3.9,
+            "event_type": "CLOSING_START",
+            "attributes": {
+              "source_track": "track_001"
+            }
+          },
+          {
+            "graph": "A",
+            "local_node": "A:e10",
+            "t_local": 4.8,
+            "event_type": "CLOSING_END",
+            "attributes": {
+              "source_track": "track_001"
+            }
+          }
+        ]
+      },
+      "source": "radar",
+      "confidence": null,
+      "observations": [
+        {
+          "graph": "A",
+          "local_node": "A:e10",
+          "t_local": 4.8
+        }
+      ],
+      "perceived_state_before": {
+        "A": {
+          "ego": {
+            "MOVING": true,
+            "STOP": false,
+            "BRAKE": true,
+            "THROTTLE": false,
+            "TURN_LEFT": false,
+            "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
+            "SPEED_LIMIT_EXCEEDED": false
+          },
+          "external": {
+            "track_001": {
+              "CLOSING": true,
+              "CRITICAL_TTC": true,
+              "IN_EGO_PATH": true,
+              "CUT_IN_FROM_LEFT": false,
+              "CUT_IN_FROM_RIGHT": false
+            }
+          },
+          "signs": {},
+          "facts_t_local": 4.7
+        }
+      }
+    },
+    {
+      "node_id": "g24",
       "event_type": "BRAKE_END",
       "kind": "ACTION",
       "actor_id": "B",
@@ -1196,6 +1317,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1209,79 +1332,6 @@
           },
           "signs": {},
           "facts_t_local": 4.8
-        }
-      }
-    },
-    {
-      "node_id": "g24",
-      "event_type": "CLOSING_END",
-      "kind": "PERCEPTION",
-      "actor_id": "A",
-      "subject_id": "B",
-      "participants": [
-        "A",
-        "B"
-      ],
-      "t_global": 0.4,
-      "attributes": {
-        "source_track": "track_001",
-        "aggregation": "entity_state_union",
-        "semantic_state": "CLOSING",
-        "source_tracks": [
-          "A:track_001"
-        ],
-        "source_local_nodes": [
-          {
-            "graph": "A",
-            "local_node": "A:e05",
-            "t_local": 3.95,
-            "event_type": "CLOSING_START",
-            "attributes": {
-              "source_track": "track_001"
-            }
-          },
-          {
-            "graph": "A",
-            "local_node": "A:e10",
-            "t_local": 5.2,
-            "event_type": "CLOSING_END",
-            "attributes": {
-              "source_track": "track_001"
-            }
-          }
-        ]
-      },
-      "source": "radar",
-      "confidence": null,
-      "observations": [
-        {
-          "graph": "A",
-          "local_node": "A:e10",
-          "t_local": 5.2
-        }
-      ],
-      "perceived_state_before": {
-        "A": {
-          "ego": {
-            "MOVING": true,
-            "STOP": false,
-            "BRAKE": true,
-            "THROTTLE": false,
-            "TURN_LEFT": false,
-            "TURN_RIGHT": false,
-            "SPEED_LIMIT_EXCEEDED": false
-          },
-          "external": {
-            "track_001": {
-              "CLOSING": true,
-              "CRITICAL_TTC": false,
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            }
-          },
-          "signs": {},
-          "facts_t_local": 5.1
         }
       }
     },
@@ -1327,6 +1377,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1349,6 +1401,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -1414,6 +1468,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1487,6 +1543,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1532,6 +1590,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1577,6 +1637,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1635,6 +1697,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1657,6 +1721,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1702,6 +1768,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1747,6 +1815,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1792,6 +1862,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
+            "INDICATOR_LEFT": "UNKNOWN",
+            "INDICATOR_RIGHT": "UNKNOWN",
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1981,6 +2053,11 @@
       "relation": "PRECEDES"
     },
     {
+      "from": "g19",
+      "to": "g23",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "g20",
       "to": "g21",
       "relation": "PRECEDES"
@@ -1991,13 +2068,18 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g21",
+      "from": "g20",
       "to": "g23",
       "relation": "PRECEDES"
     },
     {
+      "from": "g21",
+      "to": "g24",
+      "relation": "PRECEDES"
+    },
+    {
       "from": "g22",
-      "to": "g23",
+      "to": "g24",
       "relation": "PRECEDES"
     },
     {
@@ -2107,7 +2189,7 @@
     },
     {
       "from": "g07",
-      "to": "g24",
+      "to": "g23",
       "relation": "SAME_TRACK"
     },
     {
@@ -2203,7 +2285,9 @@
       "radial_speed_std_mps": 0.3,
       "acceleration_std_mps2": 6.0,
       "smoothing_innovation_sigma": 3.0,
-      "min_slowdown_returns": 3,
+      "max_braking_mps2": 30.0,
+      "contact_clearance_m": 1.0,
+      "lane_heading_std_deg": 10.0,
       "identity_body_width_m": 2.5,
       "gate_probability": 0.99,
       "body_length_m": 4.6,
@@ -2283,6 +2367,9 @@
       "turn_min_heading_change_deg": 15.0,
       "path_half_width_m": 1.5,
       "path_hysteresis_m": 0.5,
+      "path_edge_std_m": 0.25,
+      "path_occupancy_quantile": 1.645,
+      "path_min_definite_samples": 2,
       "track_appeared_front_deg": 5.0,
       "max_position_std_m": 1.0,
       "max_velocity_std_mps": 1.0,

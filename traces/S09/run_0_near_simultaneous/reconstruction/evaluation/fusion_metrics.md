@@ -6,13 +6,10 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 
 | Track | Decision | Status | By | True identity | Purity | Verdict |
 |-------|----------|--------|----|---------------|-------:|---------|
-| A:track_001 | B | ASSOCIATED | common_frame | B | 1.000 | correct link |
-| A:track_002 | B | ASSOCIATED | collision | B | 1.000 | correct link |
+| A:track_001 | B | ASSOCIATED | collision | B | 1.000 | correct link |
 | B:track_001 | A | ASSOCIATED | collision | A | 1.000 | correct link |
-| B:track_002 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
-| B:track_003 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
 
-Counts: correct link: 5
+Counts: correct link: 2
 
 ## Anonymous entities
 

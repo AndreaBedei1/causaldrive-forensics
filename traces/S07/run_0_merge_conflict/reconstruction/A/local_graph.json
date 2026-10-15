@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 14.006294470280409,
+      "origin_source_timestamp": 15.514892023056746,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -23,6 +23,7 @@
       "collisions.jsonl",
       "controls.jsonl",
       "ego.jsonl",
+      "lights.jsonl",
       "radar",
       "traffic_signs.jsonl"
     ],
@@ -95,6 +96,8 @@
           "THROTTLE": "UNKNOWN",
           "TURN_LEFT": "UNKNOWN",
           "TURN_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": "UNKNOWN",
+          "INDICATOR_RIGHT": "UNKNOWN",
           "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
         },
         "external": {},
@@ -122,6 +125,8 @@
           "THROTTLE": "UNKNOWN",
           "TURN_LEFT": "UNKNOWN",
           "TURN_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": "UNKNOWN",
+          "INDICATOR_RIGHT": "UNKNOWN",
           "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
         },
         "external": {},
@@ -149,6 +154,8 @@
           "THROTTLE": "UNKNOWN",
           "TURN_LEFT": "UNKNOWN",
           "TURN_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": "UNKNOWN",
+          "INDICATOR_RIGHT": "UNKNOWN",
           "SPEED_LIMIT_EXCEEDED": "UNKNOWN"
         },
         "external": {},
@@ -162,7 +169,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.3,
+      "t_local": 2.75,
       "attributes": {
         "initial_in_ego_path": false
       },
@@ -176,11 +183,13 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 3.2
+        "facts_t_local": 2.7
       }
     },
     {
@@ -189,7 +198,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 3.3,
+      "t_local": 2.75,
       "attributes": {
         "active_at_first_observation": true
       },
@@ -203,11 +212,13 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 3.2
+        "facts_t_local": 2.7
       }
     },
     {
@@ -216,7 +227,7 @@
       "kind": "PERCEPTION",
       "actor_id": "A",
       "subject_id": "track_001",
-      "t_local": 6.9,
+      "t_local": 6.95,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -228,6 +239,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -240,7 +253,7 @@
           }
         },
         "signs": {},
-        "facts_t_local": 6.8
+        "facts_t_local": 6.9
       }
     },
     {
@@ -273,6 +286,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -306,6 +321,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -339,6 +356,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -372,6 +391,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -405,6 +426,8 @@
           "THROTTLE": true,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -438,6 +461,8 @@
           "THROTTLE": false,
           "TURN_LEFT": true,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -471,6 +496,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -504,6 +531,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -652,25 +681,25 @@
       "track_id": "track_001",
       "parent_track": null,
       "identity_ambiguous": false,
-      "first_seen_t_local": 3.3,
+      "first_seen_t_local": 2.75,
       "last_seen_t_local": 23.35,
-      "duration_s": 20.05,
-      "measured_sweeps": 396,
-      "radar_returns": 41258,
+      "duration_s": 20.6,
+      "measured_sweeps": 402,
+      "radar_returns": 30961,
       "radars": [
         "front",
         "left",
         "right"
       ],
-      "min_range_m": 1.33,
-      "min_range_t_local": 10.5,
+      "min_range_m": 0.97,
+      "min_range_t_local": 10.25,
       "min_clearance_m": 0.0,
       "min_clearance_t_local": 10.3,
-      "max_speed_mps": 10.62,
-      "first_range_m": 80.79,
-      "first_bearing_deg": -34.5,
-      "last_range_m": 2.6,
-      "last_bearing_deg": 103.2
+      "max_speed_mps": 9.85,
+      "first_range_m": 87.44,
+      "first_bearing_deg": -43.1,
+      "last_range_m": 1.61,
+      "last_bearing_deg": 101.3
     }
   ]
 }

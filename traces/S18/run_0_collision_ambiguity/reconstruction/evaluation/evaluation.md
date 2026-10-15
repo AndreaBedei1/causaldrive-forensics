@@ -27,28 +27,28 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-60 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1668/1668 pairs.
+57 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 1493/1493 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | U1 | C | correctly left anonymous | 90 | 0.223 / 0.241 m | 2.214 m | 1.415 / 0.106 m/s |
-| A:track_002 | B | B | correct | 88 | 0.145 / 0.216 m | 2.229 m | 1.056 / 0.403 m/s |
-| A:track_003 | U2 | E | correctly left anonymous | 63 | 0.12 / 0.196 m | 1.794 m | 1.103 / 0.599 m/s |
-| A:track_004 | U3 | F | correctly left anonymous | 55 | 0.106 / 0.21 m | 1.744 m | 1.172 / 0.621 m/s |
-| A:track_005 | U5 | D | correctly left anonymous | 91 | 0.221 / 0.317 m | 2.067 m | 2.603 / 0.256 m/s |
-| A:track_006 | U6 | H | correctly left anonymous | 46 | 0.24 / 0.238 m | 1.878 m | 2.306 / 0.355 m/s |
-| A:track_007 | U6 | H | correctly left anonymous | 8 | 0.244 / 0.237 m | 1.631 m | 5.85 / 0.007 m/s |
-| A:track_008 | U4 | G | correctly left anonymous | 8 | 0.073 / 0.068 m | 2.19 m | 0.339 / 0.01 m/s |
-| A:track_009 | U7 | E | correctly left anonymous | 20 | 0.115 / 0.495 m | 1.429 m | 3.964 / 1.915 m/s |
-| A:track_010 | U8 | F | correctly left anonymous | 19 | 0.108 / 0.49 m | 1.295 m | 3.996 / 1.78 m/s |
-| B:track_001 | U4 | G | correctly left anonymous | 120 | 0.073 / 0.071 m | 2.186 m | 0.337 / 0.01 m/s |
-| B:track_002 | U1 | C | correctly left anonymous | 120 | 0.173 / 0.234 m | 1.458 m | 1.702 / 0.297 m/s |
-| B:track_003 | U5 | D | correctly left anonymous | 120 | 0.171 / 0.247 m | 1.432 m | 1.926 / 0.647 m/s |
-| B:track_004 | U6 | H | correctly left anonymous | 118 | 0.213 / 0.254 m | 1.882 m | 2.607 / 0.033 m/s |
-| B:track_005 | U7 | E | correctly left anonymous | 28 | 0.153 / 0.419 m | 1.673 m | 3.699 / 1.828 m/s |
-| B:track_006 | U8 | F | correctly left anonymous | 26 | 0.123 / 0.429 m | 1.471 m | 3.202 / 1.581 m/s |
+| A:track_001 | U1 | C | correctly left anonymous | 90 | 0.233 / 0.24 m | 2.21 m | 1.487 / 0.05 m/s |
+| A:track_002 | B | B | correct | 120 | 0.144 / 0.184 m | 2.225 m | 1.35 / 0.069 m/s |
+| A:track_003 | U2 | E | correctly left anonymous | 63 | 0.12 / 0.337 m | 1.578 m | 1.103 / 0.284 m/s |
+| A:track_004 | U3 | F | correctly left anonymous | 55 | 0.106 / 0.328 m | 1.585 m | 1.172 / 0.233 m/s |
+| A:track_005 | U5 | D | correctly left anonymous | 91 | 0.224 / 0.387 m | 2.066 m | 2.347 / 0.072 m/s |
+| A:track_006 | U6 | H | correctly left anonymous | 43 | 0.245 / 0.199 m | 1.911 m | 2.318 / 0.038 m/s |
+| A:track_007 | U6 | H | correctly left anonymous | 8 | 0.244 / 0.237 m | 1.631 m | 5.85 / 0.008 m/s |
+| A:track_008 | U4 | G | correctly left anonymous | 8 | 0.072 / 0.068 m | 2.189 m | 0.386 / 0.01 m/s |
+| A:track_009 | U7 | E | correctly left anonymous | 20 | 0.115 / 0.759 m | 0.354 m | 4.235 / 0.359 m/s |
+| A:track_010 | U8 | F | correctly left anonymous | 19 | 0.108 / 0.74 m | 0.341 m | 3.996 / 0.35 m/s |
+| B:track_001 | U4 | G | correctly left anonymous | 120 | 0.073 / 0.071 m | 2.186 m | 0.351 / 0.009 m/s |
+| B:track_002 | U1 | C | correctly left anonymous | 120 | 0.173 / 0.284 m | 1.388 m | 1.702 / 0.154 m/s |
+| B:track_003 | U5 | D | correctly left anonymous | 120 | 0.171 / 0.344 m | 1.18 m | 1.926 / 0.28 m/s |
+| B:track_004 | U6 | H | correctly left anonymous | 115 | 0.214 / 0.256 m | 1.879 m | 2.593 / 0.028 m/s |
+| B:track_005 | U7 | E | correctly left anonymous | 28 | 0.152 / 0.579 m | 0.696 m | 3.544 / 0.395 m/s |
+| B:track_006 | U9 | F | correctly left anonymous | 26 | 0.123 / 0.631 m | 0.618 m | 3.202 / 0.377 m/s |
 
 ## Clearance at the true contacts
 
@@ -56,7 +56,7 @@ Per recorder, its track lying on the partner at the last 10 Hz sample at or befo
 
 | Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
 |---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
-| A + B | A | B | A:track_002 | -0.05 s | 0.0 m | 0.0 m | 0.0 m | 0.646 m |
+| A + B | A | B | A:track_002 | -0.05 s | 0.0 m | 0.0 m | 0.0 m | 0.144 m |
 | A + B | B | A | - | - s | - m | - m | - m | - m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).

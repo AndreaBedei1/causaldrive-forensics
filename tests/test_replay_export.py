@@ -40,7 +40,10 @@ class S12ExportTests(unittest.TestCase):
         times = [round(self.replay.display_time(frame.time), 2) for frame in frames]
         self.assertEqual(times, sorted(times))
         self.assertEqual(len(times), len(set(times)))
-        for expected in (-2.2, -2.1, -1.15, -0.9, 0.0, 0.55):  # -2.2: A's CUT_IN and CRITICAL_TTC on U1 together
+        # -2.65: A's CUT_IN on U1 (dated at the onset of U1's lateral approach), -2.45: its forward gap turning
+        # critical, -2.1: U1's entry; -1.1: A's CRITICAL_TTC on B; -1.0 / -0.9 / -0.4: B's CUT_IN, CRITICAL_TTC and
+        # path entry about A; 0.0: the collision; 0.5: the end of A's CRITICAL_TTC on U1.
+        for expected in (-2.65, -2.45, -2.1, -1.1, -1.0, -0.9, -0.4, 0.0, 0.5):
             self.assertIn(expected, times)
         collision = next(frame for frame in frames if abs(self.replay.display_time(frame.time)) < 1e-6)
         self.assertIn("COLLISION(A,B)", collision.label)

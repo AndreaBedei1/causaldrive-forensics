@@ -10,15 +10,6 @@
       "track": "A:track_001",
       "decision": "B",
       "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "B",
-      "purity": 1.0,
-      "verdict": "correct link"
-    },
-    {
-      "track": "A:track_002",
-      "decision": "B",
-      "status": "ASSOCIATED",
       "by": "collision",
       "true_identity": "B",
       "purity": 1.0,
@@ -32,28 +23,10 @@
       "true_identity": "A",
       "purity": 1.0,
       "verdict": "correct link"
-    },
-    {
-      "track": "B:track_002",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "A",
-      "purity": 1.0,
-      "verdict": "correct link"
-    },
-    {
-      "track": "B:track_003",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "A",
-      "purity": 1.0,
-      "verdict": "correct link"
     }
   ],
   "decision_counts": {
-    "correct link": 5
+    "correct link": 2
   },
   "entities": [],
   "merges": {

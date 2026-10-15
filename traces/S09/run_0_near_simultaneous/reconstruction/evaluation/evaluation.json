@@ -1,6 +1,6 @@
 {
   "run": "S09/run_0_near_simultaneous",
-  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 5/5; anonymous: 0; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (1/1 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,7 @@
       ],
       "sim_time": 192.76600752398372,
       "peak_impulse": 7661.461427344263,
-      "reconstructed_as": "g38",
+      "reconstructed_as": "g37",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 54,
+    "nodes": 51,
     "max_abs_error_s": 0.0,
-    "order_pairs": 1371,
-    "order_concordant": 1371
+    "order_pairs": 1220,
+    "order_concordant": 1220
   },
   "tracks": [
     {
@@ -64,28 +64,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 11,
-      "raw_rmse_to_surface_m": 0.319,
-      "smoothed_rmse_to_surface_m": 0.536,
-      "smoothed_rmse_to_centre_m": 1.438,
-      "raw_difference_speed_rmse_mps": 7.497,
-      "speed_rmse_mps": 0.857
-    },
-    {
-      "track": "A:track_002",
-      "decision": "B",
-      "status": "ASSOCIATED",
-      "true_identity": "B",
-      "median_box_distance_m": {
-        "B": 0.0
-      },
-      "verdict": "correct",
-      "samples": 77,
-      "raw_rmse_to_surface_m": 0.149,
-      "smoothed_rmse_to_surface_m": 0.315,
-      "smoothed_rmse_to_centre_m": 1.434,
-      "raw_difference_speed_rmse_mps": 1.567,
-      "speed_rmse_mps": 0.502
+      "samples": 104,
+      "raw_rmse_to_surface_m": 0.214,
+      "smoothed_rmse_to_surface_m": 0.46,
+      "smoothed_rmse_to_centre_m": 1.278,
+      "raw_difference_speed_rmse_mps": 2.562,
+      "speed_rmse_mps": 0.324
     },
     {
       "track": "B:track_001",
@@ -96,44 +80,12 @@
         "A": 0.0
       },
       "verdict": "correct",
-      "samples": 43,
-      "raw_rmse_to_surface_m": 0.215,
-      "smoothed_rmse_to_surface_m": 0.411,
-      "smoothed_rmse_to_centre_m": 1.142,
-      "raw_difference_speed_rmse_mps": 3.102,
-      "speed_rmse_mps": 1.063
-    },
-    {
-      "track": "B:track_002",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "true_identity": "A",
-      "median_box_distance_m": {
-        "A": 0.0
-      },
-      "verdict": "correct",
-      "samples": 9,
-      "raw_rmse_to_surface_m": 0.106,
-      "smoothed_rmse_to_surface_m": 0.191,
-      "smoothed_rmse_to_centre_m": 2.306,
-      "raw_difference_speed_rmse_mps": 2.279,
-      "speed_rmse_mps": 0.706
-    },
-    {
-      "track": "B:track_003",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "true_identity": "A",
-      "median_box_distance_m": {
-        "A": 0.0
-      },
-      "verdict": "correct",
-      "samples": 55,
-      "raw_rmse_to_surface_m": 0.132,
-      "smoothed_rmse_to_surface_m": 0.151,
-      "smoothed_rmse_to_centre_m": 1.11,
-      "raw_difference_speed_rmse_mps": 3.606,
-      "speed_rmse_mps": 0.28
+      "samples": 104,
+      "raw_rmse_to_surface_m": 0.178,
+      "smoothed_rmse_to_surface_m": 0.501,
+      "smoothed_rmse_to_centre_m": 0.847,
+      "raw_difference_speed_rmse_mps": 2.623,
+      "speed_rmse_mps": 0.47
     }
   ],
   "contact_clearances": [
@@ -141,12 +93,12 @@
       "contact": "A + B",
       "recorder": "A",
       "partner": "B",
-      "track": "A:track_002",
+      "track": "A:track_001",
       "seen_s_before_contact": -0.05,
-      "clearance_m": 0.234,
+      "clearance_m": 0.641,
       "true_gap_m": 0.0,
-      "error_m": 0.234,
-      "range_m": 0.529,
+      "error_m": 0.641,
+      "range_m": 0.805,
       "ttc_s": null
     },
     {
@@ -154,11 +106,11 @@
       "recorder": "B",
       "partner": "A",
       "track": "B:track_001",
-      "seen_s_before_contact": 0.05,
-      "clearance_m": 0.0,
+      "seen_s_before_contact": -0.05,
+      "clearance_m": 0.059,
       "true_gap_m": 0.0,
-      "error_m": 0.0,
-      "range_m": 0.446,
+      "error_m": 0.059,
+      "range_m": 1.14,
       "ttc_s": null
     }
   ],

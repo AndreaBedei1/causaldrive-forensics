@@ -10,7 +10,7 @@
       ],
       "sim_time": 72.69340289756656,
       "peak_impulse": 12137.594220167219,
-      "reconstructed_as": "g11",
+      "reconstructed_as": "g13",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 34,
+    "nodes": 33,
     "max_abs_error_s": 0.0,
-    "order_pairs": 513,
-    "order_concordant": 513
+    "order_pairs": 487,
+    "order_concordant": 487
   },
   "tracks": [
     {
@@ -66,10 +66,10 @@
       "verdict": "correct",
       "samples": 131,
       "raw_rmse_to_surface_m": 0.089,
-      "smoothed_rmse_to_surface_m": 0.118,
-      "smoothed_rmse_to_centre_m": 1.411,
-      "raw_difference_speed_rmse_mps": 1.879,
-      "speed_rmse_mps": 0.413
+      "smoothed_rmse_to_surface_m": 0.132,
+      "smoothed_rmse_to_centre_m": 1.399,
+      "raw_difference_speed_rmse_mps": 1.878,
+      "speed_rmse_mps": 0.17
     },
     {
       "track": "B:track_001",
@@ -82,10 +82,10 @@
       "verdict": "correct",
       "samples": 131,
       "raw_rmse_to_surface_m": 0.154,
-      "smoothed_rmse_to_surface_m": 0.177,
-      "smoothed_rmse_to_centre_m": 1.16,
-      "raw_difference_speed_rmse_mps": 1.69,
-      "speed_rmse_mps": 0.527
+      "smoothed_rmse_to_surface_m": 0.161,
+      "smoothed_rmse_to_centre_m": 1.151,
+      "raw_difference_speed_rmse_mps": 1.673,
+      "speed_rmse_mps": 0.196
     }
   ],
   "contact_clearances": [
@@ -95,10 +95,10 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.427,
+      "clearance_m": 0.0,
       "true_gap_m": 0.0,
-      "error_m": 0.427,
-      "range_m": 1.957,
+      "error_m": 0.0,
+      "range_m": 2.05,
       "ttc_s": null
     },
     {
@@ -107,10 +107,10 @@
       "partner": "A",
       "track": "B:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.488,
+      "clearance_m": 1.12,
       "true_gap_m": 0.0,
-      "error_m": 0.488,
-      "range_m": 2.205,
+      "error_m": 1.12,
+      "range_m": 2.138,
       "ttc_s": null
     }
   ],

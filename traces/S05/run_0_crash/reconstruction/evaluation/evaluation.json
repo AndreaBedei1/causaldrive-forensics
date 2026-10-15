@@ -10,7 +10,7 @@
       ],
       "sim_time": 132.15217785164714,
       "peak_impulse": 22183.348832025982,
-      "reconstructed_as": "g26",
+      "reconstructed_as": "g25",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -70,10 +70,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 30,
+    "nodes": 29,
     "max_abs_error_s": 0.05,
-    "order_pairs": 410,
-    "order_concordant": 410
+    "order_pairs": 374,
+    "order_concordant": 374
   },
   "tracks": [
     {
@@ -86,12 +86,12 @@
         "C": 17.83
       },
       "verdict": "correct",
-      "samples": 135,
+      "samples": 136,
       "raw_rmse_to_surface_m": 0.186,
-      "smoothed_rmse_to_surface_m": 0.178,
+      "smoothed_rmse_to_surface_m": 0.175,
       "smoothed_rmse_to_centre_m": 1.935,
-      "raw_difference_speed_rmse_mps": 1.744,
-      "speed_rmse_mps": 0.074
+      "raw_difference_speed_rmse_mps": 1.742,
+      "speed_rmse_mps": 0.079
     },
     {
       "track": "B:track_001",
@@ -99,16 +99,16 @@
       "status": "ASSOCIATED",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 44.71,
+        "A": 18.45,
         "C": 0.0
       },
       "verdict": "correct",
-      "samples": 40,
-      "raw_rmse_to_surface_m": 0.462,
-      "smoothed_rmse_to_surface_m": 0.451,
-      "smoothed_rmse_to_centre_m": 1.947,
-      "raw_difference_speed_rmse_mps": 1.535,
-      "speed_rmse_mps": 0.047
+      "samples": 132,
+      "raw_rmse_to_surface_m": 0.451,
+      "smoothed_rmse_to_surface_m": 0.441,
+      "smoothed_rmse_to_centre_m": 1.958,
+      "raw_difference_speed_rmse_mps": 2.226,
+      "speed_rmse_mps": 0.055
     }
   ],
   "contact_clearances": [
@@ -118,10 +118,10 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.094,
+      "clearance_m": 0.116,
       "true_gap_m": 0.002,
-      "error_m": 0.092,
-      "range_m": 0.058,
+      "error_m": 0.114,
+      "range_m": 0.075,
       "ttc_s": null
     },
     {

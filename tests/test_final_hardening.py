@@ -201,11 +201,12 @@ class CorrelatedGNSS(unittest.TestCase):
 
 class CanonicalFinalRules(unittest.TestCase):
     def test_s09_has_no_anonymous_recorder_between_its_tracks(self):
-        # B sees only A: however its view of A is fragmented, every fragment is A, none an anonymous road user.
+        # B sees only A: every track of it is A, none an anonymous road user (one track since the tracker follows
+        # A through its stop; the earlier tracker split it).
         root=Path(__file__).resolve().parents[1]
         rows=json.loads((root/'traces/S09/run_0_near_simultaneous/reconstruction/global/associations.json').read_text(encoding='utf-8'))
         parts=[r for r in rows if r['local_graph']=='B']
-        self.assertGreaterEqual(len(parts),2)
+        self.assertGreaterEqual(len(parts),1)
         self.assertEqual({(r['status'],r['global_entity']) for r in parts},{('ASSOCIATED','A')})
 
     def test_s11_ego_turn_has_no_target_c_cut_in(self):

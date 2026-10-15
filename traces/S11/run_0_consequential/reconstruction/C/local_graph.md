@@ -6,7 +6,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)
 - Anonymous radar tracks: 1 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 13; edges: 21 (PRECEDES 16, SAME_TRACK 5)
+- Nodes: 13; edges: 22 (PRECEDES 17, SAME_TRACK 5)
 
 ## Nodes
 
@@ -16,9 +16,9 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e02 | 0.00 | THROTTLE_START | C | - | controls | active_at_first_observation=True |
 | C:e03 | 2.65 | TRACK_APPEARED_RIGHT | C | track_001 | radar | initial_in_ego_path=False |
 | C:e04 | 2.65 | CLOSING_START | C | track_001 | radar | active_at_first_observation=True |
-| C:e05 | 4.40 | CLOSING_END | C | track_001 | radar |  |
-| C:e06 | 5.70 | CLOSING_START | C | track_001 | radar |  |
-| C:e07 | 5.90 | CRITICAL_TTC_START | C | track_001 | radar |  |
+| C:e05 | 4.35 | CLOSING_END | C | track_001 | radar |  |
+| C:e06 | 5.55 | CLOSING_START | C | track_001 | radar |  |
+| C:e07 | 5.55 | CRITICAL_TTC_START | C | track_001 | radar |  |
 | C:e08 | 6.45 | TRACK_LOST | C | track_001 | radar |  |
 | C:e09 | 6.60 | COLLISION | C | - | collision_sensor | peak_impulse=322.10; merged_bursts=[[6.85, 322.1], [7.6, 239.84]] |
 | C:e10 | 6.65 | THROTTLE_END | C | - | controls |  |
@@ -38,7 +38,8 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     C:e03 --PRECEDES--> C:e05
     C:e04 --PRECEDES--> C:e05
     C:e05 --PRECEDES--> C:e06
-    C:e06 --PRECEDES--> C:e07
+    C:e05 --PRECEDES--> C:e07
+    C:e06 --PRECEDES--> C:e08
     C:e07 --PRECEDES--> C:e08
     C:e08 --PRECEDES--> C:e09
     C:e09 --PRECEDES--> C:e10
@@ -61,19 +62,18 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | C:e01 MOVING_START<br>C:e02 THROTTLE_START | ego: not yet observed | - |
-| 2.65 | C:e03 TRACK_APPEARED_RIGHT track_001<br>C:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE | 2.60 |
-| 4.40 | C:e05 CLOSING_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING | 4.30 |
-| 5.70 | C:e06 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: no active state | 5.60 |
-| 5.90 | C:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING | 5.80 |
-| 6.45 | C:e08 TRACK_LOST track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC | 6.40 |
-| 6.60 | C:e09 COLLISION | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 6.50 |
-| 6.65 | C:e10 THROTTLE_END<br>C:e11 BRAKE_START | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 6.60 |
-| 7.45 | C:e12 MOVING_END<br>C:e13 STOP_START | ego: MOVING, BRAKE<br>track lost, states UNKNOWN: track_001 | 7.40 |
+| 2.65 | C:e03 TRACK_APPEARED_RIGHT track_001<br>C:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 2.60 |
+| 4.35 | C:e05 CLOSING_END track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING | 4.30 |
+| 5.55 | C:e06 CLOSING_START track_001<br>C:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state | 5.50 |
+| 6.45 | C:e08 TRACK_LOST track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC | 6.40 |
+| 6.60 | C:e09 COLLISION | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 6.50 |
+| 6.65 | C:e10 THROTTLE_END<br>C:e11 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 6.60 |
+| 7.45 | C:e12 MOVING_END<br>C:e13 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 7.40 |
 
 ## States still active when observation ended
 
-- CLOSING of track_001, since C:e06 (t = 5.70 s); the track was lost at 6.45 s
-- CRITICAL_TTC of track_001, since C:e07 (t = 5.90 s); the track was lost at 6.45 s
+- CLOSING of track_001, since C:e06 (t = 5.55 s); the track was lost at 6.45 s
+- CRITICAL_TTC of track_001, since C:e07 (t = 5.55 s); the track was lost at 6.45 s
 - BRAKE, since C:e11 (t = 6.65 s)
 - STOP, since C:e13 (t = 7.45 s)
 
@@ -85,7 +85,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 Order of each track's cut-in, critical TTC and path entry and of the collision report, in local time. Temporal properties only, not causes.
 
-- track_001: CRITICAL_TTC_START 5.90, COLLISION 6.60 (+0.70 s)
+- track_001: CRITICAL_TTC_START 5.55, COLLISION 6.60 (+1.05 s)
 
 ## Sign detection windows
 
@@ -97,7 +97,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 2.65 | 6.45 | 69 | 8.8 m / +154 deg | 3.32 m (6.45) | 3.3 m / +144 deg | 11.7 m/s |
+| track_001 | 2.65 | 6.45 | 77 | 8.9 m / +154 deg | 3.07 m (6.45) | 3.1 m / +144 deg | 11.8 m/s |
 
 Bearing: positive = to C's right. Ranges are measured from the radar to the visible surface of the object.
 
@@ -107,9 +107,9 @@ Bearing: positive = to C's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: C pressed the accelerator (already the case when first observed).
 - t = 2.65 s: C's radar started tracking track_001, which appeared on its right.
 - t = 2.65 s: C observed track_001 start closing in (already the case when first observed).
-- t = 4.40 s: C observed track_001 stop closing in.
-- t = 5.70 s: C observed track_001 start closing in.
-- t = 5.90 s: C's time-to-contact with track_001 became critical.
+- t = 4.35 s: C observed track_001 stop closing in.
+- t = 5.55 s: C observed track_001 start closing in.
+- t = 5.55 s: C's time-to-contact with track_001 became critical.
 - t = 6.45 s: C's radar lost track_001 (its states are UNKNOWN from then on, not ended).
 - t = 6.60 s: C's collision sensor recorded a contact (peak impulse 322 N*s).
 - t = 6.65 s: C released the accelerator.

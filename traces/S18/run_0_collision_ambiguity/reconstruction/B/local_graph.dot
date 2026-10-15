@@ -7,7 +7,7 @@ digraph "local_B" {
   "B:e03" [label="TRACK_APPEARED_FRONT\nB -> track_001\nt=0.00", fillcolor="#bfdbfe"];
   "B:e04" [label="TRACK_APPEARED_LEFT\nB -> track_002\nt=0.00", fillcolor="#bfdbfe"];
   "B:e05" [label="TRACK_APPEARED_RIGHT\nB -> track_003\nt=0.00", fillcolor="#bfdbfe"];
-  "B:e06" [label="TRACK_APPEARED_LEFT\nB -> track_004\nt=0.10", fillcolor="#bfdbfe"];
+  "B:e06" [label="TRACK_APPEARED_LEFT\nB -> track_004\nt=0.40", fillcolor="#bfdbfe"];
   "B:e07" [label="CRITICAL_TTC_START\nB -> track_001\nt=0.50", fillcolor="#bfdbfe"];
   "B:e08" [label="COLLISION\nB\nt=7.65", fillcolor="#fca5a5"];
   "B:e09" [label="THROTTLE_END\nB\nt=7.70", fillcolor="#fde68a"];
@@ -19,8 +19,8 @@ digraph "local_B" {
   "B:e15" [label="CLOSING_START\nB -> track_005\nt=9.20", fillcolor="#bfdbfe"];
   "B:e16" [label="TRACK_APPEARED_RIGHT\nB -> track_006\nt=9.35", fillcolor="#bfdbfe"];
   "B:e17" [label="CLOSING_START\nB -> track_006\nt=9.35", fillcolor="#bfdbfe"];
-  "B:e18" [label="CLOSING_END\nB -> track_005\nt=10.10", fillcolor="#bfdbfe"];
-  "B:e19" [label="CLOSING_END\nB -> track_006\nt=10.30", fillcolor="#bfdbfe"];
+  "B:e18" [label="CLOSING_END\nB -> track_005\nt=10.00", fillcolor="#bfdbfe"];
+  "B:e19" [label="CLOSING_END\nB -> track_006\nt=10.10", fillcolor="#bfdbfe"];
   {rank=same; "B:e01"; "B:e02"; "B:e03"; "B:e04"; "B:e05";}
   {rank=same; "B:e09"; "B:e10";}
   {rank=same; "B:e12"; "B:e13";}

@@ -430,7 +430,8 @@ class S12GhostTests(unittest.TestCase):
                          [(0.0, ("A", "B"))])
         critical = next(e for e in events if e.event_type == "CRITICAL_TTC_START" and e.subject == "track_001"
                         and e.actor == "A")
-        self.assertAlmostEqual(self.replay.display_time(critical.time), -2.20, places=6)  # local 2.75 s
+        # local 2.50 s: within U1's cut-in (from its onset, 2.30 s), once its body is near A's corridor
+        self.assertAlmostEqual(self.replay.display_time(critical.time), -2.45, places=6)
 
     def test_the_tracks_are_shown_as_the_fusion_decided(self):
         self.assertEqual({name: (t.status, t.entity, t.road_user, t.ghost) for name, t in self.tracks.items()},

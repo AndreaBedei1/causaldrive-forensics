@@ -21,7 +21,7 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 | B:track_003 | U5 | ANONYMOUS | - | D | 1.000 | anonymous (non-recording road user D) |
 | B:track_004 | U6 | ANONYMOUS | - | H | 1.000 | anonymous (non-recording road user H) |
 | B:track_005 | U7 | ANONYMOUS | - | E | 1.000 | anonymous (non-recording road user E) |
-| B:track_006 | U8 | ANONYMOUS | - | F | 1.000 | anonymous (non-recording road user F) |
+| B:track_006 | U9 | ANONYMOUS | - | F | 1.000 | anonymous (non-recording road user F) |
 
 Counts: anonymous: 15, correct link: 1
 
@@ -36,41 +36,42 @@ Counts: anonymous: 15, correct link: 1
 | U5 | B:track_003, A:track_005 | D | no | 1.000 |
 | U6 | A:track_006, B:track_004, A:track_007 | H | no | 1.000 |
 | U7 | A:track_009, B:track_005 | E | no | 1.000 |
-| U8 | A:track_010, B:track_006 | F | no | 1.000 |
+| U8 | A:track_010 | F | no | 1.000 |
+| U9 | B:track_006 | F | no | 1.000 |
 
-Merges over pairs of anonymous tracks: correct 8, false 0, missed 4.
-Fragmentation (true road user -> entities): C -> U1, D -> U5, E -> U2/U7, F -> U3/U8, G -> U4, H -> U6
+Merges over pairs of anonymous tracks: correct 7, false 0, missed 5.
+Fragmentation (true road user -> entities): C -> U1, D -> U5, E -> U2/U7, F -> U3/U8/U9, G -> U4, H -> U6
 
-## Fused state errors (against the majority identity, 665 pure states; 0 impure states where a source track was on another body, excluded)
+## Fused state errors (against the majority identity, 677 pure states; 0 impure states where a source track was on another body, excluded)
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 665 | 0.189 | 0.112 | 0.408 | 0.296 | 1.875 | 2.306 | 2.825 |
-| coverage_s | 8 | 9.100 | 5.050 | 11.950 | 6.900 | 11.950 | 11.950 | 11.950 |
-| heading_error_deg | 665 | 0.611 | 0.164 | 1.559 | 1.395 | 2.604 | 6.290 | 15.806 |
-| length_error_m | 8 | 0.192 | 0.161 | 0.351 | 0.191 | 0.419 | 0.419 | 0.419 |
-| normalised_centre_error | 665 | 0.405 | 0.229 | 0.789 | 0.561 | 1.595 | 1.853 | 3.865 |
-| single_track_nominal_centre_error_m | 656 | 0.412 | 0.227 | 0.607 | 0.381 | 1.076 | 1.407 | 2.120 |
-| speed_error_mps | 665 | 0.049 | 0.010 | 0.246 | 0.237 | 0.809 | 1.301 | 3.769 |
-| velocity_error_mps | 665 | 0.150 | 0.045 | 0.473 | 0.428 | 1.102 | 1.866 | 3.771 |
-| width_error_m | 8 | 0.107 | 0.094 | 0.146 | 0.052 | 0.263 | 0.263 | 0.263 |
+| centre_error_m | 677 | 0.161 | 0.115 | 0.289 | 0.174 | 0.450 | 0.748 | 1.836 |
+| coverage_s | 9 | 6.350 | 3.250 | 11.950 | 8.700 | 11.950 | 11.950 | 11.950 |
+| heading_error_deg | 677 | 0.298 | 0.092 | 0.784 | 0.692 | 2.118 | 3.090 | 9.766 |
+| length_error_m | 9 | 0.261 | 0.192 | 0.419 | 0.227 | 0.419 | 0.419 | 0.419 |
+| normalised_centre_error | 677 | 1.729 | 1.161 | 3.191 | 2.030 | 4.139 | 6.385 | 11.114 |
+| single_track_nominal_centre_error_m | 666 | 0.443 | 0.321 | 0.764 | 0.443 | 1.371 | 1.554 | 2.390 |
+| speed_error_mps | 677 | 0.032 | 0.011 | 0.172 | 0.161 | 0.305 | 0.401 | 0.560 |
+| velocity_error_mps | 677 | 0.090 | 0.030 | 0.252 | 0.222 | 0.458 | 0.690 | 1.787 |
+| width_error_m | 9 | 0.107 | 0.094 | 0.107 | 0.013 | 0.263 | 0.263 | 0.263 |
 
 ### Method: box_fit
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 378 | 0.142 | 0.075 | 0.231 | 0.156 | 0.359 | 0.496 | 1.607 |
-| heading_error_deg | 378 | 0.602 | 0.105 | 1.474 | 1.370 | 4.647 | 8.024 | 15.806 |
-| speed_error_mps | 378 | 0.052 | 0.018 | 0.219 | 0.201 | 0.911 | 1.510 | 3.769 |
-| velocity_error_mps | 378 | 0.144 | 0.040 | 0.367 | 0.327 | 1.249 | 2.819 | 3.771 |
+| centre_error_m | 400 | 0.159 | 0.109 | 0.264 | 0.154 | 0.336 | 0.384 | 0.722 |
+| heading_error_deg | 400 | 0.225 | 0.058 | 0.754 | 0.696 | 1.552 | 2.244 | 3.186 |
+| speed_error_mps | 400 | 0.032 | 0.013 | 0.139 | 0.127 | 0.258 | 0.344 | 0.560 |
+| velocity_error_mps | 400 | 0.077 | 0.021 | 0.203 | 0.182 | 0.387 | 0.461 | 0.785 |
 
 ### Method: covariance_intersection
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 287 | 0.382 | 0.149 | 1.618 | 1.469 | 2.366 | 2.517 | 2.825 |
-| heading_error_deg | 287 | 0.633 | 0.229 | 1.641 | 1.412 | 2.285 | 2.482 | 14.559 |
-| speed_error_mps | 287 | 0.035 | 0.009 | 0.267 | 0.259 | 0.688 | 1.224 | 1.447 |
-| velocity_error_mps | 287 | 0.196 | 0.051 | 0.502 | 0.451 | 0.850 | 1.304 | 2.822 |
+| centre_error_m | 277 | 0.166 | 0.121 | 0.396 | 0.275 | 0.972 | 1.503 | 1.836 |
+| heading_error_deg | 277 | 0.387 | 0.143 | 1.018 | 0.875 | 3.266 | 3.832 | 9.766 |
+| speed_error_mps | 277 | 0.033 | 0.010 | 0.240 | 0.230 | 0.360 | 0.428 | 0.495 |
+| velocity_error_mps | 277 | 0.111 | 0.050 | 0.302 | 0.252 | 0.750 | 0.863 | 1.787 |
 
-Calibration of pos_std_m over 665 states: within 1/2/3 sigma 0.806/0.977/0.994 (Gaussian: 0.393/0.865/0.989).
+Calibration of pos_std_m over 677 states: within 1/2/3 sigma 0.171/0.569/0.712 (Gaussian: 0.393/0.865/0.989).

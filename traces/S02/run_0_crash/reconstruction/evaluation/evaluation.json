@@ -10,7 +10,7 @@
       ],
       "sim_time": 1776.7966108731925,
       "peak_impulse": 2460.669927422933,
-      "reconstructed_as": "g16",
+      "reconstructed_as": "g17",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -51,8 +51,8 @@
   "event_timing": {
     "nodes": 25,
     "max_abs_error_s": 0.0,
-    "order_pairs": 283,
-    "order_concordant": 283
+    "order_pairs": 279,
+    "order_concordant": 279
   },
   "tracks": [
     {
@@ -64,12 +64,12 @@
         "B": 0.0
       },
       "verdict": "correct",
-      "samples": 140,
-      "raw_rmse_to_surface_m": 0.209,
-      "smoothed_rmse_to_surface_m": 0.266,
-      "smoothed_rmse_to_centre_m": 1.923,
-      "raw_difference_speed_rmse_mps": 1.869,
-      "speed_rmse_mps": 0.337
+      "samples": 147,
+      "raw_rmse_to_surface_m": 0.206,
+      "smoothed_rmse_to_surface_m": 0.219,
+      "smoothed_rmse_to_centre_m": 1.918,
+      "raw_difference_speed_rmse_mps": 1.814,
+      "speed_rmse_mps": 0.094
     }
   ],
   "contact_clearances": [
@@ -79,10 +79,10 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.0,
+      "clearance_m": 0.03,
       "true_gap_m": 0.0,
-      "error_m": 0.0,
-      "range_m": 0.124,
+      "error_m": 0.03,
+      "range_m": 0.142,
       "ttc_s": null
     },
     {

@@ -33,8 +33,10 @@ class S12WorkedExampleTests(unittest.TestCase):
         times = {}
         for row in self.part.timeline:
             times.setdefault((row.event, row.subject.split(" ")[0]), row.t_local)
-        # U1 is A's leader from its confirmed cut-in on: the unsafe gap and the cut-in start together.
-        self.assertEqual(times[("CRITICAL_TTC_START", "A:track_001")], times[("CUT_IN_FROM_RIGHT_START", "A:track_001")])
+        # U1 is A's leader only within its confirmed cut-in, dated at the onset of its lateral approach: the unsafe
+        # gap starts within it (once U1's body is near A's corridor), before U1 enters A's path.
+        self.assertLessEqual(times[("CUT_IN_FROM_RIGHT_START", "A:track_001")], times[("CRITICAL_TTC_START", "A:track_001")])
+        self.assertLess(times[("CRITICAL_TTC_START", "A:track_001")], times[("EGO_PATH_ENTRY", "A:track_001")])
         sequence = [times[("CUT_IN_FROM_RIGHT_START", "A:track_001")],
                     times[("EGO_PATH_ENTRY", "A:track_001")], times[("steering command onset (controls.jsonl)", "-")],
                     times[("CRITICAL_TTC_START", "B")], times[("COLLISION", "B")]]
@@ -53,8 +55,9 @@ class S12WorkedExampleTests(unittest.TestCase):
 
     def test_response_delays_are_measured_from_sensor_events_to_the_steering_command(self):
         delays = self.part.delays
-        self.assertEqual(delays["critical (CRITICAL_TTC_START on the track) -> steering"],
-                         delays["perception (CUT_IN start) -> steering"])
+        # The cut-in (the onset of U1's lateral approach) precedes the unsafe gap it makes.
+        self.assertGreaterEqual(delays["perception (CUT_IN start) -> steering"],
+                                delays["critical (CRITICAL_TTC_START on the track) -> steering"])
         self.assertGreater(delays["perception (CUT_IN start) -> steering"],
                            delays["path entry (EGO_PATH_ENTRY) -> steering"])
         self.assertGreater(delays["path entry (EGO_PATH_ENTRY) -> steering"], 0.0)

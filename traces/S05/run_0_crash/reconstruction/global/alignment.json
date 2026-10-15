@@ -5,7 +5,7 @@
   "graphs": {
     "A": {
       "status": "ALIGNED",
-      "anchor_node": "A:e10",
+      "anchor_node": "A:e08",
       "anchor_t_local": 5.9,
       "offset_to_global": -5.9,
       "method": "matched_collisions",
@@ -16,7 +16,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e11",
+      "anchor_node": "B:e12",
       "anchor_t_local": 5.9,
       "offset_to_global": -5.9,
       "method": "matched_collisions",
@@ -32,7 +32,7 @@
       "offset_to_global": -5.95,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of B:track_001 lie where their lines of sight enter the body (pooled median 0.63 sigma) at this offset; offsets within 2.00 sigma span [-6.00, -5.90] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of B:track_001 lie where their lines of sight enter the body (pooled median 0.64 sigma) at this offset; offsets within 2.00 sigma span [-5.95, -5.90] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
@@ -48,8 +48,8 @@
         "B"
       ],
       "nodes": {
-        "A": "A:e10",
-        "B": "B:e11"
+        "A": "A:e08",
+        "B": "B:e12"
       },
       "t_local": {
         "A": 5.9,
@@ -83,9 +83,9 @@
         "B:track_001"
       ],
       "offset_to_global": -5.95,
-      "median_distance_sigma": 0.625,
+      "median_distance_sigma": 0.638,
       "interval": [
-        -6.0,
+        -5.95,
         -5.9
       ],
       "other_intervals": 0,

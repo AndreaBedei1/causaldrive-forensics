@@ -25,37 +25,10 @@
       "verdict": "correct link"
     },
     {
-      "track": "B:track_002#segment_1",
+      "track": "B:track_002",
       "decision": "C",
       "status": "ASSOCIATED",
       "by": "common_frame",
-      "true_identity": "C",
-      "purity": 1.0,
-      "verdict": "correct link"
-    },
-    {
-      "track": "B:track_002#segment_2",
-      "decision": "U1",
-      "status": "ANONYMOUS",
-      "by": null,
-      "true_identity": null,
-      "purity": 1.0,
-      "verdict": "anonymous (clutter: no true vehicle)"
-    },
-    {
-      "track": "B:track_002#segment_3",
-      "decision": "U2",
-      "status": "ANONYMOUS",
-      "by": null,
-      "true_identity": null,
-      "purity": 1.0,
-      "verdict": "anonymous (clutter: no true vehicle)"
-    },
-    {
-      "track": "B:track_003",
-      "decision": "C",
-      "status": "ASSOCIATED",
-      "by": "collision",
       "true_identity": "C",
       "purity": 1.0,
       "verdict": "correct link"
@@ -71,41 +44,9 @@
     }
   ],
   "decision_counts": {
-    "anonymous": 2,
-    "correct link": 5
+    "correct link": 4
   },
-  "entities": [
-    {
-      "id": "U1",
-      "source_tracks": [
-        "B:track_002#segment_2"
-      ],
-      "observers": [
-        "B"
-      ],
-      "true_identity": null,
-      "identity_is_recorder": false,
-      "purity": 1.0,
-      "track_identities": {
-        "B:track_002#segment_2": null
-      }
-    },
-    {
-      "id": "U2",
-      "source_tracks": [
-        "B:track_002#segment_3"
-      ],
-      "observers": [
-        "B"
-      ],
-      "true_identity": null,
-      "identity_is_recorder": false,
-      "purity": 1.0,
-      "track_identities": {
-        "B:track_002#segment_3": null
-      }
-    }
-  ],
+  "entities": [],
   "merges": {
     "correct": 0,
     "false": 0,

@@ -8,7 +8,7 @@ digraph "local_A" {
   "A:e04" [label="CLOSING_START\nA -> track_001\nt=0.00", fillcolor="#bfdbfe"];
   "A:e05" [label="THROTTLE_END\nA\nt=3.95", fillcolor="#fde68a"];
   "A:e06" [label="BRAKE_START\nA\nt=3.95", fillcolor="#fde68a"];
-  "A:e07" [label="CLOSING_END\nA -> track_001\nt=4.45", fillcolor="#bfdbfe"];
+  "A:e07" [label="CLOSING_END\nA -> track_001\nt=4.40", fillcolor="#bfdbfe"];
   "A:e08" [label="BRAKE_END\nA\nt=4.55", fillcolor="#fde68a"];
   "A:e09" [label="THROTTLE_START\nA\nt=4.65", fillcolor="#fde68a"];
   "A:e10" [label="COLLISION\nA\nt=5.55", fillcolor="#fca5a5"];
@@ -17,7 +17,7 @@ digraph "local_A" {
   "A:e13" [label="CLOSING_START\nA -> track_001\nt=5.55", fillcolor="#bfdbfe"];
   "A:e14" [label="CRITICAL_TTC_START\nA -> track_001\nt=5.55", fillcolor="#bfdbfe"];
   "A:e15" [label="BRAKE_END\nA\nt=5.60", fillcolor="#fde68a"];
-  "A:e16" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.85", fillcolor="#bfdbfe"];
+  "A:e16" [label="EGO_PATH_ENTRY\nA -> track_001\nt=5.90", fillcolor="#bfdbfe"];
   "A:e17" [label="COLLISION\nA\nt=6.60", fillcolor="#fca5a5"];
   "A:e18" [label="CRITICAL_TTC_END\nA -> track_001\nt=6.60", fillcolor="#bfdbfe"];
   "A:e19" [label="CLOSING_END\nA -> track_001\nt=6.60", fillcolor="#bfdbfe"];

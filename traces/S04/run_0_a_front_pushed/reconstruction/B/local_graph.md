@@ -67,13 +67,13 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START<br>B:e03 TRACK_APPEARED_FRONT track_001 | ego: not yet observed | - |
-| 0.50 | B:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
-| 3.20 | B:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.10 |
-| 3.70 | B:e06 THROTTLE_END<br>B:e07 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 3.60 |
-| 4.80 | B:e08 COLLISION | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.70 |
-| 4.85 | B:e09 BRAKE_END | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.80 |
-| 5.30 | B:e10 COLLISION<br>B:e11 CRITICAL_TTC_END track_001<br>B:e12 CLOSING_END track_001 | ego: MOVING<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.20 |
-| 5.45 | B:e13 MOVING_END<br>B:e14 STOP_START<br>B:e15 BRAKE_START | ego: MOVING<br>track_001: IN_EGO_PATH | 5.40 |
+| 0.50 | B:e04 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CRITICAL_TTC? | 0.40 |
+| 3.20 | B:e05 CLOSING_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CRITICAL_TTC, IN_EGO_PATH | 3.10 |
+| 3.70 | B:e06 THROTTLE_END<br>B:e07 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 3.60 |
+| 4.80 | B:e08 COLLISION | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.70 |
+| 4.85 | B:e09 BRAKE_END | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.80 |
+| 5.30 | B:e10 COLLISION<br>B:e11 CRITICAL_TTC_END track_001<br>B:e12 CLOSING_END track_001 | ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 5.20 |
+| 5.45 | B:e13 MOVING_END<br>B:e14 STOP_START<br>B:e15 BRAKE_START | ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH | 5.40 |
 
 ## States still active when observation ended
 
@@ -100,7 +100,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 13.70 | 275 | 13.5 m / +0 deg | 0.01 m (5.30) | 0.1 m / +0 deg | 13.8 m/s |
+| track_001 | 0.00 | 13.70 | 275 | 13.5 m / +0 deg | 0.02 m (5.30) | 0.1 m / -0 deg | 13.8 m/s |
 
 Bearing: positive = to B's right. Ranges are measured from the radar to the visible surface of the object.
 

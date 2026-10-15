@@ -16,7 +16,7 @@
     },
     "B": {
       "status": "ALIGNED",
-      "anchor_node": "B:e08",
+      "anchor_node": "B:e09",
       "anchor_t_local": 4.1,
       "offset_to_global": -4.1,
       "method": "matched_collisions",
@@ -32,7 +32,7 @@
       "offset_to_global": -4.15,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_002 on A, C:track_003 on B lie where their lines of sight enter the body (pooled median 0.65 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002#segment_1 on B lie where their lines of sight enter the body (pooled median 0.56 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
@@ -49,7 +49,7 @@
       ],
       "nodes": {
         "A": "A:e09",
-        "B": "B:e08"
+        "B": "B:e09"
       },
       "t_local": {
         "A": 4.1,
@@ -82,11 +82,11 @@
       "pooled": [
         "A:track_001",
         "B:track_001",
-        "C:track_002 on A",
-        "C:track_003 on B"
+        "C:track_001 on A",
+        "C:track_002#segment_1 on B"
       ],
       "offset_to_global": -4.15,
-      "median_distance_sigma": 0.647,
+      "median_distance_sigma": 0.556,
       "interval": [
         -4.2,
         -4.0

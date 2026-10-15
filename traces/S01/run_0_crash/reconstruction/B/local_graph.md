@@ -44,9 +44,9 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START | ego: not yet observed | - |
-| 3.95 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE | 3.90 |
-| 5.15 | B:e05 MOVING_END<br>B:e06 STOP_START | ego: MOVING, BRAKE | 5.10 |
-| 6.75 | B:e07 COLLISION | ego: STOP, BRAKE | 6.70 |
+| 3.95 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.90 |
+| 5.15 | B:e05 MOVING_END<br>B:e06 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 5.10 |
+| 6.75 | B:e07 COLLISION | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 6.70 |
 
 ## States still active when observation ended
 

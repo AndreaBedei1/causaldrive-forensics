@@ -30,7 +30,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 14394.
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 14394.11 vs 14394.11 N*s)<br>tracked for 6.30 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 9.2 m -> 0.2 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)<br>clearance at the contact 0.17 m<br>the only track of A compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 14394.11 vs 14394.11 N*s)<br>tracked for 6.75 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 9.3 m -> 0.2 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.10 m/s for reference)<br>clearance at the contact 0.24 m<br>the only track of A compatible with the contact |
 
 ## Road users in the common frame
 
@@ -38,12 +38,11 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 14394.
 
 ## Global graph
 
-18 nodes, 31 edges; 3 merged node(s): g08 CLOSING_START(A,B) from A:e04 + A:e10, g09 CRITICAL_TTC_START(A,B) from A:e05 + A:e09, g14 COLLISION(A,B) from A:e08 + B:e07.
+18 nodes, 35 edges; 3 merged node(s): g08 CLOSING_START(A,B) from A:e04 + A:e10, g09 CRITICAL_TTC_START(A,B) from A:e05 + A:e09, g14 COLLISION(A,B) from A:e08 + B:e07.
 
 ### Event sequence (global time)
 
-- `-6.75` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
-- `-6.30` TRACK_APPEARED_FRONT(A,B)
+- `-6.75` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B)
 - `-2.80` THROTTLE_END(B); BRAKE_START(B)
 - `-2.55` CLOSING_START(A,B)
 - `-2.35` CRITICAL_TTC_START(A,B)
@@ -58,7 +57,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 14394.
 - 6.75 s before the reference collision, B started moving (already the case when first observed).
 - 6.75 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 6.75 s before the reference collision, B pressed the accelerator (already the case when first observed).
-- 6.30 s before the reference collision, A's radar started tracking B, which appeared in front of it.
+- 6.75 s before the reference collision, A's radar started tracking B, which appeared in front of it.
 - 2.80 s before the reference collision, B released the accelerator.
 - 2.80 s before the reference collision, B started braking.
 - 2.55 s before the reference collision, A observed B start closing in.
@@ -81,7 +80,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
-- MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
+- MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B); TRACK_APPEARED_FRONT(A,B)
 - THROTTLE_END(B); BRAKE_START(B)
 - MOVING_END(B); STOP_START(B)
 - THROTTLE_END(A); BRAKE_START(A)
@@ -106,8 +105,8 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e08 at 6.75 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- B B:e07 at 6.75 s (local): ego: STOP, BRAKE
+- A A:e08 at 6.75 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e07 at 6.75 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?
 
 ### Tracks lost while a state was active
 
@@ -154,7 +153,9 @@ B:
     "radial_speed_std_mps": 0.3,
     "acceleration_std_mps2": 6.0,
     "smoothing_innovation_sigma": 3.0,
-    "min_slowdown_returns": 3,
+    "max_braking_mps2": 30.0,
+    "contact_clearance_m": 1.0,
+    "lane_heading_std_deg": 10.0,
     "identity_body_width_m": 2.5,
     "gate_probability": 0.99,
     "body_length_m": 4.6,
@@ -234,6 +235,9 @@ B:
     "turn_min_heading_change_deg": 15.0,
     "path_half_width_m": 1.5,
     "path_hysteresis_m": 0.5,
+    "path_edge_std_m": 0.25,
+    "path_occupancy_quantile": 1.645,
+    "path_min_definite_samples": 2,
     "track_appeared_front_deg": 5.0,
     "max_position_std_m": 1.0,
     "max_velocity_std_mps": 1.0,

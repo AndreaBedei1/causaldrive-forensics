@@ -52,42 +52,223 @@
       "verdict": "correct link"
     },
     {
-      "track": "C:track_002",
-      "decision": "A",
-      "status": "ASSOCIATED",
-      "by": "common_frame",
-      "true_identity": "A",
-      "purity": 0.86,
-      "verdict": "correct link"
-    },
-    {
-      "track": "C:track_003",
+      "track": "C:track_002#segment_1",
       "decision": "B",
       "status": "ASSOCIATED",
       "by": "common_frame",
       "true_identity": "B",
-      "purity": 0.924,
+      "purity": 1.0,
       "verdict": "correct link"
+    },
+    {
+      "track": "C:track_002#segment_2",
+      "decision": "U1",
+      "status": "ANONYMOUS",
+      "by": null,
+      "true_identity": "A",
+      "purity": 1.0,
+      "verdict": "missed link (true identity A)"
     }
   ],
   "decision_counts": {
-    "correct link": 7
+    "correct link": 6,
+    "missed link": 1
   },
-  "entities": [],
+  "entities": [
+    {
+      "id": "U1",
+      "source_tracks": [
+        "C:track_002#segment_2"
+      ],
+      "observers": [
+        "C"
+      ],
+      "true_identity": "A",
+      "identity_is_recorder": true,
+      "purity": 1.0,
+      "track_identities": {
+        "C:track_002#segment_2": "A"
+      }
+    }
+  ],
   "merges": {
     "correct": 0,
     "false": 0,
     "missed": 0
   },
-  "fragmentation": {},
-  "state_errors": {},
-  "state_errors_by_method": {},
+  "fragmentation": {
+    "A": [
+      "U1"
+    ]
+  },
+  "state_errors": {
+    "centre_error_m": {
+      "n": 99,
+      "median": 1.8697,
+      "q25": 1.7904,
+      "q75": 1.923,
+      "p90": 1.9549,
+      "p95": 1.9573,
+      "max": 1.9714,
+      "mean": 1.7576,
+      "iqr": 0.1326
+    },
+    "coverage_s": {
+      "n": 1,
+      "median": 9.85,
+      "q25": 9.85,
+      "q75": 9.85,
+      "p90": 9.85,
+      "p95": 9.85,
+      "max": 9.85,
+      "mean": 9.85,
+      "iqr": 0.0
+    },
+    "length_error_m": {
+      "n": 1,
+      "median": 0.192,
+      "q25": 0.192,
+      "q75": 0.192,
+      "p90": 0.192,
+      "p95": 0.192,
+      "max": 0.192,
+      "mean": 0.192,
+      "iqr": 0.0
+    },
+    "normalised_centre_error": {
+      "n": 99,
+      "median": 11.2248,
+      "q25": 10.0237,
+      "q75": 11.4796,
+      "p90": 12.0252,
+      "p95": 12.1063,
+      "max": 12.1385,
+      "mean": 10.242,
+      "iqr": 1.4559
+    },
+    "single_track_nominal_centre_error_m": {
+      "n": 98,
+      "median": 1.8867,
+      "q25": 1.8352,
+      "q75": 1.8987,
+      "p90": 1.9119,
+      "p95": 1.9191,
+      "max": 1.9277,
+      "mean": 1.7702,
+      "iqr": 0.0635
+    },
+    "speed_error_mps": {
+      "n": 99,
+      "median": 0.0556,
+      "q25": 0.0303,
+      "q75": 0.1501,
+      "p90": 0.5789,
+      "p95": 0.6161,
+      "max": 0.6393,
+      "mean": 0.158,
+      "iqr": 0.1197
+    },
+    "velocity_error_mps": {
+      "n": 99,
+      "median": 0.0556,
+      "q25": 0.0303,
+      "q75": 0.1501,
+      "p90": 0.5789,
+      "p95": 0.6161,
+      "max": 0.6393,
+      "mean": 0.158,
+      "iqr": 0.1197
+    },
+    "width_error_m": {
+      "n": 1,
+      "median": 0.263,
+      "q25": 0.263,
+      "q75": 0.263,
+      "p90": 0.263,
+      "p95": 0.263,
+      "max": 0.263,
+      "mean": 0.263,
+      "iqr": 0.0
+    }
+  },
+  "state_errors_by_method": {
+    "box_fit": {
+      "centre_error_m": {
+        "n": 1,
+        "median": 1.3733,
+        "q25": 1.3733,
+        "q75": 1.3733,
+        "p90": 1.3733,
+        "p95": 1.3733,
+        "max": 1.3733,
+        "mean": 1.3733,
+        "iqr": 0.0
+      },
+      "speed_error_mps": {
+        "n": 1,
+        "median": 0.351,
+        "q25": 0.351,
+        "q75": 0.351,
+        "p90": 0.351,
+        "p95": 0.351,
+        "max": 0.351,
+        "mean": 0.351,
+        "iqr": 0.0
+      },
+      "velocity_error_mps": {
+        "n": 1,
+        "median": 0.351,
+        "q25": 0.351,
+        "q75": 0.351,
+        "p90": 0.351,
+        "p95": 0.351,
+        "max": 0.351,
+        "mean": 0.351,
+        "iqr": 0.0
+      }
+    },
+    "covariance_intersection": {
+      "centre_error_m": {
+        "n": 98,
+        "median": 1.8717,
+        "q25": 1.795,
+        "q75": 1.9246,
+        "p90": 1.9549,
+        "p95": 1.9574,
+        "max": 1.9714,
+        "mean": 1.7616,
+        "iqr": 0.1296
+      },
+      "speed_error_mps": {
+        "n": 98,
+        "median": 0.0544,
+        "q25": 0.0299,
+        "q75": 0.1419,
+        "p90": 0.5819,
+        "p95": 0.6161,
+        "max": 0.6393,
+        "mean": 0.156,
+        "iqr": 0.112
+      },
+      "velocity_error_mps": {
+        "n": 98,
+        "median": 0.0544,
+        "q25": 0.0299,
+        "q75": 0.1419,
+        "p90": 0.5819,
+        "p95": 0.6161,
+        "max": 0.6393,
+        "mean": 0.156,
+        "iqr": 0.112
+      }
+    }
+  },
   "calibration": {
-    "states": 0,
+    "states": 99,
     "observed_within": {
       "1_sigma": 0.0,
-      "2_sigma": 0.0,
-      "3_sigma": 0.0
+      "2_sigma": 0.02,
+      "3_sigma": 0.04
     },
     "expected_within_gaussian": {
       "1_sigma": 0.393,
@@ -95,7 +276,54 @@
       "3_sigma": 0.989
     }
   },
-  "entity_errors": [],
+  "entity_errors": [
+    {
+      "id": "U1",
+      "true_identity": "A",
+      "coverage_s": 9.85,
+      "states": 99,
+      "impure_states": 0,
+      "centre_error_m": {
+        "n": 99,
+        "median": 1.8697,
+        "q25": 1.7904,
+        "q75": 1.923,
+        "p90": 1.9549,
+        "p95": 1.9573,
+        "max": 1.9714,
+        "mean": 1.7576,
+        "iqr": 0.1326
+      },
+      "velocity_error_mps": {
+        "n": 99,
+        "median": 0.0556,
+        "q25": 0.0303,
+        "q75": 0.1501,
+        "p90": 0.5789,
+        "p95": 0.6161,
+        "max": 0.6393,
+        "mean": 0.158,
+        "iqr": 0.1197
+      },
+      "speed_error_mps": {
+        "n": 99,
+        "median": 0.0556,
+        "q25": 0.0303,
+        "q75": 0.1501,
+        "p90": 0.5789,
+        "p95": 0.6161,
+        "max": 0.6393,
+        "mean": 0.158,
+        "iqr": 0.1197
+      },
+      "length_error_m": -0.192,
+      "width_error_m": -0.263,
+      "length_source": "prior",
+      "width_source": "prior",
+      "true_length_m": 4.792,
+      "true_width_m": 2.163
+    }
+  ],
   "observed_alignment": [
     {
       "recorder": "C",
@@ -110,6 +338,6 @@
       "status": "ALIGNED"
     }
   ],
-  "states_compared": 0,
+  "states_compared": 99,
   "impure_states": 0
 }

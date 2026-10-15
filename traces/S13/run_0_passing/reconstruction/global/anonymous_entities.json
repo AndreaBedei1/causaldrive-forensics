@@ -33,59 +33,59 @@
       "kind": "same_observer",
       "compared": 155,
       "passed": 0.019,
-      "median_box_chi2": 29.525,
-      "median_velocity_chi2": 2.791,
-      "centre_gap_m": 3.925,
+      "median_box_chi2": 29.523,
+      "median_velocity_chi2": 3.177,
+      "centre_gap_m": 3.954,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 32.316
+      "score": 32.7
     },
     {
       "a": "A:track_001",
       "b": "B:track_002",
       "kind": "cross_observer",
       "compared": 94,
-      "passed": 0.989,
-      "median_box_chi2": 0.104,
-      "median_velocity_chi2": 0.184,
-      "centre_gap_m": 0.281,
+      "passed": 0.936,
+      "median_box_chi2": 0.093,
+      "median_velocity_chi2": 0.16,
+      "centre_gap_m": 0.287,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.288
+      "score": 0.253
     },
     {
       "a": "A:track_001",
       "b": "B:track_003",
       "kind": "cross_observer",
-      "compared": 112,
-      "passed": 0.089,
-      "median_box_chi2": 19.8,
-      "median_velocity_chi2": 3.049,
-      "centre_gap_m": 3.837,
+      "compared": 109,
+      "passed": 0.073,
+      "median_box_chi2": 20.108,
+      "median_velocity_chi2": 3.247,
+      "centre_gap_m": 3.806,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 22.849
+      "score": 23.355
     },
     {
       "a": "A:track_001",
       "b": "B:track_004",
       "kind": "cross_observer",
-      "compared": 14,
+      "compared": 17,
       "passed": 1.0,
-      "median_box_chi2": 0.362,
+      "median_box_chi2": 0.379,
       "median_velocity_chi2": 0.0,
-      "centre_gap_m": 0.372,
+      "centre_gap_m": 0.421,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.362
+      "score": 0.379
     },
     {
       "a": "A:track_003",
@@ -93,59 +93,59 @@
       "kind": "cross_observer",
       "compared": 92,
       "passed": 0.0,
-      "median_box_chi2": 26.56,
-      "median_velocity_chi2": 2.678,
-      "centre_gap_m": 3.797,
+      "median_box_chi2": 26.599,
+      "median_velocity_chi2": 2.863,
+      "centre_gap_m": 3.796,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 29.238
+      "score": 29.462
     },
     {
       "a": "A:track_003",
       "b": "B:track_003",
       "kind": "cross_observer",
-      "compared": 120,
+      "compared": 116,
       "passed": 1.0,
-      "median_box_chi2": 0.105,
-      "median_velocity_chi2": 0.029,
-      "centre_gap_m": 0.207,
+      "median_box_chi2": 0.121,
+      "median_velocity_chi2": 0.028,
+      "centre_gap_m": 0.214,
       "gap_s": null,
       "accepted": true,
       "refused": null,
       "lateral_chi2": null,
-      "score": 0.134
+      "score": 0.149
     },
     {
       "a": "A:track_003",
       "b": "B:track_004",
       "kind": "cross_observer",
-      "compared": 3,
+      "compared": 6,
       "passed": 0.0,
-      "median_box_chi2": 29.42,
-      "median_velocity_chi2": 0.0,
-      "centre_gap_m": 4.51,
+      "median_box_chi2": 28.86,
+      "median_velocity_chi2": 0.949,
+      "centre_gap_m": 4.543,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 29.42
+      "score": 29.809
     },
     {
       "a": "B:track_002",
       "b": "B:track_003",
       "kind": "same_observer",
-      "compared": 91,
-      "passed": 0.121,
-      "median_box_chi2": 18.314,
-      "median_velocity_chi2": 2.567,
-      "centre_gap_m": 3.879,
+      "compared": 88,
+      "passed": 0.102,
+      "median_box_chi2": 18.231,
+      "median_velocity_chi2": 2.702,
+      "centre_gap_m": 3.878,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 20.881
+      "score": 20.933
     },
     {
       "a": "B:track_002",
@@ -153,29 +153,29 @@
       "kind": "stitch",
       "compared": 1,
       "passed": 1.0,
-      "median_box_chi2": 0.033,
-      "median_velocity_chi2": 0.005,
-      "centre_gap_m": 1.023,
-      "gap_s": 1.35,
+      "median_box_chi2": 0.08,
+      "median_velocity_chi2": 0.013,
+      "centre_gap_m": 0.815,
+      "gap_s": 0.95,
       "accepted": false,
-      "refused": "UNRESOLVED: across the 1.35 s gap the re-acquisition is not singled out against a new road user (posterior 0.252)",
-      "lateral_chi2": 0.674,
-      "score": 0.038
+      "refused": "UNRESOLVED: when B:track_002 was last measured, A:track_003, B:track_003 was within two car widths of it: across the 0.95 s gap nothing tells which came back",
+      "lateral_chi2": 0.42,
+      "score": 0.093
     },
     {
       "a": "B:track_003",
       "b": "B:track_004",
       "kind": "same_observer",
-      "compared": 19,
+      "compared": 22,
       "passed": 0.0,
-      "median_box_chi2": 34.508,
+      "median_box_chi2": 34.665,
       "median_velocity_chi2": 0.0,
-      "centre_gap_m": 4.946,
+      "centre_gap_m": 4.92,
       "gap_s": null,
       "accepted": false,
       "refused": null,
       "lateral_chi2": null,
-      "score": 34.508
+      "score": 34.665
     }
   ],
   "entities": [
@@ -209,7 +209,7 @@
           "track": "B:track_004",
           "observer": "B",
           "t_global": [
-            0.2,
+            -0.2,
             2.05
           ]
         }
@@ -229,36 +229,36 @@
             "b": "B:track_002",
             "kind": "cross_observer",
             "compared": 94,
-            "passed": 0.989,
-            "median_box_chi2": 0.104,
-            "median_velocity_chi2": 0.184,
-            "centre_gap_m": 0.281,
+            "passed": 0.936,
+            "median_box_chi2": 0.093,
+            "median_velocity_chi2": 0.16,
+            "centre_gap_m": 0.287,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.288,
-            "posterior": 0.9886
+            "score": 0.253,
+            "posterior": 0.9888
           },
           {
             "a": "A:track_001",
             "b": "B:track_004",
             "kind": "cross_observer",
-            "compared": 14,
+            "compared": 17,
             "passed": 1.0,
-            "median_box_chi2": 0.362,
+            "median_box_chi2": 0.379,
             "median_velocity_chi2": 0.0,
-            "centre_gap_m": 0.372,
+            "centre_gap_m": 0.421,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.362,
-            "posterior": 0.9882
+            "score": 0.379,
+            "posterior": 0.9881
           }
         ],
         "retrospective": [],
-        "confidence": 0.9882
+        "confidence": 0.9881
       },
       "fusion_method": "box_fit+covariance_intersection",
       "footprint": {
@@ -269,7 +269,7 @@
           "source": "prior",
           "std_m": 0.7,
           "fitted_instants": 0,
-          "observed_extent_m": 3.008,
+          "observed_extent_m": 3.028,
           "observed_extent_used": false
         },
         "width": {
@@ -277,13 +277,13 @@
           "source": "prior",
           "std_m": 0.2,
           "fitted_instants": 0,
-          "observed_extent_m": 1.29,
+          "observed_extent_m": 1.285,
           "observed_extent_used": false
         }
       },
       "relevance": {
         "relevant_from_t_global": -6.2,
-        "min_clearance_to_relevance_range": 0.463
+        "min_clearance_to_relevance_range": 0.555
       },
       "timeline": {
         "first_detected": -6.2,
@@ -295,16 +295,16 @@
       "trajectory": [
         {
           "t_global": -6.2,
-          "x": -29.968,
-          "y": -207.204,
-          "pos_std_m": 0.376,
-          "vx": -12.282,
-          "vy": -0.941,
-          "vel_std_mps": 0.646,
-          "heading_deg": -175.62,
+          "x": -28.925,
+          "y": -206.862,
+          "pos_std_m": 0.105,
+          "vx": -11.811,
+          "vy": -3.197,
+          "vel_std_mps": 0.293,
+          "heading_deg": -164.23,
           "heading_source": "velocity",
-          "length_m": 4.211,
-          "width_m": 1.745,
+          "length_m": 4.383,
+          "width_m": 1.867,
           "method": "box_fit",
           "observers": [
             "A",
@@ -313,20 +313,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -6.1,
-          "x": -29.976,
-          "y": -208.479,
-          "pos_std_m": 0.362,
-          "vx": -12.314,
-          "vy": -0.919,
-          "vel_std_mps": 0.532,
-          "heading_deg": -175.73,
+          "x": -30.11,
+          "y": -207.153,
+          "pos_std_m": 0.101,
+          "vx": -11.894,
+          "vy": -2.624,
+          "vel_std_mps": 0.259,
+          "heading_deg": -167.26,
           "heading_source": "velocity",
-          "length_m": 4.303,
-          "width_m": 1.758,
+          "length_m": 4.388,
+          "width_m": 1.819,
           "method": "box_fit",
           "observers": [
             "A",
@@ -335,20 +336,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -6.0,
-          "x": -31.286,
-          "y": -207.515,
-          "pos_std_m": 0.376,
-          "vx": -12.388,
-          "vy": -0.838,
-          "vel_std_mps": 0.464,
-          "heading_deg": -176.13,
+          "x": -31.309,
+          "y": -207.373,
+          "pos_std_m": 0.097,
+          "vx": -12.087,
+          "vy": -1.782,
+          "vel_std_mps": 0.268,
+          "heading_deg": -171.56,
           "heading_source": "velocity",
           "length_m": 4.614,
-          "width_m": 1.864,
+          "width_m": 1.877,
           "method": "box_fit",
           "observers": [
             "A",
@@ -357,20 +359,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.9,
-          "x": -32.74,
-          "y": -207.796,
-          "pos_std_m": 0.376,
-          "vx": -12.405,
-          "vy": -0.674,
-          "vel_std_mps": 0.412,
-          "heading_deg": -176.89,
+          "x": -32.524,
+          "y": -207.516,
+          "pos_std_m": 0.094,
+          "vx": -12.224,
+          "vy": -1.079,
+          "vel_std_mps": 0.266,
+          "heading_deg": -174.83,
           "heading_source": "velocity",
-          "length_m": 4.27,
-          "width_m": 1.909,
+          "length_m": 4.265,
+          "width_m": 1.908,
           "method": "box_fit",
           "observers": [
             "A",
@@ -379,20 +382,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.8,
-          "x": -33.608,
-          "y": -207.743,
-          "pos_std_m": 0.376,
-          "vx": -12.443,
-          "vy": -0.47,
-          "vel_std_mps": 0.375,
-          "heading_deg": -177.84,
+          "x": -33.753,
+          "y": -207.598,
+          "pos_std_m": 0.091,
+          "vx": -12.343,
+          "vy": -0.555,
+          "vel_std_mps": 0.261,
+          "heading_deg": -177.21,
           "heading_source": "velocity",
-          "length_m": 4.369,
-          "width_m": 1.917,
+          "length_m": 4.331,
+          "width_m": 1.926,
           "method": "box_fit",
           "observers": [
             "A",
@@ -401,20 +405,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.7,
-          "x": -35.041,
-          "y": -207.512,
-          "pos_std_m": 0.376,
-          "vx": -12.488,
-          "vy": -0.269,
-          "vel_std_mps": 0.354,
-          "heading_deg": -178.77,
+          "x": -34.991,
+          "y": -207.636,
+          "pos_std_m": 0.089,
+          "vx": -12.426,
+          "vy": -0.209,
+          "vel_std_mps": 0.258,
+          "heading_deg": -178.78,
           "heading_source": "velocity",
-          "length_m": 4.649,
-          "width_m": 1.898,
+          "length_m": 4.487,
+          "width_m": 1.891,
           "method": "box_fit",
           "observers": [
             "A",
@@ -423,19 +428,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.6,
-          "x": -35.978,
-          "y": -207.604,
-          "pos_std_m": 0.391,
-          "vx": -12.532,
-          "vy": -0.123,
-          "vel_std_mps": 0.343,
-          "heading_deg": -179.44,
+          "x": -36.237,
+          "y": -207.647,
+          "pos_std_m": 0.087,
+          "vx": -12.483,
+          "vy": -0.014,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.65,
           "heading_source": "velocity",
-          "length_m": 4.219,
+          "length_m": 4.285,
           "width_m": 1.885,
           "method": "box_fit",
           "observers": [
@@ -445,19 +451,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.5,
-          "x": -37.404,
-          "y": -207.471,
-          "pos_std_m": 0.409,
-          "vx": -12.545,
-          "vy": -0.04,
-          "vel_std_mps": 0.339,
-          "heading_deg": -179.82,
+          "x": -37.487,
+          "y": -207.644,
+          "pos_std_m": 0.085,
+          "vx": -12.518,
+          "vy": 0.067,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.98,
           "heading_source": "velocity",
-          "length_m": 4.412,
+          "length_m": 4.422,
           "width_m": 1.87,
           "method": "box_fit",
           "observers": [
@@ -467,19 +474,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.4,
-          "x": -38.503,
-          "y": -207.665,
-          "pos_std_m": 0.391,
-          "vx": -12.553,
-          "vy": -0.001,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.99,
+          "x": -38.739,
+          "y": -207.636,
+          "pos_std_m": 0.083,
+          "vx": -12.534,
+          "vy": 0.091,
+          "vel_std_mps": 0.25,
+          "heading_deg": 179.91,
           "heading_source": "velocity",
-          "length_m": 4.249,
+          "length_m": 4.306,
           "width_m": 1.918,
           "method": "box_fit",
           "observers": [
@@ -489,17 +497,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.3,
-          "x": -39.906,
-          "y": -207.575,
-          "pos_std_m": 0.391,
-          "vx": -12.57,
-          "vy": 0.01,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.96,
+          "x": -39.993,
+          "y": -207.627,
+          "pos_std_m": 0.082,
+          "vx": -12.548,
+          "vy": 0.091,
+          "vel_std_mps": 0.252,
+          "heading_deg": 179.95,
           "heading_source": "velocity",
           "length_m": 4.444,
           "width_m": 1.889,
@@ -511,17 +520,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.2,
-          "x": -41.242,
-          "y": -207.519,
-          "pos_std_m": 0.362,
-          "vx": -12.59,
-          "vy": 0.019,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.92,
+          "x": -41.249,
+          "y": -207.618,
+          "pos_std_m": 0.081,
+          "vx": -12.559,
+          "vy": 0.094,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.91,
           "heading_source": "velocity",
           "length_m": 4.474,
           "width_m": 1.878,
@@ -533,17 +543,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.1,
-          "x": -42.486,
-          "y": -207.48,
-          "pos_std_m": 0.376,
-          "vx": -12.602,
-          "vy": 0.023,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.89,
+          "x": -42.505,
+          "y": -207.609,
+          "pos_std_m": 0.08,
+          "vx": -12.566,
+          "vy": 0.09,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.9,
           "heading_source": "velocity",
           "length_m": 4.419,
           "width_m": 1.855,
@@ -555,17 +566,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.0,
-          "x": -43.616,
-          "y": -207.562,
-          "pos_std_m": 0.362,
-          "vx": -12.592,
-          "vy": 0.034,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.85,
+          "x": -43.762,
+          "y": -207.6,
+          "pos_std_m": 0.079,
+          "vx": -12.574,
+          "vy": 0.084,
+          "vel_std_mps": 0.252,
+          "heading_deg": 179.9,
           "heading_source": "velocity",
           "length_m": 4.302,
           "width_m": 1.891,
@@ -577,17 +589,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.9,
-          "x": -44.857,
-          "y": -207.597,
-          "pos_std_m": 0.362,
-          "vx": -12.601,
-          "vy": 0.048,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.78,
+          "x": -45.02,
+          "y": -207.592,
+          "pos_std_m": 0.078,
+          "vx": -12.584,
+          "vy": 0.085,
+          "vel_std_mps": 0.253,
+          "heading_deg": 179.88,
           "heading_source": "velocity",
           "length_m": 4.226,
           "width_m": 1.901,
@@ -599,19 +612,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.8,
-          "x": -46.345,
-          "y": -207.523,
-          "pos_std_m": 0.362,
-          "vx": -12.599,
-          "vy": 0.054,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.75,
+          "x": -46.279,
+          "y": -207.583,
+          "pos_std_m": 0.077,
+          "vx": -12.588,
+          "vy": 0.084,
+          "vel_std_mps": 0.252,
+          "heading_deg": 179.88,
           "heading_source": "velocity",
-          "length_m": 4.592,
+          "length_m": 4.591,
           "width_m": 1.859,
           "method": "box_fit",
           "observers": [
@@ -621,17 +635,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.7,
-          "x": -47.494,
-          "y": -207.628,
-          "pos_std_m": 0.362,
-          "vx": -12.604,
-          "vy": 0.045,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.8,
+          "x": -47.538,
+          "y": -207.575,
+          "pos_std_m": 0.077,
+          "vx": -12.591,
+          "vy": 0.082,
+          "vel_std_mps": 0.25,
+          "heading_deg": 179.86,
           "heading_source": "velocity",
           "length_m": 4.451,
           "width_m": 1.912,
@@ -643,17 +658,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.6,
-          "x": -48.86,
-          "y": -207.505,
-          "pos_std_m": 0.362,
-          "vx": -12.601,
-          "vy": 0.024,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.89,
+          "x": -48.797,
+          "y": -207.568,
+          "pos_std_m": 0.077,
+          "vx": -12.59,
+          "vy": 0.063,
+          "vel_std_mps": 0.252,
+          "heading_deg": 179.95,
           "heading_source": "velocity",
           "length_m": 4.583,
           "width_m": 1.875,
@@ -665,17 +681,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.5,
-          "x": -50.301,
-          "y": -207.265,
-          "pos_std_m": 0.392,
-          "vx": -12.596,
-          "vy": -0.014,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.94,
+          "x": -50.055,
+          "y": -207.563,
+          "pos_std_m": 0.076,
+          "vx": -12.582,
+          "vy": 0.024,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.89,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -687,17 +704,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.4,
-          "x": -51.366,
-          "y": -207.554,
-          "pos_std_m": 0.362,
-          "vx": -12.61,
-          "vy": -0.056,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.75,
+          "x": -51.313,
+          "y": -207.563,
+          "pos_std_m": 0.076,
+          "vx": -12.572,
+          "vy": -0.015,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.74,
           "heading_source": "velocity",
           "length_m": 4.563,
           "width_m": 1.89,
@@ -709,16 +727,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.3,
-          "x": -52.643,
-          "y": -207.613,
-          "pos_std_m": 0.376,
-          "vx": -12.607,
-          "vy": -0.075,
-          "vel_std_mps": 0.335,
+          "x": -52.57,
+          "y": -207.565,
+          "pos_std_m": 0.076,
+          "vx": -12.567,
+          "vy": -0.031,
+          "vel_std_mps": 0.252,
           "heading_deg": -179.66,
           "heading_source": "velocity",
           "length_m": 4.575,
@@ -731,19 +750,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.2,
-          "x": -53.735,
-          "y": -207.589,
-          "pos_std_m": 0.362,
-          "vx": -12.594,
-          "vy": -0.081,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.63,
+          "x": -53.827,
+          "y": -207.568,
+          "pos_std_m": 0.076,
+          "vx": -12.568,
+          "vy": -0.025,
+          "vel_std_mps": 0.252,
+          "heading_deg": -179.69,
           "heading_source": "velocity",
-          "length_m": 4.364,
+          "length_m": 4.365,
           "width_m": 1.898,
           "method": "box_fit",
           "observers": [
@@ -753,17 +773,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.1,
-          "x": -54.931,
-          "y": -207.566,
-          "pos_std_m": 0.391,
-          "vx": -12.596,
-          "vy": -0.073,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.67,
+          "x": -55.084,
+          "y": -207.57,
+          "pos_std_m": 0.075,
+          "vx": -12.578,
+          "vy": -0.013,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.75,
           "heading_source": "velocity",
           "length_m": 4.346,
           "width_m": 1.872,
@@ -775,17 +796,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.0,
-          "x": -56.224,
-          "y": -207.62,
-          "pos_std_m": 0.362,
-          "vx": -12.601,
-          "vy": -0.049,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.78,
+          "x": -56.342,
+          "y": -207.57,
+          "pos_std_m": 0.075,
+          "vx": -12.592,
+          "vy": 0.006,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.81,
           "heading_source": "velocity",
           "length_m": 4.322,
           "width_m": 1.902,
@@ -797,16 +819,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.9,
-          "x": -57.593,
-          "y": -207.584,
-          "pos_std_m": 0.362,
-          "vx": -12.605,
-          "vy": -0.011,
-          "vel_std_mps": 0.336,
+          "x": -57.602,
+          "y": -207.568,
+          "pos_std_m": 0.075,
+          "vx": -12.608,
+          "vy": 0.038,
+          "vel_std_mps": 0.254,
           "heading_deg": -179.95,
           "heading_source": "velocity",
           "length_m": 4.468,
@@ -819,16 +842,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.8,
-          "x": -58.735,
-          "y": -207.589,
-          "pos_std_m": 0.362,
-          "vx": -12.627,
-          "vy": 0.032,
-          "vel_std_mps": 0.336,
+          "x": -58.864,
+          "y": -207.562,
+          "pos_std_m": 0.075,
+          "vx": -12.624,
+          "vy": 0.08,
+          "vel_std_mps": 0.256,
           "heading_deg": 179.86,
           "heading_source": "velocity",
           "length_m": 4.313,
@@ -841,20 +865,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.7,
-          "x": -60.147,
-          "y": -207.591,
-          "pos_std_m": 0.376,
-          "vx": -12.654,
-          "vy": 0.088,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.6,
+          "x": -60.127,
+          "y": -207.552,
+          "pos_std_m": 0.075,
+          "vx": -12.639,
+          "vy": 0.124,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.64,
           "heading_source": "velocity",
-          "length_m": 4.557,
-          "width_m": 1.904,
+          "length_m": 4.556,
+          "width_m": 1.905,
           "method": "box_fit",
           "observers": [
             "A",
@@ -863,17 +888,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.6,
-          "x": -61.459,
-          "y": -207.334,
-          "pos_std_m": 0.392,
-          "vx": -12.655,
-          "vy": 0.143,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.35,
+          "x": -61.391,
+          "y": -207.538,
+          "pos_std_m": 0.075,
+          "vx": -12.645,
+          "vy": 0.149,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.49,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -885,20 +911,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.5,
-          "x": -62.689,
-          "y": -207.57,
-          "pos_std_m": 0.376,
-          "vx": -12.654,
-          "vy": 0.159,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.28,
+          "x": -62.656,
+          "y": -207.523,
+          "pos_std_m": 0.075,
+          "vx": -12.649,
+          "vy": 0.151,
+          "vel_std_mps": 0.253,
+          "heading_deg": 179.49,
           "heading_source": "velocity",
           "length_m": 4.577,
-          "width_m": 1.897,
+          "width_m": 1.898,
           "method": "box_fit",
           "observers": [
             "A",
@@ -907,20 +934,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.4,
-          "x": -63.91,
-          "y": -207.638,
-          "pos_std_m": 0.391,
-          "vx": -12.656,
-          "vy": 0.146,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.34,
+          "x": -63.921,
+          "y": -207.508,
+          "pos_std_m": 0.076,
+          "vx": -12.653,
+          "vy": 0.148,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.51,
           "heading_source": "velocity",
-          "length_m": 4.543,
-          "width_m": 1.907,
+          "length_m": 4.542,
+          "width_m": 1.908,
           "method": "box_fit",
           "observers": [
             "A",
@@ -929,17 +957,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.3,
-          "x": -65.091,
-          "y": -207.528,
-          "pos_std_m": 0.362,
-          "vx": -12.658,
-          "vy": 0.111,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.5,
+          "x": -65.186,
+          "y": -207.495,
+          "pos_std_m": 0.076,
+          "vx": -12.655,
+          "vy": 0.125,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.66,
           "heading_source": "velocity",
           "length_m": 4.398,
           "width_m": 1.86,
@@ -951,19 +980,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.2,
-          "x": -66.333,
-          "y": -207.574,
-          "pos_std_m": 0.362,
-          "vx": -12.651,
-          "vy": 0.062,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.72,
+          "x": -66.452,
+          "y": -207.484,
+          "pos_std_m": 0.076,
+          "vx": -12.661,
+          "vy": 0.094,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.81,
           "heading_source": "velocity",
-          "length_m": 4.394,
+          "length_m": 4.393,
           "width_m": 1.884,
           "method": "box_fit",
           "observers": [
@@ -973,17 +1003,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.1,
-          "x": -67.756,
-          "y": -207.124,
-          "pos_std_m": 0.392,
-          "vx": -12.643,
-          "vy": 0.002,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.99,
+          "x": -67.718,
+          "y": -207.477,
+          "pos_std_m": 0.076,
+          "vx": -12.655,
+          "vy": 0.042,
+          "vel_std_mps": 0.256,
+          "heading_deg": -179.98,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -995,16 +1026,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -3.0,
-          "x": -69.048,
-          "y": -207.581,
-          "pos_std_m": 0.362,
-          "vx": -12.629,
-          "vy": -0.07,
-          "vel_std_mps": 0.336,
+          "x": -68.983,
+          "y": -207.476,
+          "pos_std_m": 0.076,
+          "vx": -12.644,
+          "vy": -0.025,
+          "vel_std_mps": 0.254,
           "heading_deg": -179.68,
           "heading_source": "velocity",
           "length_m": 4.67,
@@ -1017,17 +1049,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.9,
-          "x": -70.33,
-          "y": -207.654,
-          "pos_std_m": 0.376,
-          "vx": -12.622,
-          "vy": -0.145,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.34,
+          "x": -70.247,
+          "y": -207.481,
+          "pos_std_m": 0.076,
+          "vx": -12.638,
+          "vy": -0.076,
+          "vel_std_mps": 0.256,
+          "heading_deg": -179.4,
           "heading_source": "velocity",
           "length_m": 4.535,
           "width_m": 1.902,
@@ -1039,20 +1072,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.8,
-          "x": -71.48,
-          "y": -207.743,
-          "pos_std_m": 0.376,
-          "vx": -12.619,
-          "vy": -0.215,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.02,
+          "x": -71.511,
+          "y": -207.491,
+          "pos_std_m": 0.077,
+          "vx": -12.636,
+          "vy": -0.114,
+          "vel_std_mps": 0.253,
+          "heading_deg": -179.19,
           "heading_source": "velocity",
           "length_m": 4.521,
-          "width_m": 1.934,
+          "width_m": 1.933,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1061,19 +1095,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.7,
-          "x": -72.699,
-          "y": -207.669,
-          "pos_std_m": 0.362,
-          "vx": -12.623,
-          "vy": -0.275,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.75,
+          "x": -72.775,
+          "y": -207.504,
+          "pos_std_m": 0.077,
+          "vx": -12.641,
+          "vy": -0.151,
+          "vel_std_mps": 0.254,
+          "heading_deg": -178.95,
           "heading_source": "velocity",
-          "length_m": 4.434,
+          "length_m": 4.435,
           "width_m": 1.914,
           "method": "box_fit",
           "observers": [
@@ -1083,20 +1118,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.6,
-          "x": -74.026,
-          "y": -207.601,
-          "pos_std_m": 0.376,
-          "vx": -12.631,
-          "vy": -0.319,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.55,
+          "x": -74.039,
+          "y": -207.521,
+          "pos_std_m": 0.077,
+          "vx": -12.653,
+          "vy": -0.185,
+          "vel_std_mps": 0.256,
+          "heading_deg": -178.74,
           "heading_source": "velocity",
-          "length_m": 4.575,
-          "width_m": 1.898,
+          "length_m": 4.576,
+          "width_m": 1.897,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1105,17 +1141,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.5,
-          "x": -75.315,
-          "y": -207.339,
-          "pos_std_m": 0.392,
-          "vx": -12.65,
-          "vy": -0.346,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.43,
+          "x": -75.305,
+          "y": -207.541,
+          "pos_std_m": 0.078,
+          "vx": -12.665,
+          "vy": -0.211,
+          "vel_std_mps": 0.256,
+          "heading_deg": -178.63,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1127,20 +1164,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.4,
-          "x": -76.488,
-          "y": -207.708,
-          "pos_std_m": 0.409,
-          "vx": -12.668,
-          "vy": -0.351,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.41,
+          "x": -76.573,
+          "y": -207.562,
+          "pos_std_m": 0.078,
+          "vx": -12.682,
+          "vy": -0.22,
+          "vel_std_mps": 0.257,
+          "heading_deg": -178.61,
           "heading_source": "velocity",
           "length_m": 4.49,
-          "width_m": 1.907,
+          "width_m": 1.906,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1149,19 +1187,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.3,
-          "x": -77.742,
-          "y": -207.611,
-          "pos_std_m": 0.362,
-          "vx": -12.674,
-          "vy": -0.351,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.41,
+          "x": -77.842,
+          "y": -207.585,
+          "pos_std_m": 0.079,
+          "vx": -12.704,
+          "vy": -0.226,
+          "vel_std_mps": 0.259,
+          "heading_deg": -178.56,
           "heading_source": "velocity",
-          "length_m": 4.473,
+          "length_m": 4.474,
           "width_m": 1.856,
           "method": "box_fit",
           "observers": [
@@ -1171,17 +1210,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.2,
-          "x": -79.138,
-          "y": -207.583,
-          "pos_std_m": 0.409,
-          "vx": -12.704,
-          "vy": -0.346,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.44,
+          "x": -79.113,
+          "y": -207.607,
+          "pos_std_m": 0.079,
+          "vx": -12.728,
+          "vy": -0.226,
+          "vel_std_mps": 0.259,
+          "heading_deg": -178.54,
           "heading_source": "velocity",
           "length_m": 4.585,
           "width_m": 1.88,
@@ -1193,17 +1233,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.1,
-          "x": -80.179,
-          "y": -207.71,
-          "pos_std_m": 0.362,
-          "vx": -12.717,
-          "vy": -0.323,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.54,
+          "x": -80.388,
+          "y": -207.629,
+          "pos_std_m": 0.08,
+          "vx": -12.754,
+          "vy": -0.21,
+          "vel_std_mps": 0.26,
+          "heading_deg": -178.6,
           "heading_source": "velocity",
           "length_m": 4.332,
           "width_m": 1.88,
@@ -1215,17 +1256,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.0,
-          "x": -81.621,
-          "y": -207.705,
-          "pos_std_m": 0.376,
-          "vx": -12.739,
-          "vy": -0.282,
-          "vel_std_mps": 0.336,
-          "heading_deg": -178.73,
+          "x": -81.665,
+          "y": -207.648,
+          "pos_std_m": 0.081,
+          "vx": -12.784,
+          "vy": -0.177,
+          "vel_std_mps": 0.26,
+          "heading_deg": -178.75,
           "heading_source": "velocity",
           "length_m": 4.558,
           "width_m": 1.87,
@@ -1237,16 +1279,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.9,
-          "x": -82.949,
-          "y": -207.525,
-          "pos_std_m": 0.392,
-          "vx": -12.772,
-          "vy": -0.238,
-          "vel_std_mps": 0.336,
+          "x": -82.944,
+          "y": -207.664,
+          "pos_std_m": 0.082,
+          "vx": -12.815,
+          "vy": -0.14,
+          "vel_std_mps": 0.261,
           "heading_deg": -178.93,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -1259,17 +1302,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.8,
-          "x": -84.045,
-          "y": -207.729,
-          "pos_std_m": 0.409,
-          "vx": -12.791,
-          "vy": -0.199,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.11,
+          "x": -84.227,
+          "y": -207.676,
+          "pos_std_m": 0.083,
+          "vx": -12.846,
+          "vy": -0.105,
+          "vel_std_mps": 0.262,
+          "heading_deg": -179.07,
           "heading_source": "velocity",
           "length_m": 4.358,
           "width_m": 1.877,
@@ -1281,19 +1325,20 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.7,
-          "x": -85.47,
-          "y": -207.777,
-          "pos_std_m": 0.409,
-          "vx": -12.826,
-          "vy": -0.141,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.37,
+          "x": -85.514,
+          "y": -207.684,
+          "pos_std_m": 0.084,
+          "vx": -12.876,
+          "vy": -0.049,
+          "vel_std_mps": 0.263,
+          "heading_deg": -179.32,
           "heading_source": "velocity",
-          "length_m": 4.577,
+          "length_m": 4.576,
           "width_m": 1.884,
           "method": "box_fit",
           "observers": [
@@ -1303,17 +1348,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.6,
-          "x": -86.948,
-          "y": -207.465,
-          "pos_std_m": 0.392,
-          "vx": -12.865,
-          "vy": -0.079,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.65,
+          "x": -86.802,
+          "y": -207.686,
+          "pos_std_m": 0.085,
+          "vx": -12.902,
+          "vy": 0.004,
+          "vel_std_mps": 0.264,
+          "heading_deg": -179.59,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1325,17 +1371,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.5,
-          "x": -87.94,
-          "y": -207.803,
-          "pos_std_m": 0.409,
-          "vx": -12.878,
-          "vy": -0.028,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.87,
+          "x": -88.094,
+          "y": -207.684,
+          "pos_std_m": 0.087,
+          "vx": -12.929,
+          "vy": 0.047,
+          "vel_std_mps": 0.265,
+          "heading_deg": -179.81,
           "heading_source": "velocity",
           "length_m": 4.42,
           "width_m": 1.872,
@@ -1347,16 +1394,63 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.4,
-          "x": -89.449,
-          "y": -207.265,
-          "pos_std_m": 0.392,
-          "vx": -12.903,
-          "vy": 0.005,
-          "vel_std_mps": 0.338,
+          "x": -89.388,
+          "y": -207.678,
+          "pos_std_m": 0.088,
+          "vx": -12.954,
+          "vy": 0.069,
+          "vel_std_mps": 0.266,
+          "heading_deg": -179.97,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -1.3,
+          "x": -90.684,
+          "y": -207.671,
+          "pos_std_m": 0.09,
+          "vx": -12.968,
+          "vy": 0.064,
+          "vel_std_mps": 0.268,
+          "heading_deg": 179.99,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -1.2,
+          "x": -91.982,
+          "y": -207.665,
+          "pos_std_m": 0.092,
+          "vx": -12.978,
+          "vy": 0.053,
+          "vel_std_mps": 0.27,
           "heading_deg": 179.98,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -1369,61 +1463,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
-        },
-        {
-          "t_global": -1.3,
-          "x": -90.938,
-          "y": -207.462,
-          "pos_std_m": 0.392,
-          "vx": -12.929,
-          "vy": 0.012,
-          "vel_std_mps": 0.338,
-          "heading_deg": 179.95,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
           ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -1.2,
-          "x": -92.144,
-          "y": -207.448,
-          "pos_std_m": 0.392,
-          "vx": -12.946,
-          "vy": 0.014,
-          "vel_std_mps": 0.339,
-          "heading_deg": 179.94,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
+          "position": "smoothed"
         },
         {
           "t_global": -1.1,
-          "x": -93.345,
-          "y": -207.465,
-          "pos_std_m": 0.392,
-          "vx": -12.964,
-          "vy": 0.009,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.96,
+          "x": -93.28,
+          "y": -207.661,
+          "pos_std_m": 0.095,
+          "vx": -12.988,
+          "vy": 0.038,
+          "vel_std_mps": 0.271,
+          "heading_deg": 180.0,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1435,17 +1486,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.0,
-          "x": -94.673,
-          "y": -207.799,
-          "pos_std_m": 0.548,
-          "vx": -12.986,
-          "vy": 0.003,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.99,
+          "x": -94.579,
+          "y": -207.657,
+          "pos_std_m": 0.097,
+          "vx": -13.005,
+          "vy": 0.033,
+          "vel_std_mps": 0.271,
+          "heading_deg": -179.99,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1455,17 +1507,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.9,
-          "x": -95.619,
-          "y": -207.824,
-          "pos_std_m": 0.409,
-          "vx": -13.016,
-          "vy": 0.001,
-          "vel_std_mps": 0.339,
-          "heading_deg": 180.0,
+          "x": -95.882,
+          "y": -207.653,
+          "pos_std_m": 0.1,
+          "vx": -13.048,
+          "vy": 0.052,
+          "vel_std_mps": 0.279,
+          "heading_deg": -179.98,
           "heading_source": "velocity",
           "length_m": 4.392,
           "width_m": 1.871,
@@ -1475,17 +1528,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.8,
-          "x": -97.174,
-          "y": -207.425,
-          "pos_std_m": 0.548,
-          "vx": -13.113,
-          "vy": -0.006,
-          "vel_std_mps": 0.36,
-          "heading_deg": -179.97,
+          "x": -97.191,
+          "y": -207.644,
+          "pos_std_m": 0.104,
+          "vx": -13.138,
+          "vy": 0.134,
+          "vel_std_mps": 0.457,
+          "heading_deg": -179.96,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1493,17 +1547,18 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": -0.7,
-          "x": -98.572,
-          "y": -207.433,
-          "pos_std_m": 0.548,
-          "vx": -13.062,
-          "vy": 0.015,
-          "vel_std_mps": 0.339,
-          "heading_deg": 179.93,
+          "x": -98.504,
+          "y": -207.633,
+          "pos_std_m": 0.112,
+          "vx": -13.115,
+          "vy": 0.08,
+          "vel_std_mps": 0.289,
+          "heading_deg": 179.94,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1513,17 +1568,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.6,
-          "x": -99.79,
-          "y": -207.419,
-          "pos_std_m": 0.548,
-          "vx": -13.103,
-          "vy": 0.002,
-          "vel_std_mps": 0.36,
-          "heading_deg": 179.99,
+          "x": -99.818,
+          "y": -207.623,
+          "pos_std_m": 0.117,
+          "vx": -13.167,
+          "vy": 0.115,
+          "vel_std_mps": 0.459,
+          "heading_deg": 180.0,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1531,16 +1587,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": -0.5,
-          "x": -101.106,
-          "y": -207.421,
-          "pos_std_m": 0.548,
-          "vx": -13.064,
-          "vy": -0.007,
-          "vel_std_mps": 0.34,
+          "x": -101.132,
+          "y": -207.616,
+          "pos_std_m": 0.124,
+          "vx": -13.114,
+          "vy": 0.039,
+          "vel_std_mps": 0.281,
           "heading_deg": -179.97,
           "heading_source": "velocity",
           "length_m": null,
@@ -1551,17 +1608,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.4,
-          "x": -101.652,
-          "y": -207.705,
-          "pos_std_m": 2.3,
-          "vx": -13.069,
-          "vy": -0.026,
-          "vel_std_mps": 0.34,
-          "heading_deg": -179.89,
+          "x": -102.443,
+          "y": -207.613,
+          "pos_std_m": 0.128,
+          "vx": -13.105,
+          "vy": 0.009,
+          "vel_std_mps": 0.273,
+          "heading_deg": -179.9,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1571,17 +1629,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.3,
-          "x": -103.661,
-          "y": -207.416,
-          "pos_std_m": 0.548,
-          "vx": -13.052,
-          "vy": -0.04,
-          "vel_std_mps": 0.332,
-          "heading_deg": -179.82,
+          "x": -103.753,
+          "y": -207.613,
+          "pos_std_m": 0.131,
+          "vx": -13.092,
+          "vy": -0.009,
+          "vel_std_mps": 0.27,
+          "heading_deg": -179.84,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1591,97 +1650,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.2,
-          "x": -103.914,
-          "y": -207.674,
-          "pos_std_m": 2.3,
-          "vx": -13.059,
-          "vy": -0.041,
-          "vel_std_mps": 0.339,
-          "heading_deg": -179.82,
-          "heading_source": "velocity",
-          "length_m": null,
-          "width_m": null,
-          "method": "covariance_intersection",
-          "observers": [
-            "A"
-          ],
-          "measured_by": [
-            "A"
-          ]
-        },
-        {
-          "t_global": -0.1,
-          "x": -106.267,
-          "y": -207.416,
-          "pos_std_m": 0.548,
-          "vx": -13.057,
-          "vy": -0.03,
-          "vel_std_mps": 0.329,
-          "heading_deg": -179.87,
-          "heading_source": "velocity",
-          "length_m": null,
-          "width_m": null,
-          "method": "covariance_intersection",
-          "observers": [
-            "A"
-          ],
-          "measured_by": [
-            "A"
-          ]
-        },
-        {
-          "t_global": 0.0,
-          "x": -107.529,
-          "y": -208.017,
-          "pos_std_m": 0.548,
-          "vx": -13.081,
-          "vy": -0.017,
-          "vel_std_mps": 0.328,
-          "heading_deg": -179.93,
-          "heading_source": "velocity",
-          "length_m": null,
-          "width_m": null,
-          "method": "covariance_intersection",
-          "observers": [
-            "A"
-          ],
-          "measured_by": [
-            "A"
-          ]
-        },
-        {
-          "t_global": 0.1,
-          "x": -108.118,
-          "y": -207.765,
-          "pos_std_m": 2.3,
-          "vx": -13.091,
-          "vy": -0.019,
-          "vel_std_mps": 0.338,
-          "heading_deg": -179.92,
-          "heading_source": "velocity",
-          "length_m": null,
-          "width_m": null,
-          "method": "covariance_intersection",
-          "observers": [
-            "A"
-          ],
-          "measured_by": [
-            "A"
-          ]
-        },
-        {
-          "t_global": 0.2,
-          "x": -110.171,
-          "y": -207.406,
-          "pos_std_m": 0.392,
-          "vx": -13.108,
-          "vy": -0.031,
-          "vel_std_mps": 0.338,
-          "heading_deg": -179.86,
+          "x": -105.062,
+          "y": -207.614,
+          "pos_std_m": 0.133,
+          "vx": -13.086,
+          "vy": -0.018,
+          "vel_std_mps": 0.275,
+          "heading_deg": -179.84,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1693,17 +1673,108 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -0.1,
+          "x": -106.37,
+          "y": -207.616,
+          "pos_std_m": 0.136,
+          "vx": -13.069,
+          "vy": -0.018,
+          "vel_std_mps": 0.294,
+          "heading_deg": -179.89,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": 0.0,
+          "x": -107.524,
+          "y": -207.666,
+          "pos_std_m": 0.122,
+          "vx": -13.092,
+          "vy": -0.009,
+          "vel_std_mps": 0.293,
+          "heading_deg": -179.94,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": 0.1,
+          "x": -108.834,
+          "y": -207.667,
+          "pos_std_m": 0.118,
+          "vx": -13.099,
+          "vy": -0.011,
+          "vel_std_mps": 0.275,
+          "heading_deg": -179.92,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": 0.2,
+          "x": -110.143,
+          "y": -207.668,
+          "pos_std_m": 0.114,
+          "vx": -13.09,
+          "vy": -0.001,
+          "vel_std_mps": 0.273,
+          "heading_deg": -179.88,
+          "heading_source": "velocity",
+          "length_m": 4.245,
+          "width_m": 1.849,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.3,
-          "x": -111.579,
-          "y": -207.436,
-          "pos_std_m": 0.548,
-          "vx": -13.162,
-          "vy": -0.006,
-          "vel_std_mps": 0.359,
-          "heading_deg": -179.97,
+          "x": -111.453,
+          "y": -207.666,
+          "pos_std_m": 0.11,
+          "vx": -13.107,
+          "vy": 0.038,
+          "vel_std_mps": 0.283,
+          "heading_deg": -179.99,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1714,16 +1785,17 @@
           ],
           "measured_by": [
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.4,
-          "x": -112.7,
-          "y": -207.833,
-          "pos_std_m": 0.376,
-          "vx": -13.159,
-          "vy": 0.052,
-          "vel_std_mps": 0.338,
+          "x": -112.764,
+          "y": -207.66,
+          "pos_std_m": 0.107,
+          "vx": -13.11,
+          "vy": 0.088,
+          "vel_std_mps": 0.271,
           "heading_deg": 179.77,
           "heading_source": "velocity",
           "length_m": 4.623,
@@ -1736,17 +1808,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.5,
-          "x": -113.949,
-          "y": -207.801,
-          "pos_std_m": 0.392,
-          "vx": -13.16,
-          "vy": 0.107,
-          "vel_std_mps": 0.339,
-          "heading_deg": 179.53,
+          "x": -114.075,
+          "y": -207.648,
+          "pos_std_m": 0.104,
+          "vx": -13.121,
+          "vy": 0.139,
+          "vel_std_mps": 0.27,
+          "heading_deg": 179.56,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1758,20 +1831,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.6,
-          "x": -115.103,
-          "y": -207.819,
-          "pos_std_m": 0.391,
-          "vx": -13.167,
-          "vy": 0.142,
-          "vel_std_mps": 0.339,
-          "heading_deg": 179.38,
+          "x": -115.387,
+          "y": -207.633,
+          "pos_std_m": 0.102,
+          "vx": -13.107,
+          "vy": 0.16,
+          "vel_std_mps": 0.269,
+          "heading_deg": 179.62,
           "heading_source": "velocity",
           "length_m": 4.447,
-          "width_m": 1.9,
+          "width_m": 1.901,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1780,17 +1854,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.7,
-          "x": -116.451,
-          "y": -207.877,
-          "pos_std_m": 0.376,
-          "vx": -13.173,
-          "vy": 0.154,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.33,
+          "x": -116.699,
+          "y": -207.614,
+          "pos_std_m": 0.1,
+          "vx": -13.145,
+          "vy": 0.231,
+          "vel_std_mps": 0.268,
+          "heading_deg": 179.32,
           "heading_source": "velocity",
           "length_m": 4.446,
           "width_m": 1.892,
@@ -1802,20 +1877,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.8,
-          "x": -117.79,
-          "y": -207.703,
-          "pos_std_m": 0.376,
+          "x": -118.016,
+          "y": -207.588,
+          "pos_std_m": 0.099,
           "vx": -13.188,
-          "vy": 0.174,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.25,
+          "vy": 0.296,
+          "vel_std_mps": 0.267,
+          "heading_deg": 179.0,
           "heading_source": "velocity",
           "length_m": 4.539,
-          "width_m": 1.916,
+          "width_m": 1.915,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1824,17 +1900,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.9,
-          "x": -119.382,
-          "y": -207.326,
-          "pos_std_m": 0.392,
-          "vx": -13.199,
-          "vy": 0.199,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.14,
+          "x": -119.337,
+          "y": -207.559,
+          "pos_std_m": 0.099,
+          "vx": -13.225,
+          "vy": 0.285,
+          "vel_std_mps": 0.27,
+          "heading_deg": 179.17,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1846,20 +1923,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.0,
-          "x": -120.432,
-          "y": -207.694,
-          "pos_std_m": 0.409,
-          "vx": -13.207,
-          "vy": 0.217,
-          "vel_std_mps": 0.34,
-          "heading_deg": 179.06,
+          "x": -120.66,
+          "y": -207.53,
+          "pos_std_m": 0.099,
+          "vx": -13.239,
+          "vy": 0.288,
+          "vel_std_mps": 0.27,
+          "heading_deg": 179.09,
           "heading_source": "velocity",
           "length_m": 4.446,
-          "width_m": 1.909,
+          "width_m": 1.91,
           "method": "box_fit",
           "observers": [
             "A",
@@ -1868,17 +1946,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.1,
-          "x": -121.809,
-          "y": -207.353,
-          "pos_std_m": 0.392,
-          "vx": -13.18,
-          "vy": 0.196,
-          "vel_std_mps": 0.341,
-          "heading_deg": 179.15,
+          "x": -121.984,
+          "y": -207.502,
+          "pos_std_m": 0.099,
+          "vx": -13.241,
+          "vy": 0.267,
+          "vel_std_mps": 0.27,
+          "heading_deg": 179.18,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1890,17 +1969,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.2,
-          "x": -121.241,
-          "y": -208.152,
-          "pos_std_m": 0.939,
-          "vx": -13.166,
-          "vy": 0.142,
-          "vel_std_mps": 0.342,
-          "heading_deg": 179.38,
+          "x": -123.308,
+          "y": -207.478,
+          "pos_std_m": 0.099,
+          "vx": -13.24,
+          "vy": 0.218,
+          "vel_std_mps": 0.271,
+          "heading_deg": 179.39,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -1912,16 +1992,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.3,
-          "x": -124.443,
-          "y": -207.437,
-          "pos_std_m": 0.392,
-          "vx": -13.132,
-          "vy": 0.054,
-          "vel_std_mps": 0.343,
+          "x": -124.631,
+          "y": -207.46,
+          "pos_std_m": 0.1,
+          "vx": -13.228,
+          "vy": 0.144,
+          "vel_std_mps": 0.272,
           "heading_deg": 179.77,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -1934,17 +2015,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.4,
-          "x": -125.741,
-          "y": -207.136,
-          "pos_std_m": 0.548,
-          "vx": -13.09,
-          "vy": -0.029,
-          "vel_std_mps": 0.344,
-          "heading_deg": -179.87,
+          "x": -125.953,
+          "y": -207.449,
+          "pos_std_m": 0.101,
+          "vx": -13.206,
+          "vy": 0.069,
+          "vel_std_mps": 0.273,
+          "heading_deg": -179.88,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1956,17 +2038,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.5,
-          "x": -127.421,
-          "y": -207.325,
-          "pos_std_m": 0.548,
-          "vx": -13.081,
-          "vy": -0.061,
-          "vel_std_mps": 0.346,
-          "heading_deg": -179.73,
+          "x": -127.273,
+          "y": -207.444,
+          "pos_std_m": 0.102,
+          "vx": -13.198,
+          "vy": 0.03,
+          "vel_std_mps": 0.274,
+          "heading_deg": -179.75,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1977,17 +2060,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.6,
-          "x": -128.742,
-          "y": -207.334,
-          "pos_std_m": 0.548,
-          "vx": -13.084,
-          "vy": -0.064,
-          "vel_std_mps": 0.347,
-          "heading_deg": -179.72,
+          "x": -128.593,
+          "y": -207.442,
+          "pos_std_m": 0.103,
+          "vx": -13.197,
+          "vy": 0.023,
+          "vel_std_mps": 0.275,
+          "heading_deg": -179.74,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -1998,17 +2082,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.7,
-          "x": -130.068,
-          "y": -207.327,
-          "pos_std_m": 0.548,
-          "vx": -13.091,
-          "vy": -0.037,
-          "vel_std_mps": 0.347,
-          "heading_deg": -179.84,
+          "x": -129.913,
+          "y": -207.438,
+          "pos_std_m": 0.104,
+          "vx": -13.206,
+          "vy": 0.04,
+          "vel_std_mps": 0.275,
+          "heading_deg": -179.86,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2019,17 +2104,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.8,
-          "x": -131.588,
-          "y": -207.246,
-          "pos_std_m": 0.548,
-          "vx": -13.137,
-          "vy": 0.002,
-          "vel_std_mps": 0.351,
-          "heading_deg": 179.99,
+          "x": -131.236,
+          "y": -207.433,
+          "pos_std_m": 0.106,
+          "vx": -13.247,
+          "vy": 0.067,
+          "vel_std_mps": 0.277,
+          "heading_deg": 179.97,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2041,17 +2127,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.9,
-          "x": -132.782,
-          "y": -207.284,
-          "pos_std_m": 0.392,
-          "vx": -13.24,
-          "vy": 0.019,
-          "vel_std_mps": 0.352,
-          "heading_deg": 179.92,
+          "x": -132.565,
+          "y": -207.426,
+          "pos_std_m": 0.108,
+          "vx": -13.334,
+          "vy": 0.08,
+          "vel_std_mps": 0.279,
+          "heading_deg": 179.9,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2063,17 +2150,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.0,
-          "x": -134.445,
-          "y": -207.518,
-          "pos_std_m": 0.548,
-          "vx": -13.409,
-          "vy": 0.031,
-          "vel_std_mps": 0.354,
-          "heading_deg": 179.87,
+          "x": -133.905,
+          "y": -207.417,
+          "pos_std_m": 0.11,
+          "vx": -13.471,
+          "vy": 0.095,
+          "vel_std_mps": 0.28,
+          "heading_deg": 179.85,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2084,17 +2172,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.1,
-          "x": -135.556,
-          "y": -207.243,
-          "pos_std_m": 0.548,
-          "vx": -13.596,
-          "vy": 0.062,
-          "vel_std_mps": 0.358,
-          "heading_deg": 179.74,
+          "x": -135.26,
+          "y": -207.406,
+          "pos_std_m": 0.112,
+          "vx": -13.627,
+          "vy": 0.13,
+          "vel_std_mps": 0.283,
+          "heading_deg": 179.73,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2106,17 +2195,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.2,
-          "x": -135.898,
-          "y": -207.488,
-          "pos_std_m": 2.3,
-          "vx": -13.744,
-          "vy": 0.131,
-          "vel_std_mps": 0.361,
-          "heading_deg": 179.46,
+          "x": -136.63,
+          "y": -207.389,
+          "pos_std_m": 0.115,
+          "vx": -13.768,
+          "vy": 0.199,
+          "vel_std_mps": 0.285,
+          "heading_deg": 179.45,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2126,16 +2216,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.3,
-          "x": -138.177,
-          "y": -207.263,
-          "pos_std_m": 0.548,
-          "vx": -13.863,
-          "vy": 0.249,
-          "vel_std_mps": 0.367,
+          "x": -138.012,
+          "y": -207.364,
+          "pos_std_m": 0.117,
+          "vx": -13.884,
+          "vy": 0.312,
+          "vel_std_mps": 0.288,
           "heading_deg": 178.97,
           "heading_source": "velocity",
           "length_m": null,
@@ -2146,16 +2237,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.4,
-          "x": -139.565,
-          "y": -207.206,
-          "pos_std_m": 0.548,
-          "vx": -13.952,
-          "vy": 0.399,
-          "vel_std_mps": 0.373,
+          "x": -139.405,
+          "y": -207.325,
+          "pos_std_m": 0.12,
+          "vx": -13.969,
+          "vy": 0.455,
+          "vel_std_mps": 0.292,
           "heading_deg": 178.36,
           "heading_source": "velocity",
           "length_m": null,
@@ -2166,16 +2258,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.5,
-          "x": -140.976,
-          "y": -207.131,
-          "pos_std_m": 0.548,
-          "vx": -14.016,
-          "vy": 0.571,
-          "vel_std_mps": 0.38,
+          "x": -140.805,
+          "y": -207.272,
+          "pos_std_m": 0.123,
+          "vx": -14.031,
+          "vy": 0.619,
+          "vel_std_mps": 0.296,
           "heading_deg": 177.67,
           "heading_source": "velocity",
           "length_m": null,
@@ -2186,16 +2279,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.6,
-          "x": -142.38,
-          "y": -207.037,
-          "pos_std_m": 0.548,
-          "vx": -14.084,
-          "vy": 0.746,
-          "vel_std_mps": 0.392,
+          "x": -142.211,
+          "y": -207.201,
+          "pos_std_m": 0.126,
+          "vx": -14.081,
+          "vy": 0.798,
+          "vel_std_mps": 0.317,
           "heading_deg": 176.97,
           "heading_source": "velocity",
           "length_m": null,
@@ -2206,16 +2300,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.7,
-          "x": -143.793,
-          "y": -206.932,
-          "pos_std_m": 0.548,
-          "vx": -14.17,
-          "vy": 0.895,
-          "vel_std_mps": 0.429,
+          "x": -143.619,
+          "y": -207.11,
+          "pos_std_m": 0.131,
+          "vx": -14.096,
+          "vy": 1.013,
+          "vel_std_mps": 0.528,
           "heading_deg": 176.39,
           "heading_source": "velocity",
           "length_m": null,
@@ -2224,16 +2319,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 2.8,
-          "x": -145.205,
-          "y": -206.813,
-          "pos_std_m": 0.548,
-          "vx": -14.154,
-          "vy": 1.03,
-          "vel_std_mps": 0.445,
+          "x": -145.029,
+          "y": -207.002,
+          "pos_std_m": 0.145,
+          "vx": -14.096,
+          "vy": 1.151,
+          "vel_std_mps": 0.536,
           "heading_deg": 175.84,
           "heading_source": "velocity",
           "length_m": null,
@@ -2242,16 +2338,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 2.9,
-          "x": -146.617,
-          "y": -206.684,
-          "pos_std_m": 0.548,
-          "vx": -14.082,
-          "vy": 1.152,
-          "vel_std_mps": 0.443,
+          "x": -146.438,
+          "y": -206.884,
+          "pos_std_m": 0.16,
+          "vx": -14.079,
+          "vy": 1.21,
+          "vel_std_mps": 0.364,
           "heading_deg": 175.32,
           "heading_source": "velocity",
           "length_m": null,
@@ -2262,16 +2359,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.0,
-          "x": -147.852,
-          "y": -206.536,
-          "pos_std_m": 0.548,
-          "vx": -14.101,
-          "vy": 1.243,
-          "vel_std_mps": 0.498,
+          "x": -147.844,
+          "y": -206.758,
+          "pos_std_m": 0.169,
+          "vx": -14.05,
+          "vy": 1.311,
+          "vel_std_mps": 0.509,
           "heading_deg": 174.96,
           "heading_source": "velocity",
           "length_m": null,
@@ -2280,16 +2378,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.1,
-          "x": -149.259,
-          "y": -206.396,
-          "pos_std_m": 0.548,
-          "vx": -14.044,
-          "vy": 1.316,
-          "vel_std_mps": 0.52,
+          "x": -149.248,
+          "y": -206.624,
+          "pos_std_m": 0.18,
+          "vx": -14.026,
+          "vy": 1.357,
+          "vel_std_mps": 0.415,
           "heading_deg": 174.65,
           "heading_source": "velocity",
           "length_m": null,
@@ -2300,16 +2399,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.2,
-          "x": -150.627,
-          "y": -206.253,
-          "pos_std_m": 0.548,
-          "vx": -14.025,
-          "vy": 1.359,
-          "vel_std_mps": 0.584,
+          "x": -150.648,
+          "y": -206.486,
+          "pos_std_m": 0.191,
+          "vx": -13.984,
+          "vy": 1.419,
+          "vel_std_mps": 0.612,
           "heading_deg": 174.47,
           "heading_source": "velocity",
           "length_m": null,
@@ -2318,16 +2418,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.3,
-          "x": -152.025,
-          "y": -206.112,
-          "pos_std_m": 0.548,
-          "vx": -13.967,
-          "vy": 1.38,
-          "vel_std_mps": 0.643,
+          "x": -152.045,
+          "y": -206.342,
+          "pos_std_m": 0.212,
+          "vx": -13.949,
+          "vy": 1.455,
+          "vel_std_mps": 0.687,
           "heading_deg": 174.36,
           "heading_source": "velocity",
           "length_m": null,
@@ -2336,17 +2437,18 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.4,
-          "x": -153.385,
-          "y": -205.97,
-          "pos_std_m": 0.548,
-          "vx": -13.93,
-          "vy": 1.392,
-          "vel_std_mps": 0.709,
-          "heading_deg": 174.29,
+          "x": -153.439,
+          "y": -206.196,
+          "pos_std_m": 0.24,
+          "vx": -13.92,
+          "vy": 1.464,
+          "vel_std_mps": 0.692,
+          "heading_deg": 174.3,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -2354,16 +2456,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.5,
-          "x": -154.775,
-          "y": -205.829,
-          "pos_std_m": 0.548,
-          "vx": -13.869,
-          "vy": 1.399,
-          "vel_std_mps": 0.742,
+          "x": -154.829,
+          "y": -206.05,
+          "pos_std_m": 0.269,
+          "vx": -13.898,
+          "vy": 1.446,
+          "vel_std_mps": 0.622,
           "heading_deg": 174.24,
           "heading_source": "velocity",
           "length_m": null,
@@ -2374,7 +2477,8 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         }
       ]
     },
@@ -2383,24 +2487,24 @@
       "anonymous": true,
       "identity_ambiguous": false,
       "source_tracks": [
-        "A:track_003",
-        "B:track_003"
+        "B:track_003",
+        "A:track_003"
       ],
       "source_track_segments": [
+        {
+          "track": "B:track_003",
+          "observer": "B",
+          "t_global": [
+            -6.2,
+            2.75
+          ]
+        },
         {
           "track": "A:track_003",
           "observer": "A",
           "t_global": [
             -6.1,
             4.0
-          ]
-        },
-        {
-          "track": "B:track_003",
-          "observer": "B",
-          "t_global": [
-            -6.1,
-            2.75
           ]
         }
       ],
@@ -2409,7 +2513,7 @@
         "B"
       ],
       "time_span": [
-        -6.1,
+        -6.2,
         4.0
       ],
       "association": {
@@ -2418,21 +2522,21 @@
             "a": "A:track_003",
             "b": "B:track_003",
             "kind": "cross_observer",
-            "compared": 120,
+            "compared": 116,
             "passed": 1.0,
-            "median_box_chi2": 0.105,
-            "median_velocity_chi2": 0.029,
-            "centre_gap_m": 0.207,
+            "median_box_chi2": 0.121,
+            "median_velocity_chi2": 0.028,
+            "centre_gap_m": 0.214,
             "gap_s": null,
             "accepted": true,
             "refused": null,
             "lateral_chi2": null,
-            "score": 0.134,
-            "posterior": 0.9894
+            "score": 0.149,
+            "posterior": 0.9893
           }
         ],
         "retrospective": [],
-        "confidence": 0.9894
+        "confidence": 0.9893
       },
       "fusion_method": "box_fit+covariance_intersection",
       "footprint": {
@@ -2451,97 +2555,118 @@
           "source": "prior",
           "std_m": 0.2,
           "fitted_instants": 0,
-          "observed_extent_m": 1.571,
+          "observed_extent_m": 1.573,
           "observed_extent_used": false
         }
       },
       "relevance": {
-        "relevant_from_t_global": -6.1,
-        "min_clearance_to_relevance_range": 0.491
+        "relevant_from_t_global": -6.2,
+        "min_clearance_to_relevance_range": 0.515
       },
       "timeline": {
-        "first_detected": -6.1,
+        "first_detected": -6.2,
         "first_tracked": -6.0,
-        "first_relevant": -6.1,
-        "first_identity_resolved": -5.65,
+        "first_relevant": -6.2,
+        "first_identity_resolved": -5.4,
         "first_hazard_relevant": -5.6
       },
       "trajectory": [
         {
-          "t_global": -6.1,
-          "x": -32.69,
-          "y": -203.784,
-          "pos_std_m": 0.392,
-          "vx": -11.699,
-          "vy": -0.599,
-          "vel_std_mps": 0.647,
-          "heading_deg": -177.07,
+          "t_global": -6.2,
+          "x": -31.368,
+          "y": -203.91,
+          "pos_std_m": 0.129,
+          "vx": -11.78,
+          "vy": -0.026,
+          "vel_std_mps": 0.492,
+          "heading_deg": 179.25,
           "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
+          "observers": [
+            "B"
+          ],
+          "measured_by": [
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -6.1,
+          "x": -32.543,
+          "y": -203.919,
+          "pos_std_m": 0.117,
+          "vx": -11.723,
+          "vy": -0.165,
+          "vel_std_mps": 0.382,
+          "heading_deg": -178.88,
+          "heading_source": "velocity",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
           "observers": [
             "A",
             "B"
           ],
           "measured_by": [
-            "A",
-            "B"
-          ]
+            "A"
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -6.0,
-          "x": -33.785,
-          "y": -204.161,
-          "pos_std_m": 0.392,
-          "vx": -11.716,
-          "vy": -0.587,
-          "vel_std_mps": 0.533,
-          "heading_deg": -177.13,
+          "x": -33.716,
+          "y": -203.938,
+          "pos_std_m": 0.109,
+          "vx": -11.737,
+          "vy": -0.206,
+          "vel_std_mps": 0.333,
+          "heading_deg": -178.93,
           "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
           "observers": [
             "A",
             "B"
           ],
           "measured_by": [
-            "A",
-            "B"
-          ]
+            "A"
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.9,
-          "x": -35.034,
-          "y": -203.994,
-          "pos_std_m": 0.392,
-          "vx": -11.747,
-          "vy": -0.543,
-          "vel_std_mps": 0.466,
-          "heading_deg": -177.35,
+          "x": -34.891,
+          "y": -203.958,
+          "pos_std_m": 0.104,
+          "vx": -11.777,
+          "vy": -0.2,
+          "vel_std_mps": 0.301,
+          "heading_deg": -179.06,
           "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
+          "length_m": null,
+          "width_m": null,
+          "method": "covariance_intersection",
           "observers": [
             "A",
             "B"
           ],
           "measured_by": [
-            "A",
-            "B"
-          ]
+            "A"
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.8,
-          "x": -36.133,
-          "y": -204.283,
-          "pos_std_m": 0.392,
-          "vx": -11.786,
-          "vy": -0.472,
-          "vel_std_mps": 0.413,
-          "heading_deg": -177.71,
+          "x": -36.071,
+          "y": -203.977,
+          "pos_std_m": 0.1,
+          "vx": -11.812,
+          "vy": -0.177,
+          "vel_std_mps": 0.28,
+          "heading_deg": -179.15,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2553,17 +2678,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.7,
-          "x": -37.345,
-          "y": -203.892,
-          "pos_std_m": 0.392,
-          "vx": -11.805,
-          "vy": -0.382,
-          "vel_std_mps": 0.376,
-          "heading_deg": -178.15,
+          "x": -37.253,
+          "y": -203.993,
+          "pos_std_m": 0.096,
+          "vx": -11.827,
+          "vy": -0.148,
+          "vel_std_mps": 0.269,
+          "heading_deg": -179.28,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2575,17 +2701,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.6,
-          "x": -38.498,
-          "y": -204.222,
-          "pos_std_m": 0.392,
-          "vx": -11.806,
-          "vy": -0.284,
-          "vel_std_mps": 0.355,
-          "heading_deg": -178.62,
+          "x": -38.435,
+          "y": -204.006,
+          "pos_std_m": 0.093,
+          "vx": -11.823,
+          "vy": -0.113,
+          "vel_std_mps": 0.263,
+          "heading_deg": -179.43,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2597,17 +2724,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.5,
-          "x": -39.695,
-          "y": -204.317,
-          "pos_std_m": 0.392,
-          "vx": -11.801,
-          "vy": -0.183,
-          "vel_std_mps": 0.344,
-          "heading_deg": -179.11,
+          "x": -39.617,
+          "y": -204.015,
+          "pos_std_m": 0.091,
+          "vx": -11.814,
+          "vy": -0.064,
+          "vel_std_mps": 0.261,
+          "heading_deg": -179.62,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2619,17 +2747,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.4,
-          "x": -40.731,
-          "y": -204.087,
-          "pos_std_m": 0.376,
-          "vx": -11.796,
-          "vy": -0.091,
-          "vel_std_mps": 0.339,
-          "heading_deg": -179.56,
+          "x": -40.798,
+          "y": -204.019,
+          "pos_std_m": 0.089,
+          "vx": -11.806,
+          "vy": -0.02,
+          "vel_std_mps": 0.258,
+          "heading_deg": -179.79,
           "heading_source": "velocity",
           "length_m": 4.388,
           "width_m": 1.904,
@@ -2641,17 +2770,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.3,
-          "x": -41.992,
-          "y": -203.998,
-          "pos_std_m": 0.376,
-          "vx": -11.791,
-          "vy": -0.024,
-          "vel_std_mps": 0.338,
-          "heading_deg": -179.88,
+          "x": -41.979,
+          "y": -204.02,
+          "pos_std_m": 0.087,
+          "vx": -11.803,
+          "vy": 0.004,
+          "vel_std_mps": 0.256,
+          "heading_deg": -179.89,
           "heading_source": "velocity",
           "length_m": 4.488,
           "width_m": 1.886,
@@ -2663,17 +2793,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.2,
-          "x": -43.062,
-          "y": -204.048,
-          "pos_std_m": 0.376,
-          "vx": -11.787,
-          "vy": 0.027,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.87,
+          "x": -43.159,
+          "y": -204.019,
+          "pos_std_m": 0.085,
+          "vx": -11.804,
+          "vy": 0.023,
+          "vel_std_mps": 0.256,
+          "heading_deg": -179.98,
           "heading_source": "velocity",
           "length_m": 4.4,
           "width_m": 1.903,
@@ -2685,17 +2816,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.1,
-          "x": -44.346,
-          "y": -204.064,
-          "pos_std_m": 0.376,
-          "vx": -11.789,
-          "vy": 0.056,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.73,
+          "x": -44.339,
+          "y": -204.015,
+          "pos_std_m": 0.084,
+          "vx": -11.807,
+          "vy": 0.038,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.94,
           "heading_source": "velocity",
           "length_m": 4.497,
           "width_m": 1.879,
@@ -2707,17 +2839,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -5.0,
-          "x": -45.574,
-          "y": -203.904,
-          "pos_std_m": 0.392,
-          "vx": -11.793,
-          "vy": 0.064,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.69,
+          "x": -45.52,
+          "y": -204.012,
+          "pos_std_m": 0.083,
+          "vx": -11.807,
+          "vy": 0.039,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.94,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2729,17 +2862,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.9,
-          "x": -46.804,
-          "y": -203.894,
-          "pos_std_m": 0.392,
-          "vx": -11.794,
-          "vy": 0.057,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.72,
+          "x": -46.701,
+          "y": -204.008,
+          "pos_std_m": 0.082,
+          "vx": -11.807,
+          "vy": 0.026,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.98,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2751,17 +2885,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.8,
-          "x": -47.917,
-          "y": -203.732,
-          "pos_std_m": 0.392,
-          "vx": -11.799,
-          "vy": 0.038,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.82,
+          "x": -47.881,
+          "y": -204.007,
+          "pos_std_m": 0.081,
+          "vx": -11.805,
+          "vy": 0.008,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.98,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2773,17 +2908,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.7,
-          "x": -49.092,
-          "y": -203.991,
-          "pos_std_m": 0.392,
-          "vx": -11.8,
-          "vy": 0.014,
-          "vel_std_mps": 0.337,
-          "heading_deg": 179.93,
+          "x": -49.062,
+          "y": -204.007,
+          "pos_std_m": 0.08,
+          "vx": -11.801,
+          "vy": -0.008,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.95,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2795,17 +2931,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.6,
-          "x": -50.282,
-          "y": -203.883,
-          "pos_std_m": 0.392,
-          "vx": -11.802,
-          "vy": -0.008,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.96,
+          "x": -50.242,
+          "y": -204.008,
+          "pos_std_m": 0.079,
+          "vx": -11.8,
+          "vy": -0.025,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.89,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2817,17 +2954,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.5,
-          "x": -51.533,
-          "y": -203.931,
-          "pos_std_m": 0.392,
-          "vx": -11.805,
-          "vy": -0.029,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.86,
+          "x": -51.422,
+          "y": -204.012,
+          "pos_std_m": 0.079,
+          "vx": -11.799,
+          "vy": -0.045,
+          "vel_std_mps": 0.253,
+          "heading_deg": -179.81,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2839,17 +2977,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.4,
-          "x": -52.549,
-          "y": -204.111,
-          "pos_std_m": 0.376,
-          "vx": -11.807,
-          "vy": -0.046,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.77,
+          "x": -52.602,
+          "y": -204.017,
+          "pos_std_m": 0.078,
+          "vx": -11.799,
+          "vy": -0.056,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.74,
           "heading_source": "velocity",
           "length_m": 4.488,
           "width_m": 1.91,
@@ -2861,17 +3000,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.3,
-          "x": -53.68,
-          "y": -204.095,
-          "pos_std_m": 0.376,
-          "vx": -11.81,
+          "x": -53.782,
+          "y": -204.023,
+          "pos_std_m": 0.078,
+          "vx": -11.806,
           "vy": -0.055,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.74,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.73,
           "heading_source": "velocity",
           "length_m": 4.414,
           "width_m": 1.887,
@@ -2883,17 +3023,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.2,
-          "x": -54.982,
-          "y": -203.883,
-          "pos_std_m": 0.392,
-          "vx": -11.81,
-          "vy": -0.056,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.73,
+          "x": -54.963,
+          "y": -204.028,
+          "pos_std_m": 0.078,
+          "vx": -11.809,
+          "vy": -0.052,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.76,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -2905,17 +3046,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.1,
-          "x": -56.26,
-          "y": -204.101,
-          "pos_std_m": 0.376,
-          "vx": -11.813,
-          "vy": -0.052,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.75,
+          "x": -56.144,
+          "y": -204.033,
+          "pos_std_m": 0.077,
+          "vx": -11.809,
+          "vy": -0.044,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.81,
           "heading_source": "velocity",
           "length_m": 4.758,
           "width_m": 1.916,
@@ -2927,16 +3069,224 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -4.0,
-          "x": -57.347,
-          "y": -204.165,
-          "pos_std_m": 0.392,
-          "vx": -11.816,
+          "x": -57.324,
+          "y": -204.036,
+          "pos_std_m": 0.077,
+          "vx": -11.809,
+          "vy": -0.033,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.83,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.9,
+          "x": -58.506,
+          "y": -204.039,
+          "pos_std_m": 0.077,
+          "vx": -11.814,
+          "vy": -0.021,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.86,
+          "heading_source": "velocity",
+          "length_m": 4.369,
+          "width_m": 1.873,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.8,
+          "x": -59.687,
+          "y": -204.041,
+          "pos_std_m": 0.077,
+          "vx": -11.819,
+          "vy": -0.007,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.93,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.7,
+          "x": -60.869,
+          "y": -204.041,
+          "pos_std_m": 0.077,
+          "vx": -11.823,
+          "vy": 0.006,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.97,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.6,
+          "x": -62.052,
+          "y": -204.04,
+          "pos_std_m": 0.077,
+          "vx": -11.829,
+          "vy": 0.008,
+          "vel_std_mps": 0.254,
+          "heading_deg": 179.92,
+          "heading_source": "velocity",
+          "length_m": 4.342,
+          "width_m": 1.867,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.5,
+          "x": -63.235,
+          "y": -204.04,
+          "pos_std_m": 0.076,
+          "vx": -11.831,
+          "vy": -0.002,
+          "vel_std_mps": 0.252,
+          "heading_deg": 179.98,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.4,
+          "x": -64.418,
+          "y": -204.041,
+          "pos_std_m": 0.076,
+          "vx": -11.831,
+          "vy": -0.019,
+          "vel_std_mps": 0.253,
+          "heading_deg": -179.96,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.3,
+          "x": -65.601,
+          "y": -204.043,
+          "pos_std_m": 0.076,
+          "vx": -11.832,
+          "vy": -0.036,
+          "vel_std_mps": 0.253,
+          "heading_deg": -179.89,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.2,
+          "x": -66.785,
+          "y": -204.048,
+          "pos_std_m": 0.076,
+          "vx": -11.835,
           "vy": -0.047,
-          "vel_std_mps": 0.336,
+          "vel_std_mps": 0.253,
+          "heading_deg": -179.83,
+          "heading_source": "velocity",
+          "length_m": 4.463,
+          "width_m": 1.908,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -3.1,
+          "x": -67.968,
+          "y": -204.053,
+          "pos_std_m": 0.076,
+          "vx": -11.841,
+          "vy": -0.055,
+          "vel_std_mps": 0.253,
           "heading_deg": -179.77,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -2949,215 +3299,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
-        },
-        {
-          "t_global": -3.9,
-          "x": -58.401,
-          "y": -204.075,
-          "pos_std_m": 0.376,
-          "vx": -11.818,
-          "vy": -0.039,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.81,
-          "heading_source": "velocity",
-          "length_m": 4.369,
-          "width_m": 1.873,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
           ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.8,
-          "x": -59.688,
-          "y": -204.066,
-          "pos_std_m": 0.392,
-          "vx": -11.822,
-          "vy": -0.024,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.89,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.7,
-          "x": -60.881,
-          "y": -203.839,
-          "pos_std_m": 0.392,
-          "vx": -11.825,
-          "vy": -0.0,
-          "vel_std_mps": 0.336,
-          "heading_deg": -180.0,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.6,
-          "x": -61.989,
-          "y": -204.04,
-          "pos_std_m": 0.376,
-          "vx": -11.827,
-          "vy": 0.012,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.94,
-          "heading_source": "velocity",
-          "length_m": 4.342,
-          "width_m": 1.867,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.5,
-          "x": -63.238,
-          "y": -203.991,
-          "pos_std_m": 0.392,
-          "vx": -11.827,
-          "vy": 0.014,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.93,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.4,
-          "x": -64.477,
-          "y": -203.911,
-          "pos_std_m": 0.392,
-          "vx": -11.829,
-          "vy": 0.002,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.99,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.3,
-          "x": -65.608,
-          "y": -204.053,
-          "pos_std_m": 0.392,
-          "vx": -11.832,
-          "vy": -0.018,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.91,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.2,
-          "x": -66.714,
-          "y": -204.115,
-          "pos_std_m": 0.376,
-          "vx": -11.835,
-          "vy": -0.032,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.84,
-          "heading_source": "velocity",
-          "length_m": 4.463,
-          "width_m": 1.907,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": -3.1,
-          "x": -67.988,
-          "y": -204.045,
-          "pos_std_m": 0.392,
-          "vx": -11.839,
-          "vy": -0.039,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.81,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
+          "position": "smoothed"
         },
         {
           "t_global": -3.0,
-          "x": -68.975,
-          "y": -204.085,
-          "pos_std_m": 0.376,
-          "vx": -11.846,
-          "vy": -0.035,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.83,
+          "x": -69.153,
+          "y": -204.058,
+          "pos_std_m": 0.076,
+          "vx": -11.853,
+          "vy": -0.051,
+          "vel_std_mps": 0.252,
+          "heading_deg": -179.79,
           "heading_source": "velocity",
           "length_m": 4.379,
           "width_m": 1.898,
@@ -3169,17 +3322,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.9,
-          "x": -70.353,
-          "y": -204.211,
-          "pos_std_m": 0.392,
-          "vx": -11.853,
-          "vy": -0.023,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.89,
+          "x": -70.339,
+          "y": -204.062,
+          "pos_std_m": 0.076,
+          "vx": -11.866,
+          "vy": -0.037,
+          "vel_std_mps": 0.251,
+          "heading_deg": -179.83,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3191,17 +3345,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.8,
-          "x": -71.471,
-          "y": -204.0,
-          "pos_std_m": 0.376,
-          "vx": -11.861,
-          "vy": -0.008,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.96,
+          "x": -71.526,
+          "y": -204.065,
+          "pos_std_m": 0.076,
+          "vx": -11.877,
+          "vy": -0.017,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.93,
           "heading_source": "velocity",
           "length_m": 4.552,
           "width_m": 1.889,
@@ -3213,17 +3368,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.7,
-          "x": -72.56,
-          "y": -204.094,
-          "pos_std_m": 0.376,
-          "vx": -11.87,
-          "vy": 0.002,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.99,
+          "x": -72.715,
+          "y": -204.066,
+          "pos_std_m": 0.077,
+          "vx": -11.892,
+          "vy": -0.005,
+          "vel_std_mps": 0.254,
+          "heading_deg": -179.99,
           "heading_source": "velocity",
           "length_m": 4.391,
           "width_m": 1.887,
@@ -3235,16 +3391,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.6,
-          "x": -73.732,
-          "y": -204.133,
-          "pos_std_m": 0.376,
-          "vx": -11.878,
+          "x": -73.905,
+          "y": -204.066,
+          "pos_std_m": 0.077,
+          "vx": -11.91,
           "vy": 0.004,
-          "vel_std_mps": 0.336,
+          "vel_std_mps": 0.255,
           "heading_deg": 179.98,
           "heading_source": "velocity",
           "length_m": 4.354,
@@ -3257,17 +3414,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.5,
-          "x": -74.991,
-          "y": -204.112,
-          "pos_std_m": 0.376,
-          "vx": -11.887,
-          "vy": 0.001,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.99,
+          "x": -75.097,
+          "y": -204.066,
+          "pos_std_m": 0.077,
+          "vx": -11.927,
+          "vy": 0.008,
+          "vel_std_mps": 0.255,
+          "heading_deg": 179.97,
           "heading_source": "velocity",
           "length_m": 4.518,
           "width_m": 1.899,
@@ -3279,17 +3437,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.4,
-          "x": -76.323,
-          "y": -204.026,
-          "pos_std_m": 0.376,
-          "vx": -11.897,
-          "vy": -0.006,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.97,
+          "x": -76.29,
+          "y": -204.065,
+          "pos_std_m": 0.077,
+          "vx": -11.94,
+          "vy": 0.003,
+          "vel_std_mps": 0.256,
+          "heading_deg": 180.0,
           "heading_source": "velocity",
           "length_m": 4.766,
           "width_m": 1.889,
@@ -3301,16 +3460,40 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.3,
-          "x": -77.408,
-          "y": -203.85,
-          "pos_std_m": 0.392,
-          "vx": -11.905,
-          "vy": -0.021,
-          "vel_std_mps": 0.336,
+          "x": -77.484,
+          "y": -204.066,
+          "pos_std_m": 0.078,
+          "vx": -11.95,
+          "vy": -0.013,
+          "vel_std_mps": 0.256,
+          "heading_deg": -179.96,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": -2.2,
+          "x": -78.68,
+          "y": -204.068,
+          "pos_std_m": 0.078,
+          "vx": -11.962,
+          "vy": -0.034,
+          "vel_std_mps": 0.255,
           "heading_deg": -179.9,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -3323,39 +3506,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
-        },
-        {
-          "t_global": -2.2,
-          "x": -78.606,
-          "y": -203.908,
-          "pos_std_m": 0.392,
-          "vx": -11.911,
-          "vy": -0.035,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.83,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
           ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
+          "position": "smoothed"
         },
         {
           "t_global": -2.1,
-          "x": -79.792,
-          "y": -203.971,
-          "pos_std_m": 0.392,
-          "vx": -11.918,
-          "vy": -0.041,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.8,
+          "x": -79.877,
+          "y": -204.072,
+          "pos_std_m": 0.078,
+          "vx": -11.974,
+          "vy": -0.048,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.87,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3367,17 +3529,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -2.0,
-          "x": -81.026,
-          "y": -204.136,
-          "pos_std_m": 0.392,
-          "vx": -11.926,
-          "vy": -0.039,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.81,
+          "x": -81.075,
+          "y": -204.077,
+          "pos_std_m": 0.079,
+          "vx": -11.986,
+          "vy": -0.047,
+          "vel_std_mps": 0.255,
+          "heading_deg": -179.89,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3389,17 +3552,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.9,
-          "x": -82.165,
-          "y": -204.119,
-          "pos_std_m": 0.392,
-          "vx": -11.933,
-          "vy": -0.025,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.88,
+          "x": -82.274,
+          "y": -204.081,
+          "pos_std_m": 0.079,
+          "vx": -11.998,
+          "vy": -0.037,
+          "vel_std_mps": 0.257,
+          "heading_deg": -179.92,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3411,17 +3575,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.8,
-          "x": -83.484,
-          "y": -204.095,
-          "pos_std_m": 0.392,
-          "vx": -11.938,
-          "vy": -0.002,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.99,
+          "x": -83.474,
+          "y": -204.084,
+          "pos_std_m": 0.08,
+          "vx": -12.007,
+          "vy": -0.018,
+          "vel_std_mps": 0.257,
+          "heading_deg": 179.99,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3433,16 +3598,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.7,
-          "x": -84.618,
-          "y": -204.192,
-          "pos_std_m": 0.392,
-          "vx": -11.943,
-          "vy": 0.024,
-          "vel_std_mps": 0.336,
+          "x": -84.675,
+          "y": -204.085,
+          "pos_std_m": 0.081,
+          "vx": -12.015,
+          "vy": 0.004,
+          "vel_std_mps": 0.258,
           "heading_deg": 179.89,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -3455,17 +3621,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.6,
-          "x": -85.783,
-          "y": -203.984,
-          "pos_std_m": 0.392,
-          "vx": -11.95,
-          "vy": 0.046,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.78,
+          "x": -85.877,
+          "y": -204.083,
+          "pos_std_m": 0.081,
+          "vx": -12.025,
+          "vy": 0.021,
+          "vel_std_mps": 0.259,
+          "heading_deg": 179.81,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3477,17 +3644,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.5,
-          "x": -87.089,
-          "y": -204.005,
-          "pos_std_m": 0.392,
-          "vx": -11.954,
-          "vy": 0.067,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.68,
+          "x": -87.08,
+          "y": -204.081,
+          "pos_std_m": 0.082,
+          "vx": -12.032,
+          "vy": 0.034,
+          "vel_std_mps": 0.259,
+          "heading_deg": 179.73,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3499,17 +3667,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.4,
-          "x": -88.435,
-          "y": -203.937,
-          "pos_std_m": 0.392,
-          "vx": -11.959,
-          "vy": 0.088,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.58,
+          "x": -88.283,
+          "y": -204.077,
+          "pos_std_m": 0.083,
+          "vx": -12.031,
+          "vy": 0.046,
+          "vel_std_mps": 0.26,
+          "heading_deg": 179.63,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3521,17 +3690,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.3,
-          "x": -89.826,
-          "y": -204.209,
-          "pos_std_m": 0.392,
-          "vx": -11.964,
-          "vy": 0.106,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.49,
+          "x": -89.486,
+          "y": -204.071,
+          "pos_std_m": 0.084,
+          "vx": -12.021,
+          "vy": 0.06,
+          "vel_std_mps": 0.262,
+          "heading_deg": 179.55,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3543,17 +3713,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.2,
-          "x": -90.851,
-          "y": -203.909,
-          "pos_std_m": 0.392,
-          "vx": -11.967,
-          "vy": 0.11,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.47,
+          "x": -90.688,
+          "y": -204.065,
+          "pos_std_m": 0.086,
+          "vx": -12.011,
+          "vy": 0.064,
+          "vel_std_mps": 0.262,
+          "heading_deg": 179.51,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3565,17 +3736,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.1,
-          "x": -92.222,
-          "y": -203.929,
-          "pos_std_m": 0.548,
-          "vx": -11.973,
-          "vy": 0.097,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.53,
+          "x": -91.888,
+          "y": -204.059,
+          "pos_std_m": 0.087,
+          "vx": -12.008,
+          "vy": 0.049,
+          "vel_std_mps": 0.262,
+          "heading_deg": 179.56,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3586,16 +3758,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -1.0,
-          "x": -93.261,
-          "y": -203.87,
-          "pos_std_m": 0.392,
-          "vx": -11.978,
-          "vy": 0.072,
-          "vel_std_mps": 0.336,
+          "x": -93.089,
+          "y": -204.056,
+          "pos_std_m": 0.089,
+          "vx": -12.006,
+          "vy": 0.024,
+          "vel_std_mps": 0.264,
           "heading_deg": 179.66,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -3608,17 +3781,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.9,
-          "x": -94.447,
-          "y": -204.414,
-          "pos_std_m": 0.409,
-          "vx": -11.983,
-          "vy": 0.04,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.81,
+          "x": -94.29,
+          "y": -204.055,
+          "pos_std_m": 0.09,
+          "vx": -12.002,
+          "vy": 0.001,
+          "vel_std_mps": 0.265,
+          "heading_deg": 179.79,
           "heading_source": "velocity",
           "length_m": 4.37,
           "width_m": 1.866,
@@ -3630,17 +3804,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.8,
-          "x": -95.842,
-          "y": -203.939,
-          "pos_std_m": 0.548,
-          "vx": -11.986,
-          "vy": 0.008,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.96,
+          "x": -95.49,
+          "y": -204.055,
+          "pos_std_m": 0.092,
+          "vx": -11.999,
+          "vy": -0.018,
+          "vel_std_mps": 0.265,
+          "heading_deg": 179.93,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3651,17 +3826,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.7,
-          "x": -96.884,
-          "y": -204.032,
-          "pos_std_m": 0.548,
-          "vx": -11.994,
-          "vy": -0.003,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.98,
+          "x": -96.69,
+          "y": -204.058,
+          "pos_std_m": 0.094,
+          "vx": -12.003,
+          "vy": -0.029,
+          "vel_std_mps": 0.266,
+          "heading_deg": 179.98,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3672,17 +3848,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.6,
-          "x": -98.043,
-          "y": -204.051,
-          "pos_std_m": 0.392,
-          "vx": -12.005,
-          "vy": 0.01,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.95,
+          "x": -97.89,
+          "y": -204.06,
+          "pos_std_m": 0.096,
+          "vx": -12.006,
+          "vy": -0.02,
+          "vel_std_mps": 0.267,
+          "heading_deg": 179.92,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3694,17 +3871,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.5,
-          "x": -99.064,
-          "y": -203.954,
-          "pos_std_m": 0.392,
-          "vx": -12.013,
-          "vy": 0.043,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.8,
+          "x": -99.091,
+          "y": -204.061,
+          "pos_std_m": 0.099,
+          "vx": -12.009,
+          "vy": 0.005,
+          "vel_std_mps": 0.268,
+          "heading_deg": 179.77,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3716,17 +3894,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.4,
-          "x": -100.465,
-          "y": -203.996,
-          "pos_std_m": 0.392,
-          "vx": -12.017,
-          "vy": 0.081,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.62,
+          "x": -100.292,
+          "y": -204.059,
+          "pos_std_m": 0.102,
+          "vx": -12.01,
+          "vy": 0.036,
+          "vel_std_mps": 0.268,
+          "heading_deg": 179.6,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3738,17 +3917,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.3,
-          "x": -101.301,
-          "y": -204.416,
-          "pos_std_m": 0.376,
-          "vx": -12.021,
-          "vy": 0.117,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.44,
+          "x": -101.493,
+          "y": -204.053,
+          "pos_std_m": 0.105,
+          "vx": -12.015,
+          "vy": 0.081,
+          "vel_std_mps": 0.269,
+          "heading_deg": 179.45,
           "heading_source": "velocity",
           "length_m": 4.361,
           "width_m": 1.88,
@@ -3760,17 +3940,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.2,
-          "x": -102.673,
-          "y": -204.298,
-          "pos_std_m": 0.376,
-          "vx": -12.033,
-          "vy": 0.169,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.2,
+          "x": -102.695,
+          "y": -204.042,
+          "pos_std_m": 0.109,
+          "vx": -12.028,
+          "vy": 0.142,
+          "vel_std_mps": 0.271,
+          "heading_deg": 179.23,
           "heading_source": "velocity",
           "length_m": 4.341,
           "width_m": 1.906,
@@ -3782,17 +3963,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": -0.1,
-          "x": -103.969,
-          "y": -204.194,
-          "pos_std_m": 0.548,
-          "vx": -12.039,
-          "vy": 0.223,
-          "vel_std_mps": 0.336,
-          "heading_deg": 178.94,
+          "x": -103.898,
+          "y": -204.025,
+          "pos_std_m": 0.114,
+          "vx": -12.035,
+          "vy": 0.193,
+          "vel_std_mps": 0.296,
+          "heading_deg": 178.99,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3804,17 +3986,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.0,
-          "x": -105.277,
-          "y": -203.986,
-          "pos_std_m": 0.392,
-          "vx": -12.049,
-          "vy": 0.255,
-          "vel_std_mps": 0.336,
-          "heading_deg": 178.79,
+          "x": -104.886,
+          "y": -204.103,
+          "pos_std_m": 0.113,
+          "vx": -12.034,
+          "vy": 0.229,
+          "vel_std_mps": 0.296,
+          "heading_deg": 178.87,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -3826,17 +4009,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.1,
-          "x": -105.978,
-          "y": -203.942,
-          "pos_std_m": 0.548,
-          "vx": -12.05,
-          "vy": 0.251,
-          "vel_std_mps": 0.336,
-          "heading_deg": 178.81,
+          "x": -106.089,
+          "y": -204.081,
+          "pos_std_m": 0.109,
+          "vx": -12.028,
+          "vy": 0.216,
+          "vel_std_mps": 0.271,
+          "heading_deg": 178.9,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3848,17 +4032,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.2,
-          "x": -107.28,
-          "y": -204.241,
-          "pos_std_m": 0.376,
-          "vx": -12.053,
-          "vy": 0.21,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.0,
+          "x": -107.292,
+          "y": -204.061,
+          "pos_std_m": 0.105,
+          "vx": -12.03,
+          "vy": 0.185,
+          "vel_std_mps": 0.268,
+          "heading_deg": 179.08,
           "heading_source": "velocity",
           "length_m": 4.368,
           "width_m": 1.884,
@@ -3870,17 +4055,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.3,
-          "x": -108.447,
-          "y": -204.189,
-          "pos_std_m": 0.548,
-          "vx": -12.057,
-          "vy": 0.154,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.27,
+          "x": -108.496,
+          "y": -204.045,
+          "pos_std_m": 0.102,
+          "vx": -12.034,
+          "vy": 0.143,
+          "vel_std_mps": 0.267,
+          "heading_deg": 179.33,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -3892,17 +4078,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.4,
-          "x": -109.517,
-          "y": -204.084,
-          "pos_std_m": 0.376,
-          "vx": -12.055,
-          "vy": 0.086,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.59,
+          "x": -109.699,
+          "y": -204.033,
+          "pos_std_m": 0.099,
+          "vx": -12.038,
+          "vy": 0.095,
+          "vel_std_mps": 0.266,
+          "heading_deg": 179.62,
           "heading_source": "velocity",
           "length_m": 4.406,
           "width_m": 1.874,
@@ -3914,17 +4101,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.5,
-          "x": -110.843,
-          "y": -204.223,
-          "pos_std_m": 0.376,
-          "vx": -12.053,
-          "vy": 0.011,
-          "vel_std_mps": 0.336,
-          "heading_deg": 179.95,
+          "x": -110.903,
+          "y": -204.025,
+          "pos_std_m": 0.096,
+          "vx": -12.038,
+          "vy": 0.068,
+          "vel_std_mps": 0.264,
+          "heading_deg": 179.82,
           "heading_source": "velocity",
           "length_m": 4.604,
           "width_m": 1.915,
@@ -3936,20 +4124,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.6,
-          "x": -111.786,
-          "y": -204.161,
-          "pos_std_m": 0.362,
-          "vx": -12.049,
-          "vy": -0.05,
-          "vel_std_mps": 0.336,
-          "heading_deg": -179.76,
+          "x": -112.108,
+          "y": -204.017,
+          "pos_std_m": 0.094,
+          "vx": -12.058,
+          "vy": 0.087,
+          "vel_std_mps": 0.264,
+          "heading_deg": 179.74,
           "heading_source": "velocity",
-          "length_m": 4.225,
-          "width_m": 1.865,
+          "length_m": 4.226,
+          "width_m": 1.864,
           "method": "box_fit",
           "observers": [
             "A",
@@ -3958,20 +4147,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.7,
-          "x": -113.216,
-          "y": -204.244,
-          "pos_std_m": 0.376,
-          "vx": -12.049,
-          "vy": -0.1,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.53,
+          "x": -113.315,
+          "y": -204.007,
+          "pos_std_m": 0.092,
+          "vx": -12.085,
+          "vy": 0.112,
+          "vel_std_mps": 0.262,
+          "heading_deg": 179.63,
           "heading_source": "velocity",
-          "length_m": 4.534,
-          "width_m": 1.915,
+          "length_m": 4.535,
+          "width_m": 1.912,
           "method": "box_fit",
           "observers": [
             "A",
@@ -3980,20 +4170,21 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.8,
-          "x": -114.47,
-          "y": -204.06,
-          "pos_std_m": 0.376,
-          "vx": -12.056,
-          "vy": -0.128,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.39,
+          "x": -114.524,
+          "y": -203.996,
+          "pos_std_m": 0.091,
+          "vx": -12.103,
+          "vy": 0.107,
+          "vel_std_mps": 0.263,
+          "heading_deg": 179.56,
           "heading_source": "velocity",
-          "length_m": 4.575,
-          "width_m": 1.877,
+          "length_m": 4.576,
+          "width_m": 1.876,
           "method": "box_fit",
           "observers": [
             "A",
@@ -4002,38 +4193,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 0.9,
-          "x": -115.649,
-          "y": -204.084,
-          "pos_std_m": 0.392,
-          "vx": -12.062,
-          "vy": -0.138,
-          "vel_std_mps": 0.337,
-          "heading_deg": -179.34,
-          "heading_source": "velocity",
-          "length_m": 4.6,
-          "width_m": 1.9,
-          "method": "box_fit",
-          "observers": [
-            "A",
-            "B"
-          ],
-          "measured_by": [
-            "A",
-            "B"
-          ]
-        },
-        {
-          "t_global": 1.0,
-          "x": -116.808,
-          "y": -204.153,
-          "pos_std_m": 0.392,
-          "vx": -12.072,
-          "vy": -0.126,
-          "vel_std_mps": 0.338,
+          "x": -115.735,
+          "y": -203.992,
+          "pos_std_m": 0.09,
+          "vx": -12.105,
+          "vy": -0.029,
+          "vel_std_mps": 0.264,
           "heading_deg": -179.4,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -4046,16 +4216,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
-          "t_global": 1.1,
-          "x": -118.005,
-          "y": -204.368,
-          "pos_std_m": 0.392,
-          "vx": -12.083,
-          "vy": -0.115,
-          "vel_std_mps": 0.338,
+          "t_global": 1.0,
+          "x": -116.946,
+          "y": -203.996,
+          "pos_std_m": 0.089,
+          "vx": -12.12,
+          "vy": -0.041,
+          "vel_std_mps": 0.265,
           "heading_deg": -179.45,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -4068,17 +4239,41 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
+        },
+        {
+          "t_global": 1.1,
+          "x": -118.159,
+          "y": -203.999,
+          "pos_std_m": 0.088,
+          "vx": -12.14,
+          "vy": -0.026,
+          "vel_std_mps": 0.266,
+          "heading_deg": -179.49,
+          "heading_source": "velocity",
+          "length_m": 4.6,
+          "width_m": 1.9,
+          "method": "box_fit",
+          "observers": [
+            "A",
+            "B"
+          ],
+          "measured_by": [
+            "A",
+            "B"
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.2,
-          "x": -119.168,
-          "y": -204.193,
-          "pos_std_m": 0.409,
-          "vx": -12.092,
-          "vy": -0.14,
-          "vel_std_mps": 0.338,
-          "heading_deg": -179.34,
+          "x": -119.374,
+          "y": -204.002,
+          "pos_std_m": 0.088,
+          "vx": -12.16,
+          "vy": -0.032,
+          "vel_std_mps": 0.267,
+          "heading_deg": -179.37,
           "heading_source": "velocity",
           "length_m": 4.552,
           "width_m": 1.87,
@@ -4090,17 +4285,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.3,
-          "x": -120.35,
-          "y": -204.063,
-          "pos_std_m": 0.376,
-          "vx": -12.093,
-          "vy": -0.188,
-          "vel_std_mps": 0.339,
-          "heading_deg": -179.11,
+          "x": -120.591,
+          "y": -204.007,
+          "pos_std_m": 0.088,
+          "vx": -12.176,
+          "vy": -0.066,
+          "vel_std_mps": 0.267,
+          "heading_deg": -179.15,
           "heading_source": "velocity",
           "length_m": 4.541,
           "width_m": 1.884,
@@ -4112,17 +4308,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.4,
-          "x": -121.853,
-          "y": -203.901,
-          "pos_std_m": 0.392,
-          "vx": -12.089,
-          "vy": -0.235,
-          "vel_std_mps": 0.339,
-          "heading_deg": -178.89,
+          "x": -121.809,
+          "y": -204.016,
+          "pos_std_m": 0.088,
+          "vx": -12.183,
+          "vy": -0.11,
+          "vel_std_mps": 0.268,
+          "heading_deg": -178.91,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -4134,17 +4331,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.5,
-          "x": -123.049,
-          "y": -203.764,
-          "pos_std_m": 0.392,
-          "vx": -12.091,
-          "vy": -0.256,
-          "vel_std_mps": 0.34,
-          "heading_deg": -178.79,
+          "x": -123.027,
+          "y": -204.028,
+          "pos_std_m": 0.088,
+          "vx": -12.185,
+          "vy": -0.143,
+          "vel_std_mps": 0.268,
+          "heading_deg": -178.8,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -4156,16 +4354,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.6,
-          "x": -124.342,
-          "y": -203.981,
-          "pos_std_m": 0.392,
-          "vx": -12.099,
-          "vy": -0.252,
-          "vel_std_mps": 0.34,
+          "x": -124.246,
+          "y": -204.043,
+          "pos_std_m": 0.089,
+          "vx": -12.194,
+          "vy": -0.153,
+          "vel_std_mps": 0.269,
           "heading_deg": -178.81,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -4178,16 +4377,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.7,
-          "x": -125.509,
-          "y": -203.874,
-          "pos_std_m": 0.392,
-          "vx": -12.117,
-          "vy": -0.233,
-          "vel_std_mps": 0.341,
+          "x": -125.467,
+          "y": -204.058,
+          "pos_std_m": 0.09,
+          "vx": -12.22,
+          "vy": -0.144,
+          "vel_std_mps": 0.27,
           "heading_deg": -178.9,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -4200,16 +4400,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.8,
-          "x": -126.791,
-          "y": -203.862,
-          "pos_std_m": 0.392,
-          "vx": -12.174,
-          "vy": -0.193,
-          "vel_std_mps": 0.342,
+          "x": -126.693,
+          "y": -204.071,
+          "pos_std_m": 0.091,
+          "vx": -12.304,
+          "vy": -0.119,
+          "vel_std_mps": 0.271,
           "heading_deg": -179.09,
           "heading_source": "velocity",
           "length_m": 4.6,
@@ -4222,17 +4423,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 1.9,
-          "x": -128.049,
-          "y": -204.064,
-          "pos_std_m": 0.548,
-          "vx": -12.416,
-          "vy": -0.141,
-          "vel_std_mps": 0.344,
-          "heading_deg": -179.35,
+          "x": -127.935,
+          "y": -204.081,
+          "pos_std_m": 0.092,
+          "vx": -12.54,
+          "vy": -0.078,
+          "vel_std_mps": 0.272,
+          "heading_deg": -179.34,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4244,17 +4446,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.0,
-          "x": -129.376,
-          "y": -204.756,
-          "pos_std_m": 0.548,
-          "vx": -12.867,
-          "vy": -0.069,
-          "vel_std_mps": 0.345,
-          "heading_deg": -179.69,
+          "x": -129.209,
+          "y": -204.086,
+          "pos_std_m": 0.094,
+          "vx": -12.95,
+          "vy": -0.017,
+          "vel_std_mps": 0.273,
+          "heading_deg": -179.67,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4265,17 +4468,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.1,
-          "x": -130.626,
-          "y": -204.012,
-          "pos_std_m": 0.392,
-          "vx": -13.409,
-          "vy": 0.011,
-          "vel_std_mps": 0.347,
-          "heading_deg": 179.95,
+          "x": -130.529,
+          "y": -204.084,
+          "pos_std_m": 0.095,
+          "vx": -13.445,
+          "vy": 0.059,
+          "vel_std_mps": 0.274,
+          "heading_deg": 179.97,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -4287,17 +4491,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.2,
-          "x": -132.025,
-          "y": -204.008,
-          "pos_std_m": 0.392,
-          "vx": -13.907,
-          "vy": 0.101,
-          "vel_std_mps": 0.349,
-          "heading_deg": 179.58,
+          "x": -131.896,
+          "y": -204.073,
+          "pos_std_m": 0.097,
+          "vx": -13.899,
+          "vy": 0.15,
+          "vel_std_mps": 0.276,
+          "heading_deg": 179.6,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -4309,17 +4514,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.3,
-          "x": -133.33,
-          "y": -203.993,
-          "pos_std_m": 0.548,
-          "vx": -14.235,
-          "vy": 0.222,
-          "vel_std_mps": 0.351,
-          "heading_deg": 179.1,
+          "x": -133.302,
+          "y": -204.052,
+          "pos_std_m": 0.099,
+          "vx": -14.206,
+          "vy": 0.268,
+          "vel_std_mps": 0.277,
+          "heading_deg": 179.12,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4330,17 +4536,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.4,
-          "x": -134.723,
-          "y": -203.955,
-          "pos_std_m": 0.392,
-          "vx": -14.351,
-          "vy": 0.381,
-          "vel_std_mps": 0.352,
-          "heading_deg": 178.48,
+          "x": -134.729,
+          "y": -204.018,
+          "pos_std_m": 0.102,
+          "vx": -14.334,
+          "vy": 0.416,
+          "vel_std_mps": 0.279,
+          "heading_deg": 178.49,
           "heading_source": "velocity",
           "length_m": 4.6,
           "width_m": 1.9,
@@ -4352,17 +4559,18 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.5,
-          "x": -135.952,
-          "y": -203.877,
-          "pos_std_m": 0.548,
-          "vx": -14.323,
-          "vy": 0.539,
-          "vel_std_mps": 0.354,
-          "heading_deg": 177.84,
+          "x": -136.162,
+          "y": -203.969,
+          "pos_std_m": 0.104,
+          "vx": -14.33,
+          "vy": 0.573,
+          "vel_std_mps": 0.288,
+          "heading_deg": 177.85,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4373,16 +4581,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.6,
-          "x": -137.53,
-          "y": -203.8,
-          "pos_std_m": 0.548,
-          "vx": -14.343,
-          "vy": 0.67,
-          "vel_std_mps": 0.386,
+          "x": -137.592,
+          "y": -203.903,
+          "pos_std_m": 0.107,
+          "vx": -14.273,
+          "vy": 0.74,
+          "vel_std_mps": 0.46,
           "heading_deg": 177.33,
           "heading_source": "velocity",
           "length_m": null,
@@ -4392,17 +4601,18 @@
             "A",
             "B"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 2.7,
-          "x": -138.955,
-          "y": -203.709,
-          "pos_std_m": 0.548,
-          "vx": -14.128,
-          "vy": 0.777,
-          "vel_std_mps": 0.362,
-          "heading_deg": 176.85,
+          "x": -139.013,
+          "y": -203.825,
+          "pos_std_m": 0.115,
+          "vx": -14.151,
+          "vy": 0.814,
+          "vel_std_mps": 0.294,
+          "heading_deg": 176.86,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4413,17 +4623,18 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.8,
-          "x": -140.517,
-          "y": -203.908,
-          "pos_std_m": 0.548,
-          "vx": -13.999,
-          "vy": 0.86,
-          "vel_std_mps": 0.364,
-          "heading_deg": 176.48,
+          "x": -140.423,
+          "y": -203.74,
+          "pos_std_m": 0.119,
+          "vx": -14.038,
+          "vy": 0.897,
+          "vel_std_mps": 0.287,
+          "heading_deg": 176.49,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4435,16 +4646,17 @@
           "measured_by": [
             "A",
             "B"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 2.9,
-          "x": -141.802,
-          "y": -203.514,
-          "pos_std_m": 0.548,
-          "vx": -13.955,
-          "vy": 0.925,
-          "vel_std_mps": 0.37,
+          "x": -141.824,
+          "y": -203.646,
+          "pos_std_m": 0.122,
+          "vx": -13.986,
+          "vy": 0.972,
+          "vel_std_mps": 0.29,
           "heading_deg": 176.21,
           "heading_source": "velocity",
           "length_m": null,
@@ -4455,16 +4667,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.0,
-          "x": -143.301,
-          "y": -203.407,
-          "pos_std_m": 0.548,
-          "vx": -13.959,
-          "vy": 1.001,
-          "vel_std_mps": 0.38,
+          "x": -143.222,
+          "y": -203.545,
+          "pos_std_m": 0.125,
+          "vx": -13.977,
+          "vy": 1.053,
+          "vel_std_mps": 0.296,
           "heading_deg": 175.9,
           "heading_source": "velocity",
           "length_m": null,
@@ -4475,16 +4688,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.1,
-          "x": -144.029,
-          "y": -203.488,
-          "pos_std_m": 2.3,
-          "vx": -13.964,
-          "vy": 1.116,
-          "vel_std_mps": 0.389,
+          "x": -144.62,
+          "y": -203.434,
+          "pos_std_m": 0.129,
+          "vx": -13.979,
+          "vy": 1.166,
+          "vel_std_mps": 0.301,
           "heading_deg": 175.43,
           "heading_source": "velocity",
           "length_m": null,
@@ -4495,16 +4709,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.2,
-          "x": -146.091,
-          "y": -203.139,
-          "pos_std_m": 0.548,
-          "vx": -13.968,
-          "vy": 1.267,
-          "vel_std_mps": 0.401,
+          "x": -146.018,
+          "y": -203.31,
+          "pos_std_m": 0.132,
+          "vx": -13.982,
+          "vy": 1.306,
+          "vel_std_mps": 0.308,
           "heading_deg": 174.82,
           "heading_source": "velocity",
           "length_m": null,
@@ -4515,16 +4730,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.3,
-          "x": -147.487,
-          "y": -202.982,
-          "pos_std_m": 0.548,
-          "vx": -13.971,
-          "vy": 1.411,
-          "vel_std_mps": 0.416,
+          "x": -147.416,
+          "y": -203.172,
+          "pos_std_m": 0.136,
+          "vx": -13.986,
+          "vy": 1.453,
+          "vel_std_mps": 0.334,
           "heading_deg": 174.23,
           "heading_source": "velocity",
           "length_m": null,
@@ -4535,16 +4751,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.4,
-          "x": -148.883,
-          "y": -202.816,
-          "pos_std_m": 0.548,
-          "vx": -13.996,
-          "vy": 1.532,
-          "vel_std_mps": 0.454,
+          "x": -148.816,
+          "y": -203.018,
+          "pos_std_m": 0.141,
+          "vx": -14.002,
+          "vy": 1.63,
+          "vel_std_mps": 0.563,
           "heading_deg": 173.75,
           "heading_source": "velocity",
           "length_m": null,
@@ -4553,16 +4770,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.5,
-          "x": -150.281,
-          "y": -202.642,
-          "pos_std_m": 0.548,
-          "vx": -14.043,
-          "vy": 1.634,
-          "vel_std_mps": 0.498,
+          "x": -150.216,
+          "y": -202.849,
+          "pos_std_m": 0.157,
+          "vx": -14.0,
+          "vy": 1.757,
+          "vel_std_mps": 0.639,
           "heading_deg": 173.36,
           "heading_source": "velocity",
           "length_m": null,
@@ -4571,17 +4789,18 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.6,
-          "x": -151.686,
-          "y": -202.462,
-          "pos_std_m": 0.548,
-          "vx": -14.069,
-          "vy": 1.711,
-          "vel_std_mps": 0.551,
-          "heading_deg": 173.07,
+          "x": -151.615,
+          "y": -202.669,
+          "pos_std_m": 0.182,
+          "vx": -13.981,
+          "vy": 1.837,
+          "vel_std_mps": 0.65,
+          "heading_deg": 173.06,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4589,16 +4808,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.7,
-          "x": -153.088,
-          "y": -202.278,
-          "pos_std_m": 0.548,
-          "vx": -13.978,
-          "vy": 1.763,
-          "vel_std_mps": 0.573,
+          "x": -153.011,
+          "y": -202.484,
+          "pos_std_m": 0.209,
+          "vx": -13.944,
+          "vy": 1.869,
+          "vel_std_mps": 0.605,
           "heading_deg": 172.81,
           "heading_source": "velocity",
           "length_m": null,
@@ -4607,17 +4827,18 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 3.8,
-          "x": -154.477,
-          "y": -202.094,
-          "pos_std_m": 0.548,
-          "vx": -13.849,
-          "vy": 1.79,
-          "vel_std_mps": 0.602,
-          "heading_deg": 172.64,
+          "x": -154.403,
+          "y": -202.298,
+          "pos_std_m": 0.23,
+          "vx": -13.891,
+          "vy": 1.853,
+          "vel_std_mps": 0.464,
+          "heading_deg": 172.63,
           "heading_source": "velocity",
           "length_m": null,
           "width_m": null,
@@ -4627,16 +4848,17 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         },
         {
           "t_global": 3.9,
-          "x": -155.861,
-          "y": -201.912,
-          "pos_std_m": 0.548,
-          "vx": -13.837,
-          "vy": 1.802,
-          "vel_std_mps": 0.689,
+          "x": -155.791,
+          "y": -202.112,
+          "pos_std_m": 0.246,
+          "vx": -13.868,
+          "vy": 1.861,
+          "vel_std_mps": 0.594,
           "heading_deg": 172.58,
           "heading_source": "velocity",
           "length_m": null,
@@ -4645,16 +4867,17 @@
           "observers": [
             "A"
           ],
-          "measured_by": []
+          "measured_by": [],
+          "position": "smoothed"
         },
         {
           "t_global": 4.0,
-          "x": -157.242,
-          "y": -201.729,
-          "pos_std_m": 0.548,
-          "vx": -13.783,
-          "vy": 1.806,
-          "vel_std_mps": 0.73,
+          "x": -157.176,
+          "y": -201.927,
+          "pos_std_m": 0.265,
+          "vx": -13.836,
+          "vy": 1.847,
+          "vel_std_mps": 0.581,
           "heading_deg": 172.53,
           "heading_source": "velocity",
           "length_m": null,
@@ -4665,7 +4888,8 @@
           ],
           "measured_by": [
             "A"
-          ]
+          ],
+          "position": "smoothed"
         }
       ]
     }
@@ -4681,15 +4905,15 @@
     {
       "a": "B:track_002",
       "b": "B:track_003",
-      "compared": 91,
-      "distinct": 80,
+      "compared": 88,
+      "distinct": 79,
       "evidence": "one recorder measured both at once, not one body"
     },
     {
       "a": "B:track_003",
       "b": "B:track_004",
-      "compared": 19,
-      "distinct": 19,
+      "compared": 22,
+      "distinct": 22,
       "evidence": "one recorder measured both at once, not one body"
     }
   ],

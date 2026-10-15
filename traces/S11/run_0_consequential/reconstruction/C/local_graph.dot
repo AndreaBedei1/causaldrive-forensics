@@ -6,9 +6,9 @@ digraph "local_C" {
   "C:e02" [label="THROTTLE_START\nC\nt=0.00", fillcolor="#fde68a"];
   "C:e03" [label="TRACK_APPEARED_RIGHT\nC -> track_001\nt=2.65", fillcolor="#bfdbfe"];
   "C:e04" [label="CLOSING_START\nC -> track_001\nt=2.65", fillcolor="#bfdbfe"];
-  "C:e05" [label="CLOSING_END\nC -> track_001\nt=4.40", fillcolor="#bfdbfe"];
-  "C:e06" [label="CLOSING_START\nC -> track_001\nt=5.70", fillcolor="#bfdbfe"];
-  "C:e07" [label="CRITICAL_TTC_START\nC -> track_001\nt=5.90", fillcolor="#bfdbfe"];
+  "C:e05" [label="CLOSING_END\nC -> track_001\nt=4.35", fillcolor="#bfdbfe"];
+  "C:e06" [label="CLOSING_START\nC -> track_001\nt=5.55", fillcolor="#bfdbfe"];
+  "C:e07" [label="CRITICAL_TTC_START\nC -> track_001\nt=5.55", fillcolor="#bfdbfe"];
   "C:e08" [label="TRACK_LOST\nC -> track_001\nt=6.45", fillcolor="#bfdbfe"];
   "C:e09" [label="COLLISION\nC\nt=6.60", fillcolor="#fca5a5"];
   "C:e10" [label="THROTTLE_END\nC\nt=6.65", fillcolor="#fde68a"];
@@ -17,6 +17,7 @@ digraph "local_C" {
   "C:e13" [label="STOP_START\nC\nt=7.45", fillcolor="#e5e7eb"];
   {rank=same; "C:e01"; "C:e02";}
   {rank=same; "C:e03"; "C:e04";}
+  {rank=same; "C:e06"; "C:e07";}
   {rank=same; "C:e10"; "C:e11";}
   {rank=same; "C:e12"; "C:e13";}
   "C:e01" -> "C:e03" [label="PRECEDES"];
@@ -26,7 +27,8 @@ digraph "local_C" {
   "C:e03" -> "C:e05" [label="PRECEDES"];
   "C:e04" -> "C:e05" [label="PRECEDES"];
   "C:e05" -> "C:e06" [label="PRECEDES"];
-  "C:e06" -> "C:e07" [label="PRECEDES"];
+  "C:e05" -> "C:e07" [label="PRECEDES"];
+  "C:e06" -> "C:e08" [label="PRECEDES"];
   "C:e07" -> "C:e08" [label="PRECEDES"];
   "C:e08" -> "C:e09" [label="PRECEDES"];
   "C:e09" -> "C:e10" [label="PRECEDES"];

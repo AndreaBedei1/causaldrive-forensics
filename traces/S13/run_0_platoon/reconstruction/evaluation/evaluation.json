@@ -10,7 +10,7 @@
       ],
       "sim_time": 503.78820499777794,
       "peak_impulse": 1097.5294421779033,
-      "reconstructed_as": "g19",
+      "reconstructed_as": "g21",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -49,10 +49,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 40,
+    "nodes": 42,
     "max_abs_error_s": 0.0,
-    "order_pairs": 738,
-    "order_concordant": 738
+    "order_pairs": 798,
+    "order_concordant": 798
   },
   "tracks": [
     {
@@ -62,16 +62,16 @@
       "true_identity": "B",
       "median_box_distance_m": {
         "B": 0.0,
-        "C": 26.8,
-        "D": 18.75
+        "C": 26.87,
+        "D": 18.9
       },
       "verdict": "correct",
       "samples": 115,
-      "raw_rmse_to_surface_m": 0.245,
-      "smoothed_rmse_to_surface_m": 0.244,
-      "smoothed_rmse_to_centre_m": 1.669,
-      "raw_difference_speed_rmse_mps": 0.839,
-      "speed_rmse_mps": 0.523
+      "raw_rmse_to_surface_m": 0.244,
+      "smoothed_rmse_to_surface_m": 0.313,
+      "smoothed_rmse_to_centre_m": 1.609,
+      "raw_difference_speed_rmse_mps": 0.826,
+      "speed_rmse_mps": 0.118
     },
     {
       "track": "A:track_002",
@@ -79,17 +79,17 @@
       "status": "ANONYMOUS",
       "true_identity": "D",
       "median_box_distance_m": {
-        "B": 18.18,
-        "C": 8.29,
+        "B": 17.78,
+        "C": 8.32,
         "D": 0.0
       },
       "verdict": "correctly left anonymous",
-      "samples": 96,
-      "raw_rmse_to_surface_m": 0.295,
-      "smoothed_rmse_to_surface_m": 0.294,
-      "smoothed_rmse_to_centre_m": 1.977,
-      "raw_difference_speed_rmse_mps": 2.433,
-      "speed_rmse_mps": 0.058
+      "samples": 89,
+      "raw_rmse_to_surface_m": 0.299,
+      "smoothed_rmse_to_surface_m": 0.297,
+      "smoothed_rmse_to_centre_m": 1.975,
+      "raw_difference_speed_rmse_mps": 2.53,
+      "speed_rmse_mps": 0.06
     },
     {
       "track": "A:track_003",
@@ -97,17 +97,17 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "B": 27.56,
+        "B": 34.72,
         "C": 0.0,
-        "D": 5.18
+        "D": 5.21
       },
       "verdict": "correctly left anonymous",
-      "samples": 10,
-      "raw_rmse_to_surface_m": 0.467,
-      "smoothed_rmse_to_surface_m": 0.417,
-      "smoothed_rmse_to_centre_m": 1.464,
-      "raw_difference_speed_rmse_mps": 5.473,
-      "speed_rmse_mps": 0.025
+      "samples": 19,
+      "raw_rmse_to_surface_m": 0.487,
+      "smoothed_rmse_to_surface_m": 0.467,
+      "smoothed_rmse_to_centre_m": 1.423,
+      "raw_difference_speed_rmse_mps": 5.139,
+      "speed_rmse_mps": 0.06
     },
     {
       "track": "B:track_001",
@@ -116,16 +116,16 @@
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0,
-        "C": 24.76,
-        "D": 16.77
+        "C": 24.58,
+        "D": 16.55
       },
       "verdict": "correct",
       "samples": 115,
-      "raw_rmse_to_surface_m": 0.122,
-      "smoothed_rmse_to_surface_m": 0.26,
-      "smoothed_rmse_to_centre_m": 1.477,
-      "raw_difference_speed_rmse_mps": 1.748,
-      "speed_rmse_mps": 0.422
+      "raw_rmse_to_surface_m": 0.123,
+      "smoothed_rmse_to_surface_m": 0.224,
+      "smoothed_rmse_to_centre_m": 1.437,
+      "raw_difference_speed_rmse_mps": 1.456,
+      "speed_rmse_mps": 0.131
     },
     {
       "track": "B:track_002",
@@ -133,17 +133,17 @@
       "status": "ANONYMOUS",
       "true_identity": "D",
       "median_box_distance_m": {
-        "A": 13.4,
-        "C": 8.02,
+        "A": 13.28,
+        "C": 8.05,
         "D": 0.0
       },
       "verdict": "correctly left anonymous",
       "samples": 91,
-      "raw_rmse_to_surface_m": 0.408,
-      "smoothed_rmse_to_surface_m": 0.517,
-      "smoothed_rmse_to_centre_m": 1.76,
-      "raw_difference_speed_rmse_mps": 3.785,
-      "speed_rmse_mps": 0.088
+      "raw_rmse_to_surface_m": 0.406,
+      "smoothed_rmse_to_surface_m": 0.436,
+      "smoothed_rmse_to_centre_m": 1.847,
+      "raw_difference_speed_rmse_mps": 3.508,
+      "speed_rmse_mps": 0.057
     },
     {
       "track": "B:track_003",
@@ -151,17 +151,17 @@
       "status": "ANONYMOUS",
       "true_identity": "C",
       "median_box_distance_m": {
-        "A": 22.06,
+        "A": 21.96,
         "C": 0.0,
-        "D": 4.74
+        "D": 4.61
       },
       "verdict": "correctly left anonymous",
-      "samples": 34,
-      "raw_rmse_to_surface_m": 0.439,
-      "smoothed_rmse_to_surface_m": 0.428,
-      "smoothed_rmse_to_centre_m": 1.484,
+      "samples": 37,
+      "raw_rmse_to_surface_m": 0.847,
+      "smoothed_rmse_to_surface_m": 0.416,
+      "smoothed_rmse_to_centre_m": 1.583,
       "raw_difference_speed_rmse_mps": 8.876,
-      "speed_rmse_mps": 0.072
+      "speed_rmse_mps": 0.087
     },
     {
       "track": "B:track_004",
@@ -179,7 +179,7 @@
       "smoothed_rmse_to_surface_m": 0.632,
       "smoothed_rmse_to_centre_m": 1.708,
       "raw_difference_speed_rmse_mps": 2.04,
-      "speed_rmse_mps": 0.051
+      "speed_rmse_mps": 0.052
     }
   ],
   "contact_clearances": [
@@ -189,10 +189,10 @@
       "partner": "B",
       "track": "A:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.175,
+      "clearance_m": 0.229,
       "true_gap_m": 0.0,
-      "error_m": 0.175,
-      "range_m": 0.312,
+      "error_m": 0.229,
+      "range_m": 0.539,
       "ttc_s": null
     },
     {
@@ -201,10 +201,10 @@
       "partner": "A",
       "track": "B:track_001",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 0.493,
+      "clearance_m": 0.341,
       "true_gap_m": 0.0,
-      "error_m": 0.493,
-      "range_m": 0.543,
+      "error_m": 0.341,
+      "range_m": 0.377,
       "ttc_s": null
     }
   ],

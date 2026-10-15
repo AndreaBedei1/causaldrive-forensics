@@ -6,7 +6,7 @@ digraph "global" {
   "g02" [label="MOVING_START\nB\nt=-6.75", fillcolor="#e5e7eb"];
   "g03" [label="THROTTLE_START\nA\nt=-6.75", fillcolor="#fde68a"];
   "g04" [label="THROTTLE_START\nB\nt=-6.75", fillcolor="#fde68a"];
-  "g05" [label="TRACK_APPEARED_FRONT\nA -> B\nt=-6.30", fillcolor="#bfdbfe"];
+  "g05" [label="TRACK_APPEARED_FRONT\nA -> B\nt=-6.75", fillcolor="#bfdbfe"];
   "g06" [label="THROTTLE_END\nB\nt=-2.80", fillcolor="#fde68a"];
   "g07" [label="BRAKE_START\nB\nt=-2.80", fillcolor="#fde68a"];
   "g08" [label="CLOSING_START\nA -> B\nt=-2.55", fillcolor="#bfdbfe", peripheries=2];
@@ -20,16 +20,20 @@ digraph "global" {
   "g16" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
   "g17" [label="MOVING_END\nA\nt=+0.05", fillcolor="#e5e7eb"];
   "g18" [label="STOP_START\nA\nt=+0.05", fillcolor="#e5e7eb"];
-  {rank=same; "g01"; "g02"; "g03"; "g04";}
+  {rank=same; "g01"; "g02"; "g03"; "g04"; "g05";}
   {rank=same; "g06"; "g07";}
   {rank=same; "g10"; "g11";}
   {rank=same; "g12"; "g13";}
   {rank=same; "g14"; "g15"; "g16";}
   {rank=same; "g17"; "g18";}
-  "g01" -> "g05" [label="PRECEDES"];
-  "g02" -> "g05" [label="PRECEDES"];
-  "g03" -> "g05" [label="PRECEDES"];
-  "g04" -> "g05" [label="PRECEDES"];
+  "g01" -> "g06" [label="PRECEDES"];
+  "g01" -> "g07" [label="PRECEDES"];
+  "g02" -> "g06" [label="PRECEDES"];
+  "g02" -> "g07" [label="PRECEDES"];
+  "g03" -> "g06" [label="PRECEDES"];
+  "g03" -> "g07" [label="PRECEDES"];
+  "g04" -> "g06" [label="PRECEDES"];
+  "g04" -> "g07" [label="PRECEDES"];
   "g05" -> "g06" [label="PRECEDES"];
   "g05" -> "g07" [label="PRECEDES"];
   "g06" -> "g08" [label="PRECEDES"];

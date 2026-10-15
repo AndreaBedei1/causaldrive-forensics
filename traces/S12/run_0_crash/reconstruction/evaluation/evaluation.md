@@ -27,17 +27,17 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-45 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 924/924 pairs.
+41 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 756/756 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | U1 | C | correctly left anonymous | 73 | 0.297 / 0.331 m | 2.118 m | 0.883 / 0.08 m/s |
-| A:track_002 | B | B | correct | 110 | 1.452 / 1.277 m | 3.178 m | 3.859 / 1.183 m/s |
-| B:track_001 | A | A | correct | 110 | 2.449 / 2.036 m | 3.119 m | 4.648 / 0.881 m/s |
-| B:track_002 | U1 | C | correctly left anonymous | 58 | 0.18 / 0.396 m | 1.008 m | 5.12 / 0.529 m/s |
-| B:track_003 | U1 | C | correctly left anonymous | 4 | 0.496 / 0.596 m | 1.229 m | 5.523 / 0.367 m/s |
+| A:track_001 | U1 | C | correctly left anonymous | 73 | 0.297 / 0.328 m | 2.114 m | 0.883 / 0.021 m/s |
+| A:track_002 | B | B | correct | 110 | 0.175 / 0.304 m | 2.061 m | 1.581 / 0.07 m/s |
+| B:track_001 | A | A | correct | 110 | 0.096 / 0.159 m | 1.263 m | 2.618 / 0.106 m/s |
+| B:track_002 | U1 | C | correctly left anonymous | 58 | 0.18 / 0.31 m | 0.953 m | 5.12 / 0.438 m/s |
+| B:track_003 | U1 | C | correctly left anonymous | 6 | 0.424 / 0.562 m | 0.984 m | 6.697 / 0.411 m/s |
 
 ## Clearance at the true contacts
 
@@ -45,8 +45,8 @@ Per recorder, its track lying on the partner at the last 10 Hz sample at or befo
 
 | Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
 |---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
-| A + B | A | B | A:track_002 | -0.05 s | 0.735 m | 0.0 m | 0.735 m | 0.803 m |
-| A + B | B | A | B:track_001 | -0.05 s | 0.0 m | 0.0 m | 0.0 m | 0.48 m |
+| A + B | A | B | A:track_002 | -0.05 s | 0.361 m | 0.0 m | 0.361 m | 0.416 m |
+| A + B | B | A | B:track_001 | -0.05 s | 0.0 m | 0.0 m | 0.0 m | 1.133 m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 

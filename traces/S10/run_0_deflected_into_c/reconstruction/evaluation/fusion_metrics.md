@@ -8,7 +8,7 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 |-------|----------|--------|----|---------------|-------:|---------|
 | A:track_001 | C | ASSOCIATED | collision | C | 1.000 | correct link |
 | A:track_002 | B | ASSOCIATED | collision | B | 1.000 | correct link |
-| B:track_001 | C | ASSOCIATED | common_frame | C | 0.971 | correct link |
+| B:track_001 | C | ASSOCIATED | common_frame | C | 1.000 | correct link |
 | B:track_002 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 | C:track_001 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 | C:track_002 | B | ASSOCIATED | common_frame | B | 1.000 | correct link |
