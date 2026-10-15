@@ -10,12 +10,15 @@ raw detections of every radar of the recorder (front, left, right)
      smoothed backward (Rauch-Tung-Striebel) into a local trajectory.
 
 A confirmed track keeps claiming returns even when they look static, so a
-vehicle that stops (a braking lead car) is not dropped.  A target that stops
-abruptly (it crashes) changes its Doppler speed beyond the gate in one sweep:
-a confirmed track whose surroundings were free of foreign returns may then
-take the returns around it whose speed lies between standstill and the
-predicted one (see ``_slowdown_gate``), and follows the target through the
-crash.
+vehicle that stops (a braking lead car) is not dropped.  A target that brakes
+harder than the constant-velocity model allows is followed sweep by sweep up to
+a physical braking bound (``_manoeuvre_gate``).  A target whose velocity changes
+in a collision (it hits something, or is hit) leaves the Doppler gate in one
+sweep while its returns stay on its body: the track then takes those returns
+when they are still moving (a rebound, a push, a partial stop), and the update
+carries the measured velocity change as an impulse (``_impact_gate``).  Static
+returns never qualify there: in that sweep a body stopped dead cannot be told
+from the road surface or the scenery beside it.
 
 Local odometric frame: origin at the recorder's first ego position, x along
 its first heading, y to its right (CARLA's convention).  Every recorder has its
@@ -44,7 +47,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -467,6 +470,19 @@ class TrackMeasurement:
     points: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
     origins: Optional[np.ndarray] = field(default=None, repr=False, compare=False)
     competing: bool = False  # at least one claimed gate overlaps a confirmed rival's gate
+    # Extra variance of every Doppler row (m/s)^2: the recorder's own velocity jump at its impact, which the
+    # radar's motion compensation cannot follow (the same variance widens the association gate).
+    doppler_var: float = 0.0
+    # Set when the returns were taken by the manoeuvre gate (``_manoeuvre_gate``): the time (s) over which
+    # the target may have braked at up to ``max_braking_mps2``; the filter adds that along-track uncertainty.
+    manoeuvre_dt: Optional[float] = None
+    # Set when the returns were taken by the impact gate (``_impact_gate``): the velocity variance (m/s)^2 of
+    # the velocity change their Doppler measured (any direction), added before the update like the recorder's
+    # own impact kick; the smoother does not carry the change across it.
+    impulse_var: float = 0.0
+    # The Doppler velocity profile (``velocity_profile``): per radar, (unit direction, velocity component along
+    # it, variance) of the rigid-body velocity its returns imply; the filter's Doppler rows.
+    velocity_rows: List[Tuple[np.ndarray, float, float]] = field(default_factory=list)
 
 
 def _transition(dt: float) -> np.ndarray:
@@ -491,15 +507,57 @@ def kf_update(x: np.ndarray, P: np.ndarray, z: np.ndarray, H: np.ndarray, R: np.
     return x_new, I_KH @ P @ I_KH.T + K @ R @ K.T  # Joseph form stays symmetric
 
 
+def velocity_profile(points: np.ndarray, origins: np.ndarray, radial: np.ndarray,
+                     cfg: TrackingConfig) -> List[Tuple[np.ndarray, float, float]]:
+    """Velocity rows of one radar's returns of one rigid body: each return measures r_i = u_i . v along its own
+    line of sight u_i, so the least-squares velocity over all of them (one refit without the returns beyond 3
+    sigma) has the information u'u summed: its eigen-directions are the rows, each with the variance
+    ``radial_speed_std_mps``^2 / eigenvalue but never less than that of one return (the returns share
+    systematic errors).  A body spanning a wide angle (close, broadside) fixes both components; a narrow one
+    only the radial component, and the tangential row carries the variance its small angular spread allows.
+    A median radial speed on the line of sight of the median point would mix the two (a 2 deg mismatch at
+    12 m/s fakes 0.4 m/s sideways)."""
+    lines = points - origins
+    lines = lines / np.maximum(np.hypot(lines[:, 0], lines[:, 1]), 1e-6)[:, None]
+    keep = np.ones(len(radial), dtype=bool)
+    velocity = None
+    for _ in range(2):
+        U, r = lines[keep], radial[keep]
+        info = U.T @ U
+        if len(r) < 2 or np.linalg.eigvalsh(info)[-1] < 1e-9:
+            break
+        velocity = np.linalg.lstsq(U, r, rcond=None)[0]
+        residual = np.abs(radial - lines @ velocity)
+        scale = max(cfg.radial_speed_std_mps, 1.4826 * float(np.median(residual[keep])))
+        new = residual <= 3.0 * scale
+        if new.sum() < 2 or (new == keep).all():
+            break
+        keep = new
+    if velocity is None:
+        line = np.median(lines, axis=0)
+        line = line / max(float(np.linalg.norm(line)), 1e-6)
+        return [(line, float(np.median(radial)), cfg.radial_speed_std_mps ** 2)]
+    info = lines[keep].T @ lines[keep]
+    values, vectors = np.linalg.eigh(info)
+    rows = []
+    for value, vector in zip(values, vectors.T):
+        variance = cfg.radial_speed_std_mps ** 2 / max(float(value), 1e-9)
+        rows.append((vector, float(vector @ velocity), max(variance, cfg.radial_speed_std_mps ** 2)))
+    return rows
+
+
 def _measurement_model(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Position rows, plus one Doppler row per radar: radial speed = line_of_sight . velocity."""
+    """Position rows, plus the Doppler rows: per radar the velocity profile of its returns
+    (``velocity_profile``: direction . velocity), else one row radial speed = line_of_sight . velocity."""
     rows = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]]
     values = [measurement.xy[0], measurement.xy[1]]
     variances = [cfg.measurement_std_m ** 2] * 2
-    for line, radial in measurement.dopplers:
+    doppler_rows = measurement.velocity_rows or [(line, radial, cfg.radial_speed_std_mps ** 2)
+                                                 for line, radial in measurement.dopplers]
+    for line, value, variance in doppler_rows:
         rows.append([0.0, 0.0, float(line[0]), float(line[1])])
-        values.append(radial)
-        variances.append(cfg.radial_speed_std_mps ** 2)
+        values.append(value)
+        variances.append(variance + measurement.doppler_var)
     R = np.diag(variances)
     if measurement.origins is not None and len(measurement.origins):
         # The median point's radar noise at its range (lateral = range x azimuth sigma).
@@ -509,20 +567,58 @@ def _measurement_model(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tu
 
 
 def _initial_state(measurement: TrackMeasurement, cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray]:
-    velocity = np.zeros(2)
-    if measurement.dopplers:
-        line, radial = measurement.dopplers[0]
-        velocity = radial * np.asarray(line, dtype=float)
-    x = np.array([measurement.xy[0], measurement.xy[1], velocity[0], velocity[1]])
+    """Position from the measurement; velocity from its Doppler rows (the velocity profile of the first radar:
+    both components when its returns span a wide angle), the prior ``INITIAL_VELOCITY_STD_MPS`` elsewhere."""
+    x = np.array([measurement.xy[0], measurement.xy[1], 0.0, 0.0])
     P = np.diag([cfg.measurement_std_m ** 2] * 2 + [INITIAL_VELOCITY_STD_MPS ** 2] * 2)
+    if measurement.velocity_rows:
+        info = np.eye(2) / INITIAL_VELOCITY_STD_MPS ** 2
+        vector = np.zeros(2)
+        for line, value, variance in measurement.velocity_rows:
+            line = np.asarray(line, dtype=float)
+            info += np.outer(line, line) / variance
+            vector += line * value / variance
+        cov = np.linalg.inv(info)
+        x[2:] = cov @ vector
+        P[2:, 2:] = cov
+    elif measurement.dopplers:
+        line, radial = measurement.dopplers[0]
+        x[2:] = radial * np.asarray(line, dtype=float)
     return x, P
+
+
+def manoeuvre_noise(x: np.ndarray, P: np.ndarray, dt: float, cfg: TrackingConfig) -> np.ndarray:
+    """``P`` with the along-track uncertainty of a braking manoeuvre of up to ``max_braking_mps2`` over ``dt``
+    added (velocity a dt, position a dt^2 / 2, along the predicted velocity): the process noise of a step the
+    manoeuvre gate accepted, so the update follows a deceleration the constant-velocity model cannot."""
+    speed = float(np.hypot(x[2], x[3]))
+    if speed < 1e-6:
+        return P
+    unit = np.array([x[2], x[3]]) / speed
+    outer = np.outer(unit, unit)
+    dv = cfg.max_braking_mps2 * dt
+    out = P.copy()
+    out[2:, 2:] += dv * dv * outer
+    out[:2, :2] += (0.5 * dv * dt) ** 2 * outer
+    return out
+
+
+def impulse_noise(P: np.ndarray, variance: float, dt: float) -> np.ndarray:
+    """``P`` with an impact's velocity change added: ``variance`` (m/s)^2 in every direction, and the position it
+    moves the body over ``dt``."""
+    out = P.copy()
+    out[2:, 2:] += variance * np.eye(2)
+    out[:2, :2] += variance * dt * dt * np.eye(2)
+    return out
 
 
 def filter_and_smooth(measurements: Sequence[TrackMeasurement], cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Forward Kalman filter, then backward Rauch-Tung-Striebel smoother.
 
     Returns (smoothed states, smoothed covariances, filtered states), one row
-    per measurement record; missed sweeps are prediction-only steps.
+    per measurement record; missed sweeps are prediction-only steps.  A step the association took through the
+    manoeuvre gate carries the braking process noise there too (``manoeuvre_noise``); a step taken through the
+    impact gate carries the impulse (``impulse_noise``) and the smoother stops there.
     """
     boundaries = set()
     last_competing = measurements[0].t_local if measurements[0].competing else -math.inf
@@ -530,6 +626,11 @@ def filter_and_smooth(measurements: Sequence[TrackMeasurement], cfg: TrackingCon
     predicted_x, predicted_P, filtered_x, filtered_P = [x], [P], [x], [P]
     for previous, current in zip(measurements, measurements[1:]):
         x, P = kf_predict(x, P, current.t_local - previous.t_local, cfg.acceleration_std_mps2)
+        if current.manoeuvre_dt is not None:
+            P = manoeuvre_noise(x, P, current.manoeuvre_dt, cfg)
+        if current.impulse_var > 0.0:
+            P = impulse_noise(P, current.impulse_var, current.t_local - previous.t_local)
+            boundaries.add(len(filtered_x))  # an impact is not smoothed into the past
         predicted_x.append(x)
         predicted_P.append(P)
         if current.xy is not None:
@@ -586,16 +687,45 @@ def kf_predict_speed(x: np.ndarray, P: np.ndarray, dt: float, acceleration_std: 
 class _ActiveTrack:
     """A track during association: current filter state and its sweeps so far."""
 
-    def __init__(self, birth_order: int, first: TrackMeasurement, cfg: TrackingConfig) -> None:
+    def __init__(self, birth_order: int, first: TrackMeasurement, cfg: TrackingConfig,
+                 lanes: Optional[Callable[[float, float], Sequence[float]]] = None) -> None:
         self.birth_order = birth_order
         self.track_id: Optional[str] = None
-        # Its last sweep had returns of its own and no foreign return around it.
-        self.clean = False
         self.x, self.P = _initial_state(first, cfg)
+        if lanes is not None:
+            self.x, self.P = lane_velocity_prior(self.x, self.P, first, lanes(float(first.xy[0]), float(first.xy[1])),
+                                                 cfg)
         self.t_local = first.t_local
         self.measurements = [first]
         self.n_updates = 1
         self.last_update_t = first.t_local
+        # The covariance right after the last update: what coasting since then has added is P - P_update.
+        self.P_update = self.P.copy()
+        # The heading of its last moving state and that heading's variance (rad^2): a vehicle that stops keeps
+        # its orientation; None while it never moved.
+        self.held_heading: Optional[Tuple[float, float]] = None
+        # Tentative tracks: updates whose point lay inside a confirmed track's body region.
+        self.inside_known = 0
+        # When a body that moved came to rest: the first of the measurements whose line-of-sight speeds were all
+        # below ``moving_speed_mps`` up to the filter's speed falling below it (the filter lags the Doppler);
+        # None while it moves.
+        self.stopped_since: Optional[float] = None
+        self._static_run: Optional[float] = None
+        # Directions of travel of the lanes at a point (local frame; the road model's ``lane_headings``).
+        self.lanes = lanes
+        self._hold(cfg)
+
+    def _hold(self, cfg: TrackingConfig) -> None:
+        heading = velocity_heading(self.x, self.P, cfg)
+        if heading is not None:
+            self.held_heading = heading
+
+    def heading(self, cfg: TrackingConfig) -> Optional[Tuple[float, float]]:
+        """(heading, variance) of the body: from the velocity while it moves, else the held one, combined with the
+        map's prior that a vehicle travels along its lane (``body_heading``)."""
+        own = velocity_heading(self.x, self.P, cfg) or self.held_heading
+        lanes = self.lanes(float(self.x[0]), float(self.x[1])) if self.lanes is not None else ()
+        return body_heading(own, lanes, cfg)
 
     def predict(self, t_local: float, cfg: TrackingConfig) -> None:
         self.x, self.P = kf_predict_speed(self.x, self.P, t_local - self.t_local, cfg.acceleration_std_mps2,
@@ -603,11 +733,28 @@ class _ActiveTrack:
         self.t_local = t_local
 
     def update(self, measurement: TrackMeasurement, cfg: TrackingConfig) -> None:
+        if measurement.manoeuvre_dt is not None:
+            self.P = manoeuvre_noise(self.x, self.P, measurement.manoeuvre_dt, cfg)
+        if measurement.impulse_var > 0.0:
+            self.P = impulse_noise(self.P, measurement.impulse_var, measurement.t_local - self.last_update_t)
         H, z, R = _measurement_model(measurement, cfg)
         self.x, self.P = kf_update(self.x, self.P, z, H, R)
         self.measurements.append(measurement)
         self.n_updates += 1
         self.last_update_t = measurement.t_local
+        self.P_update = self.P.copy()
+        self._hold(cfg)
+        static = bool(measurement.dopplers) and all(abs(r) < cfg.moving_speed_mps for _, r in measurement.dopplers)
+        self._static_run = (self._static_run if self._static_run is not None else measurement.t_local) if static else None
+        if float(np.hypot(self.x[2], self.x[3])) >= cfg.moving_speed_mps:
+            self.stopped_since = None
+        elif self.stopped_since is None and self.held_heading is not None:
+            self.stopped_since = self._static_run if self._static_run is not None else measurement.t_local
+
+    def coasting_spread(self) -> float:
+        """Standard deviation (largest axis) that coasting since the last update added to the position."""
+        grown = self.P[:2, :2] - self.P_update[:2, :2]
+        return math.sqrt(max(float(np.linalg.eigvalsh(0.5 * (grown + grown.T))[-1]), 0.0))
 
     def miss(self, sweep: RadarSweep) -> None:
         self.measurements.append(TrackMeasurement(t_local=sweep.t_local))
@@ -649,16 +796,92 @@ def polar_covariances(points: np.ndarray, origins: np.ndarray, cfg: TrackingConf
     return out
 
 
-def body_covariance(state: np.ndarray, cfg: TrackingConfig) -> np.ndarray:
-    """Spread of single returns about a track's point: uniform over a vehicle box (length and width /
-    sqrt(12)), along the track's heading when its speed fixes one, else isotropic at the length."""
-    sl, sw = cfg.body_length_m / math.sqrt(12.0), cfg.body_width_m / math.sqrt(12.0)
-    speed = float(np.hypot(*state[2:]))
+def velocity_heading(state: np.ndarray, P: np.ndarray, cfg: TrackingConfig) -> Optional[Tuple[float, float]]:
+    """(heading, variance rad^2) of a moving state's velocity; the variance is that of the velocity across its
+    direction over the squared speed.  None below ``moving_speed_mps``."""
+    speed = float(np.hypot(state[2], state[3]))
     if speed < cfg.moving_speed_mps:
-        return np.eye(2) * sl * sl
-    c, s = state[2] / speed, state[3] / speed
+        return None
+    across = np.array([-state[3], state[2]]) / speed
+    return math.atan2(state[3], state[2]), float(across @ P[2:, 2:] @ across) / (speed * speed)
+
+
+def lane_velocity_prior(x: np.ndarray, P: np.ndarray, first: TrackMeasurement, lanes: Sequence[float],
+                        cfg: TrackingConfig) -> Tuple[np.ndarray, np.ndarray]:
+    """A new track's velocity with the map's prior that a vehicle moves along its lane: when the lanes at its
+    first point share one axis (within ``lane_heading_std_deg``; lanes of crossing directions at a junction
+    leave it ambiguous and the prior unused), the velocity lies along that axis d, its sign and speed from the
+    first Doppler row (speed r / (u . d); a body crossing the line of sight broadside leaves the speed unknown,
+    ``INITIAL_VELOCITY_STD_MPS``), across d only the heading prior's share (speed x sigma).  Without it the
+    tangential velocity is unknown to +-10 m/s and two missed sweeps already blur a young track beyond a car
+    width; with it a crossing car's direction of travel is known from its birth."""
+    if not lanes or not first.dopplers:
+        return x, P
+    sigma = math.radians(cfg.lane_heading_std_deg)
+    axis = lanes[0]
+    for lane in lanes[1:]:
+        gap = (lane - axis + 0.5 * math.pi) % math.pi - 0.5 * math.pi
+        if abs(gap) > sigma:
+            return x, P
+    d = np.array([math.cos(axis), math.sin(axis)])
+    line, radial = first.dopplers[0]
+    projection = float(np.asarray(line, dtype=float) @ d)
+    if abs(projection) >= 0.3:
+        speed = radial / projection
+        along_var = (cfg.radial_speed_std_mps / abs(projection)) ** 2
+    else:
+        speed, along_var = 0.0, INITIAL_VELOCITY_STD_MPS ** 2
+    across_std = max(abs(speed), math.sqrt(along_var)) * math.sin(sigma)
+    rot = np.array([[d[0], -d[1]], [d[1], d[0]]])
+    out_x, out_P = x.copy(), P.copy()
+    out_x[2:] = speed * d
+    out_P[2:, 2:] = rot @ np.diag([along_var, across_std ** 2]) @ rot.T
+    out_P[:2, 2:] = 0.0
+    out_P[2:, :2] = 0.0
+    return out_x, out_P
+
+
+def body_heading(own: Optional[Tuple[float, float]], lanes: Sequence[float],
+                 cfg: TrackingConfig) -> Optional[Tuple[float, float]]:
+    """The body's orientation (modulo 180 deg: a box is symmetric) from its own heading estimate ``own``
+    (heading, variance; None when unknown) and the map's prior that a vehicle travels along its lane: the lane
+    direction nearest to ``own`` (``lanes``: those containing the body point, nearest first) with variance
+    ``lane_heading_std_deg``^2, combined by inverse variance.  A lane direction the estimate rejects (3 sigma
+    of the two variances: a car turning or crossing at an angle) is not used.  Without an estimate the nearest
+    lane gives the orientation."""
+    prior = math.radians(cfg.lane_heading_std_deg) ** 2
+    if not lanes:
+        return own
+    if own is None:
+        return float(lanes[0]), prior
+    theta, variance = own
+
+    def axis_gap(lane: float) -> float:  # difference modulo pi, in (-pi/2, pi/2]
+        return (lane - theta + 0.5 * math.pi) % math.pi - 0.5 * math.pi
+
+    gap = min((axis_gap(lane) for lane in lanes), key=abs)
+    if gap * gap > 9.0 * (variance + prior):
+        return own
+    weight = variance / (variance + prior)
+    return theta + weight * gap, variance * prior / (variance + prior)
+
+
+def body_covariance(state: np.ndarray, cfg: TrackingConfig,
+                    heading: Optional[Tuple[float, float]] = None) -> np.ndarray:
+    """Spread of single returns about a track's point: uniform over a vehicle box (variances a = L^2 / 12 along
+    and b = W^2 / 12 across its heading).  ``heading`` = (theta, variance): for a Gaussian heading error of
+    variance s^2 the expected spread along theta is (a + b) / 2 + (a - b) / 2 exp(-2 s^2), across it
+    (a + b) / 2 - (a - b) / 2 exp(-2 s^2) (E[cos 2 delta] = exp(-2 s^2)): a heading the Doppler cannot fix (a car
+    crossing the line of sight) spreads the body evenly.  Without a heading: isotropic at the length."""
+    a, b = cfg.body_length_m ** 2 / 12.0, cfg.body_width_m ** 2 / 12.0
+    if heading is None:
+        return np.eye(2) * a
+    theta, variance = heading
+    rho = math.exp(-2.0 * variance)
+    along, across = 0.5 * (a + b) + 0.5 * (a - b) * rho, 0.5 * (a + b) - 0.5 * (a - b) * rho
+    c, s = math.cos(theta), math.sin(theta)
     rot = np.array([[c, -s], [s, c]])
-    return rot @ np.diag([sl * sl, sw * sw]) @ rot.T
+    return rot @ np.diag([along, across]) @ rot.T
 
 
 def covariance_gate(track: "_ActiveTrack", sweep: "RadarSweep", cfg: TrackingConfig,
@@ -669,9 +892,13 @@ def covariance_gate(track: "_ActiveTrack", sweep: "RadarSweep", cfg: TrackingCon
     in this sweep, which the radar's motion compensation cannot follow)."""
     nu = sweep.points - track.x[:2]
     # A return and the track point (the median of the body's visible returns) are two points of one vehicle
-    # body: their difference is that of two points uniform over the box, variance 2 x (L^2, W^2) / 12.  The
-    # spread of the currently visible face is NOT used: the next returns may come from another face.
-    spread = 2.0 * body_covariance(track.x, cfg)
+    # body: their difference is that of two points uniform over the box, variance 2 x (L^2, W^2) / 12, along
+    # the track's current or held heading.  The heading's own uncertainty does NOT widen this gate: a young
+    # track's heading is barely known, and a gate turned round would take the returns of the car abreast (the
+    # region where a second body may not START, ``on_body``, does include it).  The spread of the currently
+    # visible face is NOT used: the next returns may come from another face.
+    heading = track.heading(cfg)
+    spread = 2.0 * body_covariance(track.x, cfg, None if heading is None else (heading[0], 0.0))
     S = track.P[:2, :2][None, :, :] + spread[None, :, :] + polar_covariances(sweep.points, sweep.origins, cfg)
     det = S[:, 0, 0] * S[:, 1, 1] - S[:, 0, 1] * S[:, 1, 0]
     d2 = (S[:, 1, 1] * nu[:, 0] ** 2 - 2.0 * S[:, 0, 1] * nu[:, 0] * nu[:, 1] + S[:, 0, 0] * nu[:, 1] ** 2) / np.maximum(det, 1e-12)
@@ -685,72 +912,132 @@ def covariance_gate(track: "_ActiveTrack", sweep: "RadarSweep", cfg: TrackingCon
     return d2, radial2, np.hypot(nu[:, 0], nu[:, 1])
 
 
-def on_body(track: "_ActiveTrack", points: np.ndarray, cfg: TrackingConfig, widen: bool = True) -> np.ndarray:
+def on_body(track: "_ActiveTrack", points: np.ndarray, cfg: TrackingConfig, widen: bool = True,
+            turned: bool = True) -> np.ndarray:
     """Points that can lie on the track's own vehicle body: the track point and any return are two points of
-    one box, at most a body length apart along its heading and a body width across it (a length in every
-    direction while the heading is unknown), widened by 3 sigma of the predicted position (``widen``)."""
+    one box, at most a body length apart along its heading and a body width across it; with ``turned`` a box
+    turned by up to delta = 3 sigma of the heading (at most 90 deg) reaches L + W sin(delta) along and
+    W + L sin(delta) across.  A length in every direction while the heading is unknown; widened by 3 sigma of
+    the predicted position (``widen``)."""
     margin = 3.0 * math.sqrt(max(float(np.linalg.eigvalsh(track.P[:2, :2])[-1]), 0.0)) if widen else 0.0
     offsets = points - track.x[:2]
-    speed = float(np.hypot(*track.x[2:]))
-    if speed < cfg.moving_speed_mps:
+    heading = track.heading(cfg)
+    if heading is None:
         return np.hypot(offsets[:, 0], offsets[:, 1]) <= cfg.body_length_m + margin
-    c, s = track.x[2] / speed, track.x[3] / speed
+    theta, variance = heading
+    turn = math.sin(min(3.0 * math.sqrt(max(variance, 0.0)), 0.5 * math.pi)) if turned else 0.0
+    c, s = math.cos(theta), math.sin(theta)
     along, across = offsets @ np.array([c, s]), offsets @ np.array([-s, c])
-    return (np.abs(along) <= cfg.body_length_m + margin) & (np.abs(across) <= cfg.body_width_m + margin)
+    return ((np.abs(along) <= cfg.body_length_m + cfg.body_width_m * turn + margin)
+            & (np.abs(across) <= cfg.body_width_m + cfg.body_length_m * turn + margin))
 
 
-def _measurement_from_returns(sweep: RadarSweep, mask: np.ndarray) -> TrackMeasurement:
-    """Median position of the claimed returns, and per radar the median line-of-sight speed."""
+def _measurement_from_returns(sweep: RadarSweep, mask: np.ndarray, cfg: TrackingConfig) -> TrackMeasurement:
+    """Median position of the claimed returns, per radar the median line-of-sight speed and the velocity profile
+    of its returns (``velocity_profile``)."""
     xy = np.median(sweep.points[mask], axis=0)
     dopplers = []
     counts = []
+    rows = []
     for k in sorted(set(sweep.radar[mask].tolist())):
         own = mask & (sweep.radar == k)
         line = np.median(sweep.points[own], axis=0) - sweep.origins[own][0]
         line = line / max(float(np.linalg.norm(line)), 1e-6)
         counts.append((int(own.sum()), k))
         dopplers.append((int(own.sum()), line, float(np.median(sweep.radial_speed[own]))))
+        rows.append((int(own.sum()), velocity_profile(sweep.points[own], sweep.origins[own],
+                                                      sweep.radial_speed[own], cfg)))
     dopplers.sort(key=lambda item: -item[0])  # the radar with most returns first
+    rows.sort(key=lambda item: -item[0])
     clearances = sweep.clearance[mask]
     near = float(np.percentile(clearances, NEAR_SURFACE_PERCENTILE))
     offset = max(float(np.median(clearances)) - near, 0.0)
     main = max(counts)[1]
     return TrackMeasurement(t_local=sweep.t_local, xy=xy, dopplers=[(line, radial) for _, line, radial in dopplers],
+                            velocity_rows=[row for _, profile in rows for row in profile],
                             n_returns=int(mask.sum()), near_clearance=near, surface_offset=offset,
                             radar=sweep.radars[main] if sweep.radars else str(main),
                             radars=tuple(sorted(sweep.radars[k] if sweep.radars else str(k) for _, k in counts)),
                             points=sweep.points[mask].copy(), origins=sweep.origins[mask].copy())
 
 
-def _slowdown_gate(track: _ActiveTrack, sweep: RadarSweep, free: np.ndarray, own: np.ndarray,
-                   cfg: TrackingConfig) -> np.ndarray:
-    """A confirmed track's returns after an abrupt slowdown of its target (a crash).
+def _manoeuvre_gate(track: _ActiveTrack, sweep: RadarSweep, candidates: np.ndarray, rivals: np.ndarray,
+                    period: float, cfg: TrackingConfig, ego_variance: float = 0.0) -> np.ndarray:
+    """A confirmed track's returns while its target brakes harder than the constant-velocity model allows.
 
-    Only when the ordinary gate gave it nothing in this sweep and its previous
-    sweep was clean (its own returns, no foreign one inside the region its own
-    body can occupy, ``on_body`` without widening: a road crest or a guardrail
-    along the target is foreign clutter in every sweep, so it never qualifies,
-    while a stray return or another vehicle metres away does not count): the
-    free returns within the position gate whose line-of-sight speed is at most
-    the predicted one in magnitude (Doppler gate width added): an impact removes
-    the target's speed or partly reverses it (a rebound), it does not add to it.
-    At least ``min_slowdown_returns`` of them.
-    """
+    The ordinary gate gave the track nothing in this sweep, it was updated in the previous sweep (the
+    deceleration is followed sweep by sweep, never across a gap), and it moves.  Its returns are then the
+    ``candidates`` (free, unambiguous, unclaimed) inside its position gate and its own body region
+    (``on_body``), outside every other track's position gate (``rivals``: nobody else can explain them), whose
+    line-of-sight speed is that of the predicted velocity slowed by at most ``max_braking_mps2`` x dt along
+    itself (Doppler tolerance at both ends): a vehicle brakes at a bounded rate; it does not lose 8 m/s in one
+    50 ms sweep, as a moving track that jumped onto static scenery would.  The update then carries that braking
+    as process noise (``manoeuvre_noise``)."""
+    dt = sweep.t_local - track.last_update_t
+    speed = float(np.hypot(track.x[2], track.x[3]))
+    if track.track_id is None or not len(sweep.points) or dt > 1.5 * period + 1e-6 or speed < cfg.moving_speed_mps:
+        return np.zeros(len(sweep.points), dtype=bool)
     d2, _, euclid = covariance_gate(track, sweep, cfg)
-    near = free & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
-    was_clean = track.clean
-    track.clean = bool(own.any()) and not (free & on_body(track, sweep.points, cfg, widen=False) & ~own).any()
-    if track.track_id is None or own.any() or not was_clean:
-        return own
+    near = (candidates & ~rivals & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
+            & on_body(track, sweep.points, cfg))
     u = _unit_lines(sweep.points, sweep.origins)
     predicted = u @ track.x[2:]
+    slowed = predicted * (1.0 - min(1.0, cfg.max_braking_mps2 * dt / speed))
     tolerance = math.sqrt(chi2_quantile(cfg.gate_probability, 1)) * np.sqrt(
-        np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2)
-    slowed = near & (np.abs(sweep.radial_speed) <= np.abs(predicted) + tolerance)
-    if int(slowed.sum()) < cfg.min_slowdown_returns:
-        return own
-    track.clean = True
-    return slowed
+        np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2 + ego_variance)
+    lo, hi = np.minimum(predicted, slowed) - tolerance, np.maximum(predicted, slowed) + tolerance
+    return near & (sweep.radial_speed >= lo) & (sweep.radial_speed <= hi)
+
+
+def _impact_gate(track: _ActiveTrack, sweep: RadarSweep, candidates: np.ndarray, rivals: np.ndarray,
+                 period: float, cfg: TrackingConfig, ego_variance: float = 0.0) -> Tuple[np.ndarray, float]:
+    """A confirmed track's returns right after its target's velocity changed in a collision, and the variance of
+    that change: (returns, (m/s)^2), or nothing.
+
+    Neither gate gave the track anything in this sweep, it was updated in the previous sweep (an impact is seen
+    from one sweep to the next, never across a gap) and it moves.  Two vehicle bodies cannot overlap: returns on
+    the region its own body can occupy (``on_body``) inside its position gate, unclaimed and outside every other
+    track's position gate (``rivals``), are its body whatever their Doppler, provided they are moving (a
+    rebound, a push, a partial stop): a static return there may be the road surface or the scenery beside the
+    body (a moving recorder sees new ground every sweep, so no history tells them apart), and a body stopped
+    dead within one sweep is not followed.  The body is still measured as a body: at least half as many returns
+    as the median of its last updates, and two.  The impulse is the largest line-of-sight speed change measured
+    (beyond the predicted Doppler, its tolerance removed), its direction unknown."""
+    none = (np.zeros(len(sweep.points), dtype=bool), 0.0)
+    dt = sweep.t_local - track.last_update_t
+    speed = float(np.hypot(track.x[2], track.x[3]))
+    if track.track_id is None or not len(sweep.points) or dt > 1.5 * period + 1e-6 or speed < cfg.moving_speed_mps:
+        return none
+    d2, _, euclid = covariance_gate(track, sweep, cfg)
+    near = (candidates & ~rivals & (d2 <= chi2_quantile(cfg.gate_probability, 2)) & (euclid <= cfg.position_cap_m)
+            & on_body(track, sweep.points, cfg))
+    taken = near & (np.abs(sweep.radial_speed) >= cfg.moving_speed_mps)
+    counts = [m.n_returns for m in track.measurements[-5:] if m.xy is not None]
+    if not counts or int(taken.sum()) < max(2, math.ceil(0.5 * float(np.median(counts)))):
+        return none
+    u = _unit_lines(sweep.points[taken], sweep.origins[taken])
+    tolerance = math.sqrt(chi2_quantile(cfg.gate_probability, 1)) * np.sqrt(
+        np.einsum("ni,ij,nj->n", u, track.P[2:, 2:], u) + cfg.radial_speed_std_mps ** 2 + ego_variance)
+    change = np.abs(sweep.radial_speed[taken] - u @ track.x[2:]) - tolerance
+    if float(change.max()) <= 0.0:
+        return none  # within the Doppler gate: not an impact (the ordinary gate refused them for another reason)
+    return taken, float(change.max()) ** 2
+
+
+def _may_touch(track: _ActiveTrack, pose: EgoState, footprint: Optional[EgoFootprint], cfg: TrackingConfig) -> bool:
+    """Whether a track's body can be in contact with the recorder at its own impact: the predicted near surface
+    (the track point's clearance minus the depth of that point behind the near surface at its last measurement)
+    within ``contact_clearance_m`` (the radar clearance of a touching body is biased high) plus 3 sigma of the
+    predicted position.  Only such a body can have exchanged momentum with the recorder."""
+    c, s = math.cos(pose.heading), math.sin(pose.heading)
+    dx, dy = track.x[0] - pose.x, track.x[1] - pose.y
+    vx, vy = c * dx + s * dy, -s * dx + c * dy
+    if footprint is None:
+        return math.hypot(vx, vy) <= cfg.body_length_m
+    depth = next((m.surface_offset for m in reversed(track.measurements) if m.surface_offset is not None), 0.0)
+    near = float(footprint.distance(vx, vy)) - depth
+    sigma = math.sqrt(max(float(np.linalg.eigvalsh(track.P[:2, :2])[-1]), 0.0))
+    return near <= cfg.contact_clearance_m + 3.0 * sigma
 
 
 def _impact_kicks(sweeps: Sequence[RadarSweep], impacts: Optional[Sequence[Tuple[float, float]]],
@@ -770,21 +1057,38 @@ def _impact_kicks(sweeps: Sequence[RadarSweep], impacts: Optional[Sequence[Tuple
 
 def _statistical_assignment(ordered: Sequence[_ActiveTrack], sweep: RadarSweep, free: np.ndarray,
                             cfg: TrackingConfig, ego_variance: float,
-                            stats: Optional[Dict[str, int]]) -> Tuple[List[np.ndarray], np.ndarray, np.ndarray]:
+                            stats: Optional[Dict[str, int]],
+                            period: float = 0.05,
+                            static_since: Optional[np.ndarray] = None) -> Tuple[List[np.ndarray], np.ndarray, np.ndarray, List[Optional[str]], List[float]]:
     """Per track, the free returns inside its position and Doppler gates (chi-square, ``covariance_gate``);
     each return goes to the track with the highest likelihood, confirmed tracks before tentative ones, when
     that likelihood is at least ``return_likelihood_ratio`` times the runner-up's; otherwise it is ambiguous
-    and updates no track.  The hard caps only remove what the statistics would accept beyond them (counted)."""
+    and updates no track.  The hard caps only remove what the statistics would accept beyond them (counted).
+    A confirmed track left without returns may then take braking returns (``_manoeuvre_gate``), else the
+    returns of an impact (``_impact_gate``); the last two values give, per track, the gate its returns came
+    from ("braking", "impact" or None) and the impulse variance of an impact (else 0)."""
     n = len(sweep.points)
     masks: List[np.ndarray] = []
     loglik = np.full((len(ordered), n), -np.inf)
     if not n or not ordered:
-        return [np.zeros(n, dtype=bool) for _ in ordered], np.full(n, -1, dtype=int), np.zeros(n, dtype=bool)
+        return ([np.zeros(n, dtype=bool) for _ in ordered], np.full(n, -1, dtype=int), np.zeros(n, dtype=bool),
+                [None] * len(ordered), [0.0] * len(ordered))
     g2, r2 = chi2_quantile(cfg.gate_probability, 2), chi2_quantile(cfg.gate_probability, 1)
+    position_gates = []
     for k, track in enumerate(ordered):
         d2, radial2, euclid, logdet, logvar, residual = covariance_gate(track, sweep, cfg, ego_variance, full=True)
+        position_gates.append(d2 <= g2)
         statistical = free & (d2 <= g2) & (radial2 <= r2)
         gate = statistical & (euclid <= cfg.position_cap_m) & (residual <= cfg.doppler_cap_mps)
+        if track.track_id is not None and float(np.hypot(track.x[2], track.x[3])) < cfg.moving_speed_mps:
+            # A stopped body and the static scenery beside it have the same (zero) Doppler speed: only geometry
+            # and history tell them apart.  A stationary track takes only returns its own body can occupy
+            # (``on_body``, its held heading), not the whole statistical gate (two box spreads reach 5-6 m), and
+            # none from a place that already returned static echoes well before it stopped (``static_since``:
+            # a wall or a parked car was there before; a body that stops brings its echoes with it).
+            gate &= on_body(track, sweep.points, cfg)
+            if static_since is not None and track.stopped_since is not None:
+                gate &= ~(static_since < track.stopped_since - cfg.max_track_gap_s)
         if stats is not None:
             stats["cap_rejections"] = stats.get("cap_rejections", 0) + int((statistical & ~gate).sum())
         if track.track_id is None:
@@ -807,23 +1111,65 @@ def _statistical_assignment(ordered: Sequence[_ActiveTrack], sweep: RadarSweep, 
             stats["ambiguous_returns"] = stats.get("ambiguous_returns", 0) + int(ambiguous.sum())
     winners = np.where(np.isfinite(loglik.max(axis=0)) & ~ambiguous, winners, -1)
     masks = [mask & ~ambiguous for mask in masks]
+    manoeuvring: List[Optional[str]] = [None] * len(ordered)
+    impulses = [0.0] * len(ordered)
     for k, track in enumerate(ordered):
-        masks[k] = _slowdown_gate(track, sweep, free & ~ambiguous & (winners < 0), masks[k] & (winners == k), cfg)
-        winners = np.where(masks[k] & (winners < 0), k, winners)
-    return masks, winners, ambiguous
+        if (masks[k] & (winners == k)).any():
+            continue
+        rivals = np.zeros(n, dtype=bool)
+        for j, gate in enumerate(position_gates):
+            if j != k:
+                rivals |= gate
+        unclaimed = free & ~ambiguous & (winners < 0)
+        braking = _manoeuvre_gate(track, sweep, unclaimed, rivals, period, cfg, ego_variance)
+        impulse = 0.0
+        if braking.any():
+            manoeuvring[k] = "braking"
+        else:
+            braking, impulse = _impact_gate(track, sweep, unclaimed, rivals, period, cfg, ego_variance)
+            if braking.any():
+                manoeuvring[k], impulses[k] = "impact", impulse
+        if braking.any():
+            masks[k] = braking
+            winners = np.where(braking, k, winners)
+    return masks, winners, ambiguous, manoeuvring, impulses
 
 
 def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
                       impacts: Optional[Sequence[Tuple[float, float]]] = None,
                       footprint: Optional["EgoFootprint"] = None, ego: Optional["EgoTrajectory"] = None,
-                      stats: Optional[Dict[str, int]] = None) -> List[_ActiveTrack]:
-    """Deterministic gated association; returns the confirmed tracks."""
+                      stats: Optional[Dict[str, int]] = None,
+                      trace: Optional[List[Dict[str, Any]]] = None,
+                      lane_headings: Optional[Callable[[float, float], Sequence[float]]] = None) -> List[_ActiveTrack]:
+    """Deterministic gated association; returns the confirmed tracks.  ``trace`` (diagnostics only) receives one
+    record per sweep: which track took each return, ambiguous returns, births, confirmations and ends."""
     active: List[_ActiveTrack] = []
     finished: List[_ActiveTrack] = []
     births = 0
     confirmed = 0
     kicks = _impact_kicks(sweeps, impacts, cfg)
     g2 = chi2_quantile(cfg.gate_probability, 2)
+    times = [sweep.t_local for sweep in sweeps]
+    period = float(np.median(np.diff(times))) if len(times) > 1 else 0.05
+    # Static scenery by history: per cell of the local frame (``measurement_std_m`` wide), the first time a
+    # static return (line-of-sight speed below ``moving_speed_mps``) was measured there.
+    cell = cfg.measurement_std_m
+    first_static: Dict[Tuple[int, int], float] = {}
+    for sweep in sweeps:
+        for (x, y), speed in zip(sweep.points, sweep.radial_speed):
+            if abs(speed) < cfg.moving_speed_mps:
+                first_static.setdefault((int(round(x / cell)), int(round(y / cell))), sweep.t_local)
+    lanes: Optional[Callable[[float, float], Sequence[float]]] = None
+    if lane_headings is not None:
+        from functools import lru_cache
+
+        @lru_cache(maxsize=None)
+        def _lanes_at(ix: int, iy: int) -> Tuple[float, ...]:
+            return tuple(lane_headings(ix * cell, iy * cell))
+
+        def _lanes(x: float, y: float) -> Tuple[float, ...]:
+            return _lanes_at(int(round(x / cell)), int(round(y / cell)))
+        lanes = _lanes
     for index, sweep in enumerate(sweeps):
         free = np.ones(len(sweep.points), dtype=bool)
         # 1. Predict all tracks before any updates. An older track must not
@@ -832,38 +1178,64 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
         ordered = sorted(active, key=lambda item: (item.track_id is None, item.birth_order))
         for track in ordered:
             track.predict(sweep.t_local, cfg)
-            if index in kicks and ego is not None:
+            if index in kicks and ego is not None and _may_touch(track, ego.at(sweep.t_local), footprint, cfg):
                 # The recorder's own impact: a body touching it may have had its velocity changed by J / m.
-                pose = ego.at(sweep.t_local)
-                c, s = math.cos(pose.heading), math.sin(pose.heading)
-                dx, dy = track.x[0] - pose.x, track.x[1] - pose.y
-                vx, vy = c * dx + s * dy, -s * dx + c * dy
-                clearance = float(footprint.distance(vx, vy)) if footprint is not None else math.hypot(vx, vy)
-                if clearance <= cfg.body_length_m:
-                    track.P[2:, 2:] += np.eye(2) * kicks[index]
-                    dt = sweep.t_local - (sweeps[index - 1].t_local if index else sweep.t_local)
-                    track.P[:2, :2] += np.eye(2) * kicks[index] * dt * dt
-        masks, winners, ambiguous = _statistical_assignment(ordered, sweep, free, cfg, kicks.get(index, 0.0), stats)
+                track.P[2:, 2:] += np.eye(2) * kicks[index]
+                dt = sweep.t_local - (sweeps[index - 1].t_local if index else sweep.t_local)
+                track.P[:2, :2] += np.eye(2) * kicks[index] * dt * dt
+        static_since = None
+        if len(sweep.points):
+            keys = [(int(round(x / cell)), int(round(y / cell))) for x, y in sweep.points]
+            static_since = np.array([first_static.get(key, math.inf) for key in keys])
+        masks, winners, ambiguous, manoeuvring, impulses = _statistical_assignment(ordered, sweep, free, cfg,
+                                                                        kicks.get(index, 0.0), stats, period,
+                                                                        static_since)
         free &= ~ambiguous  # an ambiguous return is nobody's and starts nothing
+        record: Optional[Dict[str, Any]] = None
+        if trace is not None:
+            record = {"t": sweep.t_local, "owner": np.where(ambiguous, "AMBIG", "").astype(object), "ended": [],
+                      "born": [], "confirmed": [], "manoeuvre": [],
+                      "pred": {(tr.track_id or "tent%d" % tr.birth_order): (tr.x.copy(), tr.coasting_spread())
+                               for tr in ordered}}
+            trace.append(record)
         confirmed_support = sum((mask.astype(int) for track, mask in zip(ordered, masks)
                                  if track.track_id is not None), np.zeros(len(sweep.points), dtype=int))
         for k, track in enumerate(ordered):
             mask = masks[k] & (winners == k)
             if mask.any():
-                measurement = _measurement_from_returns(sweep, mask)
+                measurement = _measurement_from_returns(sweep, mask, cfg)
                 measurement.competing = bool((masks[k] & (confirmed_support > 1)).any())
+                measurement.doppler_var = kicks.get(index, 0.0)
+                if manoeuvring[k] == "braking":
+                    measurement.manoeuvre_dt = sweep.t_local - track.last_update_t
+                elif manoeuvring[k] == "impact":
+                    measurement.impulse_var = impulses[k]
+                if manoeuvring[k] is not None and stats is not None:
+                    key = "manoeuvre_updates" if manoeuvring[k] == "braking" else "impact_updates"
+                    stats[key] = stats.get(key, 0) + 1
                 track.update(measurement, cfg)
                 free &= ~mask
+                if record is not None:
+                    record["owner"][mask] = track.track_id or "tent%d" % track.birth_order
+                    if manoeuvring[k] is not None:
+                        record["manoeuvre"].append((track.track_id, manoeuvring[k]))
+                if track.track_id is None and any(
+                        other.track_id is not None and bool(on_body(other, track.x[None, :2], cfg, False, False)[0])
+                        for other in ordered):
+                    track.inside_known += 1
             else:
                 track.miss(sweep)
-        # 2. End a track once its prediction no longer tells two bodies a car width apart (3 sigma), at most
-        # after the fail-safe cap.
+        # 2. End a track once COASTING has made its prediction unable to tell two bodies a car width apart
+        # (3 sigma of the spread added since its last update), at most after the fail-safe cap.  The radar's
+        # own noise at long range (a wide but not growing prediction) does not end it.
         survivors = []
         for track in active:
-            spread = math.sqrt(max(float(np.linalg.eigvalsh(track.P[:2, :2])[-1]), 0.0))
             lost = (sweep.t_local - track.last_update_t > cfg.gap_cap_s
-                    or (sweep.t_local > track.last_update_t and 3.0 * spread > cfg.body_width_m))
+                    or (sweep.t_local > track.last_update_t and 3.0 * track.coasting_spread() > cfg.body_width_m))
             if lost:
+                if record is not None:
+                    record["ended"].append((track.track_id or "tent%d" % track.birth_order,
+                                            round(sweep.t_local - track.last_update_t, 3)))
                 if track.track_id is not None:
                     finished.append(track)
             else:
@@ -871,31 +1243,42 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
         active = survivors
         # 3. Left-over moving returns start tentative tracks: a new object only outside every track's gate AND
         # outside the region its own body can occupy (``on_body``): an unlikely return of a known body is not
-        # a second body.
+        # a second body.  A confirmed body's region is turned by its heading uncertainty (the far end of a car
+        # crossing the line of sight); a tentative track is a hypothesis and vetoes no other one beyond its
+        # oriented extent (a young track's heading is barely known: the car abreast must still start).
         candidates = free & (np.abs(sweep.radial_speed) >= cfg.moving_speed_mps)
         if len(sweep.points):
             for track in active:
                 d2, _, _ = covariance_gate(track, sweep, cfg)
-                candidates &= (d2 > g2) & ~on_body(track, sweep.points, cfg)
+                candidates &= (d2 > g2) & ~on_body(track, sweep.points, cfg, turned=track.track_id is not None)
         indices = np.flatnonzero(candidates)
         for cluster in cluster_points(sweep.points[indices], cfg.cluster_distance_m):
             mask = np.zeros(len(sweep.points), dtype=bool)
             mask[indices[cluster]] = True
             births += 1
-            active.append(_ActiveTrack(births, _measurement_from_returns(sweep, mask), cfg))
+            active.append(_ActiveTrack(births, _measurement_from_returns(sweep, mask, cfg), cfg, lanes))
+            if record is not None:
+                record["owner"][mask] = "birth%d" % births
+                record["born"].append(births)
         # 4. Confirm tentative tracks with min_track_support_s of support and min_track_updates measurements.
         for track in active:
             ready = (track.last_update_t - track.measurements[0].t_local >= cfg.min_track_support_s - 1e-6
                      and track.n_updates >= cfg.min_track_updates)
             if ready and track.track_id is None:
-                # Two vehicle bodies cannot overlap: a tentative track whose point lies strictly inside a
-                # confirmed track's body region (no margin) is a part of that body seen apart (its front while
-                # the track's crossing speed lags), never a second vehicle.  It is not reported.
-                ready = not any(other.track_id is not None and bool(on_body(other, track.x[None, :2], cfg, False)[0])
-                                for other in active)
+                # Two vehicle bodies cannot overlap: a tentative track whose point lies inside a confirmed
+                # track's body region (no margin; the region turned by that track's heading uncertainty) now,
+                # or did in at least half of its updates, is a part of that body seen apart (the far end of a
+                # car crossing the line of sight, its front while the track's crossing speed lags), never a
+                # second vehicle.  It is not reported.
+                ready = (2 * track.inside_known < track.n_updates
+                         and not any(other.track_id is not None
+                                     and bool(on_body(other, track.x[None, :2], cfg, False, False)[0])
+                                     for other in active))
             if track.track_id is None and ready:
                 confirmed += 1
                 track.track_id = "track_{0:03d}".format(confirmed)
+                if record is not None:
+                    record["confirmed"].append((track.birth_order, track.track_id))
     finished.extend(track for track in active if track.track_id is not None)
     return sorted(finished, key=lambda item: item.track_id)
 
@@ -903,6 +1286,9 @@ def associate_returns(sweeps: Sequence[RadarSweep], cfg: TrackingConfig,
 # --------------------------------------------------------------------------
 # Smoothed local tracks
 # --------------------------------------------------------------------------
+
+NOT_WRITTEN = {"path_curvature"}  # TrackSample fields kept in memory only
+
 
 @dataclass
 class TrackSample:
@@ -947,6 +1333,10 @@ class TrackSample:
     occluded: bool = False
     identity_ambiguous: bool = False
 
+    # The curvature [1/m, + = turning right] of the lane the target keeps (map: ``road.RoadFrame.lane_curvature``):
+    # its predicted footprint follows that lane, as the recorder's follows its own yaw rate (``conflict``).  Set
+    # only on the copies the collision-course prediction uses (``LocalTrack.conflict_sample``); never written.
+    path_curvature: Optional[float] = None
     # Optional estimated rigid body in this track's local odometric frame:
     # centre x/y, heading radians, length/width. Nominal inference is the default.
     body_estimate: Optional[Tuple[float, float, float, float, float]] = None
@@ -960,6 +1350,8 @@ class TrackSample:
     def to_dict(self, track_id: str) -> Dict[str, Any]:
         out: Dict[str, Any] = {"track_id": track_id}
         for name, value in self.__dict__.items():
+            if name in NOT_WRITTEN:
+                continue
             out[name] = round(value, 3) if isinstance(value, float) else value
         return out
 
@@ -979,14 +1371,19 @@ class LocalTrack:
     # Samples (t_local rounded to 0.1 ms) whose collision course is predicted at the velocity along the target's
     # lane (``local.track_events``: an unconfirmed motion across its lane), that velocity in the local frame.
     lane_held: Dict[float, Tuple[float, float]] = field(default_factory=dict, repr=False, compare=False)
+    # Samples (t_local rounded to 0.1 ms) on a mapped lane, the curvature of that lane (``local.track_events``).
+    lane_curvature: Dict[float, float] = field(default_factory=dict, repr=False, compare=False)
 
     def conflict_sample(self, sample: "TrackSample") -> "TrackSample":
-        """The sample as the collision-course prediction uses it (``lane_held``)."""
-        held = self.lane_held.get(round(sample.t_local, 4))
-        if held is None:
+        """The sample as the collision-course prediction uses it (``lane_held``, ``lane_curvature``)."""
+        key = round(sample.t_local, 4)
+        held, curvature = self.lane_held.get(key), self.lane_curvature.get(key)
+        if held is None and curvature is None:
             return sample
         import dataclasses
-        return dataclasses.replace(sample, vx_mps=held[0], vy_mps=held[1], speed_mps=math.hypot(*held))
+        if held is not None:
+            sample = dataclasses.replace(sample, vx_mps=held[0], vy_mps=held[1], speed_mps=math.hypot(*held))
+        return dataclasses.replace(sample, path_curvature=curvature)
 
     def leader_at(self, t_local: float) -> Optional[bool]:
         if self.leader_spans is None:
@@ -1132,8 +1529,36 @@ def accelerations(times: Sequence[float], states: np.ndarray, filtered: Optional
     return out
 
 
+def entanglements(tracks: Sequence["_ActiveTrack"], cfg: TrackingConfig) -> Dict[str, float]:
+    """Per confirmed track, the time after which its identity is ambiguous because of an entanglement: another
+    confirmed track ended (its last measurement) in contact with it -- their points within half a body length
+    plus half a body width, as for two cars touching after a collision; cars abreast in adjacent lanes stay a
+    lane width apart -- while this one had been competing for returns with a confirmed rival
+    (``TrackMeasurement.competing``) in the ``max_track_gap_s`` before, and this one went on.  Nothing tells which
+    body the surviving track follows."""
+    out: Dict[str, float] = {}
+    measured = {}
+    for track in tracks:
+        rows = [m for m in track.measurements if m.xy is not None]
+        if rows:
+            measured[track.track_id] = rows
+    for loser, rows in measured.items():
+        end = rows[-1]
+        for winner, mine in measured.items():
+            if winner == loser or mine[-1].t_local <= end.t_local + 1e-6 or mine[0].t_local > end.t_local + 1e-6:
+                continue
+            competing = any(m.competing and end.t_local - cfg.max_track_gap_s - 1e-6 <= m.t_local <= end.t_local + 1e-6
+                            for m in mine)
+            if not competing:
+                continue
+            near = min(mine, key=lambda m: abs(m.t_local - end.t_local))
+            if float(np.hypot(*(np.asarray(near.xy) - np.asarray(end.xy)))) <= 0.5 * (cfg.body_length_m + cfg.body_width_m):
+                out[winner] = min(out.get(winner, math.inf), end.t_local)
+    return out
+
+
 def identity_segments(measurements: Sequence[TrackMeasurement], states: np.ndarray,
-                      cfg: TrackingConfig) -> List[Tuple[int, int, bool]]:
+                      cfg: TrackingConfig, ambiguous_after: Optional[float] = None) -> List[Tuple[int, int, bool]]:
     """Half-open segments separated by sustained incompatible transverse support.
 
     Five-sweep confirmation and the existing track-gap padding avoid single-return
@@ -1156,6 +1581,8 @@ def identity_segments(measurements: Sequence[TrackMeasurement], states: np.ndarr
         groups[-1].append(i)
     ambiguous = np.zeros(len(measurements), dtype=bool)
     times = np.array([m.t_local for m in measurements])
+    if ambiguous_after is not None:
+        ambiguous |= times > ambiguous_after + 1e-9
     for group in groups:
         if len(group) < cfg.min_track_frames:
             continue
@@ -1169,7 +1596,8 @@ def identity_segments(measurements: Sequence[TrackMeasurement], states: np.ndarr
 def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock_origin: float,
                        cfg: TrackingConfig, footprint: Optional[EgoFootprint] = None,
                        stats: Optional[Dict[str, Any]] = None,
-                       impacts: Optional[Sequence[Tuple[float, float]]] = None) -> List[LocalTrack]:
+                       impacts: Optional[Sequence[Tuple[float, float]]] = None,
+                       lane_headings: Optional[Callable[[float, float], Sequence[float]]] = None) -> List[LocalTrack]:
     """Raw radar observations of one recorder (every radar) -> smoothed anonymous tracks.
 
     ``footprint`` (the recorder's own bounding box, vehicle frame) turns
@@ -1182,15 +1610,19 @@ def build_local_tracks(streams: Sequence[RadarStream], ego: EgoTrajectory, clock
         stats["own_body_returns_dropped"] = sum(sweep.own_body for sweep in sweeps)
     tracks = []
     association_stats: Dict[str, int] = {}
-    raw_tracks = associate_returns(sweeps, cfg, impacts, footprint, ego, association_stats)
+    raw_tracks = associate_returns(sweeps, cfg, impacts, footprint, ego, association_stats,
+                                   lane_headings=lane_headings)
     if stats is not None and association_stats:
         stats["association"] = association_stats
+    entangled = entanglements(raw_tracks, cfg)
+    if stats is not None and entangled:
+        stats["entanglements"] = {k: round(v, 3) for k, v in sorted(entangled.items())}
     for raw in raw_tracks:
         measurements = list(raw.measurements)
         while measurements[-1].xy is None:  # drop the prediction-only tail
             measurements.pop()
         initial, initial_covariances, initial_filtered = filter_and_smooth(measurements, cfg)
-        pieces = identity_segments(measurements, initial, cfg)
+        pieces = identity_segments(measurements, initial, cfg, entangled.get(raw.track_id))
         for number, (lo, hi, ambiguous) in enumerate(pieces, 1):
             part = list(measurements[lo:hi])
             while part and part[0].xy is None:

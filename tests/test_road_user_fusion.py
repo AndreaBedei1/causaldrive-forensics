@@ -335,17 +335,14 @@ class LinkAndAlignmentTests(unittest.TestCase):
             record = entities_of(run)
         names = {(a.local_graph + ":" + a.local_track): (a.status, a.global_entity) for a in result.associations}
         # A's and B's tracks of the van (identities verified against the evaluation's ground truth).
-        for name in ("A:track_001", "B:track_002#segment_1"):
+        for name in ("A:track_001", "B:track_002"):
             self.assertEqual(names[name], ("ASSOCIATED", "C"), name)
-        # A's track is named by the A-C collision evidence, B's by its returns on the van's own outline.
+        # A's track is named by the A-C collision evidence, B's by its returns on the van's own outline.  B follows
+        # the van through its contact with A in one track (the earlier tracker split it there, and its later
+        # fragment had to inherit C from A's track).
         links = {link["track"]: link for link in record["recorder_links"]}
-        self.assertEqual(sorted(links), ["B:track_002#segment_1", "B:track_003"])
-        # B's later fragment of the van starts after the van touched A: its own returns cannot tell the two bodies
-        # apart, but it is one box with A's track of the van (already named C) on every shared instant, and no
-        # other recorder matches it: it inherits C (after the impact the velocity is not compared).
-        self.assertEqual(names["B:track_003"], ("ASSOCIATED", "C"))
-        self.assertEqual(links["B:track_003"]["inherited_from"], "A:track_001")
-        self.assertNotIn("inherited_from", links["B:track_002#segment_1"])
+        self.assertEqual(sorted(links), ["B:track_002"])
+        self.assertIsNone(links["B:track_002"].get("inherited_from"))
 
     def test_s06_recorder_c_is_aligned_by_its_observed_trajectory(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -361,16 +358,18 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertLessEqual(decision["interval"][0], -4.1)
         self.assertGreaterEqual(decision["interval"][1], -4.1)
         names = {(a.local_graph + ":" + a.local_track): a.global_entity for a in result.associations}
-        # C's two tracks of A and its track of B (identities verified against the evaluation's ground truth).
-        self.assertEqual(names["C:track_003"], "B")
-        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"], names["C:track_002"]),
-                         ("C", "C", "A", "A"))
+        # C's tracks of A and of B (identities verified against the evaluation's ground truth).  C follows A
+        # through its range without a break; at the A-B crash C's track of B is split where the two bodies
+        # exchanged returns, and the fragment after the contact (A's body by ground truth) stays an anonymous road
+        # user: no identity is asserted across the contact (a recorder link holds only before its collision).
+        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"],
+                          names["C:track_002#segment_1"]), ("C", "C", "A", "B"))
+        self.assertTrue(names["C:track_002#segment_2"].startswith("U"))
         observed = next(local for local in result.locals if local.owner == 'C')
-        # At 75 m one missed sweep already makes A's predicted position too uncertain to tell two cars apart, so
-        # the tracker ends the track and starts a new one (uncertainty-driven survival); the fusion names every
-        # fragment: none of C's tracks stays ambiguous or anonymous.
-        self.assertFalse([t for t in observed.tracks if t.identity_ambiguous])
-        self.assertEqual({names["C:" + t.track_id] for t in observed.tracks}, {"A", "B"})
+        # Only that fragment is flagged ambiguous (the bodies exchanged returns at their contact).
+        self.assertEqual([t.track_id for t in observed.tracks if t.identity_ambiguous], ["track_002#segment_2"])
+        self.assertEqual({names["C:" + t.track_id] for t in observed.tracks} - {"A", "B"},
+                         {names["C:track_002#segment_2"]})
 
     def test_s05_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
         # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with

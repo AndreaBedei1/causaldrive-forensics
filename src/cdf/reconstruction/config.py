@@ -74,11 +74,19 @@ class TrackingConfig:
     # After competing return gates, an unexpected Doppler update must not bend
     # the earlier trajectory backwards (e.g. lateral deflection at an impact).
     smoothing_innovation_sigma: float = 3.0
-    # A confirmed track whose target stops abruptly (a crash: tens of m/s^2, the
-    # Doppler speed leaves the gate in one sweep) may take this many returns or
-    # more whose speed lies between standstill and the predicted one, when its
-    # previous sweep was free of foreign returns (tracking._slowdown_gate).
-    min_slowdown_returns: int = 3
+    # Braking the constant-velocity model cannot follow (tracking._manoeuvre_gate): a confirmed track observed
+    # in the previous sweep may take, on its own body and outside every other track's gate, returns of its
+    # target slowed by at most this deceleration since then (physical prior of the vehicle model: CARLA 0.9.15
+    # scripted stops reach 26-28 m/s^2 in the campaign ground truth, road vehicles brake at up to ~10 m/s^2;
+    # an impact is far beyond and is modelled by the recorder's own collision callbacks).
+    max_braking_mps2: float = 30.0
+    # A body whose predicted near surface lies within this of the recorder's skin (plus 3 sigma of its position)
+    # may be the partner of the recorder's own impact and gets its velocity kick (the radar clearance of a
+    # touching body is biased high; the fusion's touching distance).
+    contact_clearance_m: float = 1.0
+    # Map prior on a body's orientation (tracking.body_heading): a vehicle travels within this of its lane's
+    # direction, a lane change included; combined with the velocity's own heading by inverse variance.
+    lane_heading_std_deg: float = 10.0
     # Engineering envelope for a single road vehicle's transverse radar support:
     # 2.5 m (car/van width) plus one measurement standard deviation. Persistent
     # violations signal mixed bodies or unreliable heading, never a named switch.
@@ -209,9 +217,17 @@ class SemanticsConfig:
     # Half width of the straight-ahead corridor used for EGO_PATH_ENTRY / EXIT;
     # the corridor starts at the recorder's front edge (its own footprint).
     path_half_width_m: float = 1.5
-    # Out of the path only this far beyond the corridor (hysteresis): a track's point for
-    # EGO_PATH_EXIT, a leader's nominal body for the end of the forward-gap reason (CRITICAL_TTC).
+    # Out of the path only this far beyond the corridor (hysteresis): a leader's nominal body for the end of the
+    # forward-gap reason (CRITICAL_TTC); the point-geometry ablation of EGO_PATH.
     path_hysteresis_m: float = 0.5
+    # EGO_PATH occupancy (local.path_occupancy): the estimated body's edge is uncertain by the track's position
+    # sigma, this placement sigma (the face of a box fitted to radar returns, fusion.box_face_std_m) and its
+    # heading sigma turned over half a body length.  It is definitely inside (outside) the corridor when this
+    # many standard deviations inside (outside) -- one-sided 95 % -- and a new state needs this many consecutive
+    # definite samples (independent radar sweeps); in between the state holds and no transition is made.
+    path_edge_std_m: float = 0.25
+    path_occupancy_quantile: float = 1.645
+    path_min_definite_samples: int = 2
     # TRACK_APPEARED_FRONT when the track's first bearing from the vehicle
     # origin lies within this angle of the recorder's heading (about its own
     # lane at 20 m); otherwise TRACK_APPEARED_LEFT (negative bearing) or _RIGHT.

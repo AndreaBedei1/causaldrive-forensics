@@ -123,16 +123,16 @@ class AmbiguityTests(unittest.TestCase):
         c = statistical()
         sweep = sweep_at([[40.0, 0.0]], [10.0])
         # Two tracks 3.5 m apart, both uncertain: the return between them gates with both, equally likely.
-        masks, winners, ambiguous = _statistical_assignment(self.two_tracks(c, 3.5, 4.0), sweep,
-                                                            np.ones(1, dtype=bool), c, 0.0, None)
+        masks, winners, ambiguous, _, _ = _statistical_assignment(self.two_tracks(c, 3.5, 4.0), sweep,
+                                                                  np.ones(1, dtype=bool), c, 0.0, None)
         self.assertTrue(ambiguous[0])
         self.assertFalse(any(m[0] for m in masks))
 
     def test_a_clear_winner_is_assigned(self):
         c = statistical()
         sweep = sweep_at([[40.0, -1.75]], [10.0])
-        masks, winners, ambiguous = _statistical_assignment(self.two_tracks(c, 3.5, 0.05), sweep,
-                                                            np.ones(1, dtype=bool), c, 0.0, None)
+        masks, winners, ambiguous, _, _ = _statistical_assignment(self.two_tracks(c, 3.5, 0.05), sweep,
+                                                                  np.ones(1, dtype=bool), c, 0.0, None)
         self.assertFalse(ambiguous[0])
         self.assertEqual(winners[0], 0)
 
