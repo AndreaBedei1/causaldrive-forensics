@@ -115,6 +115,77 @@ def lanes_from_opendrive(text: str, spacing: float = 2.0) -> List[LaneSample]:
     return lanes
 
 
+@dataclass(frozen=True)
+class LanePiece:
+    """One driving lane of one lane section of one road, as a polyline in its direction of travel (CARLA world
+    frame): centre points every ~``spacing`` metres including both ends, the travel heading [rad] and the lane
+    width at each point.  ``key`` = (road id, section index, lane id); ``junction``: the road's junction id (-1:
+    not in a junction)."""
+
+    key: Tuple[str, int, int]
+    points: Tuple[Tuple[float, float], ...]
+    headings: Tuple[float, ...]
+    widths: Tuple[float, ...]
+    junction: str
+
+
+def lane_pieces_from_opendrive(text: str, spacing: float = 1.0) -> List[LanePiece]:
+    """Every driving lane of every lane section as a ``LanePiece``.  Right lanes (negative ids) run along the
+    reference line, left lanes against it (right-hand traffic; a road with rule="LHT" the other way).  Points at
+    both section ends, so pieces that connect share their end points."""
+    root = ET.fromstring(text)
+    pieces: List[LanePiece] = []
+    for road in root.findall("road"):
+        try:
+            line = _ReferenceLine(road.find("planView"))
+        except NotImplementedError:
+            continue
+        length = float(road.get("length"))
+        left_hand = (road.get("rule") or "RHT").upper() == "LHT"
+        lanes_el = road.find("lanes")
+        offsets = [_poly(e, "s") for e in lanes_el.findall("laneOffset")] or [(0.0, 0.0, 0.0, 0.0, 0.0)]
+        sections = lanes_el.findall("laneSection")
+        starts = [float(sec.get("s")) for sec in sections] + [length]
+        for index, section in enumerate(sections):
+            s_start, s_end = starts[index], starts[index + 1]
+            if s_end - s_start < 1e-3:
+                continue
+            n = max(int(math.ceil((s_end - s_start) / spacing)), 1)
+            samples = [s_start + k * (s_end - s_start) / n for k in range(n + 1)]
+            for side, sign in (("left", 1.0), ("right", -1.0)):
+                group = section.find(side)
+                if group is None:
+                    continue
+                ordered = sorted(group.findall("lane"), key=lambda lane: abs(int(lane.get("id"))))
+                widths_of = [(int(lane.get("id")), lane.get("type"), [_poly(w, "sOffset") for w in lane.findall("width")])
+                             for lane in ordered]
+                for position, (lane_id, lane_type, widths) in enumerate(widths_of):
+                    if lane_type != "driving" or not widths:
+                        continue
+                    pts, heads, wids = [], [], []
+                    for s in samples:
+                        x, y, hdg = line.at(s)
+                        t0 = _cubic(offsets, s)
+                        inner = sum(_cubic(w, s - s_start) for _, _, w in widths_of[:position] if w)
+                        width = _cubic(widths, s - s_start)
+                        t = t0 + sign * (inner + width / 2.0)
+                        nx, ny = -math.sin(hdg), math.cos(hdg)
+                        # CARLA world frame: OpenDRIVE y and headings negated.
+                        pts.append((x + t * nx, -(y + t * ny)))
+                        heads.append(-hdg)
+                        wids.append(max(width, 0.0))
+                    if max(wids) <= 0.5:
+                        continue
+                    along_reference = (lane_id < 0) != left_hand
+                    if not along_reference:
+                        pts, wids = pts[::-1], wids[::-1]
+                        heads = [h + math.pi for h in heads[::-1]]
+                    heads = [math.atan2(math.sin(h), math.cos(h)) for h in heads]
+                    pieces.append(LanePiece((road.get("id"), index, lane_id), tuple(pts), tuple(heads), tuple(wids),
+                                            road.get("junction") or "-1"))
+    return pieces
+
+
 def lane_share(lanes: Sequence[LaneSample], points: Sequence[Tuple[float, float]]) -> float:
     """Share of the points inside some driving-lane stretch (within half its width across, half its length along)."""
     if not lanes or not points:
