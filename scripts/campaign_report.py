@@ -652,6 +652,45 @@ def robustness_report(jobs_path: Path, out: Path) -> int:
 # Generalization
 # --------------------------------------------------------------------------------------------------------------
 
+def generalization_figure(results: Path) -> list:
+    from cdf.evaluation.figures import DOUBLE_COLUMN_IN, paper_style
+    plt = paper_style()
+    summary = json.loads((results / "summary.json").read_text(encoding="utf-8"))
+    families = summary["families"]
+    names = list(families) + ["ALL"]
+    rows = [families[n] for n in families] + [summary["overall_valid"]]
+    panels = [("collision_recall", "collision recall", (0, 1.05)), ("association_accuracy", "association accuracy", (0, 1.05)),
+              ("centre_error_median_m", "fused centre error, median [m]", None),
+              ("centre_error_p95_m", "fused centre error, p95 [m]", None),
+              ("missed_merges", "missed merges (count)", None), ("oracle_event_recall", "oracle event recall", (0, 1.05))]
+    fig, grid = plt.subplots(2, 3, figsize=(DOUBLE_COLUMN_IN, 4.6))
+    for axis, (key, title, lim) in zip(grid.flat, panels):
+        values = [r.get(key) for r in rows]
+        xs = range(len(names))
+        axis.bar(xs, [math.nan if v is None else v for v in values], color=["#4c72b0"] * (len(names) - 1) + ["#333333"])
+        for x, v in zip(xs, values):
+            if v is None:
+                axis.text(x, 0, "n/a", ha="center", va="bottom", fontsize=5, rotation=90)
+        axis.set_xticks(list(xs))
+        axis.set_xticklabels(["{0} ({1})".format(n, r["cases"]) for n, r in zip(names, rows)], rotation=60, ha="right", fontsize=5)
+        axis.set_title(title)
+        axis.grid(axis="y", alpha=0.3)
+        if lim:
+            axis.set_ylim(*lim)
+    fig.suptitle("Held-out simulated traffic configurations: valid cases per family (n); n/a = undefined")
+    fig.tight_layout()
+    out = results / "figures"
+    out.mkdir(parents=True, exist_ok=True)
+    paths = []
+    for suffix in ("pdf", "svg", "png"):
+        path = out / "generalization_by_family.{0}".format(suffix)
+        fig.savefig(str(path), dpi=200 if suffix == "png" else None)
+        paths.append(path)
+    plt.close(fig)
+    return paths
+
+
+
 def generalization_report(results: Path = GENERALIZATION) -> int:
     recordings = _read_jsonl(results / "recordings.jsonl")
     latest_rec: Dict[str, Dict[str, Any]] = {}
@@ -769,6 +808,7 @@ def generalization_report(results: Path = GENERALIZATION) -> int:
             _fmt(overall["missed_merges " + b]), _fmt(overall["centre_error_median_m " + b], 2)))
     lines.append("- incident participants: link accuracy {0}".format(_fmt(overall["incident_link_accuracy"])))
     (results / "tables.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    generalization_figure(results)
     print(record["counts"])
     return 0
 

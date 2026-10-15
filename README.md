@@ -133,18 +133,17 @@ python -m pytest -q
 
 ## Frozen robustness and generalization campaign
 
-Protocol: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md) (tag `pre-robustness-campaign`); results and figures
-under `results/robustness/frozen_campaign/` and `results/generalization/frozen_campaign/`; the report (written after the campaign):
-[docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md).
+Protocol: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md) (tags `pre-robustness-campaign`, `robustness-campaign-v2*`);
+report: [docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md); tables and figures under
+`results/robustness/frozen_campaign/report/` and `results/generalization/frozen_campaign/`.
 
 ```bat
-:: from a clean checkout of the tag; every job refuses another commit or a modified tracked file
-git checkout pre-robustness-campaign
-set CDF_ANALYSIS_FREEZE_COMMIT=<commit of the tag>
-python scriptsreeze_manifest.py --workers 14
-
-:: robustness: every family on the 22 canonical runs (resumable: rerun the same command after an interruption)
-python scriptsobustness.py --canonical --workers 14 --work robustnessrozen_campaign --results resultsobustnessrozen_campaign
+:: robustness campaign (22 canonical runs): detached, resumable controller; every job checks the frozen commit
+scripts\campaign.bat workers 20
+scripts\campaign.bat start
+scripts\campaign.bat status
+scripts\campaign.bat pause
+scripts\campaign.bat resume
 python scripts\campaign_report.py robustness
 
 :: held-out generalization (private CARLA on port 3000): static check, record, evaluate, report
