@@ -65,17 +65,32 @@ class IndicatorEventTests(unittest.TestCase):
 
 
 class NeverInferredTests(unittest.TestCase):
-    def test_a_lane_change_without_a_light_log_creates_no_indicator(self):
-        # S02 critical_before_cut_in as recorded before the light log existed: B changes lane into A's; its
-        # reconstruction has no indicator event and both indicator states UNKNOWN, however it steers.
-        run = ROOT / "traces" / "S02" / "run_0_critical_before_cut_in"
-        vehicle = run / "vehicles" / "B"
-        if (vehicle / "lights.jsonl").exists():
-            self.skipTest("re-recorded with the light log")
-        local = reconstruct_vehicle(vehicle, ReconstructionConfig())
+    """B changes lane in both runs; its indicators come only from its light log, never from that motion."""
+
+    def reconstruct(self, run, owner):
+        vehicle = ROOT / "traces" / run / "vehicles" / owner
+        if not (vehicle / "ego.jsonl").exists():
+            self.skipTest("canonical trace not present")
+        return vehicle, reconstruct_vehicle(vehicle, ReconstructionConfig())
+
+    @staticmethod
+    def indicators(local, t0, t1):
+        return {(frame.perceived_state["ego"].get("INDICATOR_LEFT"), frame.perceived_state["ego"].get("INDICATOR_RIGHT"))
+                for frame in local.trace if t0 <= frame.t_local <= t1 and frame.perceived_state}
+
+    def test_a_lane_change_without_a_light_log_has_unknown_indicators(self):
+        # S02 crash, recorded before the light log existed: B cuts into A's lane from 0.2 s to 2.4 s.
+        vehicle, local = self.reconstruct("S02/run_0_crash", "B")
+        self.assertFalse((vehicle / "lights.jsonl").exists())
         self.assertFalse([n for n in local.graph.nodes if n.event_type.startswith("INDICATOR_")])
-        states = [f for f in local.trace if f.t_local >= 1.0]
-        self.assertTrue(states)
+        self.assertEqual(self.indicators(local, 0.5, 2.5), {(UNKNOWN, UNKNOWN)})
+
+    def test_an_unsignalled_lane_change_with_the_light_log_is_no_indicator(self):
+        # S17, recorded with the light log: B moves into the middle lane (4.8-6.8 s) without signalling.
+        vehicle, local = self.reconstruct("S17/run_0_occlusion_reappearance", "B")
+        self.assertTrue((vehicle / "lights.jsonl").exists())
+        self.assertFalse([n for n in local.graph.nodes if n.event_type.startswith("INDICATOR_")])
+        self.assertEqual(self.indicators(local, 4.5, 7.5), {(False, False)})
 
 
 class ScriptedIndicatorTests(unittest.TestCase):
