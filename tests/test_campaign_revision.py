@@ -85,6 +85,17 @@ class ConcurrencyTests(unittest.TestCase):
         self.assertEqual(ctl.decide(20, [self.sample(other_cores=0.0, own_cores=19.5)] * 5, 20, 22)[0], 19)
         self.assertGreaterEqual(ctl.decide(4, [self.sample(other_cores=20.0)] * 5, 4, 22)[0], ctl.MIN_WORKERS)
 
+    def test_fixed_setting(self):
+        ctl = _script("campaign_controller")
+        fixed = {"workers": 20, "cpu_rules": False}
+        busy = [self.sample(other_cores=12.0, own_cores=6.0, cpu_percent=99.0) for _ in range(5)]
+        self.assertEqual(ctl.decide(10, busy, 10, 22, fixed)[0], 20)  # CPU rules off: other users' load ignored
+        tight = [self.sample(ram_available_gb=12.0) for _ in range(5)]
+        self.assertEqual(ctl.decide(10, tight, 10, 22, fixed)[0], 12)  # RAM allows a step only
+        short = [self.sample(ram_available_gb=8.0) for _ in range(5)]
+        self.assertEqual(ctl.decide(20, short, 20, 22, fixed)[0], 18)  # safety rules still apply
+        self.assertEqual(ctl.decide(10, [], 10, 22, {"workers": 40})[0], ctl.HARD_MAX_WORKERS)
+
 
 if __name__ == "__main__":
     unittest.main()

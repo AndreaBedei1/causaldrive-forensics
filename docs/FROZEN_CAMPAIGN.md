@@ -138,3 +138,10 @@ load (measured 10.5 cores against 8.0 measured directly), and it lowered concurr
 process directly, makes its first decision after one interval, applies the per-worker efficiency rule only when the
 machine is saturated (below that, little CPU per job means I/O, not contention), refreshes the live state every
 minute, and on start adopts job processes a previous controller left running (no running job lost at the switch).
+
+## Revision v2.2 (tag `robustness-campaign-v2.2`): controller only
+
+A persistent concurrency setting (`scripts\campaign.bat workers N`, `workers auto`; `control/settings.json`): with a
+fixed N the CPU rules (other users' load, oversubscription) do not apply, the safety rules (RAM, page file, disk)
+still lower the target.  Set to 20 workers on Andrea's request (other users' load would otherwise keep the campaign
+at 8-12 workers).  Jobs run the same code as v2.

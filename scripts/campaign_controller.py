@@ -6,6 +6,8 @@
     python scripts/campaign_controller.py pause      stop scheduling; running jobs finish; then the controller exits
     python scripts/campaign_controller.py stop-now   stop scheduling and terminate running jobs (not recorded)
     python scripts/campaign_controller.py resume     clear the pause request and start detached again
+    python scripts/campaign_controller.py workers N  fixed concurrency N while the machine holds (v2.2)
+    python scripts/campaign_controller.py workers auto   adaptive concurrency from the CPU load again
     (Windows: scripts\\campaign.bat start|status|pause|stop-now|resume)
 
 Operational only.  The scientific content is ``scripts/robustness.py`` of the frozen commit, used unchanged: the
@@ -54,8 +56,8 @@ PYTHON = sys.executable
 # complete under v1 is complete (v2 changes no result where v1 completed); attempts count under v2 only.
 V1_COMMIT = "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8"
 # v2.1 changes this controller only (operational; docs/FROZEN_CAMPAIGN.md): jobs of v2 and v2.1 run identical code.
-VERSION_TAG = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "robustness-campaign-v2.1")
-SAME_VERSION_TAGS = ("robustness-campaign-v2", "robustness-campaign-v2.1")
+VERSION_TAG = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "robustness-campaign-v2.2")
+SAME_VERSION_TAGS = ("robustness-campaign-v2", "robustness-campaign-v2.1", "robustness-campaign-v2.2")
 
 
 def _tag_commit(tag: str) -> str:
@@ -85,6 +87,7 @@ WORK = Path(os.environ.get("CDF_CAMPAIGN_WORK", str(ROOT / "robustness" / "froze
 MANIFEST = ROOT / "results" / "frozen_campaign_manifest.json"
 CONTROL = RESULTS / "control"
 MIN_WORKERS, MAX_WORKERS = 4, 20
+HARD_MAX_WORKERS = 24  # a fixed setting (workers N) may go up to this
 START_WORKERS = int(os.environ.get("CDF_CAMPAIGN_START_WORKERS", "14"))
 CPU_HEADROOM, RAM_HEADROOM_GB, DISK_MIN_GB = 3.0, 10.0, 15.0
 SAMPLE_S, DECIDE_S, REPORT_S, POLL_S = 60.0, 300.0, 900.0, 3.0
@@ -249,10 +252,23 @@ class Monitor:
         return list(getattr(self, "top_others", []))
 
 
-def decide(target: int, samples: List[Dict[str, Any]], running: int, cpus: int) -> Tuple[int, str]:
-    """The next concurrency target from the recent samples (module docstring)."""
+def settings() -> Dict[str, Any]:
+    """The persistent concurrency setting (``control/settings.json``, written by ``workers N`` / ``workers auto``)."""
+    path = CONTROL / "settings.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def decide(target: int, samples: List[Dict[str, Any]], running: int, cpus: int,
+           cfg: Optional[Dict[str, Any]] = None) -> Tuple[int, str]:
+    """The next concurrency target from the recent samples (module docstring).  With a fixed setting
+    (``workers N``, v2.2) the CPU rules (other users' load, oversubscription) do not apply: the target is N while
+    RAM, page file and disk hold, and the safety rules below still lower it."""
+    fixed = int((cfg or {}).get("workers") or 0)
     if not samples:
-        return target, "no sample"
+        return (min(fixed, HARD_MAX_WORKERS) if fixed else target), "no sample"
     recent = samples[-5:]
     avail = min(s["ram_available_gb"] for s in recent)
     other = statistics.median(s["other_cores"] for s in recent)
@@ -266,6 +282,12 @@ def decide(target: int, samples: List[Dict[str, Any]], running: int, cpus: int) 
         return max(MIN_WORKERS, target - 2), "RAM available {0} GB below {1}".format(avail, RAM_HEADROOM_GB)
     if growth > 1.0:
         return max(MIN_WORKERS, target - 2), "page file grew {0:.1f} GB".format(growth)
+    if fixed:
+        fixed = max(MIN_WORKERS, min(fixed, HARD_MAX_WORKERS))
+        ram_per_worker = max(0.5, (recent[-1]["own_rss_gb"] / running) if running else 0.5)
+        if fixed > target and avail - (fixed - running) * ram_per_worker < RAM_HEADROOM_GB + 4:
+            return min(fixed, target + 2), "fixed setting {0}: RAM allows only a step".format(fixed)
+        return fixed, "fixed setting {0} workers (CPU rules off)".format(fixed)
     saturated = statistics.median(s.get("cpu_percent", 0.0) for s in recent) >= 90.0
     if saturated and running >= target and running >= 6 and per_worker < 0.75:
         return max(MIN_WORKERS, target - 2), "workers get {0:.2f} core each (oversubscribed)".format(per_worker)
@@ -359,7 +381,10 @@ def supervise(args: argparse.Namespace) -> int:
             break
     workers: Dict[str, Dict[str, Any]] = {}
     monitor = Monitor()
-    target, reason = min(START_WORKERS, MAX_WORKERS), "start"
+    cfg = settings()
+    target, reason = (min(int(cfg["workers"]), HARD_MAX_WORKERS), "start (fixed setting)") if cfg.get("workers") \
+        else (min(START_WORKERS, MAX_WORKERS), "start")
+    settings_mtime = (CONTROL / "settings.json").stat().st_mtime if (CONTROL / "settings.json").exists() else None
     last_sample = last_decide = last_report = 0.0
     completed_times: List[Tuple[float, float]] = []  # (monotonic time, wall_s) of jobs completed by this controller
     state = "RUNNING"
@@ -561,8 +586,14 @@ def supervise(args: argparse.Namespace) -> int:
                     return 0
             else:
                 state = "RUNNING"
-            if t - last_decide >= DECIDE_S and len(monitor.samples) >= 3:
-                new, why = decide(target, monitor.samples, len(workers), monitor.cpus)
+            path = CONTROL / "settings.json"
+            mtime = path.stat().st_mtime if path.exists() else None
+            if mtime != settings_mtime:  # a new setting applies now, not at the next decision
+                settings_mtime, cfg = mtime, settings()
+                log("concurrency setting: {0}".format(cfg or "auto"))
+                last_decide = 0.0
+            if t - last_decide >= DECIDE_S and (len(monitor.samples) >= 3 or cfg.get("workers")):
+                new, why = decide(target, monitor.samples, len(workers), monitor.cpus, cfg)
                 if new != target:
                     log("concurrency {0} -> {1}: {2}".format(target, new, why))
                 target, reason = new, why
@@ -642,7 +673,8 @@ def status() -> int:
     import robustness
     records = read_jsonl(RESULTS / "jobs.jsonl")
     latest = robustness.latest_results(records)
-    print("controller running: {0}; requested: {1}".format(alive, command() or "none (RUNNING)"))
+    print("controller running: {0}; requested: {1}; concurrency setting: {2}".format(
+        alive, command() or "none (RUNNING)", settings() or "auto"))
     print("state ({0}): {1}".format(state.get("time"), state.get("state")))
     print("job records {0}; jobs complete {1}; failed (latest attempt) {2}".format(
         len(records), sum(1 for r in latest if r.get("status") == "complete"),
@@ -664,7 +696,8 @@ def status() -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("start", "status", "pause", "stop-now", "resume", "_supervise", "_run-job"))
+    parser.add_argument("command", choices=("start", "status", "pause", "stop-now", "resume", "workers", "_supervise",
+                                            "_run-job"))
     parser.add_argument("rest", nargs="*")
     parser.add_argument("--families", default="")
     parser.add_argument("--min-seeds", type=int, default=3)
@@ -679,6 +712,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "status":
         return status()
     CONTROL.mkdir(parents=True, exist_ok=True)
+    if args.command == "workers":
+        value = (args.rest or ["auto"])[0]
+        if value == "auto":
+            try:
+                (CONTROL / "settings.json").unlink()
+            except OSError:
+                pass
+            print("adaptive concurrency (CPU rules on)")
+        else:
+            n = max(MIN_WORKERS, min(int(value), HARD_MAX_WORKERS))
+            write_json(CONTROL / "settings.json", {"workers": n, "cpu_rules": False, "set": now()})
+            print("fixed concurrency {0} while RAM, page file and disk hold (applied within seconds)".format(n))
+        return 0
     if args.command in ("pause", "stop-now"):
         (CONTROL / "command").write_text(args.command, encoding="utf-8")
         print("{0} requested; the controller acts on it within a few seconds (check: status)".format(args.command))
