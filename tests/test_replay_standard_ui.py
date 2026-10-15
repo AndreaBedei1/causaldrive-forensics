@@ -7,7 +7,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from src.cdf.replay.model import ReplayRun
-from src.cdf.replay.presentation import (EVENT, MAX_PANEL_LINES, MORE, camera_cycle, event_line, next_camera,
+from src.cdf.replay.presentation import (EVENT, MAX_EVENT_LINES, MAX_PANEL_LINES, MAX_STATE_LINES, MORE,
+                                        camera_cycle, event_line, next_camera, recorder_panel,
                                          standard_panel_lines)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,6 +138,43 @@ class RecordedRunPanelTests(unittest.TestCase):
                         self.assertEqual(set(kinds[kinds.index(EVENT):]), {EVENT}, (path, t, texts))
                     if lines and lines[-1][1] != MORE:  # untruncated: every recent event is listed
                         self.assertEqual(kinds.count(EVENT), len(run.recent_events(pid, t, 1.0)), (path, t, texts))
+
+
+class RecorderPanelSectionsTests(unittest.TestCase):
+    """The panel's two sections: current state (at most MAX_STATE_LINES, then '... +N more') and up to
+    MAX_EVENT_LINES recent events, newest first, whatever their age: states never push the events out."""
+
+    def test_states_cannot_hide_the_events(self):
+        many = stub_run([event("TRACK_APPEARED_LEFT", "x{0:02d}".format(k)) for k in range(20)],
+                        {"ego": {"MOVING": True},
+                         "external": {"x{0:02d}".format(k): {"CRITICAL_TTC": True} for k in range(12)}})
+        many.display_events = lambda: [SimpleNamespace(actor="A", time=0.1 * k, event_type="TRACK_APPEARED_LEFT",
+                                                       subject="x{0:02d}".format(k), attributes={})
+                                       for k in range(20)]
+        panel = recorder_panel(many, "A", 5.0)
+        self.assertEqual(len(panel.states), MAX_STATE_LINES + 1)
+        self.assertEqual(panel.states[-1][1], MORE)
+        self.assertEqual(len(panel.events), MAX_EVENT_LINES)
+        self.assertEqual(panel.events_total, 20)
+        self.assertIn("x19", panel.events[0][0])  # newest first
+        self.assertIn("x05", panel.events[-1][0])
+
+    def test_recorded_runs_newest_first_no_unknown(self):
+        for path in ("traces/S11/run_0_consequential", "traces/S14/run_0_surrounded"):
+            run = ReplayRun.load(ROOT / path)
+            for k in range(0, int(run.duration / 0.5) + 1):
+                t = 0.5 * k
+                for participant in run.participants:
+                    pid = participant.participant_id
+                    panel = recorder_panel(run, pid, t)
+                    history = [e for e in run.display_events() if e.actor == pid and e.time <= t + 1e-6]
+                    self.assertEqual(len(panel.events), min(len(history), MAX_EVENT_LINES), (path, t, pid))
+                    for (text, _), e in zip(panel.events, reversed(history)):
+                        self.assertIn(e.event_type, text)
+                    for text, _ in panel.states + panel.events:
+                        for word in ("?", "UNKNOWN", "PREDICTED"):
+                            self.assertNotIn(word, text, (path, t, text))
+                    self.assertLessEqual(len(panel.states), MAX_STATE_LINES + 1)
 
 
 class ClearanceLabelTests(unittest.TestCase):

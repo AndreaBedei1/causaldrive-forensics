@@ -59,8 +59,9 @@ from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNO
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
                               project_segment, rotate)
 from cdf.replay.topdown import export_keyframes, lanes_from_map  # noqa: E402
-from cdf.replay.presentation import (ALERT, ANONYMOUS, EGO, EVENT, HELP_LINES, MORE, ROAD_USER,  # noqa: E402
-                                     event_line, next_camera, standard_panel_lines, subject_label)
+from cdf.replay.presentation import (ALERT, ANONYMOUS, EGO, EVENT, HELP_LINES, MAX_EVENT_LINES,  # noqa: E402
+                                     MAX_STATE_LINES, MORE, ROAD_USER, event_line, next_camera, recorder_panel,
+                                     subject_label)
 from cdf.simulation.carla_client import (find_carla_root, import_carla, map_basename,  # noqa: E402
                                          session_from_config)
 
@@ -72,6 +73,8 @@ ROAD_USER_RGB = (225, 225, 225)  # an anonymous road user belongs to no observer
 CAMERA_MODES = ("overview", "follow", "free")
 SEEK_S, FINE_SEEK_S = 0.5, 0.05
 EVENT_WINDOW_S = 1.0  # replay seconds an event stays next to its vehicle
+COMPACT_STATE_LINES, COMPACT_EVENT_LINES = 3, 3  # the panels of the recorders not selected
+SECTION_RGB = (150, 200, 255)
 # A link line with the clearance: every track a recorder holds one of these about, plus its nearest IN_EGO_PATH
 # track (the car it follows); farther cars in its path get no line.
 INTERACTION_STATES = ("CRITICAL_TTC", "CUT_IN_FROM_LEFT", "CUT_IN_FROM_RIGHT")
@@ -213,6 +216,7 @@ class ReplayApp:
         self.clock = PlaybackClock(run.duration, speed=args.speed, start=args.start, playing=not args.paused)
         self.events = run.display_events()
         self.selected = args.follow if args.follow in self.ids else self.ids[0]
+        self.event_scroll = 0  # the selected recorder's events: index of the newest one shown
         self.camera_mode = args.camera
         self.heading = run.participants[0].trajectory.pose_at(run.start).yaw
         self.elevation = 30.0
@@ -438,6 +442,8 @@ class ReplayApp:
             if target is not None:
                 self.clock.seek_to(target)
                 self.clock.pause()
+        elif key in (pg.K_PAGEUP, pg.K_PAGEDOWN):
+            self.event_scroll = max(0, self.event_scroll + (3 if key == pg.K_PAGEUP else -3))
         elif key == pg.K_t:
             self.show_tracks = not self.show_tracks
         elif key == pg.K_g:
@@ -518,12 +524,20 @@ class ReplayApp:
         self.associated_lines = set()  # (observer, recorder) pairs already joined by a line this frame
         labels = self._draw_tracks(poses, t) if self.show_tracks else []
         badges = {pid: self._draw_badge(pid, pose) for pid, pose in poses.items()}
-        self._draw_side_panels(t, badges)
+        # The recorder panels on a layer of their own: laid out now (their rectangles keep the labels off them),
+        # put on top after the labels, so no label's leader line crosses a panel's text.
+        layer = pg.Surface((self.width, self.height), pg.SRCALPHA)
+        screen, self.screen = self.screen, layer
+        try:
+            self._draw_side_panels(t, badges)
+        finally:
+            self.screen = screen
         self._draw_collision_banner(t)
         self._draw_hud(t)
         self._draw_timeline(t)
-        for label in labels:  # last, each in free space: off the panels, the badges and each other
+        for label in labels:  # each in free space: off the panels, the badges and each other
             label()
+        screen.blit(layer, (0, 0))
         pg.display.flip()
 
     def _panel(self, rect: Tuple[int, int, int, int], alpha: int = 170) -> None:
@@ -550,42 +564,75 @@ class ReplayApp:
         self.occupied.append(box.inflate(4, 14))
         return box
 
-    def _vehicle_lines(self, pid: str, t: float) -> List[Tuple[str, Tuple[int, int, int], Any]]:
-        """The recorder's panel (``presentation.standard_panel_lines``, the 848a645 layout): its current
-        perceived state, its anonymous tracks and road users, then its events of the last EVENT_WINDOW_S
-        (newest first); no UNKNOWN or PREDICTED text, at most 8 lines then ``... +N more``."""
+    def _vehicle_lines(self, pid: str, t: float, full: bool = True) -> List[Tuple[str, Tuple[int, int, int], Any]]:
+        """The recorder's panel (``presentation.recorder_panel``): its CURRENT state (own states, active track
+        states, anonymous tracks, road users) and, in a separate section, its most recent semantic events newest
+        first, each with its age.  ``full`` (the selected recorder): up to MAX_STATE_LINES states and
+        MAX_EVENT_LINES events; else compact: COMPACT_STATE_LINES states (own state and alerts first) and the
+        COMPACT_EVENT_LINES latest events.  No UNKNOWN or PREDICTED text."""
         style = {ALERT: ((255, 150, 90), self.font_small), ANONYMOUS: ((200, 200, 255), self.font_small),
-                 ROAD_USER: ((220, 220, 220), self.font_small), EVENT: ((255, 214, 10), self.font_bold),
+                 ROAD_USER: ((220, 220, 220), self.font_small), EVENT: ((255, 214, 10), self.font_small),
                  EGO: ((255, 255, 255), self.font_small), MORE: ((170, 170, 170), self.font_small)}
+        panel = recorder_panel(self.run, pid, t, MAX_EVENT_LINES if full else COMPACT_EVENT_LINES,
+                               MAX_STATE_LINES if full else COMPACT_STATE_LINES)
         lines = []
-        for text, kind in standard_panel_lines(self.run, pid, t, EVENT_WINDOW_S):
+        for text, kind in panel.states:
+            rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
+            lines.append((text, rgb, font))
+        lines.append(("recent events ({0} so far)".format(panel.events_total), SECTION_RGB, self.font_bold))
+        for text, kind in panel.events:
             rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
             lines.append((text, rgb, font))
         return lines
 
     def _draw_side_panels(self, t: float, badges: Dict[str, Any]) -> None:
-        """One details panel per vehicle in a right-hand column, linked to its badge.
-
-        A fixed column cannot overlap however close the vehicles are.
-        """
+        """One details panel per vehicle in a right-hand column, linked to its badge: the selected recorder's
+        panel is full (its events scrolled with PgUp/PgDn when the window is too short for all of them), the
+        others compact.  A fixed column cannot overlap however close the vehicles are, and it stops above the
+        help lines and the timeline."""
         pg = self.pygame
         panels = []
         for pid in self.ids:
             speed = self.run.participant(pid).trajectory.speed_at(self.run.start + t)
             header = self.font_bold.render("{0}   {1:5.1f} m/s  {2:3.0f} km/h".format(pid, speed, speed * 3.6),
                                            True, (255, 255, 255))
-            body = [font.render(piece, True, rgb) for text, rgb, font in self._vehicle_lines(pid, t)
+            full = pid == self.selected
+            body = [(font.render(piece, True, rgb), text.startswith(("+", "-")) and rgb == (255, 214, 10))
+                    for text, rgb, font in self._vehicle_lines(pid, t, full)
                     for piece in _wrapped(text, font, PANEL_MAX_WIDTH - 18)]
-            panels.append((pid, header, body))
-        width = min(PANEL_MAX_WIDTH, max(240, max(max([h.get_width()] + [b.get_width() for b in body])
-                                                  for _, h, body in panels) + 18))
+            panels.append((pid, header, body, full))
+        width = min(PANEL_MAX_WIDTH, max(240, max(max([h.get_width()] + [b.get_width() for b, _ in body])
+                                                  for _, h, body, _ in panels) + 18))
         x, y = self.width - width - 8, 8
         bottom = self._bottom_bar_top() - 4  # keep clear of the help lines and the timeline
-        for pid, header, body in panels:
-            room = max(0, (bottom - y - header.get_height() - 12) // max(1, self.font_small.get_linesize()))
-            if len(body) > room:
-                body = body[:max(0, room - 1)] + [self.font_small.render("...", True, (200, 200, 200))]
-            height = header.get_height() + 6 + sum(b.get_height() for b in body) + (4 if body else 0)
+
+        def height_of(header: Any, body: Sequence[Tuple[Any, bool]]) -> int:
+            return header.get_height() + 6 + sum(b.get_height() for b, _ in body) + (4 if body else 0)
+
+        # The compact panels first: the selected one gets the room they leave.
+        reserved = sum(height_of(h, body) + 6 for _, h, body, full in panels if not full)
+        line = max(1, self.font_small.get_linesize())
+        for pid, header, body, full in panels:
+            if full:
+                room = max(0, (bottom - y - reserved - header.get_height() - 12) // line)
+                events = [i for i, (_, is_event) in enumerate(body) if is_event]
+                if len(body) > room and events:
+                    # Scroll the events: keep the states and the section line, show a window of events.
+                    fixed = body[:events[0]]
+                    window = max(1, room - len(fixed) - 1)
+                    self.event_scroll = max(0, min(self.event_scroll, len(events) - window))
+                    shown = body[events[0] + self.event_scroll:events[0] + self.event_scroll + window]
+                    hint = []
+                    if len(events) > window:
+                        hint = [(self.font_small.render("PgUp/PgDn: events {0}-{1} of {2}".format(
+                            self.event_scroll + 1, self.event_scroll + len(shown), len(events)), True,
+                            (170, 170, 170)), False)]
+                    body = fixed + shown + hint
+                if len(body) > room:
+                    body = body[:max(0, room - 1)] + [(self.font_small.render("...", True, (200, 200, 200)), False)]
+            else:
+                reserved -= height_of(header, body) + 6
+            height = height_of(header, body)
             if y + height > bottom:
                 break
             color = self.colors[pid]
@@ -593,7 +640,7 @@ class ReplayApp:
             pg.draw.rect(self.screen, color, (x, y, width, header.get_height() + 6))
             self.screen.blit(header, (x + 8, y + 3))
             line_y = y + header.get_height() + 8
-            for surface in body:
+            for surface, _ in body:
                 self.screen.blit(surface, (x + 8, line_y))
                 line_y += surface.get_height()
             badge = badges.get(pid)

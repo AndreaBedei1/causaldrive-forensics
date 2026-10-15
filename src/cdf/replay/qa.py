@@ -26,7 +26,7 @@ BOX_SPIN_DEG = 45.0  # heading change between consecutive samples, both from the
 DUPLICATE_M = 3.0  # two ghosts' centres closer than this at the same instant
 CONTACT_M = 1.0  # recorders of a collision farther apart than this (footprint to footprint)
 NEAR_COLLISION_S = 1.0  # a CRITICAL_TTC_END this long before / START this long after a collision of its pair
-CUT_IN_WINDOW_S = 0.5  # the cut-in's lateral approach is checked over this window before its start
+CUT_IN_WINDOW_S = 0.5  # the cut-in's lateral approach is checked over this window after its start (its onset)
 CUT_IN_MIN_APPROACH_M = 0.15
 CORRIDOR_M = 1.5 + 0.5  # path corridor + hysteresis (semantics.path_half_width_m, path_hysteresis_m)
 SAMPLE_STEP_S = 0.1
@@ -297,19 +297,25 @@ def _geometry_of_events(run: ReplayRun) -> List[Flag]:
             pose = participant.trajectory.pose_at(run.start + event.time)
             x, y = _in_vehicle_frame(pose, now.position)
             if event.event_type.startswith("CUT_IN_FROM_") and event.event_type.endswith("_START"):
-                before = track.state_at(event.time - CUT_IN_WINDOW_S)
-                if before is not None:
-                    anchor = participant.trajectory.pose_at(run.start+track.start)
-                    _, y0 = _in_vehicle_frame(anchor,before.position)
-                    _, stable_y = _in_vehicle_frame(anchor,now.position)
+                # The START is the onset of the lateral approach: over the window that follows it the target
+                # comes laterally closer to the recorder, from the side the event names, each position in the
+                # recorder's own frame of its instant (two cars following one bend keep their lateral offset;
+                # a frame frozen earlier would turn the bend into a lateral motion).
+                after = track.state_at(event.time + CUT_IN_WINDOW_S)
+                if after is not None:
+                    later = participant.trajectory.pose_at(run.start + event.time + CUT_IN_WINDOW_S)
+                    y0 = y
+                    _, y1 = _in_vehicle_frame(later, after.position)
                     side_ok = (y0 > 0) if "RIGHT" in event.event_type else (y0 < 0)
-                    if not side_ok or abs(y0) - abs(stable_y) < CUT_IN_MIN_APPROACH_M:
+                    if not side_ok or abs(y0) - abs(y1) < CUT_IN_MIN_APPROACH_M:
                         flags.append(_flag(run, "cut_in_without_lateral_approach", event.time, "{0}:{1}".format(pid, event.subject),
-                                           "lateral {0:+.2f} -> {1:+.2f} m over {2:.1f} s".format(y0, y, CUT_IN_WINDOW_S)))
+                                           "lateral {0:+.2f} -> {1:+.2f} m over {2:.1f} s".format(y0, y1, CUT_IN_WINDOW_S)))
             body = event.attributes.get('estimated_body_corners_vehicle_m')
             inside = (body_in_corridor(np.asarray(body),footprint.x_max-.5,CORRIDOR_M) if body
                       else x >= footprint.x_max-.5 and abs(y) <= CORRIDOR_M)
-            if event.event_type == "EGO_PATH_ENTRY" and not inside:
+            # An entry the body's own returns proved (``occupancy_evidence``) holds where its nominal box sits
+            # short of them (a car seen from beside): only the box is drawn, the returns are not re-checked here.
+            if event.event_type == "EGO_PATH_ENTRY" and not inside and event.attributes.get("occupancy_evidence") != "returns":
                 flags.append(_flag(run, "path_entry_outside_corridor", event.time, "{0}:{1}".format(pid, event.subject),
                                    "track at {0:+.1f} m ahead, {1:+.1f} m lateral".format(x, y)))
     return flags
