@@ -50,6 +50,24 @@ events:
   description: The recorder's driver releases the accelerator pedal.
   actor: recorder
   subject: none
+- name: INDICATOR_LEFT_START
+  description: The recorder's left turn indicator switches on (its own light state, CARLA VehicleLightState LeftBlinker, logged per frame).
+  actor: recorder
+  subject: none
+  note: The signal, not a manoeuvre; never inferred from steering, yaw or a lane change. A recording without the light log has the state UNKNOWN, not off.
+- name: INDICATOR_LEFT_END
+  description: The recorder's left turn indicator switches off.
+  actor: recorder
+  subject: none
+- name: INDICATOR_RIGHT_START
+  description: The recorder's right turn indicator switches on (its own light state, CARLA VehicleLightState RightBlinker, logged per frame).
+  actor: recorder
+  subject: none
+  note: The signal, not a manoeuvre; never inferred from steering, yaw or a lane change. A recording without the light log has the state UNKNOWN, not off.
+- name: INDICATOR_RIGHT_END
+  description: The recorder's right turn indicator switches off.
+  actor: recorder
+  subject: none
 - name: TURN_LEFT_START
   description: The recorder starts turning to the left.
   actor: recorder
@@ -159,6 +177,8 @@ states:
   THROTTLE: [THROTTLE_START, THROTTLE_END]
   TURN_LEFT: [TURN_LEFT_START, TURN_LEFT_END]
   TURN_RIGHT: [TURN_RIGHT_START, TURN_RIGHT_END]
+  INDICATOR_LEFT: [INDICATOR_LEFT_START, INDICATOR_LEFT_END]
+  INDICATOR_RIGHT: [INDICATOR_RIGHT_START, INDICATOR_RIGHT_END]
   SPEED_LIMIT_EXCEEDED: [SPEED_LIMIT_EXCEEDED_START, SPEED_LIMIT_EXCEEDED_END]
   CLOSING: [CLOSING_START, CLOSING_END]
   CRITICAL_TTC: [CRITICAL_TTC_START, CRITICAL_TTC_END]

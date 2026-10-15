@@ -196,6 +196,32 @@ def control_events(owner: str, controls: Sequence[Mapping[str, Any]], clock_orig
             + state_events(owner, None, "THROTTLE_START", "THROTTLE_END", ACTION, "controls", times, throttle_spans))
 
 
+def indicator_events(owner: str, lights: Optional[Sequence[Mapping[str, Any]]], clock_origin: float,
+                     start: float, world: Optional[PerceivedWorld] = None) -> List[SemanticEvent]:
+    """The INDICATOR_LEFT and INDICATOR_RIGHT states from the recorder's own light log (``lights.jsonl``: CARLA's
+    VehicleLightState per frame, LeftBlinker / RightBlinker), with their START / END events at the logged
+    timestamp of the first frame of each state: the signal, not a manoeuvre (never inferred from steering, yaw,
+    a lane change or a cut-in).  A recording without the log (made before it was recorded): both states
+    UNKNOWN from ``start`` -- not off -- and no event.  Other road users' indicators are not observable."""
+    if lights is None:
+        if world is not None:
+            world.add_ego_unknown("INDICATOR_LEFT", start)
+            world.add_ego_unknown("INDICATOR_RIGHT", start)
+        return []
+    if not lights:
+        return []
+    times = [_local_time(record, clock_origin) for record in lights]
+    events: List[SemanticEvent] = []
+    for side, key in (("LEFT", "left_blinker"), ("RIGHT", "right_blinker")):
+        values = [bool(record.get(key)) for record in lights]
+        spans = active_intervals(times, values, lambda value: value, lambda value: not value)
+        if world is not None:
+            world.add_ego_state("INDICATOR_" + side, times, spans)
+        events += state_events(owner, None, "INDICATOR_{0}_START".format(side), "INDICATOR_{0}_END".format(side),
+                               ACTION, "lights", times, spans)
+    return events
+
+
 def yaw_rates(ego: EgoTrajectory, window_s: float) -> List[float]:
     """Yaw rate [deg/s] at each ego sample: change of the unwrapped heading over
     the preceding ``window_s``, so a turn is never reported before its evidence
@@ -1547,6 +1573,8 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     if not ego_records:
         raise ValueError("no ego.jsonl records in " + str(vehicle_dir))
     controls = read_jsonl(vehicle_dir / "controls.jsonl")
+    # The vehicle's own light state; absent in recordings made before it was logged (indicators UNKNOWN).
+    lights = read_jsonl(vehicle_dir / "lights.jsonl") if (vehicle_dir / "lights.jsonl").exists() else None
     collisions = read_jsonl(vehicle_dir / "collisions.jsonl")
     signs = read_jsonl(vehicle_dir / "traffic_signs.jsonl")
     if clock_origin is None:
@@ -1576,6 +1604,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     world = PerceivedWorld()
     events: List[SemanticEvent] = []
     events += control_events(owner, controls, clock_origin, semantics, world)
+    events += indicator_events(owner, lights, clock_origin, ego.start, world)
     events += motion_events(owner, ego, semantics, context.get("speed_limit_kmh"), world)
     events += turn_events(owner, ego, semantics, world)
     contacts = collision_contacts(collisions, clock_origin, cfg.collision, ego)
@@ -1627,7 +1656,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         "end_t_local": round(ego.end, 4),
         "trace_hz": cfg.trace_hz,
         "trace_frames": len(trace),
-        "inputs": sorted(name for name in ("ego.jsonl", "controls.jsonl", "collisions.jsonl",
+        "inputs": sorted(name for name in ("ego.jsonl", "controls.jsonl", "lights.jsonl", "collisions.jsonl",
                                            "traffic_signs.jsonl", "radar")
                          if (vehicle_dir / name).exists()),
         "radar": None if not streams else {

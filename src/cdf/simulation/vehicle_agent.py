@@ -171,11 +171,17 @@ class RawVehicleAgent:
         if clamped.neutral:
             control.manual_gear_shift, control.gear = True, 0
         self.vehicle.apply_control(control)
+        left, right = int(carla.VehicleLightState.LeftBlinker), int(carla.VehicleLightState.RightBlinker)
+        self._update_indicator(t, left, right)
         if self.logger is not None:
             self.logger.log_state(record)
             self.logger.log_control({"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle,
                                      "brake": command.brake, "steer": command.steer,
                                      "hand_brake": command.hand_brake, "reverse": command.reverse})
+            # The light state CARLA reports for the vehicle (its own indicator switch, read back, not the request).
+            light = int(self.vehicle.get_light_state())
+            self.logger.log_lights({"frame": int(frame), "timestamp": timestamp, "light_state": light,
+                                    "left_blinker": bool(light & left), "right_blinker": bool(light & right)})
         for radar in self.radar:
             item = radar.poll(frame)
             if item is not None: self.logger.log_radar(item)
@@ -194,6 +200,18 @@ class RawVehicleAgent:
             self.controller.notify_impact()
         return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
                 "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
+
+    def _update_indicator(self, t: float, left: int, right: int) -> None:
+        """Switch the turn indicator lights as the scripted ``indicator`` actions ask (``controllers``), keeping
+        every other light bit as it is; nothing else (steering, lane changes) touches them."""
+        side = self.controller.indicator(t)
+        if side == getattr(self, "_indicator_side", 0):
+            return
+        carla = import_carla()
+        value = int(self.vehicle.get_light_state()) & ~(left | right)
+        value |= left if side < 0 else right if side > 0 else 0
+        self.vehicle.set_light_state(carla.VehicleLightState(value))
+        self._indicator_side = side
 
     def flush_sensor_queues(self, timeout_s: float = 2.0) -> None:
         """Process already-delivered callbacks without advancing the world."""

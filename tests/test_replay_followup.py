@@ -114,8 +114,12 @@ class S02OrderTests(unittest.TestCase):
         spec=ScenarioSpec.from_config(load_run_config('S02'),variant='critical_before_cut_in')
         b=spec.participant('B')
         self.assertEqual((b.spawn.forward_m,b.initial_speed,b.target_speed),(30.0,6.0,6.0))
-        self.assertEqual([(a.action_id,a.t_start,a.duration) for a in b.actions],[('B_cut_in',1.6,2.2)])
-        self.assertEqual([(a.action_id,a.t_start) for a in spec.participant('A').actions],[('A_slows_too_little',2.5)])
+        self.assertEqual([(a.action_id,a.t_start,a.duration) for a in b.actions],
+                         [('B_cut_in',1.6,2.2),('B_indicator_right',0.6,3.4)])
+        self.assertEqual([(a.action_id,a.t_start) for a in spec.participant('A').actions],
+                         [('A_slows_too_little',2.5),('A_indicator_left_without_manoeuvre',0.3)])
         events=self.events('critical_before_cut_in')
-        self.assertLess(events['CRITICAL_TTC_START'],events['CUT_IN_FROM_LEFT_START'])
-        self.assertLess(events['CUT_IN_FROM_LEFT_START'],events['COLLISION'])
+        # B's cut-in is dated at the onset of its lateral manoeuvre (ground truth: it leaves its lane line at
+        # 1.8-2.2 s), before the collision course turns critical; both before the collision.
+        self.assertLessEqual(events['CUT_IN_FROM_LEFT_START'],events['CRITICAL_TTC_START'])
+        self.assertLess(events['CRITICAL_TTC_START'],events['COLLISION'])

@@ -229,6 +229,7 @@ class ReplayApp:
         self.running = True
         self.dragging = False
         self.actors: Dict[str, Any] = {}
+        self.indicator_bits: Dict[str, int] = {}  # the turn indicator bits last sent per replayed recorder
         self.roof: Dict[str, float] = {}
         self.camera: Any = None
         self.camera_pose: Optional[Pose] = None
@@ -490,12 +491,29 @@ class ReplayApp:
         poses = self._poses(t)
         self.camera_pose = self._camera_pose(poses)
         commands = [carla.command.ApplyTransform(self.actors[pid].id, self._transform(pose)) for pid, pose in poses.items()]
+        commands += self._indicator_commands(t)
         commands.append(carla.command.ApplyTransform(self.camera.id, self._transform(self.camera_pose)))
         self.client.apply_batch_sync(commands, False)
         self.world.get_spectator().set_transform(self._transform(self.camera_pose))
         frame = self.world.tick()
         image = self._image_for(frame)
         self._draw(image, poses, t)
+
+    def _indicator_commands(self, t: float) -> List[Any]:
+        """The recorders' turn indicators as their own light log recorded them (perceived INDICATOR_LEFT /
+        INDICATOR_RIGHT): CARLA blinks the lights of a replayed vehicle whose blinker bit is set.  Unknown (a
+        recording without the log) or off: no blinker.  Sent only when it changes."""
+        carla = self.carla
+        out = []
+        for pid, actor in self.actors.items():
+            perceived = (getattr(self.run, "perceived", None) or {}).get(pid)
+            ego = ((perceived.state_at(t) if perceived is not None else None) or {}).get("ego") or {}
+            bits = (int(carla.VehicleLightState.LeftBlinker) if ego.get("INDICATOR_LEFT") is True else 0) | (
+                int(carla.VehicleLightState.RightBlinker) if ego.get("INDICATOR_RIGHT") is True else 0)
+            if self.indicator_bits.get(pid) != bits:
+                self.indicator_bits[pid] = bits
+                out.append(carla.command.SetVehicleLightState(actor.id, carla.VehicleLightState(bits)))
+        return out
 
     def _image_for(self, frame: int) -> Any:
         deadline = time.time() + 2.0

@@ -4,7 +4,8 @@ scenario:
   description: 'Dense three-lane traffic.  The recorder A drives in the right lane, the recorder B in the left lane
     slightly ahead and slower; a van V in the middle lane between them hides B from A for the first seconds.  V
     then accelerates and draws ahead, B re-appears to A, and later A and B both move into the middle lane at the
-    same time and collide (the only contact).  Similar cars drive around and ahead of them; nobody follows
+    same time and collide (the only contact); A signals its lane change and leaves the indicator on, B changes
+    lane without signalling.  Similar cars drive around and ahead of them; nobody follows
     them.  A correct reconstruction recovers the same identity for B before and after the occlusion (the
     earlier part from the later, clearer evidence where possible) instead of two road users or the wrong one, and
     names the contact partner.
@@ -38,6 +39,13 @@ scenario:
       duration: 2.0
       params:
         lateral_m: -3.5
+    # A signals its lane change 0.8 s ahead and leaves the indicator on after it (lights only).
+    - action_id: A_indicator_left_left_on
+      kind: indicator
+      t_start: 4.0
+      duration: 20.0  # beyond the end of the run: never switched off
+      params:
+        side: -1
   - id: B
     blueprint: vehicle.tesla.model3
     spawn:

@@ -35,8 +35,9 @@ class RenderTests(unittest.TestCase):
         self.assertIn('"A:e08" [label="BRAKE_START\\nA\\nt=3.00"', local_dot)
         # The perceived state is rendered compactly, once per timestamp, never as JSON in the node table.
         self.assertIn("## Perceived state before each event", local_md)
-        self.assertIn("| 3.00 | A:e07 THROTTLE_END<br>A:e08 BRAKE_START | ego: MOVING, THROTTLE, SPEED_LIMIT_EXCEEDED"
-                      "<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 2.90 |", local_md)
+        # A recording without a light log: the turn indicators are UNKNOWN ('?'), never shown as off.
+        self.assertIn("| 3.00 | A:e07 THROTTLE_END<br>A:e08 BRAKE_START | ego: MOVING, THROTTLE, SPEED_LIMIT_EXCEEDED, "
+                      "INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 2.90 |", local_md)
         self.assertNotIn('{"ego"', local_md)
         # The appearance side is part of the event and of the plain-language reading.
         self.assertIn("| A:e04 | 0.00 | TRACK_APPEARED_FRONT | A | track_001 |", local_md)

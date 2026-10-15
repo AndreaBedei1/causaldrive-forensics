@@ -47,6 +47,8 @@ class VehicleLogger:
         self.root.mkdir(parents=True, exist_ok=True)
         self.state = _Jsonl(self.root / "ego.jsonl")
         self.controls = _Jsonl(self.root / "controls.jsonl")
+        # The vehicle's own light state per frame (VehicleLightState bits; the turn indicators decoded).
+        self.lights = _Jsonl(self.root / "lights.jsonl")
         self.collisions = _Jsonl(self.root / "collisions.jsonl")
         self.traffic_signs = _Jsonl(self.root / "traffic_signs.jsonl")
         (self.root / "camera").mkdir(parents=True, exist_ok=True)
@@ -144,6 +146,8 @@ class VehicleLogger:
 
     def log_state(self, record: Dict[str, Any]) -> None: self.state.write(_without_privileged_ids(record))
     def log_control(self, record: Dict[str, Any]) -> None: self.controls.write(_without_privileged_ids(record))
+
+    def log_lights(self, record: Dict[str, Any]) -> None: self.lights.write(_without_privileged_ids(record))
     def log_collision(self, record: Dict[str, Any]) -> None:
         # Never accept simulator actor identity in a vehicle-local file.
         self.collisions.write(_without_privileged_ids(record))
@@ -209,7 +213,7 @@ class VehicleLogger:
             "confirmed_yield_tracks": sum(t.sign_class == "YIELD" for t in self._sign_tracker.tracks(True)),
             "rgb_images_persisted": False,
         })
-        for stream in (self.state, self.controls, self.collisions, self.traffic_signs):
+        for stream in (self.state, self.controls, self.lights, self.collisions, self.traffic_signs):
             stream.close()
         self._depth_writer.close(self._depth_stats)
         for sensor_id, writer in self._radar_writers.items():

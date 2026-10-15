@@ -175,6 +175,9 @@ class ScriptedAction:
                      progressively over ``duration``
     ``hold``         params: ``target_speed``; simply maintains a speed
     ``stop``         full brake and hand brake
+    ``indicator``    params: ``side`` (-1 left, +1 right, as ``lane_shift``'s sign); the turn indicator is on
+                     during ``duration`` -- a light, independent of any motion (a lane change may go
+                     unsignalled, an indicator may stay on with no manoeuvre)
 
     An action with a ``trigger`` (:class:`cdf.simulation.triggers.ActionTrigger`)
     has no start time of its own: it stays armed (``t_start`` infinite) until
@@ -465,6 +468,15 @@ class ScriptedController:
         return ControlCommand(
             throttle=throttle, brake=brake, steer=steer, hand_brake=False
         ).clamped()
+
+    def indicator(self, t: float) -> int:
+        """The side of the turn indicator the scripted ``indicator`` actions ask for at ``t`` (-1 left, +1 right,
+        0 off; the latest started active action wins).  Independent of the vehicle's motion and of its impacts."""
+        side, started = 0, -math.inf
+        for a in self.actions:
+            if a.kind == "indicator" and a.active_at(t) and a.t_start >= started:
+                side, started = (-1 if float(a.params.get("side", 0.0)) < 0 else 1), a.t_start
+        return side
 
     def _resolve_target_speed(self, t: float) -> float:
         """Latest ``set_speed``/``hold`` action that has started wins."""

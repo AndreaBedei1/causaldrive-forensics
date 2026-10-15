@@ -89,7 +89,9 @@ scenario:
     critical_before_cut_in:
       description: 'B drives much slower in the lane to A''s left. A closes on it so fast that
         its time-to-contact with B is already critical before B starts moving into A''s
-        lane; A slows down too little and strikes B from behind.
+        lane; A slows down too little and strikes B from behind.  Turn indicators (lights only,
+        independent of the motion): B signals right from 1 s before its cut-in to its end; A
+        switches its left indicator on for 1.2 s and does not change lane.
 
         '
       participant_overrides:
@@ -101,6 +103,12 @@ scenario:
             duration: 9.0
             params:
               target_speed: 9.0
+          - action_id: A_indicator_left_without_manoeuvre
+            kind: indicator
+            t_start: 0.3
+            duration: 1.2
+            params:
+              side: -1
         B:
           initial_speed: 6.0
           target_speed: 6.0
@@ -111,3 +119,9 @@ scenario:
             duration: 2.2
             params:
               lateral_m: 3.5
+          - action_id: B_indicator_right
+            kind: indicator
+            t_start: 0.6
+            duration: 3.4
+            params:
+              side: 1
