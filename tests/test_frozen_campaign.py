@@ -1,7 +1,6 @@
-"""The frozen robustness campaign's driver, evaluation breakdowns and report: the GNSS x radar family pairs its
-random draws with the single-sensor families, failed jobs are retried and counted once, distance bands and
-incident participants follow their definitions, the interaction is C - R - G + B, and the held-out cases are
-built from their base scenarios without touching the canonical ones."""
+"""The robustness campaign's driver, evaluation breakdowns and report: the GNSS x radar family pairs its random
+draws with the single-sensor families, failed jobs are retried and counted once, distance bands and incident
+participants follow their definitions, and the interaction is C - R - G + B."""
 
 import importlib.util
 import json
@@ -126,25 +125,6 @@ class ReportTests(unittest.TestCase):
         row["metrics"]["associations_correct"] = 0
         table = self.rep.condition_table([row])
         self.assertIsNone(table[0]["association_accuracy"])
-
-
-class HeldOutTests(unittest.TestCase):
-    def test_cases_are_new_configurations_of_their_base(self):
-        gen = _script("generalization")
-        protocol = gen.load_protocol()
-        cases = protocol["cases"]
-        self.assertEqual(len(cases), protocol["protocol"]["expected_recordings"])
-        self.assertEqual(len({c["id"] for c in cases}), len(cases))
-        canonical = {"vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.nissan.patrol", "vehicle.mercedes.sprinter",
-                     "vehicle.toyota.prius"}
-        for case in cases:
-            for pid, override in ((case.get("changes") or {}).get("participant_overrides") or {}).items():
-                self.assertNotIn(override.get("blueprint"), canonical, (case["id"], pid))
-        cfg, spec = gen.case_spec(next(c for c in cases if c["id"] == "H17"), 3000)
-        self.assertEqual(spec.scenario_id, "H17")
-        self.assertFalse(next(a for a in spec.participant("A").actions if a.action_id == "A_moves_left").enabled)
-        self.assertEqual(spec.participant("A").blueprint, "vehicle.lincoln.mkz_2020")
-        self.assertEqual(str(gen.run_dir_of(cases[0]).relative_to(ROOT).as_posix()), "heldout/frozen_campaign/H01/run_0_rear_end")
 
 
 if __name__ == "__main__":

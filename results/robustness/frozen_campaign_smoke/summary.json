@@ -1,9 +1,9 @@
 {
  "definition": "robustness of the reconstruction: every condition applied to every run (seeds for stochastic ones), pooled per seed over runs, then mean and SD over seeds",
  "provenance": {
-  "git_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8",
-  "git_dirty": false,
-  "code_sha256": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df",
+  "git_commit": "1183f5228ff132d80f9c52c11ea720e12d109e03",
+  "git_dirty": true,
+  "code_sha256": "2e18beaefd8ce1c0f0f37dd2db56adf722beb774d11c718a56def6f3e638c884",
   "config_sha256": "af2b7dc72208533f4d60f6ab9f047b6b6672a82442eb14e5a3e8fd5ca8b90f3a",
   "runs": [
    "S01/run_0_crash",
@@ -31,13 +31,9 @@
   ],
   "perturbation_profile": null,
   "seed": null,
-  "generated_utc": "2026-10-15T10:50:28Z",
+  "generated_utc": "2026-10-16T08:32:58Z",
   "python": "3.8.20",
-  "analysis_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8",
-  "analysis_started_from_clean_tree": true,
-  "analysis_code_sha256": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df",
-  "equivalent_clean_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8",
-  "final_analysis_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8"
+  "analysis_code_sha256": "2e18beaefd8ce1c0f0f37dd2db56adf722beb774d11c718a56def6f3e638c884"
  },
  "tolerances_for_seeds": {
   "association_accuracy": 0.02,

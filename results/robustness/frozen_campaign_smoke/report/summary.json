@@ -22,6 +22,10 @@
   "equivalent_clean_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8",
   "final_analysis_commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8"
  },
+ "jobs_by_commit": {
+  "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8": 86
+ },
+ "partial_evaluations": [],
  "conditions": [
   {
    "family": "baseline",
@@ -3641,694 +3645,1882 @@
    "gnss": "rtk",
    "radar": "low",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.0,
+   "gnss_only_mean": 2.6667,
+   "combined_mean": 4.0,
+   "combined_minus_baseline": 1.3333,
+   "additive_prediction": 1.3333,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.098,
+   "gnss_only_mean": 0.1145,
+   "combined_mean": 0.1184,
+   "combined_minus_baseline": 0.0216,
+   "additive_prediction": 0.019,
+   "interaction_mean": 0.0026,
+   "interaction_ci95": [
+    0.0015,
+    0.0037
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 0.4711,
+   "gnss_only_mean": 0.4736,
+   "combined_mean": 0.4718,
+   "combined_minus_baseline": -0.0022,
+   "additive_prediction": -0.0032,
+   "interaction_mean": 0.001,
+   "interaction_ci95": [
+    -0.0007,
+    0.0028
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "low",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.3333,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.3333,
+   "combined_minus_baseline": 0.3333,
+   "additive_prediction": 0.3333,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 3.0,
+   "gnss_only_mean": 2.6667,
+   "combined_mean": 3.0,
+   "combined_minus_baseline": 0.3333,
+   "additive_prediction": 0.3333,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.6667,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.6667,
+   "combined_minus_baseline": 0.6667,
+   "additive_prediction": 0.6667,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1182,
+   "gnss_only_mean": 0.1145,
+   "combined_mean": 0.1321,
+   "combined_minus_baseline": 0.0353,
+   "additive_prediction": 0.0391,
+   "interaction_mean": -0.0038,
+   "interaction_ci95": [
+    -0.0047,
+    -0.0028
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.1155,
+   "gnss_only_mean": 0.4736,
+   "combined_mean": 1.1405,
+   "combined_minus_baseline": 0.6665,
+   "additive_prediction": 0.6411,
+   "interaction_mean": 0.0254,
+   "interaction_ci95": [
+    0.0092,
+    0.0417
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "rtk",
    "radar": "nominal",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 1.6667,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 1.6667,
+   "combined_minus_baseline": 1.6667,
+   "additive_prediction": 1.6667,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 1.6667,
+   "combined_minus_baseline": 1.6667,
+   "additive_prediction": 2.0,
+   "interaction_mean": -0.3333,
+   "interaction_ci95": [
+    -1.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.3333,
+   "gnss_only_mean": 2.6667,
+   "combined_mean": 4.3333,
+   "combined_minus_baseline": 1.6667,
+   "additive_prediction": 1.6667,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 2.0,
+   "combined_minus_baseline": 2.0,
+   "additive_prediction": 2.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1936,
+   "gnss_only_mean": 0.1145,
+   "combined_mean": 0.1963,
+   "combined_minus_baseline": 0.0995,
+   "additive_prediction": 0.1146,
+   "interaction_mean": -0.0151,
+   "interaction_ci95": [
+    -0.0256,
+    -0.0045
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.2385,
+   "gnss_only_mean": 0.4736,
+   "combined_mean": 1.2046,
+   "combined_minus_baseline": 0.7307,
+   "additive_prediction": 0.7641,
+   "interaction_mean": -0.0334,
+   "interaction_ci95": [
+    -0.0458,
+    -0.021
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "rtk",
    "radar": "high",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.0,
+   "gnss_only_mean": 5.0,
+   "combined_mean": 5.0,
+   "combined_minus_baseline": 2.3333,
+   "additive_prediction": 3.6667,
+   "interaction_mean": -1.3333,
+   "interaction_ci95": [
+    -4.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.098,
+   "gnss_only_mean": 2.217,
+   "combined_mean": 2.2171,
+   "combined_minus_baseline": 2.1203,
+   "additive_prediction": 2.1214,
+   "interaction_mean": -0.0011,
+   "interaction_ci95": [
+    -0.0071,
+    0.0049
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 0.4711,
+   "gnss_only_mean": 2.8287,
+   "combined_mean": 2.8136,
+   "combined_minus_baseline": 2.3396,
+   "additive_prediction": 2.3519,
+   "interaction_mean": -0.0122,
+   "interaction_ci95": [
+    -0.058,
+    0.0335
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "low",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.3333,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 1.0,
+   "combined_minus_baseline": 1.0,
+   "additive_prediction": 0.3333,
+   "interaction_mean": 0.6667,
+   "interaction_ci95": [
+    0.0,
+    2.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 3.0,
+   "gnss_only_mean": 5.0,
+   "combined_mean": 6.6667,
+   "combined_minus_baseline": 4.0,
+   "additive_prediction": 2.6667,
+   "interaction_mean": 1.3333,
+   "interaction_ci95": [
+    -2.0,
+    6.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.6667,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 1.3333,
+   "combined_minus_baseline": 1.3333,
+   "additive_prediction": 0.6667,
+   "interaction_mean": 0.6667,
+   "interaction_ci95": [
+    0.0,
+    2.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1182,
+   "gnss_only_mean": 2.217,
+   "combined_mean": 2.2828,
+   "combined_minus_baseline": 2.186,
+   "additive_prediction": 2.1416,
+   "interaction_mean": 0.0444,
+   "interaction_ci95": [
+    -0.0107,
+    0.0995
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.1155,
+   "gnss_only_mean": 2.8287,
+   "combined_mean": 2.798,
+   "combined_minus_baseline": 2.3241,
+   "additive_prediction": 2.9962,
+   "interaction_mean": -0.6722,
+   "interaction_ci95": [
+    -1.3258,
+    -0.0185
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "consumer",
    "radar": "nominal",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 1.6667,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 3.0,
+   "combined_minus_baseline": 3.0,
+   "additive_prediction": 1.6667,
+   "interaction_mean": 1.3333,
+   "interaction_ci95": [
+    0.0,
+    2.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.3333,
+   "combined_minus_baseline": 0.3333,
+   "additive_prediction": 2.0,
+   "interaction_mean": -1.6667,
+   "interaction_ci95": [
+    -4.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.3333,
+   "gnss_only_mean": 5.0,
+   "combined_mean": 8.3333,
+   "combined_minus_baseline": 5.6667,
+   "additive_prediction": 4.0,
+   "interaction_mean": 1.6667,
+   "interaction_ci95": [
+    0.0,
+    4.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 2.3333,
+   "combined_minus_baseline": 2.3333,
+   "additive_prediction": 2.0,
+   "interaction_mean": 0.3333,
+   "interaction_ci95": [
+    0.0,
+    1.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1936,
+   "gnss_only_mean": 2.217,
+   "combined_mean": 2.3312,
+   "combined_minus_baseline": 2.2344,
+   "additive_prediction": 2.217,
+   "interaction_mean": 0.0174,
+   "interaction_ci95": [
+    -0.0124,
+    0.0472
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.2385,
+   "gnss_only_mean": 2.8287,
+   "combined_mean": 2.9787,
+   "combined_minus_baseline": 2.5048,
+   "additive_prediction": 3.1193,
+   "interaction_mean": -0.6145,
+   "interaction_ci95": [
+    -1.1545,
+    -0.0745
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "consumer",
    "radar": "high",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 0.3333,
+   "combined_minus_baseline": 0.3333,
+   "additive_prediction": 0.3333,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.0,
+   "gnss_only_mean": 7.3333,
+   "combined_mean": 7.3333,
+   "combined_minus_baseline": 4.6667,
+   "additive_prediction": 6.0,
+   "interaction_mean": -1.3333,
+   "interaction_ci95": [
+    -4.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 0.3333,
+   "combined_minus_baseline": 0.3333,
+   "additive_prediction": 0.3333,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.098,
+   "gnss_only_mean": 5.6157,
+   "combined_mean": 5.6197,
+   "combined_minus_baseline": 5.5229,
+   "additive_prediction": 5.5201,
+   "interaction_mean": 0.0029,
+   "interaction_ci95": [
+    -0.0392,
+    0.045
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 0.4711,
+   "gnss_only_mean": 9.4856,
+   "combined_mean": 9.4909,
+   "combined_minus_baseline": 9.0169,
+   "additive_prediction": 9.0088,
+   "interaction_mean": 0.0081,
+   "interaction_ci95": [
+    -0.0328,
+    0.049
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "low",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.3333,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 1.0,
+   "combined_minus_baseline": 1.0,
+   "additive_prediction": 0.6667,
+   "interaction_mean": 0.3333,
+   "interaction_ci95": [
+    0.0,
+    1.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 3.0,
+   "gnss_only_mean": 7.3333,
+   "combined_mean": 7.3333,
+   "combined_minus_baseline": 4.6667,
+   "additive_prediction": 5.0,
+   "interaction_mean": -0.3333,
+   "interaction_ci95": [
+    -2.0,
+    1.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.6667,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 1.3333,
+   "combined_minus_baseline": 1.3333,
+   "additive_prediction": 1.0,
+   "interaction_mean": 0.3333,
+   "interaction_ci95": [
+    0.0,
+    1.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1182,
+   "gnss_only_mean": 5.6157,
+   "combined_mean": 7.31,
+   "combined_minus_baseline": 7.2132,
+   "additive_prediction": 5.5402,
+   "interaction_mean": 1.673,
+   "interaction_ci95": [
+    -0.0212,
+    3.3672
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.1155,
+   "gnss_only_mean": 9.4856,
+   "combined_mean": 11.7397,
+   "combined_minus_baseline": 11.2658,
+   "additive_prediction": 9.6532,
+   "interaction_mean": 1.6125,
+   "interaction_ci95": [
+    -1.3455,
+    4.5706
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "nominal",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "association_errors",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "missed_contacts",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "wrong_collision_matches",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "wrong_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "missed_links",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 1.6667,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 3.3333,
+   "combined_minus_baseline": 3.3333,
+   "additive_prediction": 2.0,
+   "interaction_mean": 1.3333,
+   "interaction_ci95": [
+    1.0,
+    2.0
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "false_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 2.0,
+   "interaction_mean": -2.0,
+   "interaction_ci95": [
+    -4.0,
+    -1.0
+   ],
+   "interaction_supported": true
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "missed_merges",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 2.6667,
+   "radar_only_mean": 4.3333,
+   "gnss_only_mean": 7.3333,
+   "combined_mean": 9.3333,
+   "combined_minus_baseline": 6.6667,
+   "additive_prediction": 6.3333,
+   "interaction_mean": 0.3333,
+   "interaction_ci95": [
+    0.0,
+    1.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "events_lost",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 2.0,
+   "gnss_only_mean": 0.3333,
+   "combined_mean": 3.3333,
+   "combined_minus_baseline": 3.3333,
+   "additive_prediction": 2.3333,
+   "interaction_mean": 1.0,
+   "interaction_ci95": [
+    -1.0,
+    3.0
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "centre_error_median_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.0968,
+   "radar_only_mean": 0.1936,
+   "gnss_only_mean": 5.6157,
+   "combined_mean": 6.6112,
+   "combined_minus_baseline": 6.5144,
+   "additive_prediction": 5.6156,
+   "interaction_mean": 0.8988,
+   "interaction_ci95": [
+    -1.5126,
+    3.3101
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "centre_error_p95_m",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 2,
+   "paired_jobs": 2,
+   "baseline_mean": 0.4739,
+   "radar_only_mean": 1.2385,
+   "gnss_only_mean": 9.4856,
+   "combined_mean": 11.8111,
+   "combined_minus_baseline": 11.3372,
+   "additive_prediction": 9.7762,
+   "interaction_mean": 1.561,
+   "interaction_ci95": [
+    -0.3881,
+    3.5101
+   ],
+   "interaction_supported": false
   },
   {
    "gnss": "degraded",
    "radar": "high",
    "metric": "unaligned_recorders",
-   "runs": 0,
-   "note": "insufficient paired evidence"
+   "runs": 3,
+   "paired_jobs": 3,
+   "baseline_mean": 0.0,
+   "radar_only_mean": 0.0,
+   "gnss_only_mean": 0.0,
+   "combined_mean": 0.0,
+   "combined_minus_baseline": 0.0,
+   "additive_prediction": 0.0,
+   "interaction_mean": 0.0,
+   "interaction_ci95": [
+    0.0,
+    0.0
+   ],
+   "interaction_supported": false
   }
  ],
  "resources": [

@@ -16,8 +16,7 @@ Perturbations (each with its own seeded random stream: ``stream_seed``):
   velocity of a real return of the sweep (mirror-like ghosts);
 * GNSS (``GnssProfile``): per vehicle and axis, a run bias + a first-order Gauss-Markov term + white
   noise, drawn at the receiver's output rate and interpolated; heading and velocity likewise;
-* collision reports (``CollisionPerturbation``): relative impulse noise per callback, a reporting latency,
-  dropped callbacks;
+* collision reports (``CollisionPerturbation``): relative impulse noise per callback, dropped callbacks;
 * clock: a constant offset of every timestamp a recorder wrote (no drift);
 * downsampling: every n-th sample of the ego, control and radar streams;
 * dropout: a recorder's files removed, or its radar silent during a window.
@@ -257,8 +256,6 @@ class PerturbedPoseSource(RecordedPoseSource):
 @dataclass(frozen=True)
 class CollisionPerturbation:
     impulse_rel_std: float = 0.0  # multiplicative noise per callback
-    latency_s: float = 0.0  # every report of the recorders in ``latency_recorders`` this much later
-    latency_recorders: Tuple[str, ...] = ()
     p_drop: float = 0.0  # each callback lost with this probability
 
 
@@ -361,8 +358,6 @@ def _perturb_stream(path: Path, recorder: str, name: str, perturbation: Perturba
             row = dict(row)
             if c.impulse_rel_std:
                 row["impulse"] = float(row["impulse"]) * max(0.0, 1.0 + rng.normal(0.0, c.impulse_rel_std))
-            if recorder in c.latency_recorders:
-                row["timestamp"] = float(row["timestamp"]) + c.latency_s
             kept.append(row)
         rows = kept
     if shift:

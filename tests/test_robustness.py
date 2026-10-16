@@ -134,7 +134,7 @@ class CopyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             copy = perturbed_copy(S12, Path(tmp) / "a", Perturbation(
                 "mixed", clock_offsets_s=(("B", 12.5),), downsample=2, drop_recorders=("A",),
-                collisions=CollisionPerturbation(latency_s=0.25, latency_recorders=("B",))), 0)
+                collisions=CollisionPerturbation(impulse_rel_std=0.05)), 0)
             self.assertFalse((copy / "vehicles" / "A").exists())
             rows = [json.loads(l) for l in (S12 / "vehicles" / "B" / "ego.jsonl").read_text().splitlines()]
             new = [json.loads(l) for l in (copy / "vehicles" / "B" / "ego.jsonl").read_text().splitlines()]
@@ -142,7 +142,7 @@ class CopyTests(unittest.TestCase):
             self.assertAlmostEqual(new[1]["timestamp"] - rows[2]["timestamp"], 12.5, places=6)
             hits = [json.loads(l) for l in (S12 / "vehicles" / "B" / "collisions.jsonl").read_text().splitlines()]
             moved = [json.loads(l) for l in (copy / "vehicles" / "B" / "collisions.jsonl").read_text().splitlines()]
-            self.assertAlmostEqual(moved[0]["timestamp"] - hits[0]["timestamp"], 12.75, places=6)
+            self.assertAlmostEqual(moved[0]["timestamp"] - hits[0]["timestamp"], 12.5, places=6)
             with np.load(str(S12 / "vehicles" / "B" / "radar" / "front" / "observations.npz")) as a, \
                     np.load(str(copy / "vehicles" / "B" / "radar" / "front" / "observations.npz")) as b:
                 self.assertEqual(len(b["frames"]), (len(a["frames"]) + 1) // 2)

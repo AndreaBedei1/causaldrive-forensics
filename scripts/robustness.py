@@ -62,7 +62,6 @@ FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "radar_gnss_combined": ([("gnss {0} + radar {1}".format(g, r), (g, r))
                              for g in ("rtk", "consumer", "degraded") for r in ("low", "nominal", "high")], True),
     "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
-    "latency": ([("0.05 s", 0.05), ("0.10 s", 0.10), ("0.25 s", 0.25), ("0.50 s", 0.50)], False),
     "clock": ([("offsets", None)], False),
     "downsample": ([("10 Hz", 2), ("5 Hz", 4)], False),
     "dropout": ([("one recorder", None)], False),
@@ -131,9 +130,6 @@ def build(job: Dict[str, Any]):
         pose = PerturbedPoseSource.factory(GNSS_PROFILES[gnss], int(job["seed"]))
     elif family == "impulse":
         perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
-    elif family == "latency":
-        perturbation = Perturbation(name, collisions=CollisionPerturbation(latency_s=parameter,
-                                                                          latency_recorders=tuple(recorders[1:2])))
     elif family == "clock":
         # Arbitrary, large, different offsets for every recorder (no drift).
         perturbation = Perturbation(name, clock_offsets_s=tuple((r, round(7.31 * (i + 1) * (-1) ** i, 2))
@@ -430,16 +426,13 @@ def markdown(record: Dict[str, Any]) -> str:
 
 
 # Families plotted against their level, the unperturbed baseline first (its label in that family).
-PLOTS = {"radar": "ideal", "gnss": "ideal", "impulse": "0%", "latency": "0 s", "downsample": "20 Hz"}
+PLOTS = {"radar": "ideal", "gnss": "ideal", "impulse": "0%", "downsample": "20 Hz"}
 GENERAL = [("association_accuracy", "association accuracy"), ("event_recall", "core event recall"),
            ("fused_centre_error_m", "fused centre error [m]"), ("errors", "wrong links + false merges")]
 # The metrics each family degrades first.
 PANELS = {"radar": GENERAL, "gnss": GENERAL,
           "impulse": [("collision_recall", "collisions reconstructed"), ("runs_aligned", "runs fully aligned"),
                       ("event_recall", "core event recall"), ("fused_centre_error_m", "fused centre error [m]")],
-          "latency": [("runs_aligned", "runs fully aligned"), ("event_recall", "core event recall"),
-                      ("event_time_delta_p95_s", "event time difference p95 [s]"),
-                      ("fused_centre_error_m", "fused centre error [m]")],
           "downsample": [("collision_recall", "collisions reconstructed"), ("association_accuracy", "association accuracy"),
                          ("event_recall", "core event recall"), ("fused_centre_error_m", "fused centre error [m]")]}
 RATIOS = ("association_accuracy", "event_recall", "collision_recall", "runs_aligned")
@@ -511,8 +504,7 @@ def figures(record: Dict[str, Any], out_dir: Path) -> List[Path]:
         if len(groups) > 1:
             axes[0].legend()
         title = {"radar": "Radar noise, missed detections and clutter", "gnss": "GNSS position and heading errors",
-                       "impulse": "Collision impulse noise", "latency": "Collision report latency (one recorder)",
-                       "downsample": "Recording rate"}[family]
+                       "impulse": "Collision impulse noise", "downsample": "Recording rate"}[family]
         if record.get('family_provenance', {}).get(family) != record.get('family_provenance', {}).get('baseline'):
             title += ' (historical study)'
         fig.suptitle(title)

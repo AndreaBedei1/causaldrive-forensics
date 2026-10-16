@@ -1,7 +1,22 @@
 {
- "name": "pre-robustness-campaign",
- "statement": "reconstruction algorithm, configuration, event definitions, evaluation rules and experimental protocol frozen before any main result is collected; any later revision is a new version with separately identified results",
- "code_sha256": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df",
+ "name": "robustness campaign on the 22 canonical runs (final analysis scope)",
+ "scope": "35 conditions in 12 families on the 22 manually reviewed canonical runs (S01..S19); preregistered on 2026-10-15 together with a collision-report latency family and a held-out generalization set, both removed from the study on 2026-10-16 (scientific scope); see the module docstring",
+ "frozen_reconstruction": {
+  "tag": "pre-robustness-campaign",
+  "commit": "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8",
+  "reconstruction_sources": [
+   "src/cdf/reconstruction",
+   "src/cdf/common",
+   "src/cdf/recording",
+   "src/cdf/perception",
+   "configs/reconstruction.yaml"
+  ],
+  "reconstruction_sources_sha256": "fa565ff240cc98c4d06ff7e21146e80fa5dbdecc6bea352e4e4091f0fa409e17",
+  "reconstruction_sources_sha256_at_tag": "fa565ff240cc98c4d06ff7e21146e80fa5dbdecc6bea352e4e4091f0fa409e17",
+  "reconstruction_config_sha256": "af2b7dc72208533f4d60f6ab9f047b6b6672a82442eb14e5a3e8fd5ca8b90f3a",
+  "code_sha256_at_tag": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df"
+ },
+ "code_sha256": "2e18beaefd8ce1c0f0f37dd2db56adf722beb774d11c718a56def6f3e638c884",
  "reconstruction_config_sha256": "af2b7dc72208533f4d60f6ab9f047b6b6672a82442eb14e5a3e8fd5ca8b90f3a",
  "reconstruction_config": {
   "trace_hz": 10.0,
@@ -162,19 +177,15 @@
   }
  },
  "scripts_sha256": {
-  "robustness.py": "860af77e375d4bdd57b5c0eff765483f1876d8bb62f322905439f0058919054f",
-  "campaign_report.py": "e330c5657116e30a4c4ce21bf6bc8a6ee84888d7c15d95d64e5fba2d2f5b624f",
-  "generalization.py": "d476609f0f5ddf94c3f1e10823aa751187843559fc303bdcaca03d6486ebca7e",
-  "stability_audit.py": "f756db1c44e15dbee10f24a8f3d29161b4473d39fab3777fb38d0b357a7818a2",
+  "robustness.py": "e7b3e3dcd8518dcc01c461aba0eb1263d214849304678aa0508200e68af90efc",
+  "campaign_controller.py": "3c23a7b3c5ad8bec6041c67e357e9b43b38a64b2c063481f7af5eda0f133a887",
+  "campaign_report.py": "0b15aea9d389664c956bda5775276a892160bac206c0e96301265d8da637ce81",
+  "campaign_manifest.py": "dff3ff55eb11f69524194ee1698fb2740b8bf4f99f61f6988d3691dd4b13798f",
+  "stability_audit.py": "e306f95189f031e525081d7944a26ecf63672f921be1aa257eb3088da0d19fa2",
   "validate_canonical.py": "94e990dead1443f8f956bf60e82d5fd36eff53ed611793ce607d3c7a2006b60d",
-  "run_scenario.py": "2c5519a6d3c42c78529e05ade2de64bb9ce85c14229ebb8d6427fdc6018fcbd2",
-  "reconstruct_run.py": "92ff2d68086c4dc3f4bb8b5d67678118716e819783e31bdfa8a4ce4cc896d41c",
-  "hardening_refresh.py": "3db0a18ff821c2f6a109d2afa0ea7e1e32cbcf498e41b6122fc1c3ed1492ab01",
-  "freeze_manifest.py": "a7dc7d860aa87b2d589b73e23e8310c59ee2bd3d95c0bd336f477031ce6300b5"
+  "reconstruct_run.py": "92ff2d68086c4dc3f4bb8b5d67678118716e819783e31bdfa8a4ce4cc896d41c"
  },
- "scenario_configs_sha256": "8f3d58d4612b1c31452c68a0efe806f1cab52a39edfa97a19c4d8d2b75fa5088",
  "sensor_configs_sha256": "65e2976605a32f7d401dccff8376b14fb2f2783491a36115430a086556f1b8d6",
- "heldout_protocol_sha256": "8030bd5e302058f6b622603a29dac78cae4f5404a9d421f54c23b8ba4fe2480c",
  "canonical_manifest": {
   "set": "S01..S19, 22 runs",
   "variants": {
@@ -353,7 +364,7 @@
   }
  },
  "robustness": {
-  "driver": "scripts/robustness.py --canonical --work robustness/frozen_campaign --results results/robustness/frozen_campaign",
+  "launcher": "scripts/campaign_controller.py (scripts\\campaign.bat start|status|pause|resume)",
   "radar_profiles": {
    "ideal": {
     "name": "ideal",
@@ -675,30 +686,6 @@
     "jobs_max": 704,
     "configuration": "frozen"
    },
-   "latency": {
-    "levels": [
-     {
-      "label": "0.05 s",
-      "parameter": 0.05
-     },
-     {
-      "label": "0.10 s",
-      "parameter": 0.1
-     },
-     {
-      "label": "0.25 s",
-      "parameter": 0.25
-     },
-     {
-      "label": "0.50 s",
-      "parameter": 0.5
-     }
-    ],
-    "stochastic": false,
-    "jobs_initial": 88,
-    "jobs_max": 88,
-    "configuration": "frozen"
-   },
    "clock": {
     "levels": [
      {
@@ -752,8 +739,9 @@
     "configuration": "frozen"
    }
   },
-  "jobs_initial_total": 2190,
-  "jobs_max_total": 5380,
+  "conditions": 35,
+  "jobs_initial_total": 2102,
+  "jobs_max_total": 5292,
   "seed_schedule": {
    "stochastic": "seeds 0, 1, 2 first; then 3, 4, ... up to 7 while the standard error over seeds of any pooled metric exceeds its tolerance (robustness.TOLERANCES), decided per (family, level)",
    "tolerances": {
@@ -764,44 +752,13 @@
     "runs_aligned": 0.02
    },
    "deterministic": "seed 0 only",
-   "streams": "SHA-256 of (seed, sensor, profile, recorder, axis/radar): independent of family, worker and execution order"
+   "streams": "SHA-256 of (seed, sensor, profile, recorder, axis/radar): independent of family, worker and execution order, shared by all runs of a seed"
   },
-  "max_attempts_per_job": 2,
-  "workers": 14
+  "max_attempts_per_job": 2
  },
- "generalization": {
-  "protocol": "configs/heldout/frozen_campaign.yaml",
-  "cases": 32,
-  "families": [
-   "adjacent_lane",
-   "chain",
-   "crossing",
-   "cut_in",
-   "dense",
-   "highway_curve",
-   "occlusion",
-   "overtaking",
-   "rear_end",
-   "roundabout",
-   "unrecorded_causal"
-  ],
-  "seeds": [
-   0
-  ],
-  "acceptance": {
-   "completed": "the runner finished and every declared participant spawned and wrote ground truth",
-   "on_road_before_contact": "every participant's centre lies on a driving lane of the map (CARLA waypoint, no projection) at every sample before its first contact",
-   "speed_bound_mps": 3.0,
-   "attitude_before_contact_deg": 10.0,
-   "attitude_whole_run_deg": 60.0
-  },
-  "recordings": "heldout/frozen_campaign/ (not committed)",
-  "results": "results/generalization/frozen_campaign/"
- },
- "evaluation": {
-  "report": "scripts/campaign_report.py",
-  "breakdowns": "src/cdf/evaluation/campaign_metrics.py",
-  "ground_truth_use": "evaluation only; never in the reconstruction"
+ "results": {
+  "jobs": "results/robustness/frozen_campaign/jobs.jsonl.gz",
+  "report": "results/robustness/frozen_campaign/report/"
  },
  "software": {
   "python": "3.8.20 (default, Oct  3 2024, 15:19:54) [MSC v.1929 64 bit (AMD64)]",
@@ -966,10 +923,5 @@
    "xgboost": "2.1.4",
    "zipp": "3.21.0"
   }
- },
- "carla": {
-  "client_module": "C:\\Users\\andrea.bedei3\\.conda\\envs\\carla\\lib\\site-packages\\carla\\__init__.py",
-  "client_version": "0.9.15",
-  "server_version": "0.9.15"
  }
 }

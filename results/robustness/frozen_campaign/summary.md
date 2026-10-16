@@ -4,7 +4,7 @@ Every condition applied to every canonical run (`scripts/robustness.py`, `cdf.ro
 
 Columns: identity association accuracy over the decided tracks; true vehicle-vehicle collisions reconstructed; share of runs with every recorder on the global clock; core instant events of the unperturbed reconstruction found again (same type, actor and subject class within 1 s, after removing a shift of the clock origin) and those added; 95th percentile of their time differences; median fused centre error of the anonymous road users (map frame of the pose streams: a GNSS error common to all recorders stays in it); recorder links wrong or missed; false merges of anonymous tracks; anonymous entities that are no vehicle (clutter).
 
-Provenance: code `ac2cb70ad595af1c`, configuration `af2b7dc72208533f`, commit `143667f7b1d830ba497295ff213fb3a70b5154fc`, 2026-10-15T22:24:09Z.
+Provenance: code `2e18beaefd8ce1c0`, configuration `af2b7dc72208533f`, commit `1183f5228ff132d80f9c52c11ea720e12d109e03` (uncommitted changes), 2026-10-16T08:31:57Z.
 
 | family | level | seeds | runs | failed | assoc. acc. | coll. recall | runs aligned | event recall | extra events | event dt p95 [s] | centre err. [m] | wrong links | missed links | false merges | spurious U | identical graphs |
 |---|---|--:|--:|--:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -38,10 +38,6 @@ Provenance: code `ac2cb70ad595af1c`, configuration `af2b7dc72208533f`, commit `1
 | impulse | 5% | 3 | 66 | 0 | 1.000 | 1.000 | 1.000 | 1.000 | 0.0 | 0.000 | 0.273 | 0.0 | 1.0 | 0.0 | 0.0 | 22/66 |
 | impulse | 10% | 3 | 66 | 0 | 1.000 | 1.000 | 1.000 | 1.000 | 0.0 | 0.000 | 0.273 | 0.0 | 1.0 | 0.0 | 0.0 | 22/66 |
 | impulse | 20% | 3 | 66 | 0 | 1.000 | 0.988 +- 0.021 | 1.000 | 0.998 +- 0.003 | 0.3 +- 0.6 | 0.000 | 0.273 | 0.0 | 1.0 | 0.0 | 0.0 | 21/66 |
-| latency | 0.05 s | 1 | 22 | 0 | 1.000 | 1.000 | 1.000 | 1.000 | 0.0 | 0.050 | 0.469 | 0.0 | 1.0 | 0.0 | 0.0 | 0/22 |
-| latency | 0.10 s | 1 | 22 | 0 | 1.000 | 0.926 | 1.000 | 0.989 | 4.0 | 0.100 | 0.629 | 0.0 | 1.0 | 0.0 | 0.0 | 0/22 |
-| latency | 0.25 s | 1 | 22 | 0 | 1.000 | 0.815 | 1.000 | 0.968 | 9.0 | 0.250 | 0.654 | 0.0 | 1.0 | 0.0 | 0.0 | 0/22 |
-| latency | 0.50 s | 1 | 22 | 0 | 1.000 | 0.518 | 0.818 | 0.839 | 28.0 | 0.500 | 0.412 | 0.0 | 5.0 | 1.0 | 0.0 | 0/22 |
 | clock | offsets | 1 | 22 | 0 | - | - | - | 1.000 | 0.0 | 0.000 | - | - | - | - | - | 19/22 |
 | downsample | 10 Hz | 1 | 22 | 0 | 0.980 | 1.000 | 1.000 | 0.930 | 3.0 | 0.050 | 0.258 | 1.0 | 2.0 | 0.0 | 0.0 | 0/22 |
 | downsample | 5 Hz | 1 | 22 | 0 | 0.980 | 0.889 | 1.000 | 0.855 | 15.0 | 0.250 | 0.245 | 1.0 | 3.0 | 0.0 | 18.0 | 0/22 |

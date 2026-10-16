@@ -14,8 +14,6 @@ venv/
 /robustness/
 # Raw recordings of an abandoned highway stress study, kept locally, not part of the project.
 /stress_recordings/
-# Held-out generalization recordings of the frozen campaign (raw data, kept locally; results go to results/generalization/).
-/heldout/
 # Robustness campaigns: the raw job records are committed compressed (jobs.jsonl.gz); the controller's working files stay local.
 /results/robustness/*/jobs.jsonl
 /results/robustness/*/control/running/

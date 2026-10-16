@@ -16,7 +16,7 @@ reconstruction alone, and shows per vehicle when a hazard became perceivable fro
 the vehicle responded (an observed vehicle response delay).  These are inputs to an expert's avoidability
 analysis: the method decides neither avoidability nor liability, and a hazard perceivable by a vehicle's
 sensors is not a hazard perceived by its driver.  Every quantitative claim comes from CARLA simulations (the canonical
-development runs S01-S18 and the final held-out campaign) whose ground truth is used for evaluation only.
+runs S01-S19 and the robustness campaign on them) whose ground truth is used for evaluation only.
 
 ## Logging prerequisites
 
@@ -85,7 +85,7 @@ IEEE 1616.1 [B22]).
 - Alignment: it needs a shared collision, or observed trajectories that fix one clock offset (otherwise the
   recorder stays UNALIGNED).  Collision matching relies on the touching geometry from the pose streams and on
   the recorder's own radar view of the arriving body; with consumer-grade poses matches are lost (left
-  unmatched rather than guessed); a collision-report latency costs matches; clock offsets are constant within a
+  unmatched rather than guessed); clock offsets are constant within a
   recording (no drift modelled or tested).
 - Radar-only perception of road users that recorded nothing: their size is fitted only where the recorders see
   different faces (otherwise a nominal box); standing vehicles are not tracked; two cars 1.4 m apart side by

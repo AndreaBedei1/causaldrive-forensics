@@ -1,221 +1,251 @@
-# Frozen robustness and generalization campaign: report
+# Robustness of the reconstruction on the 22 canonical runs
 
-Campaign of 2026-10-15/16 on the frozen reconstruction (protocol: [FROZEN_CAMPAIGN.md](FROZEN_CAMPAIGN.md)).
-Detailed tables: `results/robustness/frozen_campaign/report/tables.md` (all 39 conditions, distance bands, incident
-participants, GNSS x radar interaction), `results/generalization/frozen_campaign/tables.md` (32 held-out cases);
-machine-readable: `summary.json`, `conditions.csv`, `interaction.csv`, `resources.csv`, `cases.csv`, `families.csv`;
-every job: `results/robustness/frozen_campaign/jobs.jsonl.gz`.  All results are simulated (CARLA 0.9.15) and the
-sensor perturbations are engineering models (`docs/robustness_profiles.md`): they establish the operating envelope
-of the method on simulated data, not real-world sensor performance.
+Report of the robustness campaign of 2026-10-15/16 (protocol: [FROZEN_CAMPAIGN.md](FROZEN_CAMPAIGN.md); perturbation
+profiles: [robustness_profiles.md](robustness_profiles.md)).  Every number below is computed by
+`scripts/campaign_report.py` from the job records `results/robustness/frozen_campaign/jobs.jsonl.gz`; the full tables
+(all 35 conditions, distance bands, incident participants, GNSS x radar interaction) are in
+`results/robustness/frozen_campaign/report/tables.md`, the machine-readable values in `report/summary.json`,
+`conditions.csv`, `interaction.csv` and `resources.csv`, the figures in `report/figures/`.
 
-## 1. S07 turn indicators
+## 1. Objective
 
-A started already circulating, so the run now begins 9.0 s earlier: A on the straight west approach (the only entry
-upstream of its old start), B 72 m further back on its straight south approach.  Conflict and A-B contact happen at
-the same instant + 9.0 s; trajectories within 1.3 m (A) and 0.42 m (B) of the earlier recording.  Verified events
-(local time = scenario time - 0.05 s, equal to the `lights.jsonl` transitions):
+To establish the operating envelope of the frozen reconstruction when the onboard recordings are worse than
+CARLA's: noisier radar with missed detections and clutter, GNSS pose errors (independent or correlated between
+recorders), both together, uncertain collision impulse reports, unsynchronised recorder clocks, a lower sampling
+rate, a missing recorder and short radar outages.  The question is which parts of the reconstruction (collisions,
+recorder identities, anonymous road users, trajectories, semantic events) survive and how they fail.  The
+perturbations are engineering models of sensor errors applied to simulated data: the results describe the method on
+CARLA recordings, not the performance of a real radar or receiver.
 
-| recorder | event | time | relation to the manoeuvre |
-|---|---|--:|---|
-| A | INDICATOR_LEFT_START | 0.95 s | before the entry curve (3.25 s) and the circulation (TURN_LEFT_START 6.35 s) |
-| A | no END | - | still circulating with the light on at the contact (19.25 s): never switched off |
-| B | INDICATOR_RIGHT_START | 12.95 s | before TURN_RIGHT_START 16.90 s |
-| B | INDICATOR_RIGHT_END | 19.05 s | after TURN_RIGHT_END 18.95 s, 0.2 s before the contact |
+## 2. Dataset
 
-## 2. S08 turn indicator
+The 22 canonical runs of the 19 scenarios S01-S19 (`scripts/validate_canonical.py`, `docs/CANONICAL_VALIDATION.md`):
+rear-end, cut-in, crossings, chains, occlusion, a non-recording causal vehicle, a roundabout, stop-controlled
+junctions, dense traffic, overtaking and a motorway curve, 2-3 recording vehicles each and up to 8 non-recording
+road users.  Every run was reviewed manually in the replay; 27 true vehicle-vehicle contacts in all.  Ground truth
+(`ground_truth/`) is read by the evaluation only.
 
-A signals left from 0.45 s (INDICATOR_LEFT_START), before STOP_SIGN_DETECTED_START (1.15 s); the left turn
-(3.70 s) ends in the collision (5.40 s) with the light still on: no END.  Rolling stop, B's trajectory and the A-B
-contact are unchanged (trajectories within 0.07 m).  The runner no longer extends a recording for an indicator left on.
+## 3. Frozen reconstruction method
 
-## 3. Final canonical validation (22 runs, S01..S19)
+The single reconstruction method of the repository (radar tracking per recorder, alignment on shared collisions or
+observed trajectories, identity association of local tracks with recorders, fusion of the anonymous road users,
+global semantic graph; README and `docs/event_definitions.md`), frozen with its configuration before the campaign
+(tag `pre-robustness-campaign`).  The reconstruction sources and configuration are those of that tag in every job
+(the hashes are in `results/robustness_campaign_manifest.json`).  The unperturbed baseline reproduces every
+canonical global graph node for node (22/22).
 
-13 PASS, 9 WARN, 0 FAIL (`docs/CANONICAL_VALIDATION.md`).  The warnings are conservative missed merges of distant
-anonymous vehicles (S14-S19), the audit's ground-truth cut-in heuristic on the S07 roundabout merge and S14, one
-missed recorder link (S06) and three track losses while the radar still saw the body (S06, S10).  The frozen
-baseline reproduces every canonical global graph node for node (22/22) with single-threaded BLAS.  Full test suite:
-599 passed before the freeze.
+## 4. Experimental methodology
 
-## 4. Frozen version
+For each condition and run a perturbed copy of the run is written (radar, collision and clock perturbations in the
+files; GNSS errors through the pose source), the frozen reconstruction runs on it, and the evaluation compares the
+result with ground truth and with the unperturbed reconstruction.  35 conditions in 12 families; stochastic
+conditions run seeds 0, 1, 2 and further seeds (at most 8) while the standard error over seeds of a pooled metric
+exceeds its tolerance; deterministic ones run once.  3,774 jobs, all complete (3,775 attempts: one job failed under
+the first version because of an evaluation defect and completed after its correction, see the protocol).
 
-| tag | commit | content |
-|---|---|---|
-| `pre-robustness-campaign` | 5d7adf76 | frozen reconstruction (code 0xac2cb70a, configuration 0xaf2b7dc7), protocol, profiles, held-out cases |
-| `robustness-campaign-v2` | 27f9c658 | evaluation defect fixed (closure check on a collision without global time crashed one job; further evaluations isolated) |
-| `robustness-campaign-v2.1` | 57611734 | campaign controller only (load measurement, adoption of running jobs) |
-| `robustness-campaign-v2.2` | 143667f7 | campaign controller only (persistent concurrency setting) |
+Aggregation: per condition and seed the counts are summed over the 22 runs; the tables give the mean over seeds
++- the standard deviation over seeds.  Metrics (counts are per seed over all 22 runs unless stated):
 
-Reconstruction code, configuration, profiles, seeds and matrix are those of the freeze in every version
-(`results/frozen_campaign_manifest.json`; every job records its commit).  Jobs per commit: 254 (v1, all complete and
-identical under v2), 86 (v2), 69 (v2.1), 3453 (v2.2).
+- **true contacts**: vehicle-vehicle contacts in ground truth (27 per seed);
+- **contacts identified** (collision recall): true contacts reconstructed as a collision node with exactly their
+  participants; **contacts detected**: with a collision node, participants right or not;
+- **missed contact**: a true contact without any reconstructed collision; **wrong collision match**: a
+  reconstructed collision with the wrong participants or between vehicles that did not touch;
+- **recorder links**: a local track of another recorder linked to that recorder: **correct**, **wrong** (linked to
+  the wrong recorder) or **missed** (left anonymous although it is a recorder);
+- **association accuracy** = correct / (correct + wrong) over the *decided* associations only: tracks left anonymous
+  are not in its denominator and are counted as missed links;
+- **false merge**: two tracks of different vehicles fused into one anonymous road user; **missed merge**: two tracks
+  of one vehicle left as separate road users; **phantom entity**: an anonymous road user on no true vehicle;
+  **duplicate hypotheses**: extra entities for one true vehicle;
+- **trajectory errors**: distance between a fused anonymous road user's state and its true vehicle (centre, m;
+  velocity, m/s), per-run median and p95, then median over runs; max over runs;
+- **incident participants**: the vehicles of the true contacts; **incident link accuracy** = correct / (correct +
+  wrong + missed) recorder links of tracks on them;
+- **distance bands**: a track's median radar range (0-10, 10-25, > 25 m);
+- **event preservation**: core events of the unperturbed reconstruction found again (stability against the
+  baseline, not accuracy); **oracle event recall / precision**: agreement with the ground-truth coverage oracle;
+- **EGO_PATH oscillations**: entry / exit undone within three sweeps (stability audit).
 
-## 5. Experiment matrix and execution
+## 5. Radar robustness
 
-3862 jobs (2190 initial, the rest adaptive seeds), 3863 attempts: **0 failed**, 1 v1 failure (the defect above)
-re-run complete under v2, 0 partial evaluations.  Seeds: 3 at least, more while the standard error over seeds of a
-pooled metric exceeded its tolerance, 8 at most.  Every condition with consumer or degraded GNSS reached 8 seeds: the
-0.05 m tolerance on the fused centre error is unreachable when the GNSS error itself is metres (a protocol
-limitation, kept unchanged during the campaign).  radar high reached 4 seeds; all others stopped at 3.
+Per detection: range / azimuth and elevation / radial-velocity sigma, missed-detection probability, false returns per
+sweep: low 0.10 m / 0.1 deg / 0.03 m/s, 5 %, 1; nominal 0.25 m / 0.5 deg / 0.10 m/s, 20 %, 3; high 0.50 m / 2 deg /
+0.20 m/s, 40 %, 30 (CARLA casts about 75 rays per sweep, so about 40 % of the points are false at high).
 
-## 6. Radar degradation (per detection: range / angle / Doppler sigma, missed detections, false returns per sweep)
-
-low = 0.10 m / 0.1 deg / 0.03 m/s, 5 %, 1; nominal = 0.25 m / 0.5 deg / 0.10 m/s, 20 %, 3; high = 0.50 m / 2 deg /
-0.20 m/s, 40 %, 30 (with CARLA's ~75 rays per sweep, about 40 % of the points are false).
-
-| radar | contacts identified | association acc. | wrong / missed links | false merges | phantom entities | centre error median / p95 [m] | events preserved | incident link acc. |
+| radar | contacts identified | association acc. | wrong / missed links | false merges | phantom entities | centre error median / p95 [m] | event preservation | incident link acc. |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|
-| none (baseline) | 1.000 | 1.000 | 0 / 1 | 0 | 0 | 0.27 / 0.75 | 1.000 | 0.979 |
+| none | 1.000 | 1.000 | 0 / 1 | 0 | 0 | 0.27 / 0.75 | 1.000 | 0.979 |
 | low | 1.000 | 1.000 | 0 / 0.7 | 0 | 1 | 0.28 / 0.74 | 0.993 | 0.986 |
 | nominal | 1.000 | 1.000 | 0 / 1.3 | 0.7 | 14 | 0.30 / 0.83 | 0.971 | 0.973 |
-| high | 0.991 | 0.950 | 1.5 / 39 | 16.5 | 2252 | 0.52 / 2.05 | 0.854 | 0.576 |
+| high | 0.991 +- 0.018 | 0.950 +- 0.031 | 1.5 / 39 | 16.5 | 2252 | 0.52 / 2.05 | 0.854 | 0.576 |
 
-(counts per seed summed over the 22 runs; mean over seeds.)  Low and nominal radar noise cost almost nothing.  High
-noise is the breaking point: clutter becomes about 100 phantom road users per run, recorder links of the incident
-participants are lost (0.58: left anonymous, never wrong), false merges appear mostly within 10 m, and 15 % of the
-core events change.  Collisions are still found with their participants (one missed contact in 88 runs).
+Low and nominal radar noise leave the reconstruction practically unchanged.  High noise is the breaking point:
+clutter becomes about 100 phantom road users per run, 42 % of the recorder links on incident participants are lost
+(left anonymous, never wrong), false merges appear mostly within 10 m of the recorder (11 of 16.5), and 15 % of the
+core events change.  Collisions are still reconstructed with their participants except about one in a hundred.
+![radar](../results/robustness/frozen_campaign/report/figures/curve_radar.png)
 
-## 7. GNSS degradation (absolute / pairwise relative position RMS injected)
+## 6. GNSS robustness
 
-| GNSS | abs / rel RMS [m] | contacts | association acc. | missed links | false merges | centre error median / p95 [m] | runs aligned | incident link acc. |
+| GNSS | injected absolute / relative error RMS [m] | contacts | association acc. | missed links | false merges | centre error median / p95 [m] | runs aligned | incident link acc. |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|
 | RTK | 0.02 / 0.03 | 1.000 | 1.000 | 1.0 | 0 | 0.30 / 0.75 | 1.000 | 0.979 |
 | consumer | 2.5 / 3.2 | 1.000 | 1.000 | 6.2 | 0 | 1.78 / 2.58 | 0.972 | 0.930 |
 | degraded | 6.9 / 9.4 | 1.000 | 1.000 | 7.9 | 0 | 4.90 / 7.17 | 0.960 | 0.894 |
 
-GNSS errors move the fused road users by about the GNSS error (absolute frame) but create no wrong identity: the
-method links fewer tracks (missed links, missed merges) instead.  `gnss_refined` (mutual pose refinement forced on)
-gives identical results: the frozen method already refines whenever a pose source declares an uncertainty, so this
-ablation is not informative in this study.
+A GNSS error moves the fused road users by about the error itself (absolute map frame) but creates no wrong
+identity and no false merge: the method decides less (missed links and merges) instead of deciding wrongly.
+Collisions are all reconstructed; 3-4 % of the runs lose the alignment of a recorder.
 
-## 8. Correlated GNSS (consumer, common fraction rho)
+## 7. Correlated GNSS
 
-| rho | abs / rel RMS [m] | centre error median [m] | missed links | incident link acc. |
+Consumer receivers whose slow error is shared between recorders with fraction rho:
+
+| rho | absolute / relative RMS [m] | centre error median [m] | missed links | incident link acc. |
 |---|--:|--:|--:|--:|
 | 0.5 | 2.11 / 2.24 | 1.63 | 6.2 | 0.930 |
 | 0.9 | 1.92 / 1.01 | 2.05 | 5.9 | 0.938 |
 | 1.0 | 1.73 / 0.08 | 2.24 | 7.2 | 0.911 |
 
-A common error cancels between recorders (relative error 0.08 m at rho = 1) but not in the map: the fused centre
-error stays about the absolute error.  Identity decisions barely change with rho.
+A common error cancels between recorders (0.08 m relative at rho = 1) but not in the map: the fused position stays
+off by about the absolute error.  Identity decisions barely depend on rho.
 
-## 9. Combined GNSS and radar degradation
+## 8. GNSS refinement ablation
+
+`gnss_refined` forces the mutual refinement of the pose sources on.  Its results are identical to `gnss` at every
+level: the frozen method already refines the pose sources whenever they declare a position uncertainty, which every
+perturbed GNSS profile does, so the flag changes nothing in this study.  The ablation is therefore not informative;
+it is reported for completeness.
+
+## 9. Combined GNSS + radar degradation
 
 ![GNSS x radar](../results/robustness/frozen_campaign/report/figures/heatmap_radar_gnss_combined.png)
 
-Mean +- SD over seeds (3 for RTK, 8 otherwise).  Collisions are reconstructed with their participants in every cell
-except radar high (0.986-0.988), never with wrong participants.  The fused centre error follows the GNSS (0.3 / 1.8 /
-4.9 m with low or nominal radar), association accuracy follows the radar (0.91-0.94 with high radar), and event
+Mean +- SD over seeds (3 with RTK, 8 otherwise).  Collisions are reconstructed with their participants in every cell
+except high radar (0.986-0.988) and never with wrong participants.  The fused position error follows the GNSS (0.3 /
+1.8 / 4.9 m with low or nominal radar), association accuracy follows the radar (0.91-0.94 with high radar), event
 preservation degrades with both (0.75 with degraded GNSS and high radar).
 
-Paired comparison per run and seed (same radar and GNSS draws as the single-sensor jobs; interaction I = C - R - G + B,
-95 % bootstrap interval over runs; `interaction.csv`):
+Paired comparison per run and seed (the combined jobs draw the same radar and GNSS errors as the single-sensor jobs;
+interaction I = C - R - G + B, mean over runs, 95 % bootstrap interval over runs; `report/interaction.csv`):
 
-- RTK adds nothing measurable to any radar level (interaction 0 for every count).
-- With consumer or degraded GNSS and **high radar**, the combination is worse than additive for missed links
-  (I = +0.56 and +0.81 per run, intervals [0.16, 0.89] and [0.51, 1.07]) and for lost core events (+0.38, +0.63),
-  and **better** than additive for false merges (-0.24, -0.64): with both degraded the method withholds decisions
-  (more tracks left anonymous) rather than merging the wrong vehicles.  Consumer GNSS with nominal radar shows the
-  same missed-link interaction, smaller (+0.15).
-- No interaction for wrong links, association errors, missed contacts or the centre error.
-- Caveat: the noise streams are keyed by seed, sensor, profile and recorder name, not by run, so one seed is one
-  realization shared by all runs (e.g. the same GNSS bias for "A" in every run).  Runs within a seed are therefore not
-  independent and the bootstrap intervals over runs are optimistic for GNSS-driven metrics.  The direction of the
-  effects is consistent across seeds; their exact size should be confirmed with run-keyed streams.
+- RTK adds nothing measurable to any radar level;
+- with consumer or degraded GNSS and high radar the combination is worse than additive for missed links (+0.56 and
+  +0.81 per run, intervals [0.16, 0.89] and [0.51, 1.07]) and lost core events (+0.38, +0.63), and better than
+  additive for false merges (-0.24, -0.64): with both degraded the method withholds decisions rather than merging
+  wrong vehicles; consumer GNSS with nominal radar shows the same missed-link interaction, smaller (+0.15);
+- no interaction for wrong links, association errors, missed contacts or the position error.
 
-## 10. GNSS + collision impulse noise (`combined`, kept separate)
+The intervals treat runs as independent although the runs of one seed share one noise realization (section 19):
+they are optimistic for GNSS-driven metrics.
 
-Exact or RTK GNSS with 10 % impulse noise: identical to the baseline.  Consumer GNSS (independent or rho 0.9) with
-10 % impulse noise: contacts identified 0.903 +- 0.275 over 8 seeds, entirely due to seed 3, whose first impulse
-reports of A and B (x 1.151 and x 0.702) differ by 3.3 sigma, beyond the method's 3-sigma pairing gate, in every run
-(the shared-realization caveat above); the other 7 seeds are perfect.  Impulse noise alone: 2-10 % no effect, 20 %
-one missed contact in 66 runs.
+## 10. Collision impulse uncertainty
 
-## 11. Timing, sampling and outages
+Each impulse report is multiplied by 1 + N(0, eps^2), independently per recorder; the method pairs two reports when
+their impulses agree within 3 sigma of an assumed 10 % relative error.  eps = 2, 5, 10 %: no effect; 20 %: one missed
+contact in 66 runs.  Combined with GNSS (`combined`): exact or RTK GNSS + 10 %: identical to the baseline; consumer
+GNSS + 10 % (independent or rho 0.9): contacts identified 0.903 +- 0.275 over 8 seeds, entirely due to seed 3, whose
+first impulse reports of A and B (x 1.151 and x 0.702) differ by 3.3 sigma, beyond the pairing gate, in every run;
+the other seven seeds are perfect.  Reports outside the gate are left unpaired, never paired wrongly.
 
-| condition | contacts | runs aligned | events preserved | note |
-|---|--:|--:|--:|---|
-| latency 0.05 / 0.10 / 0.25 / 0.50 s (one recorder) | 1.000 / 0.926 / 0.815 / 0.518 | 1 / 1 / 1 / 0.82 | 1.000 / 0.989 / 0.968 / 0.839 | report delays above ~0.1 s break collision pairing |
-| clock offsets (+-7 to 29 s) | n/a | - | 1.000 | 19/22 graphs identical node for node |
-| 10 Hz / 5 Hz sampling | 1.000 / 0.889 | 1 / 1 | 0.930 / 0.855 | 1 wrong link each; 5 Hz relative clock error up to 3.2 s |
-| one recorder missing (50) | 0.954 | 0.98 | 0.959 | contacts of the remaining recorders |
-| 1 s radar outage (50) | 1.000 | 1 | 0.941 | 2 wrong links, 2 false merges |
+## 11. Whole-recorder clock offsets
 
-## 12. Collision associations
+Every timestamp of each recorder shifted by a constant (+7.3, -14.6, +21.9 s, ...; no drift).  The core events are
+identical (preservation 1.000, time differences 0) and 19 of the 22 global graphs are identical node for node; the
+other three differ only outside the core events.  Correctness metrics are not computed here, because the shifted raw clocks
+invalidate the ground-truth time mapping.
 
-Over all 3862 jobs no reconstructed collision paired the wrong vehicles (`wrong_collision_matches` 0 in every
-condition).  Failures are missed contacts only: radar high (about 1 %), report latency >= 0.10 s, 5 Hz sampling,
-missing recorder, and the seed-3 impulse realization with consumer GNSS.
+## 12. Reduced sampling frequency
 
-## 13. Fusion near the incident
+| rate | contacts identified | association acc. | wrong links | event preservation | largest relative clock error |
+|---|--:|--:|--:|--:|--:|
+| 10 Hz | 1.000 | 0.980 | 1 | 0.930 | 0.05 s |
+| 5 Hz | 0.889 | 0.980 | 1 | 0.855 | 3.15 s |
 
-Incident participants (true contact partners) are never linked to the wrong recorder in any condition (wrong 0).
-Under degradation their links are lost instead (incident link accuracy 0.98 baseline, 0.93 consumer GNSS, 0.58 radar
-high, 0.31-0.39 GNSS x high radar).  By distance (baseline -> radar high): association accuracy 1.00 -> 0.98 within
-10 m, false merges 0 -> 11 per seed within 10 m and 0 -> 0.5 beyond 25 m; with GNSS errors the bands do not change
-(no false merges at any range).
+At 5 Hz three of the 27 contacts are not paired and one recorder's clock is placed 3 s off.
 
-## 14. Absolute trajectory errors (fused anonymous road users)
+## 13. Missing recorder
 
-Baseline: median 0.27 m, p95 0.75 m, max 3.1 m; velocity median 0.11 m/s.  Radar high: 0.52 / 2.05 / 6.1 m.
-Consumer GNSS: 1.78 / 2.58 / 5.6 m; degraded GNSS: 4.90 / 7.17 / 22.5 m (0.41 m/s).  By band the baseline error grows
-with range (0.17 / 0.25 / 0.52 m for 0-10 / 10-25 / > 25 m).
+Each recorder of the multi-recorder runs removed in turn (50 jobs): contacts identified 0.954 (contacts of the
+remaining recorders), runs aligned 0.98, association accuracy 1.000, no false merge, event preservation 0.959.
 
-## 15. Held-out simulated traffic configurations
+## 14. Temporary radar outages
 
-32 predeclared cases in 11 families (new blueprints, separations, speeds, timing, collision and non-collision), one
-recording each on the private engine, evaluated without any change to the method:
+1 s without radar on one recorder, 1-2 s before its first collision (50 jobs): all contacts identified, association
+accuracy 0.984 (2 wrong links), 2 false merges, 9 missed links, event preservation 0.941.
 
-- 27 physically valid, 5 invalid by the predeclared on-lane rule (H07, H08 left the roadway after a no-contact
-  crossing; H10, H11, H30 grazed a lane edge by 1-6 cm, as canonical S07 and S19 also do); 5 outcomes differed from
-  the intended one (H01, H07, H28 without contact; H16 hit the occluding truck; H24 an extra contact): all kept.
-- On the 27 valid cases: 23/23 contacts identified, 0 wrong collision matches, association accuracy 0.979 (1 wrong
-  link: H26, dense platoon, B's identity put on a nearby car's track by the collision association), 0 false merges,
-  50 missed merges, fused centre error median 0.33 m (p95 0.95 m), 0 EGO_PATH oscillations, 0 closure violations,
-  CUT_IN recall 0.67 against the audit's ground-truth heuristic, oracle event recall 0.85.
-- Without a collision the recorders of three runs were not aligned (H28, H29, H31: their mutual tracks stay anonymous).
+## 15. Collision reconstruction accuracy
 
-![held-out](../results/generalization/frozen_campaign/figures/generalization_by_family.png)
+Over all 3,774 jobs no reconstructed collision paired the wrong vehicles and no collision was reconstructed between
+vehicles that did not touch (wrong collision matches 0 in every condition).  Failures are missed contacts only: high
+radar (about 1 %), 5 Hz sampling (11 %), a missing recorder (5 %), the seed-3 impulse realization with consumer GNSS,
+20 % impulse noise (1 in 66 runs).
 
-## 16. Computational cost
+## 16. Vehicle identity and fusion accuracy
 
-173 CPU-hours for the campaign (per job: median 39-126 s, p95 up to 913 s for GNSS x high radar), worker peak memory
-at most 427 MB, perturbed copies deleted after each job (disk stable).  Single-threaded BLAS per job, verified
-node-for-node identical to the canonical outputs and about twice as fast as multi-threaded.  Concurrency 8-24 workers
-(adaptive, then fixed at 20 and 24 on request); the campaign paused once (15:55-18:36) and resumed without
-repeating any job.
+- Recorder links: wrong links occur only with high radar (1-2 per seed over 22 runs), 10 / 5 Hz sampling (1) and radar
+  outages (2); GNSS errors of any size produce none.
+- Incident participants are never linked to the wrong recorder; their links are lost instead (incident link
+  accuracy 0.98 baseline, 0.93 consumer GNSS, 0.58 high radar, 0.31-0.39 GNSS x high radar).
+- False merges: 0 in the baseline and under every GNSS profile; with high radar 16.5 per seed, of which 11 within
+  10 m of the recorder.
+- Missed merges are the method's conservative choice (43 in the baseline, mostly beyond 25 m) and grow with every
+  degradation (139 high radar, 80-110 consumer / degraded GNSS).
 
-## 17. Main failure conditions and limitations
+## 17. Trajectory accuracy
 
-1. Dense radar clutter (30 false returns per sweep): phantom road users, lost recorder links (including incident
-   participants), false merges close to the recorder.
-2. Collision report delays of 0.1 s or more, or impulse reports differing by more than 3 sigma: contacts left
-   unpaired (never wrongly paired).
-3. GNSS errors of metres: the fused map position is off by about the GNSS error; identities are withheld, not wrong.
-4. 5 Hz sampling: 11 % of contacts lost.
-5. Distant road users (> 25 m) often stay as several anonymous fragments (missed merges), by design.
-6. Evaluation: noise streams shared by all runs of a seed (see 9); `gnss_refined` not an informative ablation; the
-   seed-stopping tolerance on the centre error is too tight for GNSS-scale errors; the audit's cut-in truth is a
-   heuristic; the on-lane acceptance rule is stricter than CARLA's controller on curves.
+Fused anonymous road users against their true vehicle: baseline centre error median 0.27 m, p95 0.75 m, max 3.1 m;
+by distance 0.17 / 0.25 / 0.52 m (0-10 / 10-25 / > 25 m); velocity median 0.11 m/s (p95 0.65).  High radar: 0.52 /
+2.05 / 6.1 m.  Consumer GNSS: 1.78 / 2.58 / 5.6 m; degraded GNSS: 4.90 / 7.17 / 22.5 m (velocity median 0.41 m/s).
+Calibration: the share of fused states within their declared 2-sigma is 0.01 in the baseline (median over runs;
+0.865 expected for a calibrated Gaussian): the declared uncertainty of the fused states is far too small.
 
-## 18. Reproduction
+## 18. Semantic event stability
+
+Against the unperturbed reconstruction (stability, not accuracy): core events preserved 1.000 (baseline, clock
+offsets, GNSS RTK), 0.97 (nominal radar, consumer GNSS), 0.85 (high radar), 0.75 (degraded GNSS x high radar).  Against
+the ground-truth coverage oracle (accuracy of the existing definitions, unchanged by the campaign): recall 0.88 and
+precision 0.77 in the baseline; with high radar recall 0.77 and precision 0.06, because the phantom road users produce
+events.  EGO_PATH oscillations: 0 in the baseline and under GNSS errors, 3.8 per seed with high radar.  CRITICAL_TTC
+closure violations: 0 except 0.4 per seed in the GNSS x radar cells with consumer or degraded GNSS and nominal or high radar.  CUT_IN against the audit's ground-truth heuristic:
+0.80 baseline, 0.60 high radar.
+
+## 19. Scientific limitations
+
+- Perturbations are engineering models (Gaussian, per detection or per receiver epoch; uniform clutter; no
+  multipath geometry, no NLOS jumps, constant clock offsets); the results describe CARLA recordings.
+- Shared seed realizations: the random streams are keyed by seed, sensor, profile and recorder name, not by run, so
+  one seed is one realization shared by all 22 runs (for example the same GNSS bias for recorder A in every run, or
+  the seed-3 impulse draw that broke the pairing everywhere at once).  Runs within a seed are not independent: the
+  effective sample size of GNSS- and impulse-driven metrics is the number of seeds, and the bootstrap intervals over
+  runs are optimistic.
+- Calibration: the fused states' declared uncertainty is overconfident (section 17).
+- The adaptive seed rule's 0.05 m tolerance on the fused centre error cannot be met when the GNSS error is metres:
+  every condition with consumer or degraded GNSS ran the maximum 8 seeds.
+- `gnss_refined` is not an informative ablation (section 8).
+- The audit's ground-truth cut-in is a heuristic (it counts the S07 roundabout merge and the S14 sideswipe as
+  cut-ins); event preservation measures stability, not correctness.
+- 22 runs of 19 scenarios on three CARLA towns: the envelope is established for these traffic situations only.
+
+## 20. Reproducibility
+
+Inputs: the 22 canonical runs under `traces/<scenario>/<run>/` (raw `vehicles/`, `ground_truth/` for the evaluation,
+and the canonical `reconstruction/` the perturbed runs are compared with), Python 3.8 with the conda environment
+`carla` (versions in the manifest).  No CARLA server is needed.
 
 ```bat
-git checkout robustness-campaign-v2.2
-python scripts\campaign_controller.py workers 20
-python scripts\campaign_controller.py start
-python scripts\campaign_controller.py status
-python scripts\campaign_report.py robustness
-python scripts\generalization.py check & python scripts\generalization.py record & python scripts\generalization.py evaluate
-python scripts\campaign_report.py generalization
+git checkout robustness-campaign-final
+set CDF_CAMPAIGN_RESULTS=results\robustness\my_run
+scripts\campaign.bat workers 20
+scripts\campaign.bat start
+scripts\campaign.bat status
+python scripts\campaign_report.py robustness --jobs results\robustness\my_run\jobs.jsonl
 ```
 
-Every job verifies the frozen commit and a clean tree (`CDF_ANALYSIS_FREEZE_COMMIT`); the held-out recordings need
-the private CARLA engine on port 3000 (`heldout/frozen_campaign/`, not committed).
-
-## 19. Output paths
-
-- `results/robustness/frozen_campaign/report/` (tables, csv, json, `figures/*.pdf|svg|png`: degradation curves per
-  family, GNSS x radar curves and heatmap), `jobs.jsonl.gz`, `control/` (controller log, 15-min resource monitor).
-- `results/robustness/frozen_campaign_smoke/` (smoke test).
-- `results/generalization/frozen_campaign/` (protocol checks, recordings, jobs, tables, figure).
-- `results/frozen_campaign_manifest.json`, `docs/FROZEN_CAMPAIGN.md`.
+The controller verifies the commit, a clean tree, the code and configuration hashes, the raw data of the 22 runs and
+the matrix against `results/robustness_campaign_manifest.json` before any job, runs one process per job with
+single-threaded BLAS, and can be paused and resumed (`scripts\campaign.bat pause`, `resume`) without repeating a
+completed job.  The committed report is regenerated from the committed records with
+`python scripts\campaign_report.py robustness`.  Computational cost of the campaign: 171 CPU-hours, worker peak
+memory 427 MB, 20-24 workers on 22 logical CPUs.

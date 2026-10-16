@@ -131,26 +131,33 @@ scripts\review_canonical_runs.bat
 python -m pytest -q
 ```
 
-## Frozen robustness and generalization campaign
+## Robustness campaign (22 canonical runs, 35 conditions)
 
-Protocol: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md) (tags `pre-robustness-campaign`, `robustness-campaign-v2*`);
-report: [docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md); tables and figures under
-`results/robustness/frozen_campaign/report/` and `results/generalization/frozen_campaign/`.
+The frozen reconstruction (tag `pre-robustness-campaign`) under perturbed recordings: radar noise and clutter,
+GNSS errors (independent, correlated, refined), GNSS x radar, collision impulse noise, recorder clock offsets,
+reduced sampling, a missing recorder and radar outages; 3,774 jobs.  Report:
+[docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md); protocol: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md);
+results and figures: `results/robustness/frozen_campaign/report/`.
+
+Inputs: the 22 canonical runs under `traces\` (raw `vehicles\`, `ground_truth\` for the evaluation, and the
+canonical `reconstruction\` the perturbed runs are compared with), Python 3.8 (conda env `carla`).  No CARLA
+server is needed: the campaign perturbs and reconstructs saved recordings.
 
 ```bat
-:: robustness campaign (22 canonical runs): detached, resumable controller; every job checks the frozen commit
+:: from a clean checkout of the campaign's version; before any job the controller checks the commit, a clean tree
+:: and results\robustness_campaign_manifest.json (code, configuration, raw data of the 22 runs, matrix)
+git checkout robustness-campaign-final
+set CDF_CAMPAIGN_RESULTS=results\robustness\my_run
 scripts\campaign.bat workers 20
 scripts\campaign.bat start
 scripts\campaign.bat status
+:: pause / resume at any time (completed jobs are never repeated)
 scripts\campaign.bat pause
 scripts\campaign.bat resume
+:: tables and figures from the job records (jobs.jsonl or jobs.jsonl.gz)
+python scripts\campaign_report.py robustness --jobs results\robustness\my_run\jobs.jsonl
+:: regenerate the committed report from the committed records
 python scripts\campaign_report.py robustness
-
-:: held-out generalization (private CARLA on port 3000): static check, record, evaluate, report
-python scripts\generalization.py check
-python scripts\generalization.py record
-python scripts\generalization.py evaluate --workers 8
-python scripts\generalization.py report
 ```
 
 ## Canonical scenarios (development set: 19 scenarios, 22 runs)
@@ -180,8 +187,8 @@ python scripts\generalization.py report
 Run folders: `traces\<id>\run_0_<run>\` with the raw recordings (`vehicles\`), the privileged
 `ground_truth\` (evaluation only) and the reconstruction (`reconstruction\`, regenerated from the raw recordings
 with the method above).
-Validation of the set: [docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md).  The final experimental
-campaign (frozen code, parameters and scenarios; predeclared held-out seeds) has not been run.
+Validation of the set: [docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md).  Robustness of the
+reconstruction on these runs: [docs/ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md).
 
 ## Replay controls
 

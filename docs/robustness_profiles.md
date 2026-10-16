@@ -169,14 +169,12 @@ The symmetry Monte Carlo report is regenerated as a diagnostic of that legacy
 gate. All robustness families are rerun from the final clean analysis freeze;
 see the final campaign results (`results/`).
 
-`CollisionPerturbation` rewrites each recorder's `collisions.jsonl`.  Each callback is dropped with probability `p_drop`; its impulse is multiplied by max(0, 1 + N(0, eps^2)); its timestamp is delayed by `latency_s` if the recorder is in `latency_recorders`.  The draws are made per callback, separately for each recorder.
+`CollisionPerturbation` rewrites each recorder's `collisions.jsonl`.  Each callback is dropped with probability `p_drop`; its impulse is multiplied by max(0, 1 + N(0, eps^2)).  The draws are made per callback, separately for each recorder.
 
 | Family: value | Justification |
 |---|---|
 | `impulse`: eps = 0.02, 0.05, 0.10, 0.20 | Engineering assumption: a sweep of the relative error of the reported impulse magnitude, from small to large; no source reviewed covers the accuracy of crash-impulse reports. |
 | clamp of the factor at 0 | Engineering assumption: an impulse magnitude is never negative. |
-| `latency`: 0.05, 0.10, 0.25, 0.50 s | Engineering assumption: from one to ten sample periods of the 20 Hz recordings. |
-| latency on one recorder: the second in name order (none in a single-recorder run) | Engineering assumption: one recorder reports late while the others stay on time. |
 | `p_drop` = 0 | Default; the study does not exercise dropped callbacks. |
 
 ## Clock offsets
@@ -215,7 +213,7 @@ Every sweep of one recorder's radar whose local time (seconds since its first eg
 ## Seeds and metrics
 
 - Stochastic families (`radar`, `gnss`, `gnss_refined`, `gnss_correlated`, `combined`, `radar_gnss_combined`, `impulse`) draw seeds 0, 1, 2, ..., at least 3 and at most 8.  Seeds are added while the standard error over seeds of any pooled metric exceeds its tolerance: 0.02 for association accuracy, collision recall, event recall and the share of runs aligned; 0.05 m for the fused centre error.  These counts and tolerances are settings of the driver: engineering assumptions.
-- Deterministic families (`latency`, `clock`, `downsample`, `dropout`, `outage`) run once with seed 0.  The `baseline` copy, left unchanged, must reproduce the canonical reconstruction.
+- Deterministic families (`clock`, `downsample`, `dropout`, `outage`) run once with seed 0.  The `baseline` copy, left unchanged, must reproduce the canonical reconstruction.
 - For each condition and seed, the metrics are pooled over the runs.  The summary (`results/robustness/summary.{json,md,csv}`, `figures/`) gives the mean and SD over seeds.  The metrics are:
   - association accuracy of the decided tracks;
   - true vehicle-vehicle collisions reconstructed;

@@ -52,12 +52,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 PYTHON = sys.executable
-# The campaign's code versions: v1 = the frozen tag; v2 = the evaluation revision (docs/FROZEN_CAMPAIGN.md).  A job
-# complete under v1 is complete (v2 changes no result where v1 completed); attempts count under v2 only.
-V1_COMMIT = "5d7adf764f1b8c3d82e58d91f8bba309da79b7b8"
-# v2.1 changes this controller only (operational; docs/FROZEN_CAMPAIGN.md): jobs of v2 and v2.1 run identical code.
-VERSION_TAG = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "robustness-campaign-v2.2")
-SAME_VERSION_TAGS = ("robustness-campaign-v2", "robustness-campaign-v2.1", "robustness-campaign-v2.2")
+# The campaign's code versions (docs/FROZEN_CAMPAIGN.md): the jobs run from the commit of VERSION_TAG
+# (``robustness-campaign-final``: the final 35-condition scope); a job complete under an earlier version
+# (pre-robustness-campaign, v2, v2.1, v2.2: identical reconstruction and evaluation where it completed) stays complete;
+# attempts count under the versions listed in SAME_VERSION_TAGS.
+VERSION_TAG = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "robustness-campaign-final")
+SAME_VERSION_TAGS = ("robustness-campaign-v2", "robustness-campaign-v2.1", "robustness-campaign-v2.2",
+                     "robustness-campaign-final")
 
 
 def _tag_commit(tag: str) -> str:
@@ -84,7 +85,7 @@ def _same_version_commits() -> set:
 # Overridable for a test of the controller itself in scratch folders (never for the campaign).
 RESULTS = Path(os.environ.get("CDF_CAMPAIGN_RESULTS", str(ROOT / "results" / "robustness" / "frozen_campaign")))
 WORK = Path(os.environ.get("CDF_CAMPAIGN_WORK", str(ROOT / "robustness" / "frozen_campaign")))
-MANIFEST = ROOT / "results" / "frozen_campaign_manifest.json"
+MANIFEST = ROOT / "results" / "robustness_campaign_manifest.json"
 CONTROL = RESULTS / "control"
 MIN_WORKERS, MAX_WORKERS = 4, 20
 HARD_MAX_WORKERS = 24  # a fixed setting (workers N) may go up to this
@@ -142,7 +143,7 @@ def verify_freeze() -> Dict[str, Any]:
     the manifest written before the campaign.  Raises on any difference."""
     from cdf.evaluation.provenance import code_hash, config_hash
     from cdf.reconstruction.config import load_config
-    import freeze_manifest
+    import campaign_manifest
     import robustness
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(ROOT), capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=str(ROOT),
@@ -157,12 +158,14 @@ def verify_freeze() -> Dict[str, Any]:
         problems.append("code hash differs from the manifest")
     if config_hash(load_config().to_dict()) != manifest["reconstruction_config_sha256"]:
         problems.append("reconstruction configuration differs from the manifest")
+    if set(manifest["robustness"]["matrix"]) != set(robustness.FAMILIES):
+        problems.append("families differ from the manifest")
     for family, entry in manifest["robustness"]["matrix"].items():
         levels = [label for label, _ in robustness.FAMILIES.get(family, ([], False))[0]]
         if levels != [lev["label"] for lev in entry["levels"]]:
             problems.append("levels of {0} differ from the manifest".format(family))
     for run, record in manifest["canonical_manifest"]["runs"].items():
-        if freeze_manifest.raw_hash(ROOT / run)["sha256"] != record["sha256"]:
+        if campaign_manifest.raw_hash(ROOT / run)["sha256"] != record["sha256"]:
             problems.append("raw data of {0} changed".format(run))
     if problems:
         raise RuntimeError("freeze verification failed: " + " | ".join(problems))

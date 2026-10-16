@@ -1,4 +1,4 @@
-"""Breakdowns of the existing fusion and collision evaluation for the robustness and generalization campaign.
+"""Breakdowns of the existing fusion and collision evaluation for the robustness campaign.
 
 PRIVILEGED evaluation only (ground truth is read here, never by the reconstruction).  Nothing here defines a new
 event or identity criterion: every verdict is the one ``fusion_metrics.evaluate_fusion`` and

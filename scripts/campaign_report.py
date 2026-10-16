@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Tables and figures of the frozen robustness campaign and of the held-out generalization study.
+"""Tables and figures of the robustness campaign on the 22 canonical runs.
 
-    python scripts/campaign_report.py robustness   [--jobs results/robustness/frozen_campaign/jobs.jsonl]
-    python scripts/campaign_report.py generalization
+    python scripts/campaign_report.py robustness   [--jobs results/robustness/frozen_campaign/jobs.jsonl.gz]
 
-Aggregation only: every number comes from the job records written by ``scripts/robustness.py`` and
-``scripts/generalization.py`` (their existing evaluation); nothing is recomputed from the recordings and no
-threshold is introduced here.  Conventions:
+Aggregation only: every number comes from the job records written by ``scripts/robustness.py`` (run by
+``scripts/campaign_controller.py``) with their existing evaluation; nothing is recomputed from the recordings and
+no threshold is introduced here.  The command rewrites ``<jobs dir>/summary.json|csv|md`` and ``figures/``
+(``robustness.summarize``) and ``<jobs dir>/report/`` (tables, csv, json, figures).  ``jobs.jsonl`` (local) or
+``jobs.jsonl.gz`` (committed) are read alike.  Conventions:
 
 * One result per job (its complete attempt, else its last failure: ``robustness.latest_results``).  Failed jobs
   are counted and listed, never dropped silently; every aggregate states how many jobs it holds.
@@ -40,15 +41,19 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 ROBUSTNESS = ROOT / "results" / "robustness" / "frozen_campaign"
-GENERALIZATION = ROOT / "results" / "generalization" / "frozen_campaign"
 BANDS = ["0-10 m", "10-25 m", ">25 m"]
 GNSS_LEVELS = ["rtk", "consumer", "degraded"]
 RADAR_LEVELS = ["low", "nominal", "high"]
 
 
 def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
+    """A JSON-lines file, gzip-compressed when its name ends in ``.gz``."""
     if not path.exists():
         return []
+    if path.suffix == ".gz":
+        import gzip
+        with gzip.open(str(path), "rt", encoding="utf-8") as handle:
+            return [json.loads(line) for line in handle if line.strip()]
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
@@ -255,11 +260,6 @@ METRICS["incident_centre_error_median_m"] = (lambda rs: _median(rs, "incident_ce
 # Aggregation
 # --------------------------------------------------------------------------------------------------------------
 
-def load_jobs(path: Path) -> List[Dict[str, Any]]:
-    import robustness
-    return robustness.latest_results(_read_jsonl(path))
-
-
 def condition_table(jobs: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     import robustness
     groups: Dict[Tuple[str, str], Dict[int, List[Dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
@@ -385,7 +385,6 @@ CURVES = {"radar": ("Radar degradation", ["low", "nominal", "high"]),
           "combined": ("GNSS + 10 % collision impulse noise", ["exact + 10%", "RTK + 10%", "consumer independent + 10%",
                                                                "consumer common 0.9 + 10%"]),
           "impulse": ("Collision impulse noise", ["2%", "5%", "10%", "20%"]),
-          "latency": ("Collision report latency (one recorder)", ["0.05 s", "0.10 s", "0.25 s", "0.50 s"]),
           "downsample": ("Reduced sampling rate", ["10 Hz", "5 Hz"]),
           "outage": ("1 s radar outage (each recorder)", ["1 s radar outage"]),
           "dropout": ("One recorder missing (each in turn)", ["one recorder"])}
@@ -613,8 +612,10 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
 
 
 def robustness_report(jobs_path: Path, out: Path) -> int:
+    import robustness
     raw = _read_jsonl(jobs_path)
-    jobs = load_jobs(jobs_path)
+    jobs = robustness.latest_results(raw)
+    robustness.summarize(raw, jobs_path.parent)  # summary.json|csv|md and figures/ beside the job records
     rows = condition_table(jobs)
     inter = interaction_table(jobs)
     resources = resources_table(raw)
@@ -648,180 +649,15 @@ def robustness_report(jobs_path: Path, out: Path) -> int:
     return 0
 
 
-# --------------------------------------------------------------------------------------------------------------
-# Generalization
-# --------------------------------------------------------------------------------------------------------------
-
-def generalization_figure(results: Path) -> list:
-    from cdf.evaluation.figures import DOUBLE_COLUMN_IN, paper_style
-    plt = paper_style()
-    summary = json.loads((results / "summary.json").read_text(encoding="utf-8"))
-    families = summary["families"]
-    names = list(families) + ["ALL"]
-    rows = [families[n] for n in families] + [summary["overall_valid"]]
-    panels = [("collision_recall", "collision recall", (0, 1.05)), ("association_accuracy", "association accuracy", (0, 1.05)),
-              ("centre_error_median_m", "fused centre error, median [m]", None),
-              ("centre_error_p95_m", "fused centre error, p95 [m]", None),
-              ("missed_merges", "missed merges (count)", None), ("oracle_event_recall", "oracle event recall", (0, 1.05))]
-    fig, grid = plt.subplots(2, 3, figsize=(DOUBLE_COLUMN_IN, 4.6))
-    for axis, (key, title, lim) in zip(grid.flat, panels):
-        values = [r.get(key) for r in rows]
-        xs = range(len(names))
-        axis.bar(xs, [math.nan if v is None else v for v in values], color=["#4c72b0"] * (len(names) - 1) + ["#333333"])
-        for x, v in zip(xs, values):
-            if v is None:
-                axis.text(x, 0, "n/a", ha="center", va="bottom", fontsize=5, rotation=90)
-        axis.set_xticks(list(xs))
-        axis.set_xticklabels(["{0} ({1})".format(n, r["cases"]) for n, r in zip(names, rows)], rotation=60, ha="right", fontsize=5)
-        axis.set_title(title)
-        axis.grid(axis="y", alpha=0.3)
-        if lim:
-            axis.set_ylim(*lim)
-    fig.suptitle("Held-out simulated traffic configurations: valid cases per family (n); n/a = undefined")
-    fig.tight_layout()
-    out = results / "figures"
-    out.mkdir(parents=True, exist_ok=True)
-    paths = []
-    for suffix in ("pdf", "svg", "png"):
-        path = out / "generalization_by_family.{0}".format(suffix)
-        fig.savefig(str(path), dpi=200 if suffix == "png" else None)
-        paths.append(path)
-    plt.close(fig)
-    return paths
-
-
-
-def generalization_report(results: Path = GENERALIZATION) -> int:
-    recordings = _read_jsonl(results / "recordings.jsonl")
-    latest_rec: Dict[str, Dict[str, Any]] = {}
-    for r in recordings:
-        if r["case"] not in latest_rec or latest_rec[r["case"]].get("status") != "recorded":
-            latest_rec[r["case"]] = r
-    jobs: Dict[str, Dict[str, Any]] = {}
-    for r in _read_jsonl(results / "jobs.jsonl"):
-        if r["case"] not in jobs or jobs[r["case"]].get("status") != "complete":
-            jobs[r["case"]] = r
-    import yaml
-    protocol = yaml.safe_load((ROOT / "configs" / "heldout" / "frozen_campaign.yaml").read_text(encoding="utf-8"))
-    cases = []
-    for case in protocol["cases"]:
-        rec = latest_rec.get(case["id"]) or {}
-        job = jobs.get(case["id"]) or {}
-        numbers = job_numbers(job) if job.get("status") == "complete" else {}
-        intended = sorted((case.get("intended") or {}).get("collision") or [])
-        actual = rec.get("actual_contacts")
-        actual_parts = sorted({p for pair in actual or [] for p in pair})
-        cases.append({"case": case["id"], "family": case["family"], "base": case["base"],
-                      "recording": rec.get("status", "not recorded"),
-                      "valid": (rec.get("validity") or {}).get("valid"),
-                      "validity_problems": (rec.get("validity") or {}).get("problems"),
-                      "intended_participants": intended, "actual_contacts": actual,
-                      "outcome_as_intended": None if actual is None else (actual_parts == intended),
-                      "evaluation": job.get("status", "not evaluated"), "error": job.get("error") or rec.get("error"),
-                      **{k: numbers.get(k) for k in ("contacts_true", "contacts_detected", "contacts_identified",
-                                                      "contacts_wrong_participants", "collisions_extra_vehicle_pairs",
-                                                      "links_correct", "links_wrong", "links_missed", "assoc_correct",
-                                                      "assoc_decided", "merges_correct", "merges_false", "merges_missed",
-                                                      "phantom_entities", "duplicates", "centre_median_m", "centre_p95_m",
-                                                      "centre_max_m", "velocity_median_mps", "velocity_p95_mps", "osc",
-                                                      "track_losses", "closure_violations", "cut_in_tp", "cut_in_true",
-                                                      "cut_in_fp", "oracle_expected", "oracle_matched", "oracle_found",
-                                                      "recorders", "recorders_aligned",
-                                                      "incident_correct", "incident_wrong", "incident_missed_link")},
-                      **{k: numbers.get(k) for k in numbers if k.startswith("band_")},
-                      "wall_s": job.get("wall_s")})
-    valid = [c for c in cases if c["valid"] and c["evaluation"] == "complete"]
-    by_family: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-    for c in valid:
-        by_family[c["family"]].append(c)
-
-    def aggregate(rs: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
-        return {"cases": len(rs),
-                "collision_recall": _ratio(rs, "contacts_identified", "contacts_true"),
-                "collision_detection": _ratio(rs, "contacts_detected", "contacts_true"),
-                "contacts_true": _sum(rs, "contacts_true"),
-                "wrong_collision_matches": (_sum(rs, "contacts_wrong_participants") or 0) + (_sum(rs, "collisions_extra_vehicle_pairs") or 0),
-                "association_accuracy": _ratio(rs, "assoc_correct", "assoc_decided"),
-                "wrong_links": _sum(rs, "links_wrong"), "missed_links": _sum(rs, "links_missed"),
-                "false_merges": _sum(rs, "merges_false"), "missed_merges": _sum(rs, "merges_missed"),
-                "phantom_entities": _sum(rs, "phantom_entities"), "duplicates": _sum(rs, "duplicates"),
-                "centre_error_median_m": _median(rs, "centre_median_m"), "centre_error_p95_m": _median(rs, "centre_p95_m"),
-                "centre_error_max_m": _max(rs, "centre_max_m"),
-                "velocity_error_median_mps": _median(rs, "velocity_median_mps"),
-                "ego_path_oscillations": _sum(rs, "osc"), "closure_violations": _sum(rs, "closure_violations"),
-                "cut_in_recall": _ratio(rs, "cut_in_tp", "cut_in_true"), "cut_in_false_positives": _sum(rs, "cut_in_fp"),
-                "oracle_event_recall": _ratio(rs, "oracle_matched", "oracle_expected"),
-                "oracle_event_precision": _ratio(rs, "oracle_matched", "oracle_found"),
-                "runs_fully_aligned": sum(1 for r in rs if r.get("recorders") and r["recorders"] == r.get("recorders_aligned")),
-                **{"association_accuracy " + b: _band_accuracy(b)(rs) for b in BANDS},
-                **{"false_merges " + b: _sum(rs, "band_merge_false_" + b) for b in BANDS},
-                **{"missed_merges " + b: _sum(rs, "band_merge_missed_" + b) for b in BANDS},
-                **{"centre_error_median_m " + b: _median(rs, "band_centre_median_" + b) for b in BANDS},
-                "incident_link_accuracy": (lambda c, w, m: None if not (c or w or m) else (c or 0) / ((c or 0) + (w or 0) + (m or 0)))(
-                    _sum(rs, "incident_correct"), _sum(rs, "incident_wrong"), _sum(rs, "incident_missed_link"))}
-
-    families = {family: aggregate(rs) for family, rs in sorted(by_family.items())}
-    overall = aggregate(valid)
-    results.mkdir(parents=True, exist_ok=True)
-    record = {"protocol": protocol["protocol"], "cases": cases, "families": families, "overall_valid": overall,
-              "counts": {"declared": len(protocol["cases"]),
-                         "recorded": sum(1 for c in cases if c["recording"] == "recorded"),
-                         "valid": sum(1 for c in cases if c["valid"]),
-                         "invalid": sum(1 for c in cases if c["valid"] is False),
-                         "evaluated": sum(1 for c in cases if c["evaluation"] == "complete"),
-                         "evaluation_failed": sum(1 for c in cases if c["evaluation"] == "failed"),
-                         "outcome_as_intended": sum(1 for c in cases if c["outcome_as_intended"]),
-                         "outcome_differs": sum(1 for c in cases if c["outcome_as_intended"] is False)}}
-    (results / "summary.json").write_text(json.dumps(record, indent=1, default=str) + "\n", encoding="utf-8")
-    _write_csv(results / "cases.csv", cases)
-    _write_csv(results / "families.csv", [dict(family=f, **v) for f, v in families.items()] + [dict(family="ALL valid", **overall)])
-    lines = ["# Held-out generalization: tables", "",
-             "Generated by `scripts/campaign_report.py generalization`.  Frozen reconstruction, unperturbed recordings of "
-             "the predeclared cases (`configs/heldout/frozen_campaign.yaml`); correctness against simulator truth.", "",
-             "Counts: " + ", ".join("{0} {1}".format(k, v) for k, v in record["counts"].items()) + ".", "",
-             "## Cases", "",
-             "| case | family | valid | intended contact | actual contacts | as intended | contacts identified/true | "
-             "links correct/wrong/missed | assoc. | false / missed merges | centre median / p95 [m] | osc. | CUT_IN tp/true/fp | evaluation |",
-             "|---|---|---|---|---|---|---|---|---|---|---|--:|---|---|"]
-    for c in cases:
-        lines.append("| {case} | {family} | {valid} | {intended} | {actual} | {asint} | {ci}/{ct} | {lc}/{lw}/{lm} | {ac}/{ad} | "
-                     "{mf} / {mm} | {cm} / {cp} | {osc} | {tp}/{tt}/{fp} | {ev} |".format(
-                         case=c["case"], family=c["family"], valid=_fmt(c["valid"]), intended=c["intended_participants"] or "none",
-                         actual=c["actual_contacts"] if c["actual_contacts"] is not None else "n/a",
-                         asint=_fmt(c["outcome_as_intended"]), ci=_fmt(c["contacts_identified"]), ct=_fmt(c["contacts_true"]),
-                         lc=_fmt(c["links_correct"]), lw=_fmt(c["links_wrong"]), lm=_fmt(c["links_missed"]),
-                         ac=_fmt(c["assoc_correct"]), ad=_fmt(c["assoc_decided"]), mf=_fmt(c["merges_false"]),
-                         mm=_fmt(c["merges_missed"]), cm=_fmt(c["centre_median_m"], 2), cp=_fmt(c["centre_p95_m"], 2),
-                         osc=_fmt(c["osc"]), tp=_fmt(c["cut_in_tp"]), tt=_fmt(c["cut_in_true"]), fp=_fmt(c["cut_in_fp"]),
-                         ev=c["evaluation"] + (" ({0})".format(c["error"]) if c.get("error") else "")))
-    keys = ["cases", "collision_recall", "wrong_collision_matches", "association_accuracy", "wrong_links", "missed_links",
-            "false_merges", "missed_merges", "centre_error_median_m", "centre_error_p95_m", "ego_path_oscillations",
-            "closure_violations", "oracle_event_recall"]
-    lines += ["", "## Per family (valid, evaluated cases)", "", "| family | " + " | ".join(keys) + " |",
-              "|---|" + "--:|" * len(keys)]
-    for family, agg in list(families.items()) + [("ALL", overall)]:
-        lines.append("| {0} | {1} |".format(family, " | ".join(_fmt(agg.get(k)) for k in keys)))
-    lines += ["", "## Distance bands and incident participants (all valid cases)", ""]
-    for b in BANDS:
-        lines.append("- {0}: association accuracy {1}, false merges {2}, missed merges {3}, centre error median {4} m".format(
-            b, _fmt(overall["association_accuracy " + b]), _fmt(overall["false_merges " + b]),
-            _fmt(overall["missed_merges " + b]), _fmt(overall["centre_error_median_m " + b], 2)))
-    lines.append("- incident participants: link accuracy {0}".format(_fmt(overall["incident_link_accuracy"])))
-    (results / "tables.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    generalization_figure(results)
-    print(record["counts"])
-    return 0
-
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("study", choices=("robustness", "generalization"))
-    parser.add_argument("--jobs", type=Path, default=ROBUSTNESS / "jobs.jsonl")
+    parser.add_argument("study", choices=("robustness",))
+    parser.add_argument("--jobs", type=Path, default=None,
+                        help="job records (default: <results>/jobs.jsonl if present, else jobs.jsonl.gz)")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
-    if args.study == "robustness":
-        return robustness_report(args.jobs, args.out or args.jobs.parent / "report")
-    return generalization_report(args.out or GENERALIZATION)
+    jobs = args.jobs or (ROBUSTNESS / "jobs.jsonl" if (ROBUSTNESS / "jobs.jsonl").exists() else ROBUSTNESS / "jobs.jsonl.gz")
+    return robustness_report(jobs, args.out or jobs.parent / "report")
 
 
 if __name__ == "__main__":

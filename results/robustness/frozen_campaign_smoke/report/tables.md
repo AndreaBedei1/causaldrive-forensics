@@ -92,105 +92,105 @@ I = C - R - G + B per run (mean over common seeds), mean over runs, 95 % bootstr
 
 | GNSS | radar | metric | runs | B | R | G | C | C - B | additive (R-B)+(G-B) | I | I 95 % CI | supported |
 |---|---|---|--:|--:|--:|--:|--:|--:|--:|--:|---|---|
-| rtk | low | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | low | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | nominal | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| rtk | high | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | low | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | nominal | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| consumer | high | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | low | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | nominal | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | association_errors | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | missed_contacts | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | wrong_collision_matches | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | wrong_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | missed_links | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | false_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | missed_merges | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | events_lost | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | centre_error_median_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | centre_error_p95_m | 0 | | | | | | | | insufficient paired evidence | |
-| degraded | high | unaligned_recorders | 0 | | | | | | | | insufficient paired evidence | |
+| rtk | low | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | missed_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | missed_merges | 3 | 2.6667 | 4.0 | 2.6667 | 4.0 | 1.3333 | 1.3333 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | events_lost | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | low | centre_error_median_m | 2 | 0.0968 | 0.098 | 0.1145 | 0.1184 | 0.0216 | 0.019 | 0.0026 | [0.0015, 0.0037] | yes |
+| rtk | low | centre_error_p95_m | 2 | 0.4739 | 0.4711 | 0.4736 | 0.4718 | -0.0022 | -0.0032 | 0.001 | [-0.0007, 0.0028] | no |
+| rtk | low | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | missed_links | 3 | 0.0 | 0.3333 | 0.0 | 0.3333 | 0.3333 | 0.3333 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | missed_merges | 3 | 2.6667 | 3.0 | 2.6667 | 3.0 | 0.3333 | 0.3333 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | events_lost | 3 | 0.0 | 0.6667 | 0.0 | 0.6667 | 0.6667 | 0.6667 | 0.0 | [0.0, 0.0] | no |
+| rtk | nominal | centre_error_median_m | 2 | 0.0968 | 0.1182 | 0.1145 | 0.1321 | 0.0353 | 0.0391 | -0.0038 | [-0.0047, -0.0028] | yes |
+| rtk | nominal | centre_error_p95_m | 2 | 0.4739 | 1.1155 | 0.4736 | 1.1405 | 0.6665 | 0.6411 | 0.0254 | [0.0092, 0.0417] | yes |
+| rtk | nominal | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | missed_links | 3 | 0.0 | 1.6667 | 0.0 | 1.6667 | 1.6667 | 1.6667 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | false_merges | 3 | 0.0 | 2.0 | 0.0 | 1.6667 | 1.6667 | 2.0 | -0.3333 | [-1.0, 0.0] | no |
+| rtk | high | missed_merges | 3 | 2.6667 | 4.3333 | 2.6667 | 4.3333 | 1.6667 | 1.6667 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | events_lost | 3 | 0.0 | 2.0 | 0.0 | 2.0 | 2.0 | 2.0 | 0.0 | [0.0, 0.0] | no |
+| rtk | high | centre_error_median_m | 2 | 0.0968 | 0.1936 | 0.1145 | 0.1963 | 0.0995 | 0.1146 | -0.0151 | [-0.0256, -0.0045] | yes |
+| rtk | high | centre_error_p95_m | 2 | 0.4739 | 1.2385 | 0.4736 | 1.2046 | 0.7307 | 0.7641 | -0.0334 | [-0.0458, -0.021] | yes |
+| rtk | high | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | missed_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | missed_merges | 3 | 2.6667 | 4.0 | 5.0 | 5.0 | 2.3333 | 3.6667 | -1.3333 | [-4.0, 0.0] | no |
+| consumer | low | events_lost | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | low | centre_error_median_m | 2 | 0.0968 | 0.098 | 2.217 | 2.2171 | 2.1203 | 2.1214 | -0.0011 | [-0.0071, 0.0049] | no |
+| consumer | low | centre_error_p95_m | 2 | 0.4739 | 0.4711 | 2.8287 | 2.8136 | 2.3396 | 2.3519 | -0.0122 | [-0.058, 0.0335] | no |
+| consumer | low | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | missed_links | 3 | 0.0 | 0.3333 | 0.0 | 1.0 | 1.0 | 0.3333 | 0.6667 | [0.0, 2.0] | no |
+| consumer | nominal | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | nominal | missed_merges | 3 | 2.6667 | 3.0 | 5.0 | 6.6667 | 4.0 | 2.6667 | 1.3333 | [-2.0, 6.0] | no |
+| consumer | nominal | events_lost | 3 | 0.0 | 0.6667 | 0.0 | 1.3333 | 1.3333 | 0.6667 | 0.6667 | [0.0, 2.0] | no |
+| consumer | nominal | centre_error_median_m | 2 | 0.0968 | 0.1182 | 2.217 | 2.2828 | 2.186 | 2.1416 | 0.0444 | [-0.0107, 0.0995] | no |
+| consumer | nominal | centre_error_p95_m | 2 | 0.4739 | 1.1155 | 2.8287 | 2.798 | 2.3241 | 2.9962 | -0.6722 | [-1.3258, -0.0185] | yes |
+| consumer | nominal | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | high | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | high | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | high | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | high | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| consumer | high | missed_links | 3 | 0.0 | 1.6667 | 0.0 | 3.0 | 3.0 | 1.6667 | 1.3333 | [0.0, 2.0] | no |
+| consumer | high | false_merges | 3 | 0.0 | 2.0 | 0.0 | 0.3333 | 0.3333 | 2.0 | -1.6667 | [-4.0, 0.0] | no |
+| consumer | high | missed_merges | 3 | 2.6667 | 4.3333 | 5.0 | 8.3333 | 5.6667 | 4.0 | 1.6667 | [0.0, 4.0] | no |
+| consumer | high | events_lost | 3 | 0.0 | 2.0 | 0.0 | 2.3333 | 2.3333 | 2.0 | 0.3333 | [0.0, 1.0] | no |
+| consumer | high | centre_error_median_m | 2 | 0.0968 | 0.1936 | 2.217 | 2.3312 | 2.2344 | 2.217 | 0.0174 | [-0.0124, 0.0472] | no |
+| consumer | high | centre_error_p95_m | 2 | 0.4739 | 1.2385 | 2.8287 | 2.9787 | 2.5048 | 3.1193 | -0.6145 | [-1.1545, -0.0745] | yes |
+| consumer | high | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | missed_links | 3 | 0.0 | 0.0 | 0.3333 | 0.3333 | 0.3333 | 0.3333 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | missed_merges | 3 | 2.6667 | 4.0 | 7.3333 | 7.3333 | 4.6667 | 6.0 | -1.3333 | [-4.0, 0.0] | no |
+| degraded | low | events_lost | 3 | 0.0 | 0.0 | 0.3333 | 0.3333 | 0.3333 | 0.3333 | 0.0 | [0.0, 0.0] | no |
+| degraded | low | centre_error_median_m | 2 | 0.0968 | 0.098 | 5.6157 | 5.6197 | 5.5229 | 5.5201 | 0.0029 | [-0.0392, 0.045] | no |
+| degraded | low | centre_error_p95_m | 2 | 0.4739 | 0.4711 | 9.4856 | 9.4909 | 9.0169 | 9.0088 | 0.0081 | [-0.0328, 0.049] | no |
+| degraded | low | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | missed_links | 3 | 0.0 | 0.3333 | 0.3333 | 1.0 | 1.0 | 0.6667 | 0.3333 | [0.0, 1.0] | no |
+| degraded | nominal | false_merges | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | nominal | missed_merges | 3 | 2.6667 | 3.0 | 7.3333 | 7.3333 | 4.6667 | 5.0 | -0.3333 | [-2.0, 1.0] | no |
+| degraded | nominal | events_lost | 3 | 0.0 | 0.6667 | 0.3333 | 1.3333 | 1.3333 | 1.0 | 0.3333 | [0.0, 1.0] | no |
+| degraded | nominal | centre_error_median_m | 2 | 0.0968 | 0.1182 | 5.6157 | 7.31 | 7.2132 | 5.5402 | 1.673 | [-0.0212, 3.3672] | no |
+| degraded | nominal | centre_error_p95_m | 2 | 0.4739 | 1.1155 | 9.4856 | 11.7397 | 11.2658 | 9.6532 | 1.6125 | [-1.3455, 4.5706] | no |
+| degraded | nominal | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | high | association_errors | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | high | missed_contacts | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | high | wrong_collision_matches | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | high | wrong_links | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
+| degraded | high | missed_links | 3 | 0.0 | 1.6667 | 0.3333 | 3.3333 | 3.3333 | 2.0 | 1.3333 | [1.0, 2.0] | yes |
+| degraded | high | false_merges | 3 | 0.0 | 2.0 | 0.0 | 0.0 | 0.0 | 2.0 | -2.0 | [-4.0, -1.0] | yes |
+| degraded | high | missed_merges | 3 | 2.6667 | 4.3333 | 7.3333 | 9.3333 | 6.6667 | 6.3333 | 0.3333 | [0.0, 1.0] | no |
+| degraded | high | events_lost | 3 | 0.0 | 2.0 | 0.3333 | 3.3333 | 3.3333 | 2.3333 | 1.0 | [-1.0, 3.0] | no |
+| degraded | high | centre_error_median_m | 2 | 0.0968 | 0.1936 | 5.6157 | 6.6112 | 6.5144 | 5.6156 | 0.8988 | [-1.5126, 3.3101] | no |
+| degraded | high | centre_error_p95_m | 2 | 0.4739 | 1.2385 | 9.4856 | 11.8111 | 11.3372 | 9.7762 | 1.561 | [-0.3881, 3.5101] | no |
+| degraded | high | unaligned_recorders | 3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | [0.0, 0.0] | no |
 
 ## Metric definitions
 
