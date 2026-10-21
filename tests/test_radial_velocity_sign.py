@@ -59,7 +59,10 @@ class RadialVelocitySignTests(unittest.TestCase):
 
     def test_new_recordings_label_each_stored_sign(self):
         with tempfile.TemporaryDirectory() as tmp:
-            logger = VehicleLogger(Path(tmp), "A", {"radar": [{"sensor_id": "front"}]})
+            logger = VehicleLogger(Path(tmp), "A", {
+                "radar": [{"sensor_id": "front"}],
+                "depth_camera": {"sensor_id": "front_depth"},
+            })
             logger.close()
             radar = json.loads((Path(tmp) / "vehicles" / "A" / "radar" / "metadata.json").read_text())
             depth = json.loads((Path(tmp) / "vehicles" / "A" / "depth" / "metadata.json").read_text())

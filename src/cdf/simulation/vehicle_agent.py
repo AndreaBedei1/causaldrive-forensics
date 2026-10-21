@@ -84,7 +84,8 @@ class RawVehicleAgent:
                                           max_queue=512, report_frame_gaps=True)
                              if depth_camera_spec else None)
         self.depth_velocity_config = depth_radial_velocity_config_from_config(cfg)
-        self._depth_estimator = DepthRadialVelocityEstimator(self.depth_velocity_config)
+        self._depth_estimator = (DepthRadialVelocityEstimator(self.depth_velocity_config)
+                                 if depth_camera_spec else None)
         self.collision_sensor = CollisionSensor(scenario_world, self.vehicle)
         self.logger = VehicleLogger(output_root, spec.participant_id, {
             "participant_id": spec.participant_id, "blueprint": spec.blueprint,

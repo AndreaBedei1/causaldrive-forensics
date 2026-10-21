@@ -118,3 +118,7 @@ sign only): too little to evaluate rule-related events, and rule compliance is n
 The depth camera is recorded but used by nothing in the reconstruction (it also misses frames on the second
 and third vehicle when three cameras render per tick).  Both stay in the repository, documented, as future
 work.
+
+The RTK/5G acquisition protocol now disables the depth camera for future runs because it is not an input to
+reconstruction, fusion, collision assessment or campaign metrics. Existing recordings and their sensor
+metadata remain unchanged; this protocol update does not revise earlier experimental assessments.

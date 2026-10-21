@@ -65,7 +65,8 @@ sensors:
     mount_yaw_deg: 0.0
     mount_roll_deg: 0.0
   depth_camera:
-    enabled: true
+    # No reconstruction or campaign metric consumes this stream in the RTK/5G protocol.
+    enabled: false
     sensor_id: "front_depth"
     blueprint: "sensor.camera.depth"
     width: 800

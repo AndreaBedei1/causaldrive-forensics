@@ -1,0 +1,22 @@
+{
+  "old_root": "F:\\CarlaGraph_RTK5G_archive_20261021\\OLD_ARCHIVED\\traces",
+  "new_root": "F:\\CarlaGraph_RTK5G_archive_20261021\\NEW_REACQUIRED\\traces",
+  "expected_runs": 22,
+  "compared_runs": 22,
+  "missing_pairs": [],
+  "comparison_complete": true,
+  "pass_runs": 21,
+  "physical_pass_runs": 21,
+  "sensor_pass_runs": 22,
+  "fail_runs": [
+    "S10/deflected_into_c"
+  ],
+  "physical_fail_runs": [
+    "S10/deflected_into_c"
+  ],
+  "sensor_fail_runs": [],
+  "non_physical_differences": [
+    "actor IDs and absolute CARLA frame/timestamp origins are run-local; comparison uses participant IDs, relative scenario time, and relative frame offsets"
+  ],
+  "comparison_method": "20 Hz time-aligned ground truth; world position and displacement-from-first-recorded-state are both reported; wrapped yaw differences; reciprocal callbacks deduplicated within a CARLA frame and participant pair; contact episodes group callbacks for one pair when gaps are at most 2.5 fixed ticks; episode start/end timing tolerance is 0.10 s; radar and RGB block on missing samples, queue drops, unmeasured frames, or absent channel; depth-channel completeness is reported as advisory and is not a campaign gate; duplicate callback counts are reported separately; vehicle metadata, required sensor configuration, controls and minimum oriented box gaps are compared."
+}
