@@ -17,9 +17,10 @@ from src.cdf.reconstruction.common_frame import (DEFAULT_BODY, CommonSample, Pos
                                                  WorldPose)
 from src.cdf.reconstruction.config import ReconstructionConfig
 from src.cdf.reconstruction.pipeline import reconstruct_run
-from src.cdf.robustness.perturb import (GNSS_PROFILES, RADAR_PROFILES, CollisionPerturbation, GnssProfile, Perturbation,
+from src.cdf.robustness.perturb import (GNSS_PROFILES, HISTORICAL_GNSS_PROFILES, RADAR_PROFILES, CollisionPerturbation, GnssProfile, Perturbation,
                                         PerturbedPoseSource, RadarProfile, _error_series, perturb_sweeps, perturbed_copy,
                                         stream_seed)
+from src.cdf.evaluation.pose_errors import pose_errors
 from src.cdf.evaluation.run_metrics import core_event_diff, graph_signature
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,9 +99,9 @@ class GnssTests(unittest.TestCase):
         self.assertAlmostEqual(float(np.std(series)), 0.5, delta=0.03)
 
     def test_a_perturbed_pose_source_declares_its_profile_and_is_reproducible(self):
-        a = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
-        b = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
-        c = PerturbedPoseSource.factory(GNSS_PROFILES["consumer"], 4)(S12 / "vehicles" / "A", 14.307498775422573)
+        a = PerturbedPoseSource.factory(HISTORICAL_GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
+        b = PerturbedPoseSource.factory(HISTORICAL_GNSS_PROFILES["consumer"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
+        c = PerturbedPoseSource.factory(HISTORICAL_GNSS_PROFILES["consumer"], 4)(S12 / "vehicles" / "A", 14.307498775422573)
         exact = RecordedPoseSource.from_vehicle_dir(S12 / "vehicles" / "A", 14.307498775422573)
         self.assertAlmostEqual(a.position_std_m, math.sqrt(1.5 ** 2 + 0.7 ** 2 + 0.05 ** 2))
         self.assertEqual(a.pose_at(2.0), b.pose_at(2.0))
@@ -110,9 +111,86 @@ class GnssTests(unittest.TestCase):
         ideal = PerturbedPoseSource.factory(GNSS_PROFILES["ideal"], 3)(S12 / "vehicles" / "A", 14.307498775422573)
         self.assertEqual(ideal.pose_at(2.0), exact.pose_at(2.0))
 
+    def test_only_the_three_current_profiles_are_active(self):
+        self.assertEqual(set(GNSS_PROFILES), {"ideal", "rtk", "degraded"})
+        self.assertEqual(set(HISTORICAL_GNSS_PROFILES), {"consumer"})
+
+    def test_effective_pose_error_percentiles_match_the_three_level_targets(self):
+        from statistics import NormalDist
+
+        dt = 0.05
+        times = np.arange(0.0, 2.0 + dt / 2, dt)
+        records = [{"timestamp": float(t), "x": 0.0, "y": 0.0, "yaw_deg": 0.0,
+                    "velocity": {"x": 0.0, "y": 0.0}} for t in times]
+        targets = {"rtk": {"position": (0.95, 0.04), "heading": (0.95, 0.14), "velocity": (0.95, 0.016)},
+                   "degraded": {"position": (0.995, 0.5), "heading": (0.995, 0.6), "velocity": (0.995, 0.2)}}
+        radial = lambda p: math.sqrt(-2.0 * math.log(1.0 - p))
+        scalar = lambda p: NormalDist().inv_cdf((1.0 + p) / 2.0)
+        scale = {"position": radial, "heading": scalar, "velocity": radial}
+        errors = {name: {kind: [[], []] for kind in values} for name, values in targets.items()}
+
+        for seed in range(4096):
+            for name in targets:
+                source = PerturbedPoseSource(records, 0.0, GNSS_PROFILES[name], seed, "A")
+                position = np.hypot(source.x, source.y)
+                heading = np.abs((source.yaw + np.pi) % (2.0 * np.pi) - np.pi) * 180.0 / np.pi
+                velocity = np.hypot(source.vx, source.vy)
+                values = {"position": position, "heading": heading, "velocity": velocity}
+                epoch_step = round(1.0 / GNSS_PROFILES[name].rate_hz / dt)
+                for kind, value in values.items():
+                    errors[name][kind][0].extend(value.tolist())
+                    errors[name][kind][1].extend(value[::epoch_step].tolist())
+
+        for name, values in targets.items():
+            for kind, (percentile, target) in values.items():
+                sample_kinds = ("20 Hz", "receiver epochs") if kind != "velocity" else ("20 Hz",)
+                samples_by_kind = errors[name][kind] if kind != "velocity" else errors[name][kind][:1]
+                for sample_kind, samples in zip(sample_kinds, samples_by_kind):
+                    measured = float(np.percentile(samples, percentile * 100.0))
+                    self.assertLessEqual(abs(measured / target - 1.0), 0.05,
+                                         (name, kind, sample_kind, percentile, measured, target))
+
+    def test_pose_error_statistics_include_tail_and_per_recorder_metrics(self):
+        measured = pose_errors(S01, PerturbedPoseSource.factory(GNSS_PROFILES["ideal"], 0))
+        for kind in ("absolute_position_m", "heading_deg", "velocity_mps", "relative_position_m"):
+            self.assertEqual(set(("p50", "p95", "p99", "p995", "max")) & set(measured[kind]),
+                             {"p50", "p95", "p99", "p995", "max"})
+        self.assertIn("A", measured["by_recorder"])
+        self.assertIn("heading_deg", measured["by_recorder"]["A"])
+
+    def test_shared_position_fraction_reduces_simultaneous_relative_error(self):
+        records = [{"timestamp": i * 0.05, "x": 0.0, "y": 0.0, "yaw_deg": 0.0,
+                    "velocity": {"x": 0.0, "y": 0.0}} for i in range(41)]
+        spreads = []
+        for rho in (0.0, 0.5, 0.9, 1.0):
+            relative = []
+            profile = dataclasses.replace(GNSS_PROFILES["degraded"], common_fraction=rho)
+            for seed in range(512):
+                a = PerturbedPoseSource(records, 0.0, profile, seed, "A")
+                b = PerturbedPoseSource(records, 0.0, profile, seed, "B")
+                relative.append(np.hypot(a.x[0] - b.x[0], a.y[0] - b.y[0]))
+            spreads.append(float(np.sqrt(np.mean(np.square(relative)))))
+        self.assertGreater(spreads[0], spreads[1])
+        self.assertGreater(spreads[1], spreads[2])
+        self.assertGreater(spreads[2], spreads[3])
+        self.assertGreater(spreads[3], 0.0)  # white receiver-specific noise remains at rho=1
+
     def test_streams_are_independent_of_order(self):
         self.assertEqual(stream_seed(1, "radar", "A", "front"), stream_seed(1, "radar", "A", "front"))
         self.assertNotEqual(stream_seed(1, "radar", "A", "front"), stream_seed(1, "radar", "A", "left"))
+
+    def test_active_pose_streams_are_reproducible_finite_and_temporally_correlated(self):
+        vehicle = S12 / "vehicles" / "A"
+        rtk = PerturbedPoseSource.factory(GNSS_PROFILES["rtk"], 17)(vehicle, 14.307498775422573)
+        PerturbedPoseSource.factory(GNSS_PROFILES["degraded"], 17)(vehicle, 14.307498775422573)
+        repeated = PerturbedPoseSource.factory(GNSS_PROFILES["rtk"], 17)(vehicle, 14.307498775422573)
+        exact = RecordedPoseSource.from_vehicle_dir(vehicle, 14.307498775422573)
+        for key in ("x", "y", "yaw", "vx", "vy"):
+            values, again = getattr(rtk, key), getattr(repeated, key)
+            np.testing.assert_array_equal(values, again)
+            self.assertTrue(np.all(np.isfinite(values)))
+        error_x = rtk.x - exact.x
+        self.assertGreater(float(np.corrcoef(error_x[:-1], error_x[1:])[0, 1]), 0.5)
 
 
 class CopyTests(unittest.TestCase):

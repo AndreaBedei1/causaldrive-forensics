@@ -1,0 +1,10 @@
+family,level,seeds,runs,failed,association_accuracy,association_accuracy_sd,absolute_pose_rms_m,absolute_pose_rms_m_sd,relative_pose_rms_m,relative_pose_rms_m_sd,collision_recall,collision_recall_sd,false_collision_matches,false_collision_matches_sd,collision_unmatched,collision_unmatched_sd,ambiguous_candidate_refusals,ambiguous_candidate_refusals_sd,runs_aligned,runs_aligned_sd,wrong_links,wrong_links_sd,missed_links,missed_links_sd,false_merges,false_merges_sd,entities_without_vehicle,entities_without_vehicle_sd,fused_centre_error_m,fused_centre_error_m_sd,event_recall,event_recall_sd,extra_events,extra_events_sd,event_time_delta_median_s,event_time_delta_median_s_sd,event_time_delta_p95_s,event_time_delta_p95_s_sd,max_relative_offset_error_s,max_relative_offset_error_s_sd,identical_graphs,identical_graphs_sd
+baseline,none,1,4,0,1.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,0.2106,,0.8529,,11.0,,0.0,,0.45,,0.0,,1.0,
+gnss,rtk,1,4,0,1.0,,0.0322,,0.0514,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,0.2093,,0.8529,,11.0,,0.0,,0.45,,0.0,,1.0,
+gnss,degraded,1,4,0,1.0,,0.2138,,0.407,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,0.2475,,0.8529,,11.0,,0.0,,0.45,,0.0,,1.0,
+radar_gnss_combined,gnss rtk + radar low,1,1,0,1.0,,0.0187,,0.0185,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,,,1.0,,0.0,,0.0,,0.0,,0.0,,0.0,
+radar_gnss_combined,gnss rtk + radar nominal,1,1,0,1.0,,0.0187,,0.0185,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,,,1.0,,0.0,,0.0,,0.0,,0.0,,0.0,
+radar_gnss_combined,gnss rtk + radar high,1,1,0,1.0,,0.0187,,0.0185,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,1.0,,0.0,,122.0,,2.6852,,1.0,,8.0,,0.0,,0.0,,0.0,,0.0,
+radar_gnss_combined,gnss degraded + radar low,1,1,0,1.0,,0.2971,,0.4013,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,,,1.0,,0.0,,0.0,,0.0,,0.0,,0.0,
+radar_gnss_combined,gnss degraded + radar nominal,1,1,0,1.0,,0.2971,,0.4013,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,0.0,,0.0,,0.0,,,,1.0,,0.0,,0.0,,0.0,,0.0,,0.0,
+radar_gnss_combined,gnss degraded + radar high,1,1,0,1.0,,0.2971,,0.4013,,1.0,,0.0,,0.0,,0.0,,1.0,,0.0,,1.0,,0.0,,122.0,,2.2848,,1.0,,8.0,,0.0,,0.0,,0.0,,0.0,

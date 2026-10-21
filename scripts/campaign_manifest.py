@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
-"""The manifest of the robustness campaign on the 22 canonical runs (the final analysis scope).
+"""Preliminary or frozen manifest for the active RTK/5G-transport GNSS protocol on 22 canonical runs.
 
-    python scripts/campaign_manifest.py [--out results/robustness_campaign_manifest.json]
+    python scripts/campaign_manifest.py [--out results/robustness/rtk5g_current/manifest.json]
 
 It records what a reproduction must match: the frozen reconstruction (commit of the tag
 ``pre-robustness-campaign``, configuration hash, and a hash of the reconstruction sources computed both at that
-commit and now, which must be equal), the hash of the current campaign code (``provenance.code_hash``: every job
-records it), the hashes of the driver and evaluation scripts, the raw data of the 22 canonical runs, the
-perturbation profiles, the experiment matrix with its seed schedule, and the software versions.
-``scripts/campaign_controller.py`` refuses to start when the checkout differs from it.
-
-Scope: the campaign was preregistered on 2026-10-15 (tag ``pre-robustness-campaign``) with two further components,
-a collision-report latency family and a held-out set of automatically generated scenarios.  Both were removed from
-the study on 2026-10-16 by the author's decision on its scientific scope; their code, configuration and results
-remain only in the Git history (``robustness-campaign-v2.2``, commit 1183f522).  The retained 35 conditions are
-the preregistered ones, run with the frozen reconstruction.
+commit and now, which must be equal), the current protocol code hash, hashes of the driver and evaluation scripts,
+raw-data hashes for the 22 canonical runs, active perturbation profiles, the experiment matrix, seed schedule, and
+software versions.  A manifest generated before a clean, approved commit and protocol tag is marked preliminary.
+The historical manifest at ``results/robustness_campaign_manifest.json`` is left intact.
 """
 
 from __future__ import annotations
@@ -23,9 +17,11 @@ import argparse
 import dataclasses
 import hashlib
 import json
+import os
 import platform
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -100,7 +96,7 @@ def versions() -> Dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", type=Path, default=ROOT / "results" / "robustness_campaign_manifest.json")
+    parser.add_argument("--out", type=Path, default=ROOT / "results" / "robustness" / "rtk5g_current" / "manifest.json")
     args = parser.parse_args()
     from cdf.evaluation.provenance import code_hash, config_hash
     from cdf.reconstruction.config import load_config
@@ -108,6 +104,11 @@ def main() -> int:
     import robustness
     from validate_canonical import CANONICAL, canonical_runs
     frozen = _git("rev-parse", FROZEN_TAG + "^{commit}")
+    head = _git("rev-parse", "HEAD")
+    worktree_status = _git("status", "--porcelain", "--untracked-files=no") or ""
+    version_tag = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "rtk5g-current")
+    version_commit = _git("rev-parse", version_tag + "^{commit}")
+    preliminary = bool(worktree_status or not version_commit or version_commit != head)
     recon_now, recon_frozen = reconstruction_hash(), reconstruction_hash(frozen) if frozen else None
     if recon_frozen is not None and recon_now != recon_frozen:
         raise SystemExit("the reconstruction sources differ from the frozen tag: not this campaign")
@@ -121,10 +122,13 @@ def main() -> int:
                           "stochastic": stochastic, "jobs_initial": jobs3, "jobs_max": jobs8 if stochastic else jobs3,
                           "configuration": "ablation_mutual_refinement" if family == "gnss_refined" else "frozen"}
     manifest = {
-        "name": "robustness campaign on the 22 canonical runs (final analysis scope)",
-        "scope": "35 conditions in 12 families on the 22 manually reviewed canonical runs (S01..S19); preregistered "
-                 "on 2026-10-15 together with a collision-report latency family and a held-out generalization set, "
-                 "both removed from the study on 2026-10-16 (scientific scope); see the module docstring",
+        "name": "RTK GNSS with correction transport via 5G: current robustness protocol",
+        "protocol": {"version_tag": version_tag, "version_tag_commit": version_commit,
+                     "status": "PRELIMINARY" if preliminary else "FROZEN",
+                     "preliminary": preliminary, "generated_at": datetime.now(timezone.utc).isoformat(),
+                     "head_commit": head, "worktree_status": worktree_status},
+        "scope": "New GNSS perturbation protocol on the 22 manually reviewed canonical runs (S01..S19). "
+                 "This protocol is distinct from the preregistered 2026-10-15 study and does not replace its results.",
         "frozen_reconstruction": {"tag": FROZEN_TAG, "commit": frozen,
                                   "reconstruction_sources": list(RECONSTRUCTION_SOURCES),
                                   "reconstruction_sources_sha256": recon_now,
@@ -156,8 +160,8 @@ def main() -> int:
                                          "family, worker and execution order, shared by all runs of a seed"},
             "max_attempts_per_job": 2,
         },
-        "results": {"jobs": "results/robustness/frozen_campaign/jobs.jsonl.gz",
-                    "report": "results/robustness/frozen_campaign/report/"},
+        "results": {"jobs": "results/robustness/rtk5g_current/jobs.jsonl",
+                    "report": "results/robustness/rtk5g_current/report/"},
         "software": versions(),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

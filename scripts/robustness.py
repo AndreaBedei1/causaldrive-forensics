@@ -50,17 +50,17 @@ sys.path.insert(0, str(ROOT / "src"))
 FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "baseline": ([("none", None)], False),  # the copy unchanged: must reproduce the canonical reconstruction
     "radar": ([("low", "low"), ("nominal", "nominal"), ("high", "high")], True),
-    "gnss": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
+    "gnss": ([("rtk", "rtk"), ("degraded", "degraded")], True),
     # The same GNSS errors with the mutual refinement of the pose sources (fusion.mutual_refinement).
-    "gnss_refined": ([("rtk", "rtk"), ("consumer", "consumer"), ("degraded", "degraded")], True),
-    "gnss_correlated": ([("consumer common 0.5", 0.5), ("consumer common 0.9", 0.9),
-                          ("consumer common 1.0", 1.0)], True),
+    "gnss_refined": ([("rtk", "rtk"), ("degraded", "degraded")], True),
+    "gnss_correlated": ([("degraded common 0.5", 0.5), ("degraded common 0.9", 0.9),
+                          ("degraded common 1.0", 1.0)], True),
     "combined": ([("exact + 10%", ('ideal',0.0)), ("RTK + 10%", ('rtk',0.0)),
-                   ("consumer independent + 10%", ('consumer',0.0)),
-                   ("consumer common 0.9 + 10%", ('consumer',0.9))], True),
-    # GNSS and radar degraded together on the same copy: every GNSS profile x every radar profile.
+                   ("degraded independent + 10%", ('degraded',0.0)),
+                   ("degraded common 0.9 + 10%", ('degraded',0.9))], True),
+    # GNSS and radar degraded together on the same copy; ideal GNSS is already covered by radar alone.
     "radar_gnss_combined": ([("gnss {0} + radar {1}".format(g, r), (g, r))
-                             for g in ("rtk", "consumer", "degraded") for r in ("low", "nominal", "high")], True),
+                             for g in ("rtk", "degraded") for r in ("low", "nominal", "high")], True),
     "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
     "clock": ([("offsets", None)], False),
     "downsample": ([("10 Hz", 2), ("5 Hz", 4)], False),
@@ -104,8 +104,9 @@ def jobs_for(run_dir: Path, family: str, seeds: Sequence[int]) -> List[Dict[str,
 
 
 def build(job: Dict[str, Any]):
-    from cdf.robustness.perturb import (GNSS_PROFILES, RADAR_PROFILES, CollisionPerturbation, Perturbation,
+    from cdf.robustness.perturb import (GNSS_PROFILES, HISTORICAL_GNSS_PROFILES, RADAR_PROFILES, CollisionPerturbation, Perturbation,
                                         PerturbedPoseSource)
+    profiles = dict(GNSS_PROFILES, **HISTORICAL_GNSS_PROFILES)
     run_dir, family, parameter = Path(job["run"]), job["family"], job["parameter"]
     recorders = _recorders(run_dir)
     name = "{0}_{1}".format(family, job["level"]).replace(" ", "_").replace("%", "pct").replace("+", "and")
@@ -115,19 +116,20 @@ def build(job: Dict[str, Any]):
     elif family == "radar":
         perturbation = Perturbation(name, radar=RADAR_PROFILES[parameter])
     elif family in ("gnss", "gnss_refined"):
-        perturbation = Perturbation(name, gnss=GNSS_PROFILES[parameter])
-        pose = PerturbedPoseSource.factory(GNSS_PROFILES[parameter], int(job["seed"]))
+        perturbation = Perturbation(name, gnss=profiles[parameter])
+        pose = PerturbedPoseSource.factory(profiles[parameter], int(job["seed"]))
     elif family in ('gnss_correlated','combined'):
         import dataclasses
-        base, fraction = ('consumer',float(parameter)) if family=='gnss_correlated' else parameter
-        profile = dataclasses.replace(GNSS_PROFILES[base],common_fraction=float(fraction))
+        base, fraction = ("consumer" if "consumer" in str(job["level"]) else "degraded", float(parameter)) \
+            if family == 'gnss_correlated' else parameter
+        profile = dataclasses.replace(profiles[base],common_fraction=float(fraction))
         perturbation = Perturbation(name,gnss=profile,
                      collisions=CollisionPerturbation(impulse_rel_std=.10 if family=='combined' else 0.0))
         pose = PerturbedPoseSource.factory(profile,int(job['seed']))
     elif family == "radar_gnss_combined":
         gnss, radar = parameter
-        perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=GNSS_PROFILES[gnss])
-        pose = PerturbedPoseSource.factory(GNSS_PROFILES[gnss], int(job["seed"]))
+        perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=profiles[gnss])
+        pose = PerturbedPoseSource.factory(profiles[gnss], int(job["seed"]))
     elif family == "impulse":
         perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
     elif family == "clock":

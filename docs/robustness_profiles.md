@@ -4,6 +4,8 @@ The robustness study (`scripts/robustness.py`, perturbations in `src/cdf/robustn
 
 Below, every parameter value is given exactly as in the code, with its justification: a published source, a value derived from one, or an engineering assumption with its reason.
 
+The current GNSS protocol below is a new parametrization and is distinct from the historical 2026-10-15 campaign. The historical profile table and published campaign outputs remain documented separately and unchanged.
+
 ## Conventions
 
 - **Source**: the value is stated in the cited document (references at the end).
@@ -70,7 +72,87 @@ How to read the levels:
 
 Sweep density: CARLA casts int(points_per_second x dt) rays per sweep [R11].  At its default 1500 points/s and 20 Hz that is 75 rays, far below the hundreds of detections per cycle of real sensors (mean 819.91 per frame in [R7], up to 1,024 per cycle in [R3]).  With sweeps that sparse, lambda = 30 is a stress level.
 
-## GNSS (pose source)
+## Current GNSS protocol: RTK with correction transport over 5G
+
+The active profiles are exactly `ideal` (G0), `rtk` (G1) and `degraded` (G2). `consumer` is retained only under `HISTORICAL_GNSS_PROFILES` for reproducibility of old analyses; it is not scheduled by the current campaign. The 5G assumption is limited to transporting RTK corrections to a GNSS/INS receiver. CARLA does not simulate 5G, and this study does not model radio behavior, correction latency or packet loss.
+
+Errors are evaluated against the recorded CARLA pose, only after reconstruction: horizontal position is `hypot(dx, dy)` in metres; heading is the absolute wrapped difference in [-180, 180] degrees; horizontal velocity is `hypot(dvx, dvy)` in m/s. The reconstruction never reads ground truth.
+
+| Level | Horizontal position | Heading/yaw | Horizontal velocity |
+|---|---:|---:|---:|
+| G0 `ideal` | exactly 0 | exactly 0 | exactly 0 |
+| G1 `rtk` | P95 = 0.040 m | P95 = 0.140 deg | P95 = 0.016 m/s |
+| G2 `degraded` | P99.5 = 0.500 m | P99.5 = 0.600 deg | P99.5 = 0.200 m/s |
+
+These are percentile targets, not per-axis sigmas or hard limits; values above P99.5 are allowed. For a single independent, zero-mean isotropic 2D Gaussian sample, `R_p = sigma_axis sqrt(-2 ln(1-p))`; for absolute scalar Gaussian heading, `H_p = sigma_axis Phi^-1((1+p)/2)`. The velocity values below are equivalent single-sample sigmas implied by the targets; the implemented 20 Hz interpolated white-noise marginal is a mixture of phase variances and is calibrated directly to the target percentile.
+
+| Level | Position sigma/axis [m] | Heading sigma [deg] | Velocity sigma/axis [m/s] |
+|---|---:|---:|---:|
+| G0 | 0 | 0 | 0 |
+| G1 | 0.01634156 | 0.07142988 | 0.00653662 |
+| G2 | 0.15359816 | 0.21374876 | 0.06143927 |
+
+Position and heading use stationary `b + g(t) + w(t)` errors at the existing profile rates, with `g` initialized from its stationary distribution and linearly interpolated. Velocity retains the original white-noise model: independent per-axis `w` at the receiver rate, linearly interpolated to the 20 Hz reconstruction samples. Its active epoch amplitudes are calibrated against the mixture of interpolation phases at 20 Hz. The current profile components and epoch-declared one-axis sigmas are:
+
+| Level | Position b / g / w [m] | Position tau / rate | Epoch sigma [m/axis] | Velocity b / g / w [m/s] | Velocity tau / rate | Epoch sigma [m/s/axis] |
+|---|---:|---:|---:|---:|---:|---:|
+| G0 | 0 / 0 / 0 | — | 0 | 0 / 0 / 0 | — | 0 |
+| G1 | 0.00897324 / 0.01345986 / 0.00269197 | 60 s / 10 Hz | 0.01639920 | 0 / 0 / 0.00731787 | — / 10 Hz | 0.00731787 |
+| G2 | 0.08527949 / 0.12791923 / 0.01421325 | 30 s / 1 Hz | 0.15439539 | 0 / 0 / 0.07226664 | — / 1 Hz | 0.07226664 |
+
+| Level | Heading b / g / w [deg] | tau / rate | Epoch sigma [deg] |
+|---|---:|---:|---:|
+| G0 | 0 / 0 / 0 | — | 0 |
+| G1 | 0.03853691 / 0.05780536 / 0.01926845 | 30 s / 10 Hz | 0.07209595 |
+| G2 | 0.03713028 / 0.20792956 / 0.07426056 | 5 s / 1 Hz | 0.22389281 |
+
+G1 and G2 position and heading component ratios retain the preceding profile ratios while scaling their amplitudes to the percentile targets. The velocity target applies at the 20 Hz samples consumed by reconstruction. The earlier Gauss-Markov velocity candidate borrowed the position time constants of 60 s and 30 s; no cited velocity specification supplies those correlation times. The original white receiver-epoch process meets the required 20 Hz percentiles after calibration for the interpolation-phase mixture, so it is retained and does not add a velocity time constant. Interpolation still creates correlation between adjacent reconstruction samples. No clipping is applied.
+
+The deterministic acceptance test samples 4,096 independent two-second runs per profile (seed 0 through 4095). It checks position and heading at 20 Hz and receiver epochs, and velocity at the 20 Hz reconstruction samples where the protocol defines its target. This is separate from the independent validation below.
+
+Independent validation uses seeds 300000 through 302047: 2,048 independent 20-second trajectories per profile on a 20 Hz grid. The 95% intervals resample complete seed trajectories (300 bootstrap replicates), preserving temporal dependence. The bootstrap interval for a maximum describes resampled maxima and is capped at the largest observed sample; it is not an upper bound on the population maximum. Values are in metres, degrees and m/s as indicated.
+
+| Level / measure | Target | P50 (95% CI) | P95 (95% CI) | P99 (95% CI) | P99.5 (95% CI) | RMS (95% CI) | Max (95% seed-bootstrap interval) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| G1 position [m] | P95 0.040 | 0.01916 [0.01878, 0.01961] | 0.04032 [0.03931, 0.04141] | 0.04953 [0.04812, 0.05106] | 0.05285 [0.05114, 0.05468] | 0.02313 [0.02270, 0.02358] | 0.07635 [0.06690, 0.07635] |
+| G1 heading [deg] | P95 0.140 | 0.04868 [0.04717, 0.05037] | 0.14229 [0.13838, 0.14665] | 0.18816 [0.18101, 0.19556] | 0.20604 [0.19654, 0.21584] | 0.07264 [0.07076, 0.07445] | 0.31576 [0.30228, 0.31576] |
+| G1 velocity [m/s] | P95 0.016 | 0.00719 [0.00717, 0.00720] | 0.01602 [0.01599, 0.01605] | 0.02051 [0.02046, 0.02057] | 0.02223 [0.02218, 0.02230] | 0.00897 [0.00896, 0.00898] | 0.03670 [0.03437, 0.03670] |
+| G2 position [m] | P99.5 0.500 | 0.18596 [0.18218, 0.18990] | 0.38135 [0.37421, 0.38839] | 0.46805 [0.45464, 0.47941] | 0.50290 [0.48183, 0.52493] | 0.22235 [0.21864, 0.22565] | 0.71073 [0.62276, 0.71073] |
+| G2 heading [deg] | P99.5 0.600 | 0.14497 [0.14261, 0.14771] | 0.41925 [0.41345, 0.42542] | 0.54870 [0.53789, 0.55870] | 0.60049 [0.58374, 0.61657] | 0.21462 [0.21156, 0.21764] | 0.98729 [0.92970, 0.98729] |
+| G2 velocity [m/s] | P99.5 0.200 | 0.06801 [0.06760, 0.06844] | 0.14655 [0.14566, 0.14737] | 0.18610 [0.18452, 0.18766] | 0.20161 [0.19966, 0.20353] | 0.08338 [0.08297, 0.08378] | 0.34012 [0.30654, 0.34012] |
+
+All six target point estimates are within 2% of their target, and each target lies inside its seed-bootstrap 95% interval. The velocity white-noise epoch amplitudes are 0.00731787 m/s (G1, 10 Hz) and 0.07226664 m/s (G2, 1 Hz). They come from the exact Rayleigh-mixture quantile over the 20 Hz interpolation phases rather than from a target change.
+
+On the four canonical recordings, first-10-second windows were sampled at 20 Hz using 512 seed blocks per recorder: S01 and S14 had 2 recorders each, S04 had 3 and S19 had 2. Across those windows, the target percentiles were G1 P95 position 0.03956–0.04043 m, heading 0.13673–0.14270 deg and velocity 0.01597–0.01600 m/s; G2 P99.5 position 0.51761–0.51896 m, heading 0.59770–0.61808 deg and velocity 0.19900–0.19964 m/s. These short windows are descriptive and are not pooled as extra independent evidence.
+
+The model comparison used 512 new seeds (400000–400511) and both 10- and 20-second trajectories. Temporary bias is the per-trajectory magnitude of the mean 2D velocity-error vector; intervals bootstrap those trajectory means. Lag-1 autocorrelation is averaged across both horizontal components and trajectories. P95/P99.5 and RMS pool the 20 Hz samples; maxima are the observed maximum.
+
+| Profile / duration | Model | Lag-1 autocorrelation | Mean temporary bias (95% CI) | RMS [m/s] | P95 [m/s] | P99 [m/s] | P99.5 [m/s] | Max [m/s] |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| G1 / 10 s | white interpolated | 0.6620 [0.6594, 0.6646] | 0.00096 [0.00092, 0.00100] | 0.00901 | 0.01611 | 0.02073 | 0.02249 | 0.03842 |
+| G1 / 10 s | Gauss-Markov | 0.9863 [0.9857, 0.9868] | 0.00805 [0.00768, 0.00839] | 0.00929 | 0.01588 | 0.01994 | 0.02109 | 0.02557 |
+| G1 / 20 s | white interpolated | 0.6635 [0.6617, 0.6654] | 0.00066 [0.00063, 0.00068] | 0.00899 | 0.01603 | 0.02061 | 0.02229 | 0.03444 |
+| G1 / 20 s | Gauss-Markov | 0.9930 [0.9927, 0.9934] | 0.00796 [0.00760, 0.00830] | 0.00941 | 0.01596 | 0.01947 | 0.02078 | 0.02557 |
+| G2 / 10 s | white interpolated | 0.9954 [0.9953, 0.9956] | 0.02755 [0.02640, 0.02883] | 0.08327 | 0.14556 | 0.17904 | 0.19293 | 0.31215 |
+| G2 / 10 s | Gauss-Markov | 0.9987 [0.9986, 0.9987] | 0.07498 [0.07150, 0.07852] | 0.08931 | 0.15477 | 0.18818 | 0.20192 | 0.25347 |
+| G2 / 20 s | white interpolated | 0.9959 [0.9958, 0.9960] | 0.01985 [0.01897, 0.02080] | 0.08363 | 0.14557 | 0.18526 | 0.20074 | 0.30029 |
+| G2 / 20 s | Gauss-Markov | 0.9993 [0.9992, 0.9993] | 0.07126 [0.06839, 0.07430] | 0.08868 | 0.15259 | 0.18495 | 0.19602 | 0.25347 |
+
+At the required 20 Hz grid, the white-interpolated model reaches both target percentiles on independent validation. Its higher adjacent-sample correlation in G2 is the linear interpolation already present in the original model; the Gauss-Markov model adds still stronger correlation and a longer-lived velocity offset. The measured mean temporary bias is 3–12 times smaller with white noise over 10–20 seconds, while RMS and target percentiles remain comparable. The position time constants are not evidence for velocity correlation, so the white model is the better-supported engineering choice for this protocol.
+
+Position correlation is a sensitivity assumption, not a 5G property. The `gnss_correlated` family applies rho = 0.5, 0.9 and 1.0 to G2 slow position components; combined GNSS/radar and GNSS/impulse levels use G1/G2 or exact/G1/G2 as specified by the driver. For rho=1, white position noise remains recorder-specific. Heading and velocity streams remain recorder-specific and independent. The paired-family tests verify stream reuse across family names and decreasing simultaneous relative position error as rho increases.
+
+**Experimental results.** Volckaert et al.'s Septentrio presentation reports horizontal RTK-epoch position P95=4.0 cm and P99=5.3 cm, and horizontal velocity over all epochs P95=1.6 cm/s and P99=2.9 cm/s. SSR corrections are converted to OSR in that test; it does not demonstrate a 5G link. SBG's EUT#1 RTK+odometer urban report gives real-time yaw P95=0.140 deg and 2D position P95=0.246 m. Lesjak et al.'s Table 1 reports overall 2D errors for C-ITS of P95=3.1 cm/P99.5=43.4 cm and for 4G P95=2.4 cm/P99.5=37.9 cm. RTK-fixed positions were 98.90% with C-ITS and 98.78% with 4G; C-ITS also had 0.39% no-fix, 0.45% SPP and 0.25% RTK-float, while 4G had 0.42% no-fix, 0.44% SPP and 0.35% RTK-float. The C-ITS link is not 5G. SBG's Ellipse-D RTK+odometer report gives yaw P99.7=0.444 deg in light urban and 0.477 deg in forest, and position P99.7=0.600 m and 0.838 m respectively. Thus 0.50 m is not the worst observed position error.
+
+**Manufacturer specification.** The u-blox ZED-F9R-02B data sheet states velocity accuracy 0.05 m/s and dynamic heading accuracy 0.2 deg at 68% for dynamic operation at 30 m/s. It does not publish the G2 P99.5 speed or heading targets.
+
+**Engineering assumptions.** G2 position 0.50 m is a conservative rounded stress target informed by the C-ITS P99.5 of 0.434 m, not a measured P99.5 of 0.50 m. G2 yaw P99.5=0.60 deg and speed P99.5=0.20 m/s are stress assumptions, not source percentiles. G2 combines evidence from different products and trials; it is neither one receiver's measured distribution nor the worst physically observable error. The Gaussian stationary model covers horizontal position, heading and horizontal velocity. It does not model RTK float/no-fix modes, NLOS jumps, outages, vertical errors, changing receiver modes, correction-age effects, or 5G network performance.
+
+Correction transport over 5G is a system integration assumption, supported as feasible by published 5G/GNSS-RTK demonstrations and the FrontierSI testbed report. Those sources support feasibility only, not these percentile targets.
+
+The cited Springer chapter, IEEE conference paper and EURASIP journal article are peer-reviewed scientific publications used as experimental context, integration-feasibility evidence and a Gauss-Markov modeling reference respectively. The Septentrio presentation and SBG reports are not treated as peer-reviewed papers; the u-blox sheet is a manufacturer specification; the FrontierSI document is a technical report. All b/g/w splits, interpolation adjustment, correlation fractions and G2 targets are engineering assumptions.
+
+## Historical GNSS profile (frozen 2026 campaign)
 
 `PerturbedPoseSource` adds errors to the recorded pose of each recorder (`x`, `y`, `yaw`, `vx`, `vy` of `ego.jsonl`):
 
@@ -117,7 +199,7 @@ In `ideal` every amplitude is zero.  The study's unperturbed baseline uses the r
 | tau 60 s (rtk, consumer), 30 s (degraded) | Engineering assumption: no peer-reviewed Gauss-Markov time constant was found for the position error of a receiver on a moving road vehicle.  Static results bracket it: single-point solutions behave as first-order Gauss-Markov for cluster times of 10-400 s [G11], and static code multipath has bounding time constants of 100-1500 s [G13].  60 s is shorter than the static values, to cover moving-vehicle multipath and changes of the satellite set.  30 s because urban multipath varies with a mean period under one minute even for a static receiver [G12]. |
 | yaw tau 30 s (rtk), 10 s (consumer), 5 s (degraded) | Engineering assumption: no source gives a heading-error correlation time; shorter for poorer heading sources. |
 
-## Correlated position sensitivity and combined collision study
+## Historical: correlated position sensitivity and combined collision study
 
 The verified sources [G7, G10] support slowly varying orbit, clock and atmospheric errors;
 they do not establish one universal common fraction for neighbouring vehicle receivers.
@@ -144,7 +226,7 @@ pose quality with 10% independent impulse noise per callback, using the same see
 It reports true-contact recall, wrong pairings, unmatched true contacts and clock alignment.
 Singleton unpaired collision callbacks are not wrong vehicle-vehicle matches.
 
-## Simultaneous GNSS and radar degradation
+## Historical: simultaneous GNSS and radar degradation
 
 `radar_gnss_combined` applies one GNSS profile (`rtk`, `consumer`, `degraded`, independent receivers) and one radar
 profile (`low`, `nominal`, `high`) to the same perturbed copy: the radar errors are written into the copy's radar
@@ -267,3 +349,19 @@ GNSS:
 - [G11] Niu, Chen, Zhang et al., "Using Allan variance to analyze the error characteristics of GNSS positioning," GPS Solutions 18:231-242, 2014, DOI 10.1007/s10291-013-0324-x.
 - [G12] Y. Wang, X. Chen, P. Liu, "Statistical Multipath Model Based on Experimental GNSS Data in Static Urban Canyon Environment," Sensors 18(4):1149, 2018, DOI 10.3390/s18041149.
 - [G13] Jada, Joerger, "Measurement error time-correlation modeling for safety-critical navigation," NAVIGATION 72(4), 2025, DOI 10.33012/navi.721.
+
+Current RTK/5G-transport protocol sources:
+
+Peer-reviewed scientific studies and demonstrations:
+- [N3] R. Lesjak et al., "Centimeter-Level GNSS Positioning Using C-ITS for Correction Data Delivery: An Experimental Study," Springer peer-reviewed conference chapter, first online 11 October 2025, Table 1: https://doi.org/10.1007/978-3-032-06763-0_81
+- [N5] O. Elgarhy et al., "Development, Implementation and Field Trial of 5G Integrated GNSS-RTK Positioning in Cross-Border Settings," IEEE Future Networks World Forum 2024 peer-reviewed proceedings (DOI publication record: 2025), feasibility reference, not a source for the three targets: https://doi.org/10.1109/FNWF63303.2024.11028789
+- [N6] M. Hoffmann, P. Kryszkiewicz, G. P. Koudouridis, "Modeling of Real Time Kinematics localization error for use in 5G networks," peer-reviewed EURASIP Journal on Wireless Communications and Networking 2020, 31 (2020), Gauss-Markov modeling reference: https://doi.org/10.1186/s13638-020-1641-8
+
+Technical presentations and reports:
+- [N1] M. Volckaert, D. Schellekens, K. Smolders, A. Simsky, B. Bougard, "Integrity of an RTK-INS positioning system using SSR corrections for safety-critical automotive applications," Septentrio technical presentation, 19 September 2019, PDF slides 16 and 18. This cited PDF is documented as a technical presentation, not as a peer-reviewed article: https://gnss-imu.com/down/upload/20240402/1712021876.pdf
+- [N2] SBG Systems, "Automotive Tests in Urban Navigation," vendor test report, EUT#1 RTK + odometer, real-time results: https://www.sbg-systems.com/test-reports/automotive-tests/
+- [N4] SBG Systems, "Ellipse-D Automotive Test Report / Performance Assessment," vendor test report, real-time RTK + odometer results for light-urban and forest acquisitions: https://www.sbg-systems.com/wp-content/uploads/SBG-Ellipse-automotive-test-report.pdf
+- [N8] C. Marshall et al., "5G Precise Positioning Testbed — Technical Report," FrontierSI, January 2024. Technical report about transport and integration of OSR/SSR corrections over 5G; no percentile values are attributed to it: https://frontiersi.com.au/wp-content/uploads/2023/04/5G-Testbed-Technical-Report.pdf
+
+Manufacturer specification:
+- [N7] u-blox, "ZED-F9R-02B Data Sheet," UBX-21017486, revision R06, 3 May 2024: https://content.u-blox.com/sites/default/files/ZED-F9R-02B_DataSheet_UBX-21017486.pdf

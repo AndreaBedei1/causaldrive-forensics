@@ -85,7 +85,7 @@ def _same_version_commits() -> set:
 # Overridable for a test of the controller itself in scratch folders (never for the campaign).
 RESULTS = Path(os.environ.get("CDF_CAMPAIGN_RESULTS", str(ROOT / "results" / "robustness" / "frozen_campaign")))
 WORK = Path(os.environ.get("CDF_CAMPAIGN_WORK", str(ROOT / "robustness" / "frozen_campaign")))
-MANIFEST = ROOT / "results" / "robustness_campaign_manifest.json"
+MANIFEST = Path(os.environ.get("CDF_CAMPAIGN_MANIFEST", str(ROOT / "results" / "robustness_campaign_manifest.json")))
 CONTROL = RESULTS / "control"
 MIN_WORKERS, MAX_WORKERS = 4, 20
 HARD_MAX_WORKERS = 24  # a fixed setting (workers N) may go up to this
@@ -150,6 +150,8 @@ def verify_freeze() -> Dict[str, Any]:
                            capture_output=True, text=True).stdout.strip()
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     problems = []
+    if manifest.get("protocol", {}).get("preliminary"):
+        problems.append("manifest is preliminary")
     if head != FROZEN_COMMIT:
         problems.append("HEAD {0} is not the frozen commit".format(head))
     if dirty:
