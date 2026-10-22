@@ -96,6 +96,16 @@ class RawVehicleAgent:
             "sensor_profile": str(spec.sensor_profile or cfg.get("sensors.profile", "")),
             "radar": [r.metadata() for r in self.radar],
             "ego_footprint": ego_footprint(self.vehicle),
+            # What ego.jsonl is: the output of a synthetic GNSS/INS with no added error (profile G0), sampled
+            # every tick from the simulated vehicle state.  It is a sensor stream the reconstruction may read;
+            # the truth it is evaluated against is ground_truth/states.jsonl.  Degraded receivers (G1 RTK,
+            # G2 degraded) add their errors to this stream (cdf.robustness.perturb) before the whole
+            # reconstruction, local path included, sees it.
+            "pose_sensor": {"stream": "ego.jsonl", "model": "synthetic GNSS/INS", "profile": "G0",
+                            "added_error": "none", "rate_hz": round(1.0 / float(cfg.get("simulation.fixed_delta_seconds", 0.05)), 3),
+                            "fields": ["timestamp", "x", "y", "z", "roll_deg", "pitch_deg", "yaw_deg", "velocity",
+                                       "acceleration", "angular_velocity"],
+                            "note": "an ideal receiver: zero error is a reference condition, not a real receiver"},
             "camera": camera_spec.__dict__ if camera_spec else None,
             "depth_camera": depth_camera_spec.__dict__ if depth_camera_spec else None,
             "depth_observations": self.depth_observation_spec.__dict__,

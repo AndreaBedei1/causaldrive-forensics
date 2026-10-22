@@ -1558,18 +1558,22 @@ def _sign_track_gap(vehicle_dir: Path) -> float:
 
 
 def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_origin: Optional[float] = None,
-                        context: Optional[Mapping[str, Any]] = None) -> LocalReconstruction:
+                        context: Optional[Mapping[str, Any]] = None,
+                        ego_records: Optional[List[Dict[str, Any]]] = None) -> LocalReconstruction:
     """vehicles/<owner>/ -> local trace, anonymous tracks and local event graph.
 
     ``context`` is the supplied incident context (``speed_limit_kmh``); it is
     known a priori, not perceived.  ``clock_origin`` defaults to the recorder's
     first ego sample; another value emulates a recorder whose clock started at
     another moment (clock-robustness checks only, never synchronisation).
+    ``ego_records`` replaces the recorded pose stream (``ego.jsonl``) with the measured one of a perturbed
+    GNSS/INS (``pipeline.measured_ego_records``): the local path then sees the same pose errors as the fusion.
     """
     vehicle_dir = Path(vehicle_dir)
     owner = vehicle_dir.name
     context = dict(context or {})
-    ego_records = read_jsonl(vehicle_dir / "ego.jsonl")
+    if ego_records is None:
+        ego_records = read_jsonl(vehicle_dir / "ego.jsonl")
     if not ego_records:
         raise ValueError("no ego.jsonl records in " + str(vehicle_dir))
     controls = read_jsonl(vehicle_dir / "controls.jsonl")

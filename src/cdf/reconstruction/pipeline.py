@@ -16,6 +16,7 @@ runs afterwards on the files this module wrote.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -46,6 +47,32 @@ class RunReconstruction:
 # A recorder's pose stream in the common frame from (vehicle directory, its clock origin): the recorded
 # GNSS-like stream by default; the robustness study substitutes a perturbed one.
 PoseFactory = Callable[[Path, float], PoseSource]
+
+
+def measured_ego_records(vehicle_dir: Path, pose_factory: Optional[PoseFactory]) -> Optional[List[Dict[str, Any]]]:
+    """The recorder's pose stream as its (possibly perturbed) GNSS/INS reports it, in ``ego.jsonl`` form.
+
+    None for the recorded source itself (the local path then reads ``ego.jsonl``).  Otherwise each record's
+    position, heading and velocity are those of ``pose_factory``'s source at the record time, so that the
+    local reconstruction (ego motion, map matching, speed checks) and the fusion use the same measured pose,
+    never the exact one under it.  Height, pitch and roll are kept as recorded (an INS attitude assumed
+    exact; documented limitation)."""
+    if pose_factory is None:
+        return None
+    vehicle_dir = Path(vehicle_dir)
+    with (vehicle_dir / "ego.jsonl").open(encoding="utf-8") as handle:
+        records = sorted((json.loads(line) for line in handle if line.strip()), key=lambda r: float(r["timestamp"]))
+    origin = float(records[0]["timestamp"])
+    source = pose_factory(vehicle_dir, origin)
+    if type(source) is RecordedPoseSource:
+        return None
+    out = []
+    for record in records:
+        pose = source.pose_at(float(record["timestamp"]) - origin)
+        row = dict(record, x=pose.x, y=pose.y, yaw_deg=math.degrees(pose.yaw))
+        row["velocity"] = dict(record.get("velocity") or {}, x=pose.vx, y=pose.vy)
+        out.append(row)
+    return out
 
 
 def run_title(run_dir: Path) -> str:
@@ -133,7 +160,8 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,
     #      -> local trace, anonymous tracks, local graph.
     context = read_incident_context(run_dir)
     vehicle_dirs = sorted(path for path in (run_dir / "vehicles").iterdir() if path.is_dir())
-    locals_ = [reconstruct_vehicle(path, cfg, context=context) for path in vehicle_dirs]
+    locals_ = [reconstruct_vehicle(path, cfg, context=context, ego_records=measured_ego_records(path, pose_factory))
+               for path in vehicle_dirs]
     for local in locals_:
         write_local_outputs(output_dir / local.owner, local, cfg.trace_hz)
 
