@@ -365,3 +365,30 @@ Technical presentations and reports:
 
 Manufacturer specification:
 - [N7] u-blox, "ZED-F9R-02B Data Sheet," UBX-21017486, revision R06, 3 May 2024: https://content.u-blox.com/sites/default/files/ZED-F9R-02B_DataSheet_UBX-21017486.pdf
+
+## Radar levels v3 (campaign v3, 2026-10-22)
+
+Re-examined against the sources: the four radar DOIs [R6]-[R9] resolve to the cited papers and their numbers were
+checked in the papers.  Few peer-reviewed sources report *measured* per-detection errors against ground truth; most
+numbers below are specifications or tracker/simulation design values, and the labels say so.  Values are 1-sigma.
+
+| parameter | nominal | severe | extreme (stress test) |
+|---|---|---|---|
+| sigma_range | 0.25 m — assumption of [R9] (CARLA noise); specification 0.15 m [R6] | 0.50 m — engineering assumption | 0.50 m — engineering assumption |
+| sigma_azimuth | 0.5 deg — specification at boresight [R6]; [R9] | 2.0 deg — specification at the +-60 deg FOV edge [R6] | 2.0 deg — as severe |
+| sigma_elevation | 0.5 deg — engineering assumption (the cited sensors are 2-D) | 2.0 deg — engineering assumption | 2.0 deg — engineering assumption |
+| sigma_radial_velocity | 0.10 m/s — assumption of [R9]; specification 0.028 m/s [R6] is tighter | 0.20 m/s — engineering assumption | 0.20 m/s — engineering assumption |
+| p_drop (per detection) | 0.20 — 1 - P_D, P_D = 0.8 a tracker design value [R8] | 0.40 — engineering assumption ([R8] lowers P_D toward the FOV edges without a value) | 0.40 — engineering assumption |
+| false returns per sweep (Poisson mean) | 3 — derived from measured counts: ~2.3 ghost points per frame [R7] (reflective staged scenes) | 3 — as nominal | 30 — tracker design value lambda_C [R8], **not measured**; possibly per multi-sensor scan |
+
+* **nominal** = the profile of the frozen campaign (unchanged).  **severe** = measurement quality at the edges of
+  the field of view / long range, twice the misses, realistic ghost rate: the degradation of the measurements
+  themselves.  **extreme** = severe plus dense clutter: equal to the historical `high` profile, kept for
+  comparability, and explicitly a stress test beyond the characteristics of typical automotive radar.
+* Limitation of the clutter model: real clutter is spatially structured (multipath at guardrails and walls,
+  underbody reflections) and often carries non-zero Doppler; Kopp et al. measured ~90 % clutter among *moving*
+  detections of a production mid-range radar in extra-urban traffic (IEEE ITSC 2021, DOI 10.1109/ITSC48978.2021.9564776).
+  Uniform clutter is a simplification; the nominal rate is optimistic for moving clutter.
+* Not modelled: weather attenuation, mutual interference (no measured numbers could be verified in accessible
+  peer-reviewed full texts; candidate sources with DOI only: Hasirlioglu et al. ITSC 2016, 10.1109/ITSC.2016.7795918;
+  Norouzian et al. IEEE TAP 2020, 10.1109/TAP.2019.2938735; Holder et al. ITSC 2018, 10.1109/ITSC.2018.8569423).

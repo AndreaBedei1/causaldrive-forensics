@@ -62,14 +62,25 @@ FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "radar_gnss_combined": ([("gnss {0} + radar {1}".format(g, r), (g, r))
                              for g in ("rtk", "degraded") for r in ("low", "nominal", "high")], True),
     "impulse": ([("2%", 0.02), ("5%", 0.05), ("10%", 0.10), ("20%", 0.20)], True),
+    # Campaign v3 (docs/CAMPAIGN_V3.md): radar levels on every recorder, on recorder subsets (asymmetric: each
+    # recorder alone and, with three or more, all but each one; ``asym_subsets``), and GNSS x radar on every
+    # recorder.
+    "radar_v3": ([("nominal", "nominal"), ("severe", "severe"), ("extreme", "extreme")], True),
+    "radar_asym": ([("nominal", "nominal"), ("severe", "severe"), ("extreme", "extreme")], True),
+    "radar_gnss_v3": ([("gnss {0} + radar {1}".format(g, r), (g, r))
+                       for g in ("rtk", "degraded") for r in ("nominal", "severe")], True),
     "clock": ([("offsets", None)], False),
     "downsample": ([("10 Hz", 2), ("5 Hz", 4)], False),
     "dropout": ([("one recorder", None)], False),
     "outage": ([("1 s radar outage", 1.0)], False),
 }
+V3_FAMILIES = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3")
 # Pooled metrics and the standard error over seeds below which no further seed is drawn.
 TOLERANCES = {"association_accuracy": 0.02, "collision_recall": 0.02, "event_recall": 0.02,
-              "fused_centre_error_m": 0.05, "runs_aligned": 0.02}
+              "fused_centre_error_m": 0.05, "runs_aligned": 0.02,
+              # campaign v3 headline numbers (scorecard): collisions with the right participants, observable
+              # vehicles represented
+              "collisions_identified_rate": 0.02, "represented_rate": 0.02}
 
 
 def _read_json(path: Path) -> Any:
@@ -89,6 +100,19 @@ def _first_collision_t_local(run_dir: Path, recorder: str) -> Optional[float]:
     return None if not lines else float(lines[0]["timestamp"]) - float(origin)
 
 
+def asym_subsets(recorders: Sequence[str]) -> List[str]:
+    """The recorder subsets a ``radar_asym`` job degrades ("A", "A+B", ...; the other recorders keep the ideal
+    radar): each recorder alone and, with three or more recorders, all but each one (with three: every pair).
+    Every recorder degraded is the ``radar_v3`` job of the same level and seed."""
+    recorders = sorted(recorders)
+    if len(recorders) < 2:
+        return []
+    subsets = {(r,) for r in recorders}
+    if len(recorders) >= 3:
+        subsets |= {tuple(x for x in recorders if x != r) for r in recorders}
+    return sorted("+".join(subset) for subset in subsets)
+
+
 def jobs_for(run_dir: Path, family: str, seeds: Sequence[int]) -> List[Dict[str, Any]]:
     levels, stochastic = FAMILIES[family]
     recorders = _recorders(run_dir)
@@ -97,6 +121,8 @@ def jobs_for(run_dir: Path, family: str, seeds: Sequence[int]) -> List[Dict[str,
         variants: List[Dict[str, Any]] = [{}]
         if family in ("dropout", "outage"):
             variants = [{"recorder": recorder} for recorder in recorders if family == "outage" or len(recorders) > 1]
+        elif family == "radar_asym":
+            variants = [{"recorder": subset} for subset in asym_subsets(recorders)]
         for variant in variants:
             for seed in (seeds if stochastic else [0]):
                 out.append(dict(variant, run=str(run_dir), family=family, level=label, parameter=parameter, seed=seed))
@@ -113,8 +139,11 @@ def build(job: Dict[str, Any]):
     pose = None
     if family == "baseline":
         perturbation = Perturbation(name)
-    elif family == "radar":
+    elif family in ("radar", "radar_v3"):
         perturbation = Perturbation(name, radar=RADAR_PROFILES[parameter])
+    elif family == "radar_asym":
+        perturbation = Perturbation(name, radar=RADAR_PROFILES[parameter],
+                                    radar_recorders=tuple(job["recorder"].split("+")))
     elif family in ("gnss", "gnss_refined"):
         perturbation = Perturbation(name, gnss=profiles[parameter])
         pose = PerturbedPoseSource.factory(profiles[parameter], int(job["seed"]))
@@ -126,7 +155,7 @@ def build(job: Dict[str, Any]):
         perturbation = Perturbation(name,gnss=profile,
                      collisions=CollisionPerturbation(impulse_rel_std=.10 if family=='combined' else 0.0))
         pose = PerturbedPoseSource.factory(profile,int(job['seed']))
-    elif family == "radar_gnss_combined":
+    elif family in ("radar_gnss_combined", "radar_gnss_v3"):
         gnss, radar = parameter
         perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=profiles[gnss])
         pose = PerturbedPoseSource.factory(profiles[gnss], int(job["seed"]))
@@ -202,6 +231,18 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
             from cdf.evaluation.pose_errors import pose_errors
             result['pose_errors'] = pose_errors(target,pose)
             result.update(extra_evaluation(target, evaluation, fusion_full))
+            if job["family"] in V3_FAMILIES:
+                # The study's headline metrics (cdf.evaluation.scorecard) on this copy, from the files above.
+                from cdf.evaluation.scorecard import scorecard
+                try:
+                    card = scorecard(target, oracle=result.pop("_oracle_full", None))
+                    for vehicle in card["completeness"]["vehicles"]:
+                        vehicle.pop("road_users", None)
+                    result["scorecard"] = card
+                except Exception:
+                    import traceback
+                    result.setdefault("evaluation_errors", {})["scorecard"] = traceback.format_exc()[-2000:]
+            result.pop("_oracle_full", None)
         result["status"] = "complete"
     except Exception as exc:  # recorded, the study goes on
         import traceback
@@ -264,6 +305,7 @@ def extra_evaluation(target: Path, evaluation: Dict[str, Any], fusion: Dict[str,
         _stability(out, audit)
     try:
         oracle = compare_run(Path(target), load_config())
+        out["_oracle_full"] = oracle
         out["event_oracle"] = {pair: {kind: {k: v for k, v in row.items() if k in ("found", "expected", "matched", "deltas")}
                                       for kind, row in table.items()}
                                for pair, table in oracle["comparison"].items() if pair.startswith("RECONSTRUCTION vs")}
@@ -315,7 +357,16 @@ def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
     events_base = sum(r["events"]["base_events"] for r in done)
     centre = [m["fused_centre_error_median_m"] for m in with_metrics if m.get("fused_centre_error_median_m") is not None]
     deltas = [abs(d) for r in done for d in r["events"]["time_deltas_s"]]
+    from cdf.evaluation.scorecard import _numbers
+    cards = [_numbers(r["scorecard"]) for r in done if r.get("scorecard")]
+
+    def card_ratio(num: str, den: str) -> Optional[float]:
+        total = sum(c[den] for c in cards)
+        return None if not total else sum(c[num] for c in cards) / total
+
     return {"runs": len(done), "failed": len(results) - len(done),
+            "collisions_identified_rate": card_ratio("identified", "contacts"),
+            "represented_rate": card_ratio("represented", "observable"),  # road users that record nothing
             "association_accuracy": ratio("associations_correct", "associations_decided"),
             'absolute_pose_rms_m': statistics.median([r['pose_errors']['absolute_position_m']['rms'] for r in done
                                    if r.get('pose_errors')]) if any(r.get('pose_errors') for r in done) else None,
@@ -379,6 +430,21 @@ def summarize(all_results: Sequence[Dict[str, Any]], results_dir: Path) -> Dict[
         writer.writerows(rows)
     (results_dir / "summary.md").write_text(markdown(record), encoding="utf-8")
     figures(record, results_dir / "figures")
+    if any(r.get("scorecard") for r in all_results):
+        # Campaign v3: the scorecard per job (condition, seed, scenario, degraded recorders, paired change from the
+        # G0 baseline of the same run) and per condition.
+        from cdf.evaluation.scorecard import campaign_markdown, campaign_rows, condition_table
+        job_rows = campaign_rows([r for r in all_results if r["family"] in V3_FAMILIES])
+        table = condition_table(job_rows)
+        (results_dir / "campaign_v3.json").write_text(json.dumps({"conditions": table, "jobs": job_rows}, indent=1)
+                                                      + "\n", encoding="utf-8")
+        (results_dir / "campaign_v3_conditions.md").write_text(
+            campaign_markdown(table, "Campaign v3: reconstruction quality per condition"), encoding="utf-8")
+        keys = sorted({k for row in job_rows for k in row}, key=lambda k: (k.startswith("d_"), k))
+        with (results_dir / "campaign_v3_jobs.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows(job_rows)
     return record
 
 

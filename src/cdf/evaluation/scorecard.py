@@ -107,12 +107,13 @@ def _stat(block: Optional[Mapping[str, Any]]) -> Dict[str, Optional[float]]:
     return {"n": block.get("n", 0), "median": block.get("median"), "p95": block.get("p95"), "mean": block.get("mean")}
 
 
-def scorecard(run_dir: Path, min_track_frames: int = 5) -> Dict[str, Any]:
+def scorecard(run_dir: Path, min_track_frames: int = 5, oracle: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     run_dir = Path(run_dir)
     ev_dir = run_dir / "reconstruction" / "evaluation"
     evaluation = _json(ev_dir / "evaluation.json")
     fusion = _json(ev_dir / "fusion_metrics.json")
-    oracle = _json(ev_dir / "event_oracle.json") if (ev_dir / "event_oracle.json").exists() else None
+    if oracle is None and (ev_dir / "event_oracle.json").exists():
+        oracle = _json(ev_dir / "event_oracle.json")
     gt_meta = _json(run_dir / "ground_truth" / "metadata.json")
     recorders = [p["participant_id"] for p in gt_meta.get("participants", []) if p.get("record")]
     all_vehicles = [p["participant_id"] for p in gt_meta.get("participants", [])]
@@ -304,4 +305,148 @@ def markdown(cards: List[Dict[str, Any]], title: str) -> str:
                 tot("contacts"), tot("detected"), tot("identified"), tot("invented"), tot("observable"),
                 tot("represented"), tot("duplicates"), tot("phantoms"), tot("wrong_links"), tot("ttc_justified"),
                 tot("ttc_in_time"), tot("unconfirmed_ttc"), tot("rec_ghosts"))]
+    return "\n".join(out) + "\n"
+
+
+# Campaign summaries (docs/CAMPAIGN_V3.md).  One row per job, paired with the G0 baseline job of the same run; the
+# conditions pool the jobs of one seed (rates are ratios of sums, counts and paired changes are means per job, so
+# that a condition with several recorder subsets per run compares with one that has a single job per run), then
+# average the seeds.
+# ``observable`` / ``represented`` there count the road users that record nothing (the question of the study);
+# the recorders, always represented by their own pose stream, are left out.
+PAIRED = ("identified", "invented", "represented", "missed_observable", "duplicates", "rec_ghosts", "phantoms",
+          "pos_med_m")
+
+
+def _numbers(card: Mapping[str, Any]) -> Dict[str, Any]:
+    col, com, err, ass, sem = (card["collisions"], card["completeness"], card["errors"], card["association"],
+                               card.get("semantics") or {})
+    intrusions = sem.get("path_intrusions") or {}
+    # Completeness of the road users that record nothing: a recorder is represented by its own pose stream.
+    if "vehicles" in com:
+        others = [v for v in com["vehicles"] if v.get("role") != "recorder" and v.get("observable")]
+        observable, represented = len(others), sum(1 for v in others if v.get("represented"))
+    else:
+        n_recorders = len(card.get("recorders") or [])
+        observable, represented = com["observable"] - n_recorders, com["represented_observable"] - n_recorders
+    return {"contacts": col["true"], "detected": col["detected"], "identified": col["identified"],
+            "invented": col["invented"], "max_dt_s": col.get("max_abs_timing_error_s"),
+            "observable": observable, "represented": represented,
+            "missed_observable": len(com["missed_observable"]), "duplicates": com["duplicates"],
+            "rec_ghosts": len(com.get("recorder_ghosts", [])), "phantoms": len(com["phantoms"]),
+            "pos_med_m": err["centre_error_m"]["median"], "pos_p95_m": err["centre_error_m"]["p95"],
+            "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
+            "wrong_links": ass["wrong_links"], "missed_merges": (ass.get("merges") or {}).get("missed"),
+            "false_merges": (ass.get("merges") or {}).get("false"),
+            "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
+            "intrusions_found": intrusions.get("found"), "intrusions_expected": intrusions.get("expected"),
+            "unconfirmed_ttc": len(sem.get("unconfirmed_critical_ttc") or [])}
+
+
+def _run_name(run: str) -> str:
+    path = Path(str(run).replace("\\", "/"))
+    return "{0}/{1}".format(path.parent.name, path.name)
+
+
+def campaign_rows(records: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    """One row per job record (give one record per job, e.g. its latest attempt): condition, seed, scenario,
+    degraded recorders (``recorder``: "A", "A+B"; ``degraded`` of ``recorders``), status, the scorecard numbers
+    and their paired change ``d_<number>`` from the complete G0 ``baseline`` job of the same run."""
+    baselines = {_run_name(r["run"]): _numbers(r["scorecard"]) for r in records
+                 if r.get("family") == "baseline" and r.get("status") == "complete" and r.get("scorecard")}
+    rows = []
+    for r in records:
+        row: Dict[str, Any] = {"run": _run_name(r["run"]), "family": r["family"], "level": r["level"],
+                               "seed": int(r["seed"]), "recorder": r.get("recorder"), "status": r.get("status")}
+        card = r.get("scorecard")
+        if r.get("status") != "complete" or not card:
+            row["error"] = r.get("error") or (r.get("evaluation_errors") or {}).get("scorecard")
+            rows.append(row)
+            continue
+        n_recorders = len(card.get("recorders") or [])
+        row["recorders"] = n_recorders
+        row["degraded"] = len(r["recorder"].split("+")) if r.get("recorder") else n_recorders
+        numbers = _numbers(card)
+        row.update(numbers)
+        base = baselines.get(row["run"])
+        for key in PAIRED:
+            value = numbers[key]
+            row["d_" + key] = (None if base is None or value is None or base[key] is None
+                               else round(value - base[key], 6))
+        rows.append(row)
+    return rows
+
+
+def _subset(row: Mapping[str, Any]) -> str:
+    if row["family"] != "radar_asym" or not row.get("recorder"):
+        return "all"
+    return "alone" if len(row["recorder"].split("+")) == 1 else "all but one"
+
+
+def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    """Per condition (family, level, degraded subset: all / alone / all but one): per seed the jobs are pooled
+    (rates are ratios of sums; counts and paired changes are means per job; the position error is the median
+    over jobs), then the table gives the mean over seeds and its SD (``<key>_sd``)."""
+    groups: Dict[Tuple[str, str, str], List[Mapping[str, Any]]] = defaultdict(list)
+    for row in rows:
+        groups[(row["family"], row["level"], _subset(row))].append(row)
+    table = []
+    for (family, level, subset), members in groups.items():
+        done = [m for m in members if m["status"] == "complete" and "identified" in m]
+        per_seed: Dict[int, List[Mapping[str, Any]]] = defaultdict(list)
+        for m in done:
+            per_seed[m["seed"]].append(m)
+        pooled = []
+        for _, ms in sorted(per_seed.items()):
+            total = lambda key: sum(m[key] or 0 for m in ms)  # noqa: E731
+            per_job = lambda key: total(key) / len(ms)  # noqa: E731
+            paired = lambda key: (sum(m["d_" + key] for m in ms) / len(ms)  # noqa: E731
+                                  if all(m.get("d_" + key) is not None for m in ms) else None)
+            positions = [m["pos_med_m"] for m in ms if m["pos_med_m"] is not None]
+            pooled.append({
+                "collisions_identified_rate": total("identified") / total("contacts") if total("contacts") else None,
+                "collisions_detected_rate": total("detected") / total("contacts") if total("contacts") else None,
+                "invented": per_job("invented"),
+                "represented_rate": total("represented") / total("observable") if total("observable") else None,
+                "duplicates": per_job("duplicates"), "rec_ghosts": per_job("rec_ghosts"), "phantoms": per_job("phantoms"),
+                "pos_med_m": statistics.median(positions) if positions else None,
+                "d_identified": paired("identified"), "d_invented": paired("invented"),
+                "d_represented": paired("represented"), "d_duplicates": paired("duplicates"),
+                "d_phantoms": paired("phantoms")})
+        row: Dict[str, Any] = {"family": family, "level": level, "subset": subset, "seeds": len(pooled),
+                               "jobs": len(members), "failed": len(members) - len(done)}
+        for key in (pooled[0] if pooled else {}):
+            values = [p[key] for p in pooled if p[key] is not None]
+            row[key] = round(statistics.fmean(values), 4) if values else None
+            row[key + "_sd"] = round(statistics.stdev(values), 4) if len(values) > 1 else None
+        table.append(row)
+    order = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3")
+    table.sort(key=lambda r: (order.index(r["family"]) if r["family"] in order else len(order), r["family"]))
+    return table
+
+
+CONDITION_COLUMNS = (("collisions_identified_rate", "collisions identified", 3), ("invented", "invented", 1),
+                     ("represented_rate", "observable represented", 3), ("duplicates", "duplicates", 1),
+                     ("rec_ghosts", "recorder ghosts", 1), ("phantoms", "phantoms", 1),
+                     ("pos_med_m", "position err. median [m]", 3), ("d_identified", "paired d identified", 2),
+                     ("d_represented", "paired d represented", 2), ("d_phantoms", "paired d phantoms", 1))
+
+
+def campaign_markdown(table: List[Mapping[str, Any]], title: str) -> str:
+    def cell(row: Mapping[str, Any], key: str, decimals: int) -> str:
+        value = row.get(key)
+        if value is None:
+            return "-"
+        sd = row.get(key + "_sd")
+        text = "{0:.{1}f}".format(value, decimals)
+        return text + (" +- {0:.{1}f}".format(sd, decimals) if sd else "")
+    head = ["family", "level", "degraded", "seeds", "jobs", "failed"] + [h for _, h, _ in CONDITION_COLUMNS]
+    out = ["# " + title, "",
+           "Per seed the jobs are pooled: rates are ratios of sums; counts and paired changes from the G0 baseline "
+           "of the same run are means per job.  Then the mean over seeds +- SD.  Represented: observable road users "
+           "that record nothing.  Definitions: `cdf.evaluation.scorecard`.", "",
+           "| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    for row in table:
+        out.append("| " + " | ".join([row["family"], row["level"], row["subset"], str(row["seeds"]), str(row["jobs"]),
+                                      str(row["failed"])] + [cell(row, k, d) for k, _, d in CONDITION_COLUMNS]) + " |")
     return "\n".join(out) + "\n"

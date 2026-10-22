@@ -77,6 +77,14 @@ RADAR_PROFILES: Dict[str, RadarProfile] = {
     "nominal": RadarProfile("nominal", 0.25, 0.5, 0.5, 0.10, 0.20, 3.0),
     # Worst stated accuracies (long-range modes, field-of-view edges); clutter lambda_C = 30 of T-ITS 2019.
     "high": RadarProfile("high", 0.50, 2.0, 2.0, 0.20, 0.40, 30.0),
+    # Campaign v3 levels (docs/robustness_profiles.md, "Radar levels v3"): each value labelled there as
+    # specification, derived from a measurement, or engineering assumption.
+    # severe: measurement quality at the field-of-view edge / long range (azimuth 2 deg: RadarScenes edge
+    # specification), twice the nominal misses, the measured urban ghost rate kept.
+    "severe": RadarProfile("severe", 0.50, 2.0, 2.0, 0.20, 0.40, 3.0),
+    # extreme: the severe accuracies with dense clutter lambda = 30 per sweep, a tracker design value of T-ITS
+    # 2019, not a measured rate: a stress test beyond typical automotive radar (equal to the historical "high").
+    "extreme": RadarProfile("extreme", 0.50, 2.0, 2.0, 0.20, 0.40, 30.0),
 }
 
 
@@ -287,6 +295,15 @@ class Perturbation:
     downsample: int = 1  # keep every n-th ego / control / radar sample
     drop_recorders: Tuple[str, ...] = ()
     radar_outage: Optional[Tuple[str, float, float]] = None  # (recorder, start, end) in its local time [s]
+    # The recorders whose radars get the radar profile; empty: every recorder.  The random stream of a recorder's
+    # radar is keyed by (seed, profile, recorder, radar), so a recorder degraded alone gets exactly the errors it
+    # gets when every recorder is degraded (paired asymmetric comparisons).
+    radar_recorders: Tuple[str, ...] = ()
+
+    def radar_profile_of(self, recorder: str) -> "RadarProfile":
+        if self.radar_recorders and recorder not in self.radar_recorders:
+            return RADAR_PROFILES["ideal"]
+        return self.radar
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -338,7 +355,7 @@ def perturbed_copy(run_dir: Path, target: Path, perturbation: Perturbation, seed
                                               and perturbation.collisions != CollisionPerturbation())):
             _write_jsonl(target / relative, _perturb_stream(path, recorder, parts[2], perturbation, offsets, seed))
         elif parts[2] == "radar" and path.name == "observations.npz" and (
-                shifted or perturbation.radar.name != "ideal" or perturbation.downsample > 1
+                shifted or perturbation.radar_profile_of(recorder).name != "ideal" or perturbation.downsample > 1
                 or (perturbation.radar_outage is not None and perturbation.radar_outage[0] == recorder)):
             _perturb_radar_file(path, target / relative, run_dir / "vehicles" / recorder, recorder, perturbation,
                                 offsets, seed)
@@ -403,9 +420,10 @@ def _perturb_radar_file(path: Path, target: Path, vehicle_dir: Path, recorder: s
         _, start, end = perturbation.radar_outage
         local = timestamps - ego_t[0]
         keep = np.array([k for k in keep if not (start <= local[k] <= end)], dtype=int)
-    rng = np.random.default_rng(stream_seed(seed, "radar", perturbation.radar.name, recorder, path.parent.name))
+    profile = perturbation.radar_profile_of(recorder)
+    rng = np.random.default_rng(stream_seed(seed, "radar", profile.name, recorder, path.parent.name))
     frames, timestamps, starts, detections = perturb_sweeps(
-        frames, timestamps, starts, detections, metadata, perturbation.radar, rng,
+        frames, timestamps, starts, detections, metadata, profile, rng,
         lambda t: float(np.interp(t, ego_t, ego_v)), keep)
     timestamps = timestamps + offsets.get(recorder, 0.0)
     target.parent.mkdir(parents=True, exist_ok=True)
