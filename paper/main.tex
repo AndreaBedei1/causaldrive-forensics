@@ -1,0 +1,38 @@
+% IEEE T-ITS submission draft: two-column, single-spaced journal format.
+% Compile from paper/ with: latexmk -pdf main.tex
+\documentclass[journal]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+
+\title{Forensic Reconstruction of Road Collisions under Partial Observability}
+
+\author{Lorenzo Bacchiani, Andrea Bedei, Mario Bravetti, Giovanni Pau, and Roberto Girau%
+\thanks{L. Bacchiani, A. Bedei, M. Bravetti, G. Pau, and R. Girau are with the University of Bologna, Bologna, Italy.}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Road collisions are often observed only through partial recordings made by the vehicles involved. This paper presents a retrospective method that aligns multiple onboard recordings, associates radar tracks across observers, reconstructs road users without their own recordings, and derives a shared semantic event trace. The evaluation examines reconstruction quality and robustness to positioning and radar errors in simulated collision scenarios.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Partial observability, collision reconstruction, automotive radar, multi-vehicle fusion, forensic analysis.
+\end{IEEEkeywords}
+
+\input{sections/intro}
+\input{sections/running_example}
+\input{sections/background}
+\input{sections/methodology}
+\input{sections/evaluation}
+\input{sections/related_work}
+\input{sections/conclusion}
+
+% Add the verified references when the paper text is drafted.
+% \bibliographystyle{IEEEtran}
+% \bibliography{references}
+
+\end{document}

@@ -20,3 +20,18 @@ venv/
 /results/robustness/*/control/controller.stdout.txt
 /results/robustness/*/control/controller.lock
 /results/robustness/*/control/command
+# LaTeX compilation outputs for the paper (keep source and figure PDFs visible).
+/paper/*.aux
+/paper/*.bbl
+/paper/*.bcf
+/paper/*.blg
+/paper/*.fdb_latexmk
+/paper/*.fls
+/paper/*.lof
+/paper/*.lot
+/paper/*.out
+/paper/*.run.xml
+/paper/*.synctex.gz
+/paper/*.toc
+/paper/main.pdf
+/paper/build/
