@@ -1,6 +1,133 @@
 \section{Related Work}
 \label{sec:related-work}
 
-% Compare accident reconstruction, event-data recording, cooperative
-% perception, radar tracking, and multi-vehicle localization. Focus on the
-% difference between retrospective fusion and live cooperative perception.
+Reconstructing a collision from vehicle recordings connects accident
+investigation with cooperative perception and multisensor estimation.
+We review these strands through three recurring tasks: aligning recordings,
+matching vehicle identities, and recovering motion.
+Table~\ref{tab:closest-reconstruction} compares the closest forensic systems
+with our approach.
+
+\begin{table*}[!t]
+\caption{Closest forensic reconstruction systems. Entries summarize the
+reported procedures and demonstrations.}
+\label{tab:closest-reconstruction}
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}p{0.17\textwidth}p{0.25\textwidth}p{0.23\textwidth}p{0.28\textwidth}@{}}
+\hline
+\textbf{Work} & \textbf{Recorded evidence} & \textbf{Temporal alignment} & \textbf{Road-user reconstruction} \\
+\hline
+Beck et al.~\cite{beck2023pipeline} &
+Camera, LiDAR, radar; vehicle logs &
+Synchronized inputs; recovery outside scope &
+Image/depth tracking of a selected target \\
+Matsumura et al.~\cite{matsumura2024precrash} &
+EDR + dashcam from one or both vehicles &
+Video/impact anchoring &
+Trajectories of known crash participants \\
+Zhang et al.~\cite{zhang2025reverse} &
+Driving logs + dashcam/map &
+Vehicle-log timestamps &
+Motion from logged relative distances \\
+Yuan et al.~\cite{yuan2026multisource} &
+EDR + GPS + roadside video &
+External time reference and correction &
+Vehicle-state and scene-parameter fusion \\
+\hline
+\textbf{Ours} &
+Raw radar + vehicle logs  &
+Clock recovery from shared contacts or observed motion &
+Cross-observer association; Kalman filtering and RTS smoothing \\
+\hline
+\end{tabular*}
+\end{table*}
+
+\subsection{Accident Reconstruction from Recorded Evidence}
+
+Simulation tools such as PC-Crash reconstruct vehicle motion and contacts
+through dynamics models~\cite{steffan1996pccrash}; EDR measurements provide
+independent checks on reconstruction estimates~\cite{gabler2004edr}.
+DeepCrashTest extracts trajectories from monocular dashcam videos to create
+virtual crash tests~\cite{bashetty2020deepcrashtest}, while Zhang et al.
+combine vehicle logs and road geometry to reproduce pre-crash scenarios
+in OpenSCENARIO~\cite{zhang2025reverse}. Trajectory recovery and replay
+therefore have established forensic and testing applications.
+
+Several works are particularly close to the present setting. Young et al.
+reconstruct host and neighbouring trajectories from an EDR storing states
+received through cooperative collision-warning
+messages~\cite{young2009reconstruction}. Beck et al. process an automated
+vehicle's sensor and motion recordings into investigator-facing
+visualizations, including uninstrumented surrounding
+vehicles~\cite{beck2023pipeline}. Their demonstrated tracking uses image
+detections and depth, with a user-selected target; synchronization is
+explicitly outside the study's scope. Matsumura et al. combine EDR and dashcam
+data from one or both vehicles involved in a crash~\cite{matsumura2024precrash}.
+Yuan et al. align and fuse EDR, GPS, and roadside video evidence for
+simulation-based reconstruction~\cite{yuan2026multisource}.
+These precedents establish the value of perception logs, multiple recordings,
+and temporal alignment. The additional inference here concerns unknown
+clock offsets and target correspondences across independently collected
+radar recordings.
+
+\subsection{Cooperative Perception and Tracking}
+
+High-level cooperative perception already combines communicated object
+tracks~\cite{rauch2012car2x}, estimates correspondences between vehicles'
+object lists~\cite{rauch2013association}, and addresses spatial and temporal
+alignment~\cite{allig2019alignment}. Aeberhard et al. explicitly fuse
+asynchronous automotive tracks~\cite{aeberhard2012asynchronous}.
+DAIR-V2X introduces time-compensated late fusion~\cite{yu2022dairv2x},
+and V2X-ViT handles asynchronous sharing and pose errors in cooperative
+detection~\cite{xu2022v2xvit}. Chiu et al. learn detection uncertainty within
+a multisensor Kalman framework for cooperative tracking~\cite{chiu2024dmstrack}.
+More recently, Castelino et al. compare track-fusion strategies using
+Collective Perception Messages in asynchronous scenarios, assuming reliable
+source timestamps~\cite{castelino2026fusion}.
+Asynchronous fusion and cross-vehicle association are therefore established.
+Here, separately collected recordings have unknown clock offsets and target
+correspondences; inter-vehicle communication during the incident is not
+required. The objective is a retrospective account of the collision and
+each recorder's evidence history.
+
+\subsection{Association, Fusion, and Temporal Registration}
+
+Track association and fusion must account for correlated estimation
+errors~\cite{barshalom1981correlation,barshalom1986process}.
+Covariance intersection provides an established means of combining estimates
+with unknown cross-correlations~\cite{julier1997intersection}.
+Extended-object radar tracking models multiple reflection centres on one
+vehicle~\cite{hammarstrand2012extended}, while consistent cooperative
+localization addresses relative pose and correlation
+uncertainty~\cite{hery2021localization}.
+Our association tests build on these principles: one rigid body must explain
+the surfaces seen by different observers, with uncertainty and competing
+identities considered explicitly. Later evidence can establish earlier
+identities while preserving the original local observations and event times.
+
+Recovering alignment from common scene dynamics~\cite{caspi2002alignment}
+and estimating sensor timing passively~\cite{olson2010synchronization}
+also predate this work. The present method uses shared collision reports,
+tested against recorded geometry and available radar motion, to estimate
+constant clock offsets. When collision evidence cannot align a recorder,
+the method compares radar observations of a recording vehicle with that
+vehicle's own logged motion and footprint to estimate the time offset.
+This couples temporal registration to the physical evidence used for
+vehicle association.
+
+\subsection{Forensic Timelines and Interpretation}
+
+The NTSB's Tempe investigation demonstrates the forensic value of relating
+an automated vehicle's perception history to its subsequent
+response~\cite{ntsb2019tempe}. Response models also show that the timing of
+an action depends on the evolving situation and driver
+expectations~\cite{engstrom2024response}. Counterfactual studies, such as
+Scanlon et al.'s reconstructed fatal crashes, assess alternative outcomes
+through additional simulation~\cite{scanlon2021fatal}.
+Our contribution concerns the evidence supporting such analyses: it combines
+clock recovery, cross-observer identity association, reconstruction of vehicles
+without recordings, and a shared event chronology retaining each recorder's
+observation and response history. This chronology supports expert analysis;
+it does not establish driver awareness, avoidability, or responsibility.
