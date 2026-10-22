@@ -1,7 +1,8 @@
 # Repository map, branches and data (2026-10-22)
 
-This map was written on branch `work/reproducible-g0-20261022`.  Nothing listed here was deleted.  Every removal
-proposed below waits for Andrea's approval.
+This map was written on branch `work/reproducible-g0-20261022`.  The removals Andrea approved on 2026-10-22 were
+carried out after the backup was verified: the git bundle, and every file of the manifest by SHA-256.  They are
+marked "removed" below.
 
 ## What lives where
 
@@ -42,23 +43,34 @@ and raises no error, and lane-dependent events and tests then differ.  Set
 | `main` (local `1d596c1e`; `origin/main` is 4 commits ahead with the paper: `paper/`, LBacchiani, 2026-10-22) | protected | untouched; merging this work needs Andrea's approval, and the paper commits must be merged too |
 | `work/reproducible-g0-20261022` | this work (from `review/rtk5g-preflight`) | **keep**: to be reviewed and approved |
 | `review/rtk5g-preflight` (`1c7a210b`, also on origin) | contained in the work branch | keep until the work branch is merged |
-| `experiment/robust-offline-association` (`b786dcf2`, local only; worktree `.worktrees/robust-offline-association`) | candidate association v2: more merges, 0 false merges on its development set; safeguard policy open | **keep and re-evaluate**.  It targets the main G0 error (20 duplicates in S14-S19), but its numbers refer to the previous recordings.  Re-run it on the new canonical set before deciding |
-| `experiment/radar-first-association` (`71b0d9ef`, local only; worktree `.worktrees/radar-first-association`) | closed on 2026-10-18, verdict B (works only with a perfect ego pose) | **archive**: proposal to tag `archive/radar-first-association` and remove the worktree and branch, after approval |
-| `experiment/rtk5g-oldtraces-overnight` (`8a323a2a`, local; worktree with 4 untracked result folders, copied to the backup) | RTK/5G study on the previous recordings, reviewed in RTK5G_PREFLIGHT_REVIEW | **archive**: superseded by the new canonical set; tags `rtk5g-oldtraces-overnight-20261021*` already exist |
+| `experiment/robust-offline-association` (`b786dcf2`, local only; worktree `.worktrees/robust-offline-association`) | candidate association v2: more merges, 0 false merges on its development set; safeguard policy open | **keep and re-evaluate** on the new canonical set: it targets the main G0 error (20 duplicates in S14-S19) |
+| `experiment/radar-first-association` (`71b0d9ef`) | closed on 2026-10-18, verdict B | **removed**: branch and worktree; tag `archive/radar-first-association` keeps the commit |
+| `experiment/rtk5g-oldtraces-overnight` (`8a323a2a`) | RTK/5G study on the previous recordings | **removed**: branch and worktree, after copying its untracked results to the backup; tag `archive/rtk5g-oldtraces-overnight` (and the `rtk5g-oldtraces-overnight-20261021*` tags) keep the commits |
 | `local/gnss-free-multisensor-v2-design` (`a6c023b6`) | design documents for GNSS-free multisensor work | keep (future work) |
-| `codex/gnss-free-radar-odometry-2a` (`14208c4c`, on origin) | another agent's work; its worktree folder no longer exists (`git worktree list`: prunable) | keep the branch; `git worktree prune` only removes the stale entry (proposal) |
-| `%TEMP%\CarlaGraph_original_1d596c1` (detached `1d596c1e`) | a temporary worktree with 1218 local changes (regenerated traces); origin unknown | **check**, then remove after approval |
+| `codex/gnss-free-radar-odometry-2a` (`14208c4c`, on origin) | another agent's work | branch kept; its stale worktree entry was pruned (the folder no longer existed) |
+| `%TEMP%\CarlaGraph_original_1d596c1` (detached `1d596c1e`) | a temporary worktree with 1218 local changes | **removed**, after copying the 1117 changed files to `F:\CarlaGraph_backup_20261022\temp_worktree_CarlaGraph_original_1d596c1\` (SHA-256 checked; the 101 deleted paths are listed) |
+
+**Incident during the removals (2026-10-22, 22:19).**
+* **What happened.**  One of the two removed experiment worktrees held a junction to the main checkout's
+  `traces/`.  `git worktree remove --force` followed it and deleted the 1343 tracked files of `traces/`.
+* **Recovery.**  They were restored from the committed version, and all 783 raw files match the SHA-256 list of the
+  canonical acquisition (`results/reproducibility_20261022/canonical_A_raw_sha256.txt`).  `check_dataset` passes
+  22/22.  The one uncommitted change there (the S12 counterfactual summary) was regenerated.
+* **Rule from now on.**  Look for junctions (`cmd /c dir /AL`) and remove them with `cmd /c rmdir` before removing
+  any worktree.
 
 ## Local data outside Git
 
-All of it is copied, with SHA-256, in `F:\CarlaGraph_backup_20261022\untracked\`.
-
-| folder | size | content | proposal |
+| folder | size | content | state |
 |---|---|---|---|
-| `scratch/` (locally excluded) | 1.2 GB | scripts and outputs of past analyses | remove the local copy after approval (backup kept) |
-| `sweeps/` (ignored) | 3.3 GB | raw recordings of the old scenario sweeps | as above |
-| `stress_recordings/` (ignored) | 0.9 GB | an abandoned highway stress study | as above |
-| `supplementary_work/` | 15 KB | empty remainder | remove after approval |
+| `scratch/` (locally excluded) | was 1.2 GB | outputs of past analyses | data **removed**; the 34 audit scripts kept (205 KB) |
+| `sweeps/` (ignored) | 3.3 GB | raw recordings of the old scenario sweeps | **removed** |
+| `stress_recordings/` (ignored) | 0.9 GB | an abandoned highway stress study | **removed** |
+| `supplementary_work/` | 15 KB | empty remainder | **removed** |
+
+Everything removed is in `F:\CarlaGraph_backup_20261022\untracked\`; each local file was checked there by SHA-256
+before the removal.  Nothing needed by new simulations or by the campaign was removed: the code, configuration,
+canonical traces and `scripts/hardening_refresh.py` all stay.
 
 ## Evidence of this work outside the repository (F:)
 

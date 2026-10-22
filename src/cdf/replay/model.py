@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import json
 import math
+import statistics
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -775,9 +776,9 @@ class Participant:
     blueprint: str
     blueprint_source: str  # "recorded" or "fallback"
     trajectory: Trajectory  # the poses drawn: its pose source on the replay clock
-    frame_origin: Pose  # first ego record in file order: the reconstruction's local frame
+    frame_origin: Pose  # first pose in file order of its pose source: the reconstruction's local frame
     footprint: Optional[EgoFootprint] = None  # its own recorded footprint (vehicle frame)
-    recorded: Optional[Trajectory] = None  # its recorded ego stream on the replay clock (local headings)
+    recorded: Optional[Trajectory] = None  # the pose stream of its local frame on the replay clock (local headings)
 
 
 @dataclass
@@ -801,6 +802,7 @@ class ReplayRun:
     entities: List[EntityPath] = field(default_factory=list)  # anonymous road users (U1, ...)
     road_users: Dict[Tuple[str, str], str] = field(default_factory=dict)  # (recorder, track) -> U1, ...
     hidden: List[str] = field(default_factory=list)  # recorders without a global clock: not replayed
+    recording_zero: float = 0.0  # the recorders' clock at t_global = 0 (median over the aligned recorders)
 
     @classmethod
     def load(cls, run_dir: Path, geometry: Optional[GhostGeometry] = None,
@@ -847,15 +849,17 @@ class ReplayRun:
             first = records[0]
             recorded = Trajectory.from_records(records)
             trajectory = recorded
+            frame_origin = Pose(float(first["x"]), float(first["y"]), float(first["z"]), float(first["yaw_deg"]))
             if pose_factory is not None and pid in origins:
                 trajectory = _pose_source_trajectory(pose_factory(vehicles_dir / pid, origins[pid]), records,
                                                      origins[pid])
+                # The local frame of the radar tracks is the measured one too (pipeline.measured_ego_records):
+                # tracks are turned with these poses, never with the exact stream.
+                recorded, frame_origin = trajectory, trajectory.poses[0]
             if clock == GLOBAL_CLOCK:
                 recorded = recorded.shifted(offsets[pid] - origins[pid])
                 trajectory = trajectory.shifted(offsets[pid] - origins[pid])
-            participants.append(Participant(pid, str(blueprint), source, trajectory,
-                                            Pose(float(first["x"]), float(first["y"]), float(first["z"]),
-                                                 float(first["yaw_deg"])),
+            participants.append(Participant(pid, str(blueprint), source, trajectory, frame_origin,
                                             EgoFootprint.from_metadata(meta.get("ego_footprint")), recorded))
         start = min(p.trajectory.start for p in participants)
         end = max(p.trajectory.end for p in participants)
@@ -863,7 +867,9 @@ class ReplayRun:
                   participants=participants, start=start, duration=round(end - start, 6), notes=notes,
                   geometry=geometry or GhostGeometry.from_config(load_config()), clock=clock,
                   clock_origins=({pid: offsets[pid] for pid in ids} if clock == GLOBAL_CLOCK else dict(origins)),
-                  hidden=hidden)
+                  hidden=hidden,
+                  recording_zero=(statistics.median(origins[pid] - offsets[pid] for pid in ids)
+                                  if clock == GLOBAL_CLOCK and ids else 0.0))
         run._load_reconstruction()
         return run
 
@@ -924,6 +930,14 @@ class ReplayRun:
     def display_time(self, t: float) -> float:
         """Replay time -> the clock shown to the user: t_global, or seconds since the first source sample."""
         return (round(t + self.start, 6) if self.clock == GLOBAL_CLOCK else round(t, 6)) + 0.0  # no -0.0
+
+    def recording_time(self, t: float) -> float:
+        """Replay time -> the recorders' own clock (``cdf.replay.sync``), from the reconstruction's alignment and
+        the recorders' timestamps only: t_global + (clock origin - offset_to_global) of the aligned recorders."""
+        return self.start + t + (self.recording_zero if self.clock == GLOBAL_CLOCK else 0.0)
+
+    def replay_time_of(self, t_recording: float) -> float:
+        return t_recording - self.start - (self.recording_zero if self.clock == GLOBAL_CLOCK else 0.0)
 
     def participant(self, participant_id: str) -> Participant:
         return next(p for p in self.participants if p.participant_id == participant_id)

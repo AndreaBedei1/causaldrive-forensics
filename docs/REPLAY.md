@@ -1,51 +1,64 @@
 # Replay viewers
 
-There are two independent viewers.  They use the same window, keys, options, cameras and speeds, and run on the
-same CARLA 0.9.15 server.
+There are two independent viewers.  They use the same window, keys, options, cameras and speeds, and run each on a
+CARLA 0.9.15 server.
 
 | | GROUND TRUTH viewer | RECONSTRUCTION viewer |
 |---|---|---|
 | script | `scripts/view_ground_truth.py` | `scripts/replay_run.py` |
 | reads | `<run>/ground_truth/` only (privileged) | the recorders' own files and `<run>/reconstruction/` only |
 | shows | every vehicle on its true trajectory, the physical contact episodes (COLLISION banner, CONTACT_START / END) | recorders at the pose the reconstruction used, fused road users U1, U2, ... as boxes, radar tracks, associations, collisions and semantic events |
-| clock | `t_contact`: seconds from the first true vehicle-vehicle contact | `t_global`: the reconstruction's clock, 0 at its reference collision |
+| clock shown | `t_contact`: seconds from the first true vehicle-vehicle contact | `t_global`: the reconstruction's clock, 0 at its reference collision |
 
-In all 22 canonical runs the reconstruction aligns the recorders on the first collision, so `t_contact` and
-`t_global` are the same instant: `--start T` / `--at T` show the same moment in both viewers.  The recorders'
-pose in the RECONSTRUCTION viewer is never the simulator's:
+**Recorder poses.**  The recorders' pose in the RECONSTRUCTION viewer is never the simulator's:
 * in G0 it is the recorded synthetic GNSS/INS stream;
 * after a perturbation or a pose refinement it is `reconstruction/global/recorder_poses.json`
   (`docs/SENSORS_AND_GROUND_TRUTH.md`).
 
-The review menu (`scripts/review_canonical_runs.py`) opens the GROUND TRUTH viewer of the chosen run first.  When
-its window closes, the RECONSTRUCTION viewer of the same run opens.  `Ng` opens only the ground truth of run N, and
-`Nr` only its reconstruction.
+## Both viewers side by side, synchronised
+
+The review menu opens the two viewers of a run at the same time, each on its own CARLA server, so they never
+share or disturb a simulation.
+* **The leader.**  The GROUND TRUTH window (left) leads.  Play, pause, seek and speed there: the RECONSTRUCTION
+  window (right) follows the same instant.  Cameras, vehicle selection and panels stay independent in each window.
+* **What crosses.**  The two viewers exchange only the instant shown on the recording clock, the play state and the
+  speed, over a local UDP port (`cdf.replay.sync`).  The recording clock is the recorders' own clock, which in the
+  canonical runs is the simulator's.  No position, identity or event crosses.
+* **The follower's mapping.**  The RECONSTRUCTION viewer maps the instant through its own alignment and the
+  recorders' timestamps, so it never reads ground truth.
+* **The two clocks.**  The labels stay each viewer's own clock.  `t_global` = 0 is the reconstruction's strongest
+  matched contact; in 21 of the 22 runs it is also the first true contact, so `t_contact` and `t_global` read the
+  same.  In S04 `b_rear_first` the strongest contact (A-B) comes 1.55 s after the first one (B-C).  At the same
+  instant the GROUND TRUTH window then shows `t_contact` 1.55 s more than the RECONSTRUCTION window's `t_global`.
+  The menu prints this offset when it opens a single viewer of that run.
 
 ## Launch
 
 ```bat
 conda activate carla
-:: either your own CARLA 0.9.15 on port 2000, or the project's server on port 3000 (Ctrl-C stops it)
-python scripts\start_carla.py
+:: two CARLA 0.9.15 servers, one per viewer (each in its own terminal; Ctrl-C stops it)
+python scripts\start_carla.py --carla-root F:\Carla9_15\WindowsNoEditor --port 3000
+python scripts\start_carla.py --carla-root F:\Carla9_15\WindowsNoEditor --port 3100
 
-:: menu of the 22 canonical runs (pick a number; close the window to come back; q quits)
+:: menu of the 22 canonical runs: N = both viewers side by side and synchronised, Ng / Nr = one of them, q = quit
+python scripts\review_canonical_runs.py --port 3000 --gt-port 3100 --res 960x540 --speed 0.5
+
+:: with one server only: N opens the GROUND TRUTH viewer, then the RECONSTRUCTION viewer when its window closes
 python scripts\review_canonical_runs.py --port 3000
-:: the same menu on a server already running on port 2000
-scripts\review_canonical_runs.bat
 
 :: one run directly
-python scripts\view_ground_truth.py traces\S04\run_0_a_front_pushed --port 3000
+python scripts\view_ground_truth.py traces\S04\run_0_a_front_pushed --port 3100
 python scripts\replay_run.py traces\S04\run_0_a_front_pushed --port 3000
 python scripts\replay_run.py traces\S14\run_0_surrounded --port 3000 --start 5 --speed 0.25 --follow B --focus
 
-:: without a server: top-down frames of both viewers at the same instants
+:: without a server: top-down frames of both viewers at the same displayed times
 python scripts\view_ground_truth.py traces\S10\run_0_deflected_into_c --export out\gt --at -1 --at 0 --at 1
 python scripts\replay_run.py traces\S10\run_0_deflected_into_c --export out\rec --at -1 --at 0 --at 1
 ```
 
 Useful options: `--start T` (seconds), `--speed X` (default 0.5), `--paused`, `--camera overview|follow|free`,
-`--follow ID`, `--focus`, `--hide-tracks`, `--res 1280x720`.  Without a server, `--export DIR` draws top-down
-frames of the reconstruction (`--at T`, `--format png|svg|pdf`).
+`--follow ID`, `--focus`, `--hide-tracks`, `--res 1280x720`, `--sync-lead PORT` / `--sync-follow PORT` (what the
+menu passes).  Without a server, `--export DIR` draws top-down frames (`--at T`, `--format png|svg|pdf`).
 
 ## Controls
 

@@ -124,11 +124,12 @@ class CampaignSummaries(unittest.TestCase):
         from cdf.evaluation import scorecard
         self.sc = scorecard
         self.records = [
-            _job("traces/S01/run_0_crash", "baseline", "none", 0, _card(1, 1, 2, 2, pos=0.2)),
+            _job("traces/S01/run_0_crash", "baseline", "none", 0, _card(1, 1, 2, 2, pos=0.2, recorders=ABC)),
             _job("traces/S10/run_0_x", "baseline", "none", 0, _card(2, 2, 3, 3, pos=0.3, recorders=ABC)),
-            _job("traces/S01/run_0_crash", "radar_v3", "severe", 0, _card(1, 1, 1, 2, duplicates=1, phantoms=5, pos=0.6)),
+            _job("traces/S01/run_0_crash", "radar_v3", "severe", 0, _card(1, 1, 1, 2, duplicates=1, phantoms=5, pos=0.6,
+                                                                       recorders=ABC)),
             _job("traces/S10/run_0_x", "radar_v3", "severe", 0, _card(1, 2, 3, 3, phantoms=7, pos=0.5, recorders=ABC)),
-            _job("traces/S01/run_0_crash", "radar_v3", "severe", 1, _card(1, 1, 2, 2, phantoms=3, pos=0.4)),
+            _job("traces/S01/run_0_crash", "radar_v3", "severe", 1, _card(1, 1, 2, 2, phantoms=3, pos=0.4, recorders=ABC)),
             _job("traces/S10/run_0_x", "radar_v3", "severe", 1, _card(2, 2, 2, 3, phantoms=1, pos=0.7, recorders=ABC)),
             _job("traces/S10/run_0_x", "radar_asym", "severe", 0, _card(2, 2, 3, 3, phantoms=2, recorders=ABC),
                  recorder="A+B"),
@@ -162,6 +163,14 @@ class CampaignSummaries(unittest.TestCase):
         asym = [r for r in table if r["family"] == "radar_asym"]
         self.assertEqual([(r["subset"], r["jobs"], r["failed"]) for r in asym], [("all but one", 2, 1)])
 
+    def test_conditions_are_stratified_by_the_number_of_recorders(self):
+        records = self.records + [
+            _job("traces/S02/run_0_crash", "baseline", "none", 0, _card(1, 1, 1, 1)),
+            _job("traces/S02/run_0_crash", "radar_v3", "severe", 0, _card(1, 1, 1, 1, phantoms=4))]
+        table = self.sc.condition_table(self.sc.campaign_rows(records))
+        self.assertEqual(sorted((r["recorders"], r["jobs"]) for r in table if r["family"] == "radar_v3"),
+                         [(2, 1), (3, 4)])
+
     def test_the_study_summary_writes_the_scorecard_tables(self):
         events = {"base_events": 0, "matched": 0, "extra": [], "time_deltas_s": []}
         records = [dict(r, events=events, attempt=1) for r in self.records]
@@ -170,7 +179,7 @@ class CampaignSummaries(unittest.TestCase):
             conditions = (Path(tmp) / "campaign_v3_conditions.md").read_text(encoding="utf-8")
             jobs = (Path(tmp) / "campaign_v3_jobs.csv").read_text(encoding="utf-8").splitlines()
             table = json.loads((Path(tmp) / "campaign_v3.json").read_text(encoding="utf-8"))
-        self.assertIn("| radar_v3 | severe | all | 2 | 4 | 0 |", conditions)
+        self.assertIn("| radar_v3 | severe | all | 3 | 2 | 4 | 0 |", conditions)
         self.assertEqual(len(jobs), 1 + len(records))
         self.assertIn("d_identified", jobs[0])
         self.assertEqual(len(table["jobs"]), len(records))

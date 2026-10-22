@@ -69,6 +69,19 @@ class RecorderPoseOutput(unittest.TestCase):
                 self.assertAlmostEqual(drawn.poses[k].x, used["x"][k], places=6)
                 self.assertAlmostEqual(drawn.poses[k].y, used["y"][k], places=6)
 
+    def test_the_viewer_turns_radar_tracks_with_the_same_poses(self):
+        # Under a measured pose the local frame of the radar tracks is the measured one: the track boxes must be
+        # turned with the poses the reconstruction used, not with the exact ego.jsonl.
+        import math
+        record = json.loads(self.poses_file.read_text(encoding="utf-8"))
+        run = ReplayRun.load(self.degraded)
+        for participant in run.participants:
+            used = record["recorders"][participant.participant_id]
+            self.assertAlmostEqual(participant.frame_origin.x, used["x"][0], places=6)
+            self.assertAlmostEqual(participant.frame_origin.yaw, math.degrees(used["yaw_rad"][0]), places=6)
+            k = len(used["x"]) // 2
+            self.assertAlmostEqual(participant.recorded.poses[k].yaw, math.degrees(used["yaw_rad"][k]), places=6)
+
 
 if __name__ == "__main__":
     unittest.main()

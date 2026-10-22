@@ -11,3 +11,15 @@ All pure fused road users of the runs; thresholds: braking >= 2.0 m/s2 along the
 | after contact (> 3 s) | 0 | - | - | - | - | - |
 | one recorder | 641 | 0.465 | 1.650 | 0.804 | 0.110 | 0.394 |
 | several recorders | 3746 | 0.220 | 0.671 | 0.346 | 0.032 | 0.246 |
+
+## Radar tracks of the recorders, seen by another recorder
+
+Distance from the track point (the tracker's estimate, on the near side of the body) to the true body outline of the tracked recorder (0 on or inside it), and speed error, by the tracked recorder's motion.
+
+| regime | samples | measured | body distance median [m] | body distance P95 [m] | speed median [m/s] | speed P95 [m/s] |
+|---|---:|---:|---:|---:|---:|---:|
+| steady | 2270 | 0.991 | 0.000 | 0.000 | 0.062 | 0.549 |
+| braking | 134 | 0.993 | 0.000 | 0.000 | 0.105 | 1.248 |
+| turning | 355 | 0.994 | 0.000 | 0.106 | 0.126 | 0.698 |
+| after contact (0-3 s) | 1320 | 0.990 | 0.000 | 0.000 | 0.074 | 0.480 |
+| after contact (> 3 s) | 1927 | 1.000 | 0.000 | 0.000 | 0.008 | 0.076 |

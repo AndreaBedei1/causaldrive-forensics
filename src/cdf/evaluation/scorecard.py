@@ -27,9 +27,10 @@ those verdicts; where a new rule is needed it is stated below and kept deliberat
      track's true identity, as in the oracle).  ``in_time`` when it precedes the contact; the lead time is
      reported.  ``justified`` when the COVERAGE oracle (ideal tracks while observable) also raises one about the
      partner in that window -- otherwise the warning was not observable or not justified by the definition.
-   * Path intrusion: EGO_PATH_ENTRY and CUT_IN_*_START about the same subject are one manoeuvre; an oracle
-     intrusion is found when the reconstruction reports either kind for the same recorder and subject within
-     ``MATCH_WINDOW_S``, in any order.
+   * Path intrusion: EGO_PATH_ENTRY and CUT_IN_*_START about the same subject are one manoeuvre: the starts of
+     either kind less than ``MATCH_WINDOW_S`` apart are grouped (``match_intrusions``).  An oracle manoeuvre is
+     found when the reconstruction reports either kind for the same recorder and subject within ``MATCH_WINDOW_S``
+     of any of its starts, in any order; a reconstructed manoeuvre with no oracle start that close is extra.
    * Unconfirmed CRITICAL_TTC alarms: reconstruction CRITICAL_TTC_START with no COVERAGE counterpart within
      ``MATCH_WINDOW_S`` and no true contact of the pair within ``WARNING_WINDOW_S`` after it.  These are
      CANDIDATES for visual review, not proven false alarms: the oracle itself is an idealisation.
@@ -48,6 +49,28 @@ from .visibility import Box, coverage, frames_by_participant, RadarView
 WARNING_WINDOW_S = 8.0
 MATCH_WINDOW_S = 2.0
 INTRUSION_TYPES = ("EGO_PATH_ENTRY", "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START")
+
+
+def _manoeuvres(times: List[float]) -> List[List[float]]:
+    """Starts less than MATCH_WINDOW_S apart (single linkage) form one manoeuvre."""
+    groups: List[List[float]] = []
+    for t in sorted(times):
+        if groups and t - groups[-1][-1] < MATCH_WINDOW_S:
+            groups[-1].append(t)
+        else:
+            groups.append([t])
+    return groups
+
+
+def match_intrusions(oracle: List[float], reconstruction: List[float]) -> Dict[str, Any]:
+    """Path-intrusion manoeuvres of one (recorder, subject): expected and found oracle manoeuvres, the first start
+    of each missed one and of each reconstructed manoeuvre with no oracle counterpart (module docstring)."""
+    near = lambda group, others: any(abs(a - b) <= MATCH_WINDOW_S for a in group for b in others)  # noqa: E731
+    expected, found = _manoeuvres(oracle), _manoeuvres(reconstruction)
+    hits = [group for group in expected if near(group, reconstruction)]
+    return {"expected": len(expected), "found": len(hits),
+            "missed": [group[0] for group in expected if not near(group, reconstruction)],
+            "extra": [group[0] for group in found if not near(group, oracle)]}
 
 
 def _json(path: Path) -> Any:
@@ -225,19 +248,12 @@ def scorecard(run_dir: Path, min_track_frames: int = 5, oracle: Optional[Mapping
         for r in recorders:
             subjects = {e["subject"] for e in cov_events.get(r, []) + rec_events.get(r, [])
                         if e["type"] in INTRUSION_TYPES}
-            for s in subjects:
-                o = starts(cov_events, r, s, INTRUSION_TYPES)
-                x = starts(rec_events, r, s, INTRUSION_TYPES)
-                used = set()
-                for t in o:
-                    intrusions["expected"] += 1
-                    match = next((i for i, u in enumerate(x) if i not in used and abs(u - t) <= MATCH_WINDOW_S), None)
-                    if match is None:
-                        intrusions["missed"].append("{0}/{1}@{2:.2f}".format(r, s, t))
-                    else:
-                        used.add(match); intrusions["found"] += 1
-                intrusions["extra"] += ["{0}/{1}@{2:.2f}".format(r, s, u) for i, u in enumerate(x) if i not in used
-                                        and not any(abs(u - t) <= MATCH_WINDOW_S for t in o)]
+            for s in sorted(subjects, key=str):
+                m = match_intrusions(starts(cov_events, r, s, INTRUSION_TYPES), starts(rec_events, r, s, INTRUSION_TYPES))
+                intrusions["expected"] += m["expected"]
+                intrusions["found"] += m["found"]
+                intrusions["missed"] += ["{0}/{1}@{2:.2f}".format(r, s, t) for t in m["missed"]]
+                intrusions["extra"] += ["{0}/{1}@{2:.2f}".format(r, s, t) for t in m["extra"]]
         unconfirmed = []
         for r in recorders:
             for e in rec_events.get(r, []):
@@ -354,6 +370,9 @@ def campaign_rows(records: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     and their paired change ``d_<number>`` from the complete G0 ``baseline`` job of the same run."""
     baselines = {_run_name(r["run"]): _numbers(r["scorecard"]) for r in records
                  if r.get("family") == "baseline" and r.get("status") == "complete" and r.get("scorecard")}
+    # A failed job has no scorecard: its run's number of recorders comes from the other jobs of the run.
+    run_recorders = {_run_name(r["run"]): len(r["scorecard"].get("recorders") or []) for r in records
+                     if r.get("status") == "complete" and r.get("scorecard")}
     rows = []
     for r in records:
         row: Dict[str, Any] = {"run": _run_name(r["run"]), "family": r["family"], "level": r["level"],
@@ -361,6 +380,7 @@ def campaign_rows(records: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
         card = r.get("scorecard")
         if r.get("status") != "complete" or not card:
             row["error"] = r.get("error") or (r.get("evaluation_errors") or {}).get("scorecard")
+            row["recorders"] = run_recorders.get(row["run"])
             rows.append(row)
             continue
         n_recorders = len(card.get("recorders") or [])
@@ -384,14 +404,15 @@ def _subset(row: Mapping[str, Any]) -> str:
 
 
 def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
-    """Per condition (family, level, degraded subset: all / alone / all but one): per seed the jobs are pooled
+    """Per condition (family, level, degraded subset: all / alone / all but one, number of recorders of the runs:
+    comparisons between subsets are made within one population of runs): per seed the jobs are pooled
     (rates are ratios of sums; counts and paired changes are means per job; the position error is the median
     over jobs), then the table gives the mean over seeds and its SD (``<key>_sd``)."""
-    groups: Dict[Tuple[str, str, str], List[Mapping[str, Any]]] = defaultdict(list)
+    groups: Dict[Tuple[str, str, str, Optional[int]], List[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
-        groups[(row["family"], row["level"], _subset(row))].append(row)
+        groups[(row["family"], row["level"], _subset(row), row.get("recorders"))].append(row)
     table = []
-    for (family, level, subset), members in groups.items():
+    for (family, level, subset, recorders), members in groups.items():
         done = [m for m in members if m["status"] == "complete" and "identified" in m]
         per_seed: Dict[int, List[Mapping[str, Any]]] = defaultdict(list)
         for m in done:
@@ -413,7 +434,8 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
                 "d_identified": paired("identified"), "d_invented": paired("invented"),
                 "d_represented": paired("represented"), "d_duplicates": paired("duplicates"),
                 "d_phantoms": paired("phantoms")})
-        row: Dict[str, Any] = {"family": family, "level": level, "subset": subset, "seeds": len(pooled),
+        row: Dict[str, Any] = {"family": family, "level": level, "subset": subset, "recorders": recorders,
+                               "seeds": len(pooled),
                                "jobs": len(members), "failed": len(members) - len(done)}
         for key in (pooled[0] if pooled else {}):
             values = [p[key] for p in pooled if p[key] is not None]
@@ -421,7 +443,8 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
             row[key + "_sd"] = round(statistics.stdev(values), 4) if len(values) > 1 else None
         table.append(row)
     order = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3")
-    table.sort(key=lambda r: (order.index(r["family"]) if r["family"] in order else len(order), r["family"]))
+    table.sort(key=lambda r: (order.index(r["family"]) if r["family"] in order else len(order), r["family"],
+                              r["recorders"] or 0))
     return table
 
 
@@ -440,13 +463,14 @@ def campaign_markdown(table: List[Mapping[str, Any]], title: str) -> str:
         sd = row.get(key + "_sd")
         text = "{0:.{1}f}".format(value, decimals)
         return text + (" +- {0:.{1}f}".format(sd, decimals) if sd else "")
-    head = ["family", "level", "degraded", "seeds", "jobs", "failed"] + [h for _, h, _ in CONDITION_COLUMNS]
+    head = ["family", "level", "degraded", "recorders", "seeds", "jobs", "failed"] + [h for _, h, _ in CONDITION_COLUMNS]
     out = ["# " + title, "",
            "Per seed the jobs are pooled: rates are ratios of sums; counts and paired changes from the G0 baseline "
            "of the same run are means per job.  Then the mean over seeds +- SD.  Represented: observable road users "
            "that record nothing.  Definitions: `cdf.evaluation.scorecard`.", "",
            "| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for row in table:
-        out.append("| " + " | ".join([row["family"], row["level"], row["subset"], str(row["seeds"]), str(row["jobs"]),
+        out.append("| " + " | ".join([row["family"], row["level"], row["subset"], str(row["recorders"]),
+                                      str(row["seeds"]), str(row["jobs"]),
                                       str(row["failed"])] + [cell(row, k, d) for k, _, d in CONDITION_COLUMNS]) + " |")
     return "\n".join(out) + "\n"

@@ -54,7 +54,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.common.config import load_run_config  # noqa: E402
-from cdf.replay.model import (ASSOCIATED, BOX_EDGES, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT,  # noqa: E402
+from cdf.replay.model import (ASSOCIATED, BOX_EDGES, GLOBAL_CLOCK, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT,  # noqa: E402
                               SPEEDS, EntityPath, EntityState, FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath,
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
                               project_segment, rotate)
@@ -112,6 +112,10 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=None,
                         help="CARLA RPC port (default: simulation.port of configs/default.yaml)")
     parser.add_argument("--keep-server", action="store_true", help="leave a CARLA server this viewer started running")
+    parser.add_argument("--sync-lead", type=int, default=None, metavar="PORT",
+                        help="send the instant shown, play state and speed to a viewer following on local UDP PORT")
+    parser.add_argument("--sync-follow", type=int, default=None, metavar="PORT",
+                        help="follow the instant, play state and speed of the viewer leading on local UDP PORT")
     parser.add_argument("--exit-after", type=float, default=None, help=argparse.SUPPRESS)  # smoke tests
     # Self-test of the real viewer: presses C six times through pygame's own event queue, saves the rendered
     # window after each press and the camera sequence and CARLA vehicle actors to DIR, then exits.
@@ -203,6 +207,11 @@ class ReplayApp:
         self.ids = [p.participant_id for p in run.participants]  # the recorders: TAB cycles these only
         self.colors = {pid: PALETTE[i % len(PALETTE)] for i, pid in enumerate(self.ids)}
         self.clock = PlaybackClock(run.duration, speed=args.speed, start=args.start, playing=not args.paused)
+        # Side-by-side review (cdf.replay.sync): only the instant, play state and speed cross between viewers.
+        from cdf.replay.sync import SyncReceiver, SyncSender
+        self.sync_sender = SyncSender(args.sync_lead) if getattr(args, "sync_lead", None) else None
+        self.sync_receiver = SyncReceiver(args.sync_follow) if getattr(args, "sync_follow", None) else None
+        self.synced = False
         self.events = run.display_events()
         self.selected = args.follow if args.follow in self.ids else self.ids[0]
         self.event_scroll = 0  # the selected recorder's events: index of the newest one shown
@@ -318,6 +327,9 @@ class ReplayApp:
     def close(self) -> None:
         """Destroy every replay actor, restore the world settings, close pygame."""
         carla = self.carla
+        for channel in (self.sync_sender, self.sync_receiver):
+            if channel is not None:
+                channel.close()
         if self.camera is not None:
             try:
                 self.camera.stop()
@@ -470,7 +482,19 @@ class ReplayApp:
             for event in self.pygame.event.get():
                 self.handle(event)
             self._move_free_camera(wall_dt)
-            self.clock.advance(wall_dt)
+            message = self.sync_receiver.latest() if self.sync_receiver is not None else None
+            if message is not None:
+                from cdf.replay.sync import apply_sync
+                apply_sync(self.clock, self.run, message)
+                if not self.synced:
+                    self.synced = True
+                    LOGGER.info("following the leading viewer: recording clock %.3f s = %s %+.2f s", message["t_recording"],
+                                "t_global" if self.run.clock == GLOBAL_CLOCK else "t",
+                                self.run.display_time(self.clock.time))
+            else:
+                self.clock.advance(wall_dt)
+            if self.sync_sender is not None:
+                self.sync_sender.send(self.run.recording_time(self.clock.time), self.clock.playing, self.clock.speed)
             self.render_frame()
             ticker.tick(self.args.fps)
             if selftest is not None:

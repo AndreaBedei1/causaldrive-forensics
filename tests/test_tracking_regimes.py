@@ -46,5 +46,29 @@ class Regimes(unittest.TestCase):
         self.assertAlmostEqual(stats["rmse"], (sum(v * v for v in (0.1, 0.2, 0.3, 0.4, 1.0)) / 5) ** 0.5, places=4)
 
 
+def _box(x=10.0, y=0.0, yaw=0.0):
+    return {"transform": {"x": x, "y": y, "yaw_deg": yaw}, "bbox_extent": {"x": 2.0, "y": 1.0}}
+
+
+class PointToBody(unittest.TestCase):
+    def test_a_point_on_or_inside_the_body_is_at_zero(self):
+        self.assertEqual(tr.point_body_distance(11.0, 0.5, _box()), 0.0)
+        self.assertEqual(tr.point_body_distance(12.0, 1.0, _box()), 0.0)
+
+    def test_outside_the_body_the_distance_to_its_outline(self):
+        self.assertAlmostEqual(tr.point_body_distance(13.0, 0.0, _box()), 1.0)
+        self.assertAlmostEqual(tr.point_body_distance(10.0, -3.0, _box()), 2.0)
+        self.assertAlmostEqual(tr.point_body_distance(10.0, 3.0, _box(yaw=90.0)), 1.0)
+
+
+class RecorderTracks(unittest.TestCase):
+    def test_radar_tracks_of_recorders_follow_them_through_the_contact(self):
+        samples = tr.recorder_track_samples(ROOT / "traces" / "S01" / "run_0_crash")
+        labels = {label for s in samples for label in s["labels"]}
+        self.assertIn("after contact (0-3 s)", labels)
+        self.assertTrue(all(s["body_distance_m"] >= 0.0 for s in samples))
+        self.assertTrue(all("one recorder" not in s["labels"] for s in samples))
+
+
 if __name__ == "__main__":
     unittest.main()

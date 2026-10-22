@@ -245,7 +245,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     if fixed_delta_seconds is not None:
         metadata["fixed_delta_seconds"] = fixed_delta_seconds
     # Collision callbacks that arrived after the tick the controller had to react on (vehicle_agent):
-    # 0 means the post-impact controls did not depend on callback timing.
+    # 0: no impact notification arrived after its reaction tick.  Not counted: a callback of an earlier frame
+    # arriving after the controller already reacted to a later one (out-of-order delivery, not observed).
     metadata["late_impact_notifications"] = late_impacts
     if simulation_end_timestamp is not None and simulation_start_timestamp is not None:
         metadata["simulation_end_timestamp"] = simulation_end_timestamp

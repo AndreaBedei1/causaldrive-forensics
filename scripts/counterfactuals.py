@@ -79,9 +79,26 @@ def run_summary(run_dir: Path) -> Dict[str, Any]:
         entry["peak_impulse_Ns"] = round(max(entry["peak_impulse_Ns"], impulse), 1)
     triggers = [{key: row[key] for key in ("action_id", "participant_id", "t_scenario", "action_t_start", "measured")
                  if key in row} for row in _jsonl(gt / "triggers.jsonl")]
-    return {"participants": participants,
-            "recorded_duration_s": round(max(float(s["timestamp"]) for s in states) - start, 2),
-            "triggers_fired": triggers, "box_gaps": gaps, "collisions": contacts}
+    summary = {"participants": participants,
+               "recorded_duration_s": round(max(float(s["timestamp"]) for s in states) - start, 2),
+               "triggers_fired": triggers, "box_gaps": gaps, "collisions": contacts}
+    # Each vehicle's largest lateral departure, to its left and to its right, from the straight line of its first
+    # state (CARLA axes: y to the right of the heading).
+    first: Dict[str, Dict[str, Any]] = {}
+    departures: Dict[str, List[float]] = defaultdict(lambda: [0.0, 0.0])
+    for stamp in sorted(by_time):
+        for pid, state in by_time[stamp].items():
+            origin = first.setdefault(pid, state)["transform"]
+            yaw = math.radians(float(origin["yaw_deg"]))
+            dx = float(state["transform"]["x"]) - float(origin["x"])
+            dy = float(state["transform"]["y"]) - float(origin["y"])
+            lateral = -math.sin(yaw) * dx + math.cos(yaw) * dy
+            departures[pid][0] = max(departures[pid][0], -lateral)
+            departures[pid][1] = max(departures[pid][1], lateral)
+    for pid, (left, right) in sorted(departures.items()):
+        summary["{0}_max_left_departure_m".format(pid)] = round(left, 2)
+        summary["{0}_max_right_departure_m".format(pid)] = round(right, 2)
+    return summary
 
 
 def main(argv: List[str]) -> int:

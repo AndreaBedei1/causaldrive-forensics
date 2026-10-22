@@ -23,9 +23,14 @@ asymmetrically?
 * **Reference.**  "Not degraded" means the G0 condition: CARLA's radar with no added error and the exact
   synthetic GNSS/INS.  In `radar_asym` the recorders outside the subset keep that radar.  Every job is compared with
   the G0 `baseline` job of the same run (paired).
-* **Individual and collective effects.**  Compare `radar_asym` "alone" (one recorder degraded), `radar_asym` "all but
-  one" (only one recorder keeps the G0 radar) and `radar_v3` (all degraded) at the same level and seed.  With two
-  recorders this is exactly "only A, only B, both".
+* **Individual and collective effects.**  Compare, within the same population of runs and at the same level and
+  seed:
+  * `radar_asym` "alone": one recorder degraded;
+  * `radar_asym` "all but one": only one recorder keeps the G0 radar;
+  * `radar_v3`: all recorders degraded.
+
+  The condition table is stratified by the number of recorders R.  "All but one" exists only for R = 3 (6 runs),
+  so the three-way comparison uses the R = 3 rows.  With two recorders the design is exactly "only A, only B, both".
 * **Paired random streams.**  Random streams are keyed by (seed, sensor, profile, recorder, radar or axis), never
   by the family or the subset.  A recorder degraded alone therefore receives exactly the errors it receives in every
   other subset and in `radar_v3` (test `test_campaign_v3.PairedAsymmetricStreams`).  The GNSS errors of
@@ -55,9 +60,9 @@ asymmetrically?
   * association errors;
   * semantics;
   * `d_*`, the paired change from the G0 baseline of the same run.
-* **`campaign_v3_conditions.md`** and **`campaign_v3.json`**: one row per condition (family, level, subset).  Per
-  seed the runs are pooled: rates are ratios of sums, while counts and paired changes are sums.  The table then
-  gives the mean over seeds ± SD.
+* **`campaign_v3_conditions.md`** and **`campaign_v3.json`**: one row per condition (family, level, degraded
+  subset, number of recorders).  Per seed the jobs of a condition are pooled: rates are ratios of sums, while counts
+  and paired changes are means per job.  The table then gives the mean over seeds ± SD.
 * **`summary.md` / `summary.csv` / `figures/`**: the earlier per-condition table, kept for continuity.
 
 ## Size
@@ -77,6 +82,13 @@ On the 22 canonical runs (16 with two recorders, 6 with three), `jobs_for` count
 
 * **Smoke test.**  Runs S01 and S10, all five families, 2 seeds.  Before the subset generalisation: 68 jobs, 0
   failed, about 52 min with 6 workers.  Results are on F: in `F:\CarlaGraph_repro_20261022\campaign_v3_smoke\`.
+* **Pair subsets end to end.**  S10, `radar_asym` severe, seed 0: the three "all but one" jobs (A+B, A+C, B+C) ran
+  with the real runner and completed (`F:\CarlaGraph_repro_20261022\pair_subset_smoke\`).  Phantoms per job:
+  * one recorder degraded: 8.7;
+  * two: 17.3;
+  * all three (`radar_v3`): 26.0.
+* **Road users that record nothing.**  S13 abreast, baseline, GNSS G1/G2 and radar nominal/severe/extreme, 1 seed:
+  6 jobs completed, and the completeness columns are filled (`F:\CarlaGraph_repro_20261022\mini_smoke_S13\`).
 * **Resuming.**
   * Running the same command again on the finished smoke results started no job.
   * A copy with three job lines removed, simulating an interruption, re-ran exactly those three jobs and nothing
@@ -94,8 +106,9 @@ On the 22 canonical runs (16 with two recorders, 6 with three), `jobs_for` count
 | extreme | 95.2 (plus 2.0 recorder ghosts) | 38.4 (plus 0.8 recorder ghosts) |
 
   The phantoms add up over the recorders.  Summed over the recorders of a run degraded one at a time, they equal
-  the all-degraded count: per seed, 129.5 against 129 under severe radar.  Each degraded recorder's own tracks
-  fragment, independently of the others.
+  the all-degraded count: per seed, 129.5 against 129 under severe radar.  In this smoke test (2 runs x 2 seeds) the
+  phantoms come from each degraded recorder's own tracks and add up approximately.  Independence is not claimed
+  from so small a sample.
 
 ## Command (to be given only after approval and freeze)
 

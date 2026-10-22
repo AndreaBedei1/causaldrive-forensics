@@ -93,6 +93,13 @@ class GroundTruthRun(ReplayRun):
     def display_time(self, t: float) -> float:
         return round(t - self.contact_zero, 6) + 0.0
 
+    def recording_time(self, t: float) -> float:
+        """Replay time -> the simulator clock (cdf.replay.sync: the instant two viewers share)."""
+        return self.start + t
+
+    def replay_time_of(self, t_recording: float) -> float:
+        return t_recording - self.start
+
     def scenario_time(self, t: float) -> float:
         return round(t, 6) + 0.0
 

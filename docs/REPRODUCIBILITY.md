@@ -36,11 +36,33 @@ simulation time on the server.
 
 * **S10**, 6 repeats: 6/6 bit-identical ground truth over the whole run, identical collision callbacks and contact
   episodes (`s10_repeats.json`, stage `fixed3`).
+* **S10 again, at the end of the work (22:3x, final code of the branch).**  Two more recordings in two new client
+  processes, compared with the canonical S10 recorded at 18:40:
+  * positions and speeds: 0.0000 m and 0.0000 m/s apart at every tick, bitwise identical;
+  * collision callbacks and contact episodes: identical.
+
+  Three acquisitions about four hours apart, in different processes, give the same physics
+  (`F:\CarlaGraph_repro_20261022\final_S10\repro_check.json`).
 * **All 22 canonical runs**, recorded twice (sets A and B, separate client processes): **21/22 bit-identical**
-  (positions, speeds, yaw, controls, collision callbacks).  S04 `b_rear_first` differs by at most
-  **3.1e-5 m**, 9.8e-5 m/s, 6.4e-4 deg from the A–B contact tick on: one or two float32 ULPs at those map
-  coordinates, the same contact episodes (`canonical_A_vs_B.json`).
+  ground truth.  What `scripts/repro_check.py` compares:
+  * planar positions, yaw and speed of every vehicle at every tick: exactly;
+  * controls: within 1e-9;
+  * collision callbacks: as (frame, pair) sets, impulses not compared.
+
+  S04 `b_rear_first` differs by at most **3.1e-5 m**, 9.8e-5 m/s, 6.4e-4 deg from the A–B contact tick on.  That
+  is one or two float32 ULPs at those map coordinates, with the same contact episodes (`canonical_A_vs_B.json`).
+* **The sensor streams follow the physics.**  Timestamps and frame counters excluded:
+  * the radar detections (`offsets`, `detections`) are identical in 141 of the 150 radar files;
+  * the recorders' `ego.jsonl` streams are identical in 47 of 50;
+  * every difference is in S04 `b_rear_first`.
 * `late_impact_notifications` = 0 in all 44 recordings.
+* **Residuals of the acquisition loop, not observed but possible.**
+  * The recording's last tick is counted from the tick at which the last collision callback arrived
+    (`runner.py`, `last_collision_t`), so a late callback could shift the end of a recording by one tick.
+  * A callback of an earlier frame that arrives after the controller has already reacted is not counted in
+    `late_impact_notifications`.
+
+  Both depend on callback arrival order, which was in order in every run recorded here.
 
 **Declared criterion** (used from now on to accept a re-acquisition): identical contact episodes (pair, start,
 end, number of ticks), and ground-truth positions within 1e-3 m and speeds within 1e-2 m/s of the reference run.
@@ -52,6 +74,14 @@ lab repeat of S10 before fix 3 was complete, a 6e-7 difference in a steering com
 impact grew to 5.8 mm.  We therefore never claim bit-exact physics in general; we measure every acquisition against
 the criterion above (`scripts/repro_check.py`).  Changing CARLA version, GPU driver or physics settings requires the
 check to be repeated.
+
+## Reconstruction determinism
+
+The reconstruction is an offline computation.  The same raw data must give the same outputs.  The 22 canonical runs
+were reconstructed again from copies of their raw data with the final code of this branch, and every output file
+under `reconstruction/` (evaluation excluded) was compared byte for byte with the committed one.  The result is in
+the stop-point report of 2026-10-22.  Earlier, after the viewer-pose change `e0480b25`, S06, S10 and S12 were
+byte-identical.
 
 ## Acquisition integrity of the new canonical set
 

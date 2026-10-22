@@ -73,27 +73,38 @@ set CARLA_ROOT=C:\path\to\CARLA_0.9.15\WindowsNoEditor
 
 ## Explore the scenarios
 
-```bat
-conda activate carla
-python scripts\start_carla.py
-```
-
-In a second terminal, open the menu of the 22 canonical runs and pick one:
+Start two CARLA 0.9.15 servers, one per viewer, each in its own terminal:
 
 ```bat
 conda activate carla
-python scripts\review_canonical_runs.py --port 3000
+python scripts\start_carla.py --carla-root F:\Carla9_15\WindowsNoEditor --port 3000
 ```
 
-For each run the menu opens two viewers in turn:
-* the GROUND TRUTH viewer: what CARLA simulated, every vehicle on its true trajectory, with the physical contacts;
-* then the RECONSTRUCTION viewer: what the algorithm estimated from the sensors.  Recording vehicles are drawn at
+```bat
+conda activate carla
+python scripts\start_carla.py --carla-root F:\Carla9_15\WindowsNoEditor --port 3100
+```
+
+In a third terminal, open the menu of the 22 canonical runs and pick one:
+
+```bat
+conda activate carla
+python scripts\review_canonical_runs.py --port 3000 --gt-port 3100 --res 960x540
+```
+
+For each run the menu opens two viewers side by side, synchronised:
+* left, the GROUND TRUTH viewer: what CARLA simulated, every vehicle on its true trajectory, with the physical
+  contacts;
+* right, the RECONSTRUCTION viewer: what the algorithm estimated from the sensors.  Recording vehicles are drawn at
   the pose the reconstruction used, reconstructed road users are boxes, and each recorder's panel lists what it
   perceived and when.
 
-Their clocks (`t_contact`, `t_global`) coincide at the first collision.  Keys: SPACE play/pause, LEFT/RIGHT
-seek, N/P next/previous event, C camera, TAB next vehicle, F focus its panel, H help.  Full guide and how to read the
-screen: [docs/REPLAY.md](docs/REPLAY.md).
+Control time (SPACE, LEFT/RIGHT, speed keys) in the left window; the right one follows the same instant.  Only that
+instant, the play state and the speed cross between them.  Other keys: N/P next/previous event, C camera, TAB next
+vehicle, F focus its panel, H help.
+
+The labels are each viewer's own clock (`t_contact`, `t_global`).  They read the same in 21 of the 22 runs.  In S04
+`b_rear_first` the left one reads 1.55 s more.  Full guide and how to read the screen: [docs/REPLAY.md](docs/REPLAY.md).
 
 ## Reproduce the results
 

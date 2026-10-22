@@ -20,11 +20,22 @@ Definitions are in the `cdf.evaluation.scorecard` docstring.
 | Collisions | 27/27 detected, 27/27 with the correct participants, 0 invented, timing error 0.00 s.  All 27 contacts are between two recorders, so these numbers measure the matching of the recorders' own collision reports (next section) |
 | Completeness | 50 recorders, each represented by its own pose stream.  **45/45 road users that record nothing are observable and represented**.  **20 duplicates** (a vehicle split over 2-4 road users, S14-S19), **1 recorder ghost** (S06), 0 phantoms |
 | Continuity | represented time over observable time, lowest per run: 0.45 (S16), 0.63 (S17), 0.68 (S12); 0.83-0.93 elsewhere |
-| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.07 m/s, P95 0.09-0.58 m/s.  S06's 1.75 m belongs to its recorder ghost |
+| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.07 m/s, P95 0.09-0.58 m/s.  Pooled over the runs: median 0.21 m in steady motion, 0.33 m in turns (definition below).  S06's 1.75 m belongs to its recorder ghost |
 | Association | 0 wrong recorder links, 0 false merges; 1 missed recorder link (S06); 43 missed merges (S14-S19: conservative, identities left unresolved) |
 | CRITICAL_TTC | 43/43 justified warnings arrive **before** the impact (lead time min 0.75 s, median 1.55 s).  "Justified" means the COVERAGE oracle also raises one about the partner within 8 s before the contact.  The other 11 of the 54 (recorder, partner) cases have neither a warning nor an oracle warning; in most of them the recorder is the struck vehicle |
-| Path intrusions (EGO_PATH_ENTRY or CUT_IN, either order, 2 s) | 5 oracle intrusions not reported and 9 reported without an oracle counterpart.  After the ground-truth check below, none of the 5 misses has forensic weight; 7 of the 9 extras are real but minor reconstruction errors |
+| Path intrusions (manoeuvres: EGO_PATH_ENTRY and CUT_IN starts less than 2 s apart are one manoeuvre, matched in either order and kind within 2 s) | 27 of 32 oracle manoeuvres found; 5 missed and 8 reported without an oracle counterpart.  After the ground-truth check below, none of the 5 misses has forensic weight; 7 of the 8 extras are real but minor reconstruction errors, and the eighth is a real manoeuvre the oracle misses |
 | Unconfirmed CRITICAL_TTC alarms | 2 (S14, after the contact), physically plausible (below) |
+
+## Two different things: a detected collision and a reconstructed identity
+
+| | what produces it | what the G0 numbers say |
+|---|---|---|
+| **Collision detected** | each recorder's own **impact (collision) sensor**: the time and impulse magnitude of a contact it felt, with no partner identity | 27/27 contacts detected; all are between two recorders, so both felt them |
+| **Participants of a collision** | the matching of the two recorders' **impact reports** (equal and opposite impulses, bodies touching in their own pose streams).  Radar only vetoes a pairing its pre-contact view contradicts | 27/27 pairs correct, 0 invented |
+| **Identity of a radar track** | the **radar** association: which track of a recorder is which other recorder (recorder link), or an anonymous road user U1, U2, ... for a vehicle that records nothing | recorder links: 0 wrong, 1 missed (S06); road users: 45/45 represented, 20 duplicates, 0 false merges |
+
+A correct collision pair therefore does not show that radar recognised the partner.  The radar identities are judged
+on their own lines of the scorecard.
 
 ## How the collisions are identified, and what 27/27 means
 
@@ -65,9 +76,17 @@ Definitions are in the `cdf.evaluation.scorecard` docstring.
 
 ## Tracking by motion regime (diagnostic)
 
-Fused road users with a pure true identity are compared with the truth at every state of their trajectory, and
-each state is labelled by the true vehicle's motion at that instant (`scripts/tracking_regimes.py`; thresholds
-are diagnostic choices).
+**Definition of the position error.**  For each fused road user whose true identity is pure (every track sample it
+was built from lies on one true vehicle), and for every state of its fused trajectory, the error is the planar
+distance between the estimated box centre and the true vehicle's position at the same simulator time.  The
+simulator time is t_global mapped through the reference recorder's own clock, as in `cdf.evaluation.fusion_metrics`.
+* **The true position** is CARLA's actor origin.  For the five vehicle models of the set it lies within 0.06 m of
+  the bounding-box centre (Tesla Model 3 +0.029 m, Nissan Patrol -0.057 m, the others below 0.012 m; read from
+  CARLA 0.9.15).  This is negligible against the errors reported.
+* **The 0.21 m and 0.33 m** are medians over all such states of the 22 runs, labelled by the true vehicle's motion
+  (`scripts/tracking_regimes.py`; the thresholds are diagnostic choices).
+* **Recorders are excluded:** they are represented by their own pose stream.  Recorder ghosts are excluded too:
+  they are association errors.
 
 | regime | states | centre median [m] | centre P95 [m] | centre RMSE [m] | speed median [m/s] | speed P95 [m/s] |
 |---|---:|---:|---:|---:|---:|---:|
@@ -80,14 +99,29 @@ are diagnostic choices).
 
 * **Turning.**  Turning states come mostly from the S19 highway curve (404 of 1127) and from lane changes and
   swerves in S12-S17.  The S07 roundabout has no road user that records nothing.  Turning raises the median centre
-  error from 0.21 m to 0.33 m and the P95 from 0.73 m to 1.02 m.  The Kalman filter and RTS smoother follow the
-  manoeuvre with a bias but no breakdown.
-* **Several recorders.**  A road user seen by several recorders is placed about twice as accurately as one seen
-  by a single recorder (median 0.22 m against 0.47 m).
-* **Braking and contact.**  These regimes cannot be assessed on radar-tracked vehicles in this dataset.  No vehicle
-  that records nothing brakes hard (1 state) or collides (0 states).  The vehicles that brake and collide are the
-  recorders, placed by their own pose streams.  Their radar tracks seen by other recorders enter the evaluation as
-  recorder links (0 wrong, 1 missed), not as position errors.  This is a limit of the scenario design.
+  error from 0.21 m to 0.33 m and the P95 from 0.73 m to 1.02 m: larger errors, no breakdown.
+* **One recorder versus several.**  Road users fused from several recorders have a median error of 0.22 m, against
+  0.47 m for those seen by a single recorder.  The two groups also differ in range and geometry, so this is an
+  association, not a measured effect of the number of recorders.
+* **Braking and contact.**  No vehicle that records nothing brakes hard (1 state) or collides (0 states).  The
+  vehicles that brake and collide are the recorders.  They are radar-tracked by the other recorders, and those
+  tracks are assessed below: distance from the track point to the tracked recorder's true body (0 on or inside it),
+  and speed error.
+
+| tracked recorder's motion | samples | measured | body distance median / P95 [m] | speed error median / P95 [m/s] |
+|---|---:|---:|---:|---:|
+| steady | 2270 | 0.99 | 0.00 / 0.00 | 0.06 / 0.55 |
+| braking (>= 2 m/s2) | 134 | 0.99 | 0.00 / 0.00 | 0.11 / 1.25 |
+| turning | 355 | 0.99 | 0.00 / 0.11 | 0.13 / 0.70 |
+| after its first contact, 0-3 s | 1320 | 0.99 | 0.00 / 0.00 | 0.07 / 0.48 |
+| after its first contact, > 3 s | 1927 | 1.00 | 0.00 / 0.00 | 0.01 / 0.08 |
+
+* **Through braking, turns and the collision itself** the track point stays on the tracked vehicle's body (P95
+  0.11 m in turns, 0 otherwise).
+* **The speed estimate lags under hard braking**: P95 1.25 m/s, against 0.55 m/s in steady motion.  This is a lag
+  of the tracker's motion model during strong deceleration.  Smoothing on versus off was not compared here.
+* **A point on the body is not the centre.**  The track point lies on the near side of the body, so these
+  distances do not measure the centre error of the recorders' tracks.
 
 ## Semantic disagreements, checked against the ground truth
 
@@ -123,7 +157,7 @@ the S16 case was checked visually.  Times are the recorder's local time and the 
   * 3 are oracle artefacts.  The recorder's own swerve puts a target that keeps its lane into the recorder's
     predicted path.  This is the situation where "a vehicle that follows the road geometry must not be read as
     the author of a cut-in".
-* **Extra intrusions.**  7 of the 9 are real but minor reconstruction errors, all at or around the contacts:
+* **Extra intrusions.**  7 of the 8 are real but minor reconstruction errors, all at or around the contacts:
   * 3 are the abreast side contact of S13, one per variant;
   * 2 come from the recorder's own rotation with targets 32-46 m ahead (S14 A/J, S16 A/G);
   * 1 is post-contact (S16 A/I);
@@ -140,6 +174,16 @@ the S16 case was checked visually.  Times are the recorder's local time and the 
    * **Why.**  The fusion refuses uncertain merges by design (0 false merges).  The cost is completeness, not
      correctness.
    * **Weight.**  This is the largest remaining G0 error against "the correct number of vehicles".
+   * **What it looks like in the viewer.**  The trajectories are split, not doubled.  The fragments of one vehicle
+     follow one another in time, so the vehicle's fused box disappears and reappears under another name, e.g. S14
+     H: U6, then U8, U10, U12, with gaps between them.  Two fragments of the same vehicle are shown together for
+     only 2.5 s out of the 155 s these vehicles are in view:
+     * S16 E: 0.4 s, 2.9 m apart;
+     * S18 F: 1.4 s, 0.4 m apart;
+     * S19 E: 0.5 s, 0.5 m apart;
+     * S15 H: 0.2 s, 0.4 m apart.
+
+     Each fragment is placed as accurately as any other road user.
    * **Candidate fix.**  The local experiment branch `experiment/robust-offline-association` targets it (v2: 679 ->
      761 of 1512 merges on its development set; safeguard policy left open).  It was not merged here because it
      changes the reconstruction and needs its own validation on the new canonical set.

@@ -57,6 +57,9 @@ exactly the fields listed above.
   * `collisions.jsonl` keeps CARLA's exact impulse magnitude, i.e. an ideal crash sensor.  The `impulse`
     robustness family perturbs it.
   * `ego_footprint` is the recorder's own exact box: a vehicle knows its dimensions.
+  * `vehicles/<R>/metadata.json` also holds `vehicle_transform`, the exact spawn pose of R from the scenario.  No
+    code of the reconstruction or of the RECONSTRUCTION viewer reads it, and a boundary test forbids the key there.
+    Moving it out of the recorder's files would need a re-acquisition, because the raw files are never edited.
   * `frame` / `timestamp` are the simulator's clock, so the recorders' clocks are perfectly synchronised in the raw
     data.  The reconstruction does not use that:
     * it aligns the recorders from their own observations, and the `clock` robustness family shifts the clocks to
@@ -82,6 +85,19 @@ exactly the fields listed above.
   * **Non-recorders.**  They appear only as the fused road users (U1, U2, ...) or as radar tracks.
   * **Clock.**  `t_global`, the reconstruction's own clock, anchored on its reference collision.
 
-When the reconstruction aligns the recorders on the first collision (all 22 canonical runs in G0), `t_global` and
-`t_contact` coincide, so the same instant can be compared in both viewers.  To inspect a degraded condition, run its
+**Side by side.**  When the two viewers are opened together (`docs/REPLAY.md`), each runs on its own CARLA server.
+* **What crosses.**  The GROUND TRUTH viewer sends only the instant it shows on the recording clock, its play state
+  and its speed (`cdf.replay.sync`).
+* **The follower's mapping.**  The RECONSTRUCTION viewer maps that instant through its own alignment and the
+  recorders' timestamps.  No ground-truth position, identity, event or file reaches it.
+* **The one assumption.**  The recorders' clock equals the simulator's, which is true in the canonical runs; the
+  `clock` robustness family shifts it.
+
+The two clocks are defined independently:
+* `t_contact` = 0 at the first true vehicle-vehicle contact;
+* `t_global` = 0 at the reconstruction's reference collision, its strongest matched contact.
+
+In 21 of the 22 canonical runs these are the same instant.  In S04 `b_rear_first` the strongest contact (A-B) comes
+1.55 s after the first one (B-C), so `t_contact` = `t_global` + 1.55 s there.  The review menu prints this offset
+for every run where it is not zero.  To inspect a degraded condition, run its
 job with `scripts/robustness.py --keep` and open the kept copy in the RECONSTRUCTION viewer.

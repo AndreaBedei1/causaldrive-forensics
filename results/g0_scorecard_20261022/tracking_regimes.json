@@ -129,5 +129,87 @@
     "rmse": 0.1195
    }
   }
+ ],
+ "recorder_tracks": [
+  {
+   "regime": "steady",
+   "body_distance_m": {
+    "n": 2270,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0058
+   },
+   "speed_error_mps": {
+    "n": 2270,
+    "median": 0.0618,
+    "p95": 0.5489,
+    "rmse": 0.2401
+   },
+   "measured_share": 0.991
+  },
+  {
+   "regime": "braking",
+   "body_distance_m": {
+    "n": 134,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0118
+   },
+   "speed_error_mps": {
+    "n": 134,
+    "median": 0.1048,
+    "p95": 1.2481,
+    "rmse": 0.5887
+   },
+   "measured_share": 0.993
+  },
+  {
+   "regime": "turning",
+   "body_distance_m": {
+    "n": 355,
+    "median": 0.0,
+    "p95": 0.106,
+    "rmse": 0.0437
+   },
+   "speed_error_mps": {
+    "n": 355,
+    "median": 0.1258,
+    "p95": 0.6982,
+    "rmse": 0.3619
+   },
+   "measured_share": 0.994
+  },
+  {
+   "regime": "after contact (0-3 s)",
+   "body_distance_m": {
+    "n": 1320,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0095
+   },
+   "speed_error_mps": {
+    "n": 1320,
+    "median": 0.0736,
+    "p95": 0.4802,
+    "rmse": 0.2853
+   },
+   "measured_share": 0.99
+  },
+  {
+   "regime": "after contact (> 3 s)",
+   "body_distance_m": {
+    "n": 1927,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0
+   },
+   "speed_error_mps": {
+    "n": 1927,
+    "median": 0.0079,
+    "p95": 0.0762,
+    "rmse": 0.0427
+   },
+   "measured_share": 1.0
+  }
  ]
 }

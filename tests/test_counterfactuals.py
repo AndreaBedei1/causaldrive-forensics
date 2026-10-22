@@ -65,6 +65,20 @@ class RunSummary(unittest.TestCase):
         self.assertEqual(summary["collisions"], {"A-B": {"first_s": 0.5, "last_s": 0.8, "peak_impulse_Ns": 900.0}})
         self.assertEqual(summary["box_gaps"]["A-B"]["min_box_gap_m"], 0.0)
 
+    def test_lateral_departure_of_each_vehicle_from_its_initial_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run = _run(Path(tmp))
+            path = run / "ground_truth" / "states.jsonl"
+            rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+            for row in rows:  # B drifts to its left (CARLA: y to the right), 0.5 m/s
+                if row["participant_id"] == "B":
+                    row["transform"]["y"] = -0.5 * (row["timestamp"] - 100.0)
+            _write(path, rows)
+            summary = cf.run_summary(run)
+        self.assertAlmostEqual(summary["B_max_left_departure_m"], 1.0, places=2)
+        self.assertEqual(summary["B_max_right_departure_m"], 0.0)
+        self.assertEqual((summary["A_max_left_departure_m"], summary["A_max_right_departure_m"]), (0.0, 0.0))
+
     def test_triggers_that_fired(self):
         trigger = {"action_id": "A_swerve", "participant_id": "A", "t_scenario": 0.4, "action_t_start": 0.75,
                    "measured": {"front_clearance_m": 2.5}, "frame": 7, "timestamp": 100.4, "trigger": {"kind": "x"}}

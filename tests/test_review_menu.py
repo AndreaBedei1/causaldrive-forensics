@@ -19,5 +19,20 @@ class ServerLine(unittest.TestCase):
         self.assertIn("configs/default.yaml", menu.server_line([]))
 
 
+class ClockOffset(unittest.TestCase):
+    """The two viewers' clocks: t_contact (first true contact) and t_global (the reconstruction's reference)."""
+
+    S04B = ROOT / "traces" / "S04" / "run_0_b_rear_first"
+    S01 = ROOT / "traces" / "S01" / "run_0_crash"
+
+    def test_the_offset_between_the_two_clocks(self):
+        self.assertAlmostEqual(menu.clock_offset(self.S04B), 1.55, delta=0.01)
+        self.assertAlmostEqual(menu.clock_offset(self.S01), 0.0, delta=0.001)
+
+    def test_the_menu_states_a_non_zero_offset(self):
+        self.assertIn("t_contact = t_global + 1.55 s", menu.clock_note(self.S04B))
+        self.assertIsNone(menu.clock_note(self.S01))
+
+
 if __name__ == "__main__":
     unittest.main()
