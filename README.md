@@ -25,23 +25,29 @@ ambiguous identities unresolved rather than guessing.  Details: [docs/METHOD.md]
 
 ## Main results
 
-Robustness of the frozen reconstruction on the 22 canonical runs: 35 perturbed conditions, 3,774 reconstructions
-([full report](docs/ROBUSTNESS_CAMPAIGN.md)).
+The 22 canonical runs were re-acquired on 2026-10-22 with a deterministic acquisition.  Recorded twice, 21 of the
+22 runs are bit-identical ([reproducibility](docs/REPRODUCIBILITY.md)).
 
-| condition | collisions with correct participants | identity accuracy (decided links) | fused position error, median / p95 |
-|---|--:|--:|--:|
-| unperturbed | 1.000 (27 / 27) | 1.000 | 0.27 m / 0.75 m |
-| radar noise, nominal | 1.000 | 1.000 | 0.30 m / 0.83 m |
-| radar noise, high (30 false returns per sweep) | 0.991 | 0.950 | 0.52 m / 2.05 m |
-| consumer GNSS (about 2.5 m RMS) | 1.000 | 1.000 | 1.78 m / 2.58 m |
-| degraded GNSS (about 6.9 m RMS) | 1.000 | 1.000 | 4.90 m / 7.17 m |
+Results of the reconstruction with an ideal pose, G0 ([error analysis](docs/G0_ERROR_ANALYSIS.md)):
 
-- No collision was attributed to the wrong vehicles in any of the 3,774 reconstructions; failures are missed
-  contacts only.
-- GNSS errors shift the reconstructed positions but create no wrong identity: the method links fewer tracks instead.
-- Dense radar clutter is the breaking point: phantom road users appear and 42 % of the identity links of the
-  vehicles involved in the accident are left unresolved.
-- Results are on simulated data with modelled sensor errors; limitations are discussed in the report.
+| quantity | G0 result |
+|---|---|
+| collisions | 27/27 detected with the correct participants, 0 invented.  Every contact is between two recording vehicles, whose own collision reports are matched |
+| road users that record nothing | 45/45 observable vehicles represented; 20 duplicates in dense traffic (S14-S19) |
+| position of road users | median error 0.21 m in steady motion, 0.33 m in turns |
+| speed of road users | median error 0.03 m/s in steady motion, 0.06 m/s in turns |
+| CRITICAL_TTC warnings | 43/43 justified warnings issued before the impact (median lead time 1.55 s) |
+
+Limits:
+* G0 is a reference condition: a synthetic GNSS/INS with zero added error, not a real receiver.
+* The dataset has no contact involving a vehicle that records nothing.
+
+Degradation study:
+* **Campaign v3** is prepared and smoke-tested, not run ([design](docs/CAMPAIGN_V3.md)).  It covers RTK and
+  degraded GNSS, radar at nominal, severe and extreme levels, combined and asymmetric degradations, and several
+  seeds.
+* **Earlier campaign.**  The robustness campaign of 2026-10-15/16 refers to the previous recordings
+  ([archived report](docs/archive/ROBUSTNESS_CAMPAIGN.md)).
 
 ## Installation
 
@@ -104,7 +110,8 @@ python scripts\validate_canonical.py --out docs\CANONICAL_VALIDATION.md
 python scripts\campaign_report.py robustness
 ```
 
-To rerun the robustness campaign itself (about 170 CPU-hours; pause and resume at any time):
+To rerun the earlier robustness campaign on the previous recordings (about 170 CPU-hours; pause and resume at any
+time):
 
 ```bat
 git checkout robustness-campaign-final
@@ -114,7 +121,7 @@ scripts\campaign.bat start
 scripts\campaign.bat status
 ```
 
-Protocol, controller commands and verification: [docs/FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md).
+Protocol, controller commands and verification: [docs/archive/FROZEN_CAMPAIGN.md](docs/archive/FROZEN_CAMPAIGN.md).
 
 ## Repository
 
@@ -124,8 +131,10 @@ Protocol, controller commands and verification: [docs/FROZEN_CAMPAIGN.md](docs/F
 | `configs/` | reconstruction parameters, scenario definitions, sensor setup |
 | `scripts/` | command-line tools (replay, reconstruction, validation, campaign) |
 | `traces/` | the 22 canonical runs: raw recordings, ground truth, reconstruction |
-| `results/` | robustness campaign: job records, tables, figures |
-| `docs/` | method, scenarios, replay guide, campaign protocol and report |
+| `results/` | study results: G0 scorecard and reproducibility checks (current), robustness campaign (previous recordings) |
+| `docs/` | method, scenarios, viewers, analyses, campaign design; `docs/archive/`: documents of the previous recordings |
+
+Full map, data separation and the state of every branch: [docs/REPOSITORY.md](docs/REPOSITORY.md).
 
 ## Documentation
 
@@ -138,8 +147,12 @@ Protocol, controller commands and verification: [docs/FROZEN_CAMPAIGN.md](docs/F
 | Validation of the canonical set | [CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md) |
 | Replay viewer | [REPLAY.md](docs/REPLAY.md) |
 | Sensors and recording | [campaign_acquisition.md](docs/campaign_acquisition.md) |
-| Robustness report | [ROBUSTNESS_CAMPAIGN.md](docs/ROBUSTNESS_CAMPAIGN.md) |
-| Robustness protocol | [FROZEN_CAMPAIGN.md](docs/FROZEN_CAMPAIGN.md) |
+| Reproducibility of the acquisitions | [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) |
+| Sensors versus ground truth | [SENSORS_AND_GROUND_TRUTH.md](docs/SENSORS_AND_GROUND_TRUTH.md) |
+| G0 results and error analysis | [G0_ERROR_ANALYSIS.md](docs/G0_ERROR_ANALYSIS.md) |
+| Campaign v3 (prepared, not run) | [CAMPAIGN_V3.md](docs/CAMPAIGN_V3.md) |
+| Repository map, branches, data | [REPOSITORY.md](docs/REPOSITORY.md) |
+| Earlier robustness campaign (previous recordings) | [report](docs/archive/ROBUSTNESS_CAMPAIGN.md), [protocol](docs/archive/FROZEN_CAMPAIGN.md) |
 | Perturbation profiles | [robustness_profiles.md](docs/robustness_profiles.md) |
 | Stability review and audit | [STABILITY_REVIEW.md](docs/STABILITY_REVIEW.md), [STABILITY_AUDIT.md](docs/STABILITY_AUDIT.md) |
 | Positioning, related work and limitations | [paper_positioning.md](docs/paper_positioning.md), [bibliography.md](docs/bibliography.md) |

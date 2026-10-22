@@ -1,7 +1,10 @@
 # Robustness of the reconstruction on the 22 canonical runs
 
+> **Historical (archived 2026-10-22).**  Every number below refers to the canonical recordings that preceded the deterministic re-acquisition of 2026-10-22 (Git history before commit `34162ca7`, tag `robustness-campaign-final`), not to the current `traces/`.  Current results: [G0_ERROR_ANALYSIS](../G0_ERROR_ANALYSIS.md); next campaign: [CAMPAIGN_V3](../CAMPAIGN_V3.md).
+
+
 Report of the robustness campaign of 2026-10-15/16 (protocol: [FROZEN_CAMPAIGN.md](FROZEN_CAMPAIGN.md); perturbation
-profiles: [robustness_profiles.md](robustness_profiles.md)).  Every number below is computed by
+profiles: [robustness_profiles.md](../robustness_profiles.md)).  Every number below is computed by
 `scripts/campaign_report.py` from the job records `results/robustness/frozen_campaign/jobs.jsonl.gz`; the full tables
 (all 35 conditions, distance bands, incident participants, GNSS x radar interaction) are in
 `results/robustness/frozen_campaign/report/tables.md`, the machine-readable values in `report/summary.json`,
@@ -84,7 +87,7 @@ Low and nominal radar noise leave the reconstruction practically unchanged.  Hig
 clutter becomes about 100 phantom road users per run, 42 % of the recorder links on incident participants are lost
 (left anonymous, never wrong), false merges appear mostly within 10 m of the recorder (11 of 16.5), and 15 % of the
 core events change.  Collisions are still reconstructed with their participants except about one in a hundred.
-![radar](../results/robustness/frozen_campaign/report/figures/curve_radar.png)
+![radar](../../results/robustness/frozen_campaign/report/figures/curve_radar.png)
 
 ## 6. GNSS robustness
 
@@ -120,7 +123,7 @@ it is reported for completeness.
 
 ## 9. Combined GNSS + radar degradation
 
-![GNSS x radar](../results/robustness/frozen_campaign/report/figures/heatmap_radar_gnss_combined.png)
+![GNSS x radar](../../results/robustness/frozen_campaign/report/figures/heatmap_radar_gnss_combined.png)
 
 Mean +- SD over seeds (3 with RTK, 8 otherwise).  Collisions are reconstructed with their participants in every cell
 except high radar (0.986-0.988) and never with wrong participants.  The fused position error follows the GNSS (0.3 /

@@ -1,7 +1,10 @@
 # Robustness campaign: protocol
 
+> **Historical (archived 2026-10-22).**  Protocol of the campaign run on the canonical recordings that preceded the deterministic re-acquisition of 2026-10-22 (Git history before commit `34162ca7`, tag `robustness-campaign-final`).  Current dataset and results: [README](../../README.md), [G0_ERROR_ANALYSIS](../G0_ERROR_ANALYSIS.md); next campaign: [CAMPAIGN_V3](../CAMPAIGN_V3.md).
+
+
 The protocol of the robustness study of the frozen reconstruction on the 22 canonical runs (S01..S19).  Results:
-[ROBUSTNESS_CAMPAIGN.md](ROBUSTNESS_CAMPAIGN.md); perturbation profiles: [robustness_profiles.md](robustness_profiles.md);
+[ROBUSTNESS_CAMPAIGN.md](ROBUSTNESS_CAMPAIGN.md); perturbation profiles: [robustness_profiles.md](../robustness_profiles.md);
 manifest: `results/robustness_campaign_manifest.json` (`scripts/campaign_manifest.py`).
 
 ## History and scope

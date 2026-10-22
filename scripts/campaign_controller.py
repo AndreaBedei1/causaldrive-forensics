@@ -52,7 +52,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 PYTHON = sys.executable
-# The campaign's code versions (docs/FROZEN_CAMPAIGN.md): the jobs run from the commit of VERSION_TAG
+# The campaign's code versions (docs/archive/FROZEN_CAMPAIGN.md): the jobs run from the commit of VERSION_TAG
 # (``robustness-campaign-final``: the final 35-condition scope); a job complete under an earlier version
 # (pre-robustness-campaign, v2, v2.1, v2.2: identical reconstruction and evaluation where it completed) stays complete;
 # attempts count under the versions listed in SAME_VERSION_TAGS.

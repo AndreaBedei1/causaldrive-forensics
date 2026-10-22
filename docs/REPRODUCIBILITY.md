@@ -63,7 +63,7 @@ one frame per 0.1 s with no drop or duplicate; no depth stream (disabled since 2
 recorder logged is in the ground truth at the same frame.
 
 The depth camera is no longer acquired.  It was never an input of the reconstruction or of the campaign metrics
-(`docs/RTK5G_PREFLIGHT_REVIEW.md`, section "Aggiornamento protocollo: depth camera").
+(`docs/archive/RTK5G_PREFLIGHT_REVIEW.md`, section "Aggiornamento protocollo: depth camera").
 
 ## Old versus new canonical set
 
