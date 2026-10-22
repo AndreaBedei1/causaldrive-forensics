@@ -93,11 +93,11 @@ From a hazard the recorder's sensors established to the recorder's own steering 
 |---|---|---|
 | every anonymous track is the unrecorded participant | PASS | A:track_001 = C, B:track_002 = C, B:track_003 = C |
 | C cuts in ahead of A | PASS | centre lateral offset 3.50 m -> 1.04 m, always ahead |
-| A avoids C | FAIL | smallest box gap None m |
+| A avoids C | PASS | smallest box gap 0.6 m |
 | A strikes B | PASS | true contacts: A-B |
 | C collides with nobody | PASS | - |
-| without C: no collision | FAIL | counterfactuals.json |
-| swerve disabled: A runs into C | FAIL | null |
+| without C: no collision | PASS | counterfactuals.json |
+| swerve disabled: A runs into C | PASS | {"A-C": {"first_s": 6.0, "last_s": 6.1, "peak_impulse_Ns": 541.4}} |
 | reconstructed clearance at the critical start vs true bumper gap | PASS | 3.44 m reconstructed, 3.41 m true |
 
 - Track identities (privileged evaluation): A:track_001 = C; A:track_002 = B; B:track_001 = A; B:track_002 = C; B:track_003 = C
@@ -121,6 +121,10 @@ C relative to A (centres, A's heading; bumper gap along it):
 | 4.00 | 6.19 | 1.04 | 1.71 |
 | 4.40 | 5.64 | 1.86 | 1.15 |
 | 4.95 | 5.03 | 2.74 | 0.54 |
+
+Factual run: collisions {"A-B": {"first_s": 4.95, "last_s": 5.75, "peak_impulse_Ns": 1576.9}}; smallest box gaps {"A-B": {"at_s": 4.9, "min_box_gap_m": 0.0}, "A-C": {"at_s": 5.2, "min_box_gap_m": 0.6}, "B-C": {"at_s": 5.2, "min_box_gap_m": 3.14}}.
+Counterfactual swerve_disabled: collisions {"A-C": {"first_s": 6.0, "last_s": 6.1, "peak_impulse_Ns": 541.4}}.
+Counterfactual without_C: collisions {}.
 
 ### 2.1 Hazard perceivability against the ground-truth event oracle
 
