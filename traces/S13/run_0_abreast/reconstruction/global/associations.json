@@ -8,12 +8,12 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "not approaching before the contact: clearance 15.1 m -> 15.5 m over the last 1.0 s",
       "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.97 m/s for reference)",
-      "clearance at the contact 15.09 m (beyond 3.50 m: confidence factor 0.00)",
+      "clearance at the contact 15.07 m (beyond 3.50 m: confidence factor 0.00)",
       "anonymous road user U1: A:track_001, B:track_002"
     ],
     "blocking": [
@@ -23,7 +23,7 @@
       "A",
       "B"
     ],
-    "identity_confidence": 0.9888,
+    "identity_confidence": 0.989,
     "retrospective": true,
     "identity_resolved_from": -5.7
   },
@@ -36,11 +36,11 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 1.7 m -> 0.2 m over the last 1.0 s",
-      "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.18 m/s for reference)",
+      "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.17 m/s for reference)",
       "clearance at the contact 0.23 m",
       "the only track of A compatible with the contact"
     ],
@@ -59,16 +59,16 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.15 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "not approaching before the contact: clearance 15.1 m -> 15.3 m over the last 1.0 s",
-      "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.87 m/s for reference)",
-      "clearance at the contact 15.10 m (beyond 3.50 m: confidence factor 0.00)",
+      "not approaching before the contact: clearance 15.2 m -> 15.4 m over the last 1.0 s",
+      "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.86 m/s for reference)",
+      "clearance at the contact 15.16 m (beyond 3.50 m: confidence factor 0.00)",
       "anonymous road user U2: B:track_003, A:track_003"
     ],
     "blocking": [
-      "not approaching before the contact: clearance 15.1 m -> 15.3 m over the last 1.0 s"
+      "not approaching before the contact: clearance 15.2 m -> 15.4 m over the last 1.0 s"
     ],
     "source_graphs": [
       "A",
@@ -87,13 +87,13 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 1.7 m -> 0.3 m over the last 1.0 s",
-      "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.12 m/s for reference)",
-      "clearance at the contact 0.35 m",
-      "the only compatible track of B touching it at the contact (clearance 0.35 m; track_002, track_003 at 17.21 m, 16.52 m)"
+      "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)",
+      "clearance at the contact 0.34 m",
+      "the only compatible track of B touching it at the contact (clearance 0.34 m; track_002, track_003 at 17.21 m, 16.76 m)"
     ],
     "blocking": [],
     "source_graphs": [
@@ -110,7 +110,7 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 18.1 m -> 17.2 m over the last 1.0 s",
@@ -126,7 +126,7 @@
       "B",
       "A"
     ],
-    "identity_confidence": 0.9888,
+    "identity_confidence": 0.989,
     "retrospective": true,
     "identity_resolved_from": -5.7
   },
@@ -139,12 +139,12 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1079.56 vs 1079.56 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 17.6 m -> 16.5 m over the last 1.0 s",
+      "approaching before the contact: clearance 17.7 m -> 16.8 m over the last 1.0 s",
       "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)",
-      "clearance at the contact 16.52 m (beyond 3.50 m: confidence factor 0.00)",
+      "clearance at the contact 16.76 m (beyond 3.50 m: confidence factor 0.00)",
       "ambiguous: 3 persistent tracks of B are compatible with the contact (track_001, track_002, track_003)",
       "anonymous road user U2: B:track_003, A:track_003"
     ],

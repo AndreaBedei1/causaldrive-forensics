@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 13.376997336745262,
+      "origin_source_timestamp": 2132.2441545389593,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -2493,12 +2493,12 @@
       "radars": [
         "front"
       ],
-      "min_range_m": 26.83,
+      "min_range_m": 26.84,
       "min_range_t_local": 0.4,
       "min_clearance_m": 26.73,
       "min_clearance_t_local": 0.4,
       "max_speed_mps": 11.91,
-      "first_range_m": 26.83,
+      "first_range_m": 26.84,
       "first_bearing_deg": 6.6,
       "last_range_m": 32.46,
       "last_bearing_deg": 5.5

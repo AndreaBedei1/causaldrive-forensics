@@ -10,9 +10,9 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 93.587 | 10281.4 | g21 | yes | 0.0 s |
-| B + C | 94.087 | 8788.1 | g25 | yes | 0.0 s |
-| A + B | 94.237 | 1509.8 | g30 | yes | 0.0 s |
+| A + B | 1879.311 | 10281.4 | g21 | yes | 0.0 s |
+| B + C | 1879.811 | 8788.1 | g25 | yes | 0.0 s |
+| A + B | 1879.961 | 1509.8 | g30 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 

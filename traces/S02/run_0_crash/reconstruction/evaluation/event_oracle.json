@@ -28,7 +28,7 @@
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "B",
-     "t_local": 5.3,
+     "t_local": 5.25,
      "track": "B#all"
     }
    ],
@@ -44,7 +44,7 @@
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "A",
-     "t_local": 5.3,
+     "t_local": 5.25,
      "track": "A#all"
     }
    ]
@@ -76,7 +76,7 @@
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "B",
-     "t_local": 5.3,
+     "t_local": 5.25,
      "track": "B#1"
     }
    ],
@@ -109,7 +109,7 @@
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "B",
-     "t_local": 5.3,
+     "t_local": 5.25,
      "track": "B#1"
     }
    ],
@@ -149,7 +149,7 @@
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "B",
-     "t_local": 5.3,
+     "t_local": 5.25,
      "track": "track_001"
     }
    ],
@@ -157,8 +157,8 @@
   }
  },
  "first_contact_t_local": {
-  "A": 5.3,
-  "B": 5.3
+  "A": 5.25,
+  "B": 5.25
  },
  "comparison": {
   "RECONSTRUCTION vs COVERAGE": {
@@ -356,7 +356,7 @@
     ],
     "side_agree": 1,
     "missed": [
-     "B/A@5.30"
+     "B/A@5.25"
     ],
     "extra": []
    }
@@ -488,7 +488,7 @@
     ],
     "side_agree": 1,
     "missed": [
-     "B/A@5.30"
+     "B/A@5.25"
     ],
     "extra": []
    }

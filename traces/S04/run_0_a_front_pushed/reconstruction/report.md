@@ -142,11 +142,11 @@ C:
 
 ### Perceived state just before each collision report
 
-- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- A A:e13 at 5.45 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: IN_EGO_PATH
-- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- B B:e10 at 5.30 s (local): ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- C C:e07 at 5.30 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?
+- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- A A:e13 at 5.45 s (local): ego: STOP, BRAKE; track_001: IN_EGO_PATH
+- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e10 at 5.30 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- C C:e07 at 5.30 s (local): ego: STOP, BRAKE
 
 ### Tracks lost while a state was active
 

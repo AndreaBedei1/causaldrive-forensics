@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 482.42503720521927 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 2037.2595401778817 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 116 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.45 s)
@@ -21,7 +21,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e07 | 5.20 | CRITICAL_TTC_START | A | track_002 | radar |  |
 | A:e08 | 5.50 | CLOSING_START | A | track_002 | radar |  |
 | A:e09 | 5.75 | CRITICAL_TTC_END | A | track_003 | radar |  |
-| A:e10 | 6.20 | COLLISION | A | - | collision_sensor | peak_impulse=1079.56; merged_bursts=[[6.3, 49.9]] |
+| A:e10 | 6.20 | COLLISION | A | - | collision_sensor | peak_impulse=1093.08; merged_bursts=[[6.3, 41.87]] |
 | A:e11 | 6.20 | CRITICAL_TTC_END | A | track_002 | radar |  |
 | A:e12 | 6.25 | THROTTLE_END | A | - | controls |  |
 | A:e13 | 6.25 | BRAKE_START | A | - | controls |  |
@@ -77,18 +77,18 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_LEFT track_002<br>A:e04 TRACK_APPEARED_RIGHT track_001 | ego: not yet observed | - |
-| 0.05 | A:e05 TRACK_APPEARED_FRONT track_003 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CRITICAL_TTC?<br>track_002: CRITICAL_TTC? | 0.00 |
-| 0.55 | A:e06 CRITICAL_TTC_START track_003 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: no active state<br>track_003: IN_EGO_PATH, CRITICAL_TTC? | 0.50 |
-| 5.20 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: no active state<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.10 |
-| 5.50 | A:e08 CLOSING_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CRITICAL_TTC<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.40 |
-| 5.75 | A:e09 CRITICAL_TTC_END track_003 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING, CRITICAL_TTC<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.70 |
-| 6.20 | A:e10 COLLISION<br>A:e11 CRITICAL_TTC_END track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING, CRITICAL_TTC<br>track_003: IN_EGO_PATH | 6.10 |
-| 6.25 | A:e12 THROTTLE_END<br>A:e13 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING<br>track_003: IN_EGO_PATH | 6.20 |
-| 6.30 | A:e14 EGO_PATH_ENTRY track_002 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING<br>track_003: IN_EGO_PATH | 6.20 |
-| 6.35 | A:e15 CLOSING_END track_002 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING, IN_EGO_PATH<br>track_003: IN_EGO_PATH | 6.30 |
-| 7.35 | A:e16 MOVING_END<br>A:e17 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH | 7.30 |
-| 10.20 | A:e18 TRACK_LOST track_003 | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH | 10.10 |
-| 10.45 | A:e19 TRACK_LOST track_001 | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track lost, states UNKNOWN: track_003 | 10.40 |
+| 0.05 | A:e05 TRACK_APPEARED_FRONT track_003 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC?<br>track_002: CRITICAL_TTC? | 0.00 |
+| 0.55 | A:e06 CRITICAL_TTC_START track_003 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: no active state<br>track_003: IN_EGO_PATH, CRITICAL_TTC? | 0.50 |
+| 5.20 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: no active state<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.10 |
+| 5.50 | A:e08 CLOSING_START track_002 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CRITICAL_TTC<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.40 |
+| 5.75 | A:e09 CRITICAL_TTC_END track_003 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING, CRITICAL_TTC<br>track_003: CRITICAL_TTC, IN_EGO_PATH | 5.70 |
+| 6.20 | A:e10 COLLISION<br>A:e11 CRITICAL_TTC_END track_002 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING, CRITICAL_TTC<br>track_003: IN_EGO_PATH | 6.10 |
+| 6.25 | A:e12 THROTTLE_END<br>A:e13 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING<br>track_003: IN_EGO_PATH | 6.20 |
+| 6.30 | A:e14 EGO_PATH_ENTRY track_002 | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CLOSING<br>track_003: IN_EGO_PATH | 6.20 |
+| 6.35 | A:e15 CLOSING_END track_002 | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: CLOSING, IN_EGO_PATH<br>track_003: IN_EGO_PATH | 6.30 |
+| 7.35 | A:e16 MOVING_END<br>A:e17 STOP_START | ego: MOVING, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH | 7.30 |
+| 10.20 | A:e18 TRACK_LOST track_003 | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: IN_EGO_PATH | 10.10 |
+| 10.45 | A:e19 TRACK_LOST track_001 | ego: STOP, BRAKE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track lost, states UNKNOWN: track_003 | 10.40 |
 
 ## States still active when observation ended
 
@@ -118,9 +118,9 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 10.45 | 194 | 16.0 m / +10 deg | 15.30 m (4.30) | 61.3 m / +6 deg | 14.3 m/s |
+| track_001 | 0.00 | 10.45 | 193 | 15.9 m / +10 deg | 15.28 m (4.30) | 61.3 m / +6 deg | 14.3 m/s |
 | track_002 | 0.00 | 11.45 | 230 | 5.6 m / -149 deg | 0.20 m (7.20) | 0.3 m / -91 deg | 12.9 m/s |
-| track_003 | 0.05 | 10.20 | 191 | 15.3 m / -1 deg | 15.24 m (1.60) | 58.3 m / +3 deg | 14.3 m/s |
+| track_003 | 0.05 | 10.20 | 191 | 15.4 m / -1 deg | 15.31 m (1.30) | 58.4 m / +3 deg | 14.3 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
@@ -135,7 +135,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 5.20 s: A's time-to-contact with track_002 became critical.
 - t = 5.50 s: A observed track_002 start closing in.
 - t = 5.75 s: A's time-to-contact with track_003 stopped being critical.
-- t = 6.20 s: A's collision sensor recorded a contact (peak impulse 1080 N*s).
+- t = 6.20 s: A's collision sensor recorded a contact (peak impulse 1093 N*s).
 - t = 6.20 s: A's time-to-contact with track_002 stopped being critical.
 - t = 6.25 s: A released the accelerator.
 - t = 6.25 s: A started braking.

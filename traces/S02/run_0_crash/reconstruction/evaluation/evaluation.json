@@ -8,8 +8,8 @@
         "A",
         "B"
       ],
-      "sim_time": 1776.7966108731925,
-      "peak_impulse": 2460.669927422933,
+      "sim_time": 1840.7702581882477,
+      "peak_impulse": 2604.1353258641593,
       "reconstructed_as": "g17",
       "participants_correct": true,
       "report_timing_error_s": 0.0
@@ -24,8 +24,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 5.3,
-      "true_reference_t_local": 5.3,
+      "estimated_reference_t_local": 5.25,
+      "true_reference_t_local": 5.25,
       "error_s": 0.0
     },
     {
@@ -35,8 +35,8 @@
       "chain": [
         "collision_001"
       ],
-      "estimated_reference_t_local": 5.3,
-      "true_reference_t_local": 5.3,
+      "estimated_reference_t_local": 5.25,
+      "true_reference_t_local": 5.25,
       "error_s": 0.0
     }
   ],
@@ -65,11 +65,11 @@
       },
       "verdict": "correct",
       "samples": 147,
-      "raw_rmse_to_surface_m": 0.206,
-      "smoothed_rmse_to_surface_m": 0.219,
-      "smoothed_rmse_to_centre_m": 1.918,
-      "raw_difference_speed_rmse_mps": 1.814,
-      "speed_rmse_mps": 0.094
+      "raw_rmse_to_surface_m": 0.204,
+      "smoothed_rmse_to_surface_m": 0.214,
+      "smoothed_rmse_to_centre_m": 1.922,
+      "raw_difference_speed_rmse_mps": 1.87,
+      "speed_rmse_mps": 0.107
     }
   ],
   "contact_clearances": [
@@ -78,11 +78,11 @@
       "recorder": "A",
       "partner": "B",
       "track": "A:track_001",
-      "seen_s_before_contact": 0.0,
-      "clearance_m": 0.03,
+      "seen_s_before_contact": -0.05,
+      "clearance_m": 0.07,
       "true_gap_m": 0.0,
-      "error_m": 0.03,
-      "range_m": 0.142,
+      "error_m": 0.07,
+      "range_m": 0.165,
       "ttc_s": null
     },
     {
@@ -96,11 +96,11 @@
     "shifted_recorder": "B",
     "shift_s": 0.73,
     "shifted_local_collision_times": [
-      6.03
+      5.98
     ],
     "global_graph_identical": true,
-    "offset_to_global_before": -5.3,
-    "offset_to_global_after": -6.03,
+    "offset_to_global_before": -5.25,
+    "offset_to_global_after": -5.98,
     "offset_change_s": -0.73
   }
 }

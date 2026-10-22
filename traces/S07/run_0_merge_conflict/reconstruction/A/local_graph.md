@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 14.738320708274841 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 28.253541942685843 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 325 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (32.35 s)
@@ -14,7 +14,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 |----|-----------:|------|-------|---------|--------|---------|
 | A:e01 | 0.00 | MOVING_START | A | - | ego | active_at_first_observation=True |
 | A:e02 | 0.00 | THROTTLE_START | A | - | controls | active_at_first_observation=True |
-| A:e03 | 0.95 | INDICATOR_LEFT_START | A | - | lights |  |
+| A:e03 | 1.00 | INDICATOR_LEFT_START | A | - | lights |  |
 | A:e04 | 3.25 | TURN_RIGHT_START | A | - | ego |  |
 | A:e05 | 5.20 | TURN_RIGHT_END | A | - | ego |  |
 | A:e06 | 6.35 | TURN_LEFT_START | A | - | ego |  |
@@ -70,7 +70,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START | ego: not yet observed | - |
-| 0.95 | A:e03 INDICATOR_LEFT_START | ego: MOVING, THROTTLE | 0.90 |
+| 1.00 | A:e03 INDICATOR_LEFT_START | ego: MOVING, THROTTLE | 0.90 |
 | 3.25 | A:e04 TURN_RIGHT_START | ego: MOVING, THROTTLE, INDICATOR_LEFT | 3.20 |
 | 5.20 | A:e05 TURN_RIGHT_END | ego: MOVING, THROTTLE, TURN_RIGHT, INDICATOR_LEFT | 5.10 |
 | 6.35 | A:e06 TURN_LEFT_START | ego: MOVING, THROTTLE, INDICATOR_LEFT | 6.30 |
@@ -83,7 +83,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 
 ## States still active when observation ended
 
-- INDICATOR_LEFT, since A:e03 (t = 0.95 s)
+- INDICATOR_LEFT, since A:e03 (t = 1.00 s)
 - BRAKE, since A:e14 (t = 19.30 s)
 - STOP, since A:e17 (t = 20.05 s)
 
@@ -115,7 +115,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 
 - t = 0.00 s: A started moving (already the case when first observed).
 - t = 0.00 s: A pressed the accelerator (already the case when first observed).
-- t = 0.95 s: A switched on its left turn indicator.
+- t = 1.00 s: A switched on its left turn indicator.
 - t = 3.25 s: A started turning right.
 - t = 5.20 s: A stopped turning right.
 - t = 6.35 s: A started turning left.

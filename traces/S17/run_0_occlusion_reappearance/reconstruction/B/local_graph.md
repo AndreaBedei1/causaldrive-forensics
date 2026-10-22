@@ -1,6 +1,6 @@
 # Local graph - vehicle B
 
-All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 13.376997336745262 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
+All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 2132.2441545389593 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)
@@ -175,7 +175,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 | track_001 | 0.00 | 8.00 | 161 | 13.4 m / +0 deg | 13.36 m (0.00) | 15.0 m / -2 deg | 10.1 m/s |
 | track_002 | 0.00 | 5.05 | 98 | 12.3 m / +30 deg | 11.01 m (0.15) | 19.8 m / +17 deg | 12.0 m/s |
 | track_003 | 0.00 | 7.80 | 157 | 4.0 m / +144 deg | 1.52 m (2.75) | 16.1 m / +5 deg | 15.2 m/s |
-| track_004 | 0.40 | 3.40 | 58 | 26.8 m / +7 deg | 26.83 m (0.40) | 32.5 m / +6 deg | 11.9 m/s |
+| track_004 | 0.40 | 3.40 | 58 | 26.8 m / +7 deg | 26.84 m (0.40) | 32.5 m / +6 deg | 11.9 m/s |
 | track_005 | 3.00 | 11.95 | 180 | 7.7 m / +136 deg | 0.59 m (8.10) | 0.6 m / +8 deg | 12.6 m/s |
 | track_006 | 6.80 | 7.60 | 16 | 23.0 m / +3 deg | 22.97 m (6.80) | 24.4 m / +8 deg | 12.3 m/s |
 

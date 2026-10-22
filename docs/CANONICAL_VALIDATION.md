@@ -18,13 +18,13 @@ Stability (privileged audit, `evaluation/stability.json`): EGO_PATH oscillations
 | S07/run_0_merge_conflict | WARN | 1/1 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/1 | 0 | 34 | WARN: true cut-in not reported: [['B', 'A', 5.25]] |
 | S08/run_0_rolls_through | PASS | 1/1 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 35 | - |
 | S09/run_0_near_simultaneous | PASS | 1/1 | correct link 2 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 52 | - |
-| S10/run_0_deflected_into_c | WARN | 2/2 | correct link 6 | 0/0/0 | 0 | 0 | 0/0/1/0 | 0/0/0 | 0 | 59 | WARN: 1 track loss(es) while the radar kept measuring the body |
+| S10/run_0_deflected_into_c | PASS | 2/2 | correct link 6 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 59 | - |
 | S11/run_0_consequential | PASS | 2/2 | correct link 4 | 0/0/0 | 0 | 0 | 0/0/0/0 | 0/0/0 | 0 | 50 | - |
 | S12/run_0_crash | PASS | 1/1 | anonymous 3, correct link 2 | 3/0/0 | 2 | 0 | 0/0/0/0 | 2/0/0 | 1 | 42 | - |
 | S13/run_0_abreast | PASS | 1/1 | anonymous 4, correct link 2 | 2/0/0 | 0 | 0 | 0/0/0/0 | 1/0/0 | 2 | 42 | - |
 | S13/run_0_platoon | PASS | 1/1 | anonymous 5, correct link 2 | 4/0/0 | 0 | 0 | 0/0/0/0 | 1/0/0 | 2 | 43 | - |
 | S13/run_0_passing | PASS | 1/1 | anonymous 5, correct link 2 | 4/0/0 | 2 | 0 | 0/0/0/0 | 1/0/0 | 2 | 42 | - |
-| S14/run_0_surrounded | WARN | 1/1 | anonymous 21, correct link 2 | 11/0/8 | 6 | 0 | 0/0/0/0 | 0/0/1 | 8 | 62 | WARN: 8 missed merge(s) (unresolved identities, conservative); WARN: true cut-in not reported: [['B', 'A', 6.5]] |
+| S14/run_0_surrounded | WARN | 1/1 | anonymous 21, correct link 2 | 11/0/8 | 4 | 0 | 0/0/0/0 | 0/0/1 | 8 | 61 | WARN: 8 missed merge(s) (unresolved identities, conservative); WARN: true cut-in not reported: [['B', 'A', 6.5]] |
 | S15/run_0_dense_platoon | WARN | 1/1 | anonymous 18, correct link 1 | 8/0/7 | 2 | 0 | 0/0/0/0 | 0/0/0 | 8 | 56 | WARN: 7 missed merge(s) (unresolved identities, conservative) |
 | S16/run_0_overtaking | WARN | 1/1 | anonymous 19, correct link 2 | 8/0/10 | 3 | 0 | 0/0/0/0 | 0/0/0 | 7 | 82 | WARN: 10 missed merge(s) (unresolved identities, conservative) |
 | S17/run_0_occlusion_reappearance | WARN | 1/1 | anonymous 12, correct link 2 | 11/0/2 | 2 | 0 | 0/0/0/0 | 1/0/0 | 4 | 68 | WARN: 2 missed merge(s) (unresolved identities, conservative) |

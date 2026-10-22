@@ -15,7 +15,8 @@ those verdicts; where a new rule is needed it is stated below and kept deliberat
    with a clear line of sight (``cdf.evaluation.visibility``, partial bodies count) for at least
    ``min_track_frames`` radar sweeps -- the fewest the tracker can turn into a track.  It is REPRESENTED when an
    anonymous road user of the fusion has it as true identity (``fusion_metrics.entities``).  Duplicates: further
-   road users of the same true vehicle; phantoms: road users with no true identity.  Coverage: the represented
+   road users of the same true vehicle; recorder ghosts: road users that are in truth a recorder (a missed
+   recorder link draws that recorder twice); phantoms: road users with no true identity.  Coverage: the represented
    time of a vehicle (sum of its road users' ``coverage_s``, capped) over its observable time.
 3. Position and speed of the reconstructed road users against the truth: median, P95 and mean of the centre
    error and of the speed error (``fusion_metrics.state_errors``); heading is a diagnostic only.
@@ -167,13 +168,17 @@ def scorecard(run_dir: Path, min_track_frames: int = 5) -> Dict[str, Any]:
                          "road_users": [e["id"] for e in mine], "coverage": None if cov is None else round(cov, 3)})
     observable = [v for v in vehicles if v["observable"]]
     duplicates = sum(max(0, len(v["road_users"]) - 1) for v in vehicles)
+    # A road user that is in truth a recorder: the recorder is drawn twice (its own pose and an anonymous box),
+    # a missed recorder link.
+    recorder_ghosts = sorted(e["id"] for e in entities if e.get("identity_is_recorder"))
     completeness = {"true_vehicles": len(vehicles), "recorders": len(recorders),
                     "observable": len(observable), "represented_observable": sum(v["represented"] for v in observable),
                     "unobservable": [v["vehicle"] for v in vehicles if not v["observable"]],
                     "missed_observable": [v["vehicle"] for v in observable if not v["represented"]],
                     "represented_unobservable": [v["vehicle"] for v in vehicles
                                                  if not v["observable"] and v["represented"]],
-                    "duplicates": duplicates, "phantoms": phantoms, "vehicles": vehicles}
+                    "duplicates": duplicates, "recorder_ghosts": recorder_ghosts, "phantoms": phantoms,
+                    "vehicles": vehicles}
 
     # 3. Errors of the reconstructed road users
     se = fusion.get("state_errors", {})
@@ -273,7 +278,8 @@ def summary_rows(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "invented": col["invented"], "max_dt_s": col["max_abs_timing_error_s"],
             "vehicles": com["true_vehicles"], "observable": com["observable"],
             "represented": com["represented_observable"], "missed": ",".join(com["missed_observable"]),
-            "duplicates": com["duplicates"], "phantoms": len(com["phantoms"]),
+            "duplicates": com["duplicates"], "rec_ghosts": len(com.get("recorder_ghosts", [])),
+            "phantoms": len(com["phantoms"]),
             "pos_med_m": err["centre_error_m"]["median"], "pos_p95_m": err["centre_error_m"]["p95"],
             "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
             "wrong_links": ass["wrong_links"], "missed_merges": (ass["merges"] or {}).get("missed"),
@@ -293,9 +299,9 @@ def markdown(cards: List[Dict[str, Any]], title: str) -> str:
     out += ["| " + " | ".join(_fmt(r[k]) for k in keys) + " |" for r in rows]
     tot = lambda k: sum(r[k] or 0 for r in rows)  # noqa: E731
     out += ["", "Totals: contacts {0}, detected {1}, identified {2}, invented {3}; observable vehicles {4}, "
-            "represented {5}, duplicates {6}, phantoms {7}; wrong links {8}; justified CRITICAL_TTC warnings {9}, "
-            "in time {10}; unconfirmed alarms {11}.".format(
+            "represented {5}, duplicates {6}, recorder ghosts {12}, phantoms {7}; wrong links {8}; justified "
+            "CRITICAL_TTC warnings {9}, in time {10}; unconfirmed alarms {11}.".format(
                 tot("contacts"), tot("detected"), tot("identified"), tot("invented"), tot("observable"),
                 tot("represented"), tot("duplicates"), tot("phantoms"), tot("wrong_links"), tot("ttc_justified"),
-                tot("ttc_in_time"), tot("unconfirmed_ttc"))]
+                tot("ttc_in_time"), tot("unconfirmed_ttc"), tot("rec_ghosts"))]
     return "\n".join(out) + "\n"

@@ -8,10 +8,10 @@
     "losses": [
      {
       "track": "track_005",
-      "t": 7.8,
+      "t": 7.7,
       "true": "J",
       "kind": "visibility loss",
-      "visible_after": 0.1,
+      "visible_after": 0.3,
       "returns_after": 0.0,
       "reacquired_as": [
        "track_009"
@@ -19,10 +19,10 @@
      },
      {
       "track": "track_009",
-      "t": 11.25,
+      "t": 11.15,
       "true": "J",
       "kind": "visibility loss",
-      "visible_after": 0.0,
+      "visible_after": 0.1,
       "returns_after": 0.0,
       "reacquired_as": []
      }
@@ -94,7 +94,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 1.5
+    "max_implied_accel_mps2": 1.4
    }
   },
   "B": {
@@ -151,7 +151,7 @@
      },
      {
       "track": "track_009",
-      "t": 8.75,
+      "t": 8.85,
       "true": "G",
       "kind": "visibility loss",
       "visible_after": 0.0,
@@ -201,12 +201,11 @@
    },
    "critical": {
     "D": 1,
-    "A": 1,
-    "P": 1
+    "A": 1
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 1.6
+    "max_implied_accel_mps2": 1.5
    }
   }
  },

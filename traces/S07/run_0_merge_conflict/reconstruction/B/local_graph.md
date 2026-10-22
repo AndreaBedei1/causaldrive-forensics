@@ -1,12 +1,12 @@
 # Local graph - vehicle B
 
-All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 14.738320708274841 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
+All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 28.253541942685843 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 325 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (32.35 s)
 - Anonymous radar tracks: 1 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 17; edges: 29 (PRECEDES 24, SAME_TRACK 5)
+- Nodes: 17; edges: 32 (PRECEDES 27, SAME_TRACK 5)
 
 ## Nodes
 
@@ -16,11 +16,11 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e02 | 0.00 | THROTTLE_START | B | - | controls | active_at_first_observation=True |
 | B:e03 | 12.30 | TRACK_APPEARED_LEFT | B | track_001 | radar | initial_in_ego_path=False |
 | B:e04 | 12.30 | CLOSING_START | B | track_001 | radar | active_at_first_observation=True |
-| B:e05 | 12.95 | INDICATOR_RIGHT_START | B | - | lights |  |
+| B:e05 | 13.00 | INDICATOR_RIGHT_START | B | - | lights |  |
 | B:e06 | 15.50 | CRITICAL_TTC_START | B | track_001 | radar |  |
 | B:e07 | 16.90 | TURN_RIGHT_START | B | - | ego |  |
 | B:e08 | 18.95 | TURN_RIGHT_END | B | - | ego |  |
-| B:e09 | 19.05 | INDICATOR_RIGHT_END | B | - | lights |  |
+| B:e09 | 19.10 | INDICATOR_RIGHT_END | B | - | lights |  |
 | B:e10 | 19.10 | EGO_PATH_ENTRY | B | track_001 | radar | occupancy_evidence=returns; occupancy_margin_m=0.44; occupancy_sigma_m=0.25; cause=MUTUAL_LATERAL; geometry=estimated_body |
 | B:e11 | 19.25 | COLLISION | B | - | collision_sensor | peak_impulse=1928.22; merged_bursts=[[19.85, 6.8]] |
 | B:e12 | 19.25 | CRITICAL_TTC_END | B | track_001 | radar |  |
@@ -45,7 +45,10 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     B:e06 --PRECEDES--> B:e07
     B:e07 --PRECEDES--> B:e08
     B:e08 --PRECEDES--> B:e09
-    B:e09 --PRECEDES--> B:e10
+    B:e08 --PRECEDES--> B:e10
+    B:e09 --PRECEDES--> B:e11
+    B:e09 --PRECEDES--> B:e12
+    B:e09 --PRECEDES--> B:e13
     B:e10 --PRECEDES--> B:e11
     B:e10 --PRECEDES--> B:e12
     B:e10 --PRECEDES--> B:e13
@@ -74,12 +77,11 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START | ego: not yet observed | - |
 | 12.30 | B:e03 TRACK_APPEARED_LEFT track_001<br>B:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE | 12.20 |
-| 12.95 | B:e05 INDICATOR_RIGHT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING | 12.90 |
+| 13.00 | B:e05 INDICATOR_RIGHT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING | 12.90 |
 | 15.50 | B:e06 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_RIGHT<br>track_001: CLOSING | 15.40 |
 | 16.90 | B:e07 TURN_RIGHT_START | ego: MOVING, THROTTLE, INDICATOR_RIGHT<br>track_001: CLOSING, CRITICAL_TTC | 16.80 |
 | 18.95 | B:e08 TURN_RIGHT_END | ego: MOVING, THROTTLE, TURN_RIGHT, INDICATOR_RIGHT<br>track_001: CLOSING, CRITICAL_TTC | 18.90 |
-| 19.05 | B:e09 INDICATOR_RIGHT_END | ego: MOVING, THROTTLE, INDICATOR_RIGHT<br>track_001: CLOSING, CRITICAL_TTC | 19.00 |
-| 19.10 | B:e10 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC | 19.00 |
+| 19.10 | B:e09 INDICATOR_RIGHT_END<br>B:e10 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE, INDICATOR_RIGHT<br>track_001: CLOSING, CRITICAL_TTC | 19.00 |
 | 19.25 | B:e11 COLLISION<br>B:e12 CRITICAL_TTC_END track_001<br>B:e13 CLOSING_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 19.20 |
 | 19.30 | B:e14 THROTTLE_END<br>B:e15 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH | 19.20 |
 | 20.00 | B:e16 MOVING_END<br>B:e17 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH | 19.90 |
@@ -120,11 +122,11 @@ Bearing: positive = to B's right. Ranges are measured from the radar to the visi
 - t = 0.00 s: B pressed the accelerator (already the case when first observed).
 - t = 12.30 s: B's radar started tracking track_001, which appeared on its left.
 - t = 12.30 s: B observed track_001 start closing in (already the case when first observed).
-- t = 12.95 s: B switched on its right turn indicator.
+- t = 13.00 s: B switched on its right turn indicator.
 - t = 15.50 s: B's time-to-contact with track_001 became critical.
 - t = 16.90 s: B started turning right.
 - t = 18.95 s: B stopped turning right.
-- t = 19.05 s: B switched off its right turn indicator.
+- t = 19.10 s: B switched off its right turn indicator.
 - t = 19.10 s: B observed track_001 enter its forward path corridor.
 - t = 19.25 s: B's collision sensor recorded a contact (peak impulse 1928 N*s).
 - t = 19.25 s: B's time-to-contact with track_001 stopped being critical.

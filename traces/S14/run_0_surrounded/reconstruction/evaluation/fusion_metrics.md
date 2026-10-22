@@ -52,36 +52,36 @@ Counts: anonymous: 21, correct link: 2
 Merges over pairs of anonymous tracks: correct 11, false 0, missed 8.
 Fragmentation (true road user -> entities): C -> U2, D -> U3, E -> U5, F -> U4, G -> U7, H -> U10/U12/U6/U8, J -> U11/U9, P -> U1
 
-## Fused state errors (against the majority identity, 744 pure states; 0 impure states where a source track was on another body, excluded)
+## Fused state errors (against the majority identity, 743 pure states; 0 impure states where a source track was on another body, excluded)
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 744 | 0.147 | 0.093 | 0.399 | 0.307 | 0.668 | 0.751 | 2.164 |
-| coverage_s | 12 | 7.525 | 0.662 | 11.950 | 11.287 | 11.950 | 11.950 | 11.950 |
-| heading_error_deg | 744 | 0.343 | 0.140 | 0.926 | 0.787 | 2.394 | 3.358 | 14.504 |
+| centre_error_m | 743 | 0.150 | 0.092 | 0.401 | 0.309 | 0.669 | 0.748 | 1.880 |
+| coverage_s | 12 | 7.525 | 0.588 | 11.950 | 11.363 | 11.950 | 11.950 | 11.950 |
+| heading_error_deg | 743 | 0.341 | 0.139 | 0.925 | 0.786 | 2.536 | 3.173 | 15.236 |
 | length_error_m | 12 | 0.192 | 0.166 | 0.249 | 0.083 | 0.419 | 0.419 | 0.419 |
-| normalised_centre_error | 744 | 1.769 | 1.164 | 3.366 | 2.202 | 5.035 | 5.819 | 8.563 |
-| single_track_nominal_centre_error_m | 725 | 0.324 | 0.215 | 0.532 | 0.317 | 0.726 | 0.824 | 1.809 |
-| speed_error_mps | 744 | 0.025 | 0.011 | 0.057 | 0.046 | 0.091 | 0.124 | 0.334 |
-| velocity_error_mps | 744 | 0.074 | 0.038 | 0.206 | 0.168 | 0.425 | 0.650 | 3.141 |
+| normalised_centre_error | 743 | 1.770 | 1.159 | 3.371 | 2.212 | 5.156 | 5.819 | 8.590 |
+| single_track_nominal_centre_error_m | 724 | 0.322 | 0.215 | 0.534 | 0.319 | 0.734 | 0.841 | 1.667 |
+| speed_error_mps | 743 | 0.026 | 0.011 | 0.057 | 0.046 | 0.089 | 0.123 | 0.368 |
+| velocity_error_mps | 743 | 0.076 | 0.039 | 0.197 | 0.158 | 0.452 | 0.647 | 3.256 |
 | width_error_m | 12 | 0.185 | 0.104 | 0.263 | 0.159 | 0.263 | 0.263 | 0.263 |
 
 ### Method: box_fit
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 514 | 0.111 | 0.077 | 0.169 | 0.092 | 0.261 | 0.347 | 0.658 |
-| heading_error_deg | 514 | 0.231 | 0.099 | 0.436 | 0.337 | 1.078 | 1.803 | 4.065 |
-| speed_error_mps | 514 | 0.019 | 0.009 | 0.041 | 0.031 | 0.068 | 0.090 | 0.234 |
-| velocity_error_mps | 514 | 0.056 | 0.027 | 0.099 | 0.072 | 0.232 | 0.340 | 0.844 |
+| centre_error_m | 511 | 0.111 | 0.076 | 0.170 | 0.094 | 0.261 | 0.338 | 0.659 |
+| heading_error_deg | 511 | 0.228 | 0.099 | 0.438 | 0.339 | 1.079 | 1.761 | 4.266 |
+| speed_error_mps | 511 | 0.020 | 0.009 | 0.040 | 0.031 | 0.067 | 0.083 | 0.259 |
+| velocity_error_mps | 511 | 0.056 | 0.027 | 0.100 | 0.074 | 0.229 | 0.349 | 0.882 |
 
 ### Method: covariance_intersection
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 230 | 0.504 | 0.392 | 0.702 | 0.310 | 0.807 | 0.905 | 2.164 |
-| heading_error_deg | 230 | 1.107 | 0.539 | 2.421 | 1.882 | 4.509 | 5.899 | 14.504 |
-| speed_error_mps | 230 | 0.051 | 0.022 | 0.089 | 0.068 | 0.174 | 0.232 | 0.334 |
-| velocity_error_mps | 230 | 0.220 | 0.118 | 0.445 | 0.327 | 1.004 | 1.241 | 3.141 |
+| centre_error_m | 232 | 0.496 | 0.382 | 0.699 | 0.317 | 0.808 | 0.917 | 1.880 |
+| heading_error_deg | 232 | 1.108 | 0.522 | 2.552 | 2.030 | 3.565 | 5.399 | 15.236 |
+| speed_error_mps | 232 | 0.052 | 0.022 | 0.087 | 0.065 | 0.165 | 0.204 | 0.368 |
+| velocity_error_mps | 232 | 0.211 | 0.118 | 0.461 | 0.343 | 0.759 | 1.125 | 3.256 |
 
-Calibration of pos_std_m over 744 states: within 1/2/3 sigma 0.183/0.550/0.684 (Gaussian: 0.393/0.865/0.989).
+Calibration of pos_std_m over 743 states: within 1/2/3 sigma 0.195/0.540/0.688 (Gaussian: 0.393/0.865/0.989).

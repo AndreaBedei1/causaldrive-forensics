@@ -8,7 +8,7 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 1.7 m -> 0.2 m over the last 1.0 s",
@@ -31,16 +31,16 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 5.40 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "not approaching before the contact: clearance 12.8 m -> 12.8 m over the last 1.0 s",
+      "not approaching before the contact: clearance 12.8 m -> 12.9 m over the last 1.0 s",
       "track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.99 m/s for reference)",
-      "clearance at the contact 12.72 m (beyond 3.50 m: confidence factor 0.01)",
+      "clearance at the contact 12.76 m (beyond 3.50 m: confidence factor 0.01)",
       "anonymous road user U1: B:track_002, A:track_002"
     ],
     "blocking": [
-      "not approaching before the contact: clearance 12.8 m -> 12.8 m over the last 1.0 s"
+      "not approaching before the contact: clearance 12.8 m -> 12.9 m over the last 1.0 s"
     ],
     "source_graphs": [
       "A",
@@ -59,7 +59,7 @@
     "candidate": "B",
     "collision_event": "collision_001",
     "evidence": [
-      "A and B both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "A and B both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 0.00 s before the matched collision (needs 1.00 s)",
       "first seen 0.05 s after the matched collision",
       "range trend before the contact not measurable",
@@ -76,7 +76,7 @@
       "A",
       "B"
     ],
-    "identity_confidence": 0.9871,
+    "identity_confidence": 0.9822,
     "retrospective": true,
     "identity_resolved_from": 0.9
   },
@@ -89,13 +89,13 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
       "approaching before the contact: clearance 1.7 m -> 0.3 m over the last 1.0 s",
       "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.13 m/s for reference)",
       "clearance at the contact 0.34 m",
-      "the only compatible track of B touching it at the contact (clearance 0.34 m; track_002 at 13.98 m)"
+      "the only compatible track of B touching it at the contact (clearance 0.34 m; track_002 at 14.01 m)"
     ],
     "blocking": [],
     "source_graphs": [
@@ -112,12 +112,12 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
       "continuous up to the contact: last observed 0.00 s before it (window 1.00 s)",
-      "approaching before the contact: clearance 14.6 m -> 14.0 m over the last 1.0 s",
+      "approaching before the contact: clearance 14.7 m -> 14.0 m over the last 1.0 s",
       "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.11 m/s for reference)",
-      "clearance at the contact 13.98 m (beyond 3.50 m: confidence factor 0.00)",
+      "clearance at the contact 14.01 m (beyond 3.50 m: confidence factor 0.00)",
       "ambiguous: 2 persistent tracks of B are compatible with the contact (track_001, track_002)",
       "anonymous road user U1: B:track_002, A:track_002"
     ],
@@ -141,22 +141,22 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 6.20 s before the matched collision",
-      "lost 1.55 s before the matched collision (window 1.00 s)",
-      "approaching before the contact: clearance 25.1 m -> 24.4 m over the last 1.0 s",
-      "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.07 m/s for reference)",
-      "retrospective: identity resolved from later evidence at +0.05 s (entity seen by several observers), carried back 1.60 s with the motion model; posterior 0.989 against 1 candidate(s) and a new road user; observation times unchanged",
+      "lost 1.65 s before the matched collision (window 1.00 s)",
+      "approaching before the contact: clearance 25.4 m -> 24.5 m over the last 1.0 s",
+      "track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 0.06 m/s for reference)",
+      "retrospective: identity resolved from later evidence at +0.05 s (entity seen by several observers), carried back 1.70 s with the motion model; posterior 0.988 against 1 candidate(s) and a new road user; observation times unchanged",
       "anonymous road user U2: B:track_003, A:track_003, B:track_004"
     ],
     "blocking": [
-      "lost 1.55 s before the matched collision (window 1.00 s)"
+      "lost 1.65 s before the matched collision (window 1.00 s)"
     ],
     "source_graphs": [
       "B",
       "A"
     ],
-    "identity_confidence": 0.9891,
+    "identity_confidence": 0.9881,
     "retrospective": true,
     "identity_resolved_from": 0.05
   },
@@ -169,7 +169,7 @@
     "candidate": "A",
     "collision_event": "collision_001",
     "evidence": [
-      "B and A both reported collision_001 (peak impulse 1097.53 vs 1097.53 N*s)",
+      "B and A both reported collision_001 (peak impulse 1093.08 vs 1093.08 N*s)",
       "tracked for 0.00 s before the matched collision (needs 1.00 s)",
       "first seen 0.30 s after the matched collision",
       "range trend before the contact not measurable",
@@ -186,7 +186,7 @@
       "B",
       "A"
     ],
-    "identity_confidence": 0.9871,
+    "identity_confidence": 0.9822,
     "retrospective": true,
     "identity_resolved_from": 0.9
   }

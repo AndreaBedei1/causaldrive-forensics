@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "C",
     "clock": {
-      "origin_source_timestamp": 144.63758319616318,
+      "origin_source_timestamp": 1929.7311951592565,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -23,6 +23,7 @@
       "collisions.jsonl",
       "controls.jsonl",
       "ego.jsonl",
+      "lights.jsonl",
       "radar",
       "traffic_signs.jsonl"
     ],
@@ -211,8 +212,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -248,8 +249,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -283,8 +284,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -325,8 +326,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -367,8 +368,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -409,8 +410,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -442,25 +443,25 @@
       "t_local": 4.2,
       "attributes": {
         "occupancy_evidence": "box",
-        "occupancy_margin_m": 0.679,
+        "occupancy_margin_m": 0.691,
         "occupancy_sigma_m": 0.288,
         "cause": "TARGET_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            13.2159,
-            -3.1934
+            13.2196,
+            -3.1807
           ],
           [
-            13.9113,
-            -1.4252
+            13.9191,
+            -1.4141
           ],
           [
-            18.1922,
-            -3.1086
+            18.196,
+            -3.1077
           ],
           [
-            17.4968,
-            -4.8768
+            17.4965,
+            -4.8743
           ]
         ],
         "geometry": "estimated_body"
@@ -475,8 +476,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -517,8 +518,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -550,25 +551,25 @@
       "t_local": 4.6,
       "attributes": {
         "occupancy_evidence": "box",
-        "occupancy_margin_m": 0.986,
-        "occupancy_sigma_m": 0.445,
+        "occupancy_margin_m": 1.12,
+        "occupancy_sigma_m": 0.43,
         "cause": "TARGET_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            11.6238,
-            -0.6004
+            11.612,
+            -0.4649
           ],
           [
-            13.497,
-            -0.9184
+            13.4841,
+            -0.7894
           ],
           [
-            12.7272,
-            -5.4535
+            12.6984,
+            -5.3218
           ],
           [
-            10.854,
-            -5.1355
+            10.8263,
+            -4.9973
           ]
         ],
         "geometry": "estimated_body"
@@ -583,8 +584,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -625,8 +626,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -654,7 +655,7 @@
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "C",
-      "subject_id": "track_001",
+      "subject_id": "track_002#segment_1",
       "t_local": 5.15,
       "attributes": {},
       "source": "radar",
@@ -667,8 +668,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -696,8 +697,8 @@
       "event_type": "TRACK_LOST",
       "kind": "PERCEPTION",
       "actor_id": "C",
-      "subject_id": "track_002#segment_1",
-      "t_local": 5.15,
+      "subject_id": "track_001",
+      "t_local": 5.2,
       "attributes": {},
       "source": "radar",
       "confidence": null,
@@ -709,8 +710,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -722,11 +723,11 @@
             "CUT_IN_FROM_RIGHT": false
           },
           "track_002#segment_1": {
-            "CLOSING": false,
-            "CRITICAL_TTC": false,
-            "IN_EGO_PATH": true,
-            "CUT_IN_FROM_LEFT": false,
-            "CUT_IN_FROM_RIGHT": false
+            "CLOSING": "UNKNOWN",
+            "CRITICAL_TTC": "UNKNOWN",
+            "IN_EGO_PATH": "UNKNOWN",
+            "CUT_IN_FROM_LEFT": "UNKNOWN",
+            "CUT_IN_FROM_RIGHT": "UNKNOWN"
           }
         },
         "signs": {},
@@ -753,8 +754,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -895,13 +896,8 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "C:e14",
-      "to": "C:e16",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "C:e15",
-      "to": "C:e17",
+      "to": "C:e16",
       "relation": "PRECEDES"
     },
     {
@@ -940,12 +936,12 @@
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e03",
+      "from": "C:e05",
       "to": "C:e15",
       "relation": "SAME_TRACK"
     },
     {
-      "from": "C:e05",
+      "from": "C:e03",
       "to": "C:e16",
       "relation": "SAME_TRACK"
     }
@@ -956,22 +952,22 @@
       "parent_track": null,
       "identity_ambiguous": false,
       "first_seen_t_local": 0.0,
-      "last_seen_t_local": 5.15,
-      "duration_s": 5.15,
-      "measured_sweeps": 92,
-      "radar_returns": 748,
+      "last_seen_t_local": 5.2,
+      "duration_s": 5.2,
+      "measured_sweeps": 93,
+      "radar_returns": 752,
       "radars": [
         "front"
       ],
-      "min_range_m": 8.45,
-      "min_range_t_local": 5.15,
-      "min_clearance_m": 8.22,
-      "min_clearance_t_local": 5.15,
-      "max_speed_mps": 10.17,
-      "first_range_m": 77.65,
-      "first_bearing_deg": -3.0,
-      "last_range_m": 8.45,
-      "last_bearing_deg": -6.2
+      "min_range_m": 8.38,
+      "min_range_t_local": 5.2,
+      "min_clearance_m": 8.16,
+      "min_clearance_t_local": 5.2,
+      "max_speed_mps": 10.16,
+      "first_range_m": 77.62,
+      "first_bearing_deg": -3.1,
+      "last_range_m": 8.38,
+      "last_bearing_deg": -5.6
     },
     {
       "track_id": "track_002#segment_1",
@@ -981,20 +977,20 @@
       "last_seen_t_local": 5.15,
       "duration_s": 3.05,
       "measured_sweeps": 62,
-      "radar_returns": 1591,
+      "radar_returns": 1578,
       "radars": [
         "front",
         "left"
       ],
-      "min_range_m": 9.38,
+      "min_range_m": 9.31,
       "min_range_t_local": 5.15,
-      "min_clearance_m": 8.52,
+      "min_clearance_m": 8.47,
       "min_clearance_t_local": 4.5,
-      "max_speed_mps": 12.42,
+      "max_speed_mps": 12.41,
       "first_range_m": 34.4,
-      "first_bearing_deg": -59.1,
-      "last_range_m": 9.38,
-      "last_bearing_deg": -11.1
+      "first_bearing_deg": -59.0,
+      "last_range_m": 9.31,
+      "last_bearing_deg": -10.4
     },
     {
       "track_id": "track_002#segment_2",
@@ -1003,18 +999,18 @@
       "first_seen_t_local": 5.3,
       "last_seen_t_local": 15.15,
       "duration_s": 9.85,
-      "measured_sweeps": 185,
-      "radar_returns": 946,
+      "measured_sweeps": 183,
+      "radar_returns": 875,
       "radars": [
         "front"
       ],
       "min_range_m": 9.19,
-      "min_range_t_local": 14.3,
-      "min_clearance_m": 9.1,
-      "min_clearance_t_local": 14.65,
-      "max_speed_mps": 2.02,
-      "first_range_m": 9.62,
-      "first_bearing_deg": -9.5,
+      "min_range_t_local": 14.2,
+      "min_clearance_m": 9.11,
+      "min_clearance_t_local": 15.15,
+      "max_speed_mps": 2.11,
+      "first_range_m": 9.64,
+      "first_bearing_deg": -10.0,
       "last_range_m": 9.19,
       "last_bearing_deg": -0.5
     }

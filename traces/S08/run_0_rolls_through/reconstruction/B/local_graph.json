@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 13.514744967222214,
+      "origin_source_timestamp": 1949.6870362199843,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -236,25 +236,25 @@
       "t_local": 5.0,
       "attributes": {
         "occupancy_evidence": "returns",
-        "occupancy_margin_m": 0.432,
+        "occupancy_margin_m": 0.437,
         "occupancy_sigma_m": 0.25,
         "cause": "TARGET_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            8.0261,
-            2.08
+            7.9164,
+            2.0325
           ],
           [
-            6.5375,
-            3.2607
+            6.4277,
+            3.213
           ],
           [
-            9.3961,
-            6.8646
+            9.2858,
+            6.8173
           ],
           [
-            10.8847,
-            5.6839
+            10.7745,
+            5.6368
           ]
         ],
         "geometry": "estimated_body"
@@ -294,7 +294,7 @@
       "subject_id": null,
       "t_local": 5.4,
       "attributes": {
-        "peak_impulse": 12954.09
+        "peak_impulse": 12940.27
       },
       "source": "collision_sensor",
       "confidence": 1.0,
@@ -669,21 +669,21 @@
       "first_seen_t_local": 2.7,
       "last_seen_t_local": 15.95,
       "duration_s": 13.25,
-      "measured_sweeps": 265,
-      "radar_returns": 67770,
+      "measured_sweeps": 266,
+      "radar_returns": 66609,
       "radars": [
         "front",
         "right"
       ],
-      "min_range_m": 0.56,
+      "min_range_m": 0.54,
       "min_range_t_local": 15.95,
-      "min_clearance_m": 0.15,
+      "min_clearance_m": 0.16,
       "min_clearance_t_local": 5.4,
-      "max_speed_mps": 5.31,
-      "first_range_m": 34.36,
+      "max_speed_mps": 5.32,
+      "first_range_m": 34.33,
       "first_bearing_deg": 20.8,
-      "last_range_m": 0.56,
-      "last_bearing_deg": 9.3
+      "last_range_m": 0.54,
+      "last_bearing_deg": 9.6
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 144.63758319616318 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 1929.7311951592565 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
@@ -20,7 +20,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e06 | 2.05 | CLOSING_START | A | track_002 | radar | active_at_first_observation=True |
 | A:e07 | 2.55 | CRITICAL_TTC_START | A | track_002 | radar |  |
 | A:e08 | 4.05 | EGO_PATH_ENTRY | A | track_002 | radar | occupancy_evidence=returns; occupancy_margin_m=0.57; occupancy_sigma_m=0.25; cause=TARGET_LATERAL; geometry=estimated_body |
-| A:e09 | 4.10 | COLLISION | A | - | collision_sensor | peak_impulse=12137.11; merged_bursts=[[4.35, 2340.56]] |
+| A:e09 | 4.10 | COLLISION | A | - | collision_sensor | peak_impulse=12137.59; merged_bursts=[[4.35, 2340.23]] |
 | A:e10 | 4.10 | CRITICAL_TTC_END | A | track_002 | radar |  |
 | A:e11 | 4.10 | CLOSING_END | A | track_002 | radar |  |
 | A:e12 | 4.10 | TURN_LEFT_START | A | - | ego |  |
@@ -86,15 +86,15 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_FRONT track_001<br>A:e04 CLOSING_START track_001 | ego: not yet observed | - |
-| 2.05 | A:e05 TRACK_APPEARED_RIGHT track_002<br>A:e06 CLOSING_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING | 2.00 |
-| 2.55 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC? | 2.50 |
-| 4.05 | A:e08 EGO_PATH_ENTRY track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC | 4.00 |
-| 4.10 | A:e09 COLLISION<br>A:e10 CRITICAL_TTC_END track_002<br>A:e11 CLOSING_END track_002<br>A:e12 TURN_LEFT_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.00 |
-| 4.15 | A:e13 THROTTLE_END<br>A:e14 BRAKE_START | ego: MOVING, THROTTLE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.10 |
-| 4.25 | A:e15 CLOSING_START track_002 | ego: MOVING, BRAKE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.20 |
-| 4.55 | A:e16 CLOSING_END track_002 | ego: MOVING, BRAKE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, IN_EGO_PATH | 4.50 |
-| 4.70 | A:e17 TURN_LEFT_END | ego: MOVING, BRAKE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.60 |
-| 4.75 | A:e18 CLOSING_END track_001<br>A:e19 MOVING_END<br>A:e20 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.70 |
+| 2.05 | A:e05 TRACK_APPEARED_RIGHT track_002<br>A:e06 CLOSING_START track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING | 2.00 |
+| 2.55 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC? | 2.50 |
+| 4.05 | A:e08 EGO_PATH_ENTRY track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC | 4.00 |
+| 4.10 | A:e09 COLLISION<br>A:e10 CRITICAL_TTC_END track_002<br>A:e11 CLOSING_END track_002<br>A:e12 TURN_LEFT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC, IN_EGO_PATH | 4.00 |
+| 4.15 | A:e13 THROTTLE_END<br>A:e14 BRAKE_START | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.10 |
+| 4.25 | A:e15 CLOSING_START track_002 | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.20 |
+| 4.55 | A:e16 CLOSING_END track_002 | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING<br>track_002: CLOSING, IN_EGO_PATH | 4.50 |
+| 4.70 | A:e17 TURN_LEFT_END | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.60 |
+| 4.75 | A:e18 CLOSING_END track_001<br>A:e19 MOVING_END<br>A:e20 STOP_START | ego: MOVING, BRAKE<br>track_001: CLOSING<br>track_002: IN_EGO_PATH | 4.70 |
 
 ## States still active when observation ended
 
@@ -122,7 +122,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 15.15 | 303 | 77.5 m / -3 deg | 8.74 m (15.15) | 8.7 m / +20 deg | 9.2 m/s |
+| track_001 | 0.00 | 15.15 | 303 | 77.5 m / -3 deg | 8.73 m (15.15) | 8.7 m / +20 deg | 9.2 m/s |
 | track_002 | 2.05 | 15.15 | 263 | 33.3 m / +49 deg | 0.10 m (14.75) | 0.1 m / +88 deg | 12.6 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
@@ -137,7 +137,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 2.05 s: A observed track_002 start closing in (already the case when first observed).
 - t = 2.55 s: A's time-to-contact with track_002 became critical.
 - t = 4.05 s: A observed track_002 enter its forward path corridor.
-- t = 4.10 s: A's collision sensor recorded a contact (peak impulse 12137 N*s).
+- t = 4.10 s: A's collision sensor recorded a contact (peak impulse 12138 N*s).
 - t = 4.10 s: A's time-to-contact with track_002 stopped being critical.
 - t = 4.10 s: A observed track_002 stop closing in.
 - t = 4.10 s: A started turning left.

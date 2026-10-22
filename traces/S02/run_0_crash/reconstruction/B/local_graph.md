@@ -1,6 +1,6 @@
 # Local graph - vehicle B
 
-All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 1771.4966107942164 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
+All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 1835.5202581100166 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 153 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (15.15 s)
@@ -18,11 +18,11 @@ All times are B's own local clock: `t_local` = seconds since B's first ego sampl
 | B:e04 | 3.15 | BRAKE_START | B | - | controls |  |
 | B:e05 | 3.65 | BRAKE_END | B | - | controls |  |
 | B:e06 | 3.75 | THROTTLE_START | B | - | controls |  |
-| B:e07 | 5.30 | COLLISION | B | - | collision_sensor | peak_impulse=2460.67 |
-| B:e08 | 5.30 | THROTTLE_END | B | - | controls |  |
-| B:e09 | 5.30 | BRAKE_START | B | - | controls |  |
-| B:e10 | 5.85 | MOVING_END | B | - | ego |  |
-| B:e11 | 5.85 | STOP_START | B | - | ego |  |
+| B:e07 | 5.25 | COLLISION | B | - | collision_sensor | peak_impulse=2604.14 |
+| B:e08 | 5.25 | THROTTLE_END | B | - | controls |  |
+| B:e09 | 5.25 | BRAKE_START | B | - | controls |  |
+| B:e10 | 5.80 | MOVING_END | B | - | ego |  |
+| B:e11 | 5.80 | STOP_START | B | - | ego |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -54,16 +54,16 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START | ego: not yet observed | - |
-| 3.15 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.10 |
-| 3.65 | B:e05 BRAKE_END | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.60 |
-| 3.75 | B:e06 THROTTLE_START | ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT? | 3.70 |
-| 5.30 | B:e07 COLLISION<br>B:e08 THROTTLE_END<br>B:e09 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 5.20 |
-| 5.85 | B:e10 MOVING_END<br>B:e11 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 5.80 |
+| 3.15 | B:e03 THROTTLE_END<br>B:e04 BRAKE_START | ego: MOVING, THROTTLE | 3.10 |
+| 3.65 | B:e05 BRAKE_END | ego: MOVING, BRAKE | 3.60 |
+| 3.75 | B:e06 THROTTLE_START | ego: MOVING | 3.70 |
+| 5.25 | B:e07 COLLISION<br>B:e08 THROTTLE_END<br>B:e09 BRAKE_START | ego: MOVING, THROTTLE | 5.20 |
+| 5.80 | B:e10 MOVING_END<br>B:e11 STOP_START | ego: MOVING, BRAKE | 5.70 |
 
 ## States still active when observation ended
 
-- BRAKE, since B:e09 (t = 5.30 s)
-- STOP, since B:e11 (t = 5.85 s)
+- BRAKE, since B:e09 (t = 5.25 s)
+- STOP, since B:e11 (t = 5.80 s)
 
 ## Tracks lost
 
@@ -93,8 +93,8 @@ No radar track: nothing moving stayed in B's radar view long enough.
 - t = 3.15 s: B started braking.
 - t = 3.65 s: B released the brake.
 - t = 3.75 s: B pressed the accelerator.
-- t = 5.30 s: B's collision sensor recorded a contact (peak impulse 2461 N*s).
-- t = 5.30 s: B released the accelerator.
-- t = 5.30 s: B started braking.
-- t = 5.85 s: B stopped moving.
-- t = 5.85 s: B came to a stop.
+- t = 5.25 s: B's collision sensor recorded a contact (peak impulse 2604 N*s).
+- t = 5.25 s: B released the accelerator.
+- t = 5.25 s: B started braking.
+- t = 5.80 s: B stopped moving.
+- t = 5.80 s: B came to a stop.

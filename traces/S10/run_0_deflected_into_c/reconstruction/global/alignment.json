@@ -81,7 +81,7 @@
         "C"
       ],
       "nodes": {
-        "A": "A:e14",
+        "A": "A:e15",
         "C": "C:e09"
       },
       "t_local": {
@@ -89,15 +89,15 @@
         "C": 4.7
       },
       "peak_impulse": {
-        "A": 1880.32,
-        "C": 1880.32
+        "A": 2250.28,
+        "C": 2250.28
       },
       "impulse_similarity": 1.0,
       "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and C both recorded a collision",
-        "peak impulses 1880.32 vs 1880.32 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 2250.28 vs 2250.28 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
         "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
         "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",

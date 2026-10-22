@@ -104,7 +104,7 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "E",
-     "t_local": 5.65,
+     "t_local": 5.6,
      "track": "E#2"
     },
     {
@@ -127,7 +127,7 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "A",
-     "t_local": 5.15,
+     "t_local": 5.2,
      "track": "A#1"
     },
     {
@@ -201,7 +201,7 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "E",
-     "t_local": 5.65,
+     "t_local": 5.6,
      "track": "E#2"
     },
     {
@@ -224,7 +224,7 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "A",
-     "t_local": 5.15,
+     "t_local": 5.2,
      "track": "A#1"
     },
     {
@@ -268,6 +268,13 @@
    "A": [
     {
      "type": "TRACK_APPEARED",
+     "side": "TRACK_APPEARED_FRONT",
+     "subject": "B",
+     "t_local": 0.3,
+     "track": "track_006"
+    },
+    {
+     "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "E",
      "t_local": 1.4,
@@ -292,28 +299,28 @@
      "side": "CRITICAL_TTC_START",
      "subject": "B",
      "t_local": 5.5,
-     "track": "track_002"
+     "track": "track_006"
     },
     {
      "type": "CUT_IN_FROM_RIGHT_START",
      "side": "CUT_IN_FROM_RIGHT_START",
      "subject": "B",
      "t_local": 5.5,
-     "track": "track_002"
+     "track": "track_006"
     },
     {
      "type": "EGO_PATH_ENTRY",
      "side": "EGO_PATH_ENTRY",
      "subject": "B",
      "t_local": 6.3,
-     "track": "track_002"
+     "track": "track_006"
     },
     {
      "type": "CRITICAL_TTC_END",
      "side": "CRITICAL_TTC_END",
      "subject": "B",
      "t_local": 7.5,
-     "track": "track_002"
+     "track": "track_006"
     },
     {
      "type": "TRACK_APPEARED",
@@ -335,14 +342,14 @@
      "type": "TRACK_APPEARED",
      "side": "TRACK_APPEARED_LEFT",
      "subject": "A",
-     "t_local": 5.35,
+     "t_local": 5.45,
      "track": "track_005"
     },
     {
      "type": "CRITICAL_TTC_START",
      "side": "CRITICAL_TTC_START",
      "subject": "A",
-     "t_local": 5.9,
+     "t_local": 5.95,
      "track": "track_005"
     },
     {
@@ -376,22 +383,23 @@
  "comparison": {
   "RECONSTRUCTION vs COVERAGE": {
    "TRACK_APPEARED": {
-    "found": 8,
+    "found": 9,
     "expected": 7,
     "matched": 5,
     "deltas": [
      0.1,
      0.1,
      0.0,
-     0.2,
+     0.25,
      0.3
     ],
     "side_agree": 5,
     "missed": [
-     "A/E@5.65",
+     "A/E@5.60",
      "B/A@8.60"
     ],
     "extra": [
+     "A/B@0.30",
      "A/E@1.40",
      "A/E@2.50",
      "A/E@3.35"
@@ -435,7 +443,7 @@
     "matched": 2,
     "deltas": [
      0.2,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [],
@@ -455,22 +463,23 @@
   },
   "RECONSTRUCTION vs COVERAGE_TRACKED": {
    "TRACK_APPEARED": {
-    "found": 8,
+    "found": 9,
     "expected": 7,
     "matched": 5,
     "deltas": [
      0.1,
      0.1,
      0.0,
-     0.2,
+     0.25,
      0.3
     ],
     "side_agree": 5,
     "missed": [
-     "A/E@5.65",
+     "A/E@5.60",
      "B/A@8.60"
     ],
     "extra": [
+     "A/B@0.30",
      "A/E@1.40",
      "A/E@2.50",
      "A/E@3.35"
@@ -514,7 +523,7 @@
     "matched": 2,
     "deltas": [
      0.15,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [],
@@ -580,7 +589,7 @@
     "matched": 2,
     "deltas": [
      0.2,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [
@@ -752,17 +761,18 @@
  "comparison_pre_contact": {
   "RECONSTRUCTION vs COVERAGE": {
    "TRACK_APPEARED": {
-    "found": 4,
+    "found": 5,
     "expected": 2,
     "matched": 1,
     "deltas": [
-     0.2
+     0.25
     ],
     "side_agree": 1,
     "missed": [
-     "A/E@5.65"
+     "A/E@5.60"
     ],
     "extra": [
+     "A/B@0.30",
      "A/E@1.40",
      "A/E@2.50",
      "A/E@3.35"
@@ -806,7 +816,7 @@
     "matched": 2,
     "deltas": [
      0.2,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [],
@@ -824,17 +834,18 @@
   },
   "RECONSTRUCTION vs COVERAGE_TRACKED": {
    "TRACK_APPEARED": {
-    "found": 4,
+    "found": 5,
     "expected": 2,
     "matched": 1,
     "deltas": [
-     0.2
+     0.25
     ],
     "side_agree": 1,
     "missed": [
-     "A/E@5.65"
+     "A/E@5.60"
     ],
     "extra": [
+     "A/B@0.30",
      "A/E@1.40",
      "A/E@2.50",
      "A/E@3.35"
@@ -878,7 +889,7 @@
     "matched": 2,
     "deltas": [
      0.15,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [],
@@ -942,7 +953,7 @@
     "matched": 2,
     "deltas": [
      0.2,
-     -0.8
+     -0.75
     ],
     "side_agree": 2,
     "missed": [],

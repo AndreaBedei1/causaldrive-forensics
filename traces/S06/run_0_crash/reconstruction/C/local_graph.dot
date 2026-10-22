@@ -16,15 +16,14 @@ digraph "local_C" {
   "C:e12" [label="CLOSING_END\nC -> track_002#segment_1\nt=4.60", fillcolor="#bfdbfe"];
   "C:e13" [label="EGO_PATH_ENTRY\nC -> track_002#segment_1\nt=4.60", fillcolor="#bfdbfe"];
   "C:e14" [label="CLOSING_END\nC -> track_001\nt=5.05", fillcolor="#bfdbfe"];
-  "C:e15" [label="TRACK_LOST\nC -> track_001\nt=5.15", fillcolor="#bfdbfe"];
-  "C:e16" [label="TRACK_LOST\nC -> track_002#segment_1\nt=5.15", fillcolor="#bfdbfe"];
+  "C:e15" [label="TRACK_LOST\nC -> track_002#segment_1\nt=5.15", fillcolor="#bfdbfe"];
+  "C:e16" [label="TRACK_LOST\nC -> track_001\nt=5.20", fillcolor="#bfdbfe"];
   "C:e17" [label="TRACK_APPEARED_LEFT\nC -> track_002#segment_2\nt=5.30", fillcolor="#bfdbfe"];
   {rank=same; "C:e01"; "C:e02"; "C:e03"; "C:e04";}
   {rank=same; "C:e05"; "C:e06";}
   {rank=same; "C:e07"; "C:e08";}
   {rank=same; "C:e09"; "C:e10";}
   {rank=same; "C:e12"; "C:e13";}
-  {rank=same; "C:e15"; "C:e16";}
   "C:e01" -> "C:e05" [label="PRECEDES"];
   "C:e01" -> "C:e06" [label="PRECEDES"];
   "C:e02" -> "C:e05" [label="PRECEDES"];
@@ -48,8 +47,7 @@ digraph "local_C" {
   "C:e12" -> "C:e14" [label="PRECEDES"];
   "C:e13" -> "C:e14" [label="PRECEDES"];
   "C:e14" -> "C:e15" [label="PRECEDES"];
-  "C:e14" -> "C:e16" [label="PRECEDES"];
-  "C:e15" -> "C:e17" [label="PRECEDES"];
+  "C:e15" -> "C:e16" [label="PRECEDES"];
   "C:e16" -> "C:e17" [label="PRECEDES"];
   "C:e03" -> "C:e04" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "C:e05" -> "C:e06" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
@@ -57,6 +55,6 @@ digraph "local_C" {
   "C:e05" -> "C:e12" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "C:e05" -> "C:e13" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "C:e03" -> "C:e14" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "C:e03" -> "C:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
-  "C:e05" -> "C:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "C:e05" -> "C:e15" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
+  "C:e03" -> "C:e16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
 }

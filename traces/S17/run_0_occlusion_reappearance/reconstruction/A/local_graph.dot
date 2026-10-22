@@ -13,7 +13,7 @@ digraph "local_A" {
   "A:e09" [label="CLOSING_START\nA -> track_005\nt=0.90", fillcolor="#bfdbfe"];
   "A:e10" [label="TRACK_LOST\nA -> track_003\nt=3.30", fillcolor="#bfdbfe"];
   "A:e11" [label="CLOSING_END\nA -> track_005\nt=3.80", fillcolor="#bfdbfe"];
-  "A:e12" [label="INDICATOR_LEFT_START\nA\nt=3.95", fillcolor="#fde68a"];
+  "A:e12" [label="INDICATOR_LEFT_START\nA\nt=4.00", fillcolor="#fde68a"];
   "A:e13" [label="TRACK_LOST\nA -> track_004\nt=4.55", fillcolor="#bfdbfe"];
   "A:e14" [label="TRACK_LOST\nA -> track_002\nt=4.80", fillcolor="#bfdbfe"];
   "A:e15" [label="CRITICAL_TTC_START\nA -> track_005\nt=5.45", fillcolor="#bfdbfe"];

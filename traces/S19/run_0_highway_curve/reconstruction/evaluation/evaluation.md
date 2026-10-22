@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 28.146 | 7449.2 | g44 | yes | 0.0 s |
+| A + B | 31.077 | 7479.4 | g44 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -27,30 +27,30 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 ## Global event times
 
-70 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 2271/2271 pairs.
+70 timed global nodes; max |t_global - true global time| = 0.0 s; event order agrees with the truth for 2300/2300 pairs.
 
 ## Anonymous tracks: identity and trajectory
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | U1 | C | correctly left anonymous | 82 | 0.275 / 0.431 m | 1.555 m | 2.141 / 0.107 m/s |
-| A:track_002 | B | B | correct | 120 | 0.345 / 0.415 m | 2.035 m | 2.514 / 0.1 m/s |
-| A:track_003 | U2 | D | correctly left anonymous | 119 | 0.324 / 0.431 m | 1.625 m | 4.824 / 0.157 m/s |
-| A:track_004 | U3 | G | correctly left anonymous | 49 | 0.269 / 0.348 m | 1.94 m | 5.099 / 0.078 m/s |
-| A:track_005 | U4 | F | correctly left anonymous | 24 | 0.249 / 0.317 m | 2.157 m | 1.453 / 0.272 m/s |
-| A:track_006 | U6 | E | correctly left anonymous | 4 | 0.298 / 0.441 m | 1.71 m | 5.744 / 0.132 m/s |
-| A:track_007 | U5 | E | correctly left anonymous | 4 | 0.434 / 0.501 m | 1.0 m | 3.509 / 0.233 m/s |
-| A:track_008 | U5 | E | correctly left anonymous | 4 | 0.347 / 0.324 m | 0.825 m | 19.65 / 0.121 m/s |
-| A:track_009 | U5 | E | correctly left anonymous | 1 | 0.074 / 0.046 m | 1.053 m | - / 0.566 m/s |
-| A:track_010 | U7 | G | correctly left anonymous | 5 | 0.333 / 0.459 m | 1.807 m | 4.755 / 0.067 m/s |
-| A:track_011 | U8 | F | correctly left anonymous | 33 | 0.396 / 0.68 m | 0.693 m | 5.154 / 0.521 m/s |
-| B:track_001 | U3 | G | correctly left anonymous | 71 | 0.313 / 0.35 m | 1.911 m | 7.916 / 0.058 m/s |
-| B:track_002 | U5 | E | correctly left anonymous | 50 | 0.358 / 0.477 m | 1.631 m | 6.324 / 0.077 m/s |
-| B:track_003 | U1 | C | correctly left anonymous | 105 | 0.341 / 0.502 m | 1.583 m | 3.953 / 0.368 m/s |
-| B:track_004 | U2 | D | correctly left anonymous | 120 | 0.195 / 0.438 m | 1.105 m | 4.819 / 0.309 m/s |
-| B:track_005 | A | A | correct | 12 | 0.151 / 0.18 m | 2.011 m | 1.168 / 0.047 m/s |
-| B:track_006 | U9 | G | correctly left anonymous | 3 | 0.568 / 0.603 m | 1.657 m | 10.647 / 0.126 m/s |
-| B:track_007 | U8 | F | correctly left anonymous | 25 | 0.375 / 0.668 m | 0.588 m | 4.756 / 0.497 m/s |
+| A:track_001 | U1 | C | correctly left anonymous | 81 | 0.277 / 0.417 m | 1.563 m | 2.177 / 0.11 m/s |
+| A:track_002 | U2 | D | correctly left anonymous | 119 | 0.322 / 0.443 m | 1.593 m | 5.062 / 0.155 m/s |
+| A:track_003 | U3 | G | correctly left anonymous | 49 | 0.269 / 0.332 m | 1.954 m | 5.066 / 0.075 m/s |
+| A:track_004 | U4 | F | correctly left anonymous | 24 | 0.245 / 0.311 m | 2.172 m | 1.304 / 0.262 m/s |
+| A:track_005 | U6 | E | correctly left anonymous | 4 | 0.276 / 0.419 m | 1.575 m | 6.74 / 0.189 m/s |
+| A:track_006 | B | B | correct | 117 | 0.354 / 0.425 m | 2.02 m | 2.521 / 0.099 m/s |
+| A:track_007 | U5 | E | correctly left anonymous | 4 | 0.43 / 0.491 m | 0.977 m | 3.592 / 0.231 m/s |
+| A:track_008 | U5 | E | correctly left anonymous | 4 | 0.344 / 0.321 m | 0.821 m | 19.845 / 0.121 m/s |
+| A:track_009 | U5 | E | correctly left anonymous | 1 | 0.073 / 0.047 m | 1.055 m | - / 0.566 m/s |
+| A:track_010 | U7 | G | correctly left anonymous | 5 | 0.426 / 0.616 m | 1.642 m | 9.914 / 0.074 m/s |
+| A:track_011 | U8 | F | correctly left anonymous | 33 | 0.409 / 0.678 m | 0.691 m | 5.127 / 0.518 m/s |
+| B:track_001 | U3 | G | correctly left anonymous | 72 | 0.318 / 0.332 m | 1.931 m | 7.103 / 0.062 m/s |
+| B:track_002 | U5 | E | correctly left anonymous | 50 | 0.348 / 0.458 m | 1.648 m | 6.358 / 0.077 m/s |
+| B:track_003 | U1 | C | correctly left anonymous | 105 | 0.345 / 0.502 m | 1.583 m | 4.14 / 0.368 m/s |
+| B:track_004 | U2 | D | correctly left anonymous | 120 | 0.194 / 0.437 m | 1.106 m | 5.034 / 0.31 m/s |
+| B:track_005 | A | A | correct | 12 | 0.152 / 0.174 m | 2.013 m | 1.207 / 0.064 m/s |
+| B:track_006 | U9 | G | correctly left anonymous | 3 | 0.302 / 0.248 m | 2.011 m | 7.604 / 0.158 m/s |
+| B:track_007 | U8 | F | correctly left anonymous | 25 | 0.376 / 0.667 m | 0.587 m | 4.717 / 0.496 m/s |
 
 ## Clearance at the true contacts
 
@@ -58,8 +58,8 @@ Per recorder, its track lying on the partner at the last 10 Hz sample at or befo
 
 | Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
 |---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
-| A + B | A | B | A:track_002 | 0.0 s | 0.166 m | 0.0 m | 0.166 m | 0.906 m |
-| A + B | B | A | B:track_005 | 0.9 s | 4.821 m | 4.464 m | 0.357 m | 7.069 m |
+| A + B | A | B | A:track_006 | 0.0 s | 0.161 m | 0.0 m | 0.161 m | 0.915 m |
+| A + B | B | A | B:track_005 | 0.9 s | 4.847 m | 4.498 m | 0.349 m | 7.094 m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 

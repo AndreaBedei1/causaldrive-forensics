@@ -55,8 +55,8 @@ Fragmentation (true road user -> entities): C -> U9, D -> U2, E -> U10/U5, F -> 
 | coverage_s | 11 | 9.550 | 1.950 | 11.925 | 9.975 | 11.950 | 11.950 | 11.950 |
 | heading_error_deg | 841 | 0.238 | 0.096 | 0.988 | 0.892 | 2.636 | 3.499 | 10.906 |
 | length_error_m | 11 | 0.192 | 0.105 | 0.192 | 0.086 | 0.194 | 0.306 | 0.419 |
-| normalised_centre_error | 841 | 2.129 | 1.074 | 3.126 | 2.052 | 4.296 | 5.888 | 8.279 |
-| single_track_nominal_centre_error_m | 830 | 0.390 | 0.228 | 0.662 | 0.435 | 0.989 | 1.180 | 1.898 |
+| normalised_centre_error | 841 | 2.127 | 1.074 | 3.130 | 2.056 | 4.296 | 5.888 | 8.279 |
+| single_track_nominal_centre_error_m | 830 | 0.390 | 0.228 | 0.658 | 0.430 | 0.989 | 1.180 | 1.898 |
 | speed_error_mps | 841 | 0.033 | 0.015 | 0.071 | 0.056 | 0.222 | 0.354 | 0.854 |
 | velocity_error_mps | 841 | 0.071 | 0.029 | 0.252 | 0.223 | 0.624 | 0.824 | 2.328 |
 | width_error_m | 11 | 0.107 | 0.107 | 0.263 | 0.156 | 0.263 | 0.263 | 0.263 |
@@ -66,9 +66,9 @@ Fragmentation (true road user -> entities): C -> U9, D -> U2, E -> U10/U5, F -> 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
 | centre_error_m | 496 | 0.126 | 0.056 | 0.239 | 0.183 | 0.281 | 0.405 | 0.787 |
-| heading_error_deg | 496 | 0.170 | 0.086 | 0.431 | 0.345 | 1.085 | 1.705 | 3.744 |
-| speed_error_mps | 496 | 0.027 | 0.014 | 0.055 | 0.041 | 0.246 | 0.477 | 0.854 |
-| velocity_error_mps | 496 | 0.047 | 0.023 | 0.133 | 0.110 | 0.360 | 0.596 | 0.854 |
+| heading_error_deg | 496 | 0.170 | 0.084 | 0.431 | 0.347 | 1.085 | 1.698 | 3.744 |
+| speed_error_mps | 496 | 0.027 | 0.014 | 0.055 | 0.041 | 0.245 | 0.477 | 0.854 |
+| velocity_error_mps | 496 | 0.047 | 0.024 | 0.132 | 0.109 | 0.360 | 0.596 | 0.854 |
 
 ### Method: covariance_intersection
 
@@ -79,4 +79,4 @@ Fragmentation (true road user -> entities): C -> U9, D -> U2, E -> U10/U5, F -> 
 | speed_error_mps | 345 | 0.048 | 0.017 | 0.112 | 0.095 | 0.217 | 0.249 | 0.375 |
 | velocity_error_mps | 345 | 0.154 | 0.055 | 0.535 | 0.480 | 0.864 | 1.232 | 2.328 |
 
-Calibration of pos_std_m over 841 states: within 1/2/3 sigma 0.232/0.465/0.725 (Gaussian: 0.393/0.865/0.989).
+Calibration of pos_std_m over 841 states: within 1/2/3 sigma 0.233/0.466/0.725 (Gaussian: 0.393/0.865/0.989).

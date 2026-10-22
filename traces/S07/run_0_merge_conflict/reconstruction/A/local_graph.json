@@ -4,7 +4,7 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 14.738320708274841,
+      "origin_source_timestamp": 28.253541942685843,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
@@ -140,7 +140,7 @@
       "kind": "ACTION",
       "actor_id": "A",
       "subject_id": null,
-      "t_local": 0.95,
+      "t_local": 1.0,
       "attributes": {},
       "source": "lights",
       "confidence": null,

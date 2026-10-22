@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 185.61600741744041 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 1970.0582870952785 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 130 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (12.85 s)
@@ -100,19 +100,19 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START | ego: not yet observed | - |
-| 0.20 | A:e03 STOP_SIGN_DETECTED_START sign-0 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 0.10 |
-| 2.40 | A:e04 THROTTLE_END<br>A:e05 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path | 2.30 |
-| 2.50 | A:e06 TRACK_APPEARED_LEFT track_001<br>A:e07 CLOSING_START track_001 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path | 2.40 |
-| 2.75 | A:e08 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path | 2.70 |
-| 3.70 | A:e09 CLOSING_END track_001<br>A:e10 MOVING_END<br>A:e11 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 3.60 |
-| 4.85 | A:e12 BRAKE_END<br>A:e13 THROTTLE_START | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 4.80 |
-| 5.10 | A:e14 CLOSING_START track_001 | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 5.00 |
-| 5.20 | A:e15 STOP_END<br>A:e16 MOVING_START | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 5.10 |
-| 5.95 | A:e17 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 5.90 |
-| 6.15 | A:e18 TURN_LEFT_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 6.10 |
-| 7.15 | A:e19 COLLISION<br>A:e20 CRITICAL_TTC_END track_001<br>A:e21 CLOSING_END track_001 | ego: MOVING, THROTTLE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 7.10 |
-| 7.20 | A:e22 THROTTLE_END<br>A:e23 BRAKE_START | ego: MOVING, THROTTLE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 7.10 |
-| 7.65 | A:e24 TURN_LEFT_END<br>A:e25 MOVING_END<br>A:e26 STOP_START | ego: MOVING, BRAKE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 7.60 |
+| 0.20 | A:e03 STOP_SIGN_DETECTED_START sign-0 | ego: MOVING, THROTTLE | 0.10 |
+| 2.40 | A:e04 THROTTLE_END<br>A:e05 BRAKE_START | ego: MOVING, THROTTLE<br>sign-0: STOP sign known, relevant to the path | 2.30 |
+| 2.50 | A:e06 TRACK_APPEARED_LEFT track_001<br>A:e07 CLOSING_START track_001 | ego: MOVING, BRAKE<br>sign-0: STOP sign known, relevant to the path | 2.40 |
+| 2.75 | A:e08 STOP_SIGN_DETECTED_END sign-0 | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path | 2.70 |
+| 3.70 | A:e09 CLOSING_END track_001<br>A:e10 MOVING_END<br>A:e11 STOP_START | ego: MOVING, BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 3.60 |
+| 4.85 | A:e12 BRAKE_END<br>A:e13 THROTTLE_START | ego: STOP, BRAKE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 4.80 |
+| 5.10 | A:e14 CLOSING_START track_001 | ego: STOP, THROTTLE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 5.00 |
+| 5.20 | A:e15 STOP_END<br>A:e16 MOVING_START | ego: STOP, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 5.10 |
+| 5.95 | A:e17 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path | 5.90 |
+| 6.15 | A:e18 TURN_LEFT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 6.10 |
+| 7.15 | A:e19 COLLISION<br>A:e20 CRITICAL_TTC_END track_001<br>A:e21 CLOSING_END track_001 | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path | 7.10 |
+| 7.20 | A:e22 THROTTLE_END<br>A:e23 BRAKE_START | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 7.10 |
+| 7.65 | A:e24 TURN_LEFT_END<br>A:e25 MOVING_END<br>A:e26 STOP_START | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path | 7.60 |
 
 ## States still active when observation ended
 

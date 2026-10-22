@@ -6,7 +6,7 @@ digraph "global" {
   "g02" [label="MOVING_START\nB\nt=-19.25", fillcolor="#e5e7eb"];
   "g03" [label="THROTTLE_START\nA\nt=-19.25", fillcolor="#fde68a"];
   "g04" [label="THROTTLE_START\nB\nt=-19.25", fillcolor="#fde68a"];
-  "g05" [label="INDICATOR_LEFT_START\nA\nt=-18.30", fillcolor="#fde68a"];
+  "g05" [label="INDICATOR_LEFT_START\nA\nt=-18.25", fillcolor="#fde68a"];
   "g06" [label="TURN_RIGHT_START\nA\nt=-16.00", fillcolor="#e5e7eb"];
   "g07" [label="TURN_RIGHT_END\nA\nt=-14.05", fillcolor="#e5e7eb"];
   "g08" [label="TURN_LEFT_START\nA\nt=-12.90", fillcolor="#e5e7eb"];
@@ -14,12 +14,12 @@ digraph "global" {
   "g10" [label="CLOSING_START\nA -> B\nt=-7.60", fillcolor="#bfdbfe", peripheries=2];
   "g11" [label="TRACK_APPEARED_LEFT\nB -> A\nt=-6.95", fillcolor="#bfdbfe"];
   "g12" [label="CLOSING_START\nB -> A\nt=-6.95", fillcolor="#bfdbfe", peripheries=2];
-  "g13" [label="INDICATOR_RIGHT_START\nB\nt=-6.30", fillcolor="#fde68a"];
+  "g13" [label="INDICATOR_RIGHT_START\nB\nt=-6.25", fillcolor="#fde68a"];
   "g14" [label="CRITICAL_TTC_START\nB -> A\nt=-3.75", fillcolor="#bfdbfe", peripheries=2];
   "g15" [label="CRITICAL_TTC_START\nA -> B\nt=-3.40", fillcolor="#bfdbfe", peripheries=2];
   "g16" [label="TURN_RIGHT_START\nB\nt=-2.35", fillcolor="#e5e7eb"];
   "g17" [label="TURN_RIGHT_END\nB\nt=-0.30", fillcolor="#e5e7eb"];
-  "g18" [label="INDICATOR_RIGHT_END\nB\nt=-0.20", fillcolor="#fde68a"];
+  "g18" [label="INDICATOR_RIGHT_END\nB\nt=-0.15", fillcolor="#fde68a"];
   "g19" [label="EGO_PATH_ENTRY\nB -> A\nt=-0.15", fillcolor="#bfdbfe"];
   "g20" [label="COLLISION\nA + B\nt=+0.00", fillcolor="#fca5a5", peripheries=2];
   "g21" [label="CRITICAL_TTC_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
@@ -38,6 +38,7 @@ digraph "global" {
   {rank=same; "g01"; "g02"; "g03"; "g04";}
   {rank=same; "g09"; "g10";}
   {rank=same; "g11"; "g12";}
+  {rank=same; "g18"; "g19";}
   {rank=same; "g20"; "g21"; "g22"; "g23"; "g24";}
   {rank=same; "g25"; "g26"; "g27"; "g28";}
   {rank=same; "g30"; "g31";}
@@ -62,7 +63,12 @@ digraph "global" {
   "g15" -> "g16" [label="PRECEDES"];
   "g16" -> "g17" [label="PRECEDES"];
   "g17" -> "g18" [label="PRECEDES"];
-  "g18" -> "g19" [label="PRECEDES"];
+  "g17" -> "g19" [label="PRECEDES"];
+  "g18" -> "g20" [label="PRECEDES"];
+  "g18" -> "g21" [label="PRECEDES"];
+  "g18" -> "g22" [label="PRECEDES"];
+  "g18" -> "g23" [label="PRECEDES"];
+  "g18" -> "g24" [label="PRECEDES"];
   "g19" -> "g20" [label="PRECEDES"];
   "g19" -> "g21" [label="PRECEDES"];
   "g19" -> "g22" [label="PRECEDES"];

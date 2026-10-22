@@ -35,7 +35,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 26.7
+    "max_implied_accel_mps2": 26.6
    }
   },
   "B": {
@@ -72,7 +72,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 16.8
+    "max_implied_accel_mps2": 16.7
    }
   },
   "C": {
@@ -81,17 +81,6 @@
     "births": 3,
     "losses": [
      {
-      "track": "track_001",
-      "t": 5.15,
-      "true": "A",
-      "kind": "fragmentation",
-      "visible_after": 1.0,
-      "returns_after": 1.0,
-      "reacquired_as": [
-       "track_002#segment_2"
-      ]
-     },
-     {
       "track": "track_002#segment_1",
       "t": 5.15,
       "true": "B",
@@ -99,6 +88,17 @@
       "visible_after": 1.0,
       "returns_after": 1.0,
       "reacquired_as": []
+     },
+     {
+      "track": "track_001",
+      "t": 5.2,
+      "true": "A",
+      "kind": "fragmentation",
+      "visible_after": 1.0,
+      "returns_after": 1.0,
+      "reacquired_as": [
+       "track_002#segment_2"
+      ]
      }
     ],
     "phantoms": [],
@@ -135,7 +135,7 @@
    },
    "critical": {},
    "trajectory": {
-    "implausible_steps": 1,
+    "implausible_steps": 2,
     "max_implied_accel_mps2": 60.9
    }
   }
