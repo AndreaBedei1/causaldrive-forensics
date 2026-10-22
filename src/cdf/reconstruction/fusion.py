@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from .checks import temporal_safety_relations
 from .config import FusionConfig
@@ -514,9 +514,36 @@ def close_at_contact(drafts: List[GlobalNode]) -> Tuple[List[GlobalNode], set]:
     return [node for node in drafts if id(node) not in dropped_nodes] + added, dropped_local
 
 
+def group_recontacts(contacts: Sequence[Any], pair_of: Callable[[Any], Any], time_of: Callable[[Any], float],
+                     separation: Callable[[Any, float, float], Optional[float]], max_pause_s: float,
+                     max_separation_m: float) -> List[Tuple[Any, List[Any]]]:
+    """(collision, its recontacts) in time order.  A contact of a pair less than ``max_pause_s`` after the previous
+    contact of that pair is a recontact of the same collision when ``separation(pair, t_previous, t)`` -- the
+    largest gap between the two bodies in between -- is known and at most ``max_separation_m``; otherwise it starts
+    a new collision (FusionConfig.recontact_max_pause_s)."""
+    groups: List[Tuple[Any, List[Any]]] = []
+    last: Dict[Any, Tuple[int, float]] = {}  # pair -> (its current group, time of its latest contact)
+    for contact in sorted(contacts, key=time_of):
+        pair, t = pair_of(contact), time_of(contact)
+        previous = last.get(pair)
+        if previous is not None and t - previous[1] <= max_pause_s:
+            gap = separation(pair, previous[1], t)
+            if gap is not None and gap <= max_separation_m:
+                groups[previous[0]][1].append(contact)
+                last[pair] = (previous[0], t)
+                continue
+        groups.append((contact, []))
+        last[pair] = (len(groups) - 1, t)
+    return groups
+
+
 def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
-                associations: Sequence[Association], touching_clearance_m: float = 1.0) -> GlobalGraph:
-    """Local graphs + alignment + associations -> one global event graph."""
+                associations: Sequence[Association], touching_clearance_m: float = 1.0,
+                separation: Optional[Callable[[Any, float, float], Optional[float]]] = None,
+                recontact_max_pause_s: float = 2.0, recontact_max_separation_m: float = 1.0) -> GlobalGraph:
+    """Local graphs + alignment + associations -> one global event graph.  ``separation(pair, t1, t2)``: the
+    largest gap between the two recorders' bodies between two global times (their pose streams), used to keep a
+    recontact in the collision it follows (``group_recontacts``); without it every contact is its own collision."""
     names = {(item.local_graph, item.local_track): item.global_entity for item in associations}
     recorders = sorted(local.owner for local in locals_)
     merged_events = [event for event in alignment.matched_events
@@ -550,10 +577,11 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                 source=node.source, confidence=node.confidence,
                 observations=[Observation(local.owner, node.node_id, node.t_local)]))
             drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
+    collisions = []
     for event in merged_events:
         graphs = sorted(event["graphs"])
         times = [alignment.graphs[graph].to_global(event["t_local"][graph]) for graph in graphs]
-        drafts.append(GlobalNode(
+        collisions.append(GlobalNode(
             node_id="", event_type="COLLISION", kind=OUTCOME, actor_id=None, subject_id=None,
             participants=graphs, t_global=round(sum(times) / len(times), 4),
             attributes={"matched_event": event["event_id"],
@@ -561,7 +589,18 @@ def fuse_graphs(locals_: Sequence[LocalReconstruction], alignment: Alignment,
                         "peak_impulse": dict(event["peak_impulse"])},
             source="collision_sensor", confidence=event["confidence"],
             observations=[Observation(graph, event["nodes"][graph], event["t_local"][graph]) for graph in graphs]))
-        drafts[-1].perceived_state_before = beliefs(drafts[-1].observations)
+        collisions[-1].perceived_state_before = beliefs(collisions[-1].observations)
+    no_separation = lambda pair, t1, t2: None  # noqa: E731
+    for collision, recontacts in group_recontacts(collisions, lambda node: tuple(node.participants),
+                                                  lambda node: node.t_global, separation or no_separation,
+                                                  recontact_max_pause_s, recontact_max_separation_m):
+        if recontacts:
+            collision.attributes["recontacts"] = [
+                {"t_global": node.t_global, "matched_event": node.attributes["matched_event"],
+                 "peak_impulse": node.attributes["peak_impulse"],
+                 "observations": [[obs.graph, obs.local_node, obs.t_local] for obs in node.observations]}
+                for node in recontacts]
+        drafts.append(collision)
 
     track_ends = {}
     for local in locals_:

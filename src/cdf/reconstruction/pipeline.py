@@ -23,7 +23,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .alignment import align_graphs
 from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
-from .common_frame import (RECORDER_POSES_FILE, PoseSource, RecordedPoseSource, contact_check, is_recorded_stream,
+from .common_frame import (RECORDER_POSES_FILE, PoseSource, RecordedPoseSource, contact_check, footprint_gap,
+                           is_recorded_stream,
                            recorder_pose_record)
 from .config import ReconstructionConfig, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
@@ -115,6 +116,28 @@ def write_local_outputs(directory: Path, local: LocalReconstruction, trace_hz: f
     render_svg(directory / "local_graph.dot")
 
 
+def body_separation(poses: Dict[str, PoseSource], footprints: Dict[str, Any], alignment: Alignment
+                    ) -> Callable[[Tuple[str, ...], float, float], Optional[float]]:
+    """``separation(pair, t1, t2)``: the largest gap between the two recorders' bodies between two global times, from
+    their own pose streams, less 3 sigma of their declared position accuracy; None without a pose or a clock."""
+    def separation(pair: Tuple[str, ...], t1: float, t2: float) -> Optional[float]:
+        if len(pair) != 2 or any(name not in poses for name in pair):
+            return None
+        clocks = [alignment.graphs.get(name) for name in pair]
+        if any(clock is None or clock.status != "ALIGNED" or clock.offset_to_global is None for clock in clocks):
+            return None
+        a, b = pair
+        sigma = math.hypot(getattr(poses[a], "position_std_m", 0.0), getattr(poses[b], "position_std_m", 0.0))
+        steps = max(1, int(math.ceil((t2 - t1) / 0.05)))
+        worst = 0.0
+        for k in range(steps + 1):
+            t = t1 + (t2 - t1) * k / steps
+            worst = max(worst, footprint_gap(poses[a].pose_at(t - clocks[0].offset_to_global), footprints.get(a),
+                                             poses[b].pose_at(t - clocks[1].offset_to_global), footprints.get(b)))
+        return max(0.0, worst - 3.0 * sigma)
+    return separation
+
+
 def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: ReconstructionConfig,
                    pose_factory: Optional[PoseFactory] = None
                    ) -> Tuple[Alignment, List[Association], RoadUserFusion, GlobalGraph]:
@@ -144,7 +167,12 @@ def fuse_recorders(run_dir: Path, locals_: List[LocalReconstruction], cfg: Recon
         associations = associate_tracks(locals_, alignment, cfg.fusion, cfg.tracking.radial_speed_std_mps)
     # Anonymous tracks that are recorders, and the road users that recorded nothing (U1, U2, ...).
     road_users = fuse_road_users(locals_, alignment, associations, poses, cfg)
-    return alignment, associations, road_users, fuse_graphs(locals_, alignment, associations, cfg.fusion.touching_clearance_m)
+    # A recontact stays in the collision it follows when the two bodies never parted in between (their own poses).
+    separation = body_separation(road_users.poses or poses, {local.owner: local.footprint for local in locals_}, alignment)
+    return alignment, associations, road_users, fuse_graphs(
+        locals_, alignment, associations, cfg.fusion.touching_clearance_m, separation=separation,
+        recontact_max_pause_s=cfg.fusion.recontact_max_pause_s,
+        recontact_max_separation_m=cfg.fusion.recontact_max_separation_m)
 
 
 def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,

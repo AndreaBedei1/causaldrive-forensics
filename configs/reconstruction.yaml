@@ -120,6 +120,8 @@ reconstruction:
     impulse_relative_std: 0.10        # engineering assumption: per-report 1-sigma; only with contact geometry
     impulse_sigma_gate: 3.0          # combined uncertainty gate; competing contacts remain unmatched
     contact_consistency_m: 1.0        # a match's two bodies must touch: footprints within this + 3 sigma of the declared pose accuracy
+    recontact_max_pause_s: 2.0        # a contact of the same pair within this after the previous one...
+    recontact_max_separation_m: 1.0   # ...with the bodies never further apart than this is a recontact of that collision
     clock_tolerance_s: 0.1            # matches between graphs already linked must agree on the clock offset
     contact_window_s: 1.0             # a partner track may be lost up to this long before the contact (association only)
     contact_range_m: 3.5              # clearance at the contact counts fully up to this (evidence, not a veto)...

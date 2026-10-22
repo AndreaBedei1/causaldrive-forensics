@@ -13,7 +13,10 @@ The run is a :class:`cdf.replay.model.ReplayRun` so that the same viewer (``scri
   time is shown beside it;
 * contacts are grouped into episodes per vehicle pair: callbacks of one pair less than ``CONTACT_GAP_S`` apart
   are one episode (the evaluation's rule); each episode is a ``CONTACT_START`` / ``CONTACT_END`` pair in both
-  vehicles' panels and a COLLISION banner at its start.  Contacts with the static world are listed apart.
+  vehicles' panels and a COLLISION banner at its start.  An episode of the same pair that follows within
+  ``RECONTACT_MAX_PAUSE_S`` without the true boxes parting by more than ``RECONTACT_MAX_SEPARATION_M`` is a
+  recontact of that collision (the evaluation's and the reconstruction's rule): ``RECONTACT_START`` /
+  ``RECONTACT_END`` and no further banner.  Contacts with the static world are listed apart.
 """
 
 from __future__ import annotations
@@ -25,6 +28,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..evaluation.reconstruction import RECONTACT_MAX_PAUSE_S, RECONTACT_MAX_SEPARATION_M, truth_separation
+from ..reconstruction.fusion import group_recontacts
 from ..reconstruction.tracking import EgoFootprint
 from .model import (CollisionMark, LocalEvents, Participant, Pose, ReplayEvent, ReplayRun, Trajectory,
                     state_intervals)
@@ -133,6 +138,10 @@ def load_ground_truth_run(run_dir: Path) -> GroundTruthRun:
     end = max(p.trajectory.end for p in participants)
     collisions = _jsonl(gt / "collisions.jsonl") if (gt / "collisions.jsonl").exists() else []
     episodes, static = contact_episodes(collisions, actor_ids, start)
+    separation = truth_separation(states)
+    incidents = group_recontacts(episodes, lambda e: e.pair, lambda e: e.start,
+                                 lambda pair, t1, t2: separation(pair, start + t1, start + t2),
+                                 RECONTACT_MAX_PAUSE_S, RECONTACT_MAX_SEPARATION_M)
     run = GroundTruthRun(run_dir=run_dir, name="GROUND TRUTH  {0} / {1}".format(run_dir.parent.name, run_dir.name),
                          participants=participants, start=start, duration=round(end - start, 6),
                          clock=GROUND_TRUTH_CLOCK, clock_origins={})
@@ -140,19 +149,23 @@ def load_ground_truth_run(run_dir: Path) -> GroundTruthRun:
     run.contact_zero = episodes[0].start if episodes else 0.0
     run.map_name = metadata.get("map")
     run.recorders = [p["participant_id"] for p in metadata.get("participants", []) if p.get("record")]
-    run.collisions = [CollisionMark(e.start, e.pair, "gt_contact_{0}".format(i)) for i, e in enumerate(episodes)]
+    run.collisions = [CollisionMark(e.start, e.pair, "gt_contact_{0}".format(i)) for i, (e, _) in enumerate(incidents)]
     events: Dict[str, List[ReplayEvent]] = defaultdict(list)
-    for i, e in enumerate(episodes):
-        for me, other in (e.pair, e.pair[::-1]):
-            attrs = {"callbacks": e.callbacks, "peak_impulse_Ns": round(e.peak_impulse, 1)}
-            events[me].append(ReplayEvent(e.start, me, "CONTACT_START", other, "c{0}s".format(i), attrs))
-            events[me].append(ReplayEvent(e.end, me, "CONTACT_END", other, "c{0}e".format(i), attrs))
+    for i, (first, later) in enumerate(incidents):
+        for j, e in enumerate([first] + later):
+            kind, node = ("CONTACT", "c{0}".format(i)) if j == 0 else ("RECONTACT", "c{0}r{1}".format(i, j))
+            for me, other in (e.pair, e.pair[::-1]):
+                attrs = {"callbacks": e.callbacks, "peak_impulse_Ns": round(e.peak_impulse, 1)}
+                events[me].append(ReplayEvent(e.start, me, kind + "_START", other, node + "s", attrs))
+                events[me].append(ReplayEvent(e.end, me, kind + "_END", other, node + "e", attrs))
     for i, e in enumerate(static):
         me = e.pair[1] if e.pair[0].startswith("static:") else e.pair[0]
         other = e.pair[0] if me == e.pair[1] else e.pair[1]
         events[me].append(ReplayEvent(e.start, me, "STATIC_CONTACT", other, "s{0}".format(i), {}))
     for p in participants:
-        evs = sorted(events.get(p.participant_id, []), key=lambda ev: (ev.time, ev.node_id))
+        # A one-callback contact starts and ends at the same instant: its START first.
+        evs = sorted(events.get(p.participant_id, []),
+                     key=lambda ev: (ev.time, ev.event_type.endswith("_END"), ev.node_id))
         run.local_events[p.participant_id] = LocalEvents(p.participant_id, start, evs, state_intervals(evs))
     roles = ", ".join("{0}{1}".format(p.participant_id, "" if p.participant_id in run.recorders else " (not recording)")
                       for p in participants)

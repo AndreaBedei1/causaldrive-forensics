@@ -622,8 +622,8 @@ class ReplayApp:
             else ""), SECTION_RGB, self.font_bold))
         for text, kind in panel.events:
             rgb, font = style.get(kind, ((255, 255, 255), self.font_small))
-            if kind == EVENT and text.split("  ", 1)[-1].startswith("COLLISION"):
-                rgb, font = COLLISION_RGB, self.font_bold  # the recorder's own collisions stand out
+            if kind == EVENT and text.split("  ", 1)[-1].startswith(("COLLISION", "RECONTACT")):
+                rgb, font = COLLISION_RGB, self.font_bold  # the recorder's own collisions (and recontacts) stand out
             lines.append((text, rgb, font))
         return lines
 

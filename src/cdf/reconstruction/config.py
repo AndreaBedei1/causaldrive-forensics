@@ -271,6 +271,12 @@ class FusionConfig:
     # from its own pose stream, at most this far apart plus 3 sigma of the two pose sources' declared position
     # accuracy (two single-vehicle contacts with similar impulses, far apart, are not one contact).
     contact_consistency_m: float = 1.0
+    # A recontact belongs to the collision it follows: a contact of the same pair less than this long after the
+    # previous one, whose two bodies did not part by more than recontact_max_separation_m in between (from the
+    # recorders' own pose streams, beyond 3 sigma of their declared accuracy), is the same collision -- a rebound
+    # and a second touch (S04 a_front_pushed) -- not a new one.  The evaluation applies the same rule to the truth.
+    recontact_max_pause_s: float = 2.0
+    recontact_max_separation_m: float = 1.0
     # A match also fixes the clock offset between its two graphs: a further
     # match between graphs already linked (directly or through other matches)
     # must imply the same offset within this (two sensor samples at 20 Hz).

@@ -46,7 +46,7 @@ import json
 import math
 import statistics
 from bisect import bisect_right
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -354,6 +354,14 @@ def load_collisions(path: Path, origins: Mapping[str, float], run_start: float) 
         if times:
             marks.append(CollisionMark(round(min(times), 6), tuple(node.get("participants") or ()), str(node["node_id"])))
     return sorted(marks, key=lambda mark: mark.time)
+
+
+def load_recontacts(path: Path) -> set:
+    """(recorder, local node) of the local collisions the fusion kept as recontacts of the collision they follow
+    (``attributes.recontacts`` of a global COLLISION node)."""
+    return {(str(graph), str(local_node)) for node in _read_json(path)["nodes"] if node["event_type"] == "COLLISION"
+            for item in (node.get("attributes") or {}).get("recontacts", [])
+            for graph, local_node, _ in item.get("observations", [])}
 
 
 ASSOCIATED = "ASSOCIATED"  # the fusion identified the track with a recorder: that recorder's replayed vehicle
@@ -905,6 +913,11 @@ class ReplayRun:
         origins = {pid: self.clock_origins.get(pid, local.origin) for pid, local in self.local_events.items()}
         if (rec / "global" / "global_graph.json").exists():
             self.collisions = load_collisions(rec / "global" / "global_graph.json", origins, self.start)
+            # A recontact is part of the collision it follows: RECONTACT in the panels, not a further collision.
+            recontacts = load_recontacts(rec / "global" / "global_graph.json")
+            for pid, local in self.local_events.items():
+                local.events = [replace(event, event_type="RECONTACT") if (pid, event.node_id) in recontacts else event
+                                for event in local.events]
             if self.clock == GLOBAL_CLOCK:
                 graph = _read_json(rec / 'global' / 'global_graph.json')
                 # Local events the global graph deliberately does not assert stay out of the display.
