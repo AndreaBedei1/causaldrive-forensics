@@ -47,6 +47,7 @@ from cdf.evaluation.event_oracle import _to_local, prepare_truth  # noqa: E402
 from cdf.evaluation.visibility import frames_by_participant  # noqa: E402
 from cdf.reconstruction.config import load_config  # noqa: E402
 from cdf.reconstruction.local import read_jsonl  # noqa: E402
+from cdf.reconstruction.pipeline import read_incident_context  # noqa: E402
 from cdf.reconstruction.road import RoadFrame, road_for_positions  # noqa: E402
 from cdf.reconstruction.tracking import RadarMount, RadarStream, ego_trajectory, radar_sweeps  # noqa: E402
 from cdf.recording.compact_observations import load_radar_observations  # noqa: E402
@@ -198,7 +199,7 @@ def reference_path_jumps(run, owner):
     within 1 s is a flip-flop (an independent per-sweep lane choice), the others are lane switches."""
     records = read_jsonl(run / "vehicles" / owner / "ego.jsonl")
     ego = ego_trajectory(records, float(records[0]["timestamp"]))
-    road = RoadFrame.from_ego_records(records)
+    road = RoadFrame.from_ego_records(records, map_name=read_incident_context(run).get("map"))
     if road is None:
         return {"road": None}
     jumps, previous, t, checked = [], None, ego.start, 0

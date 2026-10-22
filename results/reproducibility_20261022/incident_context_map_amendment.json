@@ -1,0 +1,139 @@
+{
+ "date": "2026-10-23",
+ "change": "added the key 'map' (the road map of the incident location, from the scenario configuration; equal to the acquisition map in ground_truth/metadata.json) to the supplied incident_context.json of every canonical run; no other byte changed. scripts/run_scenario.py writes it since this change.",
+ "reason": "the CARLA towns share coordinates around the origin, so a recorder's own poses can fit a lane of another town (S06 recorder C fitted Town01); an investigation knows where the incident happened",
+ "files": [
+  {
+   "file": "traces/S01/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "dca3f4dbf6b3355dafd017d8c42e8fef7dbd79e2b372960b787553ea62e19c1b",
+   "sha256_after": "2dc6a55ff4842edda90d827edf26413c67e9ce9005ad27f8dfa0986a885c458c"
+  },
+  {
+   "file": "traces/S02/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "90e24540ca96598f3b1f7e53b0a1bf503e37733319c537d319477be2bfec6757",
+   "sha256_after": "c0621ea139d5416b5c629f34a0b51721420c7419a43fc5cc9f2c66646e01cf51"
+  },
+  {
+   "file": "traces/S03/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "25c63dd143bcdf1b4e16a26976ed15300162989f4e586b454df45dbe84743e43",
+   "sha256_after": "d292e36765d0cc0fb01a1145bc8f85907cc5aaf8effd74030a43cd73b2e2797d"
+  },
+  {
+   "file": "traces/S04/run_0_a_front_pushed/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "5ee75c75f51a8d3d0de1cc689d1082467a801095c109bb0f049048083753e170",
+   "sha256_after": "6ca3cb547ef5d3e5d167604e7ec677cf9b998ec8ebba00fe92344065b14bd4cc"
+  },
+  {
+   "file": "traces/S04/run_0_b_rear_first/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "5ee75c75f51a8d3d0de1cc689d1082467a801095c109bb0f049048083753e170",
+   "sha256_after": "6ca3cb547ef5d3e5d167604e7ec677cf9b998ec8ebba00fe92344065b14bd4cc"
+  },
+  {
+   "file": "traces/S05/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "5ee75c75f51a8d3d0de1cc689d1082467a801095c109bb0f049048083753e170",
+   "sha256_after": "6ca3cb547ef5d3e5d167604e7ec677cf9b998ec8ebba00fe92344065b14bd4cc"
+  },
+  {
+   "file": "traces/S06/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "3bc9ae5c5d245fc2ada291a9a59e90424d2cbc2decdf9a344f95aacb4c2a145d",
+   "sha256_after": "75c6dbad19c13524785fd56bb1b043e591af0fbadb1cc16fa7dfa9e92f39c5bc"
+  },
+  {
+   "file": "traces/S07/run_0_merge_conflict/incident_context.json",
+   "map": "Town03_Opt",
+   "sha256_before": "bb29442530a2a84a5f54f4715d657531dcc8de68703c3b7e5269069d1ee8c2cc",
+   "sha256_after": "25a95dcc83c6bc7430c688a09da5ba10da0b927f679412187a479cf33cf82cd3"
+  },
+  {
+   "file": "traces/S08/run_0_rolls_through/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "4625dc2e8d31e0d17d206e5194e26e3aee509c219dccd09cdb5444b4bfa28a4e",
+   "sha256_after": "6f8586379773f7827b5431fff7c8fe04de0abdd8aff0dc7e5fb4cbe1d1435f9c"
+  },
+  {
+   "file": "traces/S09/run_0_near_simultaneous/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "e549fbe445629f035967607f076c9f12cebe87358846c7f7145ec8ca600c38be",
+   "sha256_after": "0e4da3a1da926a9a93dfcd30258852977543f07f4d9da83f0b637d63cedb7496"
+  },
+  {
+   "file": "traces/S10/run_0_deflected_into_c/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "3bc9ae5c5d245fc2ada291a9a59e90424d2cbc2decdf9a344f95aacb4c2a145d",
+   "sha256_after": "75c6dbad19c13524785fd56bb1b043e591af0fbadb1cc16fa7dfa9e92f39c5bc"
+  },
+  {
+   "file": "traces/S11/run_0_consequential/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "a4c6de8fc3250ccc65b4ed799cf0dbe7c1e50e487ee856b6893aeb1affb42b44",
+   "sha256_after": "3808779b1e7c9bae7b3673af244ef0b493381504063c7a5f3edf99efffd81838"
+  },
+  {
+   "file": "traces/S12/run_0_crash/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "a4c6de8fc3250ccc65b4ed799cf0dbe7c1e50e487ee856b6893aeb1affb42b44",
+   "sha256_after": "3808779b1e7c9bae7b3673af244ef0b493381504063c7a5f3edf99efffd81838"
+  },
+  {
+   "file": "traces/S13/run_0_abreast/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "a4c6de8fc3250ccc65b4ed799cf0dbe7c1e50e487ee856b6893aeb1affb42b44",
+   "sha256_after": "3808779b1e7c9bae7b3673af244ef0b493381504063c7a5f3edf99efffd81838"
+  },
+  {
+   "file": "traces/S13/run_0_passing/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "a4c6de8fc3250ccc65b4ed799cf0dbe7c1e50e487ee856b6893aeb1affb42b44",
+   "sha256_after": "3808779b1e7c9bae7b3673af244ef0b493381504063c7a5f3edf99efffd81838"
+  },
+  {
+   "file": "traces/S13/run_0_platoon/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "a4c6de8fc3250ccc65b4ed799cf0dbe7c1e50e487ee856b6893aeb1affb42b44",
+   "sha256_after": "3808779b1e7c9bae7b3673af244ef0b493381504063c7a5f3edf99efffd81838"
+  },
+  {
+   "file": "traces/S14/run_0_surrounded/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "257281d7502c2673cdfc54af6f5a712e8e280737df8c9371db12b9b6433c2a63",
+   "sha256_after": "236bb02256f01fabd8713376c75eb3fbd07b188e96d8970183d79b967a5e12fd"
+  },
+  {
+   "file": "traces/S15/run_0_dense_platoon/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "257281d7502c2673cdfc54af6f5a712e8e280737df8c9371db12b9b6433c2a63",
+   "sha256_after": "236bb02256f01fabd8713376c75eb3fbd07b188e96d8970183d79b967a5e12fd"
+  },
+  {
+   "file": "traces/S16/run_0_overtaking/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "257281d7502c2673cdfc54af6f5a712e8e280737df8c9371db12b9b6433c2a63",
+   "sha256_after": "236bb02256f01fabd8713376c75eb3fbd07b188e96d8970183d79b967a5e12fd"
+  },
+  {
+   "file": "traces/S17/run_0_occlusion_reappearance/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "257281d7502c2673cdfc54af6f5a712e8e280737df8c9371db12b9b6433c2a63",
+   "sha256_after": "236bb02256f01fabd8713376c75eb3fbd07b188e96d8970183d79b967a5e12fd"
+  },
+  {
+   "file": "traces/S18/run_0_collision_ambiguity/incident_context.json",
+   "map": "Town05",
+   "sha256_before": "257281d7502c2673cdfc54af6f5a712e8e280737df8c9371db12b9b6433c2a63",
+   "sha256_after": "236bb02256f01fabd8713376c75eb3fbd07b188e96d8970183d79b967a5e12fd"
+  },
+  {
+   "file": "traces/S19/run_0_highway_curve/incident_context.json",
+   "map": "Town04",
+   "sha256_before": "d7a6056e121ecbdf338b6935f1921a2a10b08939d66aff9b310f6c99058787e0",
+   "sha256_after": "a9fce0e7bc99221177ecd6f0ccce33c42efd79dd43b57df7f915b996e0a73ce8"
+  }
+ ]
+}

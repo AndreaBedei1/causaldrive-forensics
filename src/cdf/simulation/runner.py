@@ -9,7 +9,7 @@ import platform
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..common.config import Config
 from ..common.geometry import distance
@@ -89,20 +89,24 @@ def _scheduled_end(spec: ScenarioSpec) -> float:
                 if (action.enabled or action.trigger is None) and action.kind != "indicator"], default=0.0)
 
 
-def write_incident_context(run_root: Path, context: Dict[str, Any]) -> None:
+def write_incident_context(run_root: Path, context: Dict[str, Any], map_name: Optional[str] = None) -> None:
     """Copy the scenario's supplied incident context into the run.
 
     This is known context such as the legal speed limit at the incident
-    location: neither perceived by a vehicle nor privileged ground truth.  It
-    is the only scenario information the reconstruction may read.
+    location and the road map of that location (``map``: an investigation
+    knows where the incident happened): neither perceived by a vehicle nor
+    privileged ground truth.  It is the only scenario information the
+    reconstruction may read.
     """
-    if not context:
+    if not context and not map_name:
         LOGGER.warning("scenario defines no incident context: no speed limit will be available")
         return
     limit = context.get("speed_limit_kmh")
     if limit is not None and (isinstance(limit, bool) or not isinstance(limit, (int, float)) or limit <= 0):
         raise ValueError("context.speed_limit_kmh must be a positive number")
     record = dict(context)
+    if map_name:
+        record["map"] = str(map_name)
     record["note"] = "supplied incident context from the scenario configuration; not perceived, not ground truth"
     (Path(run_root) / "incident_context.json").write_text(json.dumps(record, indent=2, sort_keys=True), encoding="utf-8")
 
@@ -113,7 +117,7 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
     run_name = f"run_{int(seed)}" if spec.variant == "default" else f"run_{int(seed)}_{spec.variant}"
     run_root = Path(output_root) / spec.scenario_id / run_name
     run_root.mkdir(parents=True, exist_ok=True)
-    write_incident_context(run_root, spec.context)
+    write_incident_context(run_root, spec.context, spec.map_name)
     # Privileged: every physical participant, recorder or not.
     gt = GroundTruthLogger(run_root, {"scenario_id": spec.scenario_id, "variant": spec.variant, "seed": int(seed),
                                       "map": spec.map_name,

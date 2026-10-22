@@ -7,7 +7,7 @@ CARLA 0.9.15 server.
 |---|---|---|
 | script | `scripts/view_ground_truth.py` | `scripts/replay_run.py` |
 | reads | `<run>/ground_truth/` only (privileged) | the recorders' own files and `<run>/reconstruction/` only |
-| shows | every vehicle on its true trajectory, the physical contact episodes (COLLISION banner, CONTACT_START / END) | recorders at the pose the reconstruction used, fused road users U1, U2, ... as boxes, radar tracks, associations, collisions and semantic events |
+| shows | every vehicle on its true trajectory, the physical collisions (COLLISION banner, CONTACT_START / END; a recontact of the same pair, the bodies never more than 1 m apart within 2 s, is RECONTACT_START / END of that collision) | recorders at the pose the reconstruction used, fused road users U1, U2, ... as boxes, radar tracks, associations, collisions (a recontact labelled RECONTACT, by the same rule on the recorders' own poses) and semantic events |
 | clock shown | `t_contact`: seconds from the first true vehicle-vehicle contact | `t_global`: the reconstruction's clock, 0 at its reference collision |
 
 **Recorder poses.**  The recorders' pose in the RECONSTRUCTION viewer is never the simulator's:
@@ -19,11 +19,20 @@ CARLA 0.9.15 server.
 
 The review menu opens the two viewers of a run at the same time, each on its own CARLA server, so they never
 share or disturb a simulation.
-* **The leader.**  The GROUND TRUTH window (left) leads.  Play, pause, seek and speed there: the RECONSTRUCTION
-  window (right) follows the same instant.  Cameras, vehicle selection and panels stay independent in each window.
-* **What crosses.**  The two viewers exchange only the instant shown on the recording clock, the play state and the
-  speed, over a local UDP port (`cdf.replay.sync`).  The recording clock is the recorders' own clock, which in the
-  canonical runs is the simulator's.  No position, identity or event crosses.
+* **Either window drives both.**  Play, pause, seek (keys, N / P, a click on the timeline), speed and restart act on
+  both windows, whichever one has the keyboard.  So does the camera: C, TAB while following, mouse drag and wheel,
+  the free camera.  ESC, or closing either window, closes both.  Panels and overlays (F, T, G, H, PgUp / PgDn) stay
+  each window's own.
+* **Leader and follower.**  The GROUND TRUTH window (left) keeps the clock; the RECONSTRUCTION window (right)
+  follows it.  A clock action in the follower's window goes to the leader as a numbered command, and the follower
+  keeps its own clock until the leader has applied it, so a pause or a seek never jumps back.
+* **What crosses.**  Two local UDP ports (`--sync-lead PORT` sends on PORT and listens on PORT + 1, `--sync-follow
+  PORT` the other way round; `cdf.replay.sync`).  They carry the instant shown on the recording clock, the play state,
+  the speed, the camera and the quit.  The recording clock is the recorders' own clock, which in the canonical runs
+  is the simulator's.  No position, no event and no identity crosses, except the name of a recorder both viewers
+  replay (the followed vehicle).  Side by side, the camera of both viewers moves over the recorders: the GROUND TRUTH
+  viewer still draws the vehicles that record nothing, but its overview frames the recorders and C follows only
+  them, as in the RECONSTRUCTION viewer.
 * **The follower's mapping.**  The RECONSTRUCTION viewer maps the instant through its own alignment and the
   recorders' timestamps, so it never reads ground truth.
 * **The two clocks.**  The labels stay each viewer's own clock.  `t_global` = 0 is the reconstruction's strongest
@@ -58,7 +67,14 @@ python scripts\replay_run.py traces\S10\run_0_deflected_into_c --export out\rec 
 
 Useful options: `--start T` (seconds), `--speed X` (default 0.5), `--paused`, `--camera overview|follow|free`,
 `--follow ID`, `--focus`, `--hide-tracks`, `--res 1280x720`, `--sync-lead PORT` / `--sync-follow PORT` (what the
-menu passes).  Without a server, `--export DIR` draws top-down frames (`--at T`, `--format png|svg|pdf`).
+menu passes), `--map NAME`.  Without a server, `--export DIR` draws top-down frames (`--at T`, `--format png|svg|pdf`).
+
+**Map.**  The RECONSTRUCTION viewer loads the road map named by the run's supplied incident context
+(`incident_context.json`: `map`, the incident location, read as the reconstruction reads it: Town05, Town03_Opt for
+S07, Town04 for S19), never the map the server happens to have loaded; switching between runs on different maps
+reloads the server's world.  A run recorded before its incident context named the map falls back on the map whose
+driving lanes carry the recorded positions, else `--map`.  The GROUND TRUTH viewer loads the acquisition map of its
+own `ground_truth/metadata.json`.
 
 ## Controls
 
@@ -66,7 +82,7 @@ menu passes).  Without a server, `--export DIR` draws top-down frames (`--at T`,
 |---|---|
 | SPACE | play / pause |
 | LEFT / RIGHT | seek 0.5 s (SHIFT: 0.05 s) |
-| N / P | next / previous reconstructed event |
+| N / P | next / previous event (reconstructed, or true contact in the GROUND TRUTH viewer) |
 | 1-4 | speed 0.25 / 0.5 / 1 / 2x |
 | C | camera: overview, follow each recorder in turn, free |
 | TAB | select the next recorder (its panel is the full one) |
@@ -76,7 +92,7 @@ menu passes).  Without a server, `--export DIR` draws top-down frames (`--at T`,
 | G | ghost boxes or dots for unfused tracks |
 | H | help |
 | R | restart |
-| ESC | quit |
+| ESC | quit (side by side: both viewers) |
 | free camera | W/A/S/D/Q/E move (SHIFT faster), mouse drag to look, wheel to zoom |
 
 ## Reading the screen

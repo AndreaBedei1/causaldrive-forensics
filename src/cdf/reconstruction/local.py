@@ -1584,7 +1584,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
     if clock_origin is None:
         clock_origin = float(ego_records[0]["timestamp"])
     ego = ego_trajectory(ego_records, clock_origin)
-    road = RoadFrame.from_ego_records(ego_records)
+    road = RoadFrame.from_ego_records(ego_records, map_name=context.get("map"))
 
     tracks: List[LocalTrack] = []
     # The recorder's own shape (its bounding box, recorded with its metadata):
@@ -1656,6 +1656,7 @@ def reconstruct_vehicle(vehicle_dir: Path, cfg: ReconstructionConfig, clock_orig
         "frame": {"definition": "origin = first ego position; x = first heading; "
                                 "y = to the right of the first heading (CARLA convention)"},
         "incident_context": context or None,
+        "road_map": None if road is None else {"name": road.road.name, "source": road.source},
         "start_t_local": round(ego.start, 4),
         "end_t_local": round(ego.end, 4),
         "trace_hz": cfg.trace_hz,

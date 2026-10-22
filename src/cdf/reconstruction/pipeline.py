@@ -94,7 +94,15 @@ def read_incident_context(run_dir: Path) -> Dict[str, Any]:
     limit = context.get("speed_limit_kmh")
     if limit is not None and (isinstance(limit, bool) or not isinstance(limit, (int, float)) or limit <= 0):
         raise ValueError("incident_context.json: speed_limit_kmh must be a positive number")
+    road_map = context.get("map")
+    if road_map is not None and (not isinstance(road_map, str) or not road_map.strip()):
+        raise ValueError("incident_context.json: map must be the name of a road map")
     return context
+
+
+def incident_map(run_dir: Path) -> Optional[str]:
+    """The road map the run's supplied incident context names (the incident location), None when it names none."""
+    return read_incident_context(run_dir).get("map")
 
 
 def _on_trace_grid(t_local: float, trace_hz: float) -> bool:

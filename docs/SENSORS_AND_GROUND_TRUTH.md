@@ -14,7 +14,7 @@ it, what the audit found, and what changed.
 | `ground_truth/collisions.jsonl` | every collision callback with the other actor's identity | simulator | **never** |
 | `ground_truth/controls.jsonl`, `metadata.json` | scripted controls, scenario, map, who records | scenario | **never** |
 | `metadata.json` (run) | scenario design, timing of the acquisition | runner | **never** |
-| `incident_context.json` | known context (legal speed limit) | scenario YAML | yes: supplied knowledge, not perception |
+| `incident_context.json` | known context: legal speed limit, road environment, road map of the incident location (`map`, since 2026-10-23) | scenario YAML | yes: supplied knowledge, not perception |
 | `vehicles/<R>/ego.jsonl` | **synthetic GNSS/INS of recorder R** (position, heading, attitude, velocity, IMU acceleration and angular rate) | sensor model applied to R's simulated state | yes |
 | `vehicles/<R>/radar/<id>/observations.npz` | CARLA radar detections: range, azimuth, elevation, radial velocity (no object id, no label) | CARLA radar sensor | yes |
 | `vehicles/<R>/collisions.jsonl` | R's own collision sensor: time and impulse magnitude, **no partner identity** | CARLA collision sensor, identities stripped | yes |

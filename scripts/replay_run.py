@@ -54,6 +54,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cdf.common.config import load_run_config  # noqa: E402
+from cdf.reconstruction.pipeline import incident_map  # noqa: E402
 from cdf.replay.model import (ASSOCIATED, BOX_EDGES, GLOBAL_CLOCK, HEADING_HELD, HEADING_UNKNOWN, MAP_MIN_FIT,  # noqa: E402
                               SPEEDS, EntityPath, EntityState, FreeCamera, PlaybackClock, Pose, ReplayRun, TrackPath,
                               TrackPoint, Vector, box_corners, choose_map, follow_camera, overview_camera, project,
@@ -207,11 +208,19 @@ class ReplayApp:
         self.ids = [p.participant_id for p in run.participants]  # the recorders: TAB cycles these only
         self.colors = {pid: PALETTE[i % len(PALETTE)] for i, pid in enumerate(self.ids)}
         self.clock = PlaybackClock(run.duration, speed=args.speed, start=args.start, playing=not args.paused)
-        # Side-by-side review (cdf.replay.sync): only the instant, play state and speed cross between viewers.
-        from cdf.replay.sync import SyncReceiver, SyncSender
-        self.sync_sender = SyncSender(args.sync_lead) if getattr(args, "sync_lead", None) else None
-        self.sync_receiver = SyncReceiver(args.sync_follow) if getattr(args, "sync_follow", None) else None
+        # Side by side (cdf.replay.sync): the instant, play state, speed, camera and quit cross between the two
+        # viewers, whichever window the user acts in.
+        from cdf.replay.sync import SyncPeer, follow_ports, lead_ports
+        self.leading = bool(getattr(args, "sync_lead", None))
+        ports = lead_ports(args.sync_lead) if self.leading else (
+            follow_ports(args.sync_follow) if getattr(args, "sync_follow", None) else None)
+        self.peer = SyncPeer(*ports) if ports else None
+        self.commands = 0  # follower: its latest clock command; leader: the latest one it applied
+        self.command_sent = 0.0  # follower: wall time of its latest clock command
         self.synced = False
+        # The camera of two viewers side by side moves over the vehicles both replay: the recorders.
+        recorders = getattr(run, "recorders", None) or self.ids
+        self.view_ids = [pid for pid in self.ids if pid in recorders] if self.peer is not None else list(self.ids)
         self.events = run.display_events()
         self.selected = args.follow if args.follow in self.ids else self.ids[0]
         self.event_scroll = 0  # the selected recorder's events: index of the newest one shown
@@ -327,9 +336,8 @@ class ReplayApp:
     def close(self) -> None:
         """Destroy every replay actor, restore the world settings, close pygame."""
         carla = self.carla
-        for channel in (self.sync_sender, self.sync_receiver):
-            if channel is not None:
-                channel.close()
+        if self.peer is not None:
+            self.peer.close()
         if self.camera is not None:
             try:
                 self.camera.stop()
@@ -376,7 +384,7 @@ class ReplayApp:
                                  height=0.4 * self.follow_distance)
         if self.camera_mode == "free" and self.free is not None:
             return self.free.pose
-        points = [(p.x, p.y, p.z) for p in poses.values()]
+        points = [(p.x, p.y, p.z) for pid, p in poses.items() if pid in self.view_ids]
         return overview_camera(points, self.heading, zoom=self.zoom, elevation=self.elevation)
 
     def _project(self, point: Tuple[float, float, float]) -> Optional[Tuple[int, int]]:
@@ -390,7 +398,7 @@ class ReplayApp:
     def handle(self, event: Any) -> None:
         pg = self.pygame
         if event.type == pg.QUIT:
-            self.running = False
+            self._quit()
         elif event.type == pg.KEYDOWN:
             self._on_key(event.key, event.mod)
         elif event.type == pg.MOUSEBUTTONDOWN and event.button in (1, 3):
@@ -421,7 +429,7 @@ class ReplayApp:
         pg = self.pygame
         speed_keys = {pg.K_1: 0, pg.K_2: 1, pg.K_3: 2, pg.K_4: 3, pg.K_KP1: 0, pg.K_KP2: 1, pg.K_KP3: 2, pg.K_KP4: 3}
         if key == pg.K_ESCAPE:
-            self.running = False
+            self._quit()
         elif key == pg.K_SPACE:
             self.clock.toggle()
         elif key == pg.K_r:
@@ -433,7 +441,7 @@ class ReplayApp:
             self.clock.set_speed(SPEEDS[speed_keys[key]])
         elif key == pg.K_c:
             # overview -> follow each recorder vehicle in turn -> free -> overview
-            self.camera_mode, selected = next_camera(self.ids, self.camera_mode, self.selected)
+            self.camera_mode, selected = next_camera(self.view_ids, self.camera_mode, self.selected)
             if selected is not None:
                 self.selected = selected
             if self.camera_mode == "free" and self.camera_pose is not None:
@@ -470,6 +478,78 @@ class ReplayApp:
         if forward or right or up:
             self.free.move(forward, right, up)
 
+    # -- side by side ---------------------------------------------------------------
+
+    def _quit(self) -> None:
+        """ESC or the window closed: this viewer stops, and so does the other one side by side."""
+        self.running = False
+        if self.peer is not None:
+            from cdf.replay.sync import encode_quit
+            for _ in range(3):
+                self.peer.send(encode_quit())
+
+    def _clock_state(self) -> Tuple[float, bool, float]:
+        return round(self.clock.time, 6), self.clock.playing, self.clock.speed
+
+    def _view_state(self) -> Dict[str, Any]:
+        free = None
+        if self.camera_mode == "free" and self.free is not None:
+            free = [round(value, 4) for value in (self.free.x, self.free.y, self.free.z, self.free.yaw, self.free.pitch)]
+        return {"camera": self.camera_mode, "selected": self.selected if self.selected in self.view_ids else None,
+                "heading": round(self.heading, 4), "elevation": round(self.elevation, 4), "zoom": round(self.zoom, 4),
+                "orbit": round(self.follow_orbit, 4), "distance": round(self.follow_distance, 4), "free": free}
+
+    def _apply_view(self, view: Dict[str, Any]) -> None:
+        """The camera the user set in the other window."""
+        if view.get("selected") in self.view_ids:
+            self.selected = view["selected"]
+        if view.get("camera") in ("overview", "follow", "free"):
+            self.camera_mode = view["camera"]
+        for key, attribute in (("heading", "heading"), ("elevation", "elevation"), ("zoom", "zoom"),
+                               ("orbit", "follow_orbit"), ("distance", "follow_distance")):
+            if view.get(key) is not None:
+                setattr(self, attribute, float(view[key]))
+        if self.camera_mode == "free":
+            if view.get("free"):
+                x, y, z, yaw, pitch = (float(value) for value in view["free"])
+                self.free = FreeCamera(Pose(x, y, z, yaw, pitch, 0.0))
+            elif self.free is None and self.camera_pose is not None:
+                self.free = FreeCamera(self.camera_pose)
+
+    def _exchange(self, before: Tuple[Any, Any], now: float) -> bool:
+        """Side by side: send what this window's user changed, take what the other window sent.  True when this
+        frame's instant is the leader's (the follower then does not advance its own clock)."""
+        from cdf.replay.sync import CLOCK, QUIT, VIEW, apply_sync, encode, encode_view
+        clock_before, view_before = before
+        view = self._view_state()
+        if view != view_before:
+            self.peer.send(encode_view(view))
+        if not self.leading and self._clock_state() != clock_before:
+            # Play, pause, seek or speed in the follower's window: a command for the leader.
+            self.commands += 1
+            self.command_sent = now
+            self.peer.send(encode(self.run.recording_time(self.clock.time), self.clock.playing, self.clock.speed,
+                                  self.commands))
+        followed = False
+        for message in self.peer.received():
+            if message["type"] == QUIT:
+                LOGGER.info("the other viewer was closed: closing this one too")
+                self.running = False
+            elif message["type"] == VIEW:
+                self._apply_view(message)
+            elif message["type"] == CLOCK and self.leading:
+                apply_sync(self.clock, self.run, message)  # the follower's user acted
+                self.commands = message["n"]
+            elif message["type"] == CLOCK and (message["n"] >= self.commands or now - self.command_sent > 1.0):
+                apply_sync(self.clock, self.run, message)
+                followed = True
+                if not self.synced:
+                    self.synced = True
+                    LOGGER.info("side by side with the leading viewer: recording clock %.3f s = %s %+.2f s",
+                                message["t_recording"], "t_global" if self.run.clock == GLOBAL_CLOCK else "t",
+                                self.run.display_time(self.clock.time))
+        return followed
+
     # -- frame --------------------------------------------------------------------
 
     def run_loop(self) -> None:
@@ -479,22 +559,18 @@ class ReplayApp:
         while self.running:
             now = time.perf_counter()
             wall_dt, last = min(now - last, 0.25), now
+            before = (self._clock_state(), self._view_state())  # what this window's user changes this frame
             for event in self.pygame.event.get():
                 self.handle(event)
             self._move_free_camera(wall_dt)
-            message = self.sync_receiver.latest() if self.sync_receiver is not None else None
-            if message is not None:
-                from cdf.replay.sync import apply_sync
-                apply_sync(self.clock, self.run, message)
-                if not self.synced:
-                    self.synced = True
-                    LOGGER.info("following the leading viewer: recording clock %.3f s = %s %+.2f s", message["t_recording"],
-                                "t_global" if self.run.clock == GLOBAL_CLOCK else "t",
-                                self.run.display_time(self.clock.time))
-            else:
+            if not (self.peer is not None and self._exchange(before, now)):
                 self.clock.advance(wall_dt)
-            if self.sync_sender is not None:
-                self.sync_sender.send(self.run.recording_time(self.clock.time), self.clock.playing, self.clock.speed)
+            if self.peer is not None and self.leading:
+                from cdf.replay.sync import encode
+                self.peer.send(encode(self.run.recording_time(self.clock.time), self.clock.playing, self.clock.speed,
+                                      self.commands))
+            if not self.running:
+                break
             self.render_frame()
             ticker.tick(self.args.fps)
             if selftest is not None:
@@ -1035,6 +1111,8 @@ class ReplayApp:
     def _help_lines(self) -> List[str]:
         if not self.show_help:
             return []
+        if self.peer is not None:
+            return list(HELP_LINES) + ["side by side: play, seek, speed, N/P, camera and ESC act on both viewers"]
         return list(HELP_LINES)
 
     def _bottom_bar_top(self) -> int:
@@ -1148,11 +1226,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     run_dir = Path(args.run_dir)
     if args.export:
-        for frame in export_run(run_dir, Path(args.export), args.at, args.format, args.map):
+        for frame in export_run(run_dir, Path(args.export), args.at, args.format, supplied_map(args)[0]):
             LOGGER.info("%s  %s", frame["file"], frame["label"])
         return 0
     run = ReplayRun.load(run_dir)
     return view(run, args)
+
+
+def supplied_map(args: argparse.Namespace, run: Any = None) -> Tuple[Optional[str], str]:
+    """(map to load, where it comes from): ``--map``; for the GROUND TRUTH viewer its own acquisition metadata;
+    else the road map of the run's supplied incident context, read as the reconstruction reads it (known context,
+    never the simulator server's state).  (None, ...) for a run whose context names no map."""
+    if args.map:
+        return args.map, "--map"
+    truth_map = getattr(run, "map_name", None)
+    if truth_map:
+        return truth_map, "the ground-truth acquisition metadata"
+    return incident_map(Path(args.run_dir)), "the supplied incident context"
 
 
 def view(run: Any, args: argparse.Namespace) -> int:
@@ -1165,25 +1255,31 @@ def view(run: Any, args: argparse.Namespace) -> int:
         LOGGER.warning("%s has no reconstruction (no %s): the replay shows the recorders only, no reconstructed "
                        "road users and no events; run scripts/reconstruct_run.py %s first", run.name,
                        run_dir / "reconstruction", run_dir)
-    LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous road users: %s%s", run.name,
-                ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()),
-                "; ".join("{0} = {1}".format(e.entity_id, e.sources) for e in run.entities) or "none",
-                "" if not run.ghost_tracks() else "; unfused tracks: " + ", ".join(t.name for t in run.ghost_tracks()))
+    if run.clock == "t_contact":  # the GROUND TRUTH viewer: true vehicles and true contacts, nothing reconstructed
+        LOGGER.info("%s: vehicles %s, %.2f s, %d ground-truth contact event(s)", run.name,
+                    ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()))
+    else:
+        LOGGER.info("%s: recorders %s, %.2f s, %d reconstructed event(s), anonymous road users: %s%s", run.name,
+                    ", ".join(p.participant_id for p in run.participants), run.duration, len(run.all_events()),
+                    "; ".join("{0} = {1}".format(e.entity_id, e.sources) for e in run.entities) or "none",
+                    "" if not run.ghost_tracks() else "; unfused tracks: " + ", ".join(t.name for t in run.ghost_tracks()))
 
     # configs/default.yaml: only the simulator connection (no scenario).
     cfg = load_run_config(overrides=[] if args.port is None else ["simulation.port={0}".format(args.port)])
     session = session_from_config(cfg, autostart=not args.no_autostart)
     app = None
     try:
-        map_name = args.map
-        if not map_name:
+        map_name, source = supplied_map(args, run)
+        if not map_name:  # a run recorded before its incident context named the map
             server_map = session.client().get_world().get_map()
             map_name = resolve_map(run, find_carla_root(cfg.get("simulation.carla_root")),
                                    map_basename(server_map.name), server_map)
+            source = "recognised from the recorded positions"
             if not map_name:
-                LOGGER.error("cannot recognise the map of %s from the recorded positions; pass --map", run_dir)
+                LOGGER.error("cannot recognise the map of %s: its incident context names none and the recorded "
+                             "positions fit no single map; pass --map", run_dir)
                 return 2
-        LOGGER.info("map %s (%s)", map_name, "--map" if args.map else "recognised from the recorded positions")
+        LOGGER.info("map %s (%s)", map_name, source)
         world = session.world_for_map(map_name)
         app = ReplayApp(run, map_name, session.client(), world, args)
         app.setup()

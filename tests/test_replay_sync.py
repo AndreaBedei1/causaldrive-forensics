@@ -1,41 +1,74 @@
-"""Two viewers side by side (GROUND TRUTH and RECONSTRUCTION), synchronised in time.  The leader sends only the
+"""Two viewers side by side (GROUND TRUTH and RECONSTRUCTION), driven from either window.  The leader sends the
 instant it shows on the recording clock (in G0 the recorders' clocks are the simulator's), whether it plays and its
-speed; the follower maps that instant through its own clock.  Nothing else crosses: no position, identity or
-event, so neither viewer reads the other's data."""
+speed; the follower maps that instant through its own clock.  Play, pause, seek and speed in the follower's window
+go to the leader as numbered commands; the camera (C, mouse, free camera) and ESC act on both.  Nothing about the
+recordings crosses: no position, no event, no identity but a recorder both viewers replay."""
 
 import json
+import socket
 import unittest
 from pathlib import Path
 
 from src.cdf.replay.ground_truth import load_ground_truth_run
 from src.cdf.replay.model import PlaybackClock, ReplayRun
-from src.cdf.replay.sync import SyncReceiver, SyncSender, apply_sync, decode, encode
+from src.cdf.replay.sync import (SyncPeer, apply_sync, decode, encode, encode_quit, encode_view, follow_ports,
+                                 lead_ports)
 
 ROOT = Path(__file__).resolve().parents[1]
 S01 = ROOT / "traces" / "S01" / "run_0_crash"
 S04B = ROOT / "traces" / "S04" / "run_0_b_rear_first"
+S12 = ROOT / "traces" / "S12" / "run_0_crash"
+
+
+def _free_port_pair():
+    for port in range(47900, 48900, 2):
+        sockets = []
+        try:
+            for p in (port, port + 1):
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sockets.append(s)
+                s.bind(("127.0.0.1", p))
+            return port
+        except OSError:
+            continue
+        finally:
+            for s in sockets:
+                s.close()
+    raise RuntimeError("no free port pair")
 
 
 class Messages(unittest.TestCase):
-    def test_a_message_carries_only_the_instant_the_play_state_and_the_speed(self):
-        message = decode(encode(2031.25, True, 0.5))
-        self.assertEqual(message, {"t_recording": 2031.25, "playing": True, "speed": 0.5})
-        self.assertEqual(set(json.loads(encode(1.0, False, 1.0).decode("utf-8"))), {"t_recording", "playing", "speed"})
+    def test_a_clock_message_carries_only_the_instant_the_play_state_the_speed_and_a_command_number(self):
+        message = decode(encode(2031.25, True, 0.5, 3))
+        self.assertEqual(message, {"type": "clock", "t_recording": 2031.25, "playing": True, "speed": 0.5, "n": 3})
+        self.assertEqual(set(json.loads(encode(1.0, False, 1.0).decode("utf-8"))),
+                         {"type", "t_recording", "playing", "speed", "n"})
 
-    def test_the_follower_reads_the_latest_message_sent_on_the_local_port(self):
-        receiver = SyncReceiver(0)  # any free port
-        sender = SyncSender(receiver.port)
-        self.assertIsNone(receiver.latest())
-        sender.send(10.0, True, 0.5)
-        sender.send(10.5, False, 0.25)
-        latest = None
-        for _ in range(200):
-            latest = receiver.latest() or latest
-            if latest and latest["t_recording"] == 10.5:
-                break
-        self.assertEqual(latest, {"t_recording": 10.5, "playing": False, "speed": 0.25})
-        sender.close()
-        receiver.close()
+    def test_a_view_message_carries_only_the_camera(self):
+        view = {"camera": "follow", "selected": "A", "heading": 10.0, "elevation": 30.0, "zoom": 1.0, "orbit": 0.0,
+                "distance": 9.0, "free": None, "position": [1.0, 2.0]}
+        message = decode(encode_view(view))
+        self.assertEqual(set(message), {"type", "camera", "selected", "heading", "elevation", "zoom", "orbit",
+                                        "distance", "free"})
+        self.assertEqual(decode(encode_quit()), {"type": "quit"})
+
+    def test_the_two_ends_talk_both_ways(self):
+        port = _free_port_pair()
+        lead, follow = SyncPeer(*lead_ports(port)), SyncPeer(*follow_ports(port))
+        try:
+            lead.send(encode(10.0, True, 0.5))
+            follow.send(encode_quit())
+            received = {"follow": [], "lead": []}
+            for _ in range(200):
+                received["follow"] += follow.received()
+                received["lead"] += lead.received()
+                if received["follow"] and received["lead"]:
+                    break
+            self.assertEqual(received["follow"][0]["t_recording"], 10.0)
+            self.assertEqual(received["lead"][0], {"type": "quit"})
+        finally:
+            lead.close()
+            follow.close()
 
 
 class Clocks(unittest.TestCase):
@@ -77,6 +110,105 @@ def _script(name):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+class BothWindows(unittest.TestCase):
+    """The real viewer's handlers, without CARLA or a window: GROUND TRUTH leading, RECONSTRUCTION following."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.replay_run = _script("replay_run")
+        cls.truth, cls.rec = load_ground_truth_run(S12), ReplayRun.load(S12)
+
+    def _app(self, run, peer, leading):
+        app = object.__new__(self.replay_run.ReplayApp)
+        app.run, app.peer, app.leading = run, peer, leading
+        app.commands, app.command_sent, app.synced, app.running = 0, 0.0, False, True
+        app.ids = [p.participant_id for p in run.participants]
+        recorders = getattr(run, "recorders", None) or app.ids
+        app.view_ids = [pid for pid in app.ids if pid in recorders]
+        app.clock = PlaybackClock(run.duration, speed=0.5, start=1.0, playing=True)
+        app.camera_mode, app.selected, app.free, app.camera_pose = "overview", app.ids[0], None, None
+        app.heading, app.elevation, app.zoom, app.follow_orbit, app.follow_distance = 0.0, 30.0, 1.0, 0.0, 9.0
+        return app
+
+    def setUp(self):
+        port = _free_port_pair()
+        self.lead = self._app(self.truth, SyncPeer(*lead_ports(port)), True)
+        self.follow = self._app(self.rec, SyncPeer(*follow_ports(port)), False)
+
+    def tearDown(self):
+        self.lead.peer.close()
+        self.follow.peer.close()
+
+    def _frame(self, app, act=None, now=10.0):
+        before = (app._clock_state(), app._view_state())
+        if act is not None:
+            act(app)
+        followed = app._exchange(before, now)
+        if app.leading:
+            app.peer.send(encode(app.run.recording_time(app.clock.time), app.clock.playing, app.clock.speed,
+                                 app.commands))
+        return followed
+
+    def _settle(self, frames=20):
+        for _ in range(frames):
+            self._frame(self.lead)
+            self._frame(self.follow)
+
+    def test_the_ground_truth_camera_moves_over_the_recorders_only(self):
+        self.assertIn("C", self.lead.ids)  # S12: C records nothing; the ground truth shows it
+        self.assertEqual((self.lead.view_ids, self.follow.view_ids), (["A", "B"], ["A", "B"]))
+
+    def test_c_in_the_follower_changes_the_camera_of_both(self):
+        def press_c(app):
+            app.camera_mode, app.selected = self.replay_run.next_camera(app.view_ids, app.camera_mode, app.selected)
+        self._frame(self.follow, press_c)
+        self._settle()
+        self.assertEqual((self.lead.camera_mode, self.lead.selected), ("follow", "A"))
+        self._frame(self.lead, press_c)
+        self._settle()
+        self.assertEqual((self.follow.camera_mode, self.follow.selected), ("follow", "B"))
+
+    def test_a_pause_and_a_seek_in_the_follower_reach_the_leader(self):
+        self._settle()
+        def pause_and_seek(app):
+            app.clock.pause()
+            app.clock.seek_to(app.clock.time + 2.0)
+        self._frame(self.follow, pause_and_seek)
+        wanted = self.rec.recording_time(self.follow.clock.time)
+        self._settle()
+        self.assertFalse(self.lead.clock.playing)
+        self.assertAlmostEqual(self.truth.recording_time(self.lead.clock.time), wanted, places=6)
+        self.assertFalse(self.follow.clock.playing)
+        self.assertAlmostEqual(self.rec.recording_time(self.follow.clock.time), wanted, places=6)
+
+    def test_the_follower_keeps_its_command_until_the_leader_applied_it(self):
+        self._settle()
+        self._frame(self.follow, lambda app: app.clock.set_speed(1.0))
+        stale = encode(self.truth.recording_time(self.lead.clock.time), True, 0.5, 0)
+        self.lead.peer.send(stale)  # sent before the leader read the command
+        self._frame(self.follow)
+        self.assertEqual(self.follow.clock.speed, 1.0)
+        self._settle()
+        self.assertEqual((self.lead.clock.speed, self.follow.clock.speed), (1.0, 1.0))
+
+    def test_escape_in_either_window_closes_both(self):
+        self.follow._quit()
+        self._frame(self.lead)
+        self.assertFalse(self.lead.running)
+        port = _free_port_pair()
+        self.lead.peer.close()
+        self.follow.peer.close()
+        self.lead = self._app(self.truth, SyncPeer(*lead_ports(port)), True)
+        self.follow = self._app(self.rec, SyncPeer(*follow_ports(port)), False)
+        self.lead._quit()
+        self._frame(self.follow)
+        self.assertFalse(self.follow.running)
+
+    def test_a_vehicle_that_records_nothing_never_crosses(self):
+        self.lead.selected = "C"
+        self.assertIsNone(self.lead._view_state()["selected"])
 
 
 class Launch(unittest.TestCase):

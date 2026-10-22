@@ -92,6 +92,17 @@ stop-point report; its logs are in `F:\CarlaGraph_repro_20261022\g0_identical_fi
 one frame per 0.1 s with no drop or duplicate; no depth stream (disabled since 2026-10-21); every collision a
 recorder logged is in the ground truth at the same frame.
 
+**Amendment 2026-10-23: the map in the incident context.**  Every run's `incident_context.json` now names the road
+map of the incident location (`map`, from the scenario configuration; equal to the acquisition map of
+`ground_truth/metadata.json` for all 22 runs), as `scripts/run_scenario.py` writes it from now on.  No other byte of
+the raw data changed; the old and new SHA-256 of the 22 files are in
+`results/reproducibility_20261022/incident_context_map_amendment.json` (the hashes listed in
+`canonical_A_raw_sha256.txt` are those of the acquisition).  Reason: the CARLA towns share coordinates around the
+origin, so a recorder's own poses can fit a lane of another town.  In S06 recorder C fitted Town01 instead of Town05,
+which changed its tracking and its path-entry events; in S10 recorder B fitted no map.  An investigation knows where
+the incident happened, so the map is supplied context, like the speed limit.  A recorder whose context names no map
+still recognises it from its own poses.
+
 The depth camera is no longer acquired.  It was never an input of the reconstruction or of the campaign metrics
 (`docs/archive/RTK5G_PREFLIGHT_REVIEW.md`, section "Aggiornamento protocollo: depth camera").
 
