@@ -69,12 +69,15 @@ FAMILIES: Dict[str, Tuple[List[Tuple[str, Any]], bool]] = {
     "radar_asym": ([("nominal", "nominal"), ("severe", "severe"), ("extreme", "extreme")], True),
     "radar_gnss_v3": ([("gnss {0} + radar {1}".format(g, r), (g, r))
                        for g in ("rtk", "degraded") for r in ("nominal", "severe")], True),
+    # The recorder subsets of ``radar_asym`` at the realistic radar levels, with G2 degraded GNSS on every recorder.
+    "radar_asym_gnss": ([("gnss degraded + radar {0}".format(r), ("degraded", r)) for r in ("nominal", "severe")],
+                        True),
     "clock": ([("offsets", None)], False),
     "downsample": ([("10 Hz", 2), ("5 Hz", 4)], False),
     "dropout": ([("one recorder", None)], False),
     "outage": ([("1 s radar outage", 1.0)], False),
 }
-V3_FAMILIES = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3")
+V3_FAMILIES = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3", "radar_asym_gnss")
 # Pooled metrics and the standard error over seeds below which no further seed is drawn.
 TOLERANCES = {"association_accuracy": 0.02, "collision_recall": 0.02, "event_recall": 0.02,
               "fused_centre_error_m": 0.05, "runs_aligned": 0.02,
@@ -121,7 +124,7 @@ def jobs_for(run_dir: Path, family: str, seeds: Sequence[int]) -> List[Dict[str,
         variants: List[Dict[str, Any]] = [{}]
         if family in ("dropout", "outage"):
             variants = [{"recorder": recorder} for recorder in recorders if family == "outage" or len(recorders) > 1]
-        elif family == "radar_asym":
+        elif family in ("radar_asym", "radar_asym_gnss"):
             variants = [{"recorder": subset} for subset in asym_subsets(recorders)]
         for variant in variants:
             for seed in (seeds if stochastic else [0]):
@@ -158,6 +161,11 @@ def build(job: Dict[str, Any]):
     elif family in ("radar_gnss_combined", "radar_gnss_v3"):
         gnss, radar = parameter
         perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=profiles[gnss])
+        pose = PerturbedPoseSource.factory(profiles[gnss], int(job["seed"]))
+    elif family == "radar_asym_gnss":
+        gnss, radar = parameter
+        perturbation = Perturbation(name, radar=RADAR_PROFILES[radar], gnss=profiles[gnss],
+                                    radar_recorders=tuple(job["recorder"].split("+")))
         pose = PerturbedPoseSource.factory(profiles[gnss], int(job["seed"]))
     elif family == "impulse":
         perturbation = Perturbation(name, collisions=CollisionPerturbation(impulse_rel_std=parameter))
@@ -231,6 +239,7 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
             from cdf.evaluation.pose_errors import pose_errors
             result['pose_errors'] = pose_errors(target,pose)
             result.update(extra_evaluation(target, evaluation, fusion_full))
+            result["road_user_errors_raw"] = raw_errors(fusion_full)
             if job["family"] in V3_FAMILIES:
                 # The study's headline metrics (cdf.evaluation.scorecard) on this copy, from the files above.
                 from cdf.evaluation.scorecard import scorecard
@@ -254,6 +263,13 @@ def run_job(job: Dict[str, Any], work: str, keep: bool) -> Dict[str, Any]:
     if not keep and target.exists():
         shutil.rmtree(str(target), ignore_errors=True)
     return result
+
+
+def raw_errors(fusion: Dict[str, Any]) -> Dict[str, List[float]]:
+    """The centre and speed errors of the road users that record nothing, one per compared state (recorder ghosts
+    excluded; ``fusion_metrics``), rounded to 0.1 mm: a condition's median, P95 and RMSE pool them over its runs."""
+    raw = (fusion.get("_raw") or {}).get("road_user_errors") or {}
+    return {key: [round(float(v), 4) for v in raw.get(key, [])] for key in ("centre_error_m", "speed_error_mps")}
 
 
 def _resources() -> Dict[str, Any]:

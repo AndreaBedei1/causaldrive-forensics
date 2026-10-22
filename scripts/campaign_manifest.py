@@ -2,6 +2,11 @@
 """Preliminary or frozen manifest for the active RTK/5G-transport GNSS protocol on 22 canonical runs.
 
     python scripts/campaign_manifest.py [--out results/robustness/rtk5g_current/manifest.json]
+    campaign v3 (docs/CAMPAIGN_V3.md), from the worktree of the tag ``campaign-v3``:
+    set CDF_CAMPAIGN_VERSION_TAG=campaign-v3
+    python scripts/campaign_manifest.py --reconstruction-tag campaign-v3 --name "campaign v3" ^
+        --families baseline,gnss,radar_v3,radar_asym,radar_gnss_v3,radar_asym_gnss ^
+        --results results/robustness/campaign_v3 --out results/robustness/campaign_v3/manifest.json
 
 It records what a reproduction must match: the frozen reconstruction (commit of the tag
 ``pre-robustness-campaign``, configuration hash, and a hash of the reconstruction sources computed both at that
@@ -83,6 +88,13 @@ def reconstruction_hash(commit: Optional[str] = None) -> str:
     return digest.hexdigest()
 
 
+def _code_hash_at(commit: Optional[str]) -> Optional[str]:
+    if commit is None:
+        return None
+    from cdf.evaluation.provenance import commit_code_hash
+    return commit_code_hash(commit)
+
+
 def versions() -> Dict[str, Any]:
     out: Dict[str, Any] = {"python": sys.version, "platform": platform.platform()}
     try:
@@ -97,13 +109,19 @@ def versions() -> Dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, default=ROOT / "results" / "robustness" / "rtk5g_current" / "manifest.json")
+    parser.add_argument("--reconstruction-tag", default=FROZEN_TAG,
+                        help="the tag whose reconstruction sources the campaign tests (default: " + FROZEN_TAG + ")")
+    parser.add_argument("--name", default="RTK GNSS with correction transport via 5G: current robustness protocol")
+    parser.add_argument("--families", default="", help="the families the campaign schedules (default: all)")
+    parser.add_argument("--results", default="results/robustness/rtk5g_current")
     args = parser.parse_args()
     from cdf.evaluation.provenance import code_hash, config_hash
     from cdf.reconstruction.config import load_config
     from cdf.robustness.perturb import GNSS_PROFILES, RADAR_PROFILES
     import robustness
     from validate_canonical import CANONICAL, canonical_runs
-    frozen = _git("rev-parse", FROZEN_TAG + "^{commit}")
+    reconstruction_tag = args.reconstruction_tag
+    frozen = _git("rev-parse", reconstruction_tag + "^{commit}")
     head = _git("rev-parse", "HEAD")
     worktree_status = _git("status", "--porcelain", "--untracked-files=no") or ""
     version_tag = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "rtk5g-current")
@@ -114,6 +132,10 @@ def main() -> int:
         raise SystemExit("the reconstruction sources differ from the frozen tag: not this campaign")
     runs = [Path(r) for r in canonical_runs()]
     cfg = load_config()
+    scheduled = [f for f in args.families.split(",") if f] or list(robustness.FAMILIES)
+    unknown = [f for f in scheduled if f not in robustness.FAMILIES]
+    if unknown:
+        raise SystemExit("unknown families: " + ", ".join(unknown))
     matrix = {}
     for family, (levels, stochastic) in robustness.FAMILIES.items():
         jobs3 = sum(len(robustness.jobs_for(ROOT / run, family, [0, 1, 2])) for run in runs)
@@ -122,19 +144,21 @@ def main() -> int:
                           "stochastic": stochastic, "jobs_initial": jobs3, "jobs_max": jobs8 if stochastic else jobs3,
                           "configuration": "ablation_mutual_refinement" if family == "gnss_refined" else "frozen"}
     manifest = {
-        "name": "RTK GNSS with correction transport via 5G: current robustness protocol",
+        "name": args.name,
         "protocol": {"version_tag": version_tag, "version_tag_commit": version_commit,
                      "status": "PRELIMINARY" if preliminary else "FROZEN",
                      "preliminary": preliminary, "generated_at": datetime.now(timezone.utc).isoformat(),
                      "head_commit": head, "worktree_status": worktree_status},
         "scope": "New GNSS perturbation protocol on the 22 manually reviewed canonical runs (S01..S19). "
                  "This protocol is distinct from the preregistered 2026-10-15 study and does not replace its results.",
-        "frozen_reconstruction": {"tag": FROZEN_TAG, "commit": frozen,
+        "frozen_reconstruction": {"tag": reconstruction_tag, "commit": frozen,
                                   "reconstruction_sources": list(RECONSTRUCTION_SOURCES),
                                   "reconstruction_sources_sha256": recon_now,
                                   "reconstruction_sources_sha256_at_tag": recon_frozen,
                                   "reconstruction_config_sha256": config_hash(cfg.to_dict()),
-                                  "code_sha256_at_tag": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df"},
+                                  "code_sha256_at_tag": (
+                                      "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df"
+                                      if reconstruction_tag == FROZEN_TAG else _code_hash_at(frozen))},
         "code_sha256": code_hash(),
         "reconstruction_config_sha256": config_hash(cfg.to_dict()),
         "reconstruction_config": cfg.to_dict(),
@@ -149,9 +173,10 @@ def main() -> int:
             "gnss_profiles": {k: dataclasses.asdict(v) for k, v in GNSS_PROFILES.items()},
             "profile_documentation": "docs/robustness_profiles.md",
             "matrix": matrix,
-            "conditions": sum(len(m["levels"]) for m in matrix.values()),
-            "jobs_initial_total": sum(m["jobs_initial"] for m in matrix.values()),
-            "jobs_max_total": sum(m["jobs_max"] for m in matrix.values()),
+            "scheduled_families": scheduled,
+            "conditions": sum(len(matrix[f]["levels"]) for f in scheduled),
+            "jobs_initial_total": sum(matrix[f]["jobs_initial"] for f in scheduled),
+            "jobs_max_total": sum(matrix[f]["jobs_max"] for f in scheduled),
             "seed_schedule": {"stochastic": "seeds 0, 1, 2 first; then 3, 4, ... up to 7 while the standard error over "
                                             "seeds of any pooled metric exceeds its tolerance (robustness.TOLERANCES), "
                                             "decided per (family, level)",
@@ -160,14 +185,13 @@ def main() -> int:
                                          "family, worker and execution order, shared by all runs of a seed"},
             "max_attempts_per_job": 2,
         },
-        "results": {"jobs": "results/robustness/rtk5g_current/jobs.jsonl",
-                    "report": "results/robustness/rtk5g_current/report/"},
+        "results": {"jobs": args.results.rstrip("/") + "/jobs.jsonl", "report": args.results.rstrip("/") + "/report/"},
         "software": versions(),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(manifest, indent=1, default=str) + "\n", encoding="utf-8")
     print("conditions", manifest["robustness"]["conditions"], "jobs initial", manifest["robustness"]["jobs_initial_total"],
-          "max", manifest["robustness"]["jobs_max_total"], "| reconstruction unchanged since", FROZEN_TAG,
+          "max", manifest["robustness"]["jobs_max_total"], "| reconstruction unchanged since", reconstruction_tag,
           recon_now == recon_frozen, "| code", manifest["code_sha256"][:16])
     return 0
 

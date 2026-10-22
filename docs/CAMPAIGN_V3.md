@@ -1,8 +1,9 @@
-# Campaign v3: design (prepared, NOT started)
+# Campaign v3: design and freeze
 
-**Status (2026-10-22):** infrastructure ready and smoke-tested on two runs.  The massive campaign must not start
-before Andrea's visual validation of the 22 canonical runs and explicit approval, followed by the freeze (tag and
-manifest) of code, configuration and dataset.
+**Status (2026-10-23):** approved by Andrea (2026-10-23, full campaign authorised).  Frozen at the tag
+`campaign-v3` (code, configuration, dataset and protocol: `results/robustness/campaign_v3/manifest.json` of the
+campaign worktree) and run from a separate worktree of that tag, so that later work on the repository cannot
+change a job.  The final results and their report are in `results/campaign_v3/` and `docs/CAMPAIGN_V3_REPORT.md`.
 
 ## Question
 
@@ -19,6 +20,7 @@ asymmetrically?
 | `radar_v3` | nominal, severe, extreme | all |
 | `radar_asym` | nominal, severe, extreme | **subsets**: each recorder alone; with three or more recorders also all but each one (with three, every pair) |
 | `radar_gnss_v3` | {G1, G2} x {nominal, severe} | all |
+| `radar_asym_gnss` | G2 x {nominal, severe} | radar: the subsets of `radar_asym`; GNSS: all |
 
 * **Reference.**  "Not degraded" means the G0 condition: CARLA's radar with no added error and the exact
   synthetic GNSS/INS.  In `radar_asym` the recorders outside the subset keep that radar.  Every job is compared with
@@ -31,6 +33,9 @@ asymmetrically?
 
   The condition table is stratified by the number of recorders R.  "All but one" exists only for R = 3 (6 runs),
   so the three-way comparison uses the R = 3 rows.  With two recorders the design is exactly "only A, only B, both".
+* **Asymmetric radar under degraded GNSS.**  `radar_asym_gnss` repeats the subsets of `radar_asym` at the realistic
+  radar levels with G2 GNSS on every recorder.  Its radar errors are those of `radar_asym` and its GNSS errors those
+  of `gnss` degraded (same seed), so it pairs with both and with `radar_gnss_v3` (G2, every radar degraded).
 * **Paired random streams.**  Random streams are keyed by (seed, sensor, profile, recorder, radar or axis), never
   by the family or the subset.  A recorder degraded alone therefore receives exactly the errors it receives in every
   other subset and in `radar_v3` (test `test_campaign_v3.PairedAsymmetricStreams`).  The GNSS errors of
@@ -69,14 +74,15 @@ asymmetrically?
 
 For a run with R recorders and S seeds:
 
-| R | baseline | gnss | radar_v3 | radar_asym | radar_gnss_v3 | jobs per run |
-|---|---|---|---|---|---|---|
-| 2 | 1 | 2S | 3S | 6S (2 subsets) | 4S | 1 + 15S |
-| 3 | 1 | 2S | 3S | 18S (6 subsets) | 4S | 1 + 27S |
+| R | baseline | gnss | radar_v3 | radar_asym | radar_gnss_v3 | radar_asym_gnss | jobs per run |
+|---|---|---|---|---|---|---|---|
+| 2 | 1 | 2S | 3S | 6S (2 subsets) | 4S | 4S (2 subsets) | 1 + 19S |
+| 3 | 1 | 2S | 3S | 18S (6 subsets) | 4S | 12S (6 subsets) | 1 + 39S |
 
 On the 22 canonical runs (16 with two recorders, 6 with three), `jobs_for` counts:
-* **1228 jobs at S = 3** (the minimum);
-* **3238 jobs at S = 8** (the maximum).
+* **1636 jobs at S = 3** (the minimum): baseline 22, gnss 132, radar_v3 198, radar_asym 612, radar_gnss_v3 264,
+  radar_asym_gnss 408;
+* **4326 jobs at S = 8** (the maximum).
 
 ## Verification (2026-10-22, before the freeze)
 
@@ -110,16 +116,37 @@ On the 22 canonical runs (16 with two recorders, 6 with three), `jobs_for` count
   phantoms come from each degraded recorder's own tracks and add up approximately.  Independence is not claimed
   from so small a sample.
 
-## Command (to be given only after approval and freeze)
+## Commands
+
+From the campaign worktree (`F:\CarlaGraph_campaign_v3`, a `git worktree` of the tag `campaign-v3`):
 
 ```bat
-python scripts\robustness.py --canonical --families baseline,gnss,radar_v3,radar_asym,radar_gnss_v3 ^
-    --work robustness\campaign_v3 --results results\robustness\campaign_v3 --workers 8
+scripts\campaign_v3.bat start      :: verify the freeze against the manifest, start the controller detached
+scripts\campaign_v3.bat status     :: completed / failed / running / pending jobs, resources, estimated time left
+scripts\campaign_v3.bat pause      :: running jobs finish and are recorded, then the controller exits
+scripts\campaign_v3.bat resume     :: verify the freeze again and continue: complete jobs are skipped
 ```
-To resume, re-run the same command: complete jobs are skipped.  `--summarize` rewrites every summary from
-`jobs.jsonl`.
 
-## Open points before the freeze
+The controller (`scripts/campaign_controller.py`) survives the terminal and the chat session.  It adapts the number
+of workers to the machine's load and leaves room for other users.  Every finished attempt is a line of
+`results\robustness\campaign_v3\jobs.jsonl`; a failed job is kept with its error and tried at most twice.
+`python scripts\robustness.py --summarize --results results\robustness\campaign_v3` rewrites the summaries from
+`jobs.jsonl`, also those of an interrupted campaign.
+
+## Decisions taken at the freeze (2026-10-23)
+
+1. **Phantoms.**  The identity rule is unchanged (`IDENTITY_MAX_BOX_DISTANCE_M` = 1.5 m).  Phantoms are split, as a
+   diagnostic, by the median distance of their tracks to the nearest true vehicle box: near (<= 3 m, a displaced
+   estimate of a vehicle) or far (clutter) (`cdf.evaluation.scorecard.PHANTOM_NEAR_M`).
+2. **Scorecard definitions** (`cdf.evaluation.scorecard`, module docstring):
+   * recall and the identified rate are over the reportable collisions;
+   * a recontact reported as a collision of its own is a recontact split, not an invented collision;
+   * road-user position and speed errors exclude recorder ghosts;
+   * error statistics carry the RMSE;
+   * the observability threshold is the run's own `min_track_frames`.
+3. **Map.**  The road map is supplied incident context (`docs/REPRODUCIBILITY.md`, amendment 2026-10-23).
+
+## Open points recorded before the freeze (2026-10-22)
 
 1. **"Phantoms" under severe radar.**  In the smoke test (S01, S10; 2 seeds) there are 26 to 101 anonymous road
    users without a true identity per job under `radar_v3 severe` and `extreme`, while the collisions stay identified.

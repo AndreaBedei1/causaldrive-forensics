@@ -66,6 +66,53 @@ class AsymmetricRadarJobs(unittest.TestCase):
         self.assertEqual(perturbation.radar_profile_of("C").name, "nominal")
 
 
+
+class AsymmetricRadarUnderDegradedGnss(unittest.TestCase):
+    """``radar_asym_gnss``: the recorder subsets of ``radar_asym`` with G2 degraded GNSS on every recorder, at the
+    realistic radar levels (nominal, severe): the same radar errors as ``radar_asym`` and the same GNSS errors as
+    ``gnss`` degraded, so each comparison is paired."""
+
+    def test_the_jobs_are_the_asymmetric_subsets_at_the_realistic_levels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            jobs = rob.jobs_for(_fake_run(Path(tmp), ["A", "B", "C"]), "radar_asym_gnss", [0, 1])
+        self.assertEqual(sorted({j["level"] for j in jobs}), ["gnss degraded + radar nominal",
+                                                              "gnss degraded + radar severe"])
+        self.assertEqual(sorted({j["recorder"] for j in jobs}), ["A", "A+B", "A+C", "B", "B+C", "C"])
+        self.assertEqual(len(jobs), 2 * 6 * 2)
+        self.assertIn("radar_asym_gnss", rob.V3_FAMILIES)
+
+    def test_a_job_degrades_the_radar_of_its_subset_and_the_gnss_of_every_recorder(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run = make_run(Path(tmp) / "run")
+            job = next(j for j in rob.jobs_for(run, "radar_asym_gnss", [3])
+                       if j["recorder"] == "B" and j["level"].endswith("severe"))
+            perturbation, pose = rob.build(job)
+            gnss_job = next(j for j in rob.jobs_for(run, "gnss", [3]) if j["level"] == "degraded")
+            _, gnss_pose = rob.build(gnss_job)
+            self.assertEqual(perturbation.radar_recorders, ("B",))
+            self.assertEqual(perturbation.radar_profile_of("A").name, "ideal")
+            self.assertEqual(perturbation.radar_profile_of("B").name, "severe")
+            for recorder in ("A", "B"):  # the GNSS errors of every recorder are those of gnss degraded
+                vehicle = run / "vehicles" / recorder
+                first = json.loads((vehicle / "ego.jsonl").read_text(encoding="utf-8").splitlines()[0])
+                here, there = pose(vehicle, first["timestamp"]).pose_at(1.0), gnss_pose(vehicle, first["timestamp"]).pose_at(1.0)
+                self.assertEqual((here.x, here.y, here.yaw), (there.x, there.y, there.yaw))
+                self.assertNotEqual(here.x, first["x"])
+
+
+
+class RawErrors(unittest.TestCase):
+    """Each job keeps the errors of its road users state by state (recorder ghosts excluded), so that a condition's
+    median, P95 and RMSE pool the states of all its runs exactly."""
+
+    def test_a_job_keeps_the_road_user_errors_of_every_state(self):
+        fusion = {"_raw": {"road_user_errors": {"centre_error_m": [0.12345, 0.5], "speed_error_mps": [0.01],
+                                                "heading_error_deg": [3.0]},
+                           "errors": {"centre_error_m": [9.0, 0.12345, 0.5]}}}
+        self.assertEqual(rob.raw_errors(fusion), {"centre_error_m": [0.1235, 0.5], "speed_error_mps": [0.01]})
+        self.assertEqual(rob.raw_errors({}), {"centre_error_m": [], "speed_error_mps": []})
+
+
 def _observations(run: Path, recorder: str):
     path = next((run / "vehicles" / recorder / "radar").glob("*/observations.npz"))
     with np.load(str(path)) as data:
