@@ -57,6 +57,10 @@ class RawVehicleAgent:
     def __init__(self, scenario_world: Any, cfg: Config, spec: Any, controller: ScriptedController,
                  spawn_transform: Any, output_root: Any) -> None:
         self.world = scenario_world; self.cfg = cfg; self.spec = spec; self.controller = controller
+        self.impact_reaction_ticks = int(cfg.get("simulation.impact_reaction_ticks", 1))
+        self._first_impact_frame = None  # frame of the vehicle's first collision callback
+        self.late_impact_notifications = 0
+        self._received_frame = None
         self.vehicle = scenario_world.spawn_vehicle(spec.blueprint, spawn_transform)
         self.record = bool(getattr(spec, "record", True))
         if not self.record:
@@ -117,10 +121,11 @@ class RawVehicleAgent:
         tf, v = self.vehicle.get_transform(), self.vehicle.get_velocity()
         steer = self.controller.step(VehicleState(t=float(t), x=tf.location.x, y=tf.location.y, yaw=tf.rotation.yaw,
                                                   speed=speed, vx=v.x, vy=v.y), dt).clamped().steer
-        self.vehicle.apply_control(carla.VehicleControl(throttle=float(throttle), steer=float(steer),
-                                                        manual_gear_shift=True, gear=int(self._launch_gear)))
+        self.world.send(carla.command.ApplyVehicleControl(self.vehicle.id, carla.VehicleControl(
+            throttle=float(throttle), steer=float(steer), manual_gear_shift=True, gear=int(self._launch_gear))))
         yaw = math.radians(tf.rotation.yaw)
-        self.vehicle.set_target_velocity(carla.Vector3D(x=math.cos(yaw) * speed, y=math.sin(yaw) * speed, z=0))
+        self.world.send(carla.command.ApplyTargetVelocity(
+            self.vehicle.id, carla.Vector3D(x=math.cos(yaw) * speed, y=math.sin(yaw) * speed, z=0)))
 
     def set_sensor_start_frame(self, frame: int) -> None:
         """Exclude warm-up callbacks while retaining later delayed images."""
@@ -160,6 +165,8 @@ class RawVehicleAgent:
     def step(self, t: float, frame: int, dt: float, recorded_timestamp: float = None) -> dict:
         """Advance the scripted controller using ``t`` and log CARLA's raw time."""
         timestamp = float(t) if recorded_timestamp is None else float(recorded_timestamp)
+        self.receive_sensors(frame)
+        self._receive_impacts(frame)
         record = self.state_record(timestamp, frame)
         speed = (record["velocity"]["x"] ** 2 + record["velocity"]["y"] ** 2 + record["velocity"]["z"] ** 2) ** 0.5
         state = VehicleState(t=t, x=record["x"], y=record["y"], yaw=record["yaw_deg"], speed=speed,
@@ -171,7 +178,7 @@ class RawVehicleAgent:
                                        hand_brake=clamped.hand_brake, reverse=clamped.reverse)
         if clamped.neutral:
             control.manual_gear_shift, control.gear = True, 0
-        self.vehicle.apply_control(control)
+        self.world.send(carla.command.ApplyVehicleControl(self.vehicle.id, control))
         left, right = int(carla.VehicleLightState.LeftBlinker), int(carla.VehicleLightState.RightBlinker)
         self._update_indicator(t, left, right)
         if self.logger is not None:
@@ -183,9 +190,6 @@ class RawVehicleAgent:
             light = int(self.vehicle.get_light_state())
             self.logger.log_lights({"frame": int(frame), "timestamp": timestamp, "light_state": light,
                                     "left_blinker": bool(light & left), "right_blinker": bool(light & right)})
-        for radar in self.radar:
-            item = radar.poll(frame)
-            if item is not None: self.logger.log_radar(item)
         if self.camera is not None:
             for item in self.camera.drain_available():
                 data = item.pop("data")
@@ -195,12 +199,40 @@ class RawVehicleAgent:
             for item in self.depth_camera.drain_available():
                 self._submit_depth(item)
             self._drain_depth_futures()
+        return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
+                "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
+
+    def receive_sensors(self, frame: int) -> None:
+        """Log this frame's radar sweeps, waiting for them (once per frame).
+
+        The runner calls it for every vehicle before any controller steps: a radar sweep of frame N is
+        sent after the collision callbacks of the earlier frames, so once it has arrived those callbacks
+        have too (``_receive_impacts`` counts any that has not)."""
+        if self._received_frame == int(frame):
+            return
+        self._received_frame = int(frame)
+        for radar in self.radar:
+            item = radar.poll(frame)
+            if item is not None: self.logger.log_radar(item)
+
+    def _receive_impacts(self, frame: int) -> None:
+        """Deliver the vehicle's collisions to its controller at a tick fixed by the collision frame.
+
+        Collision callbacks arrive asynchronously; reacting when one happens to arrive made the
+        post-impact controls (and the whole post-impact dynamics) depend on network timing.  The
+        controller now reacts ``impact_reaction_ticks`` after the frame of the first callback.  A
+        callback that arrives after that tick is counted (``late_impact_notifications``): the run is
+        then not guaranteed to repeat and the metadata says so."""
         for collision in self.collision_sensor.drain_vehicle():
             if self.logger is not None:
                 self.logger.log_collision(collision)
+            if self._first_impact_frame is None or int(collision["frame"]) < self._first_impact_frame:
+                if not self.controller.impacted and int(collision["frame"]) + self.impact_reaction_ticks < int(frame):
+                    self.late_impact_notifications += 1
+                self._first_impact_frame = int(collision["frame"])
+        if (self._first_impact_frame is not None and not self.controller.impacted
+                and int(frame) >= self._first_impact_frame + self.impact_reaction_ticks):
             self.controller.notify_impact()
-        return {"frame": int(frame), "timestamp": timestamp, "throttle": command.throttle, "brake": command.brake,
-                "steer": command.steer, "hand_brake": command.hand_brake, "reverse": command.reverse}
 
     def _update_indicator(self, t: float, left: int, right: int) -> None:
         """Switch the turn indicator lights as the scripted ``indicator`` actions ask (``controllers``), keeping
@@ -211,7 +243,7 @@ class RawVehicleAgent:
         carla = import_carla()
         value = int(self.vehicle.get_light_state()) & ~(left | right)
         value |= left if side < 0 else right if side > 0 else 0
-        self.vehicle.set_light_state(carla.VehicleLightState(value))
+        self.world.send(carla.command.SetVehicleLightState(self.vehicle.id, carla.VehicleLightState(value)))
         self._indicator_side = side
 
     def flush_sensor_queues(self, timeout_s: float = 2.0) -> None:

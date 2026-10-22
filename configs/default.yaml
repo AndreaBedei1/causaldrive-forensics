@@ -7,11 +7,21 @@ simulation:
   substepping: true
   max_substep_delta_time: 0.01
   max_substeps: 10
-  traffic_manager_enabled: true
+  # No scenario drives a vehicle with the Traffic Manager.  A TM client in synchronous mode, even with no
+  # vehicle registered, made repeated runs differ by up to 0.59 m (lab test 2026-10-22, 5 client processes;
+  # without it 10 in 10 bit-identical): it stays off unless a scenario needs background traffic.
+  traffic_manager_enabled: false
   traffic_manager_port: 8100
   map_switch_settle_s: 60.0
   spawn_z_offset: 0.3
+  # Empty synchronous ticks after the settings are applied and before anything is spawned: the frame the
+  # server was running when it switched to synchronous mode has a wall-clock step (world.py).
+  sync_settle_ticks: 10
   warmup_ticks: 20
+  # A controller reacts to its vehicle's collision this many ticks after the collision frame (the event's
+  # own frame, not the arrival time of the asynchronous callback); a callback delivered too late for that
+  # tick is counted in the run metadata (late_impact_notifications).
+  impact_reaction_ticks: 1
   # After the warm-up, a moving vehicle is given its scripted initial velocity for
   # launch_ticks ticks in the gear its automatic gearbox would hold at that speed,
   # at launch_throttle (a nominal cruising throttle: 0.40-0.58 measured at 9-14 m/s

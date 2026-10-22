@@ -141,6 +141,7 @@ class ScenarioWorld:
         self._actors: List[Any] = []
         self._sensors: List[Any] = []
         self._frame: int = 0
+        self._pending_commands: List[Any] = []
         self._entered = False
 
     # -- lifecycle --------------------------------------------------------
@@ -184,6 +185,12 @@ class ScenarioWorld:
             LOGGER.info("Traffic Manager disabled for %s", self.map_name)
 
         self._entered = True
+        # The server free-runs at a wall-clock step until it receives the synchronous settings; the
+        # frame in flight when they arrive still has a variable step.  An actor spawned before that
+        # frame has completed starts from a run-dependent state (measured 2026-10-22: 1 run in 5 off by
+        # 6 cm after 60 ticks; with these empty ticks 10 in 10 bit-identical across client processes).
+        for _ in range(int(self.cfg.get("simulation.sync_settle_ticks", 10))):
+            self.tick()
         LOGGER.info(
             "scenario world ready: map=%s dt=%.3f seed=%d",
             self.map_name,
@@ -347,10 +354,24 @@ class ScenarioWorld:
 
     # -- stepping ---------------------------------------------------------
 
+    def send(self, command: Any) -> None:
+        """Queue a command for the vehicles (control, target velocity, lights) until the next tick.
+
+        ``actor.apply_control`` and the other setters are asynchronous RPC calls: the server can execute one
+        after the tick that should have followed it (measured: in ~1 run in 4 one vehicle launched one
+        tick of travel off).  :meth:`tick` sends the queue with ``apply_batch_sync``, which returns only
+        once the server has applied every command, and only then ticks."""
+        self._pending_commands.append(command)
+
     def tick(self) -> Any:
-        """Advance the simulation one fixed step and return the world snapshot."""
+        """Apply the queued commands, advance the simulation one fixed step and return the world snapshot."""
         if not self._entered:
             raise RuntimeError("ScenarioWorld.tick() called outside its context manager")
+        if self._pending_commands:
+            commands, self._pending_commands = self._pending_commands, []
+            for response in self.client.apply_batch_sync(commands, False):
+                if getattr(response, "error", None):
+                    raise RuntimeError("CARLA rejected a vehicle command: " + str(response.error))
         self._frame = self.world.tick()
         return self.world.get_snapshot()
 

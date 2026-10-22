@@ -199,6 +199,8 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
                                     record["action_id"], scenario_timestamp)
                     armed = [(owner, action) for owner, action in armed if action.armed]
                     scheduled_end = _scheduled_end(spec)
+                for agent in agents:
+                    agent.receive_sensors(frame)
                 controls = {
                     agent.spec.participant_id: agent.step(
                         scenario_timestamp, frame, dt, recorded_timestamp=timestamp
@@ -233,6 +235,7 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
             for agent in agents:
                 agent.flush_sensor_queues()
     finally:
+        late_impacts = sum(int(getattr(agent, "late_impact_notifications", 0)) for agent in agents)
         for agent in agents: agent.close()
         gt.close()
     # Recorders only: a participant with record: false is not revealed by the run's metadata.
@@ -241,6 +244,9 @@ def run_scenario(client: Any, cfg: Config, spec: ScenarioSpec, seed: int, output
         metadata["simulation_start_timestamp"] = simulation_start_timestamp
     if fixed_delta_seconds is not None:
         metadata["fixed_delta_seconds"] = fixed_delta_seconds
+    # Collision callbacks that arrived after the tick the controller had to react on (vehicle_agent):
+    # 0 means the post-impact controls did not depend on callback timing.
+    metadata["late_impact_notifications"] = late_impacts
     if simulation_end_timestamp is not None and simulation_start_timestamp is not None:
         metadata["simulation_end_timestamp"] = simulation_end_timestamp
         metadata["recorded_duration_s"] = simulation_end_timestamp - simulation_start_timestamp
