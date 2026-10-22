@@ -26,7 +26,8 @@ those verdicts; where a new rule is needed it is stated below and kept deliberat
 3. Position and speed of the reconstructed road users that record nothing against the truth: median, P95, mean
    and RMSE of the centre error and of the speed error (``fusion_metrics.road_user_state_errors``: recorder
    ghosts excluded, counted under 2); heading is a diagnostic only.
-4. Association: wrong recorder links, false and missed merges, fragmented vehicles, phantoms.
+4. Association: wrong and missed recorder links (the "WRONG link" and "missed link" verdicts of
+   ``fusion_metrics``), false and missed merges, fragmented vehicles, phantoms.
 5. Essential semantics, by physical meaning rather than exact timestamps:
    * CRITICAL_TTC warning: for each true contact and each recorder involved in it, the first CRITICAL_TTC_START
      about the partner in the ``WARNING_WINDOW_S`` before the contact (the reconstruction's subject is the
@@ -173,6 +174,16 @@ def collision_score(evaluation: Mapping[str, Any], recorders: List[str]) -> Dict
             "invented_list": invented, "recontact_split_list": splits}
 
 
+def association_score(fusion: Mapping[str, Any], phantoms: List[str]) -> Dict[str, Any]:
+    """4. Association: the recorder-link verdicts as ``fusion_metrics`` names them ("correct link", "WRONG link",
+    "missed link"), merges, fragmented vehicles and phantoms."""
+    counts = fusion.get("decision_counts", {})
+    return {"decisions": counts, "wrong_links": counts.get("WRONG link", 0), "missed_links": counts.get("missed link", 0),
+            "merges": fusion.get("merges", {}),
+            "fragmented_vehicles": {k: v for k, v in (fusion.get("fragmentation") or {}).items() if len(v) > 1},
+            "phantoms": len(phantoms)}
+
+
 def scorecard(run_dir: Path, min_track_frames: Optional[int] = None,
               oracle: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     run_dir = Path(run_dir)
@@ -243,12 +254,7 @@ def scorecard(run_dir: Path, min_track_frames: Optional[int] = None,
               "heading_error_deg_diagnostic": _stat(se.get("heading_error_deg"))}
 
     # 4. Association
-    counts = fusion.get("decision_counts", {})
-    association = {"decisions": counts,
-                   "wrong_links": sum(v for k, v in counts.items() if "wrong" in k or "false" in k),
-                   "merges": fusion.get("merges", {}),
-                   "fragmented_vehicles": {k: v for k, v in (fusion.get("fragmentation") or {}).items() if len(v) > 1},
-                   "phantoms": len(phantoms)}
+    association = association_score(fusion, phantoms)
 
     # 5. Essential semantics
     semantics: Dict[str, Any] = {"available": oracle is not None}
@@ -333,8 +339,8 @@ def summary_rows(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "pos_med_m": err["centre_error_m"]["median"], "pos_p95_m": err["centre_error_m"]["p95"],
             "pos_rmse_m": err["centre_error_m"].get("rmse"),
             "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
-            "wrong_links": ass["wrong_links"], "missed_merges": (ass["merges"] or {}).get("missed"),
-            "false_merges": (ass["merges"] or {}).get("false"),
+            "wrong_links": ass["wrong_links"], "missed_links": ass.get("missed_links"),
+            "missed_merges": (ass["merges"] or {}).get("missed"), "false_merges": (ass["merges"] or {}).get("false"),
             "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
             "intrusions": "{0}/{1}".format((sem.get("path_intrusions") or {}).get("found"),
                                            (sem.get("path_intrusions") or {}).get("expected")),
@@ -392,7 +398,8 @@ def _numbers(card: Mapping[str, Any]) -> Dict[str, Any]:
             "pos_rmse_m": err["centre_error_m"].get("rmse"),
             "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
             "spd_rmse_mps": err["speed_error_mps"].get("rmse"),
-            "wrong_links": ass["wrong_links"], "missed_merges": (ass.get("merges") or {}).get("missed"),
+            "wrong_links": ass["wrong_links"], "missed_links": ass.get("missed_links"),
+            "missed_merges": (ass.get("merges") or {}).get("missed"),
             "false_merges": (ass.get("merges") or {}).get("false"),
             "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
             "intrusions_found": intrusions.get("found"), "intrusions_expected": intrusions.get("expected"),

@@ -15,7 +15,8 @@ import unittest
 from pathlib import Path
 
 from src.cdf.evaluation.gt_audit import stats
-from src.cdf.evaluation.scorecard import PHANTOM_NEAR_M, _numbers, collision_score, run_min_track_frames
+from src.cdf.evaluation.scorecard import (PHANTOM_NEAR_M, _numbers, association_score, collision_score,
+                                          run_min_track_frames)
 
 ROOT = Path(__file__).resolve().parents[1]
 S06 = ROOT / "traces" / "S06" / "run_0_crash"
@@ -44,6 +45,16 @@ class Collisions(unittest.TestCase):
         score = collision_score(_evaluation(extras, [_contact("AB")]), ["A", "B", "C"])
         self.assertEqual((score["invented"], score["recontact_splits"]), (1, 1))
         self.assertAlmostEqual(score["precision"], 1.0 / 3.0)
+
+
+class Association(unittest.TestCase):
+    def test_wrong_and_missed_recorder_links_are_counted_as_the_evaluation_names_them(self):
+        fusion = {"decision_counts": {"correct link": 3, "WRONG link": 2, "missed link": 1, "anonymous": 4},
+                  "merges": {"correct": 1, "false": 0, "missed": 2}, "fragmentation": {"X": ["U1", "U2"], "Y": ["U3"]}}
+        score = association_score(fusion, ["U9"])
+        self.assertEqual((score["wrong_links"], score["missed_links"]), (2, 1))
+        self.assertEqual(score["fragmented_vehicles"], {"X": ["U1", "U2"]})
+        self.assertEqual(score["phantoms"], 1)
 
 
 class Statistics(unittest.TestCase):
