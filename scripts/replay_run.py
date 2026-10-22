@@ -250,7 +250,8 @@ class ReplayApp:
         self._spawn_vehicles()
         self._spawn_camera()
         pygame.init()
-        pygame.display.set_caption("CARLA replay - " + self.run.name)
+        pygame.display.set_caption(("GROUND TRUTH - " if self.run.clock == "t_contact" else "RECONSTRUCTION - ")
+                                   + self.run.name)
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)  # translucent ghost footprints
         pygame.key.set_repeat(300, 80)
@@ -962,9 +963,13 @@ class ReplayApp:
             else "tracks hidden"
         lines = [(self.run.name + "  (" + self.map_name + ")", self.font_bold, (255, 255, 255)),
                  (("t_global {0:+6.2f} s   replay {1:5.2f} / {2:.2f} s" if self.run.clock == "t_global" else
+                   "t_contact {0:+6.2f} s   scenario {1:5.2f} / {2:.2f} s" if self.run.clock == "t_contact" else
                    "Time  {1:6.2f} / {2:.2f} s (recorded source clock)").format(self.run.display_time(t), t,
                                                                                self.run.duration),
                   self.font, (255, 255, 255)),
+                 (("GROUND TRUTH (CARLA): true trajectories and physical contacts" if self.run.clock == "t_contact"
+                   else "RECONSTRUCTION: recorders at their sensor (GNSS/INS) pose, estimated road users"),
+                  self.font_bold, (255, 200, 80) if self.run.clock == "t_contact" else (120, 200, 255)),
                  ("Speed {0:.2f}x   {1}".format(self.clock.speed, state), self.font,
                   (120, 230, 120) if state == "PLAYING" else (255, 170, 60)),
                  ("Camera {0}   selected {1}   {2}".format(camera, self.selected, tracks),
@@ -979,7 +984,7 @@ class ReplayApp:
             e = upcoming[0]
             lines.append(("next {0:+6.2f} {1}".format(self.run.display_time(e.time), event_line(self.run, e)),
                           self.font_small, (200, 200, 200)))
-        if not self.run.local_events:
+        if not self.run.local_events and self.run.clock != "t_contact":
             lines.append(("NO RECONSTRUCTION: run scripts/reconstruct_run.py on this run (no boxes, no events)",
                           self.font_bold, (255, 90, 90)))
         rendered = [font.render(text, True, rgb) for text, font, rgb in lines]
@@ -1100,9 +1105,11 @@ def export_lanes(run: ReplayRun, map_name: Optional[str] = None) -> Tuple[Option
 
 
 def export_run(run_dir: Path, directory: Path, at: Sequence[float] = (), image_format: str = "png",
-               map_name: Optional[str] = None) -> List[Dict[str, Any]]:
+               map_name: Optional[str] = None, run: Any = None) -> List[Dict[str, Any]]:
     """Headless export of one run: top-down frames at ``at`` (displayed times) or at its keyframes."""
-    run = ReplayRun.load(Path(run_dir))
+    if run is None:
+        run = ReplayRun.load(Path(run_dir))
+        run.name = "RECONSTRUCTION  " + run.name
     name, lanes = export_lanes(run, map_name)
     LOGGER.info("%s: map %s, %s", run.name, name or "unknown", "lanes drawn" if lanes else "no lanes")
     times = None
@@ -1121,6 +1128,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             LOGGER.info("%s  %s", frame["file"], frame["label"])
         return 0
     run = ReplayRun.load(run_dir)
+    return view(run, args)
+
+
+def view(run: Any, args: argparse.Namespace) -> int:
+    """Open the interactive viewer on a loaded run (a ReplayRun of the reconstruction, or another model with
+    the same interface: scripts/view_ground_truth.py)."""
+    run_dir = Path(args.run_dir)
     for note in run.notes:
         LOGGER.info("note: %s", note)
     if not run.local_events:

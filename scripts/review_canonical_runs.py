@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""Menu for the manual review of the 22 canonical development runs: pick one, its interactive replay starts
-(scripts/replay_run.py, CARLA server on port 3000); when the replay window closes the menu returns.
+"""Menu for the manual review of the 22 canonical development runs.  Pick one: the GROUND TRUTH viewer opens first
+(what CARLA simulated: every vehicle, true trajectories, physical contacts), and when its window closes the
+RECONSTRUCTION viewer of the same run (what the algorithm estimated from the sensors); then the menu returns.
+``12g`` opens only the ground truth of run 12, ``12r`` only its reconstruction (scripts/replay_run.py, CARLA
+server on port 3000).
 
     conda activate carla
     python scripts/review_canonical_runs.py          (or scripts\\review_canonical_runs.bat)
@@ -26,7 +29,7 @@ def menu(runs):
         label = "{0} {1}".format(run.parent.name, run.name[len("run_0_"):])
         missing = "" if (run / "reconstruction").is_dir() else "   (no reconstruction!)"
         print("  {0:2d}  {1}{2}".format(number, label, missing))
-    print("   q  quit")
+    print("   N  ground truth, then reconstruction    Ng  ground truth only    Nr  reconstruction only    q  quit")
 
 
 def main() -> int:
@@ -41,13 +44,17 @@ def main() -> int:
             return 0
         if choice in ("q", "quit", "exit", ""):
             return 0
-        if not choice.isdigit() or not 1 <= int(choice) <= len(runs):
-            print("choose 1-{0} or q".format(len(runs)))
+        views = {"g": [True], "r": [False]}.get(choice[-1:], [True, False])
+        number = choice[:-1] if choice[-1:] in ("g", "r") else choice
+        if not number.isdigit() or not 1 <= int(number) <= len(runs):
+            print("choose 1-{0} (optionally followed by g or r) or q".format(len(runs)))
             continue
-        run = runs[int(choice) - 1]
-        command = [sys.executable, str(ROOT / "scripts" / "replay_run.py"), str(run.relative_to(ROOT))] + extra
-        print(" ".join(command))
-        subprocess.call(command, cwd=str(ROOT))
+        run = runs[int(number) - 1]
+        for ground_truth in views:
+            script = "view_ground_truth.py" if ground_truth else "replay_run.py"
+            command = [sys.executable, str(ROOT / "scripts" / script), str(run.relative_to(ROOT))] + extra
+            print(" ".join(command))
+            subprocess.call(command, cwd=str(ROOT))
 
 
 if __name__ == "__main__":
