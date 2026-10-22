@@ -1,0 +1,172 @@
+{
+ "description": "S10 deflected_into_c repeated on the private server; each list compares repeats 2..N with repeat 1",
+ "stages": {
+  "baseline": "code at 1c7a210b",
+  "fixed1": "+ impact reaction keyed to the collision frame, sync settle ticks",
+  "fixed2": "+ Traffic Manager off",
+  "fixed3": "+ vehicle commands through apply_batch_sync (final)"
+ },
+ "results": {
+  "baseline": [
+   {
+    "max_position_diff_m": 0.33093324671707514,
+    "max_speed_diff_mps": 2.0143779364345797,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.1467301181417738,
+    "max_speed_diff_mps": 1.0196621453677905,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.15036558586489138,
+    "max_speed_diff_mps": 0.8246612129503457,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   }
+  ],
+  "fixed1": [
+   {
+    "max_position_diff_m": 0.08673989236210884,
+    "max_speed_diff_mps": 0.3171959817142529,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.092395664349041,
+    "max_speed_diff_mps": 0.3207531293404706,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "B"
+    },
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.09064049090492045,
+    "max_speed_diff_mps": 0.4940793812362281,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "B"
+    },
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": false
+   }
+  ],
+  "fixed2": [
+   {
+    "max_position_diff_m": 0.005797774069850575,
+    "max_speed_diff_mps": 0.016919017524628988,
+    "first_position_divergence_s": 4.800000071525574,
+    "first_control_divergence": {
+     "t_s": 3.9500000588595867,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.005797774069850575,
+    "max_speed_diff_mps": 0.016919017524628988,
+    "first_position_divergence_s": 4.800000071525574,
+    "first_control_divergence": {
+     "t_s": 3.9500000588595867,
+     "participant": "A"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   },
+   {
+    "max_position_diff_m": 0.5754904017925868,
+    "max_speed_diff_mps": 1.7088720440178418,
+    "first_position_divergence_s": 0.0,
+    "first_control_divergence": {
+     "t_s": 0.0,
+     "participant": "C"
+    },
+    "collision_callbacks_identical": false,
+    "contact_episodes_identical": false,
+    "bitwise_identical_states": false
+   }
+  ],
+  "fixed3": [
+   {
+    "max_position_diff_m": 0.0,
+    "max_speed_diff_mps": 0.0,
+    "first_position_divergence_s": null,
+    "first_control_divergence": null,
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": true
+   },
+   {
+    "max_position_diff_m": 0.0,
+    "max_speed_diff_mps": 0.0,
+    "first_position_divergence_s": null,
+    "first_control_divergence": null,
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": true
+   },
+   {
+    "max_position_diff_m": 0.0,
+    "max_speed_diff_mps": 0.0,
+    "first_position_divergence_s": null,
+    "first_control_divergence": null,
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": true
+   },
+   {
+    "max_position_diff_m": 0.0,
+    "max_speed_diff_mps": 0.0,
+    "first_position_divergence_s": null,
+    "first_control_divergence": null,
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": true
+   },
+   {
+    "max_position_diff_m": 0.0,
+    "max_speed_diff_mps": 0.0,
+    "first_position_divergence_s": null,
+    "first_control_divergence": null,
+    "collision_callbacks_identical": true,
+    "contact_episodes_identical": true,
+    "bitwise_identical_states": true
+   }
+  ]
+ }
+}
