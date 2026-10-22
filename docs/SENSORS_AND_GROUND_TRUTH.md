@@ -42,6 +42,14 @@ pose (position, heading, velocity) as the fusion.  G0 is unchanged (bit-identica
 recorded stream).  Remaining, documented: height, pitch and roll, and the IMU fields (acceleration, angular rate,
 unused by the reconstruction) stay exact under G1/G2: an INS attitude assumed exact.
 
+**Consequence of the fix, measured.**  In S13 (seed 0), comparing the local path on the exact stream with the local
+path on the measured stream:
+* **Historical consumer GNSS profile (about 2.5 m).**  The exact stream gave 0 false merges.  With the measured
+  stream there are 2 false merges in `abreast` and 2 in `passing`, on the new recordings as on the previous ones.
+  The earlier "no false merge under consumer GNSS" therefore depended on exact local odometry.
+* **The campaign's profiles (G1 RTK, G2 degraded).**  Still 0 false merges in the three S13 variants
+  (`tests/test_retrospective.py`).
+
 No odometry or IMU sensor that does not exist in the project is declared as measured: the reconstruction uses
 exactly the fields listed above.
 
