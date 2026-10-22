@@ -78,8 +78,9 @@ are diagnostic choices).
 | fused from one recorder | 641 | 0.465 | 1.650 | 0.804 | 0.110 | 0.394 |
 | fused from several recorders | 3746 | 0.220 | 0.671 | 0.346 | 0.032 | 0.246 |
 
-* **Turning.**  Turns and curves (S07 roundabout, S19 highway curve, lane changes) raise the median centre error
-  from 0.21 m to 0.33 m and the P95 from 0.73 m to 1.02 m.  The Kalman filter and RTS smoother follow the
+* **Turning.**  Turning states come mostly from the S19 highway curve (404 of 1127) and from lane changes and
+  swerves in S12-S17.  The S07 roundabout has no road user that records nothing.  Turning raises the median centre
+  error from 0.21 m to 0.33 m and the P95 from 0.73 m to 1.02 m.  The Kalman filter and RTS smoother follow the
   manoeuvre with a bias but no breakdown.
 * **Several recorders.**  A road user seen by several recorders is placed about twice as accurately as one seen
   by a single recorder (median 0.22 m against 0.47 m).
