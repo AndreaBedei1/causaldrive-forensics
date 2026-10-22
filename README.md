@@ -166,4 +166,4 @@ Full map, data separation and the state of every branch: [docs/REPOSITORY.md](do
 | Earlier robustness campaign (previous recordings) | [report](docs/archive/ROBUSTNESS_CAMPAIGN.md), [protocol](docs/archive/FROZEN_CAMPAIGN.md) |
 | Perturbation profiles | [robustness_profiles.md](docs/robustness_profiles.md) |
 | Stability review and audit | [STABILITY_REVIEW.md](docs/STABILITY_REVIEW.md), [STABILITY_AUDIT.md](docs/STABILITY_AUDIT.md) |
-| Positioning, related work and limitations | [paper_positioning.md](docs/paper_positioning.md), [bibliography.md](docs/bibliography.md) |
+| Positioning, related work and limitations | [paper_positioning.md](docs/paper_positioning.md), [REFERENCES.md](docs/REFERENCES.md) |

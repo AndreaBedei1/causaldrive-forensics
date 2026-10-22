@@ -1,10 +1,120 @@
-# Candidate bibliography and regulatory fact sheet
+# References
+
+Every source the project relies on, in one place:
+
+* **Part A**: the sources of the simulated sensors and of the degradation profiles of the robustness study, with
+  the values each one supports and the kind of evidence behind each value;
+* **Part B**: the estimation methods the reconstruction implements;
+* **Part C**: related work and the regulatory context of the paper (compiled and verified on 2026-10-10, unchanged
+  below except for its title).
+
+**Verification.**  Every DOI of Parts A and B was resolved again against the Crossref REST API on 2026-10-23
+(`api.crossref.org/works/<DOI>`): title, first author, venue and year match the citation; the check is saved in
+`docs/references_crossref_2026-10-23.json`.  Documents without a DOI (data sheets, vendor reports, the CARLA
+documentation) are cited by the URL at which they were read on 2026-10-10.  No reference was added from memory
+without such a check.
+
+**Keys.**  Keys are unique within a part: in Part A, R1-R11 are radar sources and G/N keys GNSS sources, as `docs/robustness_profiles.md` cites them; in Part C, B1-B69 are publications and R1-R9 regulatory instruments, as `docs/paper_positioning.md` cites them.
+
+**Kinds of evidence** used in Part A (the same labels as `docs/robustness_profiles.md`, which gives every profile
+value with its justification):
+
+| label | meaning |
+|---|---|
+| measured | a value measured on real data in the cited study or dataset |
+| specification | a manufacturer's stated accuracy or a sensor specification reported by a study |
+| design value | a parameter chosen by the cited authors for their own tracker or simulation, not a measurement |
+| derived | computed by us from a cited value (unit conversion, median, Gaussian percentile conversion) |
+| engineering assumption | no source supports the value itself; the reason is given in `docs/robustness_profiles.md` |
+
+## Part A. Sensors, simulator and degradation profiles
+
+### A.1 Radar (profiles `nominal`, `severe`, `extreme` of campaign v3; historical `low`, `nominal`, `high`)
+
+| key | source | DOI / URL | what it supports here | kind |
+|---|---|---|---|---|
+| R1 | Continental Engineering Services, "ARS 408-21 Long Range Radar Sensor 77 GHz - Data Sheet", print ID 091018_FS_ARS_408_21_EN_HS (2018, modified 2020) | <https://platformselect.autonomoustuff.com/wp-content/uploads/2020/08/ARS-408-21-whitelabel.pdf> | range accuracy +-0.10 m (near) and +-0.40 m (far); azimuth +-0.1 deg (far), +-1 deg at +-45 deg and +-5 deg at +-60 deg (near); radial velocity +-0.1 km/h; Doppler resolution 0.37 / 0.43 km/h; cycle time | specification |
+| R2 | smartmicro, "High Performance Automotive Radar" flyer, UMRR-11 Type 132 and UMRR-96 Type 153 (2020) | <https://levelfivesupplies.com/wp-content/uploads/2019/11/smartmicro-High-Performance-Automotive-Radar-PDF.pdf> | range < 0.25 m (medium range) and < 0.5 m (long-range modes); azimuth <= 0.5 deg; elevation <= 0.5 deg (UMRR-11), <= 2 deg (UMRR-96); radial velocity <= 0.1 m/s (UMRR-11), < 0.2 m/s (UMRR-96) | specification |
+| R3 | Bosch Engineering, "Radar off-highway premium" data sheet (2024) | <https://www.bosch-engineering.com/media/industries/construction/bosch_engineering_ohw_premiumradar_datasheet_en_1125.pdf> | range 0.11-0.22 m; azimuth 0.1 deg; elevation 0.2 deg; radial velocity 0.04 m/s; velocity separability 0.17 m/s; up to 1,024 detections per cycle | specification |
+| R4 | AUMOVIO (former Continental automotive business), technical data of the ARS540, ARS620, ARS51x and SRR52x | <https://www.aumovio.com/en/solutions/driver-assistance/automated-assisted-driving/radar-technology/ars540.html> (same path: ars620, ars51x, srr52x) | azimuth and elevation +-0.1 deg (ARS540); radial velocity +-0.08 and +-0.07 km/h (ARS620, SRR52x); cycle times | specification |
+| R5 | H. Caesar et al., "nuScenes: A Multimodal Dataset for Autonomous Driving," CVPR 2020, pp. 11618-11628 | [10.1109/CVPR42600.2020.01164](https://doi.org/10.1109/CVPR42600.2020.01164) | radar returns per object fall from about 40 at 10 m to 10 at 50 m: motivates the higher miss rate | measured |
+| R6 | O. Schumann et al., "RadarScenes: A Real-World Radar Point Cloud Data Set for Automotive Applications," IEEE FUSION 2021, pp. 1-8 | [10.23919/FUSION49465.2021.9627037](https://doi.org/10.23919/FUSION49465.2021.9627037) | azimuth 0.5 deg at boresight (nominal) and 2 deg at the +-60 deg edge of the field of view (severe, extreme); range 0.15 m and radial velocity 0.028 m/s of its sensors | specification reported by the dataset |
+| R7 | F. Kraus, N. Scheiner, W. Ritter, K. Dietmayer, "The Radar Ghost Dataset - An Evaluation of Ghost Objects in Automotive Radar Data," IEEE/RSJ IROS 2021, pp. 8570-8577 | [10.1109/IROS51168.2021.9636338](https://doi.org/10.1109/IROS51168.2021.9636338) | about 2.3 ghost points per frame (about 100 k over 42,793 frames), rounded up to 3 false returns per sweep (nominal, severe); 819.91 detections per frame on average; Doppler resolution 0.087 m/s; 100 ms cycle | measured (scenes chosen near reflective surfaces: an upper-end urban rate) |
+| R8 | A. Scheel, K. Dietmayer, "Tracking Multiple Vehicles Using a Variational Radar Model," IEEE T-ITS 20(10):3721-3736, 2019 | [10.1109/TITS.2018.2879041](https://doi.org/10.1109/TITS.2018.2879041) | detection probability P_D = 0.8, i.e. a 0.2 miss rate (nominal); Poisson clutter mean 30 per scan (extreme) | design value of a tracker on real data, not measured |
+| R9 | P. Gao, S. Zhang, W. Wang, C. X. Lu, "DC-Loc: Accurate Automotive Radar Based Metric Localization with Explicit Doppler Compensation," ICRA 2022, pp. 4128-4134 | [10.1109/ICRA46639.2022.9811561](https://doi.org/10.1109/ICRA46639.2022.9811561) | range 0.25 m, azimuth 0.5 deg and radial velocity 0.1 m/s injected into CARLA radar (nominal) | design value of another simulation study |
+| R10 | M. Morales, G. Habibi, "Synthesizing and Identifying Noise Levels in Autonomous Vehicle Camera-Radar Datasets," arXiv:2505.00584, 2025 | <https://arxiv.org/abs/2505.00584> | 0-4 ghost points per frame, context only | preprint, not peer reviewed |
+| R11 | CARLA 0.9.15, sensors reference (radar) and source at the tag 0.9.15 | <https://carla.readthedocs.io/en/0.9.15/ref_sensors/#radar-sensor>; <https://github.com/carla-simulator/carla/blob/0.9.15/Unreal/CarlaUE4/Plugins/Carla/Source/Carla/Sensor/Radar.cpp> | the simulated radar: ray casting, no measurement noise, no false alarms, no resolution limits; blueprint defaults (30 x 30 deg, 100 m, 1,500 points/s); sign of the radial velocity | software documentation |
+| K1 | J. Kopp et al., "Fast Rule-Based Clutter Detection in Automotive Radar Data," IEEE ITSC 2021, pp. 3010-3017 | [10.1109/ITSC48978.2021.9564776](https://doi.org/10.1109/ITSC48978.2021.9564776) | about 90 % clutter among the moving detections of a production mid-range radar in extra-urban traffic: a limitation of the uniform clutter model, not a profile value | measured |
+| W1 | S. Hasirlioglu et al., "Test methodology for rain influence on automotive surround sensors," IEEE ITSC 2016 | [10.1109/ITSC.2016.7795918](https://doi.org/10.1109/ITSC.2016.7795918) | not used for any value: weather is not modelled | candidate (DOI verified, full text not read) |
+| W2 | F. Norouzian et al., "Rain Attenuation at Millimeter Wave and Low-THz Frequencies," IEEE Trans. Antennas and Propagation 68(1):421-431, 2020 | [10.1109/TAP.2019.2938735](https://doi.org/10.1109/TAP.2019.2938735) | not used for any value: weather is not modelled | candidate (DOI verified, full text not read) |
+| W3 | M. Holder et al., "Measurements revealing Challenges in Radar Sensor Modeling for Virtual Validation of Autonomous Driving," IEEE ITSC 2018 | [10.1109/ITSC.2018.8569423](https://doi.org/10.1109/ITSC.2018.8569423) | not used for any value: interference and sensor-model fidelity are not modelled | candidate (DOI verified, full text not read) |
+
+The values that no source supports are engineering assumptions, named as such in `docs/robustness_profiles.md`:
+the elevation sigmas of campaign v3 (the cited sensors are 2-D), the severe range and radial-velocity sigmas, the
+0.40 miss rate, the share of ghost-like false returns, the 0.1 m range clip and the 1 m minimum false-return range.
+
+### A.2 GNSS/INS (G0 ideal, G1 RTK, G2 degraded; 5G only as the transport of RTK corrections)
+
+| key | source | DOI / URL | what it supports here | kind |
+|---|---|---|---|---|
+| N1 | M. Volckaert, D. Schellekens, K. Smolders, A. Simsky, B. Bougard, "Integrity of an RTK-INS positioning system using SSR corrections for safety-critical automotive applications," Septentrio technical presentation, 19 September 2019, slides 16 and 18 | <https://gnss-imu.com/down/upload/20240402/1712021876.pdf> | G1: horizontal position P95 4.0 cm (P99 5.3 cm) and horizontal velocity P95 1.6 cm/s (P99 2.9 cm/s) of RTK epochs | measured (technical presentation, not peer reviewed) |
+| N2 | SBG Systems, "Automotive Tests in Urban Navigation," EUT#1 RTK + odometer, real-time results | <https://www.sbg-systems.com/test-reports/automotive-tests/> | G1: yaw P95 0.140 deg (2D position P95 0.246 m in that urban test) | measured (vendor test report) |
+| N3 | R. Lesjak et al., "Centimeter-Level GNSS Positioning Using C-ITS for Correction Data Delivery: An Experimental Study," Lecture Notes in Mobility, Springer, 2025, pp. 565-571, Table 1 | [10.1007/978-3-032-06763-0_81](https://doi.org/10.1007/978-3-032-06763-0_81) | G2: 2D error P99.5 43.4 cm with C-ITS correction delivery (P95 3.1 cm; 4G: P95 2.4 cm, P99.5 37.9 cm; RTK-fixed 98.9 % and 98.8 %), the evidence that informs the rounded P99.5 = 0.50 m stress target | measured (peer reviewed) |
+| N4 | SBG Systems, "Ellipse-D Automotive Test Report / Performance Assessment" | <https://www.sbg-systems.com/wp-content/uploads/SBG-Ellipse-automotive-test-report.pdf> | context for G2: yaw P99.7 0.444 / 0.477 deg and position P99.7 0.600 / 0.838 m (light urban / forest): 0.50 m is not the worst observed error | measured (vendor test report) |
+| N5 | O. Elgarhy et al., "Development, Implementation and Field Trial of 5G Integrated GNSS-RTK Positioning in Cross-Border Settings," IEEE Future Networks World Forum 2024 | [10.1109/FNWF63303.2024.11028789](https://doi.org/10.1109/FNWF63303.2024.11028789) | feasibility of RTK corrections over 5G; no profile value | measured (feasibility only) |
+| N6 | M. Hoffmann, P. Kryszkiewicz, G. P. Koudouridis, "Modeling of Real Time Kinematics localization error for use in 5G networks," EURASIP J. Wireless Communications and Networking 2020:31 | [10.1186/s13638-020-1641-8](https://doi.org/10.1186/s13638-020-1641-8) | the Gauss-Markov form of the position error (bias + Gauss-Markov + white) | modelling reference |
+| N7 | u-blox, "ZED-F9R-02B Data Sheet," UBX-21017486, R06, 3 May 2024 | <https://content.u-blox.com/sites/default/files/ZED-F9R-02B_DataSheet_UBX-21017486.pdf> | velocity accuracy 0.05 m/s and dynamic heading 0.2 deg (68 %): the G2 heading and speed P99.5 targets are stress assumptions above these | specification |
+| N8 | C. Marshall et al., "5G Precise Positioning Testbed - Technical Report," FrontierSI, January 2024 | <https://frontiersi.com.au/wp-content/uploads/2023/04/5G-Testbed-Technical-Report.pdf> | transport and integration of OSR/SSR corrections over 5G; no percentile is attributed to it | technical report |
+| G7 | US DoD, "GPS Standard Positioning Service Performance Standard," 5th ed., April 2020 | <https://archive.gps.gov/technical/ps/2020-SPS-performance-standard.pdf> | the 1.96 factor between 95 % values and RMS used in the statistic conversions | standard |
+| G8 | CAR 2 CAR Communication Consortium, "Vehicle C-ITS station profile," RS_2037, Release 1.6.10, 2026 | <https://www.car-2-car.org/fileadmin/documents/Basic_System_Profile/Release_1.6.10/C2CCC_RS_2037_Profile_R1610.pdf> | city speed confidence 0.6 m/s (95 %) of fused states, against which the independent velocity noise is discussed | specification |
+
+The G1 targets (P95 0.040 m, 0.140 deg, 0.016 m/s) are the measured values of N1 and N2; the G2 targets (P99.5
+0.50 m, 0.60 deg, 0.20 m/s) are engineering stress assumptions informed by N3, N4 and N7.  The error model
+(stationary bias + Gauss-Markov + white position and heading, white velocity, the component splits and the
+correlation times) is an engineering assumption calibrated to these targets (`docs/robustness_profiles.md`, section
+"Current GNSS protocol").  5G is the transport of the RTK corrections only (N5, N8): no latency, availability or
+radio behaviour is simulated or claimed.
+
+Sources of the historical GNSS profiles (frozen campaign of 2026-10-15, `docs/archive/`), kept for the record:
+
+| key | source | DOI / URL | kind |
+|---|---|---|---|
+| G1 | u-blox, "NEO-M8 - u-blox M8 concurrent GNSS modules - Data sheet," UBX-15031086, R14, 2025 | <https://content.u-blox.com/sites/default/files/NEO-M8-FW3_DataSheet_UBX-15031086.pdf> | specification |
+| G2 | u-blox, "NEO-M9N-00B - Standard precision GNSS module - Data sheet," UBX-19014285, R08, 2025 | <https://content.u-blox.com/sites/default/files/NEO-M9N-00B_DataSheet_UBX-19014285.pdf> | specification |
+| G3 | u-blox, "ZED-F9P-04B - High precision GNSS module - Data sheet," UBX-21044850, R05, 2024 | <https://content.u-blox.com/sites/default/files/ZED-F9P-04B_DataSheet_UBX-21044850.pdf> | specification |
+| G4 | u-blox, "ZED-F9R-01B - High precision sensor fusion GNSS receiver - Data sheet," UBX-19054459, R06, 2023 | <https://cdn.sparkfun.com/assets/d/4/3/f/4/ZED-F9R-01B_Datasheet_UBX-19054459.pdf> | specification |
+| G5 | Septentrio, "mosaic-X5 - Compact, multi-constellation GNSS receiver," brochure, 2019 (third-party mirror) | <https://components101.com/sites/default/files/2020-09/Mosaic-X5-Datasheet.pdf> | specification |
+| G6 | OxTS, "RT3000 v4 DATASHEET" (no version or date printed) | <https://positics.fr/wp-content/uploads/2024/02/RT3000-v4-datasheet-1.pdf> | specification |
+| G9 | L.-T. Hsu et al., "Hong Kong UrbanNav: An Open-Source Multisensory Dataset for Benchmarking Urban Navigation Algorithms," NAVIGATION 70(4), navi.602, 2023 | [10.33012/navi.602](https://doi.org/10.33012/navi.602) | measured |
+| G10 | M. Olynik, M. Petovello, M. Cannon, G. Lachapelle, "Temporal impact of selected GPS errors on point positioning," GPS Solutions 6(1-2):47-57, 2002 | [10.1007/s10291-002-0011-9](https://doi.org/10.1007/s10291-002-0011-9) | measured |
+| G11 | X. Niu et al., "Using Allan variance to analyze the error characteristics of GNSS positioning," GPS Solutions 18(2):231-242, 2014 (online 2013) | [10.1007/s10291-013-0324-x](https://doi.org/10.1007/s10291-013-0324-x) | measured |
+| G12 | Y. Wang, X. Chen, P. Liu, "Statistical Multipath Model Based on Experimental GNSS Data in Static Urban Canyon Environment," Sensors 18(4):1149, 2018 | [10.3390/s18041149](https://doi.org/10.3390/s18041149) | measured |
+| G13 | S. Jada, M. Joerger, "Measurement Error Time-Correlation Modeling for Safety-Critical Navigation," NAVIGATION 72(4), navi.721, 2025 | [10.33012/navi.721](https://doi.org/10.33012/navi.721) | modelling reference |
+
+### A.3 Simulator
+
+| key | source | DOI / URL | what it supports here |
+|---|---|---|---|
+| B63 | A. Dosovitskiy et al., "CARLA: An Open Urban Driving Simulator," CoRL 2017, PMLR 78:1-16 | <https://proceedings.mlr.press/v78/dosovitskiy17a.html> | the simulator of the 22 scenarios and of the ground truth (version 0.9.15) |
+| R11 | CARLA 0.9.15 documentation and source | see A.1 | sensors, synchronous mode, collision sensor |
+
+## Part B. Estimation methods implemented
+
+| key | source | DOI | used in |
+|---|---|---|---|
+| M1 | R. E. Kalman, "A New Approach to Linear Filtering and Prediction Problems," J. Basic Engineering 82(1):35-45, 1960 | [10.1115/1.3662552](https://doi.org/10.1115/1.3662552) | the constant-velocity Kalman filter of each local radar track (`cdf.reconstruction.tracking`) |
+| M2 | H. E. Rauch, F. Tung, C. T. Striebel, "Maximum likelihood estimates of linear dynamic systems," AIAA Journal 3(8):1445-1450, 1965 | [10.2514/3.3166](https://doi.org/10.2514/3.3166) | the backward Rauch-Tung-Striebel smoother of each track (offline reconstruction) |
+| B35 | Y. Bar-Shalom, X.-R. Li, T. Kirubarajan, *Estimation with Applications to Tracking and Navigation*, Wiley, 2001 | [10.1002/0471221279](https://doi.org/10.1002/0471221279) | motion models, gating and filter consistency (Part C, [B35]) |
+| B36 | S. J. Julier, J. K. Uhlmann, "A non-divergent estimation algorithm in the presence of unknown correlations," ACC 1997, 4:2369-2373 | [10.1109/ACC.1997.609105](https://doi.org/10.1109/ACC.1997.609105) | covariance intersection of several recorders' estimates of one road user (`cdf.reconstruction.anonymous`; Part C, [B36]) |
+| B65 | J. C. Hayward, "Near-Miss Determination Through Use of a Scale of Danger," Highway Research Record 384:24-34, 1972 | <https://onlinepubs.trb.org/Onlinepubs/hrr/1972/384/384-004.pdf> | time to collision, the quantity behind CRITICAL_TTC (Part C, [B65]) |
+
+# Part C. Related work and regulatory context
 
 Paper: multi-vehicle accident reconstruction from partial onboard recordings (collision-anchored temporal alignment, identity association between recorders, cross-observer reconstruction of non-recording road users, global semantic event trace, replay from the reconstruction, per-vehicle perceivability/reaction event graphs as input to expert avoidability analysis; no liability determination). Target style: IEEE T-ITS.
 
 Compiled and verified on 2026-10-10.
 
-## How this list was verified
+## C: How this list was verified
 
 - **DOIs.** Every DOI below was resolved against the Crossref REST API (`api.crossref.org/works/<DOI>`). Title, authors, venue, year, volume/issue and pages were taken from the returned record. When I had recalled a DOI wrongly, Crossref returned a different paper. Four such cases were caught and corrected; see the notes at the end.
 - **arXiv, PMLR and NeurIPS items.** These were checked with the arXiv API (`export.arxiv.org`) and on the official PMLR and NeurIPS proceedings pages (citation metadata).
@@ -16,9 +126,9 @@ Compiled and verified on 2026-10-10.
   - ntsb.gov, onlinepubs.trb.org and etsi.org: PDFs.
 - **Relevance notes** are based on the abstracts, retrieved from Crossref/OpenAlex/Semantic Scholar/arXiv, or on the official text. Where no abstract was available, the note sticks to what the title and venue establish and says so.
 - **Tags.** "Verified: Crossref" means the DOI record matches. "Verified: official PDF/page" means there is no DOI, but the document was opened at its publisher or authority. "[!]" marks a residual uncertainty, explained inline.
-- **How it was compiled.** Outside the code: no LLM API was called from code; only bibliographic metadata APIs were queried.  Copied into the repository unchanged otherwise (`docs/bibliography.md`); the profiles of the robustness study have their own sources in `docs/robustness_profiles.md`.
+- **How it was compiled.** Outside the code: no LLM API was called from code; only bibliographic metadata APIs were queried.  Copied into the repository unchanged otherwise (then `docs/bibliography.md`, now Part C of `docs/REFERENCES.md`); the sources of the robustness profiles are in Part A.
 
-## Counts
+## C: Counts
 
 | # | Topic | Main entries | Verified alternates (Appendix A) |
 |---|---|---|---|
@@ -35,7 +145,7 @@ Compiled and verified on 2026-10-10.
 
 ---
 
-## 1. Traffic accident reconstruction (classical, EDR-based, video/data-based, simulation-based)
+## C.1 Traffic accident reconstruction (classical, EDR-based, video/data-based, simulation-based)
 
 **[B1]** Steffan, H. & Moser, A., "The Collision and Trajectory Models of PC-CRASH," *SAE Technical Paper* 960886, 1996. DOI: [10.4271/960886](https://doi.org/10.4271/960886). Verified: Crossref.
 *Relevance:* Describes the restitution/momentum impact model and the time-forward multi-vehicle dynamics simulation behind PC-Crash, the de-facto forensic simulation tool. It represents classical simulation-based reconstruction, which infers pre-crash motion from scene evidence instead of from onboard recordings.
@@ -64,7 +174,7 @@ Compiled and verified on 2026-10-10.
 **[B9]** National Transportation Safety Board, "Collision Between Vehicle Controlled by Developmental Automated Driving System and Pedestrian, Tempe, Arizona, March 18, 2018," Highway Accident Report NTSB/HAR-19/03 (PB2019-101402), adopted 19 Nov 2019. No DOI. URL: <https://www.ntsb.gov/investigations/AccidentReports/Reports/HAR1903.pdf>. Verified: official PDF.
 *Relevance:* A landmark investigation that used the ADS's own perception record. The ADS detected the pedestrian 5.6 s before impact. It tracked her until the crash without ever classifying her correctly. By the time it determined that a collision was imminent, the situation exceeded the response specifications of the ADS braking system. This is the "perceivable versus reacted" timeline that our event graphs make explicit.
 
-## 2. Avoidability analysis and perception-reaction time
+## C.2 Avoidability analysis and perception-reaction time
 
 **[B10]** Johansson, G. & Rumar, K., "Drivers' Brake Reaction Times," *Human Factors*, vol. 13, no. 1, pp. 23-27, 1971. DOI: [10.1177/001872087101300104](https://doi.org/10.1177/001872087101300104). Verified: Crossref.
 *Relevance:* Classic on-road brake reaction-time distribution (321 drivers; surprise-corrected median about 0.9 s, 25 % above 1.2 s). It is a standard source for the reaction-time assumptions used in avoidability analysis.
@@ -90,7 +200,7 @@ Compiled and verified on 2026-10-10.
 **[B17]** Scanlon, J. M. et al., "Collision Avoidance Effectiveness of an Automated Driving System Using a Human Driver Behavior Reference Model in Reconstructed Fatal Collisions," *SAE Technical Paper* 2026-01-0520, 2026. DOI: [10.4271/2026-01-0520](https://doi.org/10.4271/2026-01-0520). Verified: Crossref.
 *Relevance:* Benchmarks an ADS against a "non-impaired, eyes on conflict" (NIEON) human reference model in reconstructed crashes. It is a formalised avoidability reference that could consume our perceivability and reaction timestamps.
 
-## 3. Event data recorders and DSSAD (literature and industry standards; the regulations are in the Regulatory facts)
+## C.3 Event data recorders and DSSAD (literature and industry standards; the regulations are in the Regulatory facts)
 
 **[B18]** Kowalick, T. M., *Fatal Exit: The Automotive Black Box Debate*, Wiley, 2004 (Crossref date; often cited as 2005). DOI: [10.1002/0471715964](https://doi.org/10.1002/0471715964). Verified: Crossref.
 *Relevance:* Book-length account of the automotive black-box (EDR) debate. It is background for why regulated EDR content is deliberately narrow.
@@ -107,7 +217,7 @@ Compiled and verified on 2026-10-10.
 **[B22]** IEEE, "IEEE Standard for Data Storage Systems for Automated Driving," IEEE Std **1616.1-2023**. DOI: [10.1109/IEEESTD.2023.10205988](https://doi.org/10.1109/IEEESTD.2023.10205988). Verified: Crossref (title and DOI). [!] The standard number and scope come from standards-retailer listings; the full text was not read.
 *Relevance:* Voluntary standard defining DSSAD functions, metrics and data elements, including an EDR/DSSAD element compendium for M1/N1 vehicles with automated driving.
 
-## 4. Cooperative perception (V2V/V2X datasets and methods)
+## C.4 Cooperative perception (V2V/V2X datasets and methods)
 
 **[B23]** Xu, R. et al., "OPV2V: An Open Benchmark Dataset and Fusion Pipeline for Perception with Vehicle-to-Vehicle Communication," *Proc. IEEE ICRA*, pp. 2583-2589, 2022. DOI: [10.1109/ICRA46639.2022.9812038](https://doi.org/10.1109/ICRA46639.2022.9812038). Verified: Crossref and arXiv:2109.07644.
 *Relevance:* CARLA-based V2V perception benchmark comparing early, late and intermediate fusion. It is the closest public setting (CARLA, several equipped vehicles), and our track-level fusion belongs to its late-fusion family.
@@ -139,7 +249,7 @@ Compiled and verified on 2026-10-10.
 **[B32]** ETSI, "Intelligent Transport System (ITS); Vehicular Communications; Basic Set of Applications; Collective Perception Service; Release 2," ETSI TS 103 324 V2.1.1 (2023-06). No DOI. URL: <https://www.etsi.org/deliver/etsi_ts/103300_103399/103324/02.01.01_60/ts_103324v020101p.pdf>. Verified: official PDF (title page).
 *Relevance:* Standardised sharing of perceived objects (collective perception) between ITS stations. It shows the object/track-list abstraction that our recorders' tracked radar output resembles.
 
-## 5. Multi-object tracking, track-to-track association and fusion
+## C.5 Multi-object tracking, track-to-track association and fusion
 
 **[B33]** Bar-Shalom, Y., "On the track-to-track correlation problem," *IEEE Trans. Automatic Control*, vol. 26, no. 2, pp. 571-572, 1981. DOI: [10.1109/TAC.1981.1102635](https://doi.org/10.1109/TAC.1981.1102635). Verified: Crossref.
 *Relevance:* Hypothesis test for whether two tracks represent the same target, accounting for the correlation between the track estimates. It is the basic T2T association test across observers.
@@ -171,7 +281,7 @@ Compiled and verified on 2026-10-10.
 **[B42]** Bernardin, K. & Stiefelhagen, R., "Evaluating Multiple Object Tracking Performance: The CLEAR MOT Metrics," *EURASIP Journal on Image and Video Processing*, vol. 2008, 246309, 2008. DOI: [10.1155/2008/246309](https://doi.org/10.1155/2008/246309). Verified: Crossref.
 *Relevance:* MOTA/MOTP metrics for evaluating the reconstructed tracks of non-recording road users against simulator ground truth.
 
-## 6. Decentralized / common-frame fusion and relative pose between vehicles
+## C.6 Decentralized / common-frame fusion and relative pose between vehicles
 
 **[B43]** Umeyama, S., "Least-squares estimation of transformation parameters between two point patterns," *IEEE Trans. Pattern Analysis and Machine Intelligence*, vol. 13, no. 4, pp. 376-380, 1991. DOI: [10.1109/34.88573](https://doi.org/10.1109/34.88573). Verified: Crossref.
 *Relevance:* Closed-form rigid/similarity transform between corresponding point sets, for example estimating a recorder-to-common-frame transform from matched trajectories.
@@ -191,7 +301,7 @@ Compiled and verified on 2026-10-10.
 **[B48]** Vadivelu, N. et al., "Learning to Communicate and Correct Pose Errors," *Proc. Conference on Robot Learning (CoRL 2020)*, PMLR vol. 155, pp. 1195-1210 (published 2021). No DOI. URL: <https://proceedings.mlr.press/v155/vadivelu21a.html>; arXiv:2011.05289. Verified: PMLR page and arXiv.
 *Relevance:* Learns to detect and correct relative pose noise between communicating vehicles before fusion. It shows how sensitive multi-vehicle fusion is to frame misalignment.
 
-## 7. Time synchronization (event-based alignment, sensor and vehicle clocks)
+## C.7 Time synchronization (event-based alignment, sensor and vehicle clocks)
 
 **[B49]** Elson, J. et al., "Fine-grained network time synchronization using reference broadcasts," *ACM SIGOPS Operating Systems Review*, vol. 36 (SI, OSDI 2002), pp. 147-163, 2002. DOI: [10.1145/844128.844143](https://doi.org/10.1145/844128.844143). Verified: Crossref; abstract via OpenAlex.
 *Relevance:* Reference-Broadcast Synchronization: receivers align their clocks using the arrival time of a common event rather than sender timestamps. This is the same principle as anchoring recorders on a shared collision.
@@ -217,7 +327,7 @@ Compiled and verified on 2026-10-10.
 **[B56]** Bannach, D. et al., "Automatic Event-Based Synchronization of Multimodal Data Streams from Wearable and Ambient Sensors," in *Smart Sensing and Context (EuroSSC 2009)*, LNCS, Springer, pp. 135-148, 2009. DOI: [10.1007/978-3-642-04471-7_11](https://doi.org/10.1007/978-3-642-04471-7_11). Verified: Crossref. [!] No abstract in the indexes used; the note relies on the title.
 *Relevance:* Event-based synchronization of independently clocked multimodal sensor streams. It is a methodological precedent for cross-modal event matching, for example collision sensor against odometry or IMU.
 
-## 8. Vehicle digital twins and onboard perception/data logging
+## C.8 Vehicle digital twins and onboard perception/data logging
 
 **[B57]** Grieves, M. & Vickers, J., "Digital Twin: Mitigating Unpredictable, Undesirable Emergent Behavior in Complex Systems," in *Transdisciplinary Perspectives on Complex Systems*, Springer, pp. 85-113, 2017. DOI: [10.1007/978-3-319-38756-7_4](https://doi.org/10.1007/978-3-319-38756-7_4). Verified: Crossref.
 *Relevance:* Widely cited origin of the digital-twin concept. It frames our replay as a post-hoc twin of the accident built only from recorded data.
@@ -237,7 +347,7 @@ Compiled and verified on 2026-10-10.
 **[B62]** Schumann, O. et al., "RadarScenes: A Real-World Radar Point Cloud Data Set for Automotive Applications," *Proc. IEEE FUSION*, pp. 1-8, 2021. DOI: [10.23919/FUSION49465.2021.9627037](https://doi.org/10.23919/FUSION49465.2021.9627037). Verified: Crossref.
 *Relevance:* Series-production radar detections (four sensors) with point-wise annotations of moving road users. It is a realistic reference for the raw radar data our recorders store.
 
-## 9. UN R157 following distance, CARLA, time-to-collision and safe distance
+## C.9 UN R157 following distance, CARLA, time-to-collision and safe distance
 
 The UN R157 minimum time-gap table, transcribed from the official text, is in the Regulatory facts, section F.
 
@@ -264,7 +374,7 @@ The UN R157 minimum time-gap table, transcribed from the official text, is in th
 
 ---
 
-## Regulatory facts (EDR / DSSAD / GSR)
+## C: Regulatory facts (EDR / DSSAD / GSR)
 
 All article, paragraph and annex numbers below were read in the official texts listed in R1-R9. Short quotes are verbatim.
 
@@ -463,7 +573,7 @@ All article, paragraph and annex numbers below were read in the official texts l
 
 ---
 
-## Appendix A: Additional verified candidates (Crossref-verified unless noted; not counted above)
+## C: Appendix A: Additional verified candidates (Crossref-verified unless noted; not counted above)
 
 | Topic | Reference | DOI / URL |
 |---|---|---|
@@ -504,7 +614,7 @@ All article, paragraph and annex numbers below were read in the official texts l
 | 9 | Ward, J. R. et al., "Extending Time to Collision for probabilistic reasoning in general traffic scenarios," TR-C 51:66-82, 2015 | [10.1016/j.trc.2014.11.002](https://doi.org/10.1016/j.trc.2014.11.002) |
 | 9 | Hillenbrand, J. et al., "A Multilevel Collision Mitigation Approach - Its Situation Assessment, Decision Making, and Performance Tradeoffs," IEEE T-ITS 7(4):528-540, 2006 | [10.1109/TITS.2006.883115](https://doi.org/10.1109/TITS.2006.883115) |
 
-## Appendix B: Verification notes and residual uncertainties
+## C: Appendix B: Verification notes and residual uncertainties
 
 - **DOIs I had recalled wrongly, caught and corrected through Crossref.** Each wrong DOI resolved to an unrelated paper (or, for the Guo et al. DOI, did not resolve), so it was replaced:
 

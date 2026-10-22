@@ -35,6 +35,10 @@ ambiguity stays unresolved, because a false merge is worse than an unresolved id
 Recorders are aligned on the collisions they report.  A pairing is refused when the pose streams put the bodies
 apart, or when a recorder's own radar view of the contact contradicts the partner's speed in the observed direction.
 Without a shared collision, observed trajectories can fix a clock offset; otherwise the recorder stays unaligned.
+A contact of the same pair at most 2 s after the previous one, with the two bodies never more than 1 m apart in
+between (their own pose streams, less 3 sigma of their declared accuracy), is a recontact of that collision, not a
+new one: the global COLLISION node lists it under `recontacts` (S04 `a_front_pushed`: a rebound of 0.15 m, then A
+pushes B again 0.65 s later).
 
 ## Identity and anonymous road users
 
@@ -51,9 +55,9 @@ Without a shared collision, observed trajectories can fix a clock offset; otherw
 
 ## Semantics
 
-- The recorder's path corridor follows the lane it drives in (OpenDRIVE map of the CARLA installation, recognised
-  from the recorder's own positions); at a junction, the branch it takes later.  Cars following one bend are not in
-  its path.
+- The recorder's path corridor follows the lane it drives in (OpenDRIVE map of the CARLA installation named by the
+  supplied incident context, as an investigation knows where the incident happened; without one, the map the
+  recorder's own poses fit); at a junction, the branch it takes later.  Cars following one bend are not in its path.
 - CUT_IN needs a lateral manoeuvre of the target toward that path, leaving its own lane, confirmed by its
   EGO_PATH_ENTRY; none starts after the recorder's own collision.
 - CRITICAL_TTC is PREDICTED_OVERLAP (a collision course braking cannot avoid: crossings, merges) or

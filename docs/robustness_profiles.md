@@ -320,51 +320,7 @@ Every sweep of one recorder's radar whose local time (seconds since its first eg
 
 ## References
 
-URLs accessed 2026-10-10; the titles of [G9] and [G12] from their DOIs (Crossref, 2026-10-11).
-
-Radar:
-- [R1] Continental Engineering Services, "ARS 408-21 Long Range Radar Sensor 77 GHz - Data Sheet", print ID 091018_FS_ARS_408_21_EN_HS (PDF created 2018, modified 2020; AutonomouStuff copy), https://platformselect.autonomoustuff.com/wp-content/uploads/2020/08/ARS-408-21-whitelabel.pdf
-- [R2] smartmicro, "High Performance Automotive Radar" flyer, UMRR-11 Type 132 and UMRR-96 Type 153 (PDF 2020; Level Five Supplies copy), https://levelfivesupplies.com/wp-content/uploads/2019/11/smartmicro-High-Performance-Automotive-Radar-PDF.pdf
-- [R3] Bosch Engineering, "Radar off-highway premium" data sheet, (c) 2024, https://www.bosch-engineering.com/media/industries/construction/bosch_engineering_ohw_premiumradar_datasheet_en_1125.pdf
-- [R4] AUMOVIO (former Continental automotive business), product pages "Technical data" of the ARS540, ARS620, ARS51x and SRR52x, https://www.aumovio.com/en/solutions/driver-assistance/automated-assisted-driving/radar-technology/ars540.html (same path with ars620.html, ars51x.html, srr52x.html)
-- [R5] H. Caesar et al., "nuScenes: A Multimodal Dataset for Autonomous Driving," CVPR 2020, pp. 11618-11628, DOI 10.1109/CVPR42600.2020.01164.
-- [R6] O. Schumann et al., "RadarScenes: A Real-World Radar Point Cloud Data Set for Automotive Applications," IEEE FUSION 2021, pp. 1-8, DOI 10.23919/FUSION49465.2021.9627037.
-- [R7] F. Kraus, N. Scheiner, W. Ritter, K. Dietmayer, "The Radar Ghost Dataset - An Evaluation of Ghost Objects in Automotive Radar Data," IEEE/RSJ IROS 2021, pp. 8570-8577, DOI 10.1109/IROS51168.2021.9636338.
-- [R8] A. Scheel, K. Dietmayer, "Tracking Multiple Vehicles Using a Variational Radar Model," IEEE T-ITS 20(10):3721-3736, 2019, DOI 10.1109/TITS.2018.2879041.
-- [R9] P. Gao, S. Zhang, W. Wang, C. X. Lu, "DC-Loc: Accurate Automotive Radar Based Metric Localization with Explicit Doppler Compensation," ICRA 2022, pp. 4128-4134, DOI 10.1109/ICRA46639.2022.9811561.
-- [R10] M. Morales, G. Habibi, "Synthesizing and Identifying Noise Levels in Autonomous Vehicle Camera-Radar Datasets," arXiv:2505.00584, 2025 (preprint, not peer reviewed; context only), https://arxiv.org/abs/2505.00584
-- [R11] CARLA 0.9.15, sensors reference (radar) and source at tag 0.9.15, https://carla.readthedocs.io/en/0.9.15/ref_sensors/#radar-sensor ; https://github.com/carla-simulator/carla/blob/0.9.15/Unreal/CarlaUE4/Plugins/Carla/Source/Carla/Sensor/Radar.cpp
-
-GNSS:
-- [G1] u-blox, "NEO-M8 - u-blox M8 concurrent GNSS modules - Data sheet", UBX-15031086, R14, 2025, https://content.u-blox.com/sites/default/files/NEO-M8-FW3_DataSheet_UBX-15031086.pdf
-- [G2] u-blox, "NEO-M9N-00B - Standard precision GNSS module - Data sheet", UBX-19014285, R08, 2025, https://content.u-blox.com/sites/default/files/NEO-M9N-00B_DataSheet_UBX-19014285.pdf
-- [G3] u-blox, "ZED-F9P-04B - High precision GNSS module - Data sheet", UBX-21044850, R05, 2024, https://content.u-blox.com/sites/default/files/ZED-F9P-04B_DataSheet_UBX-21044850.pdf
-- [G4] u-blox, "ZED-F9R-01B - High precision sensor fusion GNSS receiver - Data sheet", UBX-19054459, R06, 2023, https://cdn.sparkfun.com/assets/d/4/3/f/4/ZED-F9R-01B_Datasheet_UBX-19054459.pdf
-- [G5] Septentrio, "mosaic-X5 - Compact, multi-constellation GNSS receiver", product brochure, 2019 (third-party mirror), https://components101.com/sites/default/files/2020-09/Mosaic-X5-Datasheet.pdf
-- [G6] OxTS, "RT3000 v4 DATASHEET" (no version or date printed; distributor copy), https://positics.fr/wp-content/uploads/2024/02/RT3000-v4-datasheet-1.pdf ; product page https://www.oxts.com/products/rt3000v4/
-- [G7] US DoD, "GPS Standard Positioning Service Performance Standard," 5th Edition, April 2020, https://archive.gps.gov/technical/ps/2020-SPS-performance-standard.pdf
-- [G8] CAR 2 CAR Communication Consortium, "Vehicle C-ITS station profile," RS_2037, Release 1.6.10, 2026, https://www.car-2-car.org/fileadmin/documents/Basic_System_Profile/Release_1.6.10/C2CCC_RS_2037_Profile_R1610.pdf
-- [G9] L.-T. Hsu, F. Huang, H.-F. Ng, G. Zhang, Y. Zhong, X. Bai, W. Wen, "Hong Kong UrbanNav: An Open-Source Multisensory Dataset for Benchmarking Urban Navigation Algorithms," NAVIGATION 70(4), navi.602, 2023, DOI 10.33012/navi.602.
-- [G10] Olynik, Petovello, Cannon, Lachapelle, "Temporal impact of selected GPS errors on point positioning," GPS Solutions 6:47-57, 2002, DOI 10.1007/s10291-002-0011-9.
-- [G11] Niu, Chen, Zhang et al., "Using Allan variance to analyze the error characteristics of GNSS positioning," GPS Solutions 18:231-242, 2014, DOI 10.1007/s10291-013-0324-x.
-- [G12] Y. Wang, X. Chen, P. Liu, "Statistical Multipath Model Based on Experimental GNSS Data in Static Urban Canyon Environment," Sensors 18(4):1149, 2018, DOI 10.3390/s18041149.
-- [G13] Jada, Joerger, "Measurement error time-correlation modeling for safety-critical navigation," NAVIGATION 72(4), 2025, DOI 10.33012/navi.721.
-
-Current RTK/5G-transport protocol sources:
-
-Peer-reviewed scientific studies and demonstrations:
-- [N3] R. Lesjak et al., "Centimeter-Level GNSS Positioning Using C-ITS for Correction Data Delivery: An Experimental Study," Springer peer-reviewed conference chapter, first online 11 October 2025, Table 1: https://doi.org/10.1007/978-3-032-06763-0_81
-- [N5] O. Elgarhy et al., "Development, Implementation and Field Trial of 5G Integrated GNSS-RTK Positioning in Cross-Border Settings," IEEE Future Networks World Forum 2024 peer-reviewed proceedings (DOI publication record: 2025), feasibility reference, not a source for the three targets: https://doi.org/10.1109/FNWF63303.2024.11028789
-- [N6] M. Hoffmann, P. Kryszkiewicz, G. P. Koudouridis, "Modeling of Real Time Kinematics localization error for use in 5G networks," peer-reviewed EURASIP Journal on Wireless Communications and Networking 2020, 31 (2020), Gauss-Markov modeling reference: https://doi.org/10.1186/s13638-020-1641-8
-
-Technical presentations and reports:
-- [N1] M. Volckaert, D. Schellekens, K. Smolders, A. Simsky, B. Bougard, "Integrity of an RTK-INS positioning system using SSR corrections for safety-critical automotive applications," Septentrio technical presentation, 19 September 2019, PDF slides 16 and 18. This cited PDF is documented as a technical presentation, not as a peer-reviewed article: https://gnss-imu.com/down/upload/20240402/1712021876.pdf
-- [N2] SBG Systems, "Automotive Tests in Urban Navigation," vendor test report, EUT#1 RTK + odometer, real-time results: https://www.sbg-systems.com/test-reports/automotive-tests/
-- [N4] SBG Systems, "Ellipse-D Automotive Test Report / Performance Assessment," vendor test report, real-time RTK + odometer results for light-urban and forest acquisitions: https://www.sbg-systems.com/wp-content/uploads/SBG-Ellipse-automotive-test-report.pdf
-- [N8] C. Marshall et al., "5G Precise Positioning Testbed — Technical Report," FrontierSI, January 2024. Technical report about transport and integration of OSR/SSR corrections over 5G; no percentile values are attributed to it: https://frontiersi.com.au/wp-content/uploads/2023/04/5G-Testbed-Technical-Report.pdf
-
-Manufacturer specification:
-- [N7] u-blox, "ZED-F9R-02B Data Sheet," UBX-21017486, revision R06, 3 May 2024: https://content.u-blox.com/sites/default/files/ZED-F9R-02B_DataSheet_UBX-21017486.pdf
+The full entries of every source cited here ([R1]-[R11] radar, [G1]-[G13] GNSS, [N1]-[N8] RTK and its transport over 5G, and Kopp et al. [K1]), with the values each one supports and the kind of evidence, are in [`docs/REFERENCES.md`](REFERENCES.md), Part A.  Their DOIs were resolved again against Crossref on 2026-10-23.
 
 ## Radar levels v3 (campaign v3, 2026-10-22)
 
@@ -386,8 +342,8 @@ numbers below are specifications or tracker/simulation design values, and the la
   themselves.  **extreme** = severe plus dense clutter: equal to the historical `high` profile, kept for
   comparability, and explicitly a stress test beyond the characteristics of typical automotive radar.
 * Limitation of the clutter model: real clutter is spatially structured (multipath at guardrails and walls,
-  underbody reflections) and often carries non-zero Doppler; Kopp et al. measured ~90 % clutter among *moving*
-  detections of a production mid-range radar in extra-urban traffic (IEEE ITSC 2021, DOI 10.1109/ITSC48978.2021.9564776).
+  underbody reflections) and often carries non-zero Doppler; Kopp et al. [K1] measured ~90 % clutter among *moving*
+  detections of a production mid-range radar in extra-urban traffic.
   Uniform clutter is a simplification; the nominal rate is optimistic for moving clutter.
 * Not modelled: weather attenuation, mutual interference (no measured numbers could be verified in accessible
   peer-reviewed full texts; candidate sources with DOI only: Hasirlioglu et al. ITSC 2016, 10.1109/ITSC.2016.7795918;

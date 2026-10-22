@@ -2,7 +2,7 @@
 
 Framing, logging prerequisites against the regulations, related work, limitations and the STOP / YIELD and
 depth-camera decision.  Quantitative claims come from the final experimental campaign (not yet run); the 23
-canonical runs S01-S18 are the development set.  Citations: [bibliography](bibliography.md).
+canonical runs S01-S18 are the development set.  Citations: [references](REFERENCES.md).
 
 ## Framing
 
@@ -21,7 +21,7 @@ runs S01-S19 and the robustness campaign on them) whose ground truth is used for
 ## Logging prerequisites
 
 What each recording vehicle must log for the method, against what the regulations require (sources:
-`docs/bibliography.md`, Regulatory facts, instruments R1-R9).
+`docs/REFERENCES.md`, Part C, Regulatory facts, instruments R1-R9).
 
 | Data (per vehicle, own clock) | Used for | Required by regulation? |
 |---|---|---|
@@ -45,7 +45,7 @@ per report keeps every collision match (geometry-supported matching).  Recorders
 today's regulated content, in line with proposals for richer automated-vehicle data ([B19], SAE J3197 [B21],
 IEEE 1616.1 [B22]).
 
-## Related work (verified sources, `docs/bibliography.md`)
+## Related work (verified sources, `docs/REFERENCES.md`, Part C)
 
 - **Accident reconstruction.**  Physics- and simulation-based reconstruction from scene evidence (PC-Crash
   [B1], Brach [B2], the Burg-Moser handbook with its avoidability chapter [B3]), EDR-based checks [B4], video
