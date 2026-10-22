@@ -79,8 +79,13 @@ conda activate carla
 python scripts\review_canonical_runs.py --port 3000
 ```
 
-The replay shows the reconstruction: recording vehicles move along their own recorded poses, reconstructed road
-users are boxes, and each recorder's panel lists what it perceived and when.  Keys: SPACE play/pause, LEFT/RIGHT
+For each run the menu opens two viewers in turn:
+* the GROUND TRUTH viewer: what CARLA simulated, every vehicle on its true trajectory, with the physical contacts;
+* then the RECONSTRUCTION viewer: what the algorithm estimated from the sensors.  Recording vehicles are drawn at
+  the pose the reconstruction used, reconstructed road users are boxes, and each recorder's panel lists what it
+  perceived and when.
+
+Their clocks (`t_contact`, `t_global`) coincide at the first collision.  Keys: SPACE play/pause, LEFT/RIGHT
 seek, N/P next/previous event, C camera, TAB next vehicle, F focus its panel, H help.  Full guide and how to read the
 screen: [docs/REPLAY.md](docs/REPLAY.md).
 

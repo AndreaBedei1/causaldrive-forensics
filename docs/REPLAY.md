@@ -1,8 +1,25 @@
-# Replay viewer
+# Replay viewers
 
-`scripts/replay_run.py` replays a reconstructed run in CARLA 0.9.15.  It shows the **reconstruction**, not the
-simulator state: recorder vehicles are CARLA actors moved along their own recorded poses, reconstructed road users
-are boxes.  Ground truth is not used.
+There are two independent viewers.  They use the same window, keys, options, cameras and speeds, and run on the
+same CARLA 0.9.15 server.
+
+| | GROUND TRUTH viewer | RECONSTRUCTION viewer |
+|---|---|---|
+| script | `scripts/view_ground_truth.py` | `scripts/replay_run.py` |
+| reads | `<run>/ground_truth/` only (privileged) | the recorders' own files and `<run>/reconstruction/` only |
+| shows | every vehicle on its true trajectory, the physical contact episodes (COLLISION banner, CONTACT_START / END) | recorders at the pose the reconstruction used, fused road users U1, U2, ... as boxes, radar tracks, associations, collisions and semantic events |
+| clock | `t_contact`: seconds from the first true vehicle-vehicle contact | `t_global`: the reconstruction's clock, 0 at its reference collision |
+
+In all 22 canonical runs the reconstruction aligns the recorders on the first collision, so `t_contact` and
+`t_global` are the same instant: `--start T` / `--at T` show the same moment in both viewers.  The recorders'
+pose in the RECONSTRUCTION viewer is never the simulator's:
+* in G0 it is the recorded synthetic GNSS/INS stream;
+* after a perturbation or a pose refinement it is `reconstruction/global/recorder_poses.json`
+  (`docs/SENSORS_AND_GROUND_TRUTH.md`).
+
+The review menu (`scripts/review_canonical_runs.py`) opens the GROUND TRUTH viewer of the chosen run first.  When
+its window closes, the RECONSTRUCTION viewer of the same run opens.  `Ng` opens only the ground truth of run N, and
+`Nr` only its reconstruction.
 
 ## Launch
 
@@ -17,8 +34,13 @@ python scripts\review_canonical_runs.py --port 3000
 scripts\review_canonical_runs.bat
 
 :: one run directly
+python scripts\view_ground_truth.py traces\S04\run_0_a_front_pushed --port 3000
 python scripts\replay_run.py traces\S04\run_0_a_front_pushed --port 3000
 python scripts\replay_run.py traces\S14\run_0_surrounded --port 3000 --start 5 --speed 0.25 --follow B --focus
+
+:: without a server: top-down frames of both viewers at the same instants
+python scripts\view_ground_truth.py traces\S10\run_0_deflected_into_c --export out\gt --at -1 --at 0 --at 1
+python scripts\replay_run.py traces\S10\run_0_deflected_into_c --export out\rec --at -1 --at 0 --at 1
 ```
 
 Useful options: `--start T` (seconds), `--speed X` (default 0.5), `--paused`, `--camera overview|follow|free`,
