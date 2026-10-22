@@ -23,7 +23,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .alignment import align_graphs
 from .anonymous import RoadUserFusion, align_by_observations, fuse_road_users
-from .common_frame import PoseSource, RecordedPoseSource, contact_check
+from .common_frame import (RECORDER_POSES_FILE, PoseSource, RecordedPoseSource, contact_check, is_recorded_stream,
+                           recorder_pose_record)
 from .config import ReconstructionConfig, load_config
 from .fusion import associate_tracks, fuse_graphs, global_temporal_relations, global_trace
 from .identity import radar_contact_evidence
@@ -177,6 +178,17 @@ def reconstruct_run(run_dir: Path, cfg: Optional[ReconstructionConfig] = None,
     write_json(global_dir / "associations.json", [item.to_dict() for item in associations])
     road_user_record = road_users.to_dict(cfg, alignment)
     write_json(global_dir / "anonymous_entities.json", road_user_record)
+    # The recorders' poses the fusion used, when they are not their recorded streams (the viewer draws them).
+    poses_path = global_dir / RECORDER_POSES_FILE
+    if poses_path.exists():
+        poses_path.unlink()
+    if any(not is_recorded_stream(source) for source in road_users.poses.values()):
+        origins = {local.owner: local.clock_origin for local in locals_}
+        times = {}
+        for owner, origin in origins.items():
+            with (run_dir / "vehicles" / owner / "ego.jsonl").open(encoding="utf-8") as handle:
+                times[owner] = sorted(float(json.loads(line)["timestamp"]) - origin for line in handle if line.strip())
+        write_json(poses_path, recorder_pose_record(road_users.poses, origins, times))
     write_jsonl(global_dir / "global_trace.jsonl", trace)
     write_json(global_dir / "global_graph.json", dict(graph.to_dict(), run=title, incident_context=context or None,
                                                      temporal_safety_relations=relations,

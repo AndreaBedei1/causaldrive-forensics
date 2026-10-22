@@ -1158,6 +1158,7 @@ class RoadUserFusion:
     pose_sources: Dict[str, str]
     names: Dict[Tuple[str, str], str] = field(default_factory=dict)  # (recorder, local track) -> entity id
     refinement: Optional[Dict[str, Any]] = None  # mutual refinement of the pose sources, when applied
+    poses: Dict[str, PoseSource] = field(default_factory=dict)  # the pose sources finally used (not serialised)
 
     def to_dict(self, cfg: ReconstructionConfig, alignment: Alignment) -> Dict[str, Any]:
         return {"definition": "road users in the common frame of the recorders' own pose streams; a road user "
@@ -1210,6 +1211,7 @@ def fuse_road_users(locals_: Sequence[Any], alignment: Alignment, associations: 
         poses = corrected(refinement)
     result = fuse_corrected(locals_, alignment, associations, poses, cfg, refinement)
     result.refinement = refinement
+    result.poses = dict(poses)
     return result
 
 

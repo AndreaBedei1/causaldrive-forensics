@@ -123,6 +123,78 @@ class RecordedPoseSource(PoseSource):
         return np.interp(t, self.times, self.x), np.interp(t, self.times, self.y), np.interp(t, self.times, self.yaw)
 
 
+# The poses the reconstruction placed the recorders at, written to ``global/RECORDER_POSES_FILE`` when they are not
+# the recorded stream itself (a perturbed GNSS/INS, a mutual refinement): the RECONSTRUCTION viewer draws them.
+RECORDER_POSES_FILE = "recorder_poses.json"
+
+
+def is_recorded_stream(source: PoseSource) -> bool:
+    """True for the recorder's own recorded stream, unchanged (G0: ``ego.jsonl`` is the pose used)."""
+    return type(source) is RecordedPoseSource
+
+
+def recorder_pose_record(poses: Mapping[str, PoseSource], origins: Mapping[str, float],
+                         times: Mapping[str, Sequence[float]]) -> Dict[str, Any]:
+    """The content of ``RECORDER_POSES_FILE``: each recorder's pose source sampled at its own record instants
+    ``t_local`` (seconds after ``clock_origin``, its first record)."""
+    recorders = {}
+    for name in sorted(poses):
+        source, t = poses[name], [float(v) for v in times[name]]
+        samples = [source.pose_at(v) for v in t]
+        recorders[name] = {"source": getattr(source, "name", type(source).__name__),
+                           "declared_position_std_m": getattr(source, "position_std_m", 0.0),
+                           "clock_origin": float(origins[name]), "t_local": t,
+                           "x": [p.x for p in samples], "y": [p.y for p in samples],
+                           "yaw_rad": [p.yaw for p in samples], "vx": [p.vx for p in samples],
+                           "vy": [p.vy for p in samples]}
+    return {"definition": "the pose of each recorder that the reconstruction used (map frame of the pose streams, "
+                          "after any perturbation of the GNSS/INS and any mutual refinement), at its own record "
+                          "instants; absent when that pose is the recorded stream itself (G0)",
+            "recorders": recorders}
+
+
+class TabulatedPoseSource(PoseSource):
+    """A recorder's poses as written to ``RECORDER_POSES_FILE``, interpolated linearly."""
+
+    def __init__(self, entry: Mapping[str, Any], clock_origin: float) -> None:
+        self.name = str(entry.get("source", "tabulated"))
+        self.position_std_m = float(entry.get("declared_position_std_m", 0.0))
+        self.times = np.array(entry["t_local"], dtype=float) + (float(entry["clock_origin"]) - clock_origin)
+        self.x, self.y = np.array(entry["x"], dtype=float), np.array(entry["y"], dtype=float)
+        self.yaw = np.unwrap(np.array(entry["yaw_rad"], dtype=float))
+        self.vx, self.vy = np.array(entry["vx"], dtype=float), np.array(entry["vy"], dtype=float)
+
+    @classmethod
+    def factory_for_run(cls, run_dir: Path) -> Optional[Any]:
+        """A ``pose_factory(vehicle_dir, clock_origin)`` reading the run's ``RECORDER_POSES_FILE``, or None
+        when the reconstruction used the recorded streams."""
+        path = Path(run_dir) / "reconstruction" / "global" / RECORDER_POSES_FILE
+        if not path.exists():
+            return None
+        recorders = json.loads(path.read_text(encoding="utf-8"))["recorders"]
+
+        def make(vehicle_dir: Path, clock_origin: float) -> PoseSource:
+            name = Path(vehicle_dir).name
+            if name not in recorders:
+                return RecordedPoseSource.from_vehicle_dir(vehicle_dir, clock_origin)
+            return cls(recorders[name], clock_origin)
+        return make
+
+    @property
+    def start(self) -> float:
+        return float(self.times[0])
+
+    @property
+    def end(self) -> float:
+        return float(self.times[-1])
+
+    def pose_at(self, t_local: float) -> WorldPose:
+        t = min(max(t_local, self.times[0]), self.times[-1])
+        return WorldPose(float(np.interp(t, self.times, self.x)), float(np.interp(t, self.times, self.y)),
+                         float(np.interp(t, self.times, self.yaw)), float(np.interp(t, self.times, self.vx)),
+                         float(np.interp(t, self.times, self.vy)))
+
+
 @dataclass
 class CommonSample:
     """One radar track sample in the common frame (see the module docstring)."""

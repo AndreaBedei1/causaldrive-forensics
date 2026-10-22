@@ -50,12 +50,21 @@ exactly the fields listed above.
 * Nothing in `cdf.reconstruction`, `cdf.robustness` or the reconstruction viewer reads `ground_truth/`, the run
   metadata, the scenario YAML or the simulator (tests `test_reconstruction_boundary.py`, `test_replay_ghosts.py`,
   `test_worked_example.py`: AST checks, poisoned ground truth, forbidden file opens).
-* Radar files carry no actor id or label; vehicle-local collision files carry no partner identity.
-* Residuals, declared: `collisions.jsonl` keeps CARLA's exact impulse magnitude (an ideal crash sensor; the
-  `impulse` family perturbs it); `ego_footprint` is the recorder's own exact box (a vehicle knows its dimensions);
-  `frame` / `timestamp` are the simulator's clock, i.e. the recorders' clocks are perfectly synchronised in the raw
-  data — the reconstruction does not use that: it aligns recorders from their own observations, and the `clock`
-  robustness family shifts the clocks to prove it.
+* Radar files carry no actor id or label.  Vehicle-local collision files carry no partner identity: in the 22
+  canonical runs every record is exactly `{frame, timestamp, impulse}`.  Every `ego.jsonl` carries exactly the
+  fields its `pose_sensor` declares, plus `frame`.  Both checks are in `test_sensor_ground_truth_separation.py`.
+* Residuals, declared:
+  * `collisions.jsonl` keeps CARLA's exact impulse magnitude, i.e. an ideal crash sensor.  The `impulse`
+    robustness family perturbs it.
+  * `ego_footprint` is the recorder's own exact box: a vehicle knows its dimensions.
+  * `frame` / `timestamp` are the simulator's clock, so the recorders' clocks are perfectly synchronised in the raw
+    data.  The reconstruction does not use that:
+    * it aligns the recorders from their own observations, and the `clock` robustness family shifts the clocks to
+      prove it;
+    * the frame counter is ignored: a synthetic run with every `frame` value scrambled, in the JSONL streams and in
+      the radar files, gives the same global graph (`test_the_reconstruction_ignores_the_simulator_frame_counter`).
+      The comparison does detect a change: tripling one recorder's collision impulses, which the matching uses,
+      changes the graph.
 
 ## The two viewers
 
@@ -64,11 +73,15 @@ exactly the fields listed above.
   (callbacks of one pair less than 0.5 s apart) as COLLISION banners and CONTACT_START / END in the panels.  Clock
   `t_contact`: seconds from the first true vehicle-vehicle contact.
 * **RECONSTRUCTION viewer** (`scripts/replay_run.py`): reads only the recorders' files and the reconstruction
-  outputs.  Recorders are placed at their **sensor pose** (`ego.jsonl`, the G0 GNSS/INS; a perturbed pose source can
-  be passed to `ReplayRun.load(pose_factory=...)`); non-recorders appear only as the fused road users (U1, U2, ...)
-  or as radar tracks.  Clock `t_global`: the reconstruction's own clock, anchored on its reference collision.
+  outputs.
+  * **Recorders.**  They are placed at **the pose the reconstruction used**:
+    * in G0 that pose is the recorded synthetic GNSS/INS stream itself (`ego.jsonl`);
+    * when it is not, because the GNSS/INS was perturbed or the fusion refined the poses, the reconstruction writes
+      the poses it used to `reconstruction/global/recorder_poses.json` and the viewer draws those (tests
+      `test_recorder_pose_output.py`).  In G0 the file is not written and every other output stays unchanged.
+  * **Non-recorders.**  They appear only as the fused road users (U1, U2, ...) or as radar tracks.
+  * **Clock.**  `t_global`, the reconstruction's own clock, anchored on its reference collision.
 
 When the reconstruction aligns the recorders on the first collision (all 22 canonical runs in G0), `t_global` and
-`t_contact` coincide, so the same instant can be compared in both viewers.  Known limitation: the CARLA viewer of a
-perturbed copy is not opened by the campaign scripts with its pose source, so for G1/G2 inspections the recorders'
-drawn pose is the G0 one; the campaign evaluates G1/G2 numerically.
+`t_contact` coincide, so the same instant can be compared in both viewers.  To inspect a degraded condition, run its
+job with `scripts/robustness.py --keep` and open the kept copy in the RECONSTRUCTION viewer.

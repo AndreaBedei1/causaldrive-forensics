@@ -810,6 +810,13 @@ class ReplayRun:
         ``cdf.reconstruction.common_frame.PoseSource``); by default its recorded stream."""
         run_dir = Path(run_dir)
         notes: List[str] = []
+        if pose_factory is None:
+            # The poses the reconstruction used when they are not the recorded streams (perturbed GNSS/INS,
+            # mutual refinement): written by the reconstruction, never the simulator's.
+            from ..reconstruction.common_frame import TabulatedPoseSource
+            pose_factory = TabulatedPoseSource.factory_for_run(run_dir)
+            if pose_factory is not None:
+                notes.append("recorders drawn at the poses the reconstruction used (global/recorder_poses.json)")
         vehicles_dir = run_dir / "vehicles"
         ids = sorted(p.name for p in vehicles_dir.iterdir()
                      if (p / "ego.jsonl").exists()) if vehicles_dir.is_dir() else []
