@@ -5,21 +5,27 @@ verdicts the existing evaluation already writes (``evaluation.json``, ``fusion_m
 ``event_oracle.json``) and on the ground truth.  Nothing here changes a threshold of the reconstruction or of
 those verdicts; where a new rule is needed it is stated below and kept deliberately simple.
 
-1. Collisions.  The true vehicle-vehicle contacts are those of ``evaluation.json`` (``collisions``).  A contact is
-   DETECTED when the reconstruction holds a collision node for it, IDENTIFIED when that node names exactly its
-   participants.  ``extra_collisions`` are invented collisions.  precision = identified / (detected +
-   invented); recall = detected / true; the timing error is the evaluation's ``report_timing_error_s``.  A contact
-   none of whose vehicles records is listed (``involves_recorder`` false): no collision sensor reports it.
+1. Collisions.  The true collisions are those of ``evaluation.json`` (``collisions``; a recontact of the same pair
+   is part of the collision it follows).  A collision is DETECTED when the reconstruction holds a collision node
+   for it, IDENTIFIED when that node names exactly its participants.  A collision none of whose vehicles records
+   is listed (``involves_recorder`` false) but not REPORTABLE: no collision sensor reports it.  Recall and the
+   identified rate are over the reportable collisions.  Of the ``extra_collisions``, a true recontact reported as
+   a collision of its own is a RECONTACT SPLIT, every other one INVENTED; precision = identified / (detected +
+   invented + recontact splits); the timing error is the evaluation's ``report_timing_error_s``.
 2. Completeness.  Every true vehicle is either a recorder (represented by its own pose stream) or a road user
    that recorded nothing.  Such a road user is OBSERVABLE when it lay in the field of view of some recorder radar
    with a clear line of sight (``cdf.evaluation.visibility``, partial bodies count) for at least
    ``min_track_frames`` radar sweeps -- the fewest the tracker can turn into a track.  It is REPRESENTED when an
    anonymous road user of the fusion has it as true identity (``fusion_metrics.entities``).  Duplicates: further
    road users of the same true vehicle; recorder ghosts: road users that are in truth a recorder (a missed
-   recorder link draws that recorder twice); phantoms: road users with no true identity.  Coverage: the represented
-   time of a vehicle (sum of its road users' ``coverage_s``, capped) over its observable time.
-3. Position and speed of the reconstructed road users against the truth: median, P95 and mean of the centre
-   error and of the speed error (``fusion_metrics.state_errors``); heading is a diagnostic only.
+   recorder link draws that recorder twice); phantoms: road users with no true identity, split (a diagnostic; the
+   identity rule is unchanged) into NEAR, whose tracks lie at a median distance of at most ``PHANTOM_NEAR_M`` from
+   the nearest true vehicle box (a displaced estimate of a vehicle beyond the 1.5 m identity tolerance), and FAR
+   (clutter).  ``min_track_frames`` is the run's own tracker setting.  Coverage: the represented time of a vehicle
+   (sum of its road users' ``coverage_s``, capped) over its observable time.
+3. Position and speed of the reconstructed road users that record nothing against the truth: median, P95, mean
+   and RMSE of the centre error and of the speed error (``fusion_metrics.road_user_state_errors``: recorder
+   ghosts excluded, counted under 2); heading is a diagnostic only.
 4. Association: wrong recorder links, false and missed merges, fragmented vehicles, phantoms.
 5. Essential semantics, by physical meaning rather than exact timestamps:
    * CRITICAL_TTC warning: for each true contact and each recorder involved in it, the first CRITICAL_TTC_START
@@ -48,6 +54,7 @@ from .visibility import Box, coverage, frames_by_participant, RadarView
 
 WARNING_WINDOW_S = 8.0
 MATCH_WINDOW_S = 2.0
+PHANTOM_NEAR_M = 3.0  # twice the evaluation's identity tolerance (IDENTITY_MAX_BOX_DISTANCE_M)
 INTRUSION_TYPES = ("EGO_PATH_ENTRY", "CUT_IN_FROM_LEFT_START", "CUT_IN_FROM_RIGHT_START")
 
 
@@ -127,10 +134,47 @@ def _origins(run_dir: Path, recorders: List[str]) -> Dict[str, float]:
 
 def _stat(block: Optional[Mapping[str, Any]]) -> Dict[str, Optional[float]]:
     block = block or {}
-    return {"n": block.get("n", 0), "median": block.get("median"), "p95": block.get("p95"), "mean": block.get("mean")}
+    return {"n": block.get("n", 0), "median": block.get("median"), "p95": block.get("p95"), "mean": block.get("mean"),
+            "rmse": block.get("rmse")}
 
 
-def scorecard(run_dir: Path, min_track_frames: int = 5, oracle: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+def run_min_track_frames(run_dir: Path) -> int:
+    """The fewest radar frames of a track in the reconstruction of this run (its own configuration)."""
+    graph = _json(Path(run_dir) / "reconstruction" / "global" / "global_graph.json")
+    return int(((graph.get("reconstruction_config") or {}).get("tracking") or {}).get("min_track_frames", 5))
+
+
+def collision_score(evaluation: Mapping[str, Any], recorders: List[str]) -> Dict[str, Any]:
+    """1. Collisions (module docstring)."""
+    contacts = []
+    for c in evaluation.get("collisions", []):
+        pair = tuple(sorted(c["participants"]))
+        contacts.append({"pair": "-".join(pair), "sim_time": c["sim_time"],
+                         "involves_recorder": any(p in recorders for p in pair),
+                         "recontacts": len(c.get("recontacts") or []),
+                         "detected": c.get("reconstructed_as") is not None,
+                         "participants_correct": bool(c.get("participants_correct")),
+                         "timing_error_s": c.get("report_timing_error_s")})
+    n_true = len(contacts)
+    reportable = sum(c["involves_recorder"] for c in contacts)
+    detected = sum(c["detected"] for c in contacts)
+    identified = sum(c["detected"] and c["participants_correct"] for c in contacts)
+    extras = list(evaluation.get("extra_collisions", []))
+    splits = [e for e in extras if e.get("true_recontact")]
+    invented = [e for e in extras if not e.get("true_recontact")]
+    claimed = detected + len(invented) + len(splits)
+    timing = [abs(c["timing_error_s"]) for c in contacts if c["detected"] and c["timing_error_s"] is not None]
+    return {"true": n_true, "reportable": reportable, "detected": detected, "identified": identified,
+            "invented": len(invented), "recontact_splits": len(splits),
+            "recall": detected / reportable if reportable else None,
+            "participants_correct_rate": identified / reportable if reportable else None,
+            "precision": identified / claimed if claimed else None,
+            "max_abs_timing_error_s": max(timing) if timing else None, "contacts": contacts,
+            "invented_list": invented, "recontact_split_list": splits}
+
+
+def scorecard(run_dir: Path, min_track_frames: Optional[int] = None,
+              oracle: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     run_dir = Path(run_dir)
     ev_dir = run_dir / "reconstruction" / "evaluation"
     evaluation = _json(ev_dir / "evaluation.json")
@@ -146,34 +190,21 @@ def scorecard(run_dir: Path, min_track_frames: int = 5, oracle: Optional[Mapping
         recorders = sorted(p.name for p in (run_dir / "vehicles").iterdir() if (p / "ego.jsonl").exists())
 
     # 1. Collisions
-    contacts = []
-    for c in evaluation.get("collisions", []):
-        pair = tuple(sorted(c["participants"]))
-        contacts.append({"pair": "-".join(pair), "sim_time": c["sim_time"],
-                         "involves_recorder": any(p in recorders for p in pair),
-                         "detected": c.get("reconstructed_as") is not None,
-                         "participants_correct": bool(c.get("participants_correct")),
-                         "timing_error_s": c.get("report_timing_error_s")})
-    n_true = len(contacts)
-    detected = sum(c["detected"] for c in contacts)
-    identified = sum(c["detected"] and c["participants_correct"] for c in contacts)
-    invented = len(evaluation.get("extra_collisions", []))
-    timing = [abs(c["timing_error_s"]) for c in contacts if c["detected"] and c["timing_error_s"] is not None]
-    collisions = {"true": n_true, "detected": detected, "identified": identified, "invented": invented,
-                  "recall": detected / n_true if n_true else None,
-                  "participants_correct_rate": identified / n_true if n_true else None,
-                  "precision": identified / (detected + invented) if (detected + invented) else None,
-                  "max_abs_timing_error_s": max(timing) if timing else None, "contacts": contacts,
-                  "invented_list": evaluation.get("extra_collisions", [])}
+    collisions = collision_score(evaluation, recorders)
+    contacts = collisions["contacts"]
 
     # 2. Completeness
+    if min_track_frames is None:
+        min_track_frames = run_min_track_frames(run_dir)
     visibility = observable_seconds(run_dir, recorders, min_track_frames)
     entities = fusion.get("entities", [])
     per_truth: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-    phantoms = []
+    phantoms, phantoms_near = [], []
     for e in entities:
         if e.get("true_identity") is None:
             phantoms.append(e["id"])
+            if e.get("nearest_vehicle_m") is not None and e["nearest_vehicle_m"] <= PHANTOM_NEAR_M:
+                phantoms_near.append(e["id"])
         else:
             per_truth[e["true_identity"]].append(e)
     entity_cov = {e["id"]: e.get("coverage_s", 0.0) for e in fusion.get("entity_errors", [])}
@@ -202,10 +233,11 @@ def scorecard(run_dir: Path, min_track_frames: int = 5, oracle: Optional[Mapping
                     "represented_unobservable": [v["vehicle"] for v in vehicles
                                                  if not v["observable"] and v["represented"]],
                     "duplicates": duplicates, "recorder_ghosts": recorder_ghosts, "phantoms": phantoms,
-                    "vehicles": vehicles}
+                    "phantoms_near": phantoms_near, "phantoms_far": [p for p in phantoms if p not in phantoms_near],
+                    "min_track_frames": min_track_frames, "vehicles": vehicles}
 
-    # 3. Errors of the reconstructed road users
-    se = fusion.get("state_errors", {})
+    # 3. Errors of the reconstructed road users (recorder ghosts excluded; older files: every road user)
+    se = fusion.get("road_user_state_errors", fusion.get("state_errors", {}))
     errors = {"centre_error_m": _stat(se.get("centre_error_m")), "speed_error_mps": _stat(se.get("speed_error_mps")),
               "velocity_error_mps": _stat(se.get("velocity_error_mps")),
               "heading_error_deg_diagnostic": _stat(se.get("heading_error_deg"))}
@@ -292,12 +324,14 @@ def summary_rows(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         col, com, err, ass, sem = (c["collisions"], c["completeness"], c["errors"], c["association"], c["semantics"])
         rows.append({
             "run": c["run"], "contacts": col["true"], "detected": col["detected"], "identified": col["identified"],
-            "invented": col["invented"], "max_dt_s": col["max_abs_timing_error_s"],
+            "invented": col["invented"], "recontact_splits": col.get("recontact_splits", 0),
+            "max_dt_s": col["max_abs_timing_error_s"],
             "vehicles": com["true_vehicles"], "observable": com["observable"],
             "represented": com["represented_observable"], "missed": ",".join(com["missed_observable"]),
             "duplicates": com["duplicates"], "rec_ghosts": len(com.get("recorder_ghosts", [])),
-            "phantoms": len(com["phantoms"]),
+            "phantoms": len(com["phantoms"]), "phantoms_near": len(com.get("phantoms_near", [])),
             "pos_med_m": err["centre_error_m"]["median"], "pos_p95_m": err["centre_error_m"]["p95"],
+            "pos_rmse_m": err["centre_error_m"].get("rmse"),
             "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
             "wrong_links": ass["wrong_links"], "missed_merges": (ass["merges"] or {}).get("missed"),
             "false_merges": (ass["merges"] or {}).get("false"),
@@ -345,13 +379,19 @@ def _numbers(card: Mapping[str, Any]) -> Dict[str, Any]:
     else:
         n_recorders = len(card.get("recorders") or [])
         observable, represented = com["observable"] - n_recorders, com["represented_observable"] - n_recorders
-    return {"contacts": col["true"], "detected": col["detected"], "identified": col["identified"],
-            "invented": col["invented"], "max_dt_s": col.get("max_abs_timing_error_s"),
+    phantoms_near = com.get("phantoms_near")
+    return {"contacts": col["true"], "reportable": col.get("reportable", col["true"]), "detected": col["detected"],
+            "identified": col["identified"], "invented": col["invented"],
+            "recontact_splits": col.get("recontact_splits", 0), "max_dt_s": col.get("max_abs_timing_error_s"),
             "observable": observable, "represented": represented,
             "missed_observable": len(com["missed_observable"]), "duplicates": com["duplicates"],
             "rec_ghosts": len(com.get("recorder_ghosts", [])), "phantoms": len(com["phantoms"]),
+            "phantoms_near": None if phantoms_near is None else len(phantoms_near),
+            "phantoms_far": None if phantoms_near is None else len(com["phantoms"]) - len(phantoms_near),
             "pos_med_m": err["centre_error_m"]["median"], "pos_p95_m": err["centre_error_m"]["p95"],
+            "pos_rmse_m": err["centre_error_m"].get("rmse"),
             "spd_med_mps": err["speed_error_mps"]["median"], "spd_p95_mps": err["speed_error_mps"]["p95"],
+            "spd_rmse_mps": err["speed_error_mps"].get("rmse"),
             "wrong_links": ass["wrong_links"], "missed_merges": (ass.get("merges") or {}).get("missed"),
             "false_merges": (ass.get("merges") or {}).get("false"),
             "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
@@ -398,7 +438,7 @@ def campaign_rows(records: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def _subset(row: Mapping[str, Any]) -> str:
-    if row["family"] != "radar_asym" or not row.get("recorder"):
+    if row["family"] not in ("radar_asym", "radar_asym_gnss") or not row.get("recorder"):
         return "all"
     return "alone" if len(row["recorder"].split("+")) == 1 else "all but one"
 
@@ -425,8 +465,9 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
                                   if all(m.get("d_" + key) is not None for m in ms) else None)
             positions = [m["pos_med_m"] for m in ms if m["pos_med_m"] is not None]
             pooled.append({
-                "collisions_identified_rate": total("identified") / total("contacts") if total("contacts") else None,
-                "collisions_detected_rate": total("detected") / total("contacts") if total("contacts") else None,
+                "collisions_identified_rate": (total("identified") / total("reportable")
+                                               if total("reportable") else None),
+                "collisions_detected_rate": total("detected") / total("reportable") if total("reportable") else None,
                 "invented": per_job("invented"),
                 "represented_rate": total("represented") / total("observable") if total("observable") else None,
                 "duplicates": per_job("duplicates"), "rec_ghosts": per_job("rec_ghosts"), "phantoms": per_job("phantoms"),
@@ -442,7 +483,7 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
             row[key] = round(statistics.fmean(values), 4) if values else None
             row[key + "_sd"] = round(statistics.stdev(values), 4) if len(values) > 1 else None
         table.append(row)
-    order = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3")
+    order = ("baseline", "gnss", "radar_v3", "radar_asym", "radar_gnss_v3", "radar_asym_gnss")
     table.sort(key=lambda r: (order.index(r["family"]) if r["family"] in order else len(order), r["family"],
                               r["recorders"] or 0))
     return table
