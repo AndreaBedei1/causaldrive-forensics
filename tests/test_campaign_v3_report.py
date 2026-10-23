@@ -132,6 +132,24 @@ class Figures(unittest.TestCase):
         self.assertTrue({"collisions", "completeness", "errors", "interaction", "asymmetry_phantoms",
                          "scenarios_phantoms"} <= names)
 
+    def test_figures_are_byte_reproducible(self):
+        """The committed figures must regenerate byte for byte from the job records (no date, fixed SVG ids)."""
+        import tempfile
+        records = [_job("S01/run_0_crash", "baseline", "none", 0, _card(1, 1, 0), errors=[0.1, 0.2])]
+        for seed in (0, 1, 2):
+            records += [_job("S01/run_0_crash", "radar_v3", "severe", seed, _card(1, 1, 4 + seed), errors=[0.5])]
+        table = report.condition_table(records)
+        spec = importlib.util.spec_from_file_location("campaign_v3_figures",
+                                                      str(ROOT / "scripts" / "campaign_v3_figures.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as one, tempfile.TemporaryDirectory() as two:
+            first = module.draw(table, [], [], [], Path(one))
+            second = module.draw(table, [], [], [], Path(two))
+            self.assertTrue(first)
+            for a, b in zip(first, second):
+                self.assertEqual(a.read_bytes(), b.read_bytes(), a.name)
+
 
 if __name__ == "__main__":
     unittest.main()

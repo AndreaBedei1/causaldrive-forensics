@@ -655,7 +655,9 @@ def supervise(args: argparse.Namespace) -> int:
 
 def start_detached(extra: List[str]) -> int:
     CONTROL.mkdir(parents=True, exist_ok=True)
-    flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP: survives the terminal / chat
+    # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP: a hidden console of its own, independent of the terminal / chat.
+    # Its jobs share that console; with DETACHED_PROCESS (no console) Windows opened a visible one for every job.
+    flags = 0x08000000 | 0x00000200
     out = (CONTROL / "controller.stdout.txt").open("a", encoding="utf-8")
     proc = subprocess.Popen([PYTHON, str(Path(__file__).resolve()), "_supervise"] + extra, cwd=str(ROOT),
                             env=dict(os.environ, **ENV), stdin=subprocess.DEVNULL, stdout=out, stderr=out,

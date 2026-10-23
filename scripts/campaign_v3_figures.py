@@ -28,11 +28,15 @@ def _style(axis: Any) -> None:
 
 
 def _save(fig: Any, path: Path) -> List[Path]:
+    """SVG, PDF and PNG with no date and fixed SVG ids: the figures regenerate byte for byte."""
+    import matplotlib
+    metadata = {"svg": {"Date": None}, "pdf": {"CreationDate": None}, "png": {}}
     written = []
-    for suffix in ("svg", "pdf", "png"):
-        target = path.with_suffix("." + suffix)
-        fig.savefig(str(target), dpi=200, bbox_inches="tight")
-        written.append(target)
+    with matplotlib.rc_context({"svg.hashsalt": "campaign-v3"}):
+        for suffix in ("svg", "pdf", "png"):
+            target = path.with_suffix("." + suffix)
+            fig.savefig(str(target), dpi=200, bbox_inches="tight", metadata=metadata[suffix])
+            written.append(target)
     return written
 
 
@@ -120,8 +124,8 @@ def _asymmetry_figure(plt: Any, asymmetry: Sequence[Mapping[str, Any]], key: str
 
 def _interaction_figure(plt: Any, interaction: Sequence[Mapping[str, Any]], path: Path) -> List[Path]:
     from cdf.evaluation.figures import DOUBLE_COLUMN_IN
-    metrics = (("represented_rate", "paired change, observable represented"),
-               ("phantoms_per_job", "paired change, phantoms / job"), ("pos_median", "paired change, position median [m]"))
+    metrics = (("represented_rate", "paired change,\nobservable represented"),
+               ("phantoms_per_job", "paired change,\nphantoms / job"), ("pos_median", "paired change,\nposition median [m]"))
     rows = [r for r in interaction if r.get("seeds")]
     if not rows:
         return []
