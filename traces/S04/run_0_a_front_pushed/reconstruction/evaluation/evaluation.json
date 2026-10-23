@@ -1,6 +1,6 @@
 {
   "run": "S04/run_0_a_front_pushed",
-  "headline": "collision reconstructed: yes (3/3 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
+  "headline": "collision reconstructed: yes (2/2 vehicle contacts); associations correct: 2/2; anonymous: 0; max |t_global error| 0.0 s",
   "privileged_assumption": "recorder raw clocks are CARLA simulator time",
   "collisions": [
     {
@@ -10,7 +10,17 @@
       ],
       "sim_time": 1879.3106370046735,
       "peak_impulse": 10281.411958816992,
+      "recontacts": [
+        {
+          "sim_time": 1879.9606370143592,
+          "peak_impulse": 1509.7550582790507
+        }
+      ],
       "reconstructed_as": "g21",
+      "reconstructed_participants": [
+        "A",
+        "B"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -21,18 +31,12 @@
       ],
       "sim_time": 1879.810637012124,
       "peak_impulse": 8788.05213279538,
+      "recontacts": [],
       "reconstructed_as": "g25",
-      "participants_correct": true,
-      "report_timing_error_s": 0.0
-    },
-    {
-      "participants": [
-        "A",
-        "B"
+      "reconstructed_participants": [
+        "B",
+        "C"
       ],
-      "sim_time": 1879.9606370143592,
-      "peak_impulse": 1509.7550582790507,
-      "reconstructed_as": "g30",
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -95,10 +99,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 33,
+    "nodes": 32,
     "max_abs_error_s": 0.0,
-    "order_pairs": 482,
-    "order_concordant": 482
+    "order_pairs": 453,
+    "order_concordant": 453
   },
   "tracks": [
     {
@@ -171,24 +175,6 @@
       "contact": "B + C",
       "recorder": "C",
       "partner": "B",
-      "track": null
-    },
-    {
-      "contact": "A + B",
-      "recorder": "A",
-      "partner": "B",
-      "track": "A:track_001",
-      "seen_s_before_contact": -0.05,
-      "clearance_m": 0.471,
-      "true_gap_m": 0.0,
-      "error_m": 0.471,
-      "range_m": 0.521,
-      "ttc_s": null
-    },
-    {
-      "contact": "A + B",
-      "recorder": "B",
-      "partner": "A",
       "track": null
     }
   ],

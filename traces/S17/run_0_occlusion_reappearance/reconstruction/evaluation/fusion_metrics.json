@@ -151,6 +151,7 @@
       "true_identity": "V",
       "identity_is_recorder": false,
       "purity": 1.0,
+      "nearest_vehicle_m": null,
       "track_identities": {
         "A:track_001": "V",
         "B:track_003": "V"
@@ -171,6 +172,7 @@
       "true_identity": "D",
       "identity_is_recorder": false,
       "purity": 1.0,
+      "nearest_vehicle_m": null,
       "track_identities": {
         "A:track_002": "D",
         "B:track_002": "D",
@@ -191,6 +193,7 @@
       "true_identity": "E",
       "identity_is_recorder": false,
       "purity": 1.0,
+      "nearest_vehicle_m": null,
       "track_identities": {
         "A:track_003": "E",
         "B:track_004": "E"
@@ -210,6 +213,7 @@
       "true_identity": "C",
       "identity_is_recorder": false,
       "purity": 1.0,
+      "nearest_vehicle_m": null,
       "track_identities": {
         "A:track_004": "C",
         "B:track_001": "C",
@@ -227,6 +231,7 @@
       "true_identity": "E",
       "identity_is_recorder": false,
       "purity": 1.0,
+      "nearest_vehicle_m": null,
       "track_identities": {
         "A:track_008": "E"
       }
@@ -262,6 +267,7 @@
       "p95": 0.679,
       "max": 0.9006,
       "mean": 0.3533,
+      "rmse": 0.4228,
       "iqr": 0.4478
     },
     "coverage_s": {
@@ -273,6 +279,7 @@
       "p95": 11.95,
       "max": 11.95,
       "mean": 8.61,
+      "rmse": 9.5332,
       "iqr": 8.15
     },
     "heading_error_deg": {
@@ -284,6 +291,7 @@
       "p95": 1.7776,
       "max": 7.6172,
       "mean": 0.7253,
+      "rmse": 1.146,
       "iqr": 0.7383
     },
     "length_error_m": {
@@ -295,6 +303,7 @@
       "p95": 0.9736,
       "max": 1.169,
       "mean": 0.345,
+      "rmse": 0.5395,
       "iqr": 0.106
     },
     "normalised_centre_error": {
@@ -306,6 +315,7 @@
       "p95": 8.99,
       "max": 10.3825,
       "mean": 3.7815,
+      "rmse": 4.6711,
       "iqr": 4.1582
     },
     "single_track_nominal_centre_error_m": {
@@ -317,6 +327,7 @@
       "p95": 0.8582,
       "max": 1.2314,
       "mean": 0.4539,
+      "rmse": 0.5078,
       "iqr": 0.2417
     },
     "speed_error_mps": {
@@ -328,6 +339,7 @@
       "p95": 0.1954,
       "max": 0.4795,
       "mean": 0.0554,
+      "rmse": 0.0909,
       "iqr": 0.0458
     },
     "velocity_error_mps": {
@@ -339,6 +351,7 @@
       "p95": 0.438,
       "max": 1.7146,
       "mean": 0.1608,
+      "rmse": 0.2562,
       "iqr": 0.1359
     },
     "width_error_m": {
@@ -350,7 +363,58 @@
       "p95": 0.263,
       "max": 0.263,
       "mean": 0.1656,
+      "rmse": 0.1838,
       "iqr": 0.156
+    }
+  },
+  "road_user_state_errors": {
+    "centre_error_m": {
+      "n": 425,
+      "median": 0.2944,
+      "q25": 0.1484,
+      "q75": 0.5962,
+      "p90": 0.6511,
+      "p95": 0.679,
+      "max": 0.9006,
+      "mean": 0.3533,
+      "rmse": 0.4228,
+      "iqr": 0.4478
+    },
+    "heading_error_deg": {
+      "n": 425,
+      "median": 0.4897,
+      "q25": 0.2178,
+      "q75": 0.9561,
+      "p90": 1.484,
+      "p95": 1.7776,
+      "max": 7.6172,
+      "mean": 0.7253,
+      "rmse": 1.146,
+      "iqr": 0.7383
+    },
+    "speed_error_mps": {
+      "n": 425,
+      "median": 0.0339,
+      "q25": 0.0143,
+      "q75": 0.0602,
+      "p90": 0.1267,
+      "p95": 0.1954,
+      "max": 0.4795,
+      "mean": 0.0554,
+      "rmse": 0.0909,
+      "iqr": 0.0458
+    },
+    "velocity_error_mps": {
+      "n": 425,
+      "median": 0.11,
+      "q25": 0.0504,
+      "q75": 0.1863,
+      "p90": 0.3007,
+      "p95": 0.438,
+      "max": 1.7146,
+      "mean": 0.1608,
+      "rmse": 0.2562,
+      "iqr": 0.1359
     }
   },
   "state_errors_by_method": {
@@ -364,6 +428,7 @@
         "p95": 0.6687,
         "max": 0.727,
         "mean": 0.3332,
+        "rmse": 0.401,
         "iqr": 0.4321
       },
       "heading_error_deg": {
@@ -375,6 +440,7 @@
         "p95": 1.2166,
         "max": 2.1877,
         "mean": 0.4744,
+        "rmse": 0.6163,
         "iqr": 0.5301
       },
       "speed_error_mps": {
@@ -386,6 +452,7 @@
         "p95": 0.1291,
         "max": 0.3083,
         "mean": 0.0411,
+        "rmse": 0.0643,
         "iqr": 0.036
       },
       "velocity_error_mps": {
@@ -397,6 +464,7 @@
         "p95": 0.2654,
         "max": 0.3676,
         "mean": 0.1028,
+        "rmse": 0.1282,
         "iqr": 0.1031
       }
     },
@@ -410,6 +478,7 @@
         "p95": 0.7584,
         "max": 0.9006,
         "mean": 0.3817,
+        "rmse": 0.4517,
         "iqr": 0.4566
       },
       "heading_error_deg": {
@@ -421,6 +490,7 @@
         "p95": 3.4147,
         "max": 7.6172,
         "mean": 1.0804,
+        "rmse": 1.623,
         "iqr": 0.9902
       },
       "speed_error_mps": {
@@ -432,6 +502,7 @@
         "p95": 0.2959,
         "max": 0.4795,
         "mean": 0.0755,
+        "rmse": 0.1187,
         "iqr": 0.0766
       },
       "velocity_error_mps": {
@@ -443,6 +514,7 @@
         "p95": 0.8059,
         "max": 1.7146,
         "mean": 0.243,
+        "rmse": 0.3678,
         "iqr": 0.1867
       }
     }
@@ -476,6 +548,7 @@
         "p95": 0.69,
         "max": 0.727,
         "mean": 0.5912,
+        "rmse": 0.6003,
         "iqr": 0.0741
       },
       "velocity_error_mps": {
@@ -487,6 +560,7 @@
         "p95": 0.3211,
         "max": 0.4463,
         "mean": 0.1245,
+        "rmse": 0.1603,
         "iqr": 0.1529
       },
       "speed_error_mps": {
@@ -498,6 +572,7 @@
         "p95": 0.1957,
         "max": 0.3083,
         "mean": 0.0506,
+        "rmse": 0.0814,
         "iqr": 0.0387
       },
       "heading_error_deg": {
@@ -509,6 +584,7 @@
         "p95": 1.593,
         "max": 1.8354,
         "mean": 0.5271,
+        "rmse": 0.6929,
         "iqr": 0.5409
       },
       "length_error_m": -1.169,
@@ -533,6 +609,7 @@
         "p95": 0.3323,
         "max": 0.3622,
         "mean": 0.1874,
+        "rmse": 0.2106,
         "iqr": 0.1718
       },
       "velocity_error_mps": {
@@ -544,6 +621,7 @@
         "p95": 0.3416,
         "max": 0.8985,
         "mean": 0.1736,
+        "rmse": 0.2203,
         "iqr": 0.1375
       },
       "speed_error_mps": {
@@ -555,6 +633,7 @@
         "p95": 0.1392,
         "max": 0.1955,
         "mean": 0.0547,
+        "rmse": 0.073,
         "iqr": 0.0745
       },
       "heading_error_deg": {
@@ -566,6 +645,7 @@
         "p95": 1.6975,
         "max": 3.9099,
         "mean": 0.7719,
+        "rmse": 1.0025,
         "iqr": 0.6806
       },
       "length_error_m": -0.192,
@@ -590,6 +670,7 @@
         "p95": 0.5054,
         "max": 0.5079,
         "mean": 0.4626,
+        "rmse": 0.4635,
         "iqr": 0.0469
       },
       "velocity_error_mps": {
@@ -601,6 +682,7 @@
         "p95": 0.1928,
         "max": 0.2106,
         "mean": 0.1121,
+        "rmse": 0.1221,
         "iqr": 0.0696
       },
       "speed_error_mps": {
@@ -612,6 +694,7 @@
         "p95": 0.0802,
         "max": 0.1036,
         "mean": 0.0445,
+        "rmse": 0.0501,
         "iqr": 0.0323
       },
       "heading_error_deg": {
@@ -623,6 +706,7 @@
         "p95": 0.887,
         "max": 1.0141,
         "mean": 0.4377,
+        "rmse": 0.5004,
         "iqr": 0.3524
       },
       "length_error_m": 0.086,
@@ -647,6 +731,7 @@
         "p95": 0.1946,
         "max": 0.2022,
         "mean": 0.1356,
+        "rmse": 0.1434,
         "iqr": 0.081
       },
       "velocity_error_mps": {
@@ -658,6 +743,7 @@
         "p95": 0.1879,
         "max": 0.3723,
         "mean": 0.0851,
+        "rmse": 0.1047,
         "iqr": 0.0727
       },
       "speed_error_mps": {
@@ -669,6 +755,7 @@
         "p95": 0.0761,
         "max": 0.0886,
         "mean": 0.0291,
+        "rmse": 0.0375,
         "iqr": 0.0338
       },
       "heading_error_deg": {
@@ -680,6 +767,7 @@
         "p95": 1.1582,
         "max": 2.1877,
         "mean": 0.4911,
+        "rmse": 0.6442,
         "iqr": 0.6727
       },
       "length_error_m": -0.192,
@@ -704,6 +792,7 @@
         "p95": 0.8868,
         "max": 0.9006,
         "mean": 0.6656,
+        "rmse": 0.6757,
         "iqr": 0.165
       },
       "velocity_error_mps": {
@@ -715,6 +804,7 @@
         "p95": 1.4191,
         "max": 1.7146,
         "mean": 0.5134,
+        "rmse": 0.6717,
         "iqr": 0.3996
       },
       "speed_error_mps": {
@@ -726,6 +816,7 @@
         "p95": 0.4295,
         "max": 0.4795,
         "mean": 0.1623,
+        "rmse": 0.2188,
         "iqr": 0.2492
       },
       "heading_error_deg": {
@@ -737,6 +828,7 @@
         "p95": 6.3878,
         "max": 7.6172,
         "mean": 2.1817,
+        "rmse": 2.9108,
         "iqr": 1.2843
       },
       "length_error_m": 0.086,

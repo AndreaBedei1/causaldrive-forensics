@@ -31,10 +31,9 @@ digraph "global" {
   "g27" [label="CLOSING_END\nB -> C\nt=+0.50", fillcolor="#bfdbfe"];
   "g28" [label="MOVING_END\nA\nt=+0.55", fillcolor="#e5e7eb"];
   "g29" [label="STOP_START\nA\nt=+0.55", fillcolor="#e5e7eb"];
-  "g30" [label="COLLISION\nA + B\nt=+0.65", fillcolor="#fca5a5", peripheries=2];
-  "g31" [label="MOVING_END\nB\nt=+0.65", fillcolor="#e5e7eb"];
-  "g32" [label="STOP_START\nB\nt=+0.65", fillcolor="#e5e7eb"];
-  "g33" [label="BRAKE_START\nB\nt=+0.65", fillcolor="#fde68a"];
+  "g30" [label="MOVING_END\nB\nt=+0.65", fillcolor="#e5e7eb"];
+  "g31" [label="STOP_START\nB\nt=+0.65", fillcolor="#e5e7eb"];
+  "g32" [label="BRAKE_START\nB\nt=+0.65", fillcolor="#fde68a"];
   {rank=same; "g01"; "g02"; "g03"; "g04"; "g05"; "g06"; "g07"; "g08";}
   {rank=same; "g09"; "g10";}
   {rank=same; "g11"; "g12";}
@@ -44,7 +43,7 @@ digraph "global" {
   {rank=same; "g21"; "g22"; "g23";}
   {rank=same; "g25"; "g26"; "g27";}
   {rank=same; "g28"; "g29";}
-  {rank=same; "g30"; "g31"; "g32"; "g33";}
+  {rank=same; "g30"; "g31"; "g32";}
   "g01" -> "g09" [label="PRECEDES"];
   "g01" -> "g10" [label="PRECEDES"];
   "g02" -> "g09" [label="PRECEDES"];
@@ -98,11 +97,9 @@ digraph "global" {
   "g28" -> "g30" [label="PRECEDES"];
   "g28" -> "g31" [label="PRECEDES"];
   "g28" -> "g32" [label="PRECEDES"];
-  "g28" -> "g33" [label="PRECEDES"];
   "g29" -> "g30" [label="PRECEDES"];
   "g29" -> "g31" [label="PRECEDES"];
   "g29" -> "g32" [label="PRECEDES"];
-  "g29" -> "g33" [label="PRECEDES"];
   "g07" -> "g09" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g16" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];
   "g07" -> "g22" [label="SAME_TRACK", style=dashed, color="#2563eb", constraint=false];

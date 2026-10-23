@@ -10,7 +10,12 @@
       ],
       "sim_time": 1990.8957802802324,
       "peak_impulse": 10358.219383413683,
-      "reconstructed_as": "g31",
+      "recontacts": [],
+      "reconstructed_as": "g30",
+      "reconstructed_participants": [
+        "A",
+        "B"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -21,7 +26,12 @@
       ],
       "sim_time": 1991.7957802936435,
       "peak_impulse": 2250.2757432829326,
-      "reconstructed_as": "g45",
+      "recontacts": [],
+      "reconstructed_as": "g44",
+      "reconstructed_participants": [
+        "A",
+        "C"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -84,10 +94,10 @@
     }
   ],
   "event_timing": {
-    "nodes": 58,
+    "nodes": 57,
     "max_abs_error_s": 0.0,
-    "order_pairs": 1575,
-    "order_concordant": 1575
+    "order_pairs": 1518,
+    "order_concordant": 1518
   },
   "tracks": [
     {
@@ -136,9 +146,9 @@
       "verdict": "correct",
       "samples": 121,
       "raw_rmse_to_surface_m": 0.145,
-      "smoothed_rmse_to_surface_m": 0.174,
+      "smoothed_rmse_to_surface_m": 0.173,
       "smoothed_rmse_to_centre_m": 1.812,
-      "raw_difference_speed_rmse_mps": 2.874,
+      "raw_difference_speed_rmse_mps": 2.864,
       "speed_rmse_mps": 0.271
     },
     {
@@ -148,15 +158,15 @@
       "true_identity": "A",
       "median_box_distance_m": {
         "A": 0.0,
-        "C": 2.16
+        "C": 2.13
       },
       "verdict": "correct",
       "samples": 120,
-      "raw_rmse_to_surface_m": 0.186,
-      "smoothed_rmse_to_surface_m": 0.369,
-      "smoothed_rmse_to_centre_m": 1.899,
+      "raw_rmse_to_surface_m": 0.2,
+      "smoothed_rmse_to_surface_m": 0.381,
+      "smoothed_rmse_to_centre_m": 1.88,
       "raw_difference_speed_rmse_mps": 2.809,
-      "speed_rmse_mps": 0.283
+      "speed_rmse_mps": 0.282
     },
     {
       "track": "C:track_001",
@@ -212,10 +222,10 @@
       "partner": "A",
       "track": "B:track_002",
       "seen_s_before_contact": 0.0,
-      "clearance_m": 1.454,
+      "clearance_m": 1.457,
       "true_gap_m": 0.0,
-      "error_m": 1.454,
-      "range_m": 2.232,
+      "error_m": 1.457,
+      "range_m": 2.231,
       "ttc_s": null
     },
     {

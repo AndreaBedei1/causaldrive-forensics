@@ -32,7 +32,7 @@
       "offset_to_global": -4.15,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002#segment_1 on B lie where their lines of sight enter the body (pooled median 0.53 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.59 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
@@ -83,10 +83,10 @@
         "A:track_001",
         "B:track_001",
         "C:track_001 on A",
-        "C:track_002#segment_1 on B"
+        "C:track_002 on B"
       ],
       "offset_to_global": -4.15,
-      "median_distance_sigma": 0.529,
+      "median_distance_sigma": 0.595,
       "interval": [
         -4.2,
         -4.0

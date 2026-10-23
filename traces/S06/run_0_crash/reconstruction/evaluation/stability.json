@@ -77,57 +77,47 @@
   },
   "C": {
    "tracks": {
-    "tracks": 3,
-    "births": 3,
+    "tracks": 2,
+    "births": 2,
     "losses": [
      {
-      "track": "track_002#segment_1",
-      "t": 5.15,
-      "true": "B",
-      "kind": "fragmentation",
-      "visible_after": 1.0,
-      "returns_after": 1.0,
-      "reacquired_as": []
-     },
-     {
       "track": "track_001",
-      "t": 5.2,
+      "t": 4.55,
       "true": "A",
       "kind": "fragmentation",
       "visible_after": 1.0,
       "returns_after": 1.0,
-      "reacquired_as": [
-       "track_002#segment_2"
-      ]
+      "reacquired_as": []
      }
     ],
     "phantoms": [],
-    "duplicates": [],
+    "duplicates": [
+     {
+      "true": "A",
+      "tracks": [
+       "track_001",
+       "track_002"
+      ],
+      "overlap_s": 2.4
+     }
+    ],
     "tracks_per_true": {
-     "A": 2,
-     "B": 1
+     "A": 2
     }
    },
    "ego_path": {
     "A": {
-     "entries": 1,
+     "entries": 2,
      "exits": 0,
      "oscillations": 0,
      "tracks": [
-      "track_001"
-     ]
-    },
-    "B": {
-     "entries": 1,
-     "exits": 0,
-     "oscillations": 0,
-     "tracks": [
-      "track_002#segment_1"
+      "track_001",
+      "track_002"
      ]
     }
    },
    "reference_path": {
-    "road": "Town01",
+    "road": "Town05",
     "checked": 303,
     "jumps": 0,
     "flip_flops": 0,
@@ -135,7 +125,7 @@
    },
    "critical": {},
    "trajectory": {
-    "implausible_steps": 2,
+    "implausible_steps": 3,
     "max_implied_accel_mps2": 60.9
    }
   }

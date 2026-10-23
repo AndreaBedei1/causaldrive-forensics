@@ -290,6 +290,8 @@ C:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

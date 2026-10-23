@@ -11,9 +11,14 @@
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
     "incident_context": {
+      "map": "Town03_Opt",
       "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
       "road_environment": "urban roundabout",
       "speed_limit_kmh": 50
+    },
+    "road_map": {
+      "name": "Town03_Opt",
+      "source": "incident context"
     },
     "start_t_local": 0.0,
     "end_t_local": 32.35,

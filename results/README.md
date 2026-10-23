@@ -1,20 +1,29 @@
 # Results
 
-## Current: the canonical set re-acquired on 2026-10-22
+## Current: the canonical set of 2026-10-22, final code of campaign v3 (2026-10-23)
 
-- `g0_scorecard_20261022/`: the G0 scorecard of the 22 runs (`scorecard.md|json`, `scripts/g0_scorecard.py`) and
-  the tracking diagnostic by motion regime (`tracking_regimes.md|json`, `scripts/tracking_regimes.py`).
+- `g0_final/`: the G0 scorecard of the 22 runs with the final code (`scorecard.md|json`, `scripts/g0_scorecard.py`)
+  and the tracking diagnostic by motion regime (`tracking_regimes.md|json`, `scripts/tracking_regimes.py`).
   Analysis: `docs/G0_ERROR_ANALYSIS.md`.
+- `campaign_v3/`: the tables, figures and index of the robustness campaign v3 (`scripts/campaign_v3_report.py`;
+  report `docs/CAMPAIGN_V3_REPORT.md`).  The job records themselves stay on the data disk (paths and SHA-256 in
+  `campaign_v3/index.md`).
 - `reproducibility_20261022/`: integrity and reproducibility summaries of the two acquisitions:
   - set A, installed in `traces/`;
   - set B, the repeat, kept with the lab runs on `F:\CarlaGraph_repro_20261022`;
-  - the S10 repeats.
+  - the S10 repeats;
+  - the amendment of 2026-10-23: the road map added to the 22 incident contexts (old and new SHA-256).
 
   Protocol and causes: `docs/REPRODUCIBILITY.md`.
 
 The 22 canonical runs keep their reconstruction and evaluation next to the raw data in
-`traces/<scenario>/<run>/reconstruction/`.  Campaign v3 (`docs/CAMPAIGN_V3.md`) has not been run.  Its results will
-go to `results/robustness/campaign_v3/`.
+`traces/<scenario>/<run>/reconstruction/`.
+
+## Superseded on the same recordings
+
+- `g0_scorecard_20261022/`: the G0 scorecard of 2026-10-22, before the recontact rule, the supplied map, the
+  inherited-identity guard and the final scorecard definitions (`docs/G0_ERROR_ANALYSIS.md` lists the changes).
+  Kept for traceability; `g0_final/` replaces it.
 
 ## Historical: the previous recordings (before commit `34162ca7`)
 

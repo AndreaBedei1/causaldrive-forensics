@@ -21,7 +21,7 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S05/run_0_crash | C | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S06/run_0_crash | A | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S06/run_0_crash | B | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-| S06/run_0_crash | C | 3 | 3 | 2 | 2 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 |
+| S06/run_0_crash | C | 2 | 2 | 1 | 1 | 0 | 0 | 0 | 2.4 | 2 | 0 | 0 | 0 | 3 |
 | S07/run_0_merge_conflict | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S07/run_0_merge_conflict | B | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S08/run_0_rolls_through | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
@@ -29,7 +29,7 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S09/run_0_near_simultaneous | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S09/run_0_near_simultaneous | B | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |
 | S10/run_0_deflected_into_c | A | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| S10/run_0_deflected_into_c | B | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | None | 0 |
+| S10/run_0_deflected_into_c | B | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
 | S10/run_0_deflected_into_c | C | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S11/run_0_consequential | A | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
 | S11/run_0_consequential | B | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -54,7 +54,7 @@ Track losses: *fragm.* = the radar kept measuring the true body in at least half
 | S18/run_0_collision_ambiguity | B | 6 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | S19/run_0_highway_curve | A | 11 | 11 | 9 | 0 | 4 | 5 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | S19/run_0_highway_curve | B | 7 | 7 | 5 | 0 | 0 | 5 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| **total** | | 169 | 169 | 88 | 2 | 8 | 78 | 0 | 0.00 | 35 | 4 | 0 | 10 | 3 |
+| **total** | | 168 | 168 | 87 | 1 | 8 | 78 | 0 | 2.40 | 34 | 4 | 0 | 10 | 4 |
 
 | run | CUT_IN found | true | TP | FP | missed | onset errors (s) | closure violations | wrong links | false merges | missed merges |
 |---|--:|--:|--:|---|---|---|--:|--:|--:|--:|

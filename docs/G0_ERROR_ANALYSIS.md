@@ -1,45 +1,53 @@
-# G0 reconstruction on the 2026-10-22 canonical set: results and error analysis
+# G0 reconstruction of the canonical set (final, 2026-10-23): results and error analysis
 
-The reconstruction code is unchanged in G0, and no threshold was changed.  The reconstruction changes of this branch
-act only when the pose source is not the recorded stream:
-* the measured pose in the local path (`d9c4d4e8`);
-* the poses written for the viewer (`e0480b25`).
+The numbers below are those of the frozen code of campaign v3.  Compared with the analysis of 2026-10-22, five
+changes act in G0 (no threshold was tuned):
+* **Recontact** (`c884c288`): a contact of the same pair within 2 s, the bodies never more than 1 m apart, belongs
+  to the collision it follows.  S04 `a_front_pushed` now has 2 collisions, one with its recontact, instead of 3.
+* **Map as supplied incident context** (`41d19dfb`): S06 recorder C used Town01's lanes and S10 recorder B none;
+  both now use Town05, which changes their tracking and some of their events (below).
+* **Inherited identities** (`f3fef365`): an observer's track of its own collision partner passes no identity on to
+  a track lying on the observer itself after their contact (S06, below).
+* **Evaluation** (`6e3883cd`, `d7e7cfc4`): wrong recorder links are counted (the verdict was never matched), and a
+  collision named with the wrong participants counts as detected, not missed.  Neither changes a G0 number.
+* **Scorecard definitions** (`5b8e0753`): recall over reportable collisions, recorder ghosts out of the road-user
+  errors, RMSE, phantoms near and far.
 
 Sources of the numbers:
-* `results/g0_scorecard_20261022/scorecard.{md,json}` (`scripts/g0_scorecard.py`);
-* `results/g0_scorecard_20261022/tracking_regimes.{md,json}` (`scripts/tracking_regimes.py`);
-* `docs/CANONICAL_VALIDATION.md`;
+* `results/g0_final/scorecard.{md,json}` (`scripts/g0_scorecard.py`);
+* `results/g0_final/tracking_regimes.{md,json}` (`scripts/tracking_regimes.py`);
+* `docs/CANONICAL_VALIDATION.md` (14 PASS, 8 WARN, 0 FAIL);
 * `docs/STABILITY_AUDIT.md`.
 
 Definitions are in the `cdf.evaluation.scorecard` docstring.
 
-## Headline (22 runs, 95 vehicles, 27 true vehicle-vehicle contacts)
+## Headline (22 runs, 95 vehicles, 26 true vehicle-vehicle collisions)
 
 | family | result |
 |---|---|
-| Collisions | 27/27 detected, 27/27 with the correct participants, 0 invented, timing error 0.00 s.  All 27 contacts are between two recorders, so these numbers measure the matching of the recorders' own collision reports (next section) |
-| Completeness | 50 recorders, each represented by its own pose stream.  **45/45 road users that record nothing are observable and represented**.  **20 duplicates** (a vehicle split over 2-4 road users, S14-S19), **1 recorder ghost** (S06), 0 phantoms |
+| Collisions | 26/26 detected and 26/26 with the correct participants (0 missed, 0 misattributed), 0 invented, timing error 0.00 s; one collision (S04 `a_front_pushed`, A-B) carries its recontact 0.65 s later.  All 26 are between two recorders, so these numbers measure the matching of the recorders' own collision reports (next section) |
+| Completeness | 50 recorders, each represented by its own pose stream.  **45/45 road users that record nothing are observable and represented**.  **20 duplicates** (a vehicle split over 2-4 road users, S14-S19), **1 recorder ghost** (S06: C's track that slides from B onto A at their collision, left unresolved), 0 phantoms |
 | Continuity | represented time over observable time, lowest per run: 0.45 (S16), 0.63 (S17), 0.68 (S12); 0.83-0.93 elsewhere |
-| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.07 m/s, P95 0.09-0.58 m/s.  Pooled over the runs: median 0.21 m in steady motion, 0.33 m in turns (definition below).  S06's 1.75 m belongs to its recorder ghost |
-| Association | 0 wrong recorder links, 0 false merges; 1 missed recorder link (S06); 43 missed merges (S14-S19: conservative, identities left unresolved) |
-| CRITICAL_TTC | 43/43 justified warnings arrive **before** the impact (lead time min 0.75 s, median 1.55 s).  "Justified" means the COVERAGE oracle also raises one about the partner within 8 s before the contact.  The other 11 of the 54 (recorder, partner) cases have neither a warning nor an oracle warning; in most of them the recorder is the struck vehicle |
-| Path intrusions (manoeuvres: EGO_PATH_ENTRY and CUT_IN starts less than 2 s apart are one manoeuvre, matched in either order and kind within 2 s) | 27 of 32 oracle manoeuvres found; 5 missed and 8 reported without an oracle counterpart.  After the ground-truth check below, none of the 5 misses has forensic weight; 7 of the 8 extras are real but minor reconstruction errors, and the eighth is a real manoeuvre the oracle misses |
+| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.07 m/s, P95 0.09-0.58 m/s.  Pooled over the runs: median 0.21 m in steady motion, 0.33 m in turns (definition below).  Recorder ghosts are not road-user estimates and are left out (S06 has no other road user) |
+| Association | 0 wrong recorder links, 0 false merges; 1 missed recorder link (S06, the same track); 43 missed merges (S14-S19: conservative, identities left unresolved) |
+| CRITICAL_TTC | 42/42 justified warnings arrive **before** the impact (lead time min 0.75 s, median 1.53 s).  "Justified" means the COVERAGE oracle also raises one about the partner within 8 s before the collision.  In the other (recorder, partner) cases neither the reconstruction nor the oracle warns; in most of them the recorder is the struck vehicle |
+| Path intrusions (manoeuvres: EGO_PATH_ENTRY and CUT_IN starts less than 2 s apart are one manoeuvre, matched in either order and kind within 2 s) | 26 of 33 oracle manoeuvres found; 7 missed and 7 reported without an oracle counterpart.  After the ground-truth check below, none of the 7 misses is a missed hazard; 6 of the 7 extras are real but minor reconstruction errors, and the seventh is a real manoeuvre the oracle misses |
 | Unconfirmed CRITICAL_TTC alarms | 2 (S14, after the contact), physically plausible (below) |
 
 ## Two different things: a detected collision and a reconstructed identity
 
 | | what produces it | what the G0 numbers say |
 |---|---|---|
-| **Collision detected** | each recorder's own **impact (collision) sensor**: the time and impulse magnitude of a contact it felt, with no partner identity | 27/27 contacts detected; all are between two recorders, so both felt them |
-| **Participants of a collision** | the matching of the two recorders' **impact reports** (equal and opposite impulses, bodies touching in their own pose streams).  Radar only vetoes a pairing its pre-contact view contradicts | 27/27 pairs correct, 0 invented |
+| **Collision detected** | each recorder's own **impact (collision) sensor**: the time and impulse magnitude of a contact it felt, with no partner identity | 26/26 collisions detected; all are between two recorders, so both felt them |
+| **Participants of a collision** | the matching of the two recorders' **impact reports** (equal and opposite impulses, bodies touching in their own pose streams).  Radar only vetoes a pairing its pre-contact view contradicts | 26/26 pairs correct, 0 invented |
 | **Identity of a radar track** | the **radar** association: which track of a recorder is which other recorder (recorder link), or an anonymous road user U1, U2, ... for a vehicle that records nothing | recorder links: 0 wrong, 1 missed (S06); road users: 45/45 represented, 20 duplicates, 0 false merges |
 
 A correct collision pair therefore does not show that radar recognised the partner.  The radar identities are judged
 on their own lines of the scorecard.
 
-## How the collisions are identified, and what 27/27 means
+## How the collisions are identified, and what 26/26 means
 
-* **Every true contact involves two recorders.**  All 27 true vehicle-vehicle contacts of the canonical set are
+* **Every true contact involves two recorders.**  All 26 true vehicle-vehicle collisions of the canonical set are
   between two recording vehicles: 16 runs have two recorders, 6 have three, and no contact involves a vehicle
   that records nothing.  Each participant's own collision sensor reports the contact with its time and impulse
   magnitude, and no partner identity.  `test_sensor_ground_truth_separation` checks this on all 50 recorder files.
@@ -53,7 +61,7 @@ on their own lines of the scorecard.
   Each match fixes the clock offset between the two recorders, and t_global = 0 is the strongest matched contact.
   A later contact must agree with the offsets already fixed, within `clock_tolerance_s` = 0.1 s.
 * **Consequences.**
-  * The participants of a contact are named from both participants' own collision sensors.  The 27/27 measures the
+  * The participants of a contact are named from both participants' own collision sensors.  The 26/26 measures the
     matching of collision reports across recorders, not the recognition of a non-recording partner by radar.
   * The timing error of 0.00 s holds by construction, because the clocks are aligned on the matched contacts
     themselves.  The later contacts of S04, S10 and S11 must agree with the fixed offsets, and in G0 they do exactly.
@@ -64,12 +72,15 @@ on their own lines of the scorecard.
   * **The campaign.**  Its GNSS and radar degradations leave the collision reports unchanged.  They can act on the
     matching only through the pose-consistency gate (GNSS) and the radar approach check, and the smoke test kept
     100 % identification at every level.  The condition that tests the matching itself is the `impulse` family
-    (relative impulse noise 2-20 %, already implemented).  It is not among the v3 families: including it is a
-    decision for the campaign.
-* **Repeated contacts versus distinct incidents.**  A pause longer than `merge_gap_s` = 0.5 s always separates two
-  contacts.  A weaker burst (< 1000 N s) within it continues the same contact (scraping, pushing).  The
+    (relative impulse noise 2-20 %, already implemented).  It is not among the v3 families (decision of the
+    freeze: the requested degradations are GNSS and radar; the earlier campaign studied impulse noise).
+* **Repeated contacts versus distinct incidents.**  Within one recorder, a pause longer than `merge_gap_s` = 0.5 s
+  separates two contact reports, and a weaker burst (< 1000 N s) within it continues the same contact (scraping,
+  pushing).  Across the global graph, a contact of the same pair within 2 s, the bodies never more than 1 m apart
+  in between, is a recontact of the collision it follows (`recontact_max_pause_s`, `recontact_max_separation_m`).  The
   multi-contact runs are reconstructed with every contact detected and its pair identified:
-  * S04 a_front_pushed: 3 contacts;
+  * S04 a_front_pushed: 2 collisions, the first with a recontact (A hits B, the bodies rebound by 0.15 m, A touches
+    B again 0.65 s later and pushes it; B hits C in between);
   * S04 b_rear_first: 2;
   * S10: 2;
   * S11: 2.
@@ -142,7 +153,8 @@ the S16 case was checked visually.  Times are the recorder's local time and the 
 | S10 A/B 3.60 (-0.20) | missed intrusion | B enters A's path 0.2 s before the A-B contact | as S09 |
 | S16 A/I 6.45 (-0.30) | missed intrusion | I keeps its lane 30-35 m ahead; A swerves (yaw rate -4 then +17 deg/s), so I falls in A's predicted path | oracle artefact: the recorder moves, not the target; not reporting a target manoeuvre is correct |
 | S17 A/E 6.30 (-1.00), B/E 6.35 (-0.95) | missed intrusions | E keeps its lane 42 m ahead; A and B swerve in opposite directions (yaw rates up to 8 deg/s) | oracle artefacts, as S16 A/I |
-| S06 C/B 4.60 (+0.45) | extra intrusion | after its crash B stops 7.7 m ahead of C, centre 4.3 m to C's left, rotated 122 deg; its nearest corner is about 1 m outside C's width | borderline geometry: the reconstructed box sits up to about 1 m closer than the truth; minor reconstruction error |
+| S06 C/B 3.75 (t_local) | missed intrusion | C's radar track follows B until the A-B collision (4.1 s), then slides onto A (0.2 m away) and stays on A; the reconstruction reports the entry at 4.20 s on that track | scored against the track's majority identity A it matches the oracle's C/A 4.40; B's entry therefore counts as missed.  A consequence of the track changing body at the contact, which the identity association now leaves unresolved |
+| S10 B/A 2.85 (t_local) | missed intrusion | A crosses B's left-turn path from the left at 11 m/s; with B's lane-following corridor through the turn, A enters it at about 2.85 s | the reconstruction warns CRITICAL_TTC about A at 2.50 s, 1.3 s before the 3.80 s impact, and marks A in B's path only implicitly (EGO_PATH_EXIT at 4.85 s); no missed hazard |
 | S13 abreast, platoon, passing A/B 6.30 (+0.10) | extra intrusion (same in the three variants) | B is abreast of A (0.6 m behind A's centre); A swerves into B's lane (yaw rate -15 then +29 deg/s) for the side contact | false intrusion of an abreast car at the moment of contact (side view of B); minor, at the contact |
 | S14 A/G 11.35 (+3.60) | extra intrusion | G crosses A's lane 25 m ahead from right to left (lateral speed up to 4.8 m/s); the body enters A's corridor about 1.5-2 s earlier | real manoeuvre the oracle does not report (likely occluded in dense traffic); the reconstruction reports it 1.5-2 s late |
 | S14 A/J 7.50 (-0.25) | extra intrusion | J keeps its lane 46 m ahead; A swerves before the contact (yaw rate -8 deg/s), so J sweeps across A's heading line | reconstruction false intrusion caused by the recorder's own rotation at long range |
@@ -152,18 +164,20 @@ the S16 case was checked visually.  Times are the recorder's local time and the 
 | S14 A/B 6.5 (validator WARN "true cut-in not reported") | missed CUT_IN | B is abreast of A (-1.7 to +0.1 m longitudinal offset) and steers into A's lane for the side contact | correct: no CUT_IN for cars abreast (rule of 2026-10-14); the validator's heuristic counts the side-swipe |
 
 **Summary.**
-* **Missed intrusions.**  None of the 5 is a missed hazard:
+* **Missed intrusions.**  None of the 7 is a missed hazard:
   * 2 come a few tenths of a second before a reconstructed collision;
+  * 1 (S10 B/A) comes after a CRITICAL_TTC warning about the same vehicle 1.3 s before the impact;
+  * 1 (S06 C/B) is the entry of B on a track that later follows A;
   * 3 are oracle artefacts.  The recorder's own swerve puts a target that keeps its lane into the recorder's
     predicted path.  This is the situation where "a vehicle that follows the road geometry must not be read as
     the author of a cut-in".
-* **Extra intrusions.**  7 of the 8 are real but minor reconstruction errors, all at or around the contacts:
+* **Extra intrusions.**  6 of the 7 are real but minor reconstruction errors, all at or around the contacts:
   * 3 are the abreast side contact of S13, one per variant;
   * 2 come from the recorder's own rotation with targets 32-46 m ahead (S14 A/J, S16 A/G);
-  * 1 is post-contact (S16 A/I);
-  * 1 is borderline geometry (S06).
+  * 1 is post-contact (S16 A/I).
 
-  The eighth (S14 A/G) is a real manoeuvre that the oracle misses.  The reconstruction reports it late.
+  The seventh (S14 A/G) is a real manoeuvre that the oracle misses.  The reconstruction reports it late.  The
+  borderline S06 C/B extra of 2026-10-22 disappeared with the correct map.
 
 ## Main errors, by importance
 
@@ -207,13 +221,13 @@ A single pooled event-match percentage has three flaws:
 
 It is no longer reported as an accuracy.  The ground-truth check above shows why: 3 of the 5 "misses" are oracle
 artefacts.  The scorecard reports instead what the forensic question needs:
-* whether every observable critical situation was warned before the impact (43/43);
+* whether every observable critical situation was warned before the impact (42/42);
 * whether intrusions are recognised in either form;
 * the list of disagreements, each checked against the ground truth.
 
 ## What to check visually (both viewers)
 
-* **S06**: recorder ghost U1.
+* **S06**: recorder ghost U1, C's track that slides from B onto A at their collision.
 * **S14-S19**: duplicates and continuity gaps.
 * **The disagreements in the table above**: frames in `F:\CarlaGraph_repro_20261022\semantic_cases\`.
 * **S10**: the reproducible post-impact contact sequence A-C.

@@ -113,25 +113,7 @@
   },
   {
     "local_graph": "C",
-    "local_track": "track_002#segment_1",
-    "global_entity": "B",
-    "status": "ASSOCIATED",
-    "confidence": 1.0,
-    "candidate": "B",
-    "collision_event": null,
-    "evidence": [
-      "no matched collision of C names a partner",
-      "common frame: its returns lie on B's own footprint (median 0.00 m, 0.00 sigma of the relative uncertainty, over 41 samples; 100% within 3 sigma) at B's own velocity"
-    ],
-    "blocking": [],
-    "source_graphs": [
-      "B",
-      "C"
-    ]
-  },
-  {
-    "local_graph": "C",
-    "local_track": "track_002#segment_2",
+    "local_track": "track_002",
     "global_entity": "U1",
     "status": "ANONYMOUS",
     "confidence": null,
@@ -139,7 +121,7 @@
     "collision_event": null,
     "evidence": [
       "no matched collision of C names a partner",
-      "anonymous road user U1: C:track_002#segment_2"
+      "anonymous road user U1: C:track_002"
     ],
     "blocking": [
       "no matched collision of C names a partner"

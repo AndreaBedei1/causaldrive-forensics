@@ -11,50 +11,43 @@ Privileged evaluation (ground truth used here only). Assumptions: recorder raw c
 | B:track_001 | C | ASSOCIATED | common_frame | C | 1.000 | correct link |
 | B:track_002 | A | ASSOCIATED | collision | A | 1.000 | correct link |
 | C:track_001 | A | ASSOCIATED | common_frame | A | 1.000 | correct link |
-| C:track_002#segment_1 | B | ASSOCIATED | common_frame | B | 0.935 | correct link |
-| C:track_002#segment_2 | U1 | ANONYMOUS | - | A | 1.000 | missed link (true identity A) |
+| C:track_002 | U1 | ANONYMOUS | - | A | 0.800 | missed link (true identity A) |
 
-Counts: correct link: 6, missed link: 1
+Counts: correct link: 5, missed link: 1
 
 ## Anonymous entities
 
 | Entity | Source tracks | True identity | Recorder? | Purity |
 |--------|---------------|---------------|-----------|-------:|
-| U1 | C:track_002#segment_2 | A | yes | 1.000 |
+| U1 | C:track_002 | A | yes | 0.800 |
 
 Merges over pairs of anonymous tracks: correct 0, false 0, missed 0.
 Fragmentation (true road user -> entities): A -> U1
 
-## Fused state errors (against the majority identity, 99 pure states; 0 impure states where a source track was on another body, excluded)
+## Fused state errors (against the majority identity, 106 pure states; 25 impure states where a source track was on another body, excluded)
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 99 | 1.745 | 1.656 | 1.769 | 0.113 | 1.784 | 1.799 | 1.832 |
-| coverage_s | 1 | 9.850 | 9.850 | 9.850 | 0.000 | 9.850 | 9.850 | 9.850 |
+| centre_error_m | 106 | 1.813 | 1.768 | 1.844 | 0.076 | 1.849 | 1.851 | 1.853 |
+| coverage_s | 1 | 13.050 | 13.050 | 13.050 | 0.000 | 13.050 | 13.050 | 13.050 |
+| heading_error_deg | 1 | 69.637 | 69.637 | 69.637 | 0.000 | 69.637 | 69.637 | 69.637 |
 | length_error_m | 1 | 0.192 | 0.192 | 0.192 | 0.000 | 0.192 | 0.192 | 0.192 |
-| normalised_centre_error | 99 | 10.369 | 9.390 | 10.907 | 1.516 | 11.212 | 11.240 | 11.285 |
-| single_track_nominal_centre_error_m | 98 | 1.205 | 1.176 | 1.223 | 0.047 | 1.234 | 1.247 | 1.256 |
-| speed_error_mps | 99 | 0.066 | 0.043 | 0.100 | 0.057 | 0.562 | 0.578 | 0.870 |
-| velocity_error_mps | 99 | 0.066 | 0.043 | 0.100 | 0.057 | 0.562 | 0.578 | 0.870 |
+| normalised_centre_error | 106 | 10.979 | 9.684 | 11.827 | 2.143 | 12.005 | 12.029 | 12.111 |
+| single_track_nominal_centre_error_m | 105 | 1.937 | 1.894 | 1.964 | 0.070 | 1.970 | 1.978 | 1.986 |
+| speed_error_mps | 106 | 0.062 | 0.020 | 0.103 | 0.083 | 0.919 | 1.225 | 1.893 |
+| velocity_error_mps | 106 | 0.062 | 0.020 | 0.103 | 0.083 | 0.919 | 1.257 | 3.522 |
 | width_error_m | 1 | 0.263 | 0.263 | 0.263 | 0.000 | 0.263 | 0.263 | 0.263 |
-
-### Method: box_fit
-
-| Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
-|----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 1 | 1.089 | 1.089 | 1.089 | 0.000 | 1.089 | 1.089 | 1.089 |
-| speed_error_mps | 1 | 0.526 | 0.526 | 0.526 | 0.000 | 0.526 | 0.526 | 0.526 |
-| velocity_error_mps | 1 | 0.526 | 0.526 | 0.526 | 0.000 | 0.526 | 0.526 | 0.526 |
 
 ### Method: covariance_intersection
 
 | Quantity | n | median | q25 | q75 | IQR | p90 | p95 | max |
 |----------|--:|-------:|----:|----:|----:|----:|----:|----:|
-| centre_error_m | 98 | 1.746 | 1.659 | 1.769 | 0.110 | 1.785 | 1.799 | 1.832 |
-| speed_error_mps | 98 | 0.066 | 0.042 | 0.095 | 0.052 | 0.562 | 0.579 | 0.870 |
-| velocity_error_mps | 98 | 0.066 | 0.042 | 0.095 | 0.052 | 0.562 | 0.579 | 0.870 |
+| centre_error_m | 106 | 1.813 | 1.768 | 1.844 | 0.076 | 1.849 | 1.851 | 1.853 |
+| heading_error_deg | 1 | 69.637 | 69.637 | 69.637 | 0.000 | 69.637 | 69.637 | 69.637 |
+| speed_error_mps | 106 | 0.062 | 0.020 | 0.103 | 0.083 | 0.919 | 1.225 | 1.893 |
+| velocity_error_mps | 106 | 0.062 | 0.020 | 0.103 | 0.083 | 0.919 | 1.257 | 3.522 |
 
-Calibration of pos_std_m over 99 states: within 1/2/3 sigma 0.010/0.030/0.051 (Gaussian: 0.393/0.865/0.989).
+Calibration of pos_std_m over 106 states: within 1/2/3 sigma 0.000/0.000/0.000 (Gaussian: 0.393/0.865/0.989).
 
 ## Observed-trajectory alignment
 

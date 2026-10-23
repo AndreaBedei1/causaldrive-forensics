@@ -44,7 +44,7 @@
    },
    "ego_path": {
     "A": {
-     "entries": 1,
+     "entries": 0,
      "exits": 1,
      "oscillations": 0,
      "tracks": [
@@ -53,7 +53,11 @@
     }
    },
    "reference_path": {
-    "road": null
+    "road": "Town05",
+    "checked": 78,
+    "jumps": 0,
+    "flip_flops": 0,
+    "examples": []
    },
    "critical": {
     "A": 1

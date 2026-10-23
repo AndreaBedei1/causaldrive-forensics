@@ -34,7 +34,7 @@ and raises no error, and lane-dependent events and tests then differ.  Set
 | METHOD, event_definitions, FINAL_PARAMETER_AUDIT, SCENARIOS, REPLAY, campaign_acquisition | FROZEN_CAMPAIGN (protocol of the 2026-10-15/16 robustness campaign) |
 | REPRODUCIBILITY, SENSORS_AND_GROUND_TRUTH, G0_ERROR_ANALYSIS, CANONICAL_VALIDATION, STABILITY_AUDIT | ROBUSTNESS_CAMPAIGN (its report) |
 | CAMPAIGN_V3, robustness_profiles | RTK5G_PREFLIGHT_REVIEW (review of the RTK/5G profiles on the previous recordings) |
-| STABILITY_REVIEW, paper_positioning, bibliography, REPOSITORY | |
+| STABILITY_REVIEW, paper_positioning, REFERENCES (all references; formerly bibliography), REPOSITORY, PROJECT_STATUS | |
 
 ## Branches and worktrees
 

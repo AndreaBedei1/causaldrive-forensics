@@ -1,63 +1,34 @@
-# Project status (2026-10-22, stop point before Andrea's visual validation)
+# Project status (2026-10-23, finalisation)
 
-**Branch:** `work/reproducible-g0-20261022`, cut from `review/rtk5g-preflight`.
-* Not merged and not pushed; `main` is untouched.
-* `origin/main` has 4 newer commits with the paper (`paper/`), to be merged together with this work.
+**Branch:** `work/reproducible-g0-20261022`, to be merged into `main` together with the paper commits of
+`origin/main` (Lorenzo, `paper/` only; a trial merge is clean).
 
-## Done
+## Done in this phase
 
 | item | evidence |
 |---|---|
-| Verified backup before any change | `F:\CarlaGraph_backup_20261022\`: git bundle of every ref and the untracked data, with SHA-256.  Re-verified before the approved removals (bundle ok, 21,311 files ok) |
-| Reproducible CARLA acquisition | 4 causes found and fixed (`docs/REPRODUCIBILITY.md`).  S10: 6/6 repeats bit-identical, plus 2 more recordings at the end of the work, bitwise identical to the canonical one.  The 22 runs, acquired twice: 21/22 bit-identical, and S04 b_rear_first differs by 3e-5 m |
-| New canonical set of 22 runs | re-acquired without the depth camera; integrity 22/22 (`scripts/check_dataset.py`); raw files match their SHA-256 list |
-| Sensor / ground-truth separation | audit (`docs/SENSORS_AND_GROUND_TRUTH.md`); the local path uses the measured pose; the viewer draws, and turns the radar tracks with, the pose the reconstruction used; guard tests on the canonical data, the frame counter, `vehicle_transform` and a perturbed-pose reconstruction |
-| G0 reconstruction and evaluation | `results/g0_scorecard_20261022/`; analysis in `docs/G0_ERROR_ANALYSIS.md` |
-| Two viewers, side by side and synchronised | GROUND TRUTH and RECONSTRUCTION, each on its own CARLA server.  Only the instant, the play state and the speed cross between them (`cdf.replay.sync`).  Checked live on S04 b_rear_first (the run whose labels differ by 1.55 s) |
-| Error analysis | collisions detected by impact sensors versus identities by radar; every contact is between two recorders; position error definition; completeness and the visual effect of duplicates; tracking by regime, including radar tracks of braking and colliding vehicles; every semantic disagreement checked against the ground truth |
-| Campaign v3 infrastructure (not run) | families, asymmetric radar on recorder subsets (pairs run end to end), summaries stratified by number of recorders and paired with G0, intrusions matched as manoeuvres.  Smoke tests and resume checks pass.  Design in `docs/CAMPAIGN_V3.md` |
-| Repository | `docs/REPOSITORY.md`: map, branches, local data and the approved removals; historical documents in `docs/archive/` |
-| Independent review | fresh reviewer on the whole branch: 0 critical, 3 important, 10 minor.  All 3 important and 8 of the minor findings are fixed.  Of the other two, the scorecard details are open decision 6 below; the small robustness items are deferred (settle ticks inside `__enter__`, the Traffic Manager code default, a reverse check in `check_dataset.py`, stale docstrings) |
+| S04 `a_front_pushed`: one collision, not two | A hits B (4.80 s), the bodies rebound by 0.15 m, A touches B again 0.65 s later.  A contact of the same pair within 2 s, the bodies never more than 1 m apart, is now a recontact of that collision in the reconstruction (own pose streams), the evaluation and both viewers (true boxes).  Regenerated 22 runs: only S04 `a_front_pushed` changes collision structure (commit `c884c288`, `tests/test_recontact.py`) |
+| Road map as supplied incident context | the CARLA towns share coordinates: S06 recorder C fitted Town01 instead of Town05 (its tracking and path-entry events changed), S10 recorder B fitted no map.  `incident_context.json` now names the map (runner, and a documented amendment of the 22 files with old/new SHA-256); reconstruction, oracle, audit and RECONSTRUCTION viewer use it (`41d19dfb`, `tests/test_incident_map.py`) |
+| Viewers | S07 (Town03_Opt) and S19 (Town04) open without `--map`, switching maps between runs; either window drives both (play, pause, seek, speed, camera, ESC) and only the instant, play state, speed, camera and quit cross; the GROUND TRUTH viewer no longer logs "reconstructed" events.  Checked live on two servers (`41d19dfb`, `8344b5f6`, `tests/test_replay_sync.py`) |
+| Scorecard, final definitions | recall over reportable collisions; recontact splits apart from invented collisions; road-user errors without recorder ghosts; RMSE; phantoms near/far (diagnostic); the run's own `min_track_frames` (`5b8e0753`); wrong and missed recorder links counted by their exact verdicts: a wrong link was never counted before (`6e3883cd`) |
+| Campaign v3, final design | new family `radar_asym_gnss` (asymmetric radar under G2 GNSS); raw road-user errors per job for exact pooled statistics; manifest options; launcher `scripts/campaign_v3.bat` (`2e3dc6ef`); report script with t intervals over seeds, paired changes and the GNSS x radar interaction (`2b013194`) |
+| References | `docs/REFERENCES.md`: every source in one place, what it supports and the kind of evidence; DOIs re-resolved on Crossref (`bd024ccc`) |
 
 ## Decisions taken (and why)
 
-* **G0.**  It is a synthetic GNSS/INS with zero added error.  `ego.jsonl` is that stream, declared in each recorder's
-  metadata, and the reconstruction never reads `ground_truth/`.  G0 is a reference condition, not a receiver.
-* **Thresholds.**  No reconstruction threshold and no metric definition was changed to improve a number.  Metrics
-  were added or made to match their own definition:
-  * intrusions are matched as manoeuvres, as the scorecard docstring already stated;
-  * completeness counts the road users that record nothing.
-* **Asymmetric radar.**  Each recorder is degraded alone and, with three or more recorders, all but each one; the
-  other recorders keep the G0 radar.  Random streams are keyed per recorder, so the comparisons are paired.
-* **Removals.**  Only the approved ones, after the backup was verified; the incident with the worktree junction is
-  in `docs/REPOSITORY.md`.
+* **Recontact.**  One physical collision may consist of several contact episodes when the bodies rebound and touch
+  again; counting them as separate collisions misreports the accident.  The rule is physical (time and separation),
+  identical in reconstruction, evaluation and viewers.
+* **Map.**  An investigation knows where the incident happened; recognising the town from poses is an artefact of
+  the simulator's overlapping coordinates.  The fallback recognition stays for runs without the key.
+* **Phantoms.**  Split, as a diagnostic, by distance to the nearest true vehicle; the 1.5 m identity rule is unchanged.
+* **Collision reports in the campaign.**  Not degraded (the `impulse` family is not scheduled): the requested
+  degradations are GNSS and radar.  The earlier campaign studied impulse noise on the previous recordings.
+* **Association.**  The frozen v1 association is the method under test; the experimental v2 association is not
+  re-evaluated here (no new algorithm without a demonstrated need in G0).
+* **Tracker.**  Not re-tuned to degraded radar: the degraded conditions measure robustness to errors it does not model.
 
-## Open decisions for Andrea (before the campaign freeze)
+## Next steps
 
-1. **Visual validation** of the 22 runs in the two viewers side by side (`docs/REPLAY.md`).
-2. **Phantoms under severe radar.**  With 2 deg azimuth noise, fragments of real vehicles fall outside the 1.5 m
-   identity gate and count as phantoms.  Choose: scale the gate with the declared accuracy, or split phantoms by
-   their distance to the nearest true vehicle.
-3. **Collision reports in the campaign.**  The v3 degradations do not touch them.  To measure collision
-   identification under sensor noise, add the existing `impulse` family.
-4. **Association v2** (`experiment/robust-offline-association`).  Re-evaluate it on the new canonical set: it
-   targets the main G0 error (20 duplicates in S14-S19).
-5. **Radar tracker under degraded levels.**  It stays frozen (current choice) or is configured from the declared
-   accuracy.
-6. **Scorecard details** (reviewer, minor):
-   * collision recall over the contacts some sensor can report;
-   * position errors without recorder ghosts;
-   * `min_track_frames` read from the tracker configuration.
-7. **Scenario coverage.**  No contact involves a vehicle that records nothing.  No non-recording vehicle brakes
-   hard or collides; braking and contact are assessed on the recorders' own radar tracks.
-
-## Tests
-
-Full suite (`python -m pytest -q`, with `CARLA_ROOT=F:\Carla9_15\WindowsNoEditor`): see the stop-point report of
-2026-10-22.  Without `CARLA_ROOT` the reconstruction silently runs without lanes and lane-dependent tests fail.
-
-## Next steps, after Andrea's approval
-
-* Settle the open decisions above.
-* Freeze code, configuration and dataset: a tag and a manifest.
-* Run campaign v3 with the command in `docs/CAMPAIGN_V3.md`: 1228-3238 jobs, resumable.
+* Freeze (tag `campaign-v3`, manifest), smoke test from the campaign worktree, launch the campaign.
+* Report (`docs/CAMPAIGN_V3_REPORT.md`, `results/campaign_v3/`), README, merge into `main` with the paper commits.
