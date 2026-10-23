@@ -50,6 +50,11 @@
   provenance, so a restarted controller does not count it as an attempt: the campaign was paused (10:31) and resumed
   (10:32, freeze verified again), and the other eight jobs (one had used both attempts) ran again from the frozen
   code.
+* **Priority (2026-10-23, 12:19, at Andrea's request):** the campaign takes the machine's 22 cores ahead of the other
+  load (a WSL virtual machine of another project, 13-18 cores).  Concurrency is fixed at 22 (`campaign_v3.bat workers
+  22`).  A helper outside the frozen code sets the campaign's controller and job processes to above-normal priority
+  every 2 s, since the controller starts each job below normal.  Priority changes neither the code nor what a job
+  computes; job wall times before and after 12:19 are not comparable.
 
 ## Next steps
 
