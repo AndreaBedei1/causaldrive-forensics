@@ -1,8 +1,8 @@
-# Repository map, branches and data (2026-10-22)
+# Repository map, branches and data (2026-10-23)
 
-This map was written on branch `work/reproducible-g0-20261022`.  The removals Andrea approved on 2026-10-22 were
-carried out after the backup was verified: the git bundle, and every file of the manifest by SHA-256.  They are
-marked "removed" below.
+This map was written on branch `work/reproducible-g0-20261022`, merged into `main` on 2026-10-23.  The removals
+Andrea approved on 2026-10-22 were carried out after the backup was verified: the git bundle, and every file of the
+manifest by SHA-256.  They are marked "removed" below.
 
 ## What lives where
 
@@ -40,9 +40,9 @@ and raises no error, and lane-dependent events and tests then differ.  Set
 
 | branch / worktree | state | decision |
 |---|---|---|
-| `main` (local `1d596c1e`; `origin/main` is 4 commits ahead with the paper: `paper/`, LBacchiani, 2026-10-22) | protected | untouched; merging this work needs Andrea's approval, and the paper commits must be merged too |
-| `work/reproducible-g0-20261022` | this work (from `review/rtk5g-preflight`) | **keep**: to be reviewed and approved |
-| `review/rtk5g-preflight` (`1c7a210b`, also on origin) | contained in the work branch | keep until the work branch is merged |
+| `main` | this work merged (2026-10-23, approved by Andrea) with the paper commits of `origin/main` (`paper/` and `.gitignore`, LBacchiani), which the merge left untouched | pushed to origin without force |
+| `work/reproducible-g0-20261022` | merged into `main` | **closed**: the local branch was deleted after the merge (it was never on origin).  Tags: `campaign-v3` (the frozen campaign code) and `campaign-v3-final` (the merge with the results) |
+| `review/rtk5g-preflight` (`1c7a210b`, also on origin) | contained in `main` | kept; it can be deleted |
 | `experiment/robust-offline-association` (`b786dcf2`, local only; worktree `.worktrees/robust-offline-association`) | candidate association v2: more merges, 0 false merges on its development set; safeguard policy open | **keep and re-evaluate** on the new canonical set: it targets the main G0 error (20 duplicates in S14-S19) |
 | `experiment/radar-first-association` (`71b0d9ef`) | closed on 2026-10-18, verdict B | **removed**: branch and worktree; tag `archive/radar-first-association` keeps the commit |
 | `experiment/rtk5g-oldtraces-overnight` (`8a323a2a`) | RTK/5G study on the previous recordings | **removed**: branch and worktree, after copying its untracked results to the backup; tag `archive/rtk5g-oldtraces-overnight` (and the `rtk5g-oldtraces-overnight-20261021*` tags) keep the commits |
@@ -79,14 +79,13 @@ canonical traces and `scripts/hardening_refresh.py` all stay.
 | `F:\CarlaGraph_backup_20261022\` | the verified backup made before any change (git bundle of every ref, untracked data, SHA-256) |
 | `F:\CarlaGraph_repro_20261022\` | reproducibility evidence and checks: S10 repeats (`baseline`, `fixed1-3`), the two acquisitions of the 22 runs (`canonical_A` installed in `traces/`, `canonical_B` the repeat), lab tests, campaign v3 smoke tests (`campaign_v3_smoke`, `mini_smoke_S13`, resume checks), S12 counterfactual runs, viewer frames (`viewer_review`, `semantic_cases`) |
 | `F:\CarlaGraph_RTK5G_archive_20261021\` | the archive of the RTK/5G review (old and re-acquired 22-run sets) |
-| `F:\CarlaGraph_campaign_v3\` | **campaign v3**: a `git worktree` of the tag `campaign-v3` (detached, never edited).  `results\robustness\campaign_v3\`: the manifest of the freeze, `jobs.jsonl` (one line per attempt), the controller's state and logs (`control\`).  Run, pause and resume with `scripts\campaign_v3.bat` |
-| `F:\CarlaGraph_campaign_v3_work\` | the scratch copies of the running campaign jobs (each removed after its job) |
+| `F:\CarlaGraph_campaign_v3_results\` | **campaign v3** results folder: the manifest of the freeze, `jobs.jsonl` (one line per attempt, 1826 records; compressed copy in `results/robustness/campaign_v3/`), the controller's summary, state and logs (`control\`).  Moved out of the campaign worktree `F:\CarlaGraph_campaign_v3\`, which was removed after the campaign (2026-10-23; no junction, clean `git worktree remove`), together with the empty scratch folders `F:\CarlaGraph_campaign_v3_work\` and `F:\CarlaGraph_v3smoke_work_1023\` |
 | `F:\CarlaGraph_v3smoke_1023\` | the smoke test of the frozen campaign (33 jobs: S13 abreast in every family, S10 under G2 with each radar subset) |
 | `F:\CarlaGraph_repro_20261022\g0_identical_campaign_v3\` | the determinism check of the frozen code: 22/22 runs byte-identical |
 
-**Removing the campaign worktree** (only after its results are archived): check it for junctions first
-(`cmd /c dir /AL /S F:\CarlaGraph_campaign_v3`), then `git worktree remove F:/CarlaGraph_campaign_v3` from the main
-checkout.  The incidents of 2026-10-22 (junction) and 2026-10-23 (absolute paths in a scratch script) are why.
+**Removing a worktree:** check it for junctions first (`cmd /c dir /AL /S <folder>`), move out any untracked result,
+then `git worktree remove <folder>` without `--force`.  The incidents of 2026-10-22 (junction) and 2026-10-23
+(absolute paths in a scratch script) are why; the campaign worktree was removed this way.
 
 `canonical_A` on F: is byte-identical to the raw data in `traces/`.  It can go after approval; `canonical_B` is the
 reproducibility evidence.

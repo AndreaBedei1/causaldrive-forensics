@@ -1,7 +1,8 @@
-# Project status (2026-10-23, finalisation)
+# Project status (2026-10-23, final)
 
-**Branch:** `work/reproducible-g0-20261022`, to be merged into `main` together with the paper commits of
-`origin/main` (Lorenzo, `paper/` only; a trial merge is clean).
+**Branch:** `work/reproducible-g0-20261022`, merged into `main` on 2026-10-23 together with the paper commits of
+`origin/main` (Lorenzo, `paper/` and `.gitignore` only, untouched by the merge), then closed.  Tags: `campaign-v3`
+(frozen campaign code) and `campaign-v3-final` (the merge with the results).
 
 ## Done in this phase
 
@@ -89,6 +90,14 @@
   future campaign started with `campaign_v3.bat` opens no window per job (`tests/test_campaign_revision.py`).  The
   frozen tag is unchanged.
 
-## Next steps
+* **Clean-up:** the campaign worktree `F:\CarlaGraph_campaign_v3` was removed after its results folder was moved to
+  `F:\CarlaGraph_campaign_v3_results\` (SHA-256 checked; no junction; `git worktree remove` without `--force`).  The
+  empty scratch folders of the campaign and of its smoke test were removed.  Backups and reproducibility evidence on F:
+  are kept (`docs/REPOSITORY.md`).
 
-* Merge into `main` with the paper commits; tag; close the work branch.
+## Open points (not part of this work)
+
+* `experiment/robust-offline-association` (association v2) is still to be re-evaluated on the canonical set: it
+  targets the main G0 error, the duplicates of dense traffic.
+* An old stash on `main` ("FINAL-only method work") and the branch `review/rtk5g-preflight` (contained in `main`) are
+  kept; both can be dropped after a look.

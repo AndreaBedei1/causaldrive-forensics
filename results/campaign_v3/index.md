@@ -12,8 +12,8 @@ Design and freeze: [docs/CAMPAIGN_V3.md](../../docs/CAMPAIGN_V3.md).
 | [`../robustness/campaign_v3/jobs.jsonl.gz`](../robustness/campaign_v3/jobs.jsonl.gz) (the file above, gzip) | `eca122e2aa53bb3daa50f043c842762f29c82757eeb939999e790e2720bc2f13` | 3,137,503 bytes |
 | [`../robustness/campaign_v3/manifest.json`](../robustness/campaign_v3/manifest.json) (the freeze) | `538519a26ffeebc684a25ab49bb7cfd57fd4f08eb1e383d0aa0faeea558bdcc5` | 25,938 bytes |
 
-The uncompressed `jobs.jsonl` is also kept in the campaign worktree's results folder on the data disk; its hash is
-the one above.
+The campaign's results folder, with the uncompressed `jobs.jsonl` (hash above), is kept on the data disk in
+`F:\CarlaGraph_campaign_v3_results\`.  The campaign worktree itself was removed after the campaign.
 
 ## Tables
 

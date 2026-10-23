@@ -119,7 +119,10 @@ On the 22 canonical runs (16 with two recorders, 6 with three), `jobs_for` count
 
 ## Commands
 
-From the campaign worktree (`F:\CarlaGraph_campaign_v3`, a `git worktree` of the tag `campaign-v3`):
+The campaign ran from `F:\CarlaGraph_campaign_v3`, a `git worktree` of the tag `campaign-v3`.  That worktree was
+removed after the campaign; its results folder is kept in `F:\CarlaGraph_campaign_v3_results\` and committed in
+`results/robustness/campaign_v3/`.  To run again, create a worktree of the tag (`git worktree add <folder>
+campaign-v3`) and use, from that folder:
 
 ```bat
 scripts\campaign_v3.bat start      :: verify the freeze against the manifest, start the controller detached
