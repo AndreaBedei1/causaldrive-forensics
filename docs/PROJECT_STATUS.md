@@ -63,6 +63,14 @@
   `stop-now` interrupted the 18 running jobs (not recorded, pending again, no attempt counted) and `resume` (13:25,
   freeze verified again) started a fresh controller.  Its jobs run below normal, as the frozen controller starts them,
   with 22 fixed workers: they use every core nobody else needs and yield to any other work.
+* **No console windows, priority back (2026-10-23, 13:43, at Andrea's request):** what disturbed the desktop was a
+  console window per job.  `campaign_v3.bat` starts the controller with DETACHED_PROCESS, so it has no console and
+  Windows gives each job a visible one; with 22 short jobs a window opened every few seconds.  After a `stop-now` (21
+  jobs pending again, not recorded), a keeper outside the frozen code started the same controller command with the
+  bat's environment and a hidden console (CREATE_NO_WINDOW).  Every job and `git` child shares that invisible console.
+  The controller is in a job object with the above-normal priority class, so every descendant inherits it, and the
+  fixed 22 workers are kept.  The keeper also replaces the earlier watchdog: it restarts the controller, hidden,
+  if it ends without COMPLETE, REFUSED or a pause request.
 
 ## Next steps
 
