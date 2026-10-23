@@ -6,6 +6,8 @@
     set CDF_CAMPAIGN_VERSION_TAG=campaign-v3
     python scripts/campaign_manifest.py --reconstruction-tag campaign-v3 --name "campaign v3" ^
         --families baseline,gnss,radar_v3,radar_asym,radar_gnss_v3,radar_asym_gnss ^
+        --scope "Robustness campaign v3 on the 22 canonical runs S01..S19 (docs/CAMPAIGN_V3.md)" ^
+        --launcher "scripts/campaign_v3.bat start|status|pause|resume, from the worktree of the tag" ^
         --results results/robustness/campaign_v3 --out results/robustness/campaign_v3/manifest.json
 
 It records what a reproduction must match: the frozen reconstruction (commit of the tag
@@ -114,6 +116,11 @@ def main() -> int:
     parser.add_argument("--name", default="RTK GNSS with correction transport via 5G: current robustness protocol")
     parser.add_argument("--families", default="", help="the families the campaign schedules (default: all)")
     parser.add_argument("--results", default="results/robustness/rtk5g_current")
+    parser.add_argument("--scope", default="New GNSS perturbation protocol on the 22 manually reviewed canonical runs "
+                                           "(S01..S19). This protocol is distinct from the preregistered 2026-10-15 "
+                                           "study and does not replace its results.")
+    parser.add_argument("--launcher", default="scripts/campaign_controller.py (scripts\\campaign.bat "
+                                              "start|status|pause|resume)")
     args = parser.parse_args()
     from cdf.evaluation.provenance import code_hash, config_hash
     from cdf.reconstruction.config import load_config
@@ -149,8 +156,7 @@ def main() -> int:
                      "status": "PRELIMINARY" if preliminary else "FROZEN",
                      "preliminary": preliminary, "generated_at": datetime.now(timezone.utc).isoformat(),
                      "head_commit": head, "worktree_status": worktree_status},
-        "scope": "New GNSS perturbation protocol on the 22 manually reviewed canonical runs (S01..S19). "
-                 "This protocol is distinct from the preregistered 2026-10-15 study and does not replace its results.",
+        "scope": args.scope,
         "frozen_reconstruction": {"tag": reconstruction_tag, "commit": frozen,
                                   "reconstruction_sources": list(RECONSTRUCTION_SOURCES),
                                   "reconstruction_sources_sha256": recon_now,
@@ -168,7 +174,7 @@ def main() -> int:
                                "runs": {(ROOT / run).resolve().relative_to(ROOT.resolve()).as_posix(): raw_hash(ROOT / run)
                                         for run in runs}},
         "robustness": {
-            "launcher": "scripts/campaign_controller.py (scripts\\campaign.bat start|status|pause|resume)",
+            "launcher": args.launcher,
             "radar_profiles": {k: dataclasses.asdict(v) for k, v in RADAR_PROFILES.items()},
             "gnss_profiles": {k: dataclasses.asdict(v) for k, v in GNSS_PROFILES.items()},
             "profile_documentation": "docs/robustness_profiles.md",

@@ -210,6 +210,19 @@ class BothWindows(unittest.TestCase):
         self.lead.selected = "C"
         self.assertIsNone(self.lead._view_state()["selected"])
 
+    def test_tab_side_by_side_selects_only_the_vehicles_both_viewers_replay(self):
+        from types import SimpleNamespace
+        pg = SimpleNamespace(K_ESCAPE=1, K_SPACE=2, K_r=3, K_LEFT=4, K_RIGHT=5, K_KP1=6, K_KP2=7, K_KP3=8, K_KP4=9,
+                             K_1=10, K_2=11, K_3=12, K_4=13, K_c=14, K_TAB=15, K_n=16, K_p=17, K_t=18, K_g=19,
+                             K_h=20, K_f=21, K_PAGEUP=22, K_PAGEDOWN=23, KMOD_SHIFT=1)
+        app = self.lead  # GROUND TRUTH of S12: A and B record, C does not
+        app.pygame, app.event_scroll, app.selected = pg, 0, "A"
+        seen = []
+        for _ in range(3):
+            app._on_key(pg.K_TAB, 0)
+            seen.append(app.selected)
+        self.assertEqual(seen, ["B", "A", "B"])
+
 
 class Launch(unittest.TestCase):
     def test_both_viewers_take_the_sync_options(self):

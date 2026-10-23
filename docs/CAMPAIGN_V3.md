@@ -155,7 +155,17 @@ of workers to the machine's load and leaves room for other users.  Every finishe
    poses.
 6. **Seed rule.**  Decided per family and level over all its subsets and recorder strata (`need_more_seeds`); the
    strata report their own intervals over the seeds they share.
-7. **Authoritative tables.**  `scripts/campaign_v3_report.py` (errors pooled over all compared states, t intervals
+7. **Known properties of the frozen code** (final review of 2026-10-23; fixed on the branch after the tag, not in
+   the campaign):
+   * the legacy per-job `fused_centre_error_median_m` (`run_metrics`), which feeds the controller's own summary and
+     the seed rule's 0.05 m tolerance, falls back to every road user, recorder ghosts included, when a job's only
+     road users are ghosts.  It can only add seeds (never remove one) and does not enter the report's tables, which
+     use the raw road-user errors without ghosts;
+   * the frozen manifest's `scope` and `launcher` fields carry the text of the RTK/5G preflight; the campaign is the
+     one described here and is launched with `scripts\campaign_v3.bat`;
+   * a recontact reported by one recorder only is counted as an invented collision, not as a recontact split; the
+     report checks the invented collisions of S04 `a_front_pushed` for that case.
+8. **Authoritative tables.**  `scripts/campaign_v3_report.py` (errors pooled over all compared states, t intervals
    over seeds).  The controller's own summary (`campaign_v3_conditions.md`: median of the per-job medians) is kept
    for continuity.
 

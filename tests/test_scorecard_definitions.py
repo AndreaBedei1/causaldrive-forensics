@@ -89,6 +89,9 @@ class RunMetrics(unittest.TestCase):
         fusion["state_errors"] = {"centre_error_m": {"median": 1.75}}
         fusion["road_user_state_errors"] = {"centre_error_m": {"median": 0.25}}
         self.assertEqual(run_metrics(run, evaluation, fusion)["fused_centre_error_median_m"], 0.25)
+        # A run whose only fused road users are recorder ghosts has no road-user error at all (S06).
+        fusion["road_user_state_errors"] = {}
+        self.assertIsNone(run_metrics(run, evaluation, fusion)["fused_centre_error_median_m"])
 
 
 class PairedConditions(unittest.TestCase):

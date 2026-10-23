@@ -38,7 +38,9 @@ Without a shared collision, observed trajectories can fix a clock offset; otherw
 A contact of the same pair at most 2 s after the previous one, with the two bodies never more than 1 m apart in
 between (their own pose streams, less 3 sigma of their declared accuracy), is a recontact of that collision, not a
 new one: the global COLLISION node lists it under `recontacts` (S04 `a_front_pushed`: a rebound of 0.15 m, then A
-pushes B again 0.65 s later).
+pushes B again 0.65 s later).  The reconstruction applies the rule to collisions matched between two recorders,
+the only pairs whose two bodies it knows; the evaluation and the GROUND TRUTH viewer apply it to every pair of
+vehicles.  No collision of the 22 runs involves a vehicle that records nothing, so the two never differ there.
 
 ## Identity and anonymous road users
 

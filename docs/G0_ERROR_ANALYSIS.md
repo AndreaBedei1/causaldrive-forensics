@@ -28,7 +28,7 @@ Definitions are in the `cdf.evaluation.scorecard` docstring.
 | Collisions | 26/26 detected and 26/26 with the correct participants (0 missed, 0 misattributed), 0 invented, timing error 0.00 s; one collision (S04 `a_front_pushed`, A-B) carries its recontact 0.65 s later.  All 26 are between two recorders, so these numbers measure the matching of the recorders' own collision reports (next section) |
 | Completeness | 50 recorders, each represented by its own pose stream.  **45/45 road users that record nothing are observable and represented**.  **20 duplicates** (a vehicle split over 2-4 road users, S14-S19), **1 recorder ghost** (S06: C's track that slides from B onto A at their collision, left unresolved), 0 phantoms |
 | Continuity | represented time over observable time, lowest per run: 0.45 (S16), 0.63 (S17), 0.68 (S12); 0.83-0.93 elsewhere |
-| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.07 m/s, P95 0.09-0.58 m/s.  Pooled over the runs: median 0.21 m in steady motion, 0.33 m in turns (definition below).  Recorder ghosts are not road-user estimates and are left out (S06 has no other road user) |
+| Position / speed of road users | median centre error 0.05-0.42 m per run, P95 0.20-1.10 m; speed median 0.02-0.06 m/s, P95 0.09-0.43 m/s.  Pooled over the runs: median 0.21 m in steady motion, 0.33 m in turns (definition below).  Recorder ghosts are not road-user estimates and are left out (S06 has no other road user) |
 | Association | 0 wrong recorder links, 0 false merges; 1 missed recorder link (S06, the same track); 43 missed merges (S14-S19: conservative, identities left unresolved) |
 | CRITICAL_TTC | 42/42 justified warnings arrive **before** the impact (lead time min 0.75 s, median 1.53 s).  "Justified" means the COVERAGE oracle also raises one about the partner within 8 s before the collision.  In the other (recorder, partner) cases neither the reconstruction nor the oracle warns; in most of them the recorder is the struck vehicle |
 | Path intrusions (manoeuvres: EGO_PATH_ENTRY and CUT_IN starts less than 2 s apart are one manoeuvre, matched in either order and kind within 2 s) | 26 of 33 oracle manoeuvres found; 7 missed and 7 reported without an oracle counterpart.  After the ground-truth check below, none of the 7 misses is a missed hazard; 6 of the 7 extras are real but minor reconstruction errors, and the seventh is a real manoeuvre the oracle misses |
@@ -121,10 +121,10 @@ simulator time is t_global mapped through the reference recorder's own clock, as
 
 | tracked recorder's motion | samples | measured | body distance median / P95 [m] | speed error median / P95 [m/s] |
 |---|---:|---:|---:|---:|
-| steady | 2270 | 0.99 | 0.00 / 0.00 | 0.06 / 0.55 |
+| steady | 2250 | 0.99 | 0.00 / 0.00 | 0.06 / 0.55 |
 | braking (>= 2 m/s2) | 134 | 0.99 | 0.00 / 0.00 | 0.11 / 1.25 |
-| turning | 355 | 0.99 | 0.00 / 0.11 | 0.13 / 0.70 |
-| after its first contact, 0-3 s | 1320 | 0.99 | 0.00 / 0.00 | 0.07 / 0.48 |
+| turning | 354 | 0.99 | 0.00 / 0.11 | 0.13 / 0.67 |
+| after its first contact, 0-3 s | 1303 | 0.99 | 0.00 / 0.00 | 0.07 / 0.44 |
 | after its first contact, > 3 s | 1927 | 1.00 | 0.00 / 0.00 | 0.01 / 0.08 |
 
 * **Through braking, turns and the collision itself** the track point stays on the tracked vehicle's body (P95
@@ -203,10 +203,11 @@ the S16 case was checked visually.  Times are the recorder's local time and the 
      changes the reconstruction and needs its own validation on the new canonical set.
 2. **Continuity gaps.**  In S16 one road user is represented for only 45 % of its observable time; S17 and S12 are
    at 63-68 %.  These are the same fragmentations, seen as time not covered.
-3. **S06: recorder A drawn twice.**  C's track `track_002#segment_2` of A was not linked to recorder A (a missed
-   link).  A therefore also appears as anonymous road user U1, 1.7-1.8 m from A's true centre.  This is an
-   association miss in a multidirectional crossing, not a position error, and it is visible in the RECONSTRUCTION
-   viewer.
+3. **S06: recorder A drawn twice.**  C's radar track `track_002` follows B until the A-B collision, then slides
+   onto A (0.2 m away) and stays on A for 10 s.  No identity is asserted across that contact
+   (`identity.partner_cannot_single_out`), so the track is the anonymous road user U1 instead of a link to A (a
+   missed link, counted as a recorder ghost).  This is an association limit in a multidirectional crossing, not a
+   position error, and it is visible in the RECONSTRUCTION viewer.
 4. **Minor semantic errors at the contacts.**  These are the 7 extra intrusions above: the abreast side contact,
    the recorder's own rotation, and post-contact reports.  No missed hazard was found.
 
@@ -219,7 +220,7 @@ A single pooled event-match percentage has three flaws:
 * it penalises a correct manoeuvre reported with a different but equivalent event (CUT_IN versus EGO_PATH_ENTRY),
   or a few tenths of a second off.
 
-It is no longer reported as an accuracy.  The ground-truth check above shows why: 3 of the 5 "misses" are oracle
+It is no longer reported as an accuracy.  The ground-truth check above shows why: 3 of the 7 "misses" are oracle
 artefacts.  The scorecard reports instead what the forensic question needs:
 * whether every observable critical situation was warned before the impact (42/42);
 * whether intrusions are recognised in either form;

@@ -107,5 +107,31 @@ class Interaction(unittest.TestCase):
         self.assertAlmostEqual(row["phantoms_per_job_interaction"], ((6 - 0 - 4) + (3 - 0 - 2)) / 2)
 
 
+class Figures(unittest.TestCase):
+    def test_every_figure_is_drawn_from_the_tables(self):
+        import tempfile
+        records = [_job("S01/run_0_crash", "baseline", "none", 0, _card(1, 1, 0), errors=[0.1, 0.2])]
+        for seed in (0, 1, 2):
+            records += [_job("S01/run_0_crash", "gnss", "degraded", seed, _card(1, 1, 0), errors=[0.3]),
+                        _job("S01/run_0_crash", "radar_v3", "severe", seed, _card(1, 1, 4 + seed), errors=[0.5]),
+                        _job("S01/run_0_crash", "radar_asym", "severe", seed, _card(1, 1, 2), errors=[0.4],
+                             recorder="A"),
+                        _job("S01/run_0_crash", "radar_gnss_v3", "gnss degraded + radar severe", seed,
+                             _card(1, 1, 5), errors=[0.6])]
+        table = report.condition_table(records)
+        interaction = report.interaction_table(records)
+        asymmetry = report.asymmetry_table(table)
+        scenarios = report.scenario_table(records)
+        figures = importlib.util.spec_from_file_location("campaign_v3_figures",
+                                                         str(ROOT / "scripts" / "campaign_v3_figures.py"))
+        module = importlib.util.module_from_spec(figures)
+        figures.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as tmp:
+            written = module.draw(table, interaction, asymmetry, scenarios, Path(tmp))
+            names = {p.stem for p in written if p.exists()}
+        self.assertTrue({"collisions", "completeness", "errors", "interaction", "asymmetry_phantoms",
+                         "scenarios_phantoms"} <= names)
+
+
 if __name__ == "__main__":
     unittest.main()

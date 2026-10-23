@@ -448,7 +448,10 @@ class ReplayApp:
                 self.free = FreeCamera(self.camera_pose)
         elif key == pg.K_TAB:
             step = -1 if mod & pg.KMOD_SHIFT else 1
-            self.selected = self.ids[(self.ids.index(self.selected) + step) % len(self.ids)]
+            # Side by side, the selection (and a follow camera) moves over the vehicles both viewers replay.
+            cycle = self.view_ids if self.peer is not None else self.ids
+            index = cycle.index(self.selected) if self.selected in cycle else -step
+            self.selected = cycle[(index + step) % len(cycle)]
             self.event_scroll = 0  # the new recorder's newest events
         elif key in (pg.K_n, pg.K_p):
             target = (self.run.next_event_time if key == pg.K_n else self.run.previous_event_time)(self.clock.time)

@@ -219,6 +219,7 @@ class FocusLayoutTests(unittest.TestCase):
                              K_h=20, K_f=21, K_PAGEUP=22, K_PAGEDOWN=23, KMOD_SHIFT=1)
         app = object.__new__(self.viewer.ReplayApp)
         app.pygame, app.ids, app.selected, app.focus, app.event_scroll = pg, ["A", "B", "C"], "A", False, 0
+        app.peer = None  # a standalone viewer
         app._on_key(pg.K_f, 0)
         self.assertTrue(app.focus)
         app._on_key(pg.K_PAGEUP, 0)

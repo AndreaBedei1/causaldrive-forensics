@@ -1,8 +1,8 @@
 # Paper positioning
 
 Framing, logging prerequisites against the regulations, related work, limitations and the STOP / YIELD and
-depth-camera decision.  Quantitative claims come from the final experimental campaign (not yet run); the 23
-canonical runs S01-S18 are the development set.  Citations: [references](REFERENCES.md).
+depth-camera decision.  Quantitative claims come from campaign v3 (`docs/CAMPAIGN_V3.md`,
+`docs/CAMPAIGN_V3_REPORT.md`) on the 22 canonical runs S01-S19.  Citations: [references](REFERENCES.md).
 
 ## Framing
 
@@ -107,7 +107,8 @@ IEEE 1616.1 [B22]).
 - Responses in the campaign are scripted: observed vehicle response delays describe the scenario logic, not
   drivers; sensor perceivability is not driver perception.
 - Scope: motor vehicles only (cars and one van; no pedestrians, cyclists, motorcycles or infrastructure
-  sensors); 19 canonical scenarios (23 development runs) on two CARLA maps; no LLM in the pipeline.
+  sensors); 19 canonical scenarios (22 runs) on three CARLA maps (Town05, Town03_Opt, Town04); no LLM in the
+  pipeline.
 
 ## STOP / YIELD and the depth camera
 
