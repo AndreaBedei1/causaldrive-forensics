@@ -3,8 +3,9 @@
 
 Reconstructing a collision from vehicle recordings connects accident
 investigation with cooperative perception and multisensor estimation.
-We review these strands through three recurring tasks: aligning recordings,
-matching vehicle identities, and recovering motion.
+We review these strands through the tasks of aligning recordings,
+matching vehicle identities, recovering motion, and supporting forensic
+interpretation.
 Table~\ref{tab:closest-reconstruction} compares the closest forensic systems
 with our approach.
 
@@ -17,7 +18,7 @@ reported procedures and demonstrations.}
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}p{0.17\textwidth}p{0.25\textwidth}p{0.23\textwidth}p{0.28\textwidth}@{}}
 \hline
-\textbf{Work} & \textbf{Recorded evidence} & \textbf{Temporal alignment} & \textbf{Road-user reconstruction} \\
+\textbf{Work} & \textbf{Recorded evidence} & \textbf{Temporal alignment} & \textbf{Reconstruction and interpretation} \\
 \hline
 Beck et al.~\cite{beck2023pipeline} &
 Camera, LiDAR, radar; vehicle logs &
@@ -39,7 +40,8 @@ Vehicle-state and scene-parameter fusion \\
 \textbf{Ours} &
 Raw radar + vehicle logs  &
 Clock recovery from shared contacts or observed motion &
-Cross-observer association; Kalman filtering and RTS smoothing \\
+Cross-observer association; Kalman filtering and RTS smoothing;
+semantic events with recorder provenance \\
 \hline
 \end{tabular*}
 \end{table*}
@@ -126,8 +128,12 @@ an action depends on the evolving situation and driver
 expectations~\cite{engstrom2024response}. Counterfactual studies, such as
 Scanlon et al.'s reconstructed fatal crashes, assess alternative outcomes
 through additional simulation~\cite{scanlon2021fatal}.
-Our contribution concerns the evidence supporting such analyses: it combines
-clock recovery, cross-observer identity association, reconstruction of vehicles
-without recordings, and a shared event chronology retaining each recorder's
-observation and response history. This chronology supports expert analysis;
-it does not establish driver awareness, avoidability, or responsibility.
+Our contribution concerns the evidence supporting such analyses. Clock
+recovery, cross-observer identity association, and trajectory estimation
+reconstruct vehicles with and without recordings. To support forensic
+interpretation, we convert each recorder's kinematic and control traces
+into semantic events describing manoeuvres, conflict onset, and braking,
+then integrate these with collision reports into a shared chronology.
+This makes the sequence of observations and responses explicit and
+traceable to each recorder's evidence. The chronology does not establish
+driver awareness, avoidability, or responsibility.
