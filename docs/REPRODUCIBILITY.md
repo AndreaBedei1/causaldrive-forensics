@@ -78,10 +78,11 @@ check to be repeated.
 ## Reconstruction determinism
 
 The reconstruction is an offline computation.  The same raw data must give the same outputs.  The 22 canonical runs
-were reconstructed again from copies of their raw data with the final code of this branch (`9fff5189`), in four
-separate processes.  Every output file under `reconstruction/` (evaluation excluded) was compared byte for byte with
-the committed one: **22/22 runs identical**, 18 to 23 files per run.  The comparison script is described in the
-stop-point report; its logs are in `F:\CarlaGraph_repro_20261022\g0_identical_final.*.log`.
+were reconstructed again from copies of their raw data with the frozen code of campaign v3 (`1efab449`, the outputs
+of that commit), in four separate processes.  Every output file under `reconstruction/` (evaluation excluded) was
+compared byte for byte with the committed one: **22/22 runs identical**, 18 to 23 files per run (logs:
+`F:\CarlaGraph_repro_20261022\g0_identical_campaign_v3\`).  The same check on the code of 2026-10-22 (`9fff5189`)
+gave 22/22 as well (`g0_identical_final.*.log`).
 
 ## Acquisition integrity of the new canonical set
 

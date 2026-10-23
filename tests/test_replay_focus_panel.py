@@ -13,7 +13,9 @@ from src.cdf.replay.model import ReplayRun
 from src.cdf.replay.presentation import HELP_LINES, MAX_EVENT_LINES, event_window, recorder_panel, wrap_text
 
 ROOT = Path(__file__).resolve().parents[1]
-S04 = {"run_0_a_front_pushed": {"A": [0.0, 0.65], "B": [0.0, 0.5], "C": [0.5]},
+# S04 a_front_pushed: A-B at 0.0, B-C at 0.5, and A touching B again at 0.65, a recontact of the A-B collision
+# (RECONTACT in A's panel; B's sensor reports the B-C contact and the recontact as one, its collision with C).
+S04 = {"run_0_a_front_pushed": {"A": [0.0], "B": [0.0, 0.5], "C": [0.5]},
        "run_0_b_rear_first": {"A": [0.0], "B": [-1.55, 0.0], "C": [-1.55]}}
 
 
@@ -137,6 +139,7 @@ class FocusLayoutTests(unittest.TestCase):
         app.ids = [p.participant_id for p in app.run.participants]
         app.colors = {pid: (200, 100, 50) for pid in app.ids}
         app.selected, app.focus, app.event_scroll, app.show_help, app.occupied = selected, focus, 0, True, []
+        app.peer = None  # a standalone viewer (no viewer side by side)
         return app, blits
 
     def draw(self, app, blits, t):

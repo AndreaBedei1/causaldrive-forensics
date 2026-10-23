@@ -76,6 +76,9 @@ class S04FrontPushed(unittest.TestCase):
         self.assertEqual(sorted(mark.participants for mark in run.collisions), [("A", "B"), ("B", "C")])
         kinds = sorted(e.event_type for e in run.local_events["A"].events if e.event_type in ("COLLISION", "RECONTACT"))
         self.assertEqual(kinds, ["COLLISION", "RECONTACT"])
+        # B's sensor reports its contact with C and A's recontact as one: that report is B's collision with C.
+        kinds = [e.event_type for e in run.local_events["B"].events if e.event_type in ("COLLISION", "RECONTACT")]
+        self.assertEqual(kinds, ["COLLISION", "COLLISION"])
 
     def test_the_ground_truth_viewer_shows_one_collision_and_a_recontact(self):
         truth = load_ground_truth_run(S04A)

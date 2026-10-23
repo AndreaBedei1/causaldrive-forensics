@@ -358,10 +358,15 @@ def load_collisions(path: Path, origins: Mapping[str, float], run_start: float) 
 
 def load_recontacts(path: Path) -> set:
     """(recorder, local node) of the local collisions the fusion kept as recontacts of the collision they follow
-    (``attributes.recontacts`` of a global COLLISION node)."""
-    return {(str(graph), str(local_node)) for node in _read_json(path)["nodes"] if node["event_type"] == "COLLISION"
-            for item in (node.get("attributes") or {}).get("recontacts", [])
-            for graph, local_node, _ in item.get("observations", [])}
+    (``attributes.recontacts`` of a global COLLISION node), unless the same local report is also an observation of
+    a collision: a recorder's sensor may report a contact with a third vehicle and a recontact as one (S04
+    ``a_front_pushed``, B: its contact with C and A's recontact), and that report stays the collision."""
+    nodes = [node for node in _read_json(path)["nodes"] if node["event_type"] == "COLLISION"]
+    collisions = {(str(obs["graph"]), str(obs["local_node"])) for node in nodes for obs in node.get("observations", [])}
+    recontacts = {(str(graph), str(local_node)) for node in nodes
+                  for item in (node.get("attributes") or {}).get("recontacts", [])
+                  for graph, local_node, _ in item.get("observations", [])}
+    return recontacts - collisions
 
 
 ASSOCIATED = "ASSOCIATED"  # the fusion identified the track with a recorder: that recorder's replayed vehicle
