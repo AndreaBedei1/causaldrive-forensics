@@ -1,0 +1,561 @@
+run,family,level,subset,degraded,seeds,identified,identified_min,identified_max,reportable,reportable_min,reportable_max,invented,invented_min,invented_max,represented,represented_min,represented_max,observable,observable_min,observable_max,duplicates,duplicates_min,duplicates_max,phantoms,phantoms_min,phantoms_max,rec_ghosts,rec_ghosts_min,rec_ghosts_max,wrong_links,wrong_links_min,wrong_links_max,pos_med_m,pos_med_m_min,pos_med_m_max
+S01/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,62.2,57,70,0.6,0,2,0.0,0,0,,,
+S01/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,52.0,47,55,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,56.333333,56,57,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,38.666667,33,44,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,52.0,50,54,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,36.333333,31,42,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,87.666667,83,94,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,88.0,86,91,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,114.2,105,125,0.6,0,2,0.0,0,0,,,
+S01/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S01/run_0_crash,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,94.333333,88,101,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,58.4,51,67,0.2,0,1,0.0,0,0,,,
+S02/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,25.8,20,32,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,2,0.0,0,0,,,
+S02/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,45.0,37,51,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.0,5,13,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,2,0.0,0,0,,,
+S02/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,41.0,38,44,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.666667,7,11,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.666667,0,2,0.0,0,0,,,
+S02/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,49.666667,43,54,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,2,0.0,0,0,,,
+S02/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,51.333333,44,59,0.0,0,0,0.0,0,0,,,
+S02/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,83.0,73,90,0.2,0,1,0.0,0,0,,,
+S02/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,2,0.0,0,0,,,
+S02/run_0_crash,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,53.666667,42,60,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,20.6,16,27,0.8,0,1,0.6,0,1,,,
+S03/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,30.6,25,38,1.0,0,2,0.2,0,1,,,
+S03/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.0,4,14,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,19.666667,16,23,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.333333,6,11,0.666667,0,2,0.0,0,0,,,
+S03/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,21.666667,19,26,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,31.0,30,32,0.666667,0,2,0.0,0,0,,,
+S03/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,32.0,25,43,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,51.2,42,60,1.8,0,3,0.8,0,2,,,
+S03/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S03/run_0_crash,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,28.666667,27,30,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,baseline,none,all,all,1,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,gnss,degraded,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,gnss,rtk,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,all but one,A+B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,92.6,86,101,1.8,1,3,0.2,0,1,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,all but one,A+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,90.6,84,98,0.8,0,2,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,all but one,B+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,87.2,80,94,1.0,0,3,0.2,0,1,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,alone,A,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,49.0,43,54,0.8,0,2,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,alone,B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,44.8,42,51,1.0,0,3,0.2,0,1,,,
+S04/run_0_a_front_pushed,radar_asym,extreme,alone,C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,42.6,35,49,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,72.666667,68,77,0.333333,0,1,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,69.333333,66,72,0.333333,0,1,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,59.666667,56,64,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,42.333333,41,44,0.333333,0,1,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,32.0,28,38,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym,severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,27.666667,26,31,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,81.333333,75,86,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,77.0,74,81,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,68.333333,58,74,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,45.333333,42,50,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,37.0,27,43,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,31.666667,31,32,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_gnss_v3,gnss degraded + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,112.666667,106,117,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_gnss_v3,gnss rtk + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,101.666667,97,107,0.333333,0,1,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_v3,extreme,all,all,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,134.0,125,143,1.8,1,3,0.2,0,1,,,
+S04/run_0_a_front_pushed,radar_v3,nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_a_front_pushed,radar_v3,severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,99.666667,98,102,0.333333,0,1,0.0,0,0,,,
+S04/run_0_b_rear_first,baseline,none,all,all,1,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,gnss,degraded,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,gnss,rtk,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,extreme,all but one,A+B,5,1.2,0,2,2.0,2,2,0.8,0,2,0.0,0,0,0.0,0,0,0.0,0,0,94.0,60,119,0.4,0,1,0.2,0,1,,,
+S04/run_0_b_rear_first,radar_asym,extreme,all but one,A+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,111.0,99,123,0.2,0,1,0.2,0,1,,,
+S04/run_0_b_rear_first,radar_asym,extreme,all but one,B+C,5,1.2,0,2,2.0,2,2,0.8,0,2,0.0,0,0,0.0,0,0,0.0,0,0,69.6,50,88,0.4,0,1,0.2,0,1,,,
+S04/run_0_b_rear_first,radar_asym,extreme,alone,A,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,68.4,60,73,0.2,0,1,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,extreme,alone,B,5,1.2,0,2,2.0,2,2,0.8,0,2,0.0,0,0,0.0,0,0,0.0,0,0,27.0,0,47,0.4,0,1,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,extreme,alone,C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,43.0,33,51,0.0,0,0,0.2,0,1,,,
+S04/run_0_b_rear_first,radar_asym,nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,87.0,77,94,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,83.666667,79,89,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,62.0,60,65,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,55.333333,49,62,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,33.333333,30,37,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym,severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,28.666667,27,31,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,84.666667,84,86,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,75.333333,74,77,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,65.333333,61,72,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,48.0,45,50,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,37.333333,34,42,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,28.333333,27,30,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_gnss_v3,gnss degraded + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,111.666667,110,115,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_gnss_v3,gnss rtk + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,115.0,107,126,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_v3,extreme,all,all,5,1.2,0,2,2.0,2,2,0.8,0,2,0.0,0,0,0.0,0,0,0.0,0,0,136.4,111,160,0.4,0,1,0.4,0,1,,,
+S04/run_0_b_rear_first,radar_v3,nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S04/run_0_b_rear_first,radar_v3,severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,115.333333,107,121,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,all but one,A+B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,106.2,97,122,0.6,0,2,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,all but one,A+C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,91.2,54,116,0.4,0,2,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,all but one,B+C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,84.2,81,88,0.2,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,60.8,54,76,0.4,0,2,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,45.8,43,50,0.2,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym,extreme,alone,C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,38.4,35,40,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,nominal,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,85.333333,82,88,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,78.333333,71,84,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,64.666667,58,72,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,50.0,48,52,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,36.0,34,38,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym,severe,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,28.666667,24,34,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,83.666667,82,85,0.666667,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,71.0,48,87,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,65.0,62,67,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,50.0,48,51,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,35.0,32,39,0.333333,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,30.333333,27,36,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,104.333333,85,117,0.666667,0,1,0.0,0,0,,,
+S05/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,110.0,84,124,1.0,0,3,0.0,0,0,,,
+S05/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,136.6,97,162,0.6,0,2,0.0,0,0,,,
+S05/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S05/run_0_crash,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,113.666667,105,122,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,extreme,all but one,A+B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,59.2,52,64,3.4,2,5,0.2,0,1,,,
+S06/run_0_crash,radar_asym,extreme,all but one,A+C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,36.2,24,45,2.8,1,6,0.0,0,0,,,
+S06/run_0_crash,radar_asym,extreme,all but one,B+C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,49.4,45,53,3.4,2,5,0.2,0,1,,,
+S06/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,24.4,21,28,2.0,1,3,0.0,0,0,,,
+S06/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,34.8,30,39,2.4,1,4,0.2,0,1,,,
+S06/run_0_crash,radar_asym,extreme,alone,C,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,14.6,13,17,2.0,0,4,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,nominal,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,severe,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,24.666667,18,31,1.333333,1,2,0.0,0,0,,,
+S06/run_0_crash,radar_asym,severe,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,15.666667,10,21,1.333333,1,2,0.333333,0,1,,,
+S06/run_0_crash,radar_asym,severe,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,25.666667,22,32,1.666667,1,2,0.333333,0,1,,,
+S06/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,7.333333,3,10,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.333333,15,21,1.333333,1,2,0.0,0,0,,,
+S06/run_0_crash,radar_asym,severe,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,8.333333,7,11,1.333333,1,2,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,32.0,29,34,1.0,0,2,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,18.666667,14,22,2.666667,2,3,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,30.0,25,35,3.333333,3,4,0.333333,0,1,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,10.333333,6,13,0.333333,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,21.666667,17,27,1.0,0,2,0.0,0,0,,,
+S06/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,8.333333,8,9,2.666667,2,3,0.333333,0,1,,,
+S06/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.333333,0,1,,,
+S06/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,40.333333,37,43,3.666667,3,5,0.333333,0,1,,,
+S06/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,37.333333,34,42,1.0,1,1,0.0,0,0,,,
+S06/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,71.0,61,81,4.2,2,7,0.2,0,1,,,
+S06/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S06/run_0_crash,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,33.0,25,42,1.666667,1,2,0.333333,0,1,,,
+S07/run_0_merge_conflict,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,65.4,56,74,0.8,0,1,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,extreme,alone,B,5,0.8,0,1,1.0,1,1,0.2,0,1,0.0,0,0,0.0,0,0,0.0,0,0,68.0,65,75,1.6,0,3,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,12.666667,12,13,0.666667,0,1,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,4.666667,4,6,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,16.0,14,19,0.333333,0,1,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,7.0,4,11,0.333333,0,1,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,23.0,18,26,0.666667,0,2,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,21.0,16,26,0.333333,0,1,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_v3,extreme,all,all,5,0.8,0,1,1.0,1,1,0.2,0,1,0.0,0,0,0.0,0,0,0.0,0,0,133.4,125,147,2.4,1,3,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S07/run_0_merge_conflict,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.333333,16,19,0.666667,0,1,0.0,0,0,,,
+S08/run_0_rolls_through,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,23.4,19,29,1.2,0,3,0.2,0,1,,,
+S08/run_0_rolls_through,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,35.8,30,40,0.2,0,1,0.2,0,1,,,
+S08/run_0_rolls_through,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,7.333333,5,9,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,24.0,22,26,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,7.0,4,11,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,21.0,20,22,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,28.0,26,32,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,31.0,20,41,0.333333,0,1,0.0,0,0,,,
+S08/run_0_rolls_through,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,59.2,49,66,1.4,0,3,0.4,0,1,,,
+S08/run_0_rolls_through,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S08/run_0_rolls_through,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,31.0,27,34,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,26.6,23,29,1.4,0,3,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,22.0,16,28,1.0,0,2,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,0,2,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,8.0,6,10,0.333333,0,1,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.0,7,11,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,0,2,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.0,1,1,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,9.666667,8,12,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,7.666667,6,9,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,2.0,1,3,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.333333,16,18,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,2.0,1,3,0.666667,0,2,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.666667,15,21,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,48.6,41,56,2.4,0,5,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,2.0,1,3,0.0,0,0,0.0,0,0,,,
+S09/run_0_near_simultaneous,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.0,15,19,0.333333,0,1,0.0,0,0,,,
+S10/run_0_deflected_into_c,baseline,none,all,all,1,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,gnss,degraded,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,gnss,rtk,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,all but one,A+B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,53.2,48,63,4.0,2,7,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,all but one,A+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,46.6,36,54,2.8,0,5,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,all but one,B+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,37.0,32,44,4.0,2,8,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,alone,A,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,31.2,27,37,1.4,0,3,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,alone,B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,22.0,16,26,2.6,0,5,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,extreme,alone,C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,15.6,9,19,1.4,0,3,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,30.666667,25,34,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,19.333333,13,23,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,14.666667,13,17,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,17.666667,12,21,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,13.0,12,14,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym,severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,1.666667,1,3,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,35.666667,31,39,0.666667,0,2,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,25.0,21,29,1.0,0,2,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,15.333333,10,18,0.333333,0,1,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,22.666667,17,28,0.666667,0,2,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,13.0,9,16,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,2.333333,1,4,0.333333,0,1,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_gnss_v3,gnss degraded + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,38.0,35,41,1.0,0,2,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_gnss_v3,gnss rtk + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,34.666667,33,37,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_v3,extreme,all,all,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,68.0,59,80,5.4,3,10,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_v3,nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,,,
+S10/run_0_deflected_into_c,radar_v3,severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,32.333333,26,37,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,baseline,none,all,all,1,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,gnss,degraded,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,gnss,rtk,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,extreme,all but one,A+B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,100.2,93,108,0.8,0,2,0.2,0,1,,,
+S11/run_0_consequential,radar_asym,extreme,all but one,A+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,85.6,79,90,0.8,0,2,0.4,0,1,,,
+S11/run_0_consequential,radar_asym,extreme,all but one,B+C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,84.0,79,91,0.0,0,0,0.2,0,1,,,
+S11/run_0_consequential,radar_asym,extreme,alone,A,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,51.8,45,59,0.8,0,2,0.2,0,1,,,
+S11/run_0_consequential,radar_asym,extreme,alone,B,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,49.4,45,57,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,extreme,alone,C,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,34.6,32,39,0.0,0,0,0.2,0,1,,,
+S11/run_0_consequential,radar_asym,nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,72.666667,71,76,0.333333,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,51.0,49,54,0.333333,0,1,0.333333,0,1,,,
+S11/run_0_consequential,radar_asym,severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,47.666667,44,50,0.0,0,0,0.333333,0,1,,,
+S11/run_0_consequential,radar_asym,severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,38.666667,35,41,0.333333,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,35.0,33,36,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym,severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,12.666667,11,14,0.0,0,0,0.333333,0,1,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.666667,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar nominal,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,all but one,A+B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,71.666667,64,77,0.333333,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,all but one,A+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,48.333333,36,59,0.333333,0,1,0.333333,0,1,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,all but one,B+C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,49.666667,46,55,0.0,0,0,0.333333,0,1,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,35.666667,28,40,0.333333,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,36.666667,35,38,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_asym_gnss,gnss degraded + radar severe,alone,C,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,13.0,9,20,0.0,0,0,0.333333,0,1,,,
+S11/run_0_consequential,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.666667,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_gnss_v3,gnss degraded + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,84.333333,72,94,0.333333,0,1,0.333333,0,1,,,
+S11/run_0_consequential,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_gnss_v3,gnss rtk + radar severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,84.333333,78,88,0.333333,0,1,0.0,0,0,,,
+S11/run_0_consequential,radar_v3,extreme,all,all,5,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,134.0,130,139,0.8,0,2,0.4,0,1,,,
+S11/run_0_consequential,radar_v3,nominal,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.333333,0,1,0.0,0,0,0.0,0,0,,,
+S11/run_0_consequential,radar_v3,severe,all,all,3,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,85.0,81,89,0.333333,0,1,0.333333,0,1,,,
+S12/run_0_crash,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0455,0.0455,0.0455
+S12/run_0_crash,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.333333,0,1,0.0,0,0,0.0,0,0,0.0,0,0,0.211433,0.0544,0.2943
+S12/run_0_crash,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.048167,0.0444,0.0549
+S12/run_0_crash,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,1.0,0,2,42.6,38,47,1.2,0,2,0.0,0,0,0.11578,0.0766,0.1562
+S12/run_0_crash,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.2,0,1,37.0,31,45,0.2,0,1,0.0,0,0,0.04146,0.0264,0.0606
+S12/run_0_crash,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.054367,0.0411,0.0717
+S12/run_0_crash,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0469,0.0399,0.0597
+S12/run_0_crash,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,31.333333,28,36,1.666667,1,2,0.0,0,0,0.108867,0.1056,0.1107
+S12/run_0_crash,radar_asym,severe,alone,B,3,0.666667,0,1,1.0,1,1,0.333333,0,1,1.0,1,1,1.0,1,1,0.0,0,0,26.333333,26,27,0.0,0,0,0.0,0,0,0.0428,0.0369,0.0521
+S12/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.217267,0.0763,0.3024
+S12/run_0_crash,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.205233,0.0574,0.2907
+S12/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,33.333333,30,38,0.333333,0,1,0.0,0,0,0.243133,0.1377,0.3508
+S12/run_0_crash,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,26.666667,21,31,0.0,0,0,0.0,0,0,0.189667,0.044,0.2729
+S12/run_0_crash,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.198067,0.0807,0.2966
+S12/run_0_crash,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,59.333333,50,66,0.333333,0,1,0.0,0,0,0.2387,0.1165,0.3382
+S12/run_0_crash,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.0536,0.0505,0.0558
+S12/run_0_crash,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,56.666667,49,62,0.666667,0,1,0.0,0,0,0.100433,0.0889,0.1075
+S12/run_0_crash,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,1.0,0,2,78.6,76,80,1.4,0,3,0.0,0,0,0.1022,0.0717,0.1495
+S12/run_0_crash,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,1.0,1,1,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.055033,0.0538,0.0569
+S12/run_0_crash,radar_v3,severe,all,all,3,0.666667,0,1,1.0,1,1,0.333333,0,1,1.0,1,1,1.0,1,1,0.0,0,0,57.0,54,62,1.666667,1,2,0.0,0,0,0.1755,0.0874,0.336
+S13/run_0_abreast,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.2774,0.2774,0.2774
+S13/run_0_abreast,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,0.0,0,0,0.0,0,0,0.0,0,0,0.257767,0.1687,0.379
+S13/run_0_abreast,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.0,0,0,0.281733,0.2733,0.2947
+S13/run_0_abreast,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.2,0,5,54.2,45,64,2.0,1,4,0.0,0,0,0.2893,0.2241,0.3465
+S13/run_0_abreast,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.2,0,1,42.6,38,45,1.4,0,3,0.0,0,0,0.31058,0.2828,0.3206
+S13/run_0_abreast,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,0.280633,0.2663,0.2925
+S13/run_0_abreast,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.0,0,0,0.287233,0.2746,0.2936
+S13/run_0_abreast,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.0,0,2,32.666667,31,34,1.0,0,2,0.0,0,0,0.270533,0.2451,0.291
+S13/run_0_abreast,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,30.666667,27,34,0.666667,0,1,0.0,0,0,0.321,0.2902,0.3403
+S13/run_0_abreast,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,0.666667,0,1,0.0,0,0,0.0,0,0,0.249067,0.1873,0.347
+S13/run_0_abreast,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.0,0,0,0.2727,0.1977,0.3918
+S13/run_0_abreast,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.333333,0,3,35.666667,32,40,0.333333,0,1,0.0,0,0,0.257433,0.1834,0.3889
+S13/run_0_abreast,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,32.333333,30,35,0.0,0,0,0.0,0,0,0.294567,0.1928,0.4136
+S13/run_0_abreast,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.666667,0,1,0.0,0,0,0.0,0,0,0.274433,0.2047,0.3848
+S13/run_0_abreast,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,66.666667,59,72,0.333333,0,1,0.0,0,0,0.3239,0.237,0.4688
+S13/run_0_abreast,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.666667,0,1,0.0,0,0,0.0,0,0,0.300167,0.2948,0.3059
+S13/run_0_abreast,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,68.666667,66,72,0.666667,0,1,0.0,0,0,0.343767,0.2938,0.3901
+S13/run_0_abreast,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.4,0,5,96.6,87,102,3.2,2,5,0.0,0,0,0.35168,0.284,0.3921
+S13/run_0_abreast,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,1,0.666667,0,1,0.0,0,0,0.0,0,0,0.301333,0.294,0.3099
+S13/run_0_abreast,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,63.0,58,66,1.666667,1,2,0.0,0,0,0.361633,0.325,0.4098
+S13/run_0_passing,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.3126,0.3126,0.3126
+S13/run_0_passing,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.2893,0.2065,0.4063
+S13/run_0_passing,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.316733,0.3085,0.3278
+S13/run_0_passing,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.2,0,1,52.2,46,58,1.2,0,2,0.0,0,0,0.33114,0.3038,0.3477
+S13/run_0_passing,radar_asym,extreme,alone,B,5,0.8,0,1,1.0,1,1,0.2,0,1,2.0,2,2,2.0,2,2,0.8,0,2,40.2,31,49,2.0,0,3,0.0,0,0,0.35786,0.3429,0.3709
+S13/run_0_passing,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,0.333333,0,1,0.0,0,0,0.0,0,0,0.335933,0.3323,0.3412
+S13/run_0_passing,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,0.327333,0.3043,0.3443
+S13/run_0_passing,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.0,0,2,38.666667,32,43,0.333333,0,1,0.0,0,0,0.3124,0.2907,0.3538
+S13/run_0_passing,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.0,0,2,31.333333,29,36,0.333333,0,1,0.0,0,0,0.3746,0.3562,0.3935
+S13/run_0_passing,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,0.333333,0,1,0.0,0,0,0.0,0,0,0.305233,0.2473,0.402
+S13/run_0_passing,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.666667,0,1,0.0,0,0,0.0,0,0,0.2944,0.2153,0.4183
+S13/run_0_passing,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.0,0,2,35.666667,30,41,1.0,1,1,0.0,0,0,0.276567,0.2055,0.3514
+S13/run_0_passing,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.0,0,2,32.333333,30,35,0.333333,0,1,0.0,0,0,0.337533,0.2241,0.4656
+S13/run_0_passing,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,1.0,0,2,0.0,0,0,0.0,0,0,0.312067,0.2567,0.4144
+S13/run_0_passing,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,2.333333,0,4,67.666667,60,75,1.333333,1,2,0.0,0,0,0.338533,0.2881,0.4114
+S13/run_0_passing,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,1.0,0,2,0.0,0,0,0.0,0,0,0.3463,0.3424,0.3531
+S13/run_0_passing,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,2.333333,0,4,67.0,62,73,1.0,1,1,0.0,0,0,0.368267,0.3266,0.3998
+S13/run_0_passing,radar_v3,extreme,all,all,5,0.8,0,1,1.0,1,1,0.2,0,1,2.0,2,2,2.0,2,2,1.0,0,2,92.4,89,95,3.2,2,5,0.0,0,0,0.42532,0.3304,0.6528
+S13/run_0_passing,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.333333,0,1,1.0,0,2,0.0,0,0,0.0,0,0,0.349133,0.346,0.3533
+S13/run_0_passing,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,2.333333,0,4,69.333333,60,77,0.666667,0,2,0.0,0,0,0.376033,0.3344,0.4125
+S13/run_0_platoon,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.4154,0.4154,0.4154
+S13/run_0_platoon,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.3668,0.2728,0.4897
+S13/run_0_platoon,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.0,0,0,0.418,0.3985,0.4293
+S13/run_0_platoon,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.2,1,2,50.2,48,53,1.0,0,2,0.0,0,0,0.37074,0.2855,0.4536
+S13/run_0_platoon,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.6,0,3,40.2,29,50,0.6,0,2,0.0,0,0,0.5973,0.5117,0.6644
+S13/run_0_platoon,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.333333,0,3,0.666667,0,1,0.0,0,0,0.0,0,0,0.501367,0.396,0.5823
+S13/run_0_platoon,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,2,0.0,0,0,0.0,0,0,0.0,0,0,0.448333,0.4078,0.4832
+S13/run_0_platoon,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.333333,1,2,42.0,37,50,0.666667,0,2,0.0,0,0,0.509467,0.3552,0.6509
+S13/run_0_platoon,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,2,30.666667,26,33,0.333333,0,1,0.0,0,0,0.478367,0.4292,0.5099
+S13/run_0_platoon,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.333333,0,3,0.666667,0,1,0.0,0,0,0.0,0,0,0.436067,0.3142,0.6721
+S13/run_0_platoon,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,2,0.0,0,0,0.0,0,0,0.0,0,0,0.373367,0.2604,0.5016
+S13/run_0_platoon,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.333333,1,2,36.666667,34,41,0.333333,0,1,0.0,0,0,0.4956,0.3264,0.6247
+S13/run_0_platoon,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,0.666667,0,2,29.666667,28,32,0.333333,0,1,0.0,0,0,0.441433,0.3177,0.5172
+S13/run_0_platoon,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,0,3,0.666667,0,1,0.0,0,0,0.0,0,0,0.4837,0.3516,0.7474
+S13/run_0_platoon,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,65.333333,61,68,0.666667,0,2,0.0,0,0,0.457633,0.3315,0.6849
+S13/run_0_platoon,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,0,3,0.666667,0,1,0.0,0,0,0.0,0,0,0.565333,0.3964,0.6829
+S13/run_0_platoon,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,63.333333,55,76,0.666667,0,1,0.0,0,0,0.439733,0.3562,0.5964
+S13/run_0_platoon,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,2.6,1,4,89.8,81,97,1.6,1,2,0.0,0,0,0.49266,0.3544,0.7164
+S13/run_0_platoon,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,0,3,0.666667,0,1,0.0,0,0,0.0,0,0,0.584167,0.4407,0.6755
+S13/run_0_platoon,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,2.0,2,2,2.0,2,2,1.666667,1,2,72.333333,62,83,1.0,0,2,0.0,0,0,0.476467,0.413,0.5878
+S14/run_0_surrounded,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.0,4,4,0.0,0,0,0.0,0,0,0.0,0,0,0.1502,0.1502,0.1502
+S14/run_0_surrounded,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,5.333333,4,6,0.0,0,0,0.0,0,0,0.0,0,0,0.207767,0.1842,0.2451
+S14/run_0_surrounded,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.0,4,4,0.0,0,0,0.0,0,0,0.0,0,0,0.161367,0.1536,0.1715
+S14/run_0_surrounded,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,6.6,5,8,70.0,64,77,2.0,1,3,0.0,0,0,0.19834,0.1933,0.2054
+S14/run_0_surrounded,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,7.6,5,10,78.4,65,84,1.0,0,2,0.0,0,0,0.21346,0.1899,0.2476
+S14/run_0_surrounded,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.0,0,0,0.0,0,0,0.0,0,0,0.1567,0.1524,0.164
+S14/run_0_surrounded,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.333333,0,1,0.0,0,0,0.0,0,0,0.1698,0.1578,0.187
+S14/run_0_surrounded,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,3,6,54.666667,54,55,0.333333,0,1,0.0,0,0,0.2006,0.1991,0.2031
+S14/run_0_surrounded,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,8.333333,6,12,58.666667,53,62,1.0,0,2,0.0,0,0,0.219967,0.2003,0.2488
+S14/run_0_surrounded,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,5.333333,4,6,0.0,0,0,0.0,0,0,0.0,0,0,0.205367,0.1805,0.2405
+S14/run_0_surrounded,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.333333,0,1,0.0,0,0,0.0,0,0,0.2148,0.1851,0.254
+S14/run_0_surrounded,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.666667,4,5,54.333333,51,58,0.333333,0,1,0.0,0,0,0.2475,0.2225,0.2797
+S14/run_0_surrounded,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,8.333333,7,10,60.0,57,63,0.333333,0,1,0.0,0,0,0.268933,0.2498,0.2952
+S14/run_0_surrounded,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.333333,0,1,0.0,0,0,0.0,0,0,0.220867,0.1945,0.2588
+S14/run_0_surrounded,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,8.666667,7,10,113.666667,108,117,0.666667,0,2,0.0,0,0,0.3375,0.2839,0.3679
+S14/run_0_surrounded,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.333333,0,1,0.0,0,0,0.0,0,0,0.193867,0.1691,0.2158
+S14/run_0_surrounded,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,9.333333,8,12,114.0,102,123,0.333333,0,1,0.0,0,0,0.320067,0.2676,0.3556
+S14/run_0_surrounded,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,10.0,8,12,145.6,133,155,3.0,1,4,0.0,0,0,0.29412,0.2729,0.3206
+S14/run_0_surrounded,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,4.333333,4,5,0.333333,0,1,0.0,0,0,0.0,0,0,0.1804,0.1668,0.1948
+S14/run_0_surrounded,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,9.333333,8,12,111.0,106,114,1.333333,0,3,0.0,0,0,0.306,0.2582,0.3447
+S15/run_0_dense_platoon,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.2019,0.2019,0.2019
+S15/run_0_dense_platoon,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.2074,0.1624,0.2931
+S15/run_0_dense_platoon,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.199667,0.191,0.204
+S15/run_0_dense_platoon,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,2,4,35.2,30,43,0.0,0,0,0.0,0,0,0.22416,0.2147,0.2439
+S15/run_0_dense_platoon,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.8,2,6,75.2,68,82,0.2,0,1,0.0,0,0,0.2089,0.192,0.2338
+S15/run_0_dense_platoon,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.214,0.2084,0.2201
+S15/run_0_dense_platoon,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,2.666667,2,3,2.0,1,3,0.0,0,0,0.0,0,0,0.204767,0.2,0.2092
+S15/run_0_dense_platoon,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,25.0,23,28,0.0,0,0,0.0,0,0,0.2219,0.204,0.2328
+S15/run_0_dense_platoon,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,2,4,43.333333,41,46,0.0,0,0,0.0,0,0,0.2001,0.193,0.2101
+S15/run_0_dense_platoon,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.216133,0.1652,0.3114
+S15/run_0_dense_platoon,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,2.666667,2,3,2.333333,2,3,0.0,0,0,0.0,0,0,0.2136,0.1682,0.2957
+S15/run_0_dense_platoon,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,3,3,29.333333,21,35,0.0,0,0,0.0,0,0,0.2282,0.1916,0.288
+S15/run_0_dense_platoon,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,2,4,44.333333,41,46,0.0,0,0,0.0,0,0,0.218533,0.1765,0.2934
+S15/run_0_dense_platoon,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,2.666667,2,3,2.333333,2,3,0.0,0,0,0.0,0,0,0.224033,0.1741,0.3182
+S15/run_0_dense_platoon,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,2,4,73.666667,67,78,0.0,0,0,0.0,0,0,0.2394,0.2119,0.2832
+S15/run_0_dense_platoon,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,2.666667,2,3,2.0,1,3,0.0,0,0,0.0,0,0,0.2137,0.2026,0.2216
+S15/run_0_dense_platoon,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.666667,3,4,66.333333,63,71,0.0,0,0,0.0,0,0,0.226633,0.2089,0.2462
+S15/run_0_dense_platoon,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.8,3,7,110.2,99,125,0.2,0,1,0.0,0,0,0.24708,0.2263,0.2613
+S15/run_0_dense_platoon,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,2.666667,2,3,2.0,1,3,0.0,0,0,0.0,0,0,0.216567,0.2133,0.2193
+S15/run_0_dense_platoon,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,8.0,8,8,8.0,8,8,3.0,2,4,68.333333,65,74,0.0,0,0,0.0,0,0,0.227633,0.2047,0.2512
+S16/run_0_overtaking,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.0,5,5,0.0,0,0,0.0,0,0,0.0,0,0,0.3887,0.3887,0.3887
+S16/run_0_overtaking,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.0,5,5,0.0,0,0,0.0,0,0,0.0,0,0,0.345933,0.29,0.4575
+S16/run_0_overtaking,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.0,5,5,0.0,0,0,0.0,0,0,0.0,0,0,0.389333,0.3873,0.3926
+S16/run_0_overtaking,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.4,6,7,55.0,49,63,0.6,0,2,0.0,0,0,0.38484,0.3535,0.4142
+S16/run_0_overtaking,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,7.8,6,10,47.8,43,56,1.4,0,3,0.0,0,0,0.40882,0.3981,0.4144
+S16/run_0_overtaking,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.0,5,8,0.0,0,0,0.0,0,0,0.0,0,0,0.403367,0.3961,0.4179
+S16/run_0_overtaking,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.0,5,5,0.0,0,0,0.0,0,0,0.0,0,0,0.3907,0.3733,0.3998
+S16/run_0_overtaking,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.333333,5,8,43.666667,41,47,0.0,0,0,0.0,0,0,0.396833,0.3684,0.4221
+S16/run_0_overtaking,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.666667,4,7,42.0,38,47,0.0,0,0,0.0,0,0,0.4112,0.4009,0.4229
+S16/run_0_overtaking,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.0,5,8,0.0,0,0,0.0,0,0,0.0,0,0,0.384633,0.3088,0.5156
+S16/run_0_overtaking,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.0,5,5,0.0,0,0,0.0,0,0,0.0,0,0,0.347933,0.3001,0.4263
+S16/run_0_overtaking,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.333333,5,8,39.0,34,43,0.0,0,0,0.0,0,0,0.3777,0.3427,0.4283
+S16/run_0_overtaking,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.666667,4,7,43.333333,41,45,0.0,0,0,0.0,0,0,0.377633,0.3089,0.5019
+S16/run_0_overtaking,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,6.0,5,8,0.0,0,0,0.0,0,0,0.0,0,0,0.411533,0.3213,0.5505
+S16/run_0_overtaking,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,7.333333,7,8,81.0,77,87,0.0,0,0,0.0,0,0,0.435167,0.4013,0.4843
+S16/run_0_overtaking,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.666667,5,7,0.0,0,0,0.0,0,0,0.0,0,0,0.418967,0.3991,0.4553
+S16/run_0_overtaking,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,7.0,6,8,77.666667,72,84,0.0,0,0,0.0,0,0,0.455967,0.4492,0.4642
+S16/run_0_overtaking,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,9.2,7,12,102.4,94,112,2.0,0,5,0.0,0,0,0.44556,0.3998,0.4964
+S16/run_0_overtaking,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,5.666667,5,7,0.0,0,0,0.0,0,0,0.0,0,0,0.4264,0.403,0.4579
+S16/run_0_overtaking,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,7.0,7,7,7.0,7,7,7.0,6,8,85.333333,82,90,0.0,0,0,0.0,0,0,0.448633,0.4353,0.4615
+S17/run_0_occlusion_reappearance,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.2944,0.2944,0.2944
+S17/run_0_occlusion_reappearance,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.335833,0.2767,0.3953
+S17/run_0_occlusion_reappearance,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.0,1,1,0.0,0,0,0.0,0,0,0.0,0,0,0.286667,0.2787,0.2996
+S17/run_0_occlusion_reappearance,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,3.2,1,4,54.6,48,60,1.6,0,3,0.0,0,0,0.37624,0.3547,0.388
+S17/run_0_occlusion_reappearance,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,5.4,3,7,31.4,26,38,0.8,0,2,0.0,0,0,0.44038,0.3788,0.4778
+S17/run_0_occlusion_reappearance,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.666667,1,2,0.0,0,0,0.0,0,0,0.0,0,0,0.310567,0.2851,0.3256
+S17/run_0_occlusion_reappearance,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.333333,1,2,0.333333,0,1,0.0,0,0,0.0,0,0,0.3195,0.3046,0.3332
+S17/run_0_occlusion_reappearance,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,3.333333,1,5,38.333333,35,42,0.0,0,0,0.0,0,0,0.358267,0.349,0.3723
+S17/run_0_occlusion_reappearance,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,2.666667,1,4,13.0,11,15,0.0,0,0,0.0,0,0,0.3629,0.3418,0.3898
+S17/run_0_occlusion_reappearance,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.3567,0.3164,0.3778
+S17/run_0_occlusion_reappearance,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.333333,1,2,0.333333,0,1,0.0,0,0,0.0,0,0,0.3597,0.2817,0.4168
+S17/run_0_occlusion_reappearance,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,4.0,3,5,37.666667,37,38,0.0,0,0,0.0,0,0,0.387433,0.3172,0.4693
+S17/run_0_occlusion_reappearance,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,2.666667,1,4,18.0,15,23,0.0,0,0,0.0,0,0,0.400767,0.3331,0.4697
+S17/run_0_occlusion_reappearance,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,2.333333,2,3,0.333333,0,1,0.0,0,0,0.0,0,0,0.386,0.3122,0.4278
+S17/run_0_occlusion_reappearance,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,5.333333,4,7,55.333333,52,61,0.0,0,0,0.0,0,0,0.455233,0.3761,0.5175
+S17/run_0_occlusion_reappearance,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,1.666667,1,2,0.666667,0,2,0.0,0,0,0.0,0,0,0.350433,0.3072,0.3871
+S17/run_0_occlusion_reappearance,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,4.0,3,5,50.0,48,53,0.0,0,0,0.0,0,0,0.410967,0.3512,0.4684
+S17/run_0_occlusion_reappearance,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,6.8,2,9,85.6,77,97,2.4,0,5,0.0,0,0,0.4764,0.4147,0.5179
+S17/run_0_occlusion_reappearance,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,2.0,2,2,0.333333,0,1,0.0,0,0,0.0,0,0,0.345167,0.3037,0.3758
+S17/run_0_occlusion_reappearance,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,4.0,4,4,4.0,4,4,4.666667,3,6,51.0,50,52,0.0,0,0,0.0,0,0,0.401433,0.349,0.4524
+S18/run_0_collision_ambiguity,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.0,3,3,0.0,0,0,0.0,0,0,0.0,0,0,0.1616,0.1616,0.1616
+S18/run_0_collision_ambiguity,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.221467,0.2105,0.2378
+S18/run_0_collision_ambiguity,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.333333,2,3,0.0,0,0,0.0,0,0,0.0,0,0,0.160367,0.1552,0.1701
+S18/run_0_collision_ambiguity,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.8,3,5,56.4,48,63,0.0,0,0,0.0,0,0,0.21362,0.1982,0.2472
+S18/run_0_collision_ambiguity,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,5.0,4,7,38.6,37,40,0.0,0,0,0.2,0,1,0.23958,0.166,0.2765
+S18/run_0_collision_ambiguity,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.153,0.1472,0.1609
+S18/run_0_collision_ambiguity,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.333333,2,3,0.0,0,0,0.0,0,0,0.0,0,0,0.183867,0.178,0.1942
+S18/run_0_collision_ambiguity,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.666667,2,4,40.666667,38,43,0.333333,0,1,0.0,0,0,0.203167,0.1949,0.2079
+S18/run_0_collision_ambiguity,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.666667,2,3,16.0,15,18,0.0,0,0,0.0,0,0,0.2074,0.1802,0.2213
+S18/run_0_collision_ambiguity,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.2177,0.2085,0.2335
+S18/run_0_collision_ambiguity,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.0,0,0,0.0,0,0,0.0,0,0,0.2467,0.2336,0.2654
+S18/run_0_collision_ambiguity,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.666667,2,3,40.666667,37,44,0.333333,0,1,0.0,0,0,0.240633,0.2111,0.2618
+S18/run_0_collision_ambiguity,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.0,3,3,18.666667,16,22,0.0,0,0,0.0,0,0,0.248467,0.2143,0.267
+S18/run_0_collision_ambiguity,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.2454,0.2333,0.2662
+S18/run_0_collision_ambiguity,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.666667,3,4,59.333333,53,63,0.333333,0,1,0.0,0,0,0.265233,0.2347,0.2853
+S18/run_0_collision_ambiguity,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.183433,0.1796,0.1891
+S18/run_0_collision_ambiguity,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.333333,2,4,52.333333,51,55,0.333333,0,1,0.0,0,0,0.232533,0.2201,0.2573
+S18/run_0_collision_ambiguity,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,7.0,5,10,95.2,88,100,0.0,0,0,0.2,0,1,0.28428,0.2367,0.3344
+S18/run_0_collision_ambiguity,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,2.0,2,2,0.666667,0,1,0.0,0,0,0.0,0,0,0.179633,0.1715,0.1867
+S18/run_0_collision_ambiguity,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,6.0,6,6,6.0,6,6,3.333333,2,5,56.666667,53,59,0.333333,0,1,0.0,0,0,0.226767,0.1982,0.2579
+S19/run_0_highway_curve,baseline,none,all,all,1,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.0,4,4,0.0,0,0,0.0,0,0,0.0,0,0,0.2701,0.2701,0.2701
+S19/run_0_highway_curve,gnss,degraded,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.0,4,4,0.0,0,0,0.0,0,0,0.0,0,0,0.2946,0.2725,0.3372
+S19/run_0_highway_curve,gnss,rtk,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.0,4,4,0.0,0,0,0.0,0,0,0.0,0,0,0.2567,0.2433,0.269
+S19/run_0_highway_curve,radar_asym,extreme,alone,A,5,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,8.4,7,10,105.4,102,109,0.2,0,1,0.0,0,0,0.32856,0.248,0.3876
+S19/run_0_highway_curve,radar_asym,extreme,alone,B,5,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,8.2,6,10,83.2,79,90,0.2,0,1,0.0,0,0,0.29234,0.2689,0.3304
+S19/run_0_highway_curve,radar_asym,nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,5.333333,3,7,0.333333,0,1,0.0,0,0,0.0,0,0,0.312633,0.2973,0.3382
+S19/run_0_highway_curve,radar_asym,nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,3.666667,2,5,0.666667,0,1,0.0,0,0,0.0,0,0,0.275133,0.2675,0.2866
+S19/run_0_highway_curve,radar_asym,severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.333333,2,7,87.666667,85,91,0.666667,0,2,0.0,0,0,0.320633,0.2712,0.3628
+S19/run_0_highway_curve,radar_asym,severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,8.0,7,9,69.666667,63,77,0.0,0,0,0.0,0,0,0.291667,0.2534,0.3358
+S19/run_0_highway_curve,radar_asym_gnss,gnss degraded + radar nominal,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,6.0,3,8,0.333333,0,1,0.0,0,0,0.0,0,0,0.323067,0.2803,0.3586
+S19/run_0_highway_curve,radar_asym_gnss,gnss degraded + radar nominal,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.0,2,6,0.666667,0,1,0.0,0,0,0.0,0,0,0.308333,0.2741,0.3673
+S19/run_0_highway_curve,radar_asym_gnss,gnss degraded + radar severe,alone,A,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,4.333333,2,7,89.666667,89,91,0.666667,0,2,0.0,0,0,0.350867,0.3215,0.3739
+S19/run_0_highway_curve,radar_asym_gnss,gnss degraded + radar severe,alone,B,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,9.0,7,10,72.333333,70,74,0.0,0,0,0.0,0,0,0.3466,0.2979,0.4066
+S19/run_0_highway_curve,radar_gnss_v3,gnss degraded + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,6.666667,3,9,1.0,0,2,0.0,0,0,0.0,0,0,0.328833,0.2955,0.3798
+S19/run_0_highway_curve,radar_gnss_v3,gnss degraded + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,7.666667,6,9,161.333333,158,165,0.666667,0,2,0.0,0,0,0.3729,0.3529,0.4093
+S19/run_0_highway_curve,radar_gnss_v3,gnss rtk + radar nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,6.333333,3,9,1.0,0,2,0.0,0,0,0.0,0,0,0.3068,0.2672,0.3585
+S19/run_0_highway_curve,radar_gnss_v3,gnss rtk + radar severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,7.666667,5,9,161.0,157,164,0.666667,0,2,0.0,0,0,0.322767,0.2888,0.3468
+S19/run_0_highway_curve,radar_v3,extreme,all,all,5,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,11.2,9,14,186.8,180,194,0.4,0,1,0.0,0,0,0.36506,0.3235,0.4278
+S19/run_0_highway_curve,radar_v3,nominal,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,6.333333,3,9,1.0,0,2,0.0,0,0,0.0,0,0,0.315333,0.2798,0.3563
+S19/run_0_highway_curve,radar_v3,severe,all,all,3,1.0,1,1,1.0,1,1,0.0,0,0,5.0,5,5,5.0,5,5,7.666667,5,9,157.333333,148,164,0.666667,0,2,0.0,0,0,0.344267,0.296,0.3859

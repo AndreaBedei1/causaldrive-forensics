@@ -206,8 +206,9 @@ with the frozen method, paired with the G0 baseline of the same raw data
 | asymmetric radar x GNSS | G2 x {nominal, severe} | radar on each subset, GNSS on all |
 
 5G is only the transport of the RTK corrections: no network latency, availability or packet loss is simulated or
-claimed.  The method is not re-tuned between conditions.  Stochastic conditions draw at least 3 and at most 8 seeds,
-adding one while the standard error over seeds of a headline metric exceeds its tolerance.
+claimed.  The method is not re-tuned between conditions.  Stochastic conditions start with 3 seeds; the seed rule adds
+one while the standard error over seeds of a headline metric exceeds its tolerance.  It added seeds 3 and 4 to the
+two extreme radar conditions, and the campaign was closed there by decision (at most 5 seeds).
 
 ## Tests and the campaign
 
@@ -230,7 +231,7 @@ adding one while the standard error over seeds of a headline metric exceeds its 
 | `traces/.../incident_context.json` | supplied incident context | yes |
 | `traces/.../reconstruction/` | the reconstruction and its evaluation (`evaluation/`) | yes |
 | `results/` | G0 scorecard, reproducibility records, campaign v3 tables and figures | yes (tables, figures, summaries) |
-| campaign worktree and job records | `jobs.jsonl` of every attempt, scratch copies | no: on the data disk, with SHA-256 in `results/campaign_v3/` |
+| `results/robustness/campaign_v3/` | campaign v3 job records of every attempt (`jobs.jsonl.gz`), manifest, controller log | yes (records compressed, 3 MB; SHA-256 in `results/campaign_v3/index.md`) |
 
 Full map and the state of every branch: [docs/REPOSITORY.md](docs/REPOSITORY.md).
 
@@ -247,11 +248,34 @@ Full map and the state of every branch: [docs/REPOSITORY.md](docs/REPOSITORY.md)
 | CRITICAL_TTC | 42/42 justified warnings before the impact; lead time minimum 0.75 s, median 1.53 s |
 | validation | 14 PASS, 8 WARN, 0 FAIL ([docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md)) |
 
-### Degradation study (campaign v3)
+### Degradation study (campaign v3, [docs/CAMPAIGN_V3_REPORT.md](docs/CAMPAIGN_V3_REPORT.md))
 
-<!-- CAMPAIGN -->
-Campaign v3 started on 2026-10-23 from the frozen tag `campaign-v3` (1,636 jobs at three seeds, up to 4,326).  Its
-tables, figures and report will be in `results/campaign_v3/` and `docs/CAMPAIGN_V3_REPORT.md`.
+1816 jobs on the 22 runs, all complete, from the frozen tag `campaign-v3` (2026-10-23).  Each job is paired with the
+G0 job of the same run.  Values are means over seeds; intervals, paired changes and every other measure are in the
+report and in [`results/campaign_v3/`](results/campaign_v3/index.md).
+
+| condition | collisions identified | phantoms / job | recorder ghosts / job | coverage | position P95 [m] | CRITICAL_TTC in time |
+|---|---|---|---|---|---|---|
+| G0 | 1.000 | 0.0 | 0.05 | 0.933 | 0.817 | 1.000 |
+| GNSS G1 RTK | 1.000 | 0.0 | 0.05 | 0.933 | 0.848 | 1.000 |
+| GNSS G2 degraded | 1.000 | 0.0 | 0.02 | 0.926 | 0.867 | 1.000 |
+| radar nominal | 1.000 | 0.6 | 0.06 | 0.927 | 0.971 | 1.000 |
+| radar severe | 0.987 | 68.7 | 0.50 | 0.874 | 1.335 | 0.984 |
+| radar extreme | 0.954 | 102.4 | 1.79 | 0.887 | 1.556 | 0.919 |
+| one radar severe | 0.995 | 30.5 | 0.26 | 0.906 | 1.079 | 0.993 |
+| one radar extreme | 0.981 | 45.6 | 0.84 | 0.910 | 1.186 | 0.965 |
+| G2 + severe radar | 1.000 | 69.6 | 0.52 | 0.871 | 1.332 | 0.976 |
+
+* **Collisions.**  None of the 2344 true contacts is missed.  The 22 misattributed collisions all occur under severe
+  or extreme radar, in four scenarios.  Each comes with an invented single-recorder node and a missed recorder link.
+* **Road users that record nothing.**  Every observable vehicle stays represented.  Degraded radar lowers coverage
+  (by up to 0.062), splits vehicles (up to 2.45 duplicates per job) and adds phantoms: 97-98 % of them are clutter far
+  from any vehicle, and their number is proportional to the number of degraded radars.
+* **GNSS.**  Degradation alone (recorder pose P95 0.033 m for G1, 0.311 m for G2) leaves collisions, completeness and
+  associations unchanged.  It raises the speed error slightly and the unconfirmed CRITICAL_TTC alarms from 0.09 to
+  0.20-0.21 per job.  GNSS and radar effects add up: only four interaction intervals exclude zero, all small.
+* **CRITICAL_TTC.**  Warnings are missed only under severe or extreme radar.  Every missed warning was never raised;
+  none came late.  S11 `consequential` is the most sensitive case.
 
 ## Limitations
 
@@ -325,6 +349,10 @@ scripts\campaign_v3.bat pause
 scripts\campaign_v3.bat resume
 python scripts\campaign_v3_report.py --jobs results\robustness\campaign_v3\jobs.jsonl --out results\campaign_v3
 ```
+
+The report command reads the uncompressed records (`jobs.jsonl.gz`, see
+[`results/campaign_v3/index.md`](results/campaign_v3/index.md)); it regenerates the committed tables and figures
+byte for byte.
 
 ## Documentation and references
 

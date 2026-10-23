@@ -1,9 +1,10 @@
 # Campaign v3: design and freeze
 
-**Status (2026-10-23):** approved by Andrea (2026-10-23, full campaign authorised).  Frozen at the tag
-`campaign-v3` (code, configuration, dataset and protocol: `results/robustness/campaign_v3/manifest.json` of the
-campaign worktree) and run from a separate worktree of that tag, so that later work on the repository cannot
-change a job.  The final results and their report are in `results/campaign_v3/` and `docs/CAMPAIGN_V3_REPORT.md`.
+**Status (2026-10-23): COMPLETE.**  Approved by Andrea (2026-10-23, full campaign authorised).  Frozen at the tag
+`campaign-v3` (code, configuration, dataset and protocol: `results/robustness/campaign_v3/manifest.json`) and run from
+a separate worktree of that tag, so that later work on the repository could not change a job.  Ran from 05:36 to
+14:28: 1816 jobs, all complete (section "Execution").  Results and report: `results/campaign_v3/` and
+`docs/CAMPAIGN_V3_REPORT.md`.
 
 ## Question
 
@@ -168,6 +169,27 @@ of workers to the machine's load and leaves room for other users.  Every finishe
 8. **Authoritative tables.**  `scripts/campaign_v3_report.py` (errors pooled over all compared states, t intervals
    over seeds).  The controller's own summary (`campaign_v3_conditions.md`: median of the per-job medians) is kept
    for continuity.
+
+## Execution (2026-10-23)
+
+* **Size.**  1816 jobs: 1636 at three seeds, plus seeds 3 and 4 that the seed rule added to `radar_v3` extreme and
+  `radar_asym` extreme (180 jobs).  `jobs.jsonl` holds 1826 records: the 1816 complete jobs and 10 failed attempts.
+* **Seeds closed by decision.**  At 14:27 Andrea decided to add no seed beyond those already decided.  The controller
+  was paused, and a final start with `--max-seeds 5` closed the campaign (COMPLETE, nothing left to run).  With 5
+  seeds every tolerance is met except the legacy fused-centre error of `radar_asym` extreme (standard error 0.052 m
+  against 0.05 m; decision 7).
+* **External terminations.**  Ten job processes were terminated from outside the campaign (10:14, 10:20-10:21; exit
+  code 1, no traceback).  The failed attempts stay in `jobs.jsonl`; a pause and resume re-queued the jobs, which then
+  completed.
+* **Priority and windows.**  From 12:19 the campaign ran with 22 fixed workers ahead of another project's load (an
+  above-normal priority inherited through a Windows job object).  From 13:25 to 13:43 it ran below normal, as the
+  controller starts its jobs.
+  `campaign_v3.bat` started the controller with DETACHED_PROCESS, so Windows gave every job a visible console window.
+  From 13:43 the same controller command ran with a hidden console shared by its jobs.  On the branch (after the
+  campaign) `start_detached` now uses CREATE_NO_WINDOW (`tests/test_campaign_revision.py`).
+* **Provenance.**  Every complete job carries the frozen commit `df12f759`, code hash `83713ba5...` and a clean tree.
+  The controller verified the freeze at each of its five starts.  None of these events changed what a job computes.
+  Details: `docs/PROJECT_STATUS.md`.
 
 ## Open points recorded before the freeze (2026-10-22)
 

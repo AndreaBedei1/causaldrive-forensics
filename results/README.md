@@ -6,8 +6,14 @@
   and the tracking diagnostic by motion regime (`tracking_regimes.md|json`, `scripts/tracking_regimes.py`).
   Analysis: `docs/G0_ERROR_ANALYSIS.md`.
 - `campaign_v3/`: the tables, figures and index of the robustness campaign v3 (`scripts/campaign_v3_report.py`;
-  report `docs/CAMPAIGN_V3_REPORT.md`).  The job records themselves stay on the data disk (paths and SHA-256 in
-  `campaign_v3/index.md`).
+  report `docs/CAMPAIGN_V3_REPORT.md`).
+- `robustness/campaign_v3/`: that campaign's records:
+  - every attempt (`jobs.jsonl.gz`, 1826 records; SHA-256 in `campaign_v3/index.md`);
+  - the frozen manifest (`manifest.json`);
+  - the controller's own summary (`summary.*`, `campaign_v3_*`, `figures/`);
+  - its log and final state (`control/`).
+
+  `campaign_v3/` regenerates from `jobs.jsonl.gz` byte for byte.
 - `reproducibility_20261022/`: integrity and reproducibility summaries of the two acquisitions:
   - set A, installed in `traces/`;
   - set B, the repeat, kept with the lab runs on `F:\CarlaGraph_repro_20261022`;

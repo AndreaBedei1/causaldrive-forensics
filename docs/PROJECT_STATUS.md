@@ -71,8 +71,24 @@
   The controller is in a job object with the above-normal priority class, so every descendant inherits it, and the
   fixed 22 workers are kept.  The keeper also replaces the earlier watchdog: it restarts the controller, hidden,
   if it ends without COMPLETE, REFUSED or a pause request.
+* **Seeds closed (2026-10-23, 14:27, Andrea's decision: no seed beyond those already decided).**  The seed rule had
+  added seeds 3 and 4 to `radar_v3` extreme and `radar_asym` extreme (14:03-14:16).  The controller was paused before
+  it could add a fifth seed, and a last start with `--max-seeds 5` closed the campaign.
+* **COMPLETE (2026-10-23, 14:28):** 1816 jobs, all complete, 0 failed in the end; 1826 records with the 10 killed
+  attempts.  All complete jobs carry the frozen commit and code hash from a clean tree; the 22 baseline jobs reproduce
+  the canonical reconstruction exactly.
+
+## After the campaign (2026-10-23)
+
+* **Report:** `docs/CAMPAIGN_V3_REPORT.md`; tables and figures in `results/campaign_v3/` (index with SHA-256).  The
+  job records are committed compressed in `results/robustness/campaign_v3/jobs.jsonl.gz` (3.1 MB; 27.5 MB
+  uncompressed), with the manifest, the controller's own summary and its log.  The report script regenerates every
+  committed table and figure byte for byte from them: the figures no longer embed a date, and their SVG ids are fixed
+  (`tests/test_campaign_v3_report.py`).
+* **Controller launch fixed on the branch:** `start_detached` uses CREATE_NO_WINDOW instead of DETACHED_PROCESS, so a
+  future campaign started with `campaign_v3.bat` opens no window per job (`tests/test_campaign_revision.py`).  The
+  frozen tag is unchanged.
 
 ## Next steps
 
-* Report (`docs/CAMPAIGN_V3_REPORT.md`, `results/campaign_v3/`) once the campaign is COMPLETE.
 * Merge into `main` with the paper commits; tag; close the work branch.
