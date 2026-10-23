@@ -228,10 +228,12 @@ def condition_table(records: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]
                 continue
             here = pooled([v for _, v in complete])
             per_seed.append(here)
-            bases = [baselines.get(run_name(j["run"])) for j, _ in complete]
-            if all(b is not None for b in bases):
-                base = pooled(bases)
-                paired.append({k: (None if here[k] is None or base[k] is None else here[k] - base[k]) for k in here})
+            # Paired: the jobs whose run has a complete baseline, against those baselines (a failed baseline
+            # leaves its own run out, not the seed).
+            pairs = [(v, baselines[run_name(j["run"])]) for j, v in complete if run_name(j["run"]) in baselines]
+            if pairs:
+                mine, base = pooled([v for v, _ in pairs]), pooled([b for _, b in pairs])
+                paired.append({k: (None if mine[k] is None or base[k] is None else mine[k] - base[k]) for k in mine})
         row: Dict[str, Any] = {"family": family, "level": level, "subset": subset, "recorders": stratum,
                                "runs": len({run_name(r["run"]) for r in members}), "seeds": len(per_seed),
                                "jobs": len(members), "failed": failed}

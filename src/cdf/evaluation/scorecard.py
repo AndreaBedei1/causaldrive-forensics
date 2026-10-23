@@ -6,9 +6,10 @@ verdicts the existing evaluation already writes (``evaluation.json``, ``fusion_m
 those verdicts; where a new rule is needed it is stated below and kept deliberately simple.
 
 1. Collisions.  The true collisions are those of ``evaluation.json`` (``collisions``; a recontact of the same pair
-   is part of the collision it follows).  A collision is DETECTED when the reconstruction holds a collision node
-   for it, IDENTIFIED when that node names exactly its participants.  A collision none of whose vehicles records
-   is listed (``involves_recorder`` false) but not REPORTABLE: no collision sensor reports it.  Recall and the
+   is part of the collision it follows).  A collision is IDENTIFIED when a collision node names exactly its
+   participants, DETECTED when it is identified or when a node that one of its own recorders reported at that time
+   names other participants (misattributed; ``evaluation.match_collisions``).  A collision none of whose vehicles
+   records is listed (``involves_recorder`` false) but not REPORTABLE: no collision sensor reports it.  Recall and the
    identified rate are over the reportable collisions.  Of the ``extra_collisions``, a true recontact reported as
    a collision of its own is a RECONTACT SPLIT, every other one INVENTED; precision = identified / (detected +
    invented + recontact splits); the timing error is the evaluation's ``report_timing_error_s``.
@@ -344,7 +345,8 @@ def summary_rows(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
             "intrusions": "{0}/{1}".format((sem.get("path_intrusions") or {}).get("found"),
                                            (sem.get("path_intrusions") or {}).get("expected")),
-            "unconfirmed_ttc": len(sem.get("unconfirmed_critical_ttc") or []),
+            "unconfirmed_ttc": (None if "unconfirmed_critical_ttc" not in sem
+                                else len(sem["unconfirmed_critical_ttc"])),
         })
     return rows
 
@@ -403,7 +405,9 @@ def _numbers(card: Mapping[str, Any]) -> Dict[str, Any]:
             "false_merges": (ass.get("merges") or {}).get("false"),
             "ttc_justified": sem.get("justified_warnings"), "ttc_in_time": sem.get("justified_warned_in_time"),
             "intrusions_found": intrusions.get("found"), "intrusions_expected": intrusions.get("expected"),
-            "unconfirmed_ttc": len(sem.get("unconfirmed_critical_ttc") or [])}
+            # Without the event oracle (semantics unavailable) the alarms are unknown, not zero.
+            "unconfirmed_ttc": (None if "unconfirmed_critical_ttc" not in sem
+                                else len(sem["unconfirmed_critical_ttc"]))}
 
 
 def _run_name(run: str) -> str:
@@ -468,8 +472,9 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
         for _, ms in sorted(per_seed.items()):
             total = lambda key: sum(m[key] or 0 for m in ms)  # noqa: E731
             per_job = lambda key: total(key) / len(ms)  # noqa: E731
-            paired = lambda key: (sum(m["d_" + key] for m in ms) / len(ms)  # noqa: E731
-                                  if all(m.get("d_" + key) is not None for m in ms) else None)
+            # A job whose run has no complete baseline has no paired change; the others keep theirs.
+            paired = lambda key: (statistics.fmean([m["d_" + key] for m in ms if m.get("d_" + key) is not None])  # noqa: E731
+                                  if any(m.get("d_" + key) is not None for m in ms) else None)
             positions = [m["pos_med_m"] for m in ms if m["pos_med_m"] is not None]
             pooled.append({
                 "collisions_identified_rate": (total("identified") / total("reportable")
@@ -499,7 +504,7 @@ def condition_table(rows: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
 CONDITION_COLUMNS = (("collisions_identified_rate", "collisions identified", 3), ("invented", "invented", 1),
                      ("represented_rate", "observable represented", 3), ("duplicates", "duplicates", 1),
                      ("rec_ghosts", "recorder ghosts", 1), ("phantoms", "phantoms", 1),
-                     ("pos_med_m", "position err. median [m]", 3), ("d_identified", "paired d identified", 2),
+                     ("pos_med_m", "median of the per-job position medians [m]", 3), ("d_identified", "paired d identified", 2),
                      ("d_represented", "paired d represented", 2), ("d_phantoms", "paired d phantoms", 1))
 
 

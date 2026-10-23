@@ -16,7 +16,7 @@ import json
 import math
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -115,7 +115,12 @@ def _rmse(values: Sequence[float]) -> Optional[float]:
 
 
 def _to_world(first_pose: Dict[str, Any], x: float, y: float) -> Tuple[float, float]:
-    """Local frame of a recorder -> CARLA world (evaluation only)."""
+    """Local frame of a recorder -> CARLA world (evaluation only).
+
+    ``first_pose`` is the recorder's TRUE first pose (``ego.jsonl``, G0), also when the reconstruction ran on a
+    perturbed GNSS/INS: which vehicle a radar track followed is a physical fact, so a recorder's own pose error must
+    not turn a real vehicle into a phantom or into another vehicle.  The error of the positions the reconstruction
+    gives its road users is measured separately, on its own pose streams (``fusion_metrics`` state errors)."""
     yaw = math.radians(first_pose["yaw_deg"])
     return (first_pose["x"] + math.cos(yaw) * x - math.sin(yaw) * y,
             first_pose["y"] + math.sin(yaw) * x + math.cos(yaw) * y)
@@ -170,6 +175,57 @@ def _truth_contacts(collisions: Sequence[Dict[str, Any]], actor_to_participant: 
         contact["recontacts"] = [{"sim_time": r["sim_time"], "peak_impulse": r["peak_impulse"]} for r in recontacts]
         grouped.append(contact)
     return grouped
+
+
+def match_collisions(contacts: Sequence[Dict[str, Any]], collision_nodes: Sequence[Dict[str, Any]],
+                     recorders: Sequence[str], origins: Mapping[str, float]
+                     ) -> Tuple[List[Dict[str, Any]], set]:
+    """Each true collision against the reconstruction's COLLISION nodes, every node used once: (rows, used nodes).
+
+    1. IDENTIFIED: the node naming exactly the collision's recorders (a collision with a static object or with a
+       vehicle that records nothing is reported by the recorders involved only) that every observer reported
+       within ``TRUTH_CONTACT_GAP_S`` of it, the closest one;
+    2. else DETECTED with the wrong participants: a node that one of the collision's own recorders reported within
+       ``TRUTH_CONTACT_GAP_S`` of it (its collision sensor felt it), whatever participants the node names;
+    3. else MISSED.
+    Every collision gets its exact match before any is matched the second way."""
+    def report_error(node: Dict[str, Any], contact: Dict[str, Any]) -> float:
+        return max(abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in node["observations"])
+
+    def own_report_error(node: Dict[str, Any], contact: Dict[str, Any]) -> Optional[float]:
+        errors = [abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in node["observations"]
+                  if obs["graph"] in contact["participants"]]
+        return min(errors) if errors else None
+
+    used: set = set()
+    matches: Dict[int, Tuple[Dict[str, Any], float, bool]] = {}
+    for index, contact in enumerate(contacts):
+        expected = sorted(name for name in contact["participants"] if name in recorders)
+        options = [node for node in collision_nodes if sorted(node["participants"]) == expected
+                   and node["node_id"] not in used and report_error(node, contact) <= TRUTH_CONTACT_GAP_S]
+        if options:
+            match = min(options, key=lambda node: report_error(node, contact))
+            used.add(match["node_id"])
+            matches[index] = (match, report_error(match, contact), True)
+    for index, contact in enumerate(contacts):
+        if index in matches:
+            continue
+        options = [(own_report_error(node, contact), node) for node in collision_nodes if node["node_id"] not in used]
+        options = [(error, node) for error, node in options if error is not None and error <= TRUTH_CONTACT_GAP_S]
+        if options:
+            error, match = min(options, key=lambda item: item[0])
+            used.add(match["node_id"])
+            matches[index] = (match, error, False)
+    rows = []
+    for index, contact in enumerate(contacts):
+        match, error, exact = matches.get(index, (None, None, False))
+        rows.append({"participants": contact["participants"], "sim_time": contact["sim_time"],
+                     "peak_impulse": contact["peak_impulse"], "recontacts": contact.get("recontacts", []),
+                     "reconstructed_as": None if match is None else match["node_id"],
+                     "reconstructed_participants": None if match is None else sorted(match["participants"]),
+                     "participants_correct": exact,
+                     "report_timing_error_s": None if error is None else round(error, 4)})
+    return rows, used
 
 
 def _clock_shift_check(run_dir: Path, graph: Dict[str, Any], alignment: Dict[str, Any],
@@ -249,27 +305,12 @@ def evaluate_run(run_dir: Path, clock_shift_check: bool = True) -> Dict[str, Any
     else:
         zero_sim = None
 
-    # 1. Collisions: each true contact against the COLLISION node of the same participants
-    #    reported closest to it (within TRUTH_CONTACT_GAP_S); every node is used once.
+    # 1. Collisions: each true collision identified, detected with the wrong participants, or missed
+    #    (match_collisions); every node is used once.
     def report_error(node: Dict[str, Any], contact: Dict[str, Any]) -> float:
         return max(abs(obs["t_local"] + origins[obs["graph"]] - contact["sim_time"]) for obs in node["observations"])
 
-    collision_rows = []
-    used = set()
-    for contact in contacts:
-        # A contact with a static object or a vehicle that is not a recorder is reported by the
-        # recorders involved only: a single-recorder node.
-        expected = sorted(name for name in contact["participants"] if name in recorders)
-        options = [node for node in collision_nodes if sorted(node["participants"]) == expected
-                   and node["node_id"] not in used and report_error(node, contact) <= TRUTH_CONTACT_GAP_S]
-        match = min(options, key=lambda node: report_error(node, contact)) if options else None
-        if match is not None:
-            used.add(match["node_id"])
-        collision_rows.append({"participants": contact["participants"], "sim_time": contact["sim_time"],
-                               "peak_impulse": contact["peak_impulse"], "recontacts": contact["recontacts"],
-                               "reconstructed_as": None if match is None else match["node_id"],
-                               "participants_correct": match is not None,
-                               "report_timing_error_s": None if match is None else round(report_error(match, contact), 4)})
+    collision_rows, used = match_collisions(contacts, collision_nodes, recorders, origins)
     # Reconstructed collisions that reproduce no true contact (e.g. one contact split in two); ``true_recontact``
     # when the node is a true recontact reported as a collision of its own.
     def is_recontact(node: Dict[str, Any]) -> bool:

@@ -145,6 +145,19 @@ of workers to the machine's load and leaves room for other users.  Every finishe
    * error statistics carry the RMSE;
    * the observability threshold is the run's own `min_track_frames`.
 3. **Map.**  The road map is supplied incident context (`docs/REPRODUCIBILITY.md`, amendment 2026-10-23).
+4. **Collisions with the wrong participants** count as detected but not identified: a true collision without a node
+   naming its recorders is matched, second, to a node one of its own recorders reported at that time
+   (`cdf.evaluation.reconstruction.match_collisions`).  Before, such a collision counted as missed and its node as
+   invented (independent review of 2026-10-23).
+5. **Identity of a radar track under perturbed GNSS.**  The evaluation places a recorder's local tracks with its
+   true first pose: which vehicle a track followed is a physical fact, so a recorder's own pose error does not turn a
+   real vehicle into a phantom; the position error of the fused road users is measured on the reconstruction's own
+   poses.
+6. **Seed rule.**  Decided per family and level over all its subsets and recorder strata (`need_more_seeds`); the
+   strata report their own intervals over the seeds they share.
+7. **Authoritative tables.**  `scripts/campaign_v3_report.py` (errors pooled over all compared states, t intervals
+   over seeds).  The controller's own summary (`campaign_v3_conditions.md`: median of the per-job medians) is kept
+   for continuity.
 
 ## Open points recorded before the freeze (2026-10-22)
 

@@ -113,6 +113,16 @@ class RawErrors(unittest.TestCase):
         self.assertEqual(rob.raw_errors({}), {"centre_error_m": [], "speed_error_mps": []})
 
 
+
+class SeedRuleRate(unittest.TestCase):
+    def test_the_identified_rate_of_the_seed_rule_is_over_the_reportable_collisions(self):
+        card = _card(1, 2, 1, 1)
+        card["collisions"]["reportable"] = 1  # one of the two true collisions involves no recorder
+        record = {"status": "complete", "scorecard": card, "events": {"base_events": 0, "time_deltas_s": [],
+                                                                      "matched": 0, "extra": []}}
+        self.assertEqual(rob.pooled([record])["collisions_identified_rate"], 1.0)
+
+
 def _observations(run: Path, recorder: str):
     path = next((run / "vehicles" / recorder / "radar").glob("*/observations.npz"))
     with np.load(str(path)) as data:

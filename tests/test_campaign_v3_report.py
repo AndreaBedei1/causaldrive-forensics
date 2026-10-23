@@ -86,6 +86,14 @@ class Pooling(unittest.TestCase):
         self.assertAlmostEqual(row["d_pos_median"], ((0.7 - 0.2) + (0.5 - 0.2)) / 2)
 
 
+    def test_a_run_without_a_baseline_leaves_the_paired_change_of_the_others(self):
+        records = [r for r in self.records if not (r["family"] == "baseline" and r["run"].endswith("S02/run_0_crash"))]
+        row = next(r for r in report.condition_table(records)
+                   if r["family"] == "radar_v3" and r["recorders"] == "all")
+        # only S01 pairs: seed 0 phantoms 4 - 0, seed 1 phantoms 2 - 0
+        self.assertAlmostEqual(row["d_phantoms_per_job"], 3.0)
+
+
 class Interaction(unittest.TestCase):
     def test_the_interaction_of_a_seed_is_its_combined_change_minus_the_single_sensor_changes(self):
         records = [_job("S01/run_0_crash", "baseline", "none", 0, _card(1, 1, 0))]

@@ -72,6 +72,37 @@ class Numbers(unittest.TestCase):
             self.assertIn(key, numbers)
 
 
+
+class MissingSemantics(unittest.TestCase):
+    def test_without_the_event_oracle_the_unconfirmed_alarms_are_unknown_not_zero(self):
+        card = json.loads((ROOT / "results" / "g0_scorecard_20261022" / "scorecard.json").read_text(encoding="utf-8"))[0]
+        card["semantics"] = {"available": False}
+        self.assertIsNone(_numbers(card)["unconfirmed_ttc"])
+
+
+class RunMetrics(unittest.TestCase):
+    def test_the_fused_centre_error_of_the_run_metrics_leaves_recorder_ghosts_out(self):
+        from src.cdf.evaluation.run_metrics import run_metrics
+        run = ROOT / "traces" / "S01" / "run_0_crash"
+        evaluation = json.loads((run / "reconstruction" / "evaluation" / "evaluation.json").read_text(encoding="utf-8"))
+        fusion = json.loads((run / "reconstruction" / "evaluation" / "fusion_metrics.json").read_text(encoding="utf-8"))
+        fusion["state_errors"] = {"centre_error_m": {"median": 1.75}}
+        fusion["road_user_state_errors"] = {"centre_error_m": {"median": 0.25}}
+        self.assertEqual(run_metrics(run, evaluation, fusion)["fused_centre_error_median_m"], 0.25)
+
+
+class PairedConditions(unittest.TestCase):
+    def test_a_job_without_its_baseline_leaves_the_paired_change_of_the_others(self):
+        from src.cdf.evaluation.scorecard import condition_table
+        rows = [{"family": "radar_v3", "level": "severe", "recorder": None, "recorders": 2, "seed": 0,
+                 "status": "complete", "identified": 1, "reportable": 1, "contacts": 1, "detected": 1, "invented": 0,
+                 "represented": 1, "observable": 1, "duplicates": 0, "rec_ghosts": 0, "phantoms": p, "pos_med_m": 0.2,
+                 "d_identified": 0, "d_invented": 0, "d_represented": 0, "d_duplicates": 0, "d_phantoms": d}
+                for p, d in ((4, 4), (6, None))]
+        row = condition_table(rows)[0]
+        self.assertEqual(row["d_phantoms"], 4.0)
+
+
 class RunConfiguration(unittest.TestCase):
     def test_the_tracker_minimum_is_the_one_the_reconstruction_used(self):
         graph = json.loads((S06 / "reconstruction" / "global" / "global_graph.json").read_text(encoding="utf-8"))

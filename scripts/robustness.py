@@ -381,7 +381,7 @@ def pooled(results: Sequence[Dict[str, Any]]) -> Dict[str, Optional[float]]:
         return None if not total else sum(c[num] for c in cards) / total
 
     return {"runs": len(done), "failed": len(results) - len(done),
-            "collisions_identified_rate": card_ratio("identified", "contacts"),
+            "collisions_identified_rate": card_ratio("identified", "reportable"),  # a recorder involved
             "represented_rate": card_ratio("represented", "observable"),  # road users that record nothing
             "association_accuracy": ratio("associations_correct", "associations_decided"),
             'absolute_pose_rms_m': statistics.median([r['pose_errors']['absolute_position_m']['rms'] for r in done
