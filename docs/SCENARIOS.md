@@ -12,7 +12,7 @@ sensors and recording prerequisites: [campaign_acquisition.md](campaign_acquisit
 | S04 | chain_collision | a_front_pushed, b_rear_first | three-car chain, two orders of contacts |
 | S05 | occluded_chain_stop | crash | chain with an occluded leader |
 | S06 | multidirection_crossing | crash | three vehicles from different directions |
-| S07 | roundabout | merge_conflict | merge conflict in a roundabout, both drivers signalling (Town03) |
+| S07 | roundabout | merge_conflict | merge conflict in a roundabout, both drivers signalling (Town03_Opt) |
 | S08 | single_stop_a | rolls_through | a vehicle rolls through a STOP while signalling its turn |
 | S09 | all_way_stop | near_simultaneous | near-simultaneous arrivals at an all-way stop |
 | S10 | intersection_pileup | deflected_into_c | pile-up, a car deflected into a third |

@@ -88,7 +88,7 @@ runs, each reviewed by eye in both viewers ([docs/SCENARIOS.md](docs/SCENARIOS.m
 | S01-S03 | rear-end, cut-in and junction crossing collisions between two recorders |
 | S04 (two variants), S05, S10, S11 | chains and pile-ups: several collisions, their order, a car deflected into a third, an occluded leader, a secondary collision |
 | S06, S08, S09 | three-way junction, rolling through a STOP, an all-way stop |
-| S07 | a merge conflict in a roundabout (Town03) |
+| S07 | a merge conflict in a roundabout (Town03_Opt) |
 | S12, S13 (three variants) | road users that record nothing: a causally relevant car, two nearby cars kept apart |
 | S14-S18 | dense traffic: abreast, platoon, overtaking, occlusion and reappearance, similar cars around a contact |
 | S19 | a four-lane motorway curve (Town04) |
@@ -211,8 +211,10 @@ adding one while the standard error over seeds of a headline metric exceeds its 
 
 ## Tests and the campaign
 
-* `python -m pytest -q`: unit and integration tests, among them the ground-truth boundary, the determinism of the
-  reconstruction, the recontact rule, the two-way viewer link and the campaign's paired streams.
+* `python -m pytest -q`: unit and integration tests, among them the ground-truth boundary, the recontact rule, the
+  supplied map, the two-way viewer link, the scorecard definitions and the campaign's paired streams.  The
+  byte-for-byte determinism of the reconstruction is checked separately, by reconstructing copies of the 22 runs
+  ([docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md)).
 * `scripts/validate_canonical.py`: the automatic validation of the 22 runs
   ([docs/CANONICAL_VALIDATION.md](docs/CANONICAL_VALIDATION.md)).
 * `scripts/campaign_controller.py` (through `scripts/campaign_v3.bat`): the campaign runner.  It verifies the freeze

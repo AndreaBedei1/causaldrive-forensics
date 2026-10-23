@@ -79,6 +79,14 @@ canonical traces and `scripts/hardening_refresh.py` all stay.
 | `F:\CarlaGraph_backup_20261022\` | the verified backup made before any change (git bundle of every ref, untracked data, SHA-256) |
 | `F:\CarlaGraph_repro_20261022\` | reproducibility evidence and checks: S10 repeats (`baseline`, `fixed1-3`), the two acquisitions of the 22 runs (`canonical_A` installed in `traces/`, `canonical_B` the repeat), lab tests, campaign v3 smoke tests (`campaign_v3_smoke`, `mini_smoke_S13`, resume checks), S12 counterfactual runs, viewer frames (`viewer_review`, `semantic_cases`) |
 | `F:\CarlaGraph_RTK5G_archive_20261021\` | the archive of the RTK/5G review (old and re-acquired 22-run sets) |
+| `F:\CarlaGraph_campaign_v3\` | **campaign v3**: a `git worktree` of the tag `campaign-v3` (detached, never edited).  `results\robustness\campaign_v3\`: the manifest of the freeze, `jobs.jsonl` (one line per attempt), the controller's state and logs (`control\`).  Run, pause and resume with `scripts\campaign_v3.bat` |
+| `F:\CarlaGraph_campaign_v3_work\` | the scratch copies of the running campaign jobs (each removed after its job) |
+| `F:\CarlaGraph_v3smoke_1023\` | the smoke test of the frozen campaign (33 jobs: S13 abreast in every family, S10 under G2 with each radar subset) |
+| `F:\CarlaGraph_repro_20261022\g0_identical_campaign_v3\` | the determinism check of the frozen code: 22/22 runs byte-identical |
+
+**Removing the campaign worktree** (only after its results are archived): check it for junctions first
+(`cmd /c dir /AL /S F:\CarlaGraph_campaign_v3`), then `git worktree remove F:/CarlaGraph_campaign_v3` from the main
+checkout.  The incidents of 2026-10-22 (junction) and 2026-10-23 (absolute paths in a scratch script) are why.
 
 `canonical_A` on F: is byte-identical to the raw data in `traces/`.  It can go after approval; `canonical_B` is the
 reproducibility evidence.
