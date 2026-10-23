@@ -40,6 +40,16 @@
   work folder and removed four canonical runs (S01, S02, S03, S04 `a_front_pushed`).  They were restored from git
   (141/141 raw files match their SHA-256) and regenerated; the script now refuses any target outside its work
   folder.
+* **Incident (2026-10-23, during the campaign):** ten job processes ended with "exit code 1 without a result" and an
+  empty stderr trace.  Two ended at 10:14:10, eight between 10:20:52 and 10:21:43, about 6.5 s apart.  The jobs had run
+  15-486 s and were independent of each other.  Exit code 1 without a traceback is what `taskkill /F` leaves, and the
+  controller terminates jobs only on `stop-now`, which was not requested: the processes were terminated from outside
+  the campaign.  A concurrent session on this machine had listed the campaign's job processes and used `taskkill /F`
+  in that window; it is the likely source, but no record ties it to these PIDs.  The ten failed attempts stay in
+  `jobs.jsonl`.  They belong to nine jobs; one completed on the controller's own retry.  A killed job's record has no
+  provenance, so a restarted controller does not count it as an attempt: the campaign was paused (10:31) and resumed
+  (10:32, freeze verified again), and the other eight jobs (one had used both attempts) ran again from the frozen
+  code.
 
 ## Next steps
 
