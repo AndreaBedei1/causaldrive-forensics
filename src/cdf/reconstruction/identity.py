@@ -43,7 +43,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import replace
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -155,6 +155,22 @@ def discriminable(sigma: float, cfg: ReconstructionConfig) -> bool:
 # Recorder links with relative uncertainty
 # --------------------------------------------------------------------------
 
+def partner_cannot_single_out(track: Any, observer: str, recorder: str, bodies: Mapping[str, Any]) -> bool:
+    """Whether ``observer``'s track of ``recorder`` X cannot single X out for ``track``: the observer collided with X,
+    and after their first contact the track lies on the observer's own body more often than on X's (both bodies
+    from their own pose streams).  From that contact on, the observer's track of X and a track of the observer
+    itself are one box; S06: C's track slides from B onto A at the A-B collision and stays on A."""
+    own, partner = bodies.get(observer), bodies.get(recorder)
+    if own is None or partner is None:
+        return False
+    contact = min((t for t, partners in own.contacts if recorder in partners), default=math.inf)
+    after = [s for s in track.samples if s.measured and s.t_global >= contact
+             and own.covers(s.t_global) and partner.covers(s.t_global)]
+    on_own = sum(own.outline_distance(s.t_global, s.near) < partner.outline_distance(s.t_global, s.near)
+                 for s in after)
+    return bool(after) and on_own > len(after) / 2.0
+
+
 def inherited_links(view: Any, links: Sequence[RecorderLink], cfg: ReconstructionConfig,
                     rel: RelativePose) -> List[RecorderLink]:
     """Recorder identities passed on through another observer's view.  An anonymous track that is the same
@@ -162,7 +178,9 @@ def inherited_links(view: Any, links: Sequence[RecorderLink], cfg: Reconstructio
     ``pair_corrected``; a brief overlap must pass at every shared instant) inherits X, provided it is the same
     body as no track identified as any other recorder.  Its own returns may not single X out (X touching a
     third body: both outlines within its uncertainty); the other observer's track of X does.  The usual
-    exclusivity per observer and instant applies afterwards (``exclusive_recorder_links``)."""
+    exclusivity per observer and instant applies afterwards (``exclusive_recorder_links``).  An observer's track of
+    X passes nothing on to a track that lies on that observer's own body after their contact
+    (``partner_cannot_single_out``)."""
     named = {t.name: t.entity for t in view.tracks if t.status == ASSOCIATED and t.entity}
     named.update({link.track: link.recorder for link in links})
     by_name = {t.name: t for t in view.tracks}
@@ -174,6 +192,8 @@ def inherited_links(view: Any, links: Sequence[RecorderLink], cfg: Reconstructio
         for other_name, recorder in named.items():
             other = by_name.get(other_name)
             if other is None or other.recorder == track.recorder or recorder == track.recorder:
+                continue
+            if partner_cannot_single_out(track, other.recorder, recorder, view.bodies):
                 continue
             evidence = pair_corrected(track, other, cfg, rel)
             if evidence is not None and not evidence.accepted and short_overlap(evidence, cfg):
