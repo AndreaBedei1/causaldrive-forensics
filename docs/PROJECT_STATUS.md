@@ -58,6 +58,11 @@
   descendant runs above normal.  Campaign share of the CPU rose from about 3.6 to about 15-16 cores; throughput rose
   from about 100 to about 470 jobs per hour on the short jobs left (12:50).  Priority changes neither the code nor what
   a job computes; job wall times before and after 12:19 are not comparable.
+* **Background again (2026-10-23, 13:24, at Andrea's request: the machine must stay usable):** the helper was
+  stopped.  Lowering a process inside a job object with a priority limit has no effect without the job's handle, so
+  `stop-now` interrupted the 18 running jobs (not recorded, pending again, no attempt counted) and `resume` (13:25,
+  freeze verified again) started a fresh controller.  Its jobs run below normal, as the frozen controller starts them,
+  with 22 fixed workers: they use every core nobody else needs and yield to any other work.
 
 ## Next steps
 
