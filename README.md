@@ -250,6 +250,8 @@ Full map and the state of every branch: [docs/REPOSITORY.md](docs/REPOSITORY.md)
 ### Degradation study (campaign v3)
 
 <!-- CAMPAIGN -->
+Campaign v3 started on 2026-10-23 from the frozen tag `campaign-v3` (1,636 jobs at three seeds, up to 4,326).  Its
+tables, figures and report will be in `results/campaign_v3/` and `docs/CAMPAIGN_V3_REPORT.md`.
 
 ## Limitations
 
