@@ -28,7 +28,20 @@
   re-evaluated here (no new algorithm without a demonstrated need in G0).
 * **Tracker.**  Not re-tuned to degraded radar: the degraded conditions measure robustness to errors it does not model.
 
+## Freeze and campaign
+
+* **Frozen:** tag `campaign-v3` = `df12f759`; manifest `results/robustness/campaign_v3/manifest.json` in the campaign
+  worktree `F:\CarlaGraph_campaign_v3` (status FROZEN; code `83713ba5...`, configuration `830087c6...`, 22 raw runs).
+* **Checks before the freeze:** full suite 727 passed and 6 failed, all six fixed in `df12f759` (replay tests
+  122/122); reconstruction 22/22 byte-identical in four processes; G0 validator 14 PASS, 8 WARN, 0 FAIL; smoke test
+  from the frozen worktree 33/33 jobs complete with every check passed (`F:\CarlaGraph_v3smoke_1023\`).
+* **Launched** on 2026-10-23 at 05:36 (controller detached; `scripts\campaign_v3.bat status` in the worktree).
+* **Incident (2026-10-23, before the freeze):** a scratch determinism script joined absolute run paths under its
+  work folder and removed four canonical runs (S01, S02, S03, S04 `a_front_pushed`).  They were restored from git
+  (141/141 raw files match their SHA-256) and regenerated; the script now refuses any target outside its work
+  folder.
+
 ## Next steps
 
-* Freeze (tag `campaign-v3`, manifest), smoke test from the campaign worktree, launch the campaign.
-* Report (`docs/CAMPAIGN_V3_REPORT.md`, `results/campaign_v3/`), README, merge into `main` with the paper commits.
+* Report (`docs/CAMPAIGN_V3_REPORT.md`, `results/campaign_v3/`) once the campaign is COMPLETE.
+* Merge into `main` with the paper commits; tag; close the work branch.
