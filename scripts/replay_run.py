@@ -501,6 +501,7 @@ class ReplayApp:
 
     def _apply_view(self, view: Dict[str, Any]) -> None:
         """The camera the user set in the other window."""
+        before = (self.camera_mode, self.selected)
         if view.get("selected") in self.view_ids:
             self.selected = view["selected"]
         if view.get("camera") in ("overview", "follow", "free"):
@@ -515,6 +516,9 @@ class ReplayApp:
                 self.free = FreeCamera(Pose(x, y, z, yaw, pitch, 0.0))
             elif self.free is None and self.camera_pose is not None:
                 self.free = FreeCamera(self.camera_pose)
+        if (self.camera_mode, self.selected) != before:
+            LOGGER.info("camera set in the other window: %s", self.camera_mode
+                        + (" " + self.selected if self.camera_mode == "follow" else ""))
 
     def _exchange(self, before: Tuple[Any, Any], now: float) -> bool:
         """Side by side: send what this window's user changed, take what the other window sent.  True when this
@@ -533,7 +537,8 @@ class ReplayApp:
         followed = False
         for message in self.peer.received():
             if message["type"] == QUIT:
-                LOGGER.info("the other viewer was closed: closing this one too")
+                if self.running:  # the quit is sent three times
+                    LOGGER.info("the other viewer was closed: closing this one too")
                 self.running = False
             elif message["type"] == VIEW:
                 self._apply_view(message)
@@ -1171,7 +1176,7 @@ class SelfTest:
                     {"run": self.app.run.name, "camera_sequence": self.log, "panels": self.hud,
                      "vehicle_actors": actors,
                      "recorders": self.app.ids}, indent=1), encoding="utf-8")
-                self.app.running = False
+                self.app._quit()  # as ESC: side by side, the other viewer closes too
         elif elapsed >= due - self.PERIOD_S / 2.0 and self.pressed < self.saved and self.pressed < self.PRESSES:
             pg.event.post(pg.event.Event(pg.KEYDOWN, key=pg.K_c, mod=0))
             self.pressed += 1
