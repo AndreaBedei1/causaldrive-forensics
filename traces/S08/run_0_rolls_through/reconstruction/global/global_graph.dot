@@ -6,15 +6,15 @@ digraph "global" {
   "g02" [label="MOVING_START\nB\nt=-5.40", fillcolor="#e5e7eb"];
   "g03" [label="THROTTLE_START\nA\nt=-5.40", fillcolor="#fde68a"];
   "g04" [label="THROTTLE_START\nB\nt=-5.40", fillcolor="#fde68a"];
-  "g05" [label="INDICATOR_LEFT_START\nA\nt=-4.95", fillcolor="#fde68a"];
-  "g06" [label="STOP_SIGN_DETECTED_START\nA -> A:sign-0\nt=-4.25", fillcolor="#bfdbfe"];
+  "g05" [label="INDICATOR_LEFT_START\nA\nt=-4.90", fillcolor="#fde68a"];
+  "g06" [label="STOP_SIGN_DETECTED_START\nA -> A:sign-0\nt=-4.40", fillcolor="#bfdbfe"];
   "g07" [label="THROTTLE_END\nA\nt=-3.45", fillcolor="#fde68a"];
   "g08" [label="BRAKE_START\nA\nt=-3.45", fillcolor="#fde68a"];
   "g09" [label="TRACK_APPEARED_LEFT\nA -> B\nt=-2.80", fillcolor="#bfdbfe"];
   "g10" [label="CLOSING_START\nA -> B\nt=-2.80", fillcolor="#bfdbfe", peripheries=2];
   "g11" [label="TRACK_APPEARED_RIGHT\nB -> A\nt=-2.70", fillcolor="#bfdbfe"];
   "g12" [label="CLOSING_START\nB -> A\nt=-2.70", fillcolor="#bfdbfe", peripheries=2];
-  "g13" [label="STOP_SIGN_DETECTED_END\nA -> A:sign-0\nt=-2.65", fillcolor="#bfdbfe"];
+  "g13" [label="STOP_SIGN_DETECTED_END\nA -> A:sign-0\nt=-2.60", fillcolor="#bfdbfe"];
   "g14" [label="BRAKE_END\nA\nt=-2.55", fillcolor="#fde68a"];
   "g15" [label="THROTTLE_START\nA\nt=-2.55", fillcolor="#fde68a"];
   "g16" [label="CRITICAL_TTC_START\nA -> B\nt=-2.05", fillcolor="#bfdbfe", peripheries=2];
@@ -27,7 +27,7 @@ digraph "global" {
   "g23" [label="CRITICAL_TTC_END\nB -> A\nt=+0.00", fillcolor="#bfdbfe"];
   "g24" [label="CLOSING_END\nA -> B\nt=+0.00", fillcolor="#bfdbfe"];
   "g25" [label="CLOSING_END\nB -> A\nt=+0.00", fillcolor="#bfdbfe"];
-  "g26" [label="TURN_LEFT_END\nA\nt=+0.05", fillcolor="#e5e7eb"];
+  "g26" [label="TURN_LEFT_END\nA\nt=+0.00", fillcolor="#e5e7eb"];
   "g27" [label="THROTTLE_END\nA\nt=+0.05", fillcolor="#fde68a"];
   "g28" [label="THROTTLE_END\nB\nt=+0.05", fillcolor="#fde68a"];
   "g29" [label="BRAKE_START\nA\nt=+0.05", fillcolor="#fde68a"];
@@ -41,8 +41,8 @@ digraph "global" {
   {rank=same; "g09"; "g10";}
   {rank=same; "g11"; "g12";}
   {rank=same; "g14"; "g15";}
-  {rank=same; "g21"; "g22"; "g23"; "g24"; "g25";}
-  {rank=same; "g26"; "g27"; "g28"; "g29"; "g30";}
+  {rank=same; "g21"; "g22"; "g23"; "g24"; "g25"; "g26";}
+  {rank=same; "g27"; "g28"; "g29"; "g30";}
   {rank=same; "g31"; "g32";}
   {rank=same; "g33"; "g34";}
   "g01" -> "g05" [label="PRECEDES"];
@@ -75,33 +75,31 @@ digraph "global" {
   "g20" -> "g23" [label="PRECEDES"];
   "g20" -> "g24" [label="PRECEDES"];
   "g20" -> "g25" [label="PRECEDES"];
-  "g21" -> "g26" [label="PRECEDES"];
+  "g20" -> "g26" [label="PRECEDES"];
   "g21" -> "g27" [label="PRECEDES"];
   "g21" -> "g28" [label="PRECEDES"];
   "g21" -> "g29" [label="PRECEDES"];
   "g21" -> "g30" [label="PRECEDES"];
-  "g22" -> "g26" [label="PRECEDES"];
   "g22" -> "g27" [label="PRECEDES"];
   "g22" -> "g28" [label="PRECEDES"];
   "g22" -> "g29" [label="PRECEDES"];
   "g22" -> "g30" [label="PRECEDES"];
-  "g23" -> "g26" [label="PRECEDES"];
   "g23" -> "g27" [label="PRECEDES"];
   "g23" -> "g28" [label="PRECEDES"];
   "g23" -> "g29" [label="PRECEDES"];
   "g23" -> "g30" [label="PRECEDES"];
-  "g24" -> "g26" [label="PRECEDES"];
   "g24" -> "g27" [label="PRECEDES"];
   "g24" -> "g28" [label="PRECEDES"];
   "g24" -> "g29" [label="PRECEDES"];
   "g24" -> "g30" [label="PRECEDES"];
-  "g25" -> "g26" [label="PRECEDES"];
   "g25" -> "g27" [label="PRECEDES"];
   "g25" -> "g28" [label="PRECEDES"];
   "g25" -> "g29" [label="PRECEDES"];
   "g25" -> "g30" [label="PRECEDES"];
-  "g26" -> "g31" [label="PRECEDES"];
-  "g26" -> "g32" [label="PRECEDES"];
+  "g26" -> "g27" [label="PRECEDES"];
+  "g26" -> "g28" [label="PRECEDES"];
+  "g26" -> "g29" [label="PRECEDES"];
+  "g26" -> "g30" [label="PRECEDES"];
   "g27" -> "g31" [label="PRECEDES"];
   "g27" -> "g32" [label="PRECEDES"];
   "g28" -> "g31" [label="PRECEDES"];

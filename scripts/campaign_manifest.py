@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""The manifest of the robustness campaign on the 22 canonical runs (the final analysis scope).
+"""Preliminary or frozen manifest for the active RTK/5G-transport GNSS protocol on 22 canonical runs.
 
-    python scripts/campaign_manifest.py [--out results/robustness_campaign_manifest.json]
+    python scripts/campaign_manifest.py [--out results/robustness/rtk5g_current/manifest.json]
+    campaign v3 (docs/CAMPAIGN_V3.md), from the worktree of the tag ``campaign-v3``:
+    set CDF_CAMPAIGN_VERSION_TAG=campaign-v3
+    python scripts/campaign_manifest.py --reconstruction-tag campaign-v3 --name "campaign v3" ^
+        --families baseline,gnss,radar_v3,radar_asym,radar_gnss_v3,radar_asym_gnss ^
+        --scope "Robustness campaign v3 on the 22 canonical runs S01..S19 (docs/CAMPAIGN_V3.md)" ^
+        --launcher "scripts/campaign_v3.bat start|status|pause|resume, from the worktree of the tag" ^
+        --results results/robustness/campaign_v3 --out results/robustness/campaign_v3/manifest.json
 
 It records what a reproduction must match: the frozen reconstruction (commit of the tag
 ``pre-robustness-campaign``, configuration hash, and a hash of the reconstruction sources computed both at that
-commit and now, which must be equal), the hash of the current campaign code (``provenance.code_hash``: every job
-records it), the hashes of the driver and evaluation scripts, the raw data of the 22 canonical runs, the
-perturbation profiles, the experiment matrix with its seed schedule, and the software versions.
-``scripts/campaign_controller.py`` refuses to start when the checkout differs from it.
-
-Scope: the campaign was preregistered on 2026-10-15 (tag ``pre-robustness-campaign``) with two further components,
-a collision-report latency family and a held-out set of automatically generated scenarios.  Both were removed from
-the study on 2026-10-16 by the author's decision on its scientific scope; their code, configuration and results
-remain only in the Git history (``robustness-campaign-v2.2``, commit 1183f522).  The retained 35 conditions are
-the preregistered ones, run with the frozen reconstruction.
+commit and now, which must be equal), the current protocol code hash, hashes of the driver and evaluation scripts,
+raw-data hashes for the 22 canonical runs, active perturbation profiles, the experiment matrix, seed schedule, and
+software versions.  A manifest generated before a clean, approved commit and protocol tag is marked preliminary.
+The historical manifest at ``results/robustness_campaign_manifest.json`` is left intact.
 """
 
 from __future__ import annotations
@@ -23,9 +24,11 @@ import argparse
 import dataclasses
 import hashlib
 import json
+import os
 import platform
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -87,6 +90,13 @@ def reconstruction_hash(commit: Optional[str] = None) -> str:
     return digest.hexdigest()
 
 
+def _code_hash_at(commit: Optional[str]) -> Optional[str]:
+    if commit is None:
+        return None
+    from cdf.evaluation.provenance import commit_code_hash
+    return commit_code_hash(commit)
+
+
 def versions() -> Dict[str, Any]:
     out: Dict[str, Any] = {"python": sys.version, "platform": platform.platform()}
     try:
@@ -100,19 +110,39 @@ def versions() -> Dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", type=Path, default=ROOT / "results" / "robustness_campaign_manifest.json")
+    parser.add_argument("--out", type=Path, default=ROOT / "results" / "robustness" / "rtk5g_current" / "manifest.json")
+    parser.add_argument("--reconstruction-tag", default=FROZEN_TAG,
+                        help="the tag whose reconstruction sources the campaign tests (default: " + FROZEN_TAG + ")")
+    parser.add_argument("--name", default="RTK GNSS with correction transport via 5G: current robustness protocol")
+    parser.add_argument("--families", default="", help="the families the campaign schedules (default: all)")
+    parser.add_argument("--results", default="results/robustness/rtk5g_current")
+    parser.add_argument("--scope", default="New GNSS perturbation protocol on the 22 manually reviewed canonical runs "
+                                           "(S01..S19). This protocol is distinct from the preregistered 2026-10-15 "
+                                           "study and does not replace its results.")
+    parser.add_argument("--launcher", default="scripts/campaign_controller.py (scripts\\campaign.bat "
+                                              "start|status|pause|resume)")
     args = parser.parse_args()
     from cdf.evaluation.provenance import code_hash, config_hash
     from cdf.reconstruction.config import load_config
     from cdf.robustness.perturb import GNSS_PROFILES, RADAR_PROFILES
     import robustness
     from validate_canonical import CANONICAL, canonical_runs
-    frozen = _git("rev-parse", FROZEN_TAG + "^{commit}")
+    reconstruction_tag = args.reconstruction_tag
+    frozen = _git("rev-parse", reconstruction_tag + "^{commit}")
+    head = _git("rev-parse", "HEAD")
+    worktree_status = _git("status", "--porcelain", "--untracked-files=no") or ""
+    version_tag = os.environ.get("CDF_CAMPAIGN_VERSION_TAG", "rtk5g-current")
+    version_commit = _git("rev-parse", version_tag + "^{commit}")
+    preliminary = bool(worktree_status or not version_commit or version_commit != head)
     recon_now, recon_frozen = reconstruction_hash(), reconstruction_hash(frozen) if frozen else None
     if recon_frozen is not None and recon_now != recon_frozen:
         raise SystemExit("the reconstruction sources differ from the frozen tag: not this campaign")
     runs = [Path(r) for r in canonical_runs()]
     cfg = load_config()
+    scheduled = [f for f in args.families.split(",") if f] or list(robustness.FAMILIES)
+    unknown = [f for f in scheduled if f not in robustness.FAMILIES]
+    if unknown:
+        raise SystemExit("unknown families: " + ", ".join(unknown))
     matrix = {}
     for family, (levels, stochastic) in robustness.FAMILIES.items():
         jobs3 = sum(len(robustness.jobs_for(ROOT / run, family, [0, 1, 2])) for run in runs)
@@ -121,16 +151,20 @@ def main() -> int:
                           "stochastic": stochastic, "jobs_initial": jobs3, "jobs_max": jobs8 if stochastic else jobs3,
                           "configuration": "ablation_mutual_refinement" if family == "gnss_refined" else "frozen"}
     manifest = {
-        "name": "robustness campaign on the 22 canonical runs (final analysis scope)",
-        "scope": "35 conditions in 12 families on the 22 manually reviewed canonical runs (S01..S19); preregistered "
-                 "on 2026-10-15 together with a collision-report latency family and a held-out generalization set, "
-                 "both removed from the study on 2026-10-16 (scientific scope); see the module docstring",
-        "frozen_reconstruction": {"tag": FROZEN_TAG, "commit": frozen,
+        "name": args.name,
+        "protocol": {"version_tag": version_tag, "version_tag_commit": version_commit,
+                     "status": "PRELIMINARY" if preliminary else "FROZEN",
+                     "preliminary": preliminary, "generated_at": datetime.now(timezone.utc).isoformat(),
+                     "head_commit": head, "worktree_status": worktree_status},
+        "scope": args.scope,
+        "frozen_reconstruction": {"tag": reconstruction_tag, "commit": frozen,
                                   "reconstruction_sources": list(RECONSTRUCTION_SOURCES),
                                   "reconstruction_sources_sha256": recon_now,
                                   "reconstruction_sources_sha256_at_tag": recon_frozen,
                                   "reconstruction_config_sha256": config_hash(cfg.to_dict()),
-                                  "code_sha256_at_tag": "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df"},
+                                  "code_sha256_at_tag": (
+                                      "ac2cb70ad595af1cc12aeb7bd7c89c364baf861dec991599257f9bac4d76f5df"
+                                      if reconstruction_tag == FROZEN_TAG else _code_hash_at(frozen))},
         "code_sha256": code_hash(),
         "reconstruction_config_sha256": config_hash(cfg.to_dict()),
         "reconstruction_config": cfg.to_dict(),
@@ -140,14 +174,15 @@ def main() -> int:
                                "runs": {(ROOT / run).resolve().relative_to(ROOT.resolve()).as_posix(): raw_hash(ROOT / run)
                                         for run in runs}},
         "robustness": {
-            "launcher": "scripts/campaign_controller.py (scripts\\campaign.bat start|status|pause|resume)",
+            "launcher": args.launcher,
             "radar_profiles": {k: dataclasses.asdict(v) for k, v in RADAR_PROFILES.items()},
             "gnss_profiles": {k: dataclasses.asdict(v) for k, v in GNSS_PROFILES.items()},
             "profile_documentation": "docs/robustness_profiles.md",
             "matrix": matrix,
-            "conditions": sum(len(m["levels"]) for m in matrix.values()),
-            "jobs_initial_total": sum(m["jobs_initial"] for m in matrix.values()),
-            "jobs_max_total": sum(m["jobs_max"] for m in matrix.values()),
+            "scheduled_families": scheduled,
+            "conditions": sum(len(matrix[f]["levels"]) for f in scheduled),
+            "jobs_initial_total": sum(matrix[f]["jobs_initial"] for f in scheduled),
+            "jobs_max_total": sum(matrix[f]["jobs_max"] for f in scheduled),
             "seed_schedule": {"stochastic": "seeds 0, 1, 2 first; then 3, 4, ... up to 7 while the standard error over "
                                             "seeds of any pooled metric exceeds its tolerance (robustness.TOLERANCES), "
                                             "decided per (family, level)",
@@ -156,14 +191,13 @@ def main() -> int:
                                          "family, worker and execution order, shared by all runs of a seed"},
             "max_attempts_per_job": 2,
         },
-        "results": {"jobs": "results/robustness/frozen_campaign/jobs.jsonl.gz",
-                    "report": "results/robustness/frozen_campaign/report/"},
+        "results": {"jobs": args.results.rstrip("/") + "/jobs.jsonl", "report": args.results.rstrip("/") + "/report/"},
         "software": versions(),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(manifest, indent=1, default=str) + "\n", encoding="utf-8")
     print("conditions", manifest["robustness"]["conditions"], "jobs initial", manifest["robustness"]["jobs_initial_total"],
-          "max", manifest["robustness"]["jobs_max_total"], "| reconstruction unchanged since", FROZEN_TAG,
+          "max", manifest["robustness"]["jobs_max_total"], "| reconstruction unchanged since", reconstruction_tag,
           recon_now == recon_frozen, "| code", manifest["code_sha256"][:16])
     return 0
 

@@ -4,6 +4,7 @@ participants follow their definitions, and the interaction is C - R - G + B."""
 
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -28,21 +29,23 @@ class DriverTests(unittest.TestCase):
     def setUpClass(cls):
         cls.rob = _script("robustness")
 
-    def test_nine_gnss_radar_cells_with_both_sensors(self):
+    def test_six_gnss_radar_cells_with_both_sensors(self):
         levels, stochastic = self.rob.FAMILIES["radar_gnss_combined"]
         self.assertTrue(stochastic)
-        self.assertEqual(len(levels), 9)
-        self.assertEqual({p for _, p in levels}, {(g, r) for g in ("rtk", "consumer", "degraded")
+        self.assertEqual(len(levels), 6)
+        self.assertEqual({p for _, p in levels}, {(g, r) for g in ("rtk", "degraded")
                                                   for r in ("low", "nominal", "high")})
         run = str(ROOT / "traces/S12/run_0_crash")
         perturbation, pose = self.rob.build({"run": run, "family": "radar_gnss_combined", "level": levels[4][0],
                                              "parameter": levels[4][1], "seed": 2})
         self.assertEqual(perturbation.radar.name, "nominal")
-        self.assertEqual(perturbation.gnss.name, "consumer")
+        self.assertEqual(perturbation.gnss.name, "degraded")
         self.assertIsNotNone(pose)
-        # The existing combined family (GNSS + impulse noise) is unchanged.
+        self.assertEqual(set(self.rob.FAMILIES["gnss"][0]), {("rtk", "rtk"), ("degraded", "degraded")})
+        # G0 is measured by baseline; combined retains its exact + 10% condition.
         self.assertEqual([l for l, _ in self.rob.FAMILIES["combined"][0]],
-                         ["exact + 10%", "RTK + 10%", "consumer independent + 10%", "consumer common 0.9 + 10%"])
+                         ["exact + 10%", "RTK + 10%", "degraded independent + 10%",
+                          "degraded common 0.9 + 10%"])
 
     def test_paired_draws_with_the_single_sensor_jobs(self):
         run = ROOT / "traces/S12/run_0_crash"
@@ -55,12 +58,26 @@ class DriverTests(unittest.TestCase):
         vehicle = run / "vehicles" / "A"
         origin = json.loads((vehicle / "ego.jsonl").open(encoding="utf-8").readline())["timestamp"]
         a, b = combined_pose(vehicle, origin), gnss_pose(vehicle, origin)
-        np.testing.assert_array_equal(a.x, b.x)
-        np.testing.assert_array_equal(a.yaw, b.yaw)
+        for key in ("x", "y", "yaw", "vx", "vy"):
+            np.testing.assert_array_equal(getattr(a, key), getattr(b, key))
         # The radar stream is keyed by seed, profile, recorder and radar only (never by the family).
         from cdf.robustness.perturb import stream_seed
         self.assertEqual(stream_seed(1, "radar", "high", "A", "front"), stream_seed(1, "radar", "high", "A", "front"))
         self.assertNotEqual(stream_seed(1, "radar", "high", "A", "front"), stream_seed(1, "gnss", "high", "A", "front"))
+
+    def test_radar_draws_are_identical_in_single_and_combined_families(self):
+        from src.cdf.robustness.perturb import GNSS_PROFILES, RADAR_PROFILES, Perturbation, perturbed_copy
+        run = ROOT / "traces/S12/run_0_crash"
+        with tempfile.TemporaryDirectory() as temp:
+            single = perturbed_copy(run, Path(temp) / "single", Perturbation("radar", radar=RADAR_PROFILES["high"]), 4)
+            combined = perturbed_copy(run, Path(temp) / "combined",
+                                      Perturbation("combined", radar=RADAR_PROFILES["high"],
+                                                   gnss=GNSS_PROFILES["degraded"]), 4)
+            for single_path in single.glob("vehicles/*/radar/*/observations.npz"):
+                relative = single_path.relative_to(single)
+                with np.load(single_path) as a, np.load(combined / relative) as b:
+                    for key in a.files:
+                        np.testing.assert_array_equal(a[key], b[key])
 
     def test_retries_are_counted_once(self):
         job = {"run": "r", "family": "radar", "level": "low", "seed": 0}
@@ -125,6 +142,18 @@ class ReportTests(unittest.TestCase):
         row["metrics"]["associations_correct"] = 0
         table = self.rep.condition_table([row])
         self.assertIsNone(table[0]["association_accuracy"])
+
+    def test_pose_tail_percentiles_reach_report_metrics(self):
+        row = self.job("gnss", "degraded", "r1", 0, 0)
+        stats = {"samples": 10, "rms": 1.0, "median": 0.5, "p50": 0.5, "p95": 1.5,
+                 "p99": 1.9, "p995": 1.99, "max": 2.0}
+        row["pose_errors"] = {"absolute_position_m": stats, "relative_position_m": stats,
+                              "heading_deg": stats, "velocity_mps": stats}
+        numbers = self.rep.job_numbers(row)
+        self.assertEqual(numbers["pose_position_p995_m"], 1.99)
+        self.assertEqual(numbers["pose_heading_max_deg"], 2.0)
+        self.assertEqual(self.rep.METRICS["absolute_pose_position_p995"][0]([numbers]), 1.99)
+        self.assertEqual(self.rep.METRICS["absolute_pose_velocity_p99"][0]([numbers]), 1.9)
 
 
 if __name__ == "__main__":

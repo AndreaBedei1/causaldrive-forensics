@@ -42,8 +42,20 @@ sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 ROBUSTNESS = ROOT / "results" / "robustness" / "frozen_campaign"
 BANDS = ["0-10 m", "10-25 m", ">25 m"]
-GNSS_LEVELS = ["rtk", "consumer", "degraded"]
+GNSS_LEVELS = ["rtk", "degraded"]
 RADAR_LEVELS = ["low", "nominal", "high"]
+
+
+def observed_gnss_levels(rows: Sequence[Dict[str, Any]]) -> List[str]:
+    found = set()
+    for row in rows:
+        if row.get("family") in ("gnss", "gnss_refined") and row.get("level") in ("rtk", "consumer", "degraded"):
+            found.add(row["level"])
+        level = str(row.get("level", ""))
+        for profile in ("rtk", "consumer", "degraded"):
+            if row.get("family") == "radar_gnss_combined" and level.startswith("gnss " + profile + " + radar "):
+                found.add(profile)
+    return [level for level in ("rtk", "consumer", "degraded") if level in found] or list(GNSS_LEVELS)
 
 
 def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -127,6 +139,11 @@ def job_numbers(r: Dict[str, Any]) -> Dict[str, Any]:
         "rel_pose_rms_m": (pe.get("relative_position_m") or {}).get("rms"),
         "identical_graph": r.get("identical_graph"),
     }
+    for prefix, metric, unit in (("position", "absolute_position_m", "m"),
+                                 ("heading", "heading_deg", "deg"), ("velocity", "velocity_mps", "mps")):
+        stats = pe.get(metric) or {}
+        for percentile in ("p50", "p95", "p99", "p995", "max"):
+            out["pose_{0}_{1}_{2}".format(prefix, percentile, unit)] = stats.get(percentile)
     for band in BANDS:
         d = (camp.get("decisions_by_band") or {}).get(band) or {}
         out["band_correct_" + band] = d.get("correct link", 0) if camp else None
@@ -231,6 +248,14 @@ METRICS: Dict[str, Tuple[Callable[[Sequence[Dict[str, Any]]], Optional[float]], 
     "absolute_pose_rms_m": (lambda rs: _median(rs, "abs_pose_rms_m"), "input", "injected absolute GNSS error, RMS [m]"),
     "relative_pose_rms_m": (lambda rs: _median(rs, "rel_pose_rms_m"), "input", "injected recorder-pair relative error, RMS [m]"),
 }
+for _prefix, _label, _unit in (("position", "horizontal position", "m"), ("heading", "heading", "deg"),
+                               ("velocity", "horizontal velocity", "m/s")):
+    for _percentile in ("p50", "p95", "p99", "p995", "max"):
+        _field = "pose_{0}_{1}_{2}".format(_prefix, _percentile, "mps" if _unit == "m/s" else _unit)
+        _aggregate = _max if _percentile == "max" else _median
+        METRICS["absolute_pose_{0}_{1}".format(_prefix, _percentile)] = (
+            lambda rs, field=_field, aggregate=_aggregate: aggregate(rs, field), "input",
+            "injected {0} error: per-run {1}, median over runs [{2}]".format(_label, _percentile, _unit))
 def _band_accuracy(band: str) -> Callable[[Sequence[Dict[str, Any]]], Optional[float]]:
     def accuracy(rs: Sequence[Dict[str, Any]]) -> Optional[float]:
         correct, wrong = _sum(rs, "band_correct_" + band), _sum(rs, "band_wrong_" + band)
@@ -333,7 +358,7 @@ def interaction_table(jobs: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
         elif r["family"] in ("radar", "gnss", "radar_gnss_combined"):
             index[(r["family"], r["level"], run_key(r["run"]), int(r["seed"]))] = numbers
     rows = []
-    for g in GNSS_LEVELS:
+    for g in observed_gnss_levels(jobs):
         for rl in RADAR_LEVELS:
             level = "gnss {0} + radar {1}".format(g, rl)
             for name, fn in PAIRED.items():
@@ -379,11 +404,11 @@ CURVE_PANELS = [("association_accuracy", "association accuracy"), ("collision_re
                 ("oracle_event_recall", "oracle event recall (vs truth)"),
                 ("centre_error_median_m", "fused centre error, median [m]"), ("false_merges", "false merges")]
 CURVES = {"radar": ("Radar degradation", ["low", "nominal", "high"]),
-          "gnss": ("GNSS degradation (independent receivers)", ["rtk", "consumer", "degraded"]),
-          "gnss_correlated": ("Correlated consumer GNSS (common fraction)", ["consumer common 0.5", "consumer common 0.9",
-                                                                            "consumer common 1.0"]),
-          "combined": ("GNSS + 10 % collision impulse noise", ["exact + 10%", "RTK + 10%", "consumer independent + 10%",
-                                                               "consumer common 0.9 + 10%"]),
+          "gnss": ("GNSS degradation (independent receivers)", ["rtk", "degraded"]),
+          "gnss_correlated": ("Correlated degraded GNSS (common fraction)", ["degraded common 0.5", "degraded common 0.9",
+                                                                              "degraded common 1.0"]),
+          "combined": ("GNSS + 10 % collision impulse noise", ["exact + 10%", "RTK + 10%", "degraded independent + 10%",
+                                                               "degraded common 0.9 + 10%"]),
           "impulse": ("Collision impulse noise", ["2%", "5%", "10%", "20%"]),
           "downsample": ("Reduced sampling rate", ["10 Hz", "5 Hz"]),
           "outage": ("1 s radar outage (each recorder)", ["1 s radar outage"]),
@@ -406,6 +431,11 @@ def curve_figures(rows: Sequence[Dict[str, Any]], out: Path) -> List[Path]:
     base = next((r for r in rows if r["family"] == "baseline"), None)
     written = []
     for family, (title, levels) in CURVES.items():
+        if family in ("gnss", "gnss_refined"):
+            levels = observed_gnss_levels([r for r in rows if r.get("family") == family])
+        elif family in ("gnss_correlated", "combined"):
+            current = [r["level"] for r in rows if r.get("family") == family]
+            levels = [lev for lev in levels if lev in current] + [lev for lev in current if lev not in levels]
         items = [next((r for r in rows if r["family"] == family and r["level"] == lev), None) for lev in levels]
         if not any(items):
             continue
@@ -432,12 +462,13 @@ def curve_figures(rows: Sequence[Dict[str, Any]], out: Path) -> List[Path]:
     # GNSS x radar as lines: one line per GNSS level over the radar levels, radar-only as reference.
     combo = [r for r in rows if r["family"] == "radar_gnss_combined"]
     if combo:
+        gnss_levels = observed_gnss_levels(combo)
         fig, grid = plt.subplots(2, 3, figsize=(DOUBLE_COLUMN_IN, 4.0))
         for axis, (key, label) in zip(grid.flat, CURVE_PANELS):
             for name, rows_of in [("radar only", [next((r for r in rows if r["family"] == "radar" and r["level"] == rl), None)
                                                   for rl in RADAR_LEVELS])] + \
                     [("GNSS " + g, [next((r for r in combo if r["level"] == "gnss {0} + radar {1}".format(g, rl)), None)
-                                    for rl in RADAR_LEVELS]) for g in GNSS_LEVELS]:
+                                    for rl in RADAR_LEVELS]) for g in gnss_levels]:
                 ys = [math.nan if r is None or r.get(key) is None else r[key] for r in rows_of]
                 es = [0.0 if r is None or r.get(key + " sd") is None else r[key + " sd"] for r in rows_of]
                 axis.errorbar(range(3), ys, yerr=es, marker="o", capsize=2, linewidth=1.0, markersize=3, label=name)
@@ -468,11 +499,12 @@ def heatmaps(rows: Sequence[Dict[str, Any]], out: Path) -> List[Path]:
     combo = {r["level"]: r for r in rows if r["family"] == "radar_gnss_combined"}
     if not combo:
         return []
+    gnss_levels = observed_gnss_levels(rows)
     fig, grid = plt.subplots(2, 3, figsize=(DOUBLE_COLUMN_IN, 5.2))
     for axis, (key, label, fmt) in zip(grid.flat, HEATMAPS):
-        values = np.full((3, 3), np.nan)
-        texts = [["" for _ in RADAR_LEVELS] for _ in GNSS_LEVELS]
-        for i, g in enumerate(GNSS_LEVELS):
+        values = np.full((len(gnss_levels), len(RADAR_LEVELS)), np.nan)
+        texts = [["" for _ in RADAR_LEVELS] for _ in gnss_levels]
+        for i, g in enumerate(gnss_levels):
             for j, rl in enumerate(RADAR_LEVELS):
                 row = combo.get("gnss {0} + radar {1}".format(g, rl))
                 value = None if row is None else row.get(key)
@@ -485,15 +517,15 @@ def heatmaps(rows: Sequence[Dict[str, Any]], out: Path) -> List[Path]:
                     "\nn={0}".format(row.get(key + " n"))
         masked = np.ma.masked_invalid(values)
         image = axis.imshow(masked, cmap="viridis", aspect="auto")
-        for i in range(3):
+        for i in range(len(gnss_levels)):
             for j in range(3):
                 axis.text(j, i, texts[i][j], ha="center", va="center", fontsize=6, color="black",
                           bbox={"boxstyle": "round,pad=0.15", "facecolor": "white", "alpha": 0.7, "linewidth": 0})
         axis.set_xticks(range(3))
         axis.set_xticklabels(RADAR_LEVELS)
         axis.set_xlabel("radar profile")
-        axis.set_yticks(range(3))
-        axis.set_yticklabels(GNSS_LEVELS)
+        axis.set_yticks(range(len(gnss_levels)))
+        axis.set_yticklabels(gnss_levels)
         axis.set_ylabel("GNSS profile")
         axis.set_title(label)
         fig.colorbar(image, ax=axis, fraction=0.046)

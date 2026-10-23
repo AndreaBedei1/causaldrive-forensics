@@ -229,6 +229,7 @@ class ViewerTests(unittest.TestCase):
                              KMOD_SHIFT=1)
         app = self.app
         app.pygame, app.ids, app.selected, app.camera_mode = pg, ["A", "B", "C"], "A", "overview"
+        app.view_ids = app.ids  # standalone: the camera moves over every replayed vehicle
         app.camera_pose, app.free = None, None
         seen = []
         for _ in range(5):

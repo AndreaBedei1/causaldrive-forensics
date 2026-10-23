@@ -30,6 +30,9 @@ def run_metrics(run_dir: Path, evaluation: Dict[str, Any], fusion: Dict[str, Any
                and all(name in alignment["graphs"] for name in row["participants"])]
     counts = fusion["decision_counts"]
     errors = fusion["state_errors"]
+    # The fused road users' centre error leaves recorder ghosts out (an anonymous road user that is in truth a
+    # recorder is not a road-user estimate); results written before that split have every road user.
+    road_users = fusion["road_user_state_errors"] if "road_user_state_errors" in fusion else errors
     relative = [abs(row["error_s"]) for row in evaluation.get("relative_clock_offsets", []) if row.get("error_s") is not None]
     return {"recorders": len(alignment["graphs"]),
             "recorders_aligned": sum(1 for clock in alignment["graphs"].values() if clock["status"] == "ALIGNED"),
@@ -49,7 +52,7 @@ def run_metrics(run_dir: Path, evaluation: Dict[str, Any], fusion: Dict[str, Any
             "merges_missed": fusion["merges"]["missed"], "entities": len(fusion["entities"]),
             "entities_without_vehicle": sum(1 for e in fusion["entities"] if e["true_identity"] is None),
             "entity_purity_min": min((e["purity"] for e in fusion["entities"] if e["purity"] is not None), default=None),
-            "fused_centre_error_median_m": (errors.get("centre_error_m") or {}).get("median"),
+            "fused_centre_error_median_m": (road_users.get("centre_error_m") or {}).get("median"),
             "single_track_centre_error_median_m": (errors.get("single_track_nominal_centre_error_m") or {}).get("median"),
             "observed_alignment_errors_s": [row["error_s"] for row in fusion["observed_alignment"] if row["accepted"]]}
 

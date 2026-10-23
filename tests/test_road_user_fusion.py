@@ -358,18 +358,15 @@ class LinkAndAlignmentTests(unittest.TestCase):
         self.assertLessEqual(decision["interval"][0], -4.1)
         self.assertGreaterEqual(decision["interval"][1], -4.1)
         names = {(a.local_graph + ":" + a.local_track): a.global_entity for a in result.associations}
-        # C's tracks of A and of B (identities verified against the evaluation's ground truth).  C follows A
-        # through its range without a break; at the A-B crash C's track of B is split where the two bodies
-        # exchanged returns, and the fragment after the contact (A's body by ground truth) stays an anonymous road
-        # user: no identity is asserted across the contact (a recorder link holds only before its collision).
-        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"],
-                          names["C:track_002#segment_1"]), ("C", "C", "A", "B"))
-        self.assertTrue(names["C:track_002#segment_2"].startswith("U"))
+        # C's tracks of A and of B (identities verified against the evaluation's ground truth).  C follows A until
+        # just after the A-B crash.  With the supplied map (Town05; C used to fit Town01) C's track of B is not
+        # split at the crash: it follows B, then slides onto A (0.2 m away) and stays on A.  It inherits no identity
+        # through A's own track of B (identity.partner_cannot_single_out) and stays an anonymous road user: no
+        # identity is asserted across the contact.
+        self.assertEqual((names["A:track_001"], names["B:track_001"], names["C:track_001"]), ("C", "C", "A"))
+        self.assertTrue(names["C:track_002"].startswith("U"))
         observed = next(local for local in result.locals if local.owner == 'C')
-        # Only that fragment is flagged ambiguous (the bodies exchanged returns at their contact).
-        self.assertEqual([t.track_id for t in observed.tracks if t.identity_ambiguous], ["track_002#segment_2"])
-        self.assertEqual({names["C:" + t.track_id] for t in observed.tracks} - {"A", "B"},
-                         {names["C:track_002#segment_2"]})
+        self.assertEqual({names["C:" + t.track_id] for t in observed.tracks} - {"A", "B"}, {names["C:track_002"]})
 
     def test_s05_a_slowly_moving_recorder_is_aligned_along_the_lines_of_sight(self):
         # C, ahead of B, stops early: only B's view of it fixes its clock.  Comparing each near surface with

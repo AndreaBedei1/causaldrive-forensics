@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 19.257 | 1576.9 | g21 | yes | 0.0 s |
+| A + B | 2027.202 | 1576.9 | g21 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -33,11 +33,11 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | U1 | C | correctly left anonymous | 73 | 0.297 / 0.328 m | 2.114 m | 0.883 / 0.021 m/s |
+| A:track_001 | U1 | C | correctly left anonymous | 73 | 0.297 / 0.328 m | 2.114 m | 0.89 / 0.022 m/s |
 | A:track_002 | B | B | correct | 110 | 0.175 / 0.304 m | 2.061 m | 1.581 / 0.07 m/s |
 | B:track_001 | A | A | correct | 110 | 0.096 / 0.159 m | 1.263 m | 2.618 / 0.106 m/s |
-| B:track_002 | U1 | C | correctly left anonymous | 58 | 0.18 / 0.31 m | 0.953 m | 5.12 / 0.438 m/s |
-| B:track_003 | U1 | C | correctly left anonymous | 6 | 0.424 / 0.562 m | 0.984 m | 6.697 / 0.411 m/s |
+| B:track_002 | U1 | C | correctly left anonymous | 58 | 0.18 / 0.31 m | 0.953 m | 5.021 / 0.437 m/s |
+| B:track_003 | U1 | C | correctly left anonymous | 6 | 0.425 / 0.563 m | 0.987 m | 6.702 / 0.411 m/s |
 
 ## Clearance at the true contacts
 

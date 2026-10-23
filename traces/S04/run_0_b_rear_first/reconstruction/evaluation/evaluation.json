@@ -8,9 +8,14 @@
         "B",
         "C"
       ],
-      "sim_time": 111.64463259279728,
+      "sim_time": 1897.3789431452751,
       "peak_impulse": 21842.457779630535,
+      "recontacts": [],
       "reconstructed_as": "g15",
+      "reconstructed_participants": [
+        "B",
+        "C"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     },
@@ -19,9 +24,14 @@
         "A",
         "B"
       ],
-      "sim_time": 113.19463261589408,
-      "peak_impulse": 31706.269704451526,
+      "sim_time": 1898.928943168372,
+      "peak_impulse": 31706.312889562454,
+      "recontacts": [],
       "reconstructed_as": "g26",
+      "reconstructed_participants": [
+        "A",
+        "B"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -104,7 +114,7 @@
       "raw_rmse_to_surface_m": 0.204,
       "smoothed_rmse_to_surface_m": 0.196,
       "smoothed_rmse_to_centre_m": 1.929,
-      "raw_difference_speed_rmse_mps": 2.043,
+      "raw_difference_speed_rmse_mps": 2.042,
       "speed_rmse_mps": 0.063
     },
     {

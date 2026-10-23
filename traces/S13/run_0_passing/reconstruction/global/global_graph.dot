@@ -12,8 +12,8 @@ digraph "global" {
   "g08" [label="TRACK_APPEARED_RIGHT\nB -> U1\nt=-6.20", fillcolor="#bfdbfe", peripheries=2];
   "g09" [label="TRACK_APPEARED_RIGHT\nB -> U2\nt=-6.20", fillcolor="#bfdbfe", peripheries=2];
   "g10" [label="CLOSING_START\nB -> U2\nt=-6.20", fillcolor="#bfdbfe", peripheries=2];
-  "g11" [label="TRACK_APPEARED_FRONT\nA -> U2\nt=-6.10", fillcolor="#bfdbfe", peripheries=2];
-  "g12" [label="CRITICAL_TTC_START\nA -> U2\nt=-5.60", fillcolor="#bfdbfe", peripheries=2];
+  "g11" [label="TRACK_APPEARED_FRONT\nA -> U2\nt=-6.15", fillcolor="#bfdbfe", peripheries=2];
+  "g12" [label="CRITICAL_TTC_START\nA -> U2\nt=-5.65", fillcolor="#bfdbfe", peripheries=2];
   "g13" [label="TRACK_LOST\nB -> U1\nt=-1.15", fillcolor="#bfdbfe"];
   "g14" [label="CRITICAL_TTC_START\nA -> B\nt=-1.00", fillcolor="#bfdbfe", peripheries=2];
   "g15" [label="CUT_IN_FROM_RIGHT_START\nB -> A\nt=-0.90", fillcolor="#bfdbfe", peripheries=2];

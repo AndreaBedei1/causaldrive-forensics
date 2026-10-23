@@ -45,7 +45,7 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 
 ## Global graph
 
-33 nodes, 66 edges; 7 merged node(s): g09 CRITICAL_TTC_START(A,B) from A:e04 + A:e09, g10 CRITICAL_TTC_START(B,C) from B:e04 + B:e11, g13 CLOSING_START(B,C) from B:e05 + B:e12, g16 CLOSING_START(A,B) from A:e05 + A:e10, g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07, g30 COLLISION(A,B) from A:e13 + B:e10.
+32 nodes, 64 edges; 6 merged node(s): g09 CRITICAL_TTC_START(A,B) from A:e04 + A:e09, g10 CRITICAL_TTC_START(B,C) from B:e04 + B:e11, g13 CLOSING_START(B,C) from B:e05 + B:e12, g16 CLOSING_START(A,B) from A:e05 + A:e10, g21 COLLISION(A,B) from A:e08 + B:e08, g25 COLLISION(B,C) from B:e10 + C:e07.
 
 ### Event sequence (global time)
 
@@ -61,7 +61,7 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - `+0.05` BRAKE_END(B)
 - `+0.50` COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - `+0.55` MOVING_END(A); STOP_START(A)
-- `+0.65` COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
+- `+0.65` MOVING_END(B); STOP_START(B); BRAKE_START(B)
 
 ### What happened, in plain language
 
@@ -94,7 +94,6 @@ Matched `collision_003`: B and C both recorded a collision; peak impulses 8788.0
 - 0.50 s after the reference collision, B observed C stop closing in.
 - 0.55 s after the reference collision, A stopped moving.
 - 0.55 s after the reference collision, A came to a stop.
-- 0.65 s after the reference collision, A and B both recorded this same collision (peak impulses A: 1510, B: 1510 N*s).
 - 0.65 s after the reference collision, B stopped moving.
 - 0.65 s after the reference collision, B came to a stop.
 - 0.65 s after the reference collision, B started braking.
@@ -117,7 +116,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B)
 - COLLISION(B,C); CRITICAL_TTC_END(B,C); CLOSING_END(B,C)
 - MOVING_END(A); STOP_START(A)
-- COLLISION(A,B); MOVING_END(B); STOP_START(B); BRAKE_START(B)
+- MOVING_END(B); STOP_START(B); BRAKE_START(B)
 
 ### States still active when observation ended
 
@@ -142,11 +141,11 @@ C:
 
 ### Perceived state just before each collision report
 
-- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- A A:e13 at 5.45 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: IN_EGO_PATH
-- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- B B:e10 at 5.30 s (local): ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- C C:e07 at 5.30 s (local): ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?
+- A A:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- A A:e13 at 5.45 s (local): ego: STOP, BRAKE; track_001: IN_EGO_PATH
+- B B:e08 at 4.80 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e10 at 5.30 s (local): ego: MOVING; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- C C:e07 at 5.30 s (local): ego: STOP, BRAKE
 
 ### Tracks lost while a state was active
 
@@ -299,6 +298,8 @@ C:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

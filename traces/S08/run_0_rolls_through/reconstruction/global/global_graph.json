@@ -191,7 +191,7 @@
       "participants": [
         "A"
       ],
-      "t_global": -4.95,
+      "t_global": -4.9,
       "attributes": {},
       "source": "lights",
       "confidence": null,
@@ -199,7 +199,7 @@
         {
           "graph": "A",
           "local_node": "A:e03",
-          "t_local": 0.45
+          "t_local": 0.5
         }
       ],
       "perceived_state_before": {
@@ -230,7 +230,7 @@
       "participants": [
         "A"
       ],
-      "t_global": -4.25,
+      "t_global": -4.4,
       "attributes": {
         "relevant_to_ego_path": true
       },
@@ -240,7 +240,7 @@
         {
           "graph": "A",
           "local_node": "A:e04",
-          "t_local": 1.15
+          "t_local": 1.0
         }
       ],
       "perceived_state_before": {
@@ -258,7 +258,7 @@
           },
           "external": {},
           "signs": {},
-          "facts_t_local": 1.1
+          "facts_t_local": 0.9
         }
       }
     },
@@ -641,7 +641,7 @@
       "participants": [
         "A"
       ],
-      "t_global": -2.65,
+      "t_global": -2.6,
       "attributes": {},
       "source": "camera",
       "confidence": 1.0,
@@ -649,7 +649,7 @@
         {
           "graph": "A",
           "local_node": "A:e09",
-          "t_local": 2.75
+          "t_local": 2.8
         }
       ],
       "perceived_state_before": {
@@ -1028,20 +1028,20 @@
         "cause": "RECORDER_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            10.5266,
-            -14.627
+            10.5053,
+            -14.5761
           ],
           [
-            12.3689,
-            -14.1623
+            12.3474,
+            -14.1106
           ],
           [
-            13.4939,
-            -18.6226
+            13.4744,
+            -18.5704
           ],
           [
-            11.6516,
-            -19.0873
+            11.6324,
+            -19.0359
           ]
         ],
         "geometry": "estimated_body",
@@ -1064,20 +1064,20 @@
               "cause": "RECORDER_LATERAL",
               "estimated_body_corners_vehicle_m": [
                 [
-                  10.5266,
-                  -14.627
+                  10.5053,
+                  -14.5761
                 ],
                 [
-                  12.3689,
-                  -14.1623
+                  12.3474,
+                  -14.1106
                 ],
                 [
-                  13.4939,
-                  -18.6226
+                  13.4744,
+                  -18.5704
                 ],
                 [
-                  11.6516,
-                  -19.0873
+                  11.6324,
+                  -19.0359
                 ]
               ],
               "geometry": "estimated_body",
@@ -1141,25 +1141,25 @@
       "t_global": -0.4,
       "attributes": {
         "occupancy_evidence": "returns",
-        "occupancy_margin_m": 0.432,
+        "occupancy_margin_m": 0.437,
         "occupancy_sigma_m": 0.25,
         "cause": "TARGET_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            8.0261,
-            2.08
+            7.9164,
+            2.0325
           ],
           [
-            6.5375,
-            3.2607
+            6.4277,
+            3.213
           ],
           [
-            9.3961,
-            6.8646
+            9.2858,
+            6.8173
           ],
           [
-            10.8847,
-            5.6839
+            10.7745,
+            5.6368
           ]
         ],
         "geometry": "estimated_body",
@@ -1177,25 +1177,25 @@
             "event_type": "EGO_PATH_ENTRY",
             "attributes": {
               "occupancy_evidence": "returns",
-              "occupancy_margin_m": 0.432,
+              "occupancy_margin_m": 0.437,
               "occupancy_sigma_m": 0.25,
               "cause": "TARGET_LATERAL",
               "estimated_body_corners_vehicle_m": [
                 [
-                  8.0261,
-                  2.08
+                  7.9164,
+                  2.0325
                 ],
                 [
-                  6.5375,
-                  3.2607
+                  6.4277,
+                  3.213
                 ],
                 [
-                  9.3961,
-                  6.8646
+                  9.2858,
+                  6.8173
                 ],
                 [
-                  10.8847,
-                  5.6839
+                  10.7745,
+                  5.6368
                 ]
               ],
               "geometry": "estimated_body",
@@ -1255,8 +1255,8 @@
         "matched_event": "collision_001",
         "reference_event": true,
         "peak_impulse": {
-          "A": 12954.09,
-          "B": 12954.09
+          "A": 12940.27,
+          "B": 12940.27
         }
       },
       "source": "collision_sensor",
@@ -1653,7 +1653,7 @@
       "participants": [
         "A"
       ],
-      "t_global": 0.05,
+      "t_global": 0.0,
       "attributes": {},
       "source": "ego",
       "confidence": null,
@@ -1661,7 +1661,7 @@
         {
           "graph": "A",
           "local_node": "A:e18",
-          "t_local": 5.45
+          "t_local": 5.4
         }
       ],
       "perceived_state_before": {
@@ -1679,8 +1679,8 @@
           },
           "external": {
             "track_001": {
-              "CLOSING": false,
-              "CRITICAL_TTC": false,
+              "CLOSING": true,
+              "CRITICAL_TTC": true,
               "IN_EGO_PATH": true,
               "CUT_IN_FROM_LEFT": false,
               "CUT_IN_FROM_RIGHT": false
@@ -1693,7 +1693,7 @@
               "relevant_to_ego_path": true
             }
           },
-          "facts_t_local": 5.4
+          "facts_t_local": 5.3
         }
       }
     },
@@ -1724,7 +1724,7 @@
             "STOP": false,
             "BRAKE": false,
             "THROTTLE": true,
-            "TURN_LEFT": true,
+            "TURN_LEFT": false,
             "TURN_RIGHT": false,
             "INDICATOR_LEFT": true,
             "INDICATOR_RIGHT": false,
@@ -1824,7 +1824,7 @@
             "STOP": false,
             "BRAKE": false,
             "THROTTLE": true,
-            "TURN_LEFT": true,
+            "TURN_LEFT": false,
             "TURN_RIGHT": false,
             "INDICATOR_LEFT": true,
             "INDICATOR_RIGHT": false,
@@ -2250,7 +2250,7 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g21",
+      "from": "g20",
       "to": "g26",
       "relation": "PRECEDES"
     },
@@ -2276,11 +2276,6 @@
     },
     {
       "from": "g22",
-      "to": "g26",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g22",
       "to": "g27",
       "relation": "PRECEDES"
     },
@@ -2297,11 +2292,6 @@
     {
       "from": "g22",
       "to": "g30",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g23",
-      "to": "g26",
       "relation": "PRECEDES"
     },
     {
@@ -2326,11 +2316,6 @@
     },
     {
       "from": "g24",
-      "to": "g26",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g24",
       "to": "g27",
       "relation": "PRECEDES"
     },
@@ -2347,11 +2332,6 @@
     {
       "from": "g24",
       "to": "g30",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g25",
-      "to": "g26",
       "relation": "PRECEDES"
     },
     {
@@ -2376,12 +2356,22 @@
     },
     {
       "from": "g26",
-      "to": "g31",
+      "to": "g27",
       "relation": "PRECEDES"
     },
     {
       "from": "g26",
-      "to": "g32",
+      "to": "g28",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g26",
+      "to": "g29",
+      "relation": "PRECEDES"
+    },
+    {
+      "from": "g26",
+      "to": "g30",
       "relation": "PRECEDES"
     },
     {
@@ -2497,6 +2487,7 @@
   ],
   "run": "S08/run_0_rolls_through",
   "incident_context": {
+    "map": "Town05",
     "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
     "road_environment": "urban junction, STOP sign for A",
     "speed_limit_kmh": 50
@@ -2675,6 +2666,8 @@
       "impulse_relative_std": 0.1,
       "impulse_sigma_gate": 3.0,
       "contact_consistency_m": 1.0,
+      "recontact_max_pause_s": 2.0,
+      "recontact_max_separation_m": 1.0,
       "clock_tolerance_s": 0.1,
       "contact_window_s": 1.0,
       "contact_range_m": 3.5,

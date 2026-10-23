@@ -51,6 +51,7 @@ import numpy as np
 
 from ..reconstruction.config import ReconstructionConfig, SemanticsConfig
 from ..reconstruction.local import read_jsonl, track_events, vehicle_metadata
+from ..reconstruction.pipeline import read_incident_context
 from ..reconstruction.road import RoadFrame
 from ..reconstruction.tracking import EgoFootprint, EgoTrajectory, LocalTrack, TrackSample, ego_trajectory
 from .visibility import Box, coverage, frames_by_participant, radar_views
@@ -127,7 +128,7 @@ def recorder_truth(run_dir: Path, owner: str, frames: Mapping[int, Mapping[str, 
     sweeps = [(frame, round(t - clock_origin, 4)) for frame, t in sorted(sweep_frames.items()) if frame in frames]
     return RecorderTruth(owner, clock_origin, (float(first["x"]), float(first["y"]), math.radians(float(first["yaw_deg"]))),
                          ego_trajectory(ego_records, clock_origin), footprint, [view for view, _ in views], sweeps,
-                         RoadFrame.from_ego_records(ego_records))
+                         RoadFrame.from_ego_records(ego_records, map_name=read_incident_context(run_dir).get("map")))
 
 
 def _to_local(rec: RecorderTruth, x: float, y: float) -> np.ndarray:

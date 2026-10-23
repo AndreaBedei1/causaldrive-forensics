@@ -1,0 +1,215 @@
+{
+ "runs": [
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S01\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S02\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S03\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S04\\run_0_a_front_pushed",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S04\\run_0_b_rear_first",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S05\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S06\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S07\\run_0_merge_conflict",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S08\\run_0_rolls_through",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S09\\run_0_near_simultaneous",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S10\\run_0_deflected_into_c",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S11\\run_0_consequential",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S12\\run_0_crash",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S13\\run_0_abreast",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S13\\run_0_platoon",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S13\\run_0_passing",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S14\\run_0_surrounded",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S15\\run_0_dense_platoon",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S16\\run_0_overtaking",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S17\\run_0_occlusion_reappearance",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S18\\run_0_collision_ambiguity",
+  "C:\\Users\\andrea.bedei3\\Desktop\\CarlaGraph\\traces\\S19\\run_0_highway_curve"
+ ],
+ "rows": [
+  {
+   "regime": "steady",
+   "centre_error_m": {
+    "n": 3259,
+    "median": 0.205,
+    "p95": 0.7336,
+    "rmse": 0.4158
+   },
+   "speed_error_mps": {
+    "n": 3259,
+    "median": 0.0317,
+    "p95": 0.3082,
+    "rmse": 0.1306
+   }
+  },
+  {
+   "regime": "braking",
+   "centre_error_m": {
+    "n": 1,
+    "median": 0.4837,
+    "p95": 0.4837,
+    "rmse": 0.4837
+   },
+   "speed_error_mps": {
+    "n": 1,
+    "median": 0.0039,
+    "p95": 0.0039,
+    "rmse": 0.0039
+   }
+  },
+  {
+   "regime": "turning",
+   "centre_error_m": {
+    "n": 1127,
+    "median": 0.3251,
+    "p95": 1.0233,
+    "rmse": 0.5143
+   },
+   "speed_error_mps": {
+    "n": 1127,
+    "median": 0.0546,
+    "p95": 0.3143,
+    "rmse": 0.1388
+   }
+  },
+  {
+   "regime": "after contact (0-3 s)",
+   "centre_error_m": {
+    "n": 0,
+    "median": null,
+    "p95": null,
+    "rmse": null
+   },
+   "speed_error_mps": {
+    "n": 0,
+    "median": null,
+    "p95": null,
+    "rmse": null
+   }
+  },
+  {
+   "regime": "after contact (> 3 s)",
+   "centre_error_m": {
+    "n": 0,
+    "median": null,
+    "p95": null,
+    "rmse": null
+   },
+   "speed_error_mps": {
+    "n": 0,
+    "median": null,
+    "p95": null,
+    "rmse": null
+   }
+  },
+  {
+   "regime": "one recorder",
+   "centre_error_m": {
+    "n": 641,
+    "median": 0.4649,
+    "p95": 1.65,
+    "rmse": 0.8037
+   },
+   "speed_error_mps": {
+    "n": 641,
+    "median": 0.1096,
+    "p95": 0.3936,
+    "rmse": 0.1926
+   }
+  },
+  {
+   "regime": "several recorders",
+   "centre_error_m": {
+    "n": 3746,
+    "median": 0.2196,
+    "p95": 0.6715,
+    "rmse": 0.3457
+   },
+   "speed_error_mps": {
+    "n": 3746,
+    "median": 0.032,
+    "p95": 0.2457,
+    "rmse": 0.1195
+   }
+  }
+ ],
+ "recorder_tracks": [
+  {
+   "regime": "steady",
+   "body_distance_m": {
+    "n": 2270,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0058
+   },
+   "speed_error_mps": {
+    "n": 2270,
+    "median": 0.0618,
+    "p95": 0.5489,
+    "rmse": 0.2401
+   },
+   "measured_share": 0.991
+  },
+  {
+   "regime": "braking",
+   "body_distance_m": {
+    "n": 134,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0118
+   },
+   "speed_error_mps": {
+    "n": 134,
+    "median": 0.1048,
+    "p95": 1.2481,
+    "rmse": 0.5887
+   },
+   "measured_share": 0.993
+  },
+  {
+   "regime": "turning",
+   "body_distance_m": {
+    "n": 355,
+    "median": 0.0,
+    "p95": 0.106,
+    "rmse": 0.0437
+   },
+   "speed_error_mps": {
+    "n": 355,
+    "median": 0.1258,
+    "p95": 0.6982,
+    "rmse": 0.3619
+   },
+   "measured_share": 0.994
+  },
+  {
+   "regime": "after contact (0-3 s)",
+   "body_distance_m": {
+    "n": 1320,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0095
+   },
+   "speed_error_mps": {
+    "n": 1320,
+    "median": 0.0736,
+    "p95": 0.4802,
+    "rmse": 0.2853
+   },
+   "measured_share": 0.99
+  },
+  {
+   "regime": "after contact (> 3 s)",
+   "body_distance_m": {
+    "n": 1927,
+    "median": 0.0,
+    "p95": 0.0,
+    "rmse": 0.0
+   },
+   "speed_error_mps": {
+    "n": 1927,
+    "median": 0.0079,
+    "p95": 0.0762,
+    "rmse": 0.0427
+   },
+   "measured_share": 1.0
+  }
+ ]
+}

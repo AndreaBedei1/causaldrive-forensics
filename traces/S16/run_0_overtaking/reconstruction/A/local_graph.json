@@ -4,16 +4,21 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 318.1770825125277,
+      "origin_source_timestamp": 2116.1734774261713,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
     "incident_context": {
+      "map": "Town05",
       "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
       "road_environment": "urban arterial, three lanes one direction",
       "speed_limit_kmh": 50
+    },
+    "road_map": {
+      "name": "Town05",
+      "source": "incident context"
     },
     "start_t_local": 0.0,
     "end_t_local": 11.95,
@@ -23,6 +28,7 @@
       "collisions.jsonl",
       "controls.jsonl",
       "ego.jsonl",
+      "lights.jsonl",
       "radar",
       "traffic_signs.jsonl"
     ],
@@ -327,8 +333,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -392,8 +398,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -455,8 +461,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -525,8 +531,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -595,8 +601,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -665,8 +671,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -735,8 +741,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -805,8 +811,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -877,8 +883,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -949,8 +955,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1021,8 +1027,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1098,8 +1104,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1179,11 +1185,11 @@
             -1.6926
           ],
           [
-            13.8068,
+            13.8069,
             -2.0239
           ],
           [
-            13.67,
+            13.6701,
             -0.1288
           ]
         ],
@@ -1199,8 +1205,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1283,8 +1289,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1391,8 +1397,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1499,8 +1505,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1591,8 +1597,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1675,8 +1681,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1759,8 +1765,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1843,8 +1849,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1927,8 +1933,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2011,8 +2017,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2095,8 +2101,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2181,8 +2187,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2265,8 +2271,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2356,8 +2362,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2449,8 +2455,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2542,8 +2548,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2635,8 +2641,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2757,8 +2763,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2862,8 +2868,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -2967,8 +2973,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -3072,8 +3078,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -3177,8 +3183,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {

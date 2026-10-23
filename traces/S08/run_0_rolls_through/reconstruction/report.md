@@ -10,7 +10,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.95 s | 161 | 22 | 40 | 1 | A:e15 @ 5.40 s |
+| A | 15.95 s | 161 | 22 | 38 | 1 | A:e15 @ 5.40 s |
 | B | 15.95 s | 161 | 13 | 25 | 1 | B:e07 @ 5.40 s |
 
 ## Graph alignment
@@ -24,14 +24,14 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 12954.09 vs 12954.09 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
+Matched `collision_001`: A and B both recorded a collision; peak impulses 12940.27 vs 12940.27 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 12954.09 vs 12954.09 N*s)<br>tracked for 2.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.7 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.15 m/s for reference)<br>clearance at the contact 0.03 m<br>the only track of A compatible with the contact |
-| B:track_001 | A | ASSOCIATED | 0.73 | B and A both reported collision_001 (peak impulse 12954.09 vs 12954.09 N*s)<br>tracked for 2.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.5 m -> 0.1 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 1.19 m/s for reference)<br>clearance at the contact 0.15 m<br>the only track of B compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.80 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.6 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.15 m/s for reference)<br>clearance at the contact 0.01 m<br>the only track of A compatible with the contact |
+| B:track_001 | A | ASSOCIATED | 0.74 | B and A both reported collision_001 (peak impulse 12940.27 vs 12940.27 N*s)<br>tracked for 2.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.5 m -> 0.2 m over the last 1.0 s<br>track motion compatible with A's own speed in the observed direction (3 sigma; full-speed RMSE 1.17 m/s for reference)<br>clearance at the contact 0.16 m<br>the only track of B compatible with the contact |
 
 ## Road users in the common frame
 
@@ -39,25 +39,25 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12954.
 
 ## Global graph
 
-34 nodes, 79 edges; 5 merged node(s): g10 CLOSING_START(A,B) from A:e08 + A:e17, g12 CLOSING_START(B,A) from B:e04 + B:e09, g16 CRITICAL_TTC_START(A,B) from A:e12 + A:e16, g17 CRITICAL_TTC_START(B,A) from B:e05 + B:e08, g21 COLLISION(A,B) from A:e15 + B:e07.
+34 nodes, 77 edges; 5 merged node(s): g10 CLOSING_START(A,B) from A:e08 + A:e17, g12 CLOSING_START(B,A) from B:e04 + B:e09, g16 CRITICAL_TTC_START(A,B) from A:e12 + A:e16, g17 CRITICAL_TTC_START(B,A) from B:e05 + B:e08, g21 COLLISION(A,B) from A:e15 + B:e07.
 
 ### Event sequence (global time)
 
 - `-5.40` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
-- `-4.95` INDICATOR_LEFT_START(A)
-- `-4.25` STOP_SIGN_DETECTED_START(A,A:sign-0)
+- `-4.90` INDICATOR_LEFT_START(A)
+- `-4.40` STOP_SIGN_DETECTED_START(A,A:sign-0)
 - `-3.45` THROTTLE_END(A); BRAKE_START(A)
 - `-2.80` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - `-2.70` TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
-- `-2.65` STOP_SIGN_DETECTED_END(A,A:sign-0)
+- `-2.60` STOP_SIGN_DETECTED_END(A,A:sign-0)
 - `-2.55` BRAKE_END(A); THROTTLE_START(A)
 - `-2.05` CRITICAL_TTC_START(A,B)
 - `-1.85` CRITICAL_TTC_START(B,A)
 - `-1.70` TURN_LEFT_START(A)
 - `-1.25` EGO_PATH_ENTRY(A,B)
 - `-0.40` EGO_PATH_ENTRY(B,A)
-- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
-- `+0.05` TURN_LEFT_END(A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_END(A)
+- `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.10` MOVING_END(A); STOP_START(A)
 - `+0.20` MOVING_END(B); STOP_START(B)
 
@@ -67,15 +67,15 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12954.
 - 5.40 s before the reference collision, B started moving (already the case when first observed).
 - 5.40 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 5.40 s before the reference collision, B pressed the accelerator (already the case when first observed).
-- 4.95 s before the reference collision, A switched on its left turn indicator.
-- 4.25 s before the reference collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
+- 4.90 s before the reference collision, A switched on its left turn indicator.
+- 4.40 s before the reference collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
 - 3.45 s before the reference collision, A released the accelerator.
 - 3.45 s before the reference collision, A started braking.
 - 2.80 s before the reference collision, A's radar started tracking B, which appeared on its left.
 - 2.80 s before the reference collision, A observed B start closing in (already the case when first observed).
 - 2.70 s before the reference collision, B's radar started tracking A, which appeared on its right.
 - 2.70 s before the reference collision, B observed A start closing in (already the case when first observed).
-- 2.65 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
+- 2.60 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
 - 2.55 s before the reference collision, A released the brake.
 - 2.55 s before the reference collision, A pressed the accelerator.
 - 2.05 s before the reference collision, A's time-to-contact with B became critical.
@@ -83,12 +83,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 12954.
 - 1.70 s before the reference collision, A started turning left.
 - 1.25 s before the reference collision, A observed B enter its forward path corridor.
 - 0.40 s before the reference collision, B observed A enter its forward path corridor.
-- At the reference collision, A and B both recorded this same collision (peak impulses A: 12954, B: 12954 N*s).
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 12940, B: 12940 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, B's time-to-contact with A stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B observed A stop closing in.
-- 0.05 s after the reference collision, A stopped turning left.
+- At the reference collision, A stopped turning left.
 - 0.05 s after the reference collision, A released the accelerator.
 - 0.05 s after the reference collision, B released the accelerator.
 - 0.05 s after the reference collision, A started braking.
@@ -112,15 +112,15 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - TRACK_APPEARED_RIGHT(B,A); CLOSING_START(B,A)
 - BRAKE_END(A); THROTTLE_START(A)
-- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
-- TURN_LEFT_END(A); THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
+- COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A); TURN_LEFT_END(A)
+- THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(A); STOP_START(A)
 - MOVING_END(B); STOP_START(B)
 
 ### States still active when observation ended
 
 A:
-- INDICATOR_LEFT, since A:e03 (t = 0.45 s)
+- INDICATOR_LEFT, since A:e03 (t = 0.50 s)
 - EGO_PATH of track_001, since A:e14 (t = 4.15 s)
 - BRAKE, since A:e20 (t = 5.45 s)
 - STOP, since A:e22 (t = 5.50 s)
@@ -132,7 +132,7 @@ B:
 ### Sign detection windows
 
 A:
-- STOP sign sign-0: detected 1.15 s -> 2.75 s; relevant to the path: True; STOP_START inside: none
+- STOP sign sign-0: detected 1.00 s -> 2.80 s; relevant to the path: True; STOP_START inside: none
 B:
 - none
 
@@ -289,6 +289,8 @@ B:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

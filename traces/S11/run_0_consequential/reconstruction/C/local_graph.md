@@ -1,6 +1,6 @@
 # Local graph - vehicle C
 
-All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 224.2758263722062 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
+All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 2005.8708217665553 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)
@@ -20,7 +20,7 @@ All times are C's own local clock: `t_local` = seconds since C's first ego sampl
 | C:e06 | 5.55 | CLOSING_START | C | track_001 | radar |  |
 | C:e07 | 5.55 | CRITICAL_TTC_START | C | track_001 | radar |  |
 | C:e08 | 6.45 | TRACK_LOST | C | track_001 | radar |  |
-| C:e09 | 6.60 | COLLISION | C | - | collision_sensor | peak_impulse=322.10; merged_bursts=[[6.85, 322.1], [7.6, 239.84]] |
+| C:e09 | 6.60 | COLLISION | C | - | collision_sensor | peak_impulse=839.68; merged_bursts=[[6.85, 241.71], [7.6, 236.89]] |
 | C:e10 | 6.65 | THROTTLE_END | C | - | controls |  |
 | C:e11 | 6.65 | BRAKE_START | C | - | controls |  |
 | C:e12 | 7.45 | MOVING_END | C | - | ego |  |
@@ -62,13 +62,13 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | C:e01 MOVING_START<br>C:e02 THROTTLE_START | ego: not yet observed | - |
-| 2.65 | C:e03 TRACK_APPEARED_RIGHT track_001<br>C:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 2.60 |
-| 4.35 | C:e05 CLOSING_END track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING | 4.30 |
-| 5.55 | C:e06 CLOSING_START track_001<br>C:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state | 5.50 |
-| 6.45 | C:e08 TRACK_LOST track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC | 6.40 |
-| 6.60 | C:e09 COLLISION | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 6.50 |
-| 6.65 | C:e10 THROTTLE_END<br>C:e11 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 6.60 |
-| 7.45 | C:e12 MOVING_END<br>C:e13 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track lost, states UNKNOWN: track_001 | 7.40 |
+| 2.65 | C:e03 TRACK_APPEARED_RIGHT track_001<br>C:e04 CLOSING_START track_001 | ego: MOVING, THROTTLE | 2.60 |
+| 4.35 | C:e05 CLOSING_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING | 4.30 |
+| 5.55 | C:e06 CLOSING_START track_001<br>C:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: no active state | 5.50 |
+| 6.45 | C:e08 TRACK_LOST track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC | 6.40 |
+| 6.60 | C:e09 COLLISION | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 6.50 |
+| 6.65 | C:e10 THROTTLE_END<br>C:e11 BRAKE_START | ego: MOVING, THROTTLE<br>track lost, states UNKNOWN: track_001 | 6.60 |
+| 7.45 | C:e12 MOVING_END<br>C:e13 STOP_START | ego: MOVING, BRAKE<br>track lost, states UNKNOWN: track_001 | 7.40 |
 
 ## States still active when observation ended
 
@@ -111,7 +111,7 @@ Bearing: positive = to C's right. Ranges are measured from the radar to the visi
 - t = 5.55 s: C observed track_001 start closing in.
 - t = 5.55 s: C's time-to-contact with track_001 became critical.
 - t = 6.45 s: C's radar lost track_001 (its states are UNKNOWN from then on, not ended).
-- t = 6.60 s: C's collision sensor recorded a contact (peak impulse 322 N*s).
+- t = 6.60 s: C's collision sensor recorded a contact (peak impulse 840 N*s).
 - t = 6.65 s: C released the accelerator.
 - t = 6.65 s: C started braking.
 - t = 7.45 s: C stopped moving.

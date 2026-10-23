@@ -452,8 +452,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -532,8 +532,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -579,8 +579,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -618,8 +618,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -690,8 +690,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -737,8 +737,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -784,8 +784,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -864,8 +864,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -911,8 +911,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -950,8 +950,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -989,8 +989,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1036,8 +1036,8 @@
             "THROTTLE": true,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1071,7 +1071,29 @@
         "peak_impulse": {
           "A": 10281.41,
           "B": 10281.41
-        }
+        },
+        "recontacts": [
+          {
+            "t_global": 0.65,
+            "matched_event": "collision_002",
+            "peak_impulse": {
+              "A": 1509.76,
+              "B": 1509.76
+            },
+            "observations": [
+              [
+                "A",
+                "A:e13",
+                5.45
+              ],
+              [
+                "B",
+                "B:e10",
+                5.45
+              ]
+            ]
+          }
+        ]
       },
       "source": "collision_sensor",
       "confidence": 1.0,
@@ -1096,8 +1118,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1120,8 +1142,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1195,8 +1217,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1270,8 +1292,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1317,8 +1339,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1377,8 +1399,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1401,8 +1423,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {},
@@ -1468,8 +1490,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1543,8 +1565,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1590,8 +1612,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1637,8 +1659,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1657,90 +1679,6 @@
     },
     {
       "node_id": "g30",
-      "event_type": "COLLISION",
-      "kind": "OUTCOME",
-      "actor_id": null,
-      "subject_id": null,
-      "participants": [
-        "A",
-        "B"
-      ],
-      "t_global": 0.65,
-      "attributes": {
-        "matched_event": "collision_002",
-        "reference_event": false,
-        "peak_impulse": {
-          "A": 1509.76,
-          "B": 1509.76
-        }
-      },
-      "source": "collision_sensor",
-      "confidence": 1.0,
-      "observations": [
-        {
-          "graph": "A",
-          "local_node": "A:e13",
-          "t_local": 5.45
-        },
-        {
-          "graph": "B",
-          "local_node": "B:e10",
-          "t_local": 5.45
-        }
-      ],
-      "perceived_state_before": {
-        "A": {
-          "ego": {
-            "MOVING": false,
-            "STOP": true,
-            "BRAKE": true,
-            "THROTTLE": false,
-            "TURN_LEFT": false,
-            "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
-            "SPEED_LIMIT_EXCEEDED": false
-          },
-          "external": {
-            "track_001": {
-              "CLOSING": false,
-              "CRITICAL_TTC": false,
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            }
-          },
-          "signs": {},
-          "facts_t_local": 5.4
-        },
-        "B": {
-          "ego": {
-            "MOVING": true,
-            "STOP": false,
-            "BRAKE": false,
-            "THROTTLE": false,
-            "TURN_LEFT": false,
-            "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
-            "SPEED_LIMIT_EXCEEDED": false
-          },
-          "external": {
-            "track_001": {
-              "CLOSING": true,
-              "CRITICAL_TTC": true,
-              "IN_EGO_PATH": true,
-              "CUT_IN_FROM_LEFT": false,
-              "CUT_IN_FROM_RIGHT": false
-            }
-          },
-          "signs": {},
-          "facts_t_local": 5.2
-        }
-      }
-    },
-    {
-      "node_id": "g31",
       "event_type": "MOVING_END",
       "kind": "FACT",
       "actor_id": "B",
@@ -1768,8 +1706,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1787,7 +1725,7 @@
       }
     },
     {
-      "node_id": "g32",
+      "node_id": "g31",
       "event_type": "STOP_START",
       "kind": "FACT",
       "actor_id": "B",
@@ -1815,8 +1753,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -1834,7 +1772,7 @@
       }
     },
     {
-      "node_id": "g33",
+      "node_id": "g32",
       "event_type": "BRAKE_START",
       "kind": "ACTION",
       "actor_id": "B",
@@ -1862,8 +1800,8 @@
             "THROTTLE": false,
             "TURN_LEFT": false,
             "TURN_RIGHT": false,
-            "INDICATOR_LEFT": "UNKNOWN",
-            "INDICATOR_RIGHT": "UNKNOWN",
+            "INDICATOR_LEFT": false,
+            "INDICATOR_RIGHT": false,
             "SPEED_LIMIT_EXCEEDED": false
           },
           "external": {
@@ -2148,11 +2086,6 @@
       "relation": "PRECEDES"
     },
     {
-      "from": "g28",
-      "to": "g33",
-      "relation": "PRECEDES"
-    },
-    {
       "from": "g29",
       "to": "g30",
       "relation": "PRECEDES"
@@ -2165,11 +2098,6 @@
     {
       "from": "g29",
       "to": "g32",
-      "relation": "PRECEDES"
-    },
-    {
-      "from": "g29",
-      "to": "g33",
       "relation": "PRECEDES"
     },
     {
@@ -2215,6 +2143,7 @@
   ],
   "run": "S04/run_0_a_front_pushed",
   "incident_context": {
+    "map": "Town05",
     "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
     "road_environment": "urban road, single lane",
     "speed_limit_kmh": 50
@@ -2389,6 +2318,8 @@
       "impulse_relative_std": 0.1,
       "impulse_sigma_gate": 3.0,
       "contact_consistency_m": 1.0,
+      "recontact_max_pause_s": 2.0,
+      "recontact_max_separation_m": 1.0,
       "clock_tolerance_s": 0.1,
       "contact_window_s": 1.0,
       "contact_range_m": 3.5,

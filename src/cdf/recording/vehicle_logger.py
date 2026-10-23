@@ -108,37 +108,39 @@ class VehicleLogger:
         self._sign_detector = SignDetector(sign_cfg)
         self._sign_tracker = SignTracker(sign_cfg)
         self._camera_width = int((metadata.get("camera") or {}).get("width") or 0)
-        depth = metadata.get("depth_camera") or {}
-        depth_spec = metadata.get("depth_observations") or {}
-        depth_velocity = metadata.get("depth_radial_velocity") or {}
-        self._depth_writer = CompactObservationWriter(
-            self.root / "depth" / "observations.npz",
-            {
-                "source": "depth",
-                "sensor_id": depth.get("sensor_id"),
-                "schema_version": 1,
-                "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
-                "sensor_transform": {
-                    "x": depth.get("mount_x"), "y": depth.get("mount_y"), "z": depth.get("mount_z"),
-                    "yaw_deg": depth.get("mount_yaw_deg"), "pitch_deg": depth.get("mount_pitch_deg"),
-                    "roll_deg": depth.get("mount_roll_deg"),
+        self._depth_writer = None
+        if metadata.get("depth_camera") is not None:
+            depth = metadata.get("depth_camera") or {}
+            depth_spec = metadata.get("depth_observations") or {}
+            depth_velocity = metadata.get("depth_radial_velocity") or {}
+            self._depth_writer = CompactObservationWriter(
+                self.root / "depth" / "observations.npz",
+                {
+                    "source": "depth",
+                    "sensor_id": depth.get("sensor_id"),
+                    "schema_version": 1,
+                    "columns": ["depth_m", "azimuth_rad", "altitude_rad", "radial_velocity_mps"],
+                    "sensor_transform": {
+                        "x": depth.get("mount_x"), "y": depth.get("mount_y"), "z": depth.get("mount_z"),
+                        "yaw_deg": depth.get("mount_yaw_deg"), "pitch_deg": depth.get("mount_pitch_deg"),
+                        "roll_deg": depth.get("mount_roll_deg"),
+                    },
+                    "sensor_tick_s": depth.get("sensor_tick_s"),
+                    "horizontal_fov_deg": depth.get("fov_deg"),
+                    "vertical_observation_fov_deg": depth_spec.get("vertical_fov_deg"),
+                    "observation_horizontal_fov_deg": depth_spec.get("horizontal_fov_deg"),
+                    "max_range_m": depth_spec.get("max_range_m"),
+                    "azimuth_bin_deg": depth_spec.get("azimuth_bin_deg"),
+                    "altitude_bin_deg": depth_spec.get("altitude_bin_deg"),
+                    "radial_velocity_status": "temporally_estimated" if depth_velocity.get("enabled", True) else "disabled",
+                    "radial_velocity_method": "temporal_geometric_association_v1",
+                    "radial_velocity_sign": "positive_towards_sensor",
+                    "radial_velocity_definition": "closing_speed",
+                    "uses_ground_truth": False,
+                    "uses_radar_for_estimation": False,
+                    "association": depth_velocity,
                 },
-                "sensor_tick_s": depth.get("sensor_tick_s"),
-                "horizontal_fov_deg": depth.get("fov_deg"),
-                "vertical_observation_fov_deg": depth_spec.get("vertical_fov_deg"),
-                "observation_horizontal_fov_deg": depth_spec.get("horizontal_fov_deg"),
-                "max_range_m": depth_spec.get("max_range_m"),
-                "azimuth_bin_deg": depth_spec.get("azimuth_bin_deg"),
-                "altitude_bin_deg": depth_spec.get("altitude_bin_deg"),
-                "radial_velocity_status": "temporally_estimated" if depth_velocity.get("enabled", True) else "disabled",
-                "radial_velocity_method": "temporal_geometric_association_v1",
-                "radial_velocity_sign": "positive_towards_sensor",
-                "radial_velocity_definition": "closing_speed",
-                "uses_ground_truth": False,
-                "uses_radar_for_estimation": False,
-                "association": depth_velocity,
-            },
-        )
+            )
         self._camera_stats: Dict[str, Any] = {}
         self._depth_stats: Dict[str, Any] = {}
         self._radar_stats: Dict[str, Mapping[str, Any]] = {}
@@ -169,6 +171,8 @@ class VehicleLogger:
         del rgb, bgra
 
     def log_depth_observations(self, record: Dict[str, Any]) -> None:
+        if self._depth_writer is None:
+            raise RuntimeError("depth observations supplied without an enabled depth camera")
         self._depth_writer.append(record["frame"], record["timestamp"], record.get("detections", []))
 
     def set_camera_stats(self, stats: Mapping[str, Any]) -> None:
@@ -215,7 +219,8 @@ class VehicleLogger:
         })
         for stream in (self.state, self.controls, self.lights, self.collisions, self.traffic_signs):
             stream.close()
-        self._depth_writer.close(self._depth_stats)
+        if self._depth_writer is not None:
+            self._depth_writer.close(self._depth_stats)
         for sensor_id, writer in self._radar_writers.items():
             writer.close(self._radar_stats.get(sensor_id, {}))
         self._camera_metadata.update(self._camera_stats)

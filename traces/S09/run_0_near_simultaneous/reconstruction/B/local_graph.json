@@ -4,16 +4,21 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 185.61600741744041,
+      "origin_source_timestamp": 1970.0582870952785,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
     "incident_context": {
+      "map": "Town05",
       "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
       "road_environment": "urban all-way-stop junction",
       "speed_limit_kmh": 50
+    },
+    "road_map": {
+      "name": "Town05",
+      "source": "incident context"
     },
     "start_t_local": 0.0,
     "end_t_local": 12.85,
@@ -23,6 +28,7 @@
       "collisions.jsonl",
       "controls.jsonl",
       "ego.jsonl",
+      "lights.jsonl",
       "radar",
       "traffic_signs.jsonl"
     ],
@@ -139,12 +145,12 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "sign-0",
-      "t_local": 0.7,
+      "t_local": 0.8,
       "attributes": {
         "relevant_to_ego_path": true
       },
       "source": "camera",
-      "confidence": 0.969,
+      "confidence": 0.99,
       "perceived_state_before": {
         "ego": {
           "MOVING": true,
@@ -153,13 +159,13 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
         "signs": {},
-        "facts_t_local": 0.6
+        "facts_t_local": 0.7
       }
     },
     {
@@ -180,8 +186,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -213,8 +219,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -248,8 +254,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -283,8 +289,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {},
@@ -304,10 +310,10 @@
       "kind": "PERCEPTION",
       "actor_id": "B",
       "subject_id": "sign-0",
-      "t_local": 2.8,
+      "t_local": 2.75,
       "attributes": {},
       "source": "camera",
-      "confidence": 0.969,
+      "confidence": 0.99,
       "perceived_state_before": {
         "ego": {
           "MOVING": true,
@@ -316,8 +322,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -357,8 +363,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -398,8 +404,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -439,8 +445,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -480,8 +486,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -521,8 +527,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -562,8 +568,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -603,8 +609,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -644,8 +650,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -685,8 +691,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -750,8 +756,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -793,8 +799,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -834,8 +840,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -875,8 +881,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -916,8 +922,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -957,8 +963,8 @@
           "THROTTLE": true,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1022,8 +1028,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1063,8 +1069,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {
@@ -1104,8 +1110,8 @@
           "THROTTLE": false,
           "TURN_LEFT": false,
           "TURN_RIGHT": false,
-          "INDICATOR_LEFT": "UNKNOWN",
-          "INDICATOR_RIGHT": "UNKNOWN",
+          "INDICATOR_LEFT": false,
+          "INDICATOR_RIGHT": false,
           "SPEED_LIMIT_EXCEEDED": false
         },
         "external": {

@@ -7,7 +7,7 @@
     "births": 11,
     "losses": [
      {
-      "track": "track_006",
+      "track": "track_005",
       "t": 0.6,
       "true": "E",
       "kind": "sparse returns",
@@ -31,7 +31,7 @@
       ]
      },
      {
-      "track": "track_005",
+      "track": "track_004",
       "t": 2.35,
       "true": "F",
       "kind": "visibility loss",
@@ -60,7 +60,7 @@
       "reacquired_as": []
      },
      {
-      "track": "track_004",
+      "track": "track_003",
       "t": 6.2,
       "true": "G",
       "kind": "visibility loss",
@@ -89,7 +89,7 @@
       "reacquired_as": []
      },
      {
-      "track": "track_003",
+      "track": "track_002",
       "t": 11.9,
       "true": "D",
       "kind": "visibility loss",
@@ -115,7 +115,7 @@
      "exits": 0,
      "oscillations": 0,
      "tracks": [
-      "track_002"
+      "track_006"
      ]
     }
    },
@@ -131,7 +131,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 21.6
+    "max_implied_accel_mps2": 22.0
    }
   },
   "B": {
@@ -150,7 +150,7 @@
      },
      {
       "track": "track_001",
-      "t": 7.65,
+      "t": 7.7,
       "true": "G",
       "kind": "visibility loss",
       "visible_after": 0.0,
@@ -225,7 +225,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 6.3
+    "max_implied_accel_mps2": 6.4
    }
   }
  },

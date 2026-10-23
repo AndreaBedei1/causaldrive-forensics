@@ -1,6 +1,6 @@
 # Local graph - vehicle B
 
-All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 14.307498775422573 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
+All times are B's own local clock: `t_local` = seconds since B's first ego sample (raw clock reading 2022.2515310794115 at `t_local` = 0). Only files under `vehicles/B/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 111 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (10.95 s)
@@ -85,18 +85,18 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | B:e01 MOVING_START<br>B:e02 THROTTLE_START<br>B:e03 TRACK_APPEARED_RIGHT track_001<br>B:e04 TRACK_APPEARED_RIGHT track_002<br>B:e05 CLOSING_START track_002 | ego: not yet observed | - |
-| 3.95 | B:e06 CUT_IN_FROM_RIGHT_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: CLOSING | 3.90 |
-| 4.05 | B:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.00 |
-| 4.15 | B:e08 CLOSING_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.10 |
-| 4.55 | B:e09 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.50 |
-| 4.95 | B:e10 COLLISION<br>B:e11 CRITICAL_TTC_END track_001<br>B:e12 CLOSING_END track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.90 |
-| 5.00 | B:e13 THROTTLE_END<br>B:e14 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.90 |
-| 5.15 | B:e15 CLOSING_END track_002 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 5.10 |
-| 5.70 | B:e16 TRACK_LOST track_002 | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: no active state | 5.60 |
-| 5.95 | B:e17 MOVING_END<br>B:e18 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track lost, states UNKNOWN: track_002 | 5.90 |
-| 6.10 | B:e19 CUT_IN_FROM_RIGHT_END track_001 | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track lost, states UNKNOWN: track_002 | 6.00 |
-| 6.40 | B:e20 TRACK_APPEARED_RIGHT track_003 | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH<br>track lost, states UNKNOWN: track_002 | 6.30 |
-| 7.00 | B:e21 TRACK_LOST track_003 | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH<br>track_003: no active state<br>track lost, states UNKNOWN: track_002 | 6.90 |
+| 3.95 | B:e06 CUT_IN_FROM_RIGHT_START track_001 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: CLOSING | 3.90 |
+| 4.05 | B:e07 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.00 |
+| 4.15 | B:e08 CLOSING_START track_001 | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.10 |
+| 4.55 | B:e09 EGO_PATH_ENTRY track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.50 |
+| 4.95 | B:e10 COLLISION<br>B:e11 CRITICAL_TTC_END track_001<br>B:e12 CLOSING_END track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.90 |
+| 5.00 | B:e13 THROTTLE_END<br>B:e14 BRAKE_START | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 4.90 |
+| 5.15 | B:e15 CLOSING_END track_002 | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: CLOSING | 5.10 |
+| 5.70 | B:e16 TRACK_LOST track_002 | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track_002: no active state | 5.60 |
+| 5.95 | B:e17 MOVING_END<br>B:e18 STOP_START | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track lost, states UNKNOWN: track_002 | 5.90 |
+| 6.10 | B:e19 CUT_IN_FROM_RIGHT_END track_001 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH, CUT_IN_FROM_RIGHT<br>track lost, states UNKNOWN: track_002 | 6.00 |
+| 6.40 | B:e20 TRACK_APPEARED_RIGHT track_003 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH<br>track lost, states UNKNOWN: track_002 | 6.30 |
+| 7.00 | B:e21 TRACK_LOST track_003 | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH<br>track_003: no active state<br>track lost, states UNKNOWN: track_002 | 6.90 |
 
 ## States still active when observation ended
 
@@ -125,7 +125,7 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
 | track_001 | 0.00 | 10.95 | 220 | 4.4 m / +26 deg | 0.94 m (6.60) | 1.0 m / +20 deg | 12.4 m/s |
-| track_002 | 0.00 | 5.70 | 114 | 16.7 m / +18 deg | 5.80 m (5.15) | 6.9 m / +25 deg | 11.9 m/s |
+| track_002 | 0.00 | 5.70 | 114 | 16.7 m / +18 deg | 5.81 m (5.15) | 6.9 m / +25 deg | 11.9 m/s |
 | track_003 | 6.40 | 7.00 | 11 | 12.8 m / +20 deg | 12.82 m (6.40) | 19.2 m / +19 deg | 10.7 m/s |
 
 Bearing: positive = to B's right. Ranges are measured from the radar to the visible surface of the object.

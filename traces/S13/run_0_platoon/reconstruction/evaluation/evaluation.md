@@ -10,7 +10,7 @@ Privileged assumption: recorder raw clocks are CARLA simulator time.
 
 | True contact | Sim time | Peak impulse | Reconstructed as | Participants correct | Report timing error |
 |--------------|---------:|-------------:|------------------|----------------------|--------------------:|
-| A + B | 503.788 | 1097.5 | g21 | yes | 0.0 s |
+| A + B | 2058.987 | 1093.1 | g21 | yes | 0.0 s |
 
 Reconstructed COLLISION nodes that reproduce no true contact: none.
 
@@ -33,13 +33,13 @@ Relative clock offset B - A: estimated +0.000 s, true +0.000 s (error +0.000 s).
 
 | Track | Decision | True identity | Verdict | Samples | Position RMSE to surface: raw / smoothed | Smoothed RMSE to centre | Speed RMSE: raw differences / smoothed |
 |-------|----------|---------------|---------|--------:|------------------------------------------|------------------------:|----------------------------------------|
-| A:track_001 | B | B | correct | 115 | 0.244 / 0.313 m | 1.609 m | 0.826 / 0.118 m/s |
-| A:track_002 | U1 | D | correctly left anonymous | 89 | 0.299 / 0.297 m | 1.975 m | 2.53 / 0.06 m/s |
-| A:track_003 | U2 | C | correctly left anonymous | 19 | 0.487 / 0.467 m | 1.423 m | 5.139 / 0.06 m/s |
-| B:track_001 | A | A | correct | 115 | 0.123 / 0.224 m | 1.437 m | 1.456 / 0.131 m/s |
-| B:track_002 | U1 | D | correctly left anonymous | 91 | 0.406 / 0.436 m | 1.847 m | 3.508 / 0.057 m/s |
-| B:track_003 | U2 | C | correctly left anonymous | 37 | 0.847 / 0.416 m | 1.583 m | 8.876 / 0.087 m/s |
-| B:track_004 | U2 | C | correctly left anonymous | 13 | 0.562 / 0.632 m | 1.708 m | 2.04 / 0.052 m/s |
+| A:track_001 | B | B | correct | 115 | 0.244 / 0.311 m | 1.607 m | 0.827 / 0.118 m/s |
+| A:track_002 | U1 | D | correctly left anonymous | 88 | 0.276 / 0.286 m | 1.983 m | 1.961 / 0.055 m/s |
+| A:track_003 | U2 | C | correctly left anonymous | 18 | 0.487 / 0.469 m | 1.374 m | 6.339 / 0.052 m/s |
+| B:track_001 | A | A | correct | 115 | 0.121 / 0.224 m | 1.434 m | 1.466 / 0.131 m/s |
+| B:track_002 | U1 | D | correctly left anonymous | 91 | 0.402 / 0.436 m | 1.847 m | 3.412 / 0.056 m/s |
+| B:track_003 | U2 | C | correctly left anonymous | 37 | 0.858 / 0.412 m | 1.593 m | 8.82 / 0.09 m/s |
+| B:track_004 | U2 | C | correctly left anonymous | 13 | 0.561 / 0.629 m | 1.704 m | 2.024 / 0.052 m/s |
 
 ## Clearance at the true contacts
 
@@ -47,8 +47,8 @@ Per recorder, its track lying on the partner at the last 10 Hz sample at or befo
 
 | Contact | Recorder | Partner | Track | Seen before contact | Clearance | True gap | Error | Range |
 |---------|----------|---------|-------|--------------------:|----------:|---------:|------:|------:|
-| A + B | A | B | A:track_001 | 0.0 s | 0.229 m | 0.0 m | 0.229 m | 0.539 m |
-| A + B | B | A | B:track_001 | 0.0 s | 0.341 m | 0.0 m | 0.341 m | 0.377 m |
+| A + B | A | B | A:track_001 | 0.0 s | 0.228 m | 0.0 m | 0.228 m | 0.539 m |
+| A + B | B | A | B:track_001 | 0.0 s | 0.342 m | 0.0 m | 0.342 m | 0.379 m |
 
 Surface distance = distance from a track point to the outline of the true vehicle's bounding box, i.e. where radar returns lie. Raw = median radar return of that sweep; smoothed = Kalman + RTS estimate; both on the same measured 10 Hz sweeps. Raw returns lie on the surface by construction, so smoothing cannot be expected to bring the position closer to it; its gain shows in the speed (raw differences of consecutive returns vs smoothed velocity). The distance to the centre includes the surface-to-centre offset. True identity = the vehicle whose box is closest (median <= 1.5 m).
 

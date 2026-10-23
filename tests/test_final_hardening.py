@@ -224,13 +224,13 @@ class CanonicalFinalRules(unittest.TestCase):
             self.assertEqual(len(keys),len(set(keys)),variant)
 
     def test_combined_gnss_impulse_conservatively_matches_multiple_contacts(self):
-        from src.cdf.robustness.perturb import GNSS_PROFILES,CollisionPerturbation,Perturbation,perturbed_copy
+        from src.cdf.robustness.perturb import HISTORICAL_GNSS_PROFILES,CollisionPerturbation,Perturbation,perturbed_copy
         from src.cdf.reconstruction.pipeline import reconstruct_run
         from src.cdf.evaluation.reconstruction import evaluate_run
         root=Path(__file__).resolve().parents[1]
         for name in ['run_0_a_front_pushed','run_0_b_rear_first']:
             with tempfile.TemporaryDirectory() as temp:
-                profile=dataclasses.replace(GNSS_PROFILES['consumer'],common_fraction=.9)
+                profile=dataclasses.replace(HISTORICAL_GNSS_PROFILES['consumer'],common_fraction=.9)
                 copy=perturbed_copy(root/'traces/S04'/name,Path(temp)/'S04'/name,
                                     Perturbation('combined',gnss=profile,collisions=CollisionPerturbation(impulse_rel_std=.1)),0)
                 reconstruct_run(copy,pose_factory=PerturbedPoseSource.factory(profile,0))

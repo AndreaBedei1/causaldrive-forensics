@@ -1,6 +1,6 @@
 # Local graph - vehicle C
 
-All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 106.94463252276182 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
+All times are C's own local clock: `t_local` = seconds since C's first ego sample (raw clock reading 1892.6789430752397 at `t_local` = 0). Only files under `vehicles/C/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 143 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (14.15 s)
@@ -44,9 +44,9 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | C:e01 MOVING_START<br>C:e02 THROTTLE_START | ego: not yet observed | - |
-| 2.95 | C:e03 THROTTLE_END<br>C:e04 BRAKE_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 2.90 |
-| 4.05 | C:e05 MOVING_END<br>C:e06 STOP_START | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 4.00 |
-| 4.70 | C:e07 COLLISION | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? | 4.60 |
+| 2.95 | C:e03 THROTTLE_END<br>C:e04 BRAKE_START | ego: MOVING, THROTTLE | 2.90 |
+| 4.05 | C:e05 MOVING_END<br>C:e06 STOP_START | ego: MOVING, BRAKE | 4.00 |
+| 4.70 | C:e07 COLLISION | ego: STOP, BRAKE | 4.60 |
 
 ## States still active when observation ended
 

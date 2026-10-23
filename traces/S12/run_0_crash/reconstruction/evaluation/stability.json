@@ -51,7 +51,7 @@
    },
    "trajectory": {
     "implausible_steps": 0,
-    "max_implied_accel_mps2": 5.9
+    "max_implied_accel_mps2": 6.0
    }
   },
   "B": {
@@ -120,8 +120,8 @@
   "fp": [],
   "missed": [],
   "onset_errors_s": [
-   -0.0,
-   -0.0
+   0.0,
+   0.0
   ]
  },
  "closure_violations": 0,

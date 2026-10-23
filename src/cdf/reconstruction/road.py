@@ -97,6 +97,11 @@ def road_for_positions(points: Sequence[Tuple[float, float]]) -> Optional[RoadLa
     return _road(name)
 
 
+def road_named(name: str) -> Optional[RoadLanes]:
+    """The driving lanes of the named map (the supplied incident context), None without its OpenDRIVE file."""
+    return _road(name) if name in _opendrive_sources() else None
+
+
 def _road(name: str) -> RoadLanes:
     if name not in _ROADS:
         source = _opendrive_sources()[name]
@@ -143,18 +148,28 @@ class RoadFrame:
     y0: float
     yaw0: float
     _reference: Dict[int, Any] = field(default_factory=dict, repr=False, compare=False)
+    source: str = "own poses"  # where the map comes from: "incident context" or "own poses"
 
     @classmethod
-    def from_ego_records(cls, records: Sequence[Mapping[str, Any]], step: int = 5) -> Optional["RoadFrame"]:
+    def from_ego_records(cls, records: Sequence[Mapping[str, Any]], step: int = 5,
+                         map_name: Optional[str] = None) -> Optional["RoadFrame"]:
+        """The road frame of a recorder: the map of the supplied incident context (``map_name``) when its
+        OpenDRIVE file is installed, else the map its own poses fit (``road_for_trajectory``).  All the CARLA
+        towns share coordinates around the origin, so a recorder's poses alone can fit a lane of another town
+        (S06, recorder C: Town01 instead of Town05)."""
         if not records:
             return None
-        sample = records[::step]
-        road = road_for_trajectory([(float(r["x"]), float(r["y"])) for r in sample],
-                                   [math.radians(float(r["yaw_deg"])) for r in sample])
+        road = road_named(map_name) if map_name else None
+        source = "incident context"
+        if road is None:
+            sample = records[::step]
+            road = road_for_trajectory([(float(r["x"]), float(r["y"])) for r in sample],
+                                       [math.radians(float(r["yaw_deg"])) for r in sample])
+            source = "own poses"
         if road is None:
             return None
         first = records[0]
-        return cls(road, float(first["x"]), float(first["y"]), math.radians(float(first["yaw_deg"])))
+        return cls(road, float(first["x"]), float(first["y"]), math.radians(float(first["yaw_deg"])), source=source)
 
     def to_world(self, x: float, y: float) -> Tuple[float, float]:
         c, s = math.cos(self.yaw0), math.sin(self.yaw0)

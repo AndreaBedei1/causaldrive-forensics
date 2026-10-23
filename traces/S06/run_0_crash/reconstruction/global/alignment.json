@@ -32,7 +32,7 @@
       "offset_to_global": -4.15,
       "method": "observed_trajectories",
       "chain": [],
-      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002#segment_1 on B lie where their lines of sight enter the body (pooled median 0.56 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
+      "reason": "aligned through observed trajectories: the near surfaces of A:track_001, B:track_001, C:track_001 on A, C:track_002 on B lie where their lines of sight enter the body (pooled median 0.59 sigma) at this offset; offsets within 2.00 sigma span [-4.20, -4.00] s and nothing else fits"
     }
   },
   "relative_clock_offsets_s": {
@@ -56,15 +56,15 @@
         "B": 4.1
       },
       "peak_impulse": {
-        "A": 12137.11,
-        "B": 12137.11
+        "A": 12137.59,
+        "B": 12137.59
       },
       "impulse_similarity": 1.0,
       "impulse_z": 0.0,
       "confidence": 1.0,
       "evidence": [
         "A and B both recorded a collision",
-        "peak impulses 12137.11 vs 12137.11 N*s (similarity 1.000, tolerance 0.10)",
+        "peak impulses 12137.59 vs 12137.59 N*s (similarity 1.000, tolerance 0.10)",
         "no competing report within tolerance",
         "the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m)",
         "independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption",
@@ -83,10 +83,10 @@
         "A:track_001",
         "B:track_001",
         "C:track_001 on A",
-        "C:track_002#segment_1 on B"
+        "C:track_002 on B"
       ],
       "offset_to_global": -4.15,
-      "median_distance_sigma": 0.556,
+      "median_distance_sigma": 0.595,
       "interval": [
         -4.2,
         -4.0

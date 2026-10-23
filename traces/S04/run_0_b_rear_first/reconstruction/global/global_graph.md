@@ -24,7 +24,7 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 Estimated relative clock offsets: B - A = +0.000 s, C - A = +0.000 s, C - B = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 31706.27 vs 31706.27 N*s (similarity 1.000, tolerance 0.10); 1 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.01 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
+Matched `collision_001`: A and B both recorded a collision; peak impulses 31706.31 vs 31706.31 N*s (similarity 1.000, tolerance 0.10); 1 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.01 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.46 vs 21842.46 N*s (similarity 1.000, tolerance 0.10); 2 competing report(s) within tolerance; best match kept; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
@@ -32,7 +32,7 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 31706.27 vs 31706.27 N*s)<br>tracked for 6.25 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.0 m -> 0.1 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.12 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 1.00 | A and B both reported collision_001 (peak impulse 31706.31 vs 31706.31 N*s)<br>tracked for 6.25 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 13.0 m -> 0.1 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.12 m/s for reference)<br>clearance at the contact 0.00 m<br>the only track of A compatible with the contact |
 | B:track_001 | C | ASSOCIATED | 0.99 | B and C both reported collision_002 at 4.70 s (peak impulse 21842.46 vs 21842.46 N*s)<br>tracked for 4.70 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 12.0 m -> 0.1 m over the last 1.0 s<br>track motion compatible with C's own speed in the observed direction (3 sigma; full-speed RMSE 0.17 m/s for reference)<br>clearance at the contact 0.10 m<br>the only track of B compatible with the contact<br>collision_001 with A at 6.25 s: not compatible (track motion contradicts A's own speed in the observed direction (3 sigma; full-speed RMSE 11.92 m/s for reference)) |
 
 ## Nodes
@@ -64,7 +64,7 @@ Matched `collision_002`: B and C both recorded a collision; peak impulses 21842.
 | g23 | -1.40 | STOP_START | B | - | B:e12 @ 4.85 |  |
 | g24 | -0.10 | THROTTLE_END | A | - | A:e06 @ 6.15 |  |
 | g25 | -0.10 | BRAKE_START | A | - | A:e07 @ 6.15 |  |
-| g26 | 0.00 | COLLISION | - | A, B | A:e08 @ 6.25, B:e13 @ 6.25 | matched_event=collision_001; reference_event=True; peak_impulse=A 31706.27, B 31706.27 |
+| g26 | 0.00 | COLLISION | - | A, B | A:e08 @ 6.25, B:e13 @ 6.25 | matched_event=collision_001; reference_event=True; peak_impulse=A 31706.31, B 31706.31 |
 | g27 | 0.00 | CRITICAL_TTC_END | A | B | A:e09 @ 6.25 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g28 | 0.00 | CLOSING_END | A | B | A:e10 @ 6.25 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g29 | 0.10 | MOVING_END | A | - | A:e11 @ 6.35 |  |
@@ -171,19 +171,19 @@ Each recorder's own belief just before its events, in its own local names (track
 | -6.25 | A | g01 MOVING_START(A) (A:e01)<br>g04 THROTTLE_START(A) (A:e02)<br>g07 TRACK_APPEARED_FRONT(A,B) (A:e03) | ego: not yet observed |
 | -6.25 | B | g02 MOVING_START(B) (B:e01)<br>g05 THROTTLE_START(B) (B:e02)<br>g08 TRACK_APPEARED_FRONT(B,C) (B:e03) | ego: not yet observed |
 | -6.25 | C | g03 MOVING_START(C) (C:e01)<br>g06 THROTTLE_START(C) (C:e02) | ego: not yet observed |
-| -5.75 | B | g09 CRITICAL_TTC_START(B,C) (B:e04) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
-| -5.75 | B | g09 CRITICAL_TTC_START(B,C) (B:e04)<br>g12 CLOSING_START(B,C) (B:e05)<br>g15 COLLISION(B,C) (B:e06)<br>g16 CRITICAL_TTC_END(B,C) (B:e07)<br>g17 CLOSING_END(B,C) (B:e08) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
-| -3.30 | C | g10 THROTTLE_END(C) (C:e03)<br>g11 BRAKE_START(C) (C:e04) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -3.05 | B | g12 CLOSING_START(B,C) (B:e05) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
-| -2.20 | C | g13 MOVING_END(C) (C:e05)<br>g14 STOP_START(C) (C:e06) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -1.55 | C | g15 COLLISION(B,C) (C:e07) | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -1.55 | A | g18 CLOSING_START(A,B) (A:e04)<br>g19 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -1.55 | A | g18 CLOSING_START(A,B) (A:e04)<br>g19 CRITICAL_TTC_START(A,B) (A:e05)<br>g26 COLLISION(A,B) (A:e08)<br>g27 CRITICAL_TTC_END(A,B) (A:e09)<br>g28 CLOSING_END(A,B) (A:e10) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -1.50 | B | g20 THROTTLE_END(B) (B:e09)<br>g21 BRAKE_START(B) (B:e10) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -1.40 | B | g22 MOVING_END(B) (B:e11)<br>g23 STOP_START(B) (B:e12) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -0.10 | A | g24 THROTTLE_END(A) (A:e06)<br>g25 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| +0.00 | B | g26 COLLISION(A,B) (B:e13) | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| +0.10 | A | g29 MOVING_END(A) (A:e11)<br>g30 STOP_START(A) (A:e12) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
+| -5.75 | B | g09 CRITICAL_TTC_START(B,C) (B:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
+| -5.75 | B | g09 CRITICAL_TTC_START(B,C) (B:e04)<br>g12 CLOSING_START(B,C) (B:e05)<br>g15 COLLISION(B,C) (B:e06)<br>g16 CRITICAL_TTC_END(B,C) (B:e07)<br>g17 CLOSING_END(B,C) (B:e08) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH, CRITICAL_TTC? |
+| -3.30 | C | g10 THROTTLE_END(C) (C:e03)<br>g11 BRAKE_START(C) (C:e04) | ego: MOVING, THROTTLE |
+| -3.05 | B | g12 CLOSING_START(B,C) (B:e05) | ego: MOVING, THROTTLE<br>track_001: CRITICAL_TTC, IN_EGO_PATH |
+| -2.20 | C | g13 MOVING_END(C) (C:e05)<br>g14 STOP_START(C) (C:e06) | ego: MOVING, BRAKE |
+| -1.55 | C | g15 COLLISION(B,C) (C:e07) | ego: STOP, BRAKE |
+| -1.55 | A | g18 CLOSING_START(A,B) (A:e04)<br>g19 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -1.55 | A | g18 CLOSING_START(A,B) (A:e04)<br>g19 CRITICAL_TTC_START(A,B) (A:e05)<br>g26 COLLISION(A,B) (A:e08)<br>g27 CRITICAL_TTC_END(A,B) (A:e09)<br>g28 CLOSING_END(A,B) (A:e10) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -1.50 | B | g20 THROTTLE_END(B) (B:e09)<br>g21 BRAKE_START(B) (B:e10) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -1.40 | B | g22 MOVING_END(B) (B:e11)<br>g23 STOP_START(B) (B:e12) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
+| -0.10 | A | g24 THROTTLE_END(A) (A:e06)<br>g25 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| +0.00 | B | g26 COLLISION(A,B) (B:e13) | ego: STOP, BRAKE<br>track_001: IN_EGO_PATH |
+| +0.10 | A | g29 MOVING_END(A) (A:e11)<br>g30 STOP_START(A) (A:e12) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
 
 ## Plain-language reading
 

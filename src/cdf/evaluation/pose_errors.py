@@ -14,21 +14,30 @@ def _stats(values):
     a = np.asarray(values, dtype=float)
     return {'samples': len(a), 'rms': float(np.sqrt(np.mean(a*a))) if len(a) else None,
             'median': float(np.median(a)) if len(a) else None,
-            'p95': float(np.percentile(a,95)) if len(a) else None}
+            'p50': float(np.percentile(a, 50)) if len(a) else None,
+            'p95': float(np.percentile(a, 95)) if len(a) else None,
+            'p99': float(np.percentile(a, 99)) if len(a) else None,
+            'p995': float(np.percentile(a, 99.5)) if len(a) else None,
+            'max': float(np.max(a)) if len(a) else None}
 
 
 def pose_errors(run_dir: Path, pose_factory=None):
-    sources, errors, yaw, velocity, absolute = {}, {}, [], [], []
+    sources, errors, by_recorder, yaw, velocity, absolute = {}, {}, {}, [], [], []
     for path in sorted((Path(run_dir)/'vehicles').glob('*/ego.jsonl')):
         records = [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines() if line.strip()]
         origin = float(records[0]['timestamp'])
         base = RecordedPoseSource(records,origin)
         source = pose_factory(path.parent,origin) if pose_factory else base
         sources[path.parent.name] = (origin,base,source)
-        d = np.hypot(source.x-base.x,source.y-base.y)
-        absolute.extend(d.tolist());errors[path.parent.name] = _stats(d)
-        yaw.extend(np.degrees(np.abs((source.yaw-base.yaw+np.pi)%(2*np.pi)-np.pi)).tolist())
-        velocity.extend(np.hypot(source.vx-base.vx,source.vy-base.vy).tolist())
+        d = np.hypot(source.x - base.x, source.y - base.y)
+        heading = np.degrees(np.abs((source.yaw - base.yaw + np.pi) % (2 * np.pi) - np.pi))
+        speed = np.hypot(source.vx - base.vx, source.vy - base.vy)
+        absolute.extend(d.tolist())
+        yaw.extend(heading.tolist())
+        velocity.extend(speed.tolist())
+        errors[path.parent.name] = _stats(d)
+        by_recorder[path.parent.name] = {'absolute_position_m': _stats(d), 'heading_deg': _stats(heading),
+                                         'velocity_mps': _stats(speed)}
     pairs, relative = {}, []
     names = sorted(sources)
     for i,a in enumerate(names):
@@ -41,6 +50,7 @@ def pose_errors(run_dir: Path, pose_factory=None):
             tx,ty,_ = ab.poses_at(ts-ao);ux,uy,_ = bb.poses_at(ts-bo)
             d = np.hypot((bx-ax)-(ux-tx),(by-ay)-(uy-ty))
             relative.extend(d.tolist());pairs[a+'/'+b] = _stats(d)
-    return {'absolute_position_m':_stats(absolute),'relative_position_m':_stats(relative),
-            'heading_deg':_stats(yaw),'velocity_mps':_stats(velocity),'recorders':errors,'pairs':pairs,
+    return {'absolute_position_m': _stats(absolute), 'relative_position_m': _stats(relative),
+            'heading_deg': _stats(yaw), 'velocity_mps': _stats(velocity), 'recorders': errors,
+            'by_recorder': by_recorder, 'pairs': pairs,
             'reference':'recorded exact CARLA poses, evaluation only; simultaneous recorder pairs'}

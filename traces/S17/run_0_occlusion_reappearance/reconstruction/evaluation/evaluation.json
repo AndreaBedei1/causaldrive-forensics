@@ -8,9 +8,14 @@
         "A",
         "B"
       ],
-      "sim_time": 20.67699744552374,
+      "sim_time": 2139.5441546477377,
       "peak_impulse": 389.2610316312064,
+      "recontacts": [],
       "reconstructed_as": "g43",
+      "reconstructed_participants": [
+        "A",
+        "B"
+      ],
       "participants_correct": true,
       "report_timing_error_s": 0.0
     }
@@ -110,10 +115,10 @@
       "verdict": "correctly left anonymous",
       "samples": 32,
       "raw_rmse_to_surface_m": 0.466,
-      "smoothed_rmse_to_surface_m": 0.586,
-      "smoothed_rmse_to_centre_m": 1.681,
-      "raw_difference_speed_rmse_mps": 4.905,
-      "speed_rmse_mps": 0.078
+      "smoothed_rmse_to_surface_m": 0.588,
+      "smoothed_rmse_to_centre_m": 1.68,
+      "raw_difference_speed_rmse_mps": 4.972,
+      "speed_rmse_mps": 0.079
     },
     {
       "track": "A:track_004",
@@ -184,7 +189,7 @@
         "B": 25.78,
         "C": 0.0,
         "D": 13.67,
-        "E": 29.67,
+        "E": 29.68,
         "V": 8.3
       },
       "verdict": "correctly left anonymous",
@@ -192,7 +197,7 @@
       "raw_rmse_to_surface_m": 0.274,
       "smoothed_rmse_to_surface_m": 0.269,
       "smoothed_rmse_to_centre_m": 2.149,
-      "raw_difference_speed_rmse_mps": 2.727,
+      "raw_difference_speed_rmse_mps": 2.728,
       "speed_rmse_mps": 0.071
     },
     {
@@ -212,7 +217,7 @@
       "raw_rmse_to_surface_m": 0.322,
       "smoothed_rmse_to_surface_m": 0.542,
       "smoothed_rmse_to_centre_m": 1.64,
-      "raw_difference_speed_rmse_mps": 7.906,
+      "raw_difference_speed_rmse_mps": 7.904,
       "speed_rmse_mps": 0.221
     },
     {
@@ -264,7 +269,7 @@
         "A": 6.21,
         "C": 13.97,
         "D": 15.2,
-        "E": 31.9,
+        "E": 31.91,
         "V": 0.0
       },
       "verdict": "correctly left anonymous",
@@ -281,9 +286,9 @@
       "status": "ANONYMOUS",
       "true_identity": "E",
       "median_box_distance_m": {
-        "A": 37.66,
-        "C": 11.67,
-        "D": 13.02,
+        "A": 37.67,
+        "C": 11.68,
+        "D": 13.03,
         "E": 0.0,
         "V": 30.1
       },
@@ -292,7 +297,7 @@
       "raw_rmse_to_surface_m": 0.446,
       "smoothed_rmse_to_surface_m": 0.586,
       "smoothed_rmse_to_centre_m": 1.682,
-      "raw_difference_speed_rmse_mps": 3.975,
+      "raw_difference_speed_rmse_mps": 3.962,
       "speed_rmse_mps": 0.052
     },
     {
@@ -304,7 +309,7 @@
         "A": 0.0,
         "C": 19.72,
         "D": 23.16,
-        "E": 40.39,
+        "E": 40.4,
         "V": 13.14
       },
       "verdict": "correct",

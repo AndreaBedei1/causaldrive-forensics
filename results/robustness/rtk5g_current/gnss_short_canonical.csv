@@ -1,0 +1,7 @@
+profile,quantity,unit,window_s,sampling_hz,scenarios,recorder_scenario_pairs,seed_blocks_per_recorder,percentile,range_min,range_max
+G1,position_2d,m,10,20,"S01;S04;S14;S19",9,512,P95,0.03956,0.04043
+G1,heading_absolute,deg,10,20,"S01;S04;S14;S19",9,512,P95,0.13673,0.14270
+G1,velocity_2d,mps,10,20,"S01;S04;S14;S19",9,512,P95,0.01597,0.01600
+G2,position_2d,m,10,20,"S01;S04;S14;S19",9,512,P99.5,0.51761,0.51896
+G2,heading_absolute,deg,10,20,"S01;S04;S14;S19",9,512,P99.5,0.59770,0.61808
+G2,velocity_2d,mps,10,20,"S01;S04;S14;S19",9,512,P99.5,0.19900,0.19964

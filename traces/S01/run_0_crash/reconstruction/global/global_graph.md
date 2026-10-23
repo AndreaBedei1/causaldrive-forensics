@@ -122,14 +122,14 @@ Each recorder's own belief just before its events, in its own local names (track
 |---------:|----------|---------------------|-----------------------------|
 | -6.75 | A | g01 MOVING_START(A) (A:e01)<br>g03 THROTTLE_START(A) (A:e02)<br>g05 TRACK_APPEARED_FRONT(A,B) (A:e03) | ego: not yet observed |
 | -6.75 | B | g02 MOVING_START(B) (B:e01)<br>g04 THROTTLE_START(B) (B:e02) | ego: not yet observed |
-| -2.80 | B | g06 THROTTLE_END(B) (B:e03)<br>g07 BRAKE_START(B) (B:e04) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -2.55 | A | g08 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -2.55 | A | g08 CLOSING_START(A,B) (A:e04)<br>g09 CRITICAL_TTC_START(A,B) (A:e05)<br>g14 COLLISION(A,B) (A:e08)<br>g15 CRITICAL_TTC_END(A,B) (A:e09)<br>g16 CLOSING_END(A,B) (A:e10) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
-| -2.35 | A | g09 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, IN_EGO_PATH |
-| -1.60 | B | g10 MOVING_END(B) (B:e05)<br>g11 STOP_START(B) (B:e06) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -1.20 | A | g12 THROTTLE_END(A) (A:e06)<br>g13 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
-| +0.00 | B | g14 COLLISION(A,B) (B:e07) | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| +0.05 | A | g17 MOVING_END(A) (A:e11)<br>g18 STOP_START(A) (A:e12) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: IN_EGO_PATH |
+| -2.80 | B | g06 THROTTLE_END(B) (B:e03)<br>g07 BRAKE_START(B) (B:e04) | ego: MOVING, THROTTLE |
+| -2.55 | A | g08 CLOSING_START(A,B) (A:e04) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -2.55 | A | g08 CLOSING_START(A,B) (A:e04)<br>g09 CRITICAL_TTC_START(A,B) (A:e05)<br>g14 COLLISION(A,B) (A:e08)<br>g15 CRITICAL_TTC_END(A,B) (A:e09)<br>g16 CLOSING_END(A,B) (A:e10) | ego: MOVING, THROTTLE<br>track_001: IN_EGO_PATH |
+| -2.35 | A | g09 CRITICAL_TTC_START(A,B) (A:e05) | ego: MOVING, THROTTLE<br>track_001: CLOSING, IN_EGO_PATH |
+| -1.60 | B | g10 MOVING_END(B) (B:e05)<br>g11 STOP_START(B) (B:e06) | ego: MOVING, BRAKE |
+| -1.20 | A | g12 THROTTLE_END(A) (A:e06)<br>g13 BRAKE_START(A) (A:e07) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH |
+| +0.00 | B | g14 COLLISION(A,B) (B:e07) | ego: STOP, BRAKE |
+| +0.05 | A | g17 MOVING_END(A) (A:e11)<br>g18 STOP_START(A) (A:e12) | ego: MOVING, BRAKE<br>track_001: IN_EGO_PATH |
 
 ## Plain-language reading
 

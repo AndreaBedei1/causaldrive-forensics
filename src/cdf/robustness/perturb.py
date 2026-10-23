@@ -14,8 +14,9 @@ Perturbations (each with its own seeded random stream: ``stream_seed``):
   elevation and radial velocity; per sweep, Poisson ``clutter`` false returns uniform in the field of view
   and range, half with the radial velocity of a static point seen from the moving vehicle, half with the
   velocity of a real return of the sweep (mirror-like ghosts);
-* GNSS (``GnssProfile``): per vehicle and axis, a run bias + a first-order Gauss-Markov term + white
-  noise, drawn at the receiver's output rate and interpolated; heading and velocity likewise;
+* GNSS (``GnssProfile``): per vehicle and axis, position and heading use a run bias, a first-order
+  Gauss-Markov term and white noise; velocity uses white noise; both are drawn at the receiver's output rate
+  and interpolated;
 * collision reports (``CollisionPerturbation``): relative impulse noise per callback, dropped callbacks;
 * clock: a constant offset of every timestamp a recorder wrote (no drift);
 * downsampling: every n-th sample of the ego, control and radar streams;
@@ -76,6 +77,14 @@ RADAR_PROFILES: Dict[str, RadarProfile] = {
     "nominal": RadarProfile("nominal", 0.25, 0.5, 0.5, 0.10, 0.20, 3.0),
     # Worst stated accuracies (long-range modes, field-of-view edges); clutter lambda_C = 30 of T-ITS 2019.
     "high": RadarProfile("high", 0.50, 2.0, 2.0, 0.20, 0.40, 30.0),
+    # Campaign v3 levels (docs/robustness_profiles.md, "Radar levels v3"): each value labelled there as
+    # specification, derived from a measurement, or engineering assumption.
+    # severe: measurement quality at the field-of-view edge / long range (azimuth 2 deg: RadarScenes edge
+    # specification), twice the nominal misses, the measured urban ghost rate kept.
+    "severe": RadarProfile("severe", 0.50, 2.0, 2.0, 0.20, 0.40, 3.0),
+    # extreme: the severe accuracies with dense clutter lambda = 30 per sweep, a tracker design value of T-ITS
+    # 2019, not a measured rate: a stress test beyond typical automotive radar (equal to the historical "high").
+    "extreme": RadarProfile("extreme", 0.50, 2.0, 2.0, 0.20, 0.40, 30.0),
 }
 
 
@@ -131,7 +140,7 @@ def perturb_sweeps(frames: np.ndarray, timestamps: np.ndarray, offsets: np.ndarr
 
 @dataclass(frozen=True)
 class GnssProfile:
-    """Per-axis error e(t) = b + g(t) + w(t): run bias, first-order Gauss-Markov (tau), white per epoch."""
+    """Per-axis error e(t) = b + g(t) + w(t), drawn at the receiver rate and interpolated."""
 
     name: str
     bias_m: float = 0.0
@@ -147,6 +156,8 @@ class GnssProfile:
     # Fraction of slow horizontal-position variance shared within a local run.
     # Sensitivity parameter, not a universally calibrated receiver property.
     common_fraction: float = 0.0
+    velocity_bias_mps: float = 0.0
+    velocity_markov_mps: float = 0.0
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.common_fraction <= 1.0:
@@ -160,17 +171,28 @@ class GnssProfile:
     def yaw_std_deg(self) -> float:
         return math.sqrt(self.yaw_bias_deg ** 2 + self.yaw_markov_deg ** 2 + self.yaw_white_deg ** 2)
 
+    @property
+    def velocity_std_mps(self) -> float:
+        return math.sqrt(self.velocity_bias_mps ** 2 + self.velocity_markov_mps ** 2 +
+                         self.velocity_white_mps ** 2)
+
 
 GNSS_PROFILES: Dict[str, GnssProfile] = {
     "ideal": GnssProfile("ideal"),
-    # Fixed RTK, open sky (u-blox ZED-F9P 0.01 m + 1 ppm CEP; heading ZED-F9R 0.2 deg 68 %).
-    "rtk": GnssProfile("rtk", 0.010, 0.015, 60.0, 0.003, 10.0, 0.10, 0.15, 30.0, 0.05, 0.02),
-    # Single-frequency module, open sky to suburban (NEO-M9N 2.0 m CEP, NEO-M8N 2.0 m CEP with SBAS;
-    # C2C-CC open sky 5 m 95 %).  Sources: docs/robustness_profiles.md.
+    # Position and heading preserve the earlier b:g:w ratios; velocity keeps white receiver-epoch noise.
+    "rtk": GnssProfile("rtk", bias_m=0.0089732414, markov_m=0.0134598621, tau_s=60.0,
+                       white_m=0.0026919724, rate_hz=10.0, yaw_bias_deg=0.0385369084,
+                       yaw_markov_deg=0.0578053625, yaw_tau_s=30.0, yaw_white_deg=0.0192684542,
+                       velocity_white_mps=0.0073178670),
+    "degraded": GnssProfile("degraded", bias_m=0.0852794874, markov_m=0.1279192311, tau_s=30.0,
+                            white_m=0.0142132479, rate_hz=1.0, yaw_bias_deg=0.0371302794,
+                            yaw_markov_deg=0.2079295648, yaw_tau_s=5.0, yaw_white_deg=0.0742605588,
+                            velocity_white_mps=0.0722666351),
+}
+
+# Retained for the earlier retrospective analyses; never scheduled by the current campaign.
+HISTORICAL_GNSS_PROFILES: Dict[str, GnssProfile] = {
     "consumer": GnssProfile("consumer", 1.5, 0.7, 60.0, 0.05, 1.0, 0.3, 0.9, 10.0, 0.3, 0.10),
-    # Urban canyon / multipath: position at the C2C-CC city limit (14 m 95 %); heading 6 deg 95 % (C2C-CC
-    # mild-urban and similar scenarios: milder than its city case, 12 deg).  Sources: docs/robustness_profiles.md.
-    "degraded": GnssProfile("degraded", 3.0, 4.5, 30.0, 0.5, 1.0, 0.5, 2.8, 5.0, 1.0, 0.30),
 }
 
 
@@ -202,7 +224,7 @@ class PerturbedPoseSource(RecordedPoseSource):
         self.profile = profile
         self.position_std_m = profile.position_std_m
         self.yaw_std_rad = math.radians(profile.yaw_std_deg)
-        self.velocity_std_mps = profile.velocity_white_mps
+        self.velocity_std_mps = profile.velocity_std_mps
         rng = lambda label: np.random.default_rng(stream_seed(seed, "gnss", profile.name, recorder, label))  # noqa: E731
         t = self.times
         independent = math.sqrt(1-profile.common_fraction)
@@ -223,8 +245,10 @@ class PerturbedPoseSource(RecordedPoseSource):
         self.y = self.y + position_error('y')
         self.yaw = self.yaw + np.radians(_error_series(t, profile.yaw_bias_deg, profile.yaw_markov_deg, profile.yaw_tau_s,
                                                        profile.yaw_white_deg, profile.rate_hz, rng("yaw")))
-        self.vx = self.vx + _error_series(t, 0.0, 0.0, 1.0, profile.velocity_white_mps, profile.rate_hz, rng("vx"))
-        self.vy = self.vy + _error_series(t, 0.0, 0.0, 1.0, profile.velocity_white_mps, profile.rate_hz, rng("vy"))
+        self.vx = self.vx + _error_series(t, profile.velocity_bias_mps, profile.velocity_markov_mps, profile.tau_s,
+                                          profile.velocity_white_mps, profile.rate_hz, rng("vx"))
+        self.vy = self.vy + _error_series(t, profile.velocity_bias_mps, profile.velocity_markov_mps, profile.tau_s,
+                                          profile.velocity_white_mps, profile.rate_hz, rng("vy"))
 
     @classmethod
     def factory(cls, profile: GnssProfile, seed: int):
@@ -271,6 +295,15 @@ class Perturbation:
     downsample: int = 1  # keep every n-th ego / control / radar sample
     drop_recorders: Tuple[str, ...] = ()
     radar_outage: Optional[Tuple[str, float, float]] = None  # (recorder, start, end) in its local time [s]
+    # The recorders whose radars get the radar profile; empty: every recorder.  The random stream of a recorder's
+    # radar is keyed by (seed, profile, recorder, radar), so a recorder degraded alone gets exactly the errors it
+    # gets when every recorder is degraded (paired asymmetric comparisons).
+    radar_recorders: Tuple[str, ...] = ()
+
+    def radar_profile_of(self, recorder: str) -> "RadarProfile":
+        if self.radar_recorders and recorder not in self.radar_recorders:
+            return RADAR_PROFILES["ideal"]
+        return self.radar
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -322,7 +355,7 @@ def perturbed_copy(run_dir: Path, target: Path, perturbation: Perturbation, seed
                                               and perturbation.collisions != CollisionPerturbation())):
             _write_jsonl(target / relative, _perturb_stream(path, recorder, parts[2], perturbation, offsets, seed))
         elif parts[2] == "radar" and path.name == "observations.npz" and (
-                shifted or perturbation.radar.name != "ideal" or perturbation.downsample > 1
+                shifted or perturbation.radar_profile_of(recorder).name != "ideal" or perturbation.downsample > 1
                 or (perturbation.radar_outage is not None and perturbation.radar_outage[0] == recorder)):
             _perturb_radar_file(path, target / relative, run_dir / "vehicles" / recorder, recorder, perturbation,
                                 offsets, seed)
@@ -387,9 +420,10 @@ def _perturb_radar_file(path: Path, target: Path, vehicle_dir: Path, recorder: s
         _, start, end = perturbation.radar_outage
         local = timestamps - ego_t[0]
         keep = np.array([k for k in keep if not (start <= local[k] <= end)], dtype=int)
-    rng = np.random.default_rng(stream_seed(seed, "radar", perturbation.radar.name, recorder, path.parent.name))
+    profile = perturbation.radar_profile_of(recorder)
+    rng = np.random.default_rng(stream_seed(seed, "radar", profile.name, recorder, path.parent.name))
     frames, timestamps, starts, detections = perturb_sweeps(
-        frames, timestamps, starts, detections, metadata, perturbation.radar, rng,
+        frames, timestamps, starts, detections, metadata, profile, rng,
         lambda t: float(np.interp(t, ego_t, ego_v)), keep)
     timestamps = timestamps + offsets.get(recorder, 0.0)
     target.parent.mkdir(parents=True, exist_ok=True)

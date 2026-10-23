@@ -7,7 +7,7 @@ digraph "global" {
   "g03" [label="THROTTLE_START\nA\nt=-7.15", fillcolor="#fde68a"];
   "g04" [label="THROTTLE_START\nB\nt=-7.15", fillcolor="#fde68a"];
   "g05" [label="STOP_SIGN_DETECTED_START\nA -> A:sign-0\nt=-6.95", fillcolor="#bfdbfe"];
-  "g06" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-0\nt=-6.45", fillcolor="#bfdbfe"];
+  "g06" [label="STOP_SIGN_DETECTED_START\nB -> B:sign-0\nt=-6.35", fillcolor="#bfdbfe"];
   "g07" [label="THROTTLE_END\nA\nt=-4.75", fillcolor="#fde68a"];
   "g08" [label="BRAKE_START\nA\nt=-4.75", fillcolor="#fde68a"];
   "g09" [label="THROTTLE_END\nB\nt=-4.65", fillcolor="#fde68a"];
@@ -17,7 +17,7 @@ digraph "global" {
   "g13" [label="CLOSING_START\nA -> B\nt=-4.65", fillcolor="#bfdbfe", peripheries=2];
   "g14" [label="CLOSING_START\nB -> A\nt=-4.65", fillcolor="#bfdbfe", peripheries=2];
   "g15" [label="STOP_SIGN_DETECTED_END\nA -> A:sign-0\nt=-4.40", fillcolor="#bfdbfe"];
-  "g16" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-0\nt=-4.35", fillcolor="#bfdbfe"];
+  "g16" [label="STOP_SIGN_DETECTED_END\nB -> B:sign-0\nt=-4.40", fillcolor="#bfdbfe"];
   "g17" [label="MOVING_END\nB\nt=-3.55", fillcolor="#e5e7eb"];
   "g18" [label="STOP_START\nB\nt=-3.55", fillcolor="#e5e7eb"];
   "g19" [label="CLOSING_END\nA -> B\nt=-3.45", fillcolor="#bfdbfe"];
@@ -56,6 +56,7 @@ digraph "global" {
   {rank=same; "g01"; "g02"; "g03"; "g04";}
   {rank=same; "g07"; "g08";}
   {rank=same; "g09"; "g10"; "g11"; "g12"; "g13"; "g14";}
+  {rank=same; "g15"; "g16";}
   {rank=same; "g17"; "g18";}
   {rank=same; "g19"; "g20"; "g21"; "g22";}
   {rank=same; "g23"; "g24";}
@@ -86,12 +87,19 @@ digraph "global" {
   "g08" -> "g13" [label="PRECEDES"];
   "g08" -> "g14" [label="PRECEDES"];
   "g09" -> "g15" [label="PRECEDES"];
+  "g09" -> "g16" [label="PRECEDES"];
   "g10" -> "g15" [label="PRECEDES"];
+  "g10" -> "g16" [label="PRECEDES"];
   "g11" -> "g15" [label="PRECEDES"];
+  "g11" -> "g16" [label="PRECEDES"];
   "g12" -> "g15" [label="PRECEDES"];
+  "g12" -> "g16" [label="PRECEDES"];
   "g13" -> "g15" [label="PRECEDES"];
+  "g13" -> "g16" [label="PRECEDES"];
   "g14" -> "g15" [label="PRECEDES"];
-  "g15" -> "g16" [label="PRECEDES"];
+  "g14" -> "g16" [label="PRECEDES"];
+  "g15" -> "g17" [label="PRECEDES"];
+  "g15" -> "g18" [label="PRECEDES"];
   "g16" -> "g17" [label="PRECEDES"];
   "g16" -> "g18" [label="PRECEDES"];
   "g17" -> "g19" [label="PRECEDES"];

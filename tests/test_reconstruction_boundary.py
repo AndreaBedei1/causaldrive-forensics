@@ -42,6 +42,14 @@ class BoundaryTests(unittest.TestCase):
                     self.assertFalse(value.startswith(("ground_truth/", "ground_truth\\")), path.name)
                     self.assertNotIn("other_actor_id", value, path.name)
                     self.assertNotIn("states.jsonl", value, path.name)
+                    # The exact spawn pose that sits in the recorder's metadata.json (docs/SENSORS_AND_GROUND_TRUTH.md)
+                    self.assertNotIn("vehicle_transform", value, path.name)
+
+    def test_the_reconstruction_viewer_never_names_the_exact_spawn_pose(self):
+        for path in sorted((ROOT / "src" / "cdf" / "replay").glob("*.py")) + [ROOT / "scripts" / "replay_run.py"]:
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    self.assertNotIn("vehicle_transform", node.value, path.name)
 
     def test_importing_the_pipeline_loads_no_privileged_module(self):
         code = ("import sys; sys.path.insert(0, 'src'); import cdf.reconstruction.pipeline; "
@@ -83,6 +91,30 @@ class BoundaryTests(unittest.TestCase):
         # The supplied incident context, by contrast, is read.
         self.assertEqual(result.locals[0].graph.recorder["incident_context"], {"speed_limit_kmh": 30})
         self.assertEqual(first, second)
+
+    def test_a_reconstruction_on_a_perturbed_pose_never_opens_ground_truth(self):
+        # The measured (perturbed) GNSS/INS reaches the local path too (pipeline.measured_ego_records).
+        from src.cdf.robustness.perturb import GNSS_PROFILES, PerturbedPoseSource
+        real_open, real_path_open = builtins.open, pathlib.Path.open
+
+        def check(path):
+            if "ground_truth" in str(path):
+                raise AssertionError("reconstruction opened " + str(path))
+
+        def guarded_open(file, *args, **kwargs):
+            check(file)
+            return real_open(file, *args, **kwargs)
+
+        def guarded_path_open(self, *args, **kwargs):
+            check(self)
+            return real_path_open(self, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            run = make_run(Path(tmp) / "S00" / "run_0", with_ground_truth=True)
+            pose = PerturbedPoseSource.factory(GNSS_PROFILES["degraded"], 1)
+            with mock.patch("builtins.open", guarded_open), mock.patch.object(pathlib.Path, "open", guarded_path_open):
+                result = reconstruct_run(run, ReconstructionConfig(), pose_factory=pose)
+        self.assertTrue(result.graph.nodes)
 
 
 if __name__ == "__main__":

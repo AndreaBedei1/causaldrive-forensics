@@ -79,9 +79,18 @@ class NeverInferredTests(unittest.TestCase):
                 for frame in local.trace if t0 <= frame.t_local <= t1 and frame.perceived_state}
 
     def test_a_lane_change_without_a_light_log_has_unknown_indicators(self):
-        # S02 crash, recorded before the light log existed: B cuts into A's lane from 0.2 s to 2.4 s.
-        vehicle, local = self.reconstruct("S02/run_0_crash", "B")
-        self.assertFalse((vehicle / "lights.jsonl").exists())
+        # S02 crash: B cuts into A's lane from 0.2 s to 2.4 s.  Since 2026-10-22 every recording has a light log,
+        # so the case of a recorder without one is a copy of B's files without it.
+        import shutil
+        import tempfile
+        source = ROOT / "traces" / "S02" / "run_0_crash" / "vehicles" / "B"
+        if not (source / "ego.jsonl").exists():
+            self.skipTest("canonical trace not present")
+        with tempfile.TemporaryDirectory() as tmp:
+            vehicle = Path(tmp) / "B"
+            shutil.copytree(str(source), str(vehicle))
+            (vehicle / "lights.jsonl").unlink()
+            local = reconstruct_vehicle(vehicle, ReconstructionConfig())
         self.assertFalse([n for n in local.graph.nodes if n.event_type.startswith("INDICATOR_")])
         self.assertEqual(self.indicators(local, 0.5, 2.5), {(UNKNOWN, UNKNOWN)})
 
@@ -127,10 +136,12 @@ class CanonicalSignalTests(unittest.TestCase):
     """S07 and S08 signal their turns: the reconstructed events are exactly the logged light transitions (local time
     = scenario time - 0.05 s); an indicator still on when the recording ends has no END."""
 
+    # The canonical set re-acquired on 2026-10-22 logs every light change at its scripted instant (S07: A signals
+    # from 1.0 s); the earlier recordings logged them one tick (0.05 s) before.
     EXPECTED = {
-        ("S07/run_0_merge_conflict", "A"): [("INDICATOR_LEFT_START", 0.95)],  # still circulating when hit
-        ("S07/run_0_merge_conflict", "B"): [("INDICATOR_RIGHT_START", 12.95), ("INDICATOR_RIGHT_END", 19.05)],
-        ("S08/run_0_rolls_through", "A"): [("INDICATOR_LEFT_START", 0.45)],  # the turn ends in the collision
+        ("S07/run_0_merge_conflict", "A"): [("INDICATOR_LEFT_START", 1.0)],  # still circulating when hit
+        ("S07/run_0_merge_conflict", "B"): [("INDICATOR_RIGHT_START", 13.0), ("INDICATOR_RIGHT_END", 19.1)],
+        ("S08/run_0_rolls_through", "A"): [("INDICATOR_LEFT_START", 0.5)],  # the turn ends in the collision
         ("S08/run_0_rolls_through", "B"): [],
     }
 

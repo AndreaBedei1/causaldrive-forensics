@@ -1,12 +1,12 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 204.24685563519597 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 1987.095780223608 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 141 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (13.95 s)
 - Anonymous radar tracks: 2 (10 Hz samples in `local_tracks.jsonl`)
 - Speed limit 50 km/h, supplied as incident context: known a priori, not perceived and not ground truth.
-- Nodes: 19; edges: 39 (PRECEDES 31, SAME_TRACK 8)
+- Nodes: 19; edges: 36 (PRECEDES 28, SAME_TRACK 8)
 
 ## Nodes
 
@@ -25,12 +25,12 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e11 | 3.80 | CLOSING_END | A | track_002 | radar |  |
 | A:e12 | 3.85 | THROTTLE_END | A | - | controls |  |
 | A:e13 | 3.85 | TURN_LEFT_START | A | - | ego |  |
-| A:e14 | 4.70 | COLLISION | A | - | collision_sensor | peak_impulse=1880.32 |
-| A:e15 | 4.70 | CRITICAL_TTC_END | A | track_001 | radar |  |
-| A:e16 | 4.70 | CLOSING_END | A | track_001 | radar |  |
-| A:e17 | 5.05 | TURN_LEFT_END | A | - | ego |  |
-| A:e18 | 5.10 | MOVING_END | A | - | ego |  |
-| A:e19 | 5.10 | STOP_START | A | - | ego |  |
+| A:e14 | 4.65 | CLOSING_END | A | track_001 | radar |  |
+| A:e15 | 4.70 | COLLISION | A | - | collision_sensor | peak_impulse=2250.28; merged_bursts=[[4.8, 765.39], [6.1, 3.03], [6.75, 0.2]] |
+| A:e16 | 4.70 | CRITICAL_TTC_END | A | track_001 | radar |  |
+| A:e17 | 5.15 | TURN_LEFT_END | A | - | ego |  |
+| A:e18 | 5.25 | MOVING_END | A | - | ego |  |
+| A:e19 | 5.25 | STOP_START | A | - | ego |  |
 
 Events are state transitions; the quantities behind them (speed, pedals, ranges, TTC, relative motion, closest approach) are facts in `local_trace.jsonl`. Events with equal times are simultaneous at the recorder's resolution: PRECEDES links only different times. SAME_TRACK links a track's TRACK_APPEARED_* to every other event about the same local track (grouping only, no order).
 
@@ -58,12 +58,9 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     A:e11 --PRECEDES--> A:e12
     A:e11 --PRECEDES--> A:e13
     A:e12 --PRECEDES--> A:e14
-    A:e12 --PRECEDES--> A:e15
-    A:e12 --PRECEDES--> A:e16
     A:e13 --PRECEDES--> A:e14
-    A:e13 --PRECEDES--> A:e15
-    A:e13 --PRECEDES--> A:e16
-    A:e14 --PRECEDES--> A:e17
+    A:e14 --PRECEDES--> A:e15
+    A:e14 --PRECEDES--> A:e16
     A:e15 --PRECEDES--> A:e17
     A:e16 --PRECEDES--> A:e17
     A:e17 --PRECEDES--> A:e18
@@ -74,7 +71,7 @@ Events are state transitions; the quantities behind them (speed, pedals, ranges,
     A:e03 --SAME_TRACK--> A:e08
     A:e05 --SAME_TRACK--> A:e10
     A:e05 --SAME_TRACK--> A:e11
-    A:e03 --SAME_TRACK--> A:e15
+    A:e03 --SAME_TRACK--> A:e14
     A:e03 --SAME_TRACK--> A:e16
 ```
 
@@ -85,18 +82,19 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | Local time | Events | Perceived state just before | Facts at |
 |-----------:|--------|-----------------------------|---------:|
 | 0.00 | A:e01 MOVING_START<br>A:e02 THROTTLE_START<br>A:e03 TRACK_APPEARED_FRONT track_001<br>A:e04 CLOSING_START track_001 | ego: not yet observed | - |
-| 2.05 | A:e05 TRACK_APPEARED_RIGHT track_002<br>A:e06 CLOSING_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING | 2.00 |
-| 2.55 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC? | 2.50 |
-| 3.75 | A:e08 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC | 3.70 |
-| 3.80 | A:e09 COLLISION<br>A:e10 CRITICAL_TTC_END track_002<br>A:e11 CLOSING_END track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: CLOSING, CRITICAL_TTC | 3.70 |
-| 3.85 | A:e12 THROTTLE_END<br>A:e13 TURN_LEFT_START | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state | 3.80 |
-| 4.70 | A:e14 COLLISION<br>A:e15 CRITICAL_TTC_END track_001<br>A:e16 CLOSING_END track_001 | ego: MOVING, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state | 4.60 |
-| 5.05 | A:e17 TURN_LEFT_END | ego: MOVING, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: no active state | 5.00 |
-| 5.10 | A:e18 MOVING_END<br>A:e19 STOP_START | ego: MOVING, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>track_002: no active state | 5.00 |
+| 2.05 | A:e05 TRACK_APPEARED_RIGHT track_002<br>A:e06 CLOSING_START track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING | 2.00 |
+| 2.55 | A:e07 CRITICAL_TTC_START track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC? | 2.50 |
+| 3.75 | A:e08 CRITICAL_TTC_START track_001 | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>track_002: CLOSING, CRITICAL_TTC | 3.70 |
+| 3.80 | A:e09 COLLISION<br>A:e10 CRITICAL_TTC_END track_002<br>A:e11 CLOSING_END track_002 | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: CLOSING, CRITICAL_TTC | 3.70 |
+| 3.85 | A:e12 THROTTLE_END<br>A:e13 TURN_LEFT_START | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state | 3.80 |
+| 4.65 | A:e14 CLOSING_END track_001 | ego: MOVING, TURN_LEFT<br>track_001: CLOSING, CRITICAL_TTC<br>track_002: no active state | 4.60 |
+| 4.70 | A:e15 COLLISION<br>A:e16 CRITICAL_TTC_END track_001 | ego: MOVING, TURN_LEFT<br>track_001: CRITICAL_TTC<br>track_002: no active state | 4.60 |
+| 5.15 | A:e17 TURN_LEFT_END | ego: MOVING, TURN_LEFT<br>track_001: no active state<br>track_002: no active state | 5.10 |
+| 5.25 | A:e18 MOVING_END<br>A:e19 STOP_START | ego: MOVING<br>track_001: no active state<br>track_002: no active state | 5.20 |
 
 ## States still active when observation ended
 
-- STOP, since A:e19 (t = 5.10 s)
+- STOP, since A:e19 (t = 5.25 s)
 
 ## Tracks lost
 
@@ -119,8 +117,8 @@ An END means this recorder stopped detecting the sign, not that its obligation e
 
 | Track | First seen | Last seen | Measured sweeps | First range / bearing | Min range (at) | Last range / bearing | Max speed |
 |-------|-----------:|----------:|----------------:|----------------------|----------------|---------------------|----------:|
-| track_001 | 0.00 | 13.95 | 278 | 74.1 m / -3 deg | 0.27 m (13.95) | 0.3 m / -82 deg | 6.2 m/s |
-| track_002 | 2.05 | 13.95 | 239 | 28.6 m / +31 deg | 1.81 m (4.25) | 4.7 m / +140 deg | 9.8 m/s |
+| track_001 | 0.00 | 13.95 | 278 | 73.8 m / -3 deg | 0.15 m (13.45) | 0.1 m / -88 deg | 6.1 m/s |
+| track_002 | 2.05 | 13.95 | 239 | 28.6 m / +31 deg | 1.79 m (4.25) | 5.0 m / +141 deg | 9.8 m/s |
 
 Bearing: positive = to A's right. Ranges are measured from the radar to the visible surface of the object.
 
@@ -139,9 +137,9 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 3.80 s: A observed track_002 stop closing in.
 - t = 3.85 s: A released the accelerator.
 - t = 3.85 s: A started turning left.
-- t = 4.70 s: A's collision sensor recorded a contact (peak impulse 1880 N*s).
+- t = 4.65 s: A observed track_001 stop closing in.
+- t = 4.70 s: A's collision sensor recorded a contact (peak impulse 2250 N*s).
 - t = 4.70 s: A's time-to-contact with track_001 stopped being critical.
-- t = 4.70 s: A observed track_001 stop closing in.
-- t = 5.05 s: A stopped turning left.
-- t = 5.10 s: A stopped moving.
-- t = 5.10 s: A came to a stop.
+- t = 5.15 s: A stopped turning left.
+- t = 5.25 s: A stopped moving.
+- t = 5.25 s: A came to a stop.

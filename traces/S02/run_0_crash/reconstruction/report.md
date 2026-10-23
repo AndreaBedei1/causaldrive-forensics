@@ -10,8 +10,8 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
-| A | 15.15 s | 153 | 15 | 30 | 1 | A:e11 @ 5.30 s |
-| B | 15.15 s | 153 | 11 | 16 | 0 | B:e07 @ 5.30 s |
+| A | 15.15 s | 153 | 15 | 30 | 1 | A:e11 @ 5.25 s |
+| B | 15.15 s | 153 | 11 | 16 | 0 | B:e07 @ 5.25 s |
 
 ## Graph alignment
 
@@ -19,18 +19,18 @@ Reference event: `collision_001` (t_global = 0); `t_global = t_local + offset_to
 
 | Graph | Status | Anchor node | Anchor local time | Offset to global | Note |
 |-------|--------|-------------|------------------:|-----------------:|------|
-| A | ALIGNED | A:e11 | 5.30 | -5.30 | reported the reference collision collision_001 |
-| B | ALIGNED | B:e07 | 5.30 | -5.30 | reported the reference collision collision_001 |
+| A | ALIGNED | A:e11 | 5.25 | -5.25 | reported the reference collision collision_001 |
+| B | ALIGNED | B:e07 | 5.25 | -5.25 | reported the reference collision collision_001 |
 
 Estimated relative clock offsets: B - A = +0.000 s
 
-Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.67 vs 2460.67 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
+Matched `collision_001`: A and B both recorded a collision; peak impulses 2604.14 vs 2604.14 N*s (similarity 1.000, tolerance 0.10); no competing report within tolerance; the two bodies touch at their reports (0.00 m apart, tolerance 1.0 m); independent relative impulse std 0.100; combined z 0.000 (gate 3.0); engineering assumption; pre-contact radar view of each recorder checked against the candidate partner's own speed: not contradicted
 
 ## Identity associations
 
 | Local track | Global entity | Status | Confidence | Evidence |
 |-------------|---------------|--------|-----------:|----------|
-| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 2460.67 vs 2460.67 N*s)<br>tracked for 5.05 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 5.8 m -> 0.0 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.17 m/s for reference)<br>clearance at the contact 0.03 m<br>the only track of A compatible with the contact |
+| A:track_001 | B | ASSOCIATED | 0.99 | A and B both reported collision_001 (peak impulse 2604.14 vs 2604.14 N*s)<br>tracked for 5.00 s before the matched collision<br>continuous up to the contact: last observed 0.00 s before it (window 1.00 s)<br>approaching before the contact: clearance 6.2 m -> 0.1 m over the last 1.0 s<br>track motion compatible with B's own speed in the observed direction (3 sigma; full-speed RMSE 0.16 m/s for reference)<br>clearance at the contact 0.06 m<br>the only track of A compatible with the contact |
 
 ## Road users in the common frame
 
@@ -42,45 +42,45 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 
 ### Event sequence (global time)
 
-- `-5.30` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
-- `-5.05` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
-- `-4.40` CUT_IN_FROM_LEFT_START(A,B)
-- `-3.55` EGO_PATH_ENTRY(A,B)
-- `-3.45` CRITICAL_TTC_START(A,B)
-- `-2.15` THROTTLE_END(B); BRAKE_START(B)
-- `-1.65` BRAKE_END(B)
-- `-1.55` THROTTLE_START(B)
-- `-1.25` CUT_IN_FROM_LEFT_END(A,B)
-- `-0.85` THROTTLE_END(A); BRAKE_START(A)
+- `-5.25` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
+- `-5.00` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
+- `-4.35` CUT_IN_FROM_LEFT_START(A,B)
+- `-3.50` EGO_PATH_ENTRY(A,B)
+- `-3.40` CRITICAL_TTC_START(A,B)
+- `-2.10` THROTTLE_END(B); BRAKE_START(B)
+- `-1.60` BRAKE_END(B)
+- `-1.50` THROTTLE_START(B)
+- `-1.20` CUT_IN_FROM_LEFT_END(A,B)
+- `-0.80` THROTTLE_END(A); BRAKE_START(A)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CLOSING_END(A,B); THROTTLE_END(B); BRAKE_START(B)
-- `+0.35` MOVING_END(A); STOP_START(A)
+- `+0.40` MOVING_END(A); STOP_START(A)
 - `+0.55` MOVING_END(B); STOP_START(B)
 
 ### What happened, in plain language
 
-- 5.30 s before the reference collision, A started moving (already the case when first observed).
-- 5.30 s before the reference collision, B started moving (already the case when first observed).
-- 5.30 s before the reference collision, A pressed the accelerator (already the case when first observed).
-- 5.30 s before the reference collision, B pressed the accelerator (already the case when first observed).
-- 5.05 s before the reference collision, A's radar started tracking B, which appeared on its left.
-- 5.05 s before the reference collision, A observed B start closing in (already the case when first observed).
-- 4.40 s before the reference collision, A observed B cutting in from the left.
-- 3.55 s before the reference collision, A observed B enter its forward path corridor.
-- 3.45 s before the reference collision, A's time-to-contact with B became critical.
-- 2.15 s before the reference collision, B released the accelerator.
-- 2.15 s before the reference collision, B started braking.
-- 1.65 s before the reference collision, B released the brake.
-- 1.55 s before the reference collision, B pressed the accelerator.
-- 1.25 s before the reference collision, A observed B's cut-in from the left settle.
-- 0.85 s before the reference collision, A released the accelerator.
-- 0.85 s before the reference collision, A started braking.
-- At the reference collision, A and B both recorded this same collision (peak impulses A: 2461, B: 2461 N*s).
+- 5.25 s before the reference collision, A started moving (already the case when first observed).
+- 5.25 s before the reference collision, B started moving (already the case when first observed).
+- 5.25 s before the reference collision, A pressed the accelerator (already the case when first observed).
+- 5.25 s before the reference collision, B pressed the accelerator (already the case when first observed).
+- 5.00 s before the reference collision, A's radar started tracking B, which appeared on its left.
+- 5.00 s before the reference collision, A observed B start closing in (already the case when first observed).
+- 4.35 s before the reference collision, A observed B cutting in from the left.
+- 3.50 s before the reference collision, A observed B enter its forward path corridor.
+- 3.40 s before the reference collision, A's time-to-contact with B became critical.
+- 2.10 s before the reference collision, B released the accelerator.
+- 2.10 s before the reference collision, B started braking.
+- 1.60 s before the reference collision, B released the brake.
+- 1.50 s before the reference collision, B pressed the accelerator.
+- 1.20 s before the reference collision, A observed B's cut-in from the left settle.
+- 0.80 s before the reference collision, A released the accelerator.
+- 0.80 s before the reference collision, A started braking.
+- At the reference collision, A and B both recorded this same collision (peak impulses A: 2604, B: 2604 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
 - At the reference collision, A observed B stop closing in.
 - At the reference collision, B released the accelerator.
 - At the reference collision, B started braking.
-- 0.35 s after the reference collision, A stopped moving.
-- 0.35 s after the reference collision, A came to a stop.
+- 0.40 s after the reference collision, A stopped moving.
+- 0.40 s after the reference collision, A came to a stop.
 - 0.55 s after the reference collision, B stopped moving.
 - 0.55 s after the reference collision, B came to a stop.
 
@@ -88,7 +88,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 2460.6
 
 CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_START (critical TTC already active), and EGO_PATH_ENTRY before/after the critical TTC. Temporal order only, not causes.
 
-- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 0.90 < CRITICAL_TTC_START 1.85 (+0.95 s) < COLLISION with B 5.30 (+3.45 s); EGO_PATH_ENTRY 1.75 before critical TTC (-0.10 s) [local times; t_global: cut_in -4.40, critical_ttc_start -3.45, ego_path_entry -3.55, collision +0.00]
+- A's track_001 (B): cut-in started before critical TTC: CUT_IN_FROM_LEFT_START 0.90 < CRITICAL_TTC_START 1.85 (+0.95 s) < COLLISION with B 5.25 (+3.40 s); EGO_PATH_ENTRY 1.75 before critical TTC (-0.10 s) [local times; t_global: cut_in -4.35, critical_ttc_start -3.40, ego_path_entry -3.50, collision +0.00]
 
 ### Simultaneous events (order unresolved at 0.05 s)
 
@@ -107,8 +107,8 @@ A:
 - BRAKE, since A:e10 (t = 4.45 s)
 - STOP, since A:e15 (t = 5.65 s)
 B:
-- BRAKE, since B:e09 (t = 5.30 s)
-- STOP, since B:e11 (t = 5.85 s)
+- BRAKE, since B:e09 (t = 5.25 s)
+- STOP, since B:e11 (t = 5.80 s)
 
 ### Sign detection windows
 
@@ -119,8 +119,8 @@ B:
 
 ### Perceived state just before each collision report
 
-- A A:e11 at 5.30 s (local): ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
-- B B:e07 at 5.30 s (local): ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?
+- A A:e11 at 5.25 s (local): ego: MOVING, BRAKE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH
+- B B:e07 at 5.25 s (local): ego: MOVING, THROTTLE
 
 ### Tracks lost while a state was active
 
@@ -271,6 +271,8 @@ B:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

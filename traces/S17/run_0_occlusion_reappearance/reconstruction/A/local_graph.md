@@ -1,6 +1,6 @@
 # Local graph - vehicle A
 
-All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 13.376997336745262 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
+All times are A's own local clock: `t_local` = seconds since A's first ego sample (raw clock reading 2132.2441545389593 at `t_local` = 0). Only files under `vehicles/A/` were read; external objects are anonymous radar tracks.
 
 - Local frame: origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)
 - Trace: 121 frames at 10 Hz in `local_trace.jsonl`, the last one at the recording end (11.95 s)
@@ -23,7 +23,7 @@ All times are A's own local clock: `t_local` = seconds since A's first ego sampl
 | A:e09 | 0.90 | CLOSING_START | A | track_005 | radar | active_at_first_observation=True |
 | A:e10 | 3.30 | TRACK_LOST | A | track_003 | radar |  |
 | A:e11 | 3.80 | CLOSING_END | A | track_005 | radar |  |
-| A:e12 | 3.95 | INDICATOR_LEFT_START | A | - | lights |  |
+| A:e12 | 4.00 | INDICATOR_LEFT_START | A | - | lights |  |
 | A:e13 | 4.55 | TRACK_LOST | A | track_004 | radar |  |
 | A:e14 | 4.80 | TRACK_LOST | A | track_002 | radar |  |
 | A:e15 | 5.45 | CRITICAL_TTC_START | A | track_005 | radar |  |
@@ -133,7 +133,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 | 0.90 | A:e08 TRACK_APPEARED_LEFT track_005<br>A:e09 CLOSING_START track_005 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: CLOSING | 0.80 |
 | 3.30 | A:e10 TRACK_LOST track_003 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_003: no active state<br>track_004: CLOSING<br>track_005: CLOSING | 3.20 |
 | 3.80 | A:e11 CLOSING_END track_005 | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_004: CLOSING<br>track_005: CLOSING<br>track lost, states UNKNOWN: track_003 | 3.70 |
-| 3.95 | A:e12 INDICATOR_LEFT_START | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_004: CLOSING<br>track_005: no active state<br>track lost, states UNKNOWN: track_003 | 3.90 |
+| 4.00 | A:e12 INDICATOR_LEFT_START | ego: MOVING, THROTTLE<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_004: CLOSING<br>track_005: no active state<br>track lost, states UNKNOWN: track_003 | 3.90 |
 | 4.55 | A:e13 TRACK_LOST track_004 | ego: MOVING, THROTTLE, INDICATOR_LEFT<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_004: CLOSING<br>track_005: no active state<br>track lost, states UNKNOWN: track_003 | 4.50 |
 | 4.80 | A:e14 TRACK_LOST track_002 | ego: MOVING, THROTTLE, INDICATOR_LEFT<br>track_001: no active state<br>track_002: IN_EGO_PATH<br>track_005: no active state<br>track lost, states UNKNOWN: track_003, track_004 | 4.70 |
 | 5.45 | A:e15 CRITICAL_TTC_START track_005 | ego: MOVING, THROTTLE, INDICATOR_LEFT<br>track_001: no active state<br>track_005: no active state<br>track lost, states UNKNOWN: track_002, track_003, track_004 | 5.40 |
@@ -155,7 +155,7 @@ Each row is the state just BEFORE its events (none of them applied): events at o
 ## States still active when observation ended
 
 - CLOSING of track_004, since A:e07 (t = 0.00 s); the track was lost at 4.55 s
-- INDICATOR_LEFT, since A:e12 (t = 3.95 s)
+- INDICATOR_LEFT, since A:e12 (t = 4.00 s)
 - EGO_PATH of track_001, since A:e18 (t = 6.20 s)
 - BRAKE, since A:e26 (t = 7.35 s)
 - STOP, since A:e34 (t = 8.30 s)
@@ -208,7 +208,7 @@ Bearing: positive = to A's right. Ranges are measured from the radar to the visi
 - t = 0.90 s: A observed track_005 start closing in (already the case when first observed).
 - t = 3.30 s: A's radar lost track_003 (its states are UNKNOWN from then on, not ended).
 - t = 3.80 s: A observed track_005 stop closing in.
-- t = 3.95 s: A switched on its left turn indicator.
+- t = 4.00 s: A switched on its left turn indicator.
 - t = 4.55 s: A's radar lost track_004 (its states are UNKNOWN from then on, not ended).
 - t = 4.80 s: A's radar lost track_002 (its states are UNKNOWN from then on, not ended).
 - t = 5.45 s: A's time-to-contact with track_005 became critical.

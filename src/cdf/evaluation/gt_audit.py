@@ -46,11 +46,11 @@ def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
 
 
 def stats(values: Iterable[float]) -> Dict[str, Optional[float]]:
-    """n, median, quartiles, IQR, p90, p95, max and mean of a sample of values."""
+    """n, median, quartiles, IQR, p90, p95, max, mean and root mean square of a sample of values."""
     data = sorted(float(v) for v in values if v is not None and not math.isnan(float(v)))
     if not data:
         return {"n": 0, "median": None, "q25": None, "q75": None, "iqr": None, "p90": None, "p95": None,
-                "max": None, "mean": None}
+                "max": None, "mean": None, "rmse": None}
 
     def q(p: float) -> float:
         position = p * (len(data) - 1)
@@ -58,7 +58,7 @@ def stats(values: Iterable[float]) -> Dict[str, Optional[float]]:
         high = min(low + 1, len(data) - 1)
         return data[low] + (data[high] - data[low]) * (position - low)
     out = {"n": len(data), "median": q(0.5), "q25": q(0.25), "q75": q(0.75), "p90": q(0.9), "p95": q(0.95),
-           "max": data[-1], "mean": sum(data) / len(data)}
+           "max": data[-1], "mean": sum(data) / len(data), "rmse": math.sqrt(sum(v * v for v in data) / len(data))}
     out["iqr"] = out["q75"] - out["q25"]
     return {key: (round(value, 4) if isinstance(value, float) else value) for key, value in out.items()}
 

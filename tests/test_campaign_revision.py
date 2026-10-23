@@ -97,5 +97,23 @@ class ConcurrencyTests(unittest.TestCase):
         self.assertEqual(ctl.decide(10, [], 10, 22, {"workers": 40})[0], ctl.HARD_MAX_WORKERS)
 
 
+class DetachedStartTests(unittest.TestCase):
+    def test_the_controller_gets_a_hidden_console_that_its_jobs_share(self):
+        """Campaign v3 (2026-10-23): with DETACHED_PROCESS the controller had no console, so Windows opened a visible
+        console window for every job it started.  A hidden console of its own (CREATE_NO_WINDOW) is shared by the
+        jobs, and a new process group keeps it independent of the terminal that started it."""
+        ctl = _script("campaign_controller")
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(ctl, "CONTROL", Path(tmp)), \
+                mock.patch.object(ctl.subprocess, "Popen") as popen:
+            popen.return_value.pid = 1234
+            ctl.start_detached([])
+            for handle in popen.call_args[1]["stdout"], popen.call_args[1]["stderr"]:
+                handle.close()
+        flags = popen.call_args[1]["creationflags"]
+        self.assertTrue(flags & 0x08000000)  # CREATE_NO_WINDOW
+        self.assertTrue(flags & 0x00000200)  # CREATE_NEW_PROCESS_GROUP
+        self.assertFalse(flags & 0x00000008)  # not DETACHED_PROCESS, which leaves every job its own window
+
+
 if __name__ == "__main__":
     unittest.main()

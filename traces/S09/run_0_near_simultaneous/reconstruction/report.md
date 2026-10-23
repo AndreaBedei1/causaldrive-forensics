@@ -39,17 +39,16 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 
 ## Global graph
 
-51 nodes, 115 edges; 8 merged node(s): g13 CLOSING_START(A,B) from A:e07 + A:e09, g14 CLOSING_START(B,A) from B:e07 + B:e11, g27 CLOSING_START(A,B) from A:e14 + A:e21, g30 CLOSING_START(B,A) from B:e16 + B:e21, g33 CRITICAL_TTC_START(A,B) from A:e17 + A:e20, g34 CRITICAL_TTC_START(B,A) from B:e17 + B:e20, g36 EGO_PATH_ENTRY(B,A) from B:e18 + B:e24, g37 COLLISION(A,B) from A:e19 + B:e19.
+51 nodes, 122 edges; 8 merged node(s): g13 CLOSING_START(A,B) from A:e07 + A:e09, g14 CLOSING_START(B,A) from B:e07 + B:e11, g27 CLOSING_START(A,B) from A:e14 + A:e21, g30 CLOSING_START(B,A) from B:e16 + B:e21, g33 CRITICAL_TTC_START(A,B) from A:e17 + A:e20, g34 CRITICAL_TTC_START(B,A) from B:e17 + B:e20, g36 EGO_PATH_ENTRY(B,A) from B:e18 + B:e24, g37 COLLISION(A,B) from A:e19 + B:e19.
 
 ### Event sequence (global time)
 
 - `-7.15` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - `-6.95` STOP_SIGN_DETECTED_START(A,A:sign-0)
-- `-6.45` STOP_SIGN_DETECTED_START(B,B:sign-0)
+- `-6.35` STOP_SIGN_DETECTED_START(B,B:sign-0)
 - `-4.75` THROTTLE_END(A); BRAKE_START(A)
 - `-4.65` THROTTLE_END(B); BRAKE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(B,A); CLOSING_START(A,B); CLOSING_START(B,A)
-- `-4.40` STOP_SIGN_DETECTED_END(A,A:sign-0)
-- `-4.35` STOP_SIGN_DETECTED_END(B,B:sign-0)
+- `-4.40` STOP_SIGN_DETECTED_END(A,A:sign-0); STOP_SIGN_DETECTED_END(B,B:sign-0)
 - `-3.55` MOVING_END(B); STOP_START(B)
 - `-3.45` CLOSING_END(A,B); CLOSING_END(B,A); MOVING_END(A); STOP_START(A)
 - `-2.45` BRAKE_END(B); THROTTLE_START(B)
@@ -74,7 +73,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - 7.15 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 7.15 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 6.95 s before the reference collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
-- 6.45 s before the reference collision, B's camera established a STOP sign detection (unidentified object B:sign-0).
+- 6.35 s before the reference collision, B's camera established a STOP sign detection (unidentified object B:sign-0).
 - 4.75 s before the reference collision, A released the accelerator.
 - 4.75 s before the reference collision, A started braking.
 - 4.65 s before the reference collision, B released the accelerator.
@@ -84,7 +83,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 - 4.65 s before the reference collision, A observed B start closing in (already the case when first observed).
 - 4.65 s before the reference collision, B observed A start closing in (already the case when first observed).
 - 4.40 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
-- 4.35 s before the reference collision, B's camera stopped detecting STOP sign unidentified object B:sign-0.
+- 4.40 s before the reference collision, B's camera stopped detecting STOP sign unidentified object B:sign-0.
 - 3.55 s before the reference collision, B stopped moving.
 - 3.55 s before the reference collision, B came to a stop.
 - 3.45 s before the reference collision, A observed B stop closing in.
@@ -133,6 +132,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - THROTTLE_END(A); BRAKE_START(A)
 - THROTTLE_END(B); BRAKE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(B,A); CLOSING_START(A,B); CLOSING_START(B,A)
+- STOP_SIGN_DETECTED_END(A,A:sign-0); STOP_SIGN_DETECTED_END(B,B:sign-0)
 - MOVING_END(B); STOP_START(B)
 - CLOSING_END(A,B); CLOSING_END(B,A); MOVING_END(A); STOP_START(A)
 - BRAKE_END(B); THROTTLE_START(B)
@@ -158,12 +158,12 @@ B:
 A:
 - STOP sign sign-0: detected 0.20 s -> 2.75 s; relevant to the path: True; STOP_START inside: none
 B:
-- STOP sign sign-0: detected 0.70 s -> 2.80 s; relevant to the path: True; STOP_START inside: none
+- STOP sign sign-0: detected 0.80 s -> 2.75 s; relevant to the path: True; STOP_START inside: none
 
 ### Perceived state just before each collision report
 
-- A A:e19 at 7.15 s (local): ego: MOVING, THROTTLE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC; sign-0: STOP sign known, relevant to the path
-- B B:e19 at 7.15 s (local): ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; sign-0: STOP sign known, relevant to the path
+- A A:e19 at 7.15 s (local): ego: MOVING, THROTTLE, TURN_LEFT; track_001: CLOSING, CRITICAL_TTC; sign-0: STOP sign known, relevant to the path
+- B B:e19 at 7.15 s (local): ego: MOVING, THROTTLE; track_001: CLOSING, CRITICAL_TTC, IN_EGO_PATH; sign-0: STOP sign known, relevant to the path
 
 ### Tracks lost while a state was active
 
@@ -313,6 +313,8 @@ B:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

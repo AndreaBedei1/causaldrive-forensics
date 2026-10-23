@@ -1,8 +1,8 @@
 # Paper positioning
 
 Framing, logging prerequisites against the regulations, related work, limitations and the STOP / YIELD and
-depth-camera decision.  Quantitative claims come from the final experimental campaign (not yet run); the 23
-canonical runs S01-S18 are the development set.  Citations: [bibliography](bibliography.md).
+depth-camera decision.  Quantitative claims come from campaign v3 (`docs/CAMPAIGN_V3.md`,
+`docs/CAMPAIGN_V3_REPORT.md`) on the 22 canonical runs S01-S19.  Citations: [references](REFERENCES.md).
 
 ## Framing
 
@@ -21,7 +21,7 @@ runs S01-S19 and the robustness campaign on them) whose ground truth is used for
 ## Logging prerequisites
 
 What each recording vehicle must log for the method, against what the regulations require (sources:
-`docs/bibliography.md`, Regulatory facts, instruments R1-R9).
+`docs/REFERENCES.md`, Part C, Regulatory facts, instruments R1-R9).
 
 | Data (per vehicle, own clock) | Used for | Required by regulation? |
 |---|---|---|
@@ -45,7 +45,7 @@ per report keeps every collision match (geometry-supported matching).  Recorders
 today's regulated content, in line with proposals for richer automated-vehicle data ([B19], SAE J3197 [B21],
 IEEE 1616.1 [B22]).
 
-## Related work (verified sources, `docs/bibliography.md`)
+## Related work (verified sources, `docs/REFERENCES.md`, Part C)
 
 - **Accident reconstruction.**  Physics- and simulation-based reconstruction from scene evidence (PC-Crash
   [B1], Brach [B2], the Burg-Moser handbook with its avoidability chapter [B3]), EDR-based checks [B4], video
@@ -107,7 +107,8 @@ IEEE 1616.1 [B22]).
 - Responses in the campaign are scripted: observed vehicle response delays describe the scenario logic, not
   drivers; sensor perceivability is not driver perception.
 - Scope: motor vehicles only (cars and one van; no pedestrians, cyclists, motorcycles or infrastructure
-  sensors); 19 canonical scenarios (23 development runs) on two CARLA maps; no LLM in the pipeline.
+  sensors); 19 canonical scenarios (22 runs) on three CARLA maps (Town05, Town03_Opt, Town04); no LLM in the
+  pipeline.
 
 ## STOP / YIELD and the depth camera
 
@@ -118,3 +119,7 @@ sign only): too little to evaluate rule-related events, and rule compliance is n
 The depth camera is recorded but used by nothing in the reconstruction (it also misses frames on the second
 and third vehicle when three cameras render per tick).  Both stay in the repository, documented, as future
 work.
+
+The RTK/5G acquisition protocol now disables the depth camera for future runs because it is not an input to
+reconstruction, fusion, collision assessment or campaign metrics. Existing recordings and their sensor
+metadata remain unchanged; this protocol update does not revise earlier experimental assessments.

@@ -4,16 +4,21 @@
   "recorder": {
     "owner": "B",
     "clock": {
-      "origin_source_timestamp": 13.376997336745262,
+      "origin_source_timestamp": 2132.2441545389593,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
     "incident_context": {
+      "map": "Town05",
       "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
       "road_environment": "urban arterial, three lanes one direction",
       "speed_limit_kmh": 50
+    },
+    "road_map": {
+      "name": "Town05",
+      "source": "incident context"
     },
     "start_t_local": 0.0,
     "end_t_local": 11.95,
@@ -2493,12 +2498,12 @@
       "radars": [
         "front"
       ],
-      "min_range_m": 26.83,
+      "min_range_m": 26.84,
       "min_range_t_local": 0.4,
       "min_clearance_m": 26.73,
       "min_clearance_t_local": 0.4,
       "max_speed_mps": 11.91,
-      "first_range_m": 26.83,
+      "first_range_m": 26.84,
       "first_bearing_deg": 6.6,
       "last_range_m": 32.46,
       "last_bearing_deg": 5.5

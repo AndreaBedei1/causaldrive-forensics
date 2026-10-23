@@ -40,7 +40,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 | g03 | -7.15 | THROTTLE_START | A | - | A:e02 @ 0.00 | active_at_first_observation=True |
 | g04 | -7.15 | THROTTLE_START | B | - | B:e02 @ 0.00 | active_at_first_observation=True |
 | g05 | -6.95 | STOP_SIGN_DETECTED_START | A | A:sign-0 | A:e03 @ 0.20 | relevant_to_ego_path=True |
-| g06 | -6.45 | STOP_SIGN_DETECTED_START | B | B:sign-0 | B:e03 @ 0.70 | relevant_to_ego_path=True |
+| g06 | -6.35 | STOP_SIGN_DETECTED_START | B | B:sign-0 | B:e03 @ 0.80 | relevant_to_ego_path=True |
 | g07 | -4.75 | THROTTLE_END | A | - | A:e04 @ 2.40 |  |
 | g08 | -4.75 | BRAKE_START | A | - | A:e05 @ 2.40 |  |
 | g09 | -4.65 | THROTTLE_END | B | - | B:e04 @ 2.50 |  |
@@ -50,7 +50,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
 | g13 | -4.65 | CLOSING_START | A | B | A:e07 @ 2.50, A:e09 @ 3.70 | active_at_first_observation=True; source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
 | g14 | -4.65 | CLOSING_START | B | A | B:e07 @ 2.50, B:e11 @ 3.70 | active_at_first_observation=True; source_track=track_001; aggregation=entity_state_union; source_tracks=['B:track_001'] |
 | g15 | -4.40 | STOP_SIGN_DETECTED_END | A | A:sign-0 | A:e08 @ 2.75 |  |
-| g16 | -4.35 | STOP_SIGN_DETECTED_END | B | B:sign-0 | B:e08 @ 2.80 |  |
+| g16 | -4.40 | STOP_SIGN_DETECTED_END | B | B:sign-0 | B:e08 @ 2.75 |  |
 | g17 | -3.55 | MOVING_END | B | - | B:e09 @ 3.60 |  |
 | g18 | -3.55 | STOP_START | B | - | B:e10 @ 3.60 |  |
 | g19 | -3.45 | CLOSING_END | A | B | A:e09 @ 3.70 | source_track=track_001; aggregation=entity_state_union; source_tracks=['A:track_001'] |
@@ -110,12 +110,19 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 7661.4
     g08 --PRECEDES--> g13
     g08 --PRECEDES--> g14
     g09 --PRECEDES--> g15
+    g09 --PRECEDES--> g16
     g10 --PRECEDES--> g15
+    g10 --PRECEDES--> g16
     g11 --PRECEDES--> g15
+    g11 --PRECEDES--> g16
     g12 --PRECEDES--> g15
+    g12 --PRECEDES--> g16
     g13 --PRECEDES--> g15
+    g13 --PRECEDES--> g16
     g14 --PRECEDES--> g15
-    g15 --PRECEDES--> g16
+    g14 --PRECEDES--> g16
+    g15 --PRECEDES--> g17
+    g15 --PRECEDES--> g18
     g16 --PRECEDES--> g17
     g16 --PRECEDES--> g18
     g17 --PRECEDES--> g19
@@ -215,11 +222,10 @@ Events in one row are simultaneous at 0.05 s resolution: their order is unresolv
 |---------:|--------|
 | -7.15 | MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B) |
 | -6.95 | STOP_SIGN_DETECTED_START(A,A:sign-0) |
-| -6.45 | STOP_SIGN_DETECTED_START(B,B:sign-0) |
+| -6.35 | STOP_SIGN_DETECTED_START(B,B:sign-0) |
 | -4.75 | THROTTLE_END(A); BRAKE_START(A) |
 | -4.65 | THROTTLE_END(B); BRAKE_START(B); TRACK_APPEARED_LEFT(A,B); TRACK_APPEARED_RIGHT(B,A); CLOSING_START(A,B); CLOSING_START(B,A) |
-| -4.40 | STOP_SIGN_DETECTED_END(A,A:sign-0) |
-| -4.35 | STOP_SIGN_DETECTED_END(B,B:sign-0) |
+| -4.40 | STOP_SIGN_DETECTED_END(A,A:sign-0); STOP_SIGN_DETECTED_END(B,B:sign-0) |
 | -3.55 | MOVING_END(B); STOP_START(B) |
 | -3.45 | CLOSING_END(A,B); CLOSING_END(B,A); MOVING_END(A); STOP_START(A) |
 | -2.45 | BRAKE_END(B); THROTTLE_START(B) |
@@ -252,32 +258,32 @@ Each recorder's own belief just before its events, in its own local names (track
 |---------:|----------|---------------------|-----------------------------|
 | -7.15 | A | g01 MOVING_START(A) (A:e01)<br>g03 THROTTLE_START(A) (A:e02) | ego: not yet observed |
 | -7.15 | B | g02 MOVING_START(B) (B:e01)<br>g04 THROTTLE_START(B) (B:e02) | ego: not yet observed |
-| -6.95 | A | g05 STOP_SIGN_DETECTED_START(A,A:sign-0) (A:e03) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -6.45 | B | g06 STOP_SIGN_DETECTED_START(B,B:sign-0) (B:e03) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT? |
-| -4.75 | A | g07 THROTTLE_END(A) (A:e04)<br>g08 BRAKE_START(A) (A:e05) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path |
-| -4.65 | B | g09 THROTTLE_END(B) (B:e04)<br>g10 BRAKE_START(B) (B:e05)<br>g12 TRACK_APPEARED_RIGHT(B,A) (B:e06)<br>g14 CLOSING_START(B,A) (B:e07) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path |
-| -4.65 | A | g11 TRACK_APPEARED_LEFT(A,B) (A:e06)<br>g13 CLOSING_START(A,B) (A:e07) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path |
-| -4.65 | A | g13 CLOSING_START(A,B) (A:e07)<br>g19 CLOSING_END(A,B) (A:e09)<br>g21 MOVING_END(A) (A:e10)<br>g22 STOP_START(A) (A:e11) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path |
-| -4.65 | B | g14 CLOSING_START(B,A) (B:e07)<br>g20 CLOSING_END(B,A) (B:e11) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>sign-0: STOP sign known, relevant to the path |
-| -4.40 | A | g15 STOP_SIGN_DETECTED_END(A,A:sign-0) (A:e08) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path |
-| -4.35 | B | g16 STOP_SIGN_DETECTED_END(B,B:sign-0) (B:e08) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path |
-| -3.55 | B | g17 MOVING_END(B) (B:e09)<br>g18 STOP_START(B) (B:e10) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
-| -2.45 | B | g23 BRAKE_END(B) (B:e12)<br>g24 THROTTLE_START(B) (B:e13) | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -2.30 | A | g25 BRAKE_END(A) (A:e12)<br>g26 THROTTLE_START(A) (A:e13) | ego: STOP, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -2.05 | A | g27 CLOSING_START(A,B) (A:e14) | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -2.05 | A | g27 CLOSING_START(A,B) (A:e14)<br>g33 CRITICAL_TTC_START(A,B) (A:e17)<br>g37 COLLISION(A,B) (A:e19)<br>g38 CRITICAL_TTC_END(A,B) (A:e20)<br>g40 CLOSING_END(A,B) (A:e21) | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -2.00 | B | g28 STOP_END(B) (B:e14)<br>g29 MOVING_START(B) (B:e15)<br>g30 CLOSING_START(B,A) (B:e16) | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -2.00 | B | g30 CLOSING_START(B,A) (B:e16)<br>g41 CLOSING_END(B,A) (B:e21)<br>g43 THROTTLE_END(B) (B:e22)<br>g45 BRAKE_START(B) (B:e23) | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| -1.95 | A | g31 STOP_END(A) (A:e15)<br>g32 MOVING_START(A) (A:e16) | ego: STOP, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
-| -1.20 | A | g33 CRITICAL_TTC_START(A,B) (A:e17) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
-| -1.05 | B | g34 CRITICAL_TTC_START(B,A) (B:e17) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
-| -1.05 | B | g34 CRITICAL_TTC_START(B,A) (B:e17)<br>g37 COLLISION(A,B) (B:e19)<br>g39 CRITICAL_TTC_END(B,A) (B:e20) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
-| -1.00 | A | g35 TURN_LEFT_START(A) (A:e18) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
-| -0.70 | B | g36 EGO_PATH_ENTRY(B,A) (B:e18) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
-| -0.70 | B | g36 EGO_PATH_ENTRY(B,A) (B:e18)<br>g46 EGO_PATH_EXIT(B,A) (B:e24) | ego: MOVING, THROTTLE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
-| +0.05 | A | g42 THROTTLE_END(A) (A:e22)<br>g44 BRAKE_START(A) (A:e23) | ego: MOVING, THROTTLE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| +0.30 | B | g47 MOVING_END(B) (B:e25)<br>g48 STOP_START(B) (B:e26) | ego: MOVING, BRAKE, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
-| +0.50 | A | g49 TURN_LEFT_END(A) (A:e24)<br>g50 MOVING_END(A) (A:e25)<br>g51 STOP_START(A) (A:e26) | ego: MOVING, BRAKE, TURN_LEFT, INDICATOR_LEFT?, INDICATOR_RIGHT?<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -6.95 | A | g05 STOP_SIGN_DETECTED_START(A,A:sign-0) (A:e03) | ego: MOVING, THROTTLE |
+| -6.35 | B | g06 STOP_SIGN_DETECTED_START(B,B:sign-0) (B:e03) | ego: MOVING, THROTTLE |
+| -4.75 | A | g07 THROTTLE_END(A) (A:e04)<br>g08 BRAKE_START(A) (A:e05) | ego: MOVING, THROTTLE<br>sign-0: STOP sign known, relevant to the path |
+| -4.65 | B | g09 THROTTLE_END(B) (B:e04)<br>g10 BRAKE_START(B) (B:e05)<br>g12 TRACK_APPEARED_RIGHT(B,A) (B:e06)<br>g14 CLOSING_START(B,A) (B:e07) | ego: MOVING, THROTTLE<br>sign-0: STOP sign known, relevant to the path |
+| -4.65 | A | g11 TRACK_APPEARED_LEFT(A,B) (A:e06)<br>g13 CLOSING_START(A,B) (A:e07) | ego: MOVING, BRAKE<br>sign-0: STOP sign known, relevant to the path |
+| -4.65 | A | g13 CLOSING_START(A,B) (A:e07)<br>g19 CLOSING_END(A,B) (A:e09)<br>g21 MOVING_END(A) (A:e10)<br>g22 STOP_START(A) (A:e11) | ego: MOVING, BRAKE<br>sign-0: STOP sign known, relevant to the path |
+| -4.65 | B | g14 CLOSING_START(B,A) (B:e07)<br>g20 CLOSING_END(B,A) (B:e11) | ego: MOVING, THROTTLE<br>sign-0: STOP sign known, relevant to the path |
+| -4.40 | A | g15 STOP_SIGN_DETECTED_END(A,A:sign-0) (A:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path |
+| -4.40 | B | g16 STOP_SIGN_DETECTED_END(B,B:sign-0) (B:e08) | ego: MOVING, BRAKE<br>track_001: CLOSING, CRITICAL_TTC?<br>sign-0: STOP sign known, relevant to the path |
+| -3.55 | B | g17 MOVING_END(B) (B:e09)<br>g18 STOP_START(B) (B:e10) | ego: MOVING, BRAKE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
+| -2.45 | B | g23 BRAKE_END(B) (B:e12)<br>g24 THROTTLE_START(B) (B:e13) | ego: STOP, BRAKE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -2.30 | A | g25 BRAKE_END(A) (A:e12)<br>g26 THROTTLE_START(A) (A:e13) | ego: STOP, BRAKE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -2.05 | A | g27 CLOSING_START(A,B) (A:e14) | ego: STOP, THROTTLE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -2.05 | A | g27 CLOSING_START(A,B) (A:e14)<br>g33 CRITICAL_TTC_START(A,B) (A:e17)<br>g37 COLLISION(A,B) (A:e19)<br>g38 CRITICAL_TTC_END(A,B) (A:e20)<br>g40 CLOSING_END(A,B) (A:e21) | ego: STOP, THROTTLE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -2.00 | B | g28 STOP_END(B) (B:e14)<br>g29 MOVING_START(B) (B:e15)<br>g30 CLOSING_START(B,A) (B:e16) | ego: STOP, THROTTLE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -2.00 | B | g30 CLOSING_START(B,A) (B:e16)<br>g41 CLOSING_END(B,A) (B:e21)<br>g43 THROTTLE_END(B) (B:e22)<br>g45 BRAKE_START(B) (B:e23) | ego: STOP, THROTTLE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| -1.95 | A | g31 STOP_END(A) (A:e15)<br>g32 MOVING_START(A) (A:e16) | ego: STOP, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
+| -1.20 | A | g33 CRITICAL_TTC_START(A,B) (A:e17) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
+| -1.05 | B | g34 CRITICAL_TTC_START(B,A) (B:e17) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
+| -1.05 | B | g34 CRITICAL_TTC_START(B,A) (B:e17)<br>g37 COLLISION(A,B) (B:e19)<br>g39 CRITICAL_TTC_END(B,A) (B:e20) | ego: MOVING, THROTTLE<br>track_001: CLOSING<br>sign-0: STOP sign known, relevant to the path |
+| -1.00 | A | g35 TURN_LEFT_START(A) (A:e18) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
+| -0.70 | B | g36 EGO_PATH_ENTRY(B,A) (B:e18) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
+| -0.70 | B | g36 EGO_PATH_ENTRY(B,A) (B:e18)<br>g46 EGO_PATH_EXIT(B,A) (B:e24) | ego: MOVING, THROTTLE<br>track_001: CLOSING, CRITICAL_TTC<br>sign-0: STOP sign known, relevant to the path |
+| +0.05 | A | g42 THROTTLE_END(A) (A:e22)<br>g44 BRAKE_START(A) (A:e23) | ego: MOVING, THROTTLE, TURN_LEFT<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| +0.30 | B | g47 MOVING_END(B) (B:e25)<br>g48 STOP_START(B) (B:e26) | ego: MOVING, BRAKE<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
+| +0.50 | A | g49 TURN_LEFT_END(A) (A:e24)<br>g50 MOVING_END(A) (A:e25)<br>g51 STOP_START(A) (A:e26) | ego: MOVING, BRAKE, TURN_LEFT<br>track_001: no active state<br>sign-0: STOP sign known, relevant to the path |
 
 ## Plain-language reading
 
@@ -286,7 +292,7 @@ Each recorder's own belief just before its events, in its own local names (track
 - 7.15 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 7.15 s before the reference collision, B pressed the accelerator (already the case when first observed).
 - 6.95 s before the reference collision, A's camera established a STOP sign detection (unidentified object A:sign-0).
-- 6.45 s before the reference collision, B's camera established a STOP sign detection (unidentified object B:sign-0).
+- 6.35 s before the reference collision, B's camera established a STOP sign detection (unidentified object B:sign-0).
 - 4.75 s before the reference collision, A released the accelerator.
 - 4.75 s before the reference collision, A started braking.
 - 4.65 s before the reference collision, B released the accelerator.
@@ -296,7 +302,7 @@ Each recorder's own belief just before its events, in its own local names (track
 - 4.65 s before the reference collision, A observed B start closing in (already the case when first observed).
 - 4.65 s before the reference collision, B observed A start closing in (already the case when first observed).
 - 4.40 s before the reference collision, A's camera stopped detecting STOP sign unidentified object A:sign-0.
-- 4.35 s before the reference collision, B's camera stopped detecting STOP sign unidentified object B:sign-0.
+- 4.40 s before the reference collision, B's camera stopped detecting STOP sign unidentified object B:sign-0.
 - 3.55 s before the reference collision, B stopped moving.
 - 3.55 s before the reference collision, B came to a stop.
 - 3.45 s before the reference collision, A observed B stop closing in.

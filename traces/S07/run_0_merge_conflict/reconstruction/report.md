@@ -11,7 +11,7 @@ Pipeline: raw log -> local trace -> local graph (each recorder alone, own clock,
 | Recorder | Duration (local) | Trace frames | Graph nodes | Graph edges | Radar tracks | Collision reports (local time) |
 |----------|-----------------:|-------------:|------------:|------------:|-------------:|-------------------------------|
 | A | 32.35 s | 325 | 17 | 26 | 1 | A:e10 @ 19.25 s |
-| B | 32.35 s | 325 | 17 | 29 | 1 | B:e11 @ 19.25 s |
+| B | 32.35 s | 325 | 17 | 32 | 1 | B:e11 @ 19.25 s |
 
 ## Graph alignment
 
@@ -39,24 +39,23 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1928.2
 
 ## Global graph
 
-33 nodes, 65 edges; 5 merged node(s): g10 CLOSING_START(A,B) from A:e08 + A:e12, g12 CLOSING_START(B,A) from B:e04 + B:e13, g14 CRITICAL_TTC_START(B,A) from B:e06 + B:e12, g15 CRITICAL_TTC_START(A,B) from A:e09 + A:e11, g20 COLLISION(A,B) from A:e10 + B:e11.
+33 nodes, 70 edges; 5 merged node(s): g10 CLOSING_START(A,B) from A:e08 + A:e12, g12 CLOSING_START(B,A) from B:e04 + B:e13, g14 CRITICAL_TTC_START(B,A) from B:e06 + B:e12, g15 CRITICAL_TTC_START(A,B) from A:e09 + A:e11, g20 COLLISION(A,B) from A:e10 + B:e11.
 
 ### Event sequence (global time)
 
 - `-19.25` MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
-- `-18.30` INDICATOR_LEFT_START(A)
+- `-18.25` INDICATOR_LEFT_START(A)
 - `-16.00` TURN_RIGHT_START(A)
 - `-14.05` TURN_RIGHT_END(A)
 - `-12.90` TURN_LEFT_START(A)
 - `-7.60` TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - `-6.95` TRACK_APPEARED_LEFT(B,A); CLOSING_START(B,A)
-- `-6.30` INDICATOR_RIGHT_START(B)
+- `-6.25` INDICATOR_RIGHT_START(B)
 - `-3.75` CRITICAL_TTC_START(B,A)
 - `-3.40` CRITICAL_TTC_START(A,B)
 - `-2.35` TURN_RIGHT_START(B)
 - `-0.30` TURN_RIGHT_END(B)
-- `-0.20` INDICATOR_RIGHT_END(B)
-- `-0.15` EGO_PATH_ENTRY(B,A)
+- `-0.15` INDICATOR_RIGHT_END(B); EGO_PATH_ENTRY(B,A)
 - `+0.00` COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 - `+0.05` THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - `+0.25` TURN_LEFT_END(A)
@@ -69,7 +68,7 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1928.2
 - 19.25 s before the reference collision, B started moving (already the case when first observed).
 - 19.25 s before the reference collision, A pressed the accelerator (already the case when first observed).
 - 19.25 s before the reference collision, B pressed the accelerator (already the case when first observed).
-- 18.30 s before the reference collision, A switched on its left turn indicator.
+- 18.25 s before the reference collision, A switched on its left turn indicator.
 - 16.00 s before the reference collision, A started turning right.
 - 14.05 s before the reference collision, A stopped turning right.
 - 12.90 s before the reference collision, A started turning left.
@@ -77,12 +76,12 @@ Matched `collision_001`: A and B both recorded a collision; peak impulses 1928.2
 - 7.60 s before the reference collision, A observed B start closing in (already the case when first observed).
 - 6.95 s before the reference collision, B's radar started tracking A, which appeared on its left.
 - 6.95 s before the reference collision, B observed A start closing in (already the case when first observed).
-- 6.30 s before the reference collision, B switched on its right turn indicator.
+- 6.25 s before the reference collision, B switched on its right turn indicator.
 - 3.75 s before the reference collision, B's time-to-contact with A became critical.
 - 3.40 s before the reference collision, A's time-to-contact with B became critical.
 - 2.35 s before the reference collision, B started turning right.
 - 0.30 s before the reference collision, B stopped turning right.
-- 0.20 s before the reference collision, B switched off its right turn indicator.
+- 0.15 s before the reference collision, B switched off its right turn indicator.
 - 0.15 s before the reference collision, B observed A enter its forward path corridor.
 - At the reference collision, A and B both recorded this same collision (peak impulses A: 1928, B: 1928 N*s).
 - At the reference collision, A's time-to-contact with B stopped being critical.
@@ -111,6 +110,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 - MOVING_START(A); MOVING_START(B); THROTTLE_START(A); THROTTLE_START(B)
 - TRACK_APPEARED_LEFT(A,B); CLOSING_START(A,B)
 - TRACK_APPEARED_LEFT(B,A); CLOSING_START(B,A)
+- INDICATOR_RIGHT_END(B); EGO_PATH_ENTRY(B,A)
 - COLLISION(A,B); CRITICAL_TTC_END(A,B); CRITICAL_TTC_END(B,A); CLOSING_END(A,B); CLOSING_END(B,A)
 - THROTTLE_END(A); THROTTLE_END(B); BRAKE_START(A); BRAKE_START(B)
 - MOVING_END(B); STOP_START(B)
@@ -119,7 +119,7 @@ CUT_IN_START < CRITICAL_TTC_START < COLLISION, or CRITICAL_TTC_START <= CUT_IN_S
 ### States still active when observation ended
 
 A:
-- INDICATOR_LEFT, since A:e03 (t = 0.95 s)
+- INDICATOR_LEFT, since A:e03 (t = 1.00 s)
 - BRAKE, since A:e14 (t = 19.30 s)
 - STOP, since A:e17 (t = 20.05 s)
 B:
@@ -287,6 +287,8 @@ B:
     "impulse_relative_std": 0.1,
     "impulse_sigma_gate": 3.0,
     "contact_consistency_m": 1.0,
+    "recontact_max_pause_s": 2.0,
+    "recontact_max_separation_m": 1.0,
     "clock_tolerance_s": 0.1,
     "contact_window_s": 1.0,
     "contact_range_m": 3.5,

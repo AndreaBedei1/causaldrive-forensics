@@ -4,16 +4,21 @@
   "recorder": {
     "owner": "A",
     "clock": {
-      "origin_source_timestamp": 13.376997336745262,
+      "origin_source_timestamp": 2132.2441545389593,
       "definition": "t_local = source timestamp - origin (by default this recorder's first ego sample)"
     },
     "frame": {
       "definition": "origin = first ego position; x = first heading; y = to the right of the first heading (CARLA convention)"
     },
     "incident_context": {
+      "map": "Town05",
       "note": "supplied incident context from the scenario configuration; not perceived, not ground truth",
       "road_environment": "urban arterial, three lanes one direction",
       "speed_limit_kmh": 50
+    },
+    "road_map": {
+      "name": "Town05",
+      "source": "incident context"
     },
     "start_t_local": 0.0,
     "end_t_local": 11.95,
@@ -527,7 +532,7 @@
       "kind": "ACTION",
       "actor_id": "A",
       "subject_id": null,
-      "t_local": 3.95,
+      "t_local": 4.0,
       "attributes": {},
       "source": "lights",
       "confidence": null,
@@ -1687,19 +1692,19 @@
         "cause": "MUTUAL_LATERAL",
         "estimated_body_corners_vehicle_m": [
           [
-            26.776,
-            7.9692
+            26.7761,
+            7.9693
           ],
           [
-            27.033,
+            27.0332,
             6.0867
           ],
           [
-            22.4754,
-            5.4642
+            22.4755,
+            5.4643
           ],
           [
-            22.2183,
+            22.2184,
             7.3468
           ]
         ],
@@ -2865,7 +2870,7 @@
       "max_speed_mps": 12.49,
       "first_range_m": 41.12,
       "first_bearing_deg": 32.9,
-      "last_range_m": 86.53,
+      "last_range_m": 86.54,
       "last_bearing_deg": 26.6
     }
   ]

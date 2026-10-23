@@ -6,18 +6,18 @@ digraph "local_C" {
   "C:e02" [label="THROTTLE_START\nC\nt=0.00", fillcolor="#fde68a"];
   "C:e03" [label="TRACK_APPEARED_FRONT\nC -> track_001\nt=0.00", fillcolor="#bfdbfe"];
   "C:e04" [label="CLOSING_START\nC -> track_001\nt=0.00", fillcolor="#bfdbfe"];
-  "C:e05" [label="TRACK_APPEARED_LEFT\nC -> track_002\nt=0.20", fillcolor="#bfdbfe"];
-  "C:e06" [label="CLOSING_START\nC -> track_002\nt=0.20", fillcolor="#bfdbfe"];
-  "C:e07" [label="CRITICAL_TTC_START\nC -> track_001\nt=3.75", fillcolor="#bfdbfe"];
-  "C:e08" [label="EGO_PATH_ENTRY\nC -> track_001\nt=4.25", fillcolor="#bfdbfe"];
+  "C:e05" [label="TRACK_APPEARED_LEFT\nC -> track_002\nt=0.15", fillcolor="#bfdbfe"];
+  "C:e06" [label="CLOSING_START\nC -> track_002\nt=0.15", fillcolor="#bfdbfe"];
+  "C:e07" [label="CRITICAL_TTC_START\nC -> track_001\nt=3.65", fillcolor="#bfdbfe"];
+  "C:e08" [label="EGO_PATH_ENTRY\nC -> track_001\nt=4.20", fillcolor="#bfdbfe"];
   "C:e09" [label="COLLISION\nC\nt=4.70", fillcolor="#fca5a5"];
   "C:e10" [label="CRITICAL_TTC_END\nC -> track_001\nt=4.70", fillcolor="#bfdbfe"];
   "C:e11" [label="CLOSING_END\nC -> track_001\nt=4.70", fillcolor="#bfdbfe"];
   "C:e12" [label="THROTTLE_END\nC\nt=4.75", fillcolor="#fde68a"];
   "C:e13" [label="BRAKE_START\nC\nt=4.75", fillcolor="#fde68a"];
-  "C:e14" [label="CLOSING_END\nC -> track_002\nt=4.95", fillcolor="#bfdbfe"];
-  "C:e15" [label="MOVING_END\nC\nt=5.00", fillcolor="#e5e7eb"];
-  "C:e16" [label="STOP_START\nC\nt=5.00", fillcolor="#e5e7eb"];
+  "C:e14" [label="CLOSING_END\nC -> track_002\nt=5.05", fillcolor="#bfdbfe"];
+  "C:e15" [label="MOVING_END\nC\nt=5.10", fillcolor="#e5e7eb"];
+  "C:e16" [label="STOP_START\nC\nt=5.10", fillcolor="#e5e7eb"];
   {rank=same; "C:e01"; "C:e02"; "C:e03"; "C:e04";}
   {rank=same; "C:e05"; "C:e06";}
   {rank=same; "C:e09"; "C:e10"; "C:e11";}

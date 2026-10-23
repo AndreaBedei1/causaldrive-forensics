@@ -52,7 +52,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 PYTHON = sys.executable
-# The campaign's code versions (docs/FROZEN_CAMPAIGN.md): the jobs run from the commit of VERSION_TAG
+# The campaign's code versions (docs/archive/FROZEN_CAMPAIGN.md): the jobs run from the commit of VERSION_TAG
 # (``robustness-campaign-final``: the final 35-condition scope); a job complete under an earlier version
 # (pre-robustness-campaign, v2, v2.1, v2.2: identical reconstruction and evaluation where it completed) stays complete;
 # attempts count under the versions listed in SAME_VERSION_TAGS.
@@ -85,7 +85,7 @@ def _same_version_commits() -> set:
 # Overridable for a test of the controller itself in scratch folders (never for the campaign).
 RESULTS = Path(os.environ.get("CDF_CAMPAIGN_RESULTS", str(ROOT / "results" / "robustness" / "frozen_campaign")))
 WORK = Path(os.environ.get("CDF_CAMPAIGN_WORK", str(ROOT / "robustness" / "frozen_campaign")))
-MANIFEST = ROOT / "results" / "robustness_campaign_manifest.json"
+MANIFEST = Path(os.environ.get("CDF_CAMPAIGN_MANIFEST", str(ROOT / "results" / "robustness_campaign_manifest.json")))
 CONTROL = RESULTS / "control"
 MIN_WORKERS, MAX_WORKERS = 4, 20
 HARD_MAX_WORKERS = 24  # a fixed setting (workers N) may go up to this
@@ -150,6 +150,8 @@ def verify_freeze() -> Dict[str, Any]:
                            capture_output=True, text=True).stdout.strip()
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     problems = []
+    if manifest.get("protocol", {}).get("preliminary"):
+        problems.append("manifest is preliminary")
     if head != FROZEN_COMMIT:
         problems.append("HEAD {0} is not the frozen commit".format(head))
     if dirty:
@@ -653,7 +655,9 @@ def supervise(args: argparse.Namespace) -> int:
 
 def start_detached(extra: List[str]) -> int:
     CONTROL.mkdir(parents=True, exist_ok=True)
-    flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP: survives the terminal / chat
+    # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP: a hidden console of its own, independent of the terminal / chat.
+    # Its jobs share that console; with DETACHED_PROCESS (no console) Windows opened a visible one for every job.
+    flags = 0x08000000 | 0x00000200
     out = (CONTROL / "controller.stdout.txt").open("a", encoding="utf-8")
     proc = subprocess.Popen([PYTHON, str(Path(__file__).resolve()), "_supervise"] + extra, cwd=str(ROOT),
                             env=dict(os.environ, **ENV), stdin=subprocess.DEVNULL, stdout=out, stderr=out,

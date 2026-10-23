@@ -100,7 +100,8 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
             best = min(distances, key=distances.get) if distances else None
             identity = best if best is not None and distances[best] <= IDENTITY_MAX_BOX_DISTANCE_M else None
             samples_of[name + ":" + row["track_id"]].append(dict(row, recorder=name, world=point, sim=sim,
-                                                                identity=identity))
+                                                                identity=identity,
+                                                                nearest_m=None if best is None else distances[best]))
     track_identity = {}
     for key, rows in samples_of.items():
         votes = Counter(row["identity"] for row in rows if row["measured"])
@@ -140,10 +141,14 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
         rows = [row for name in entity["source_tracks"] for row in samples_of.get(name, []) if row["measured"]]
         votes = Counter(row["identity"] for row in rows)
         majority = votes.most_common(1)[0][0] if votes else None
+        # A phantom (no true identity): the median distance of its measured samples to the nearest true box.
+        nearest = [row["nearest_m"] for row in rows if row["nearest_m"] is not None]
         entity_rows.append({"id": entity["id"], "source_tracks": entity["source_tracks"],
                             "observers": entity["observers"], "true_identity": majority,
                             "identity_is_recorder": majority in recorders,
                             "purity": round(votes[majority] / len(rows), 3) if rows else None,
+                            "nearest_vehicle_m": (round(float(np.median(nearest)), 3)
+                                                  if majority is None and nearest else None),
                             "track_identities": {name: track_identity.get(name) for name in entity["source_tracks"]}})
     tracks = sorted(member_of)
     for first, second in combinations(tracks, 2):
@@ -165,6 +170,9 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
 
     # 4. Fused states against the truth of the entity's majority identity.
     errors: Dict[str, List[float]] = defaultdict(list)
+    # The same errors of the road users that record nothing: a recorder ghost (an anonymous road user that is in
+    # truth a recorder, a missed recorder link) is not an estimate of a road user.
+    road_user_errors: Dict[str, List[float]] = defaultdict(list)
     by_method: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: defaultdict(list))
     within = Counter()
     states_compared = impure_states = 0
@@ -203,6 +211,8 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
                 errors[key].append(value)
                 own[key].append(value)
                 by_method[state["method"]][key].append(value)
+                if not row["identity_is_recorder"]:
+                    road_user_errors[key].append(value)
             if state["pos_std_m"] and state["pos_std_m"] > 0:
                 ratio = centre / state["pos_std_m"]
                 errors["normalised_centre_error"].append(ratio)
@@ -277,6 +287,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
         "merges": merge,
         "fragmentation": fragmentation,
         "state_errors": {key: stats(values) for key, values in sorted(errors.items())},
+        "road_user_state_errors": {key: stats(values) for key, values in sorted(road_user_errors.items())},
         "state_errors_by_method": {method: {key: stats(values) for key, values in sorted(values.items())}
                                    for method, values in sorted(by_method.items())},
         "calibration": {"states": len(errors.get("normalised_centre_error", [])),
@@ -293,6 +304,7 @@ def evaluate_fusion(run_dir: Path, write: bool = True, pose_factory: Any = None)
         write_text(rec / "evaluation" / "fusion_metrics.md", fusion_markdown(result))
     # The raw values, for pooling over runs (not written).
     result["_raw"] = {"errors": {key: list(values) for key, values in errors.items()},
+                      "road_user_errors": {key: list(values) for key, values in road_user_errors.items()},
                        'paired_states': paired_states,
                       "by_method": {method: {key: list(values) for key, values in table.items()}
                                     for method, table in by_method.items()}}
