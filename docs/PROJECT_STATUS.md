@@ -52,9 +52,12 @@
   code.
 * **Priority (2026-10-23, 12:19, at Andrea's request):** the campaign takes the machine's 22 cores ahead of the other
   load (a WSL virtual machine of another project, 13-18 cores).  Concurrency is fixed at 22 (`campaign_v3.bat workers
-  22`).  A helper outside the frozen code sets the campaign's controller and job processes to above-normal priority
-  every 2 s, since the controller starts each job below normal.  Priority changes neither the code nor what a job
-  computes; job wall times before and after 12:19 are not comparable.
+  22`).  A helper outside the frozen code puts the controller and every job process into Windows job objects whose
+  only limit is the above-normal priority class.  The controller starts each job below normal, and a job's own `git`
+  children (its provenance check) would start at normal priority and be starved; with the job objects, every
+  descendant runs above normal.  Campaign share of the CPU rose from about 3.6 to about 15-16 cores; throughput rose
+  from about 100 to about 470 jobs per hour on the short jobs left (12:50).  Priority changes neither the code nor what
+  a job computes; job wall times before and after 12:19 are not comparable.
 
 ## Next steps
 
